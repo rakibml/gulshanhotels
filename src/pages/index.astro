@@ -3,49 +3,70 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
-// ১. Astro Content Collection থেকে ডাটা লোড
-let hotelEntries = [];
+// ১. Astro Content Collections থেকে ডাটা লোড
+let hotels = [];
 try {
-  hotelEntries = await getCollection('hotels');
+  const collectionData = await getCollection('hotels');
+  if (collectionData && collectionData.length > 0) {
+    hotels = collectionData.map((item: any) => ({
+      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
+      category: item.data?.category || 'Luxury Hotel',
+      location: item.data?.location || 'Gulshan 2, Dhaka',
+      price: item.data?.price || '$$$$',
+      rating: item.data?.rating || 4.8,
+      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+    }));
+  }
 } catch (err) {
-  hotelEntries = [];
+  hotels = [];
 }
 
-// ২. যদি কালেকশন খালি থাকে, তবে Relative Glob দিয়ে ফাইল রিড
-if (!hotelEntries || hotelEntries.length === 0) {
+// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
+if (!hotels || hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    hotelEntries = Object.values(rawGlob).map((item: any) => ({
-      data: item.frontmatter || {},
-      slug: 'hotel-detail'
-    }));
+    const globList = Object.values(rawGlob);
+    if (globList && globList.length > 0) {
+      hotels = globList.map((item: any) => ({
+        title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
+        category: item.frontmatter?.category || 'Luxury Hotel',
+        location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
+        price: item.frontmatter?.price || '$$$$',
+        rating: item.frontmatter?.rating || 4.8,
+        image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      }));
+    }
   } catch (err) {
-    hotelEntries = [];
+    hotels = [];
   }
 }
 
-// ৩. সেফটি নেট: হোটেল ফাইল প্রসেস না হলে ডিফল্ট রেডি ডাটা শো করবে
-if (!hotelEntries || hotelEntries.length === 0) {
-  hotelEntries = [
+// ৩. সেফটি ডিফল্ট ডাটা
+if (!hotels || hotels.length === 0) {
+  hotels = [
     {
-      data: {
-        title: "The Westin Dhaka",
-        category: "5-Star Luxury",
-        location: "Gulshan 2, Dhaka",
-        price: "$$$$",
-        rating: 4.8,
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-      }
+      title: "The Westin Dhaka",
+      category: "5-Star Luxury",
+      location: "Gulshan 2, Dhaka",
+      price: "$$$$",
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
     },
     {
-      data: {
-        title: "Renaissance Dhaka Gulshan Hotel",
-        category: "5-Star Premium",
-        location: "Gulshan 1, Dhaka",
-        price: "$$$$",
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-      }
+      title: "Renaissance Dhaka Gulshan Hotel",
+      category: "5-Star Premium",
+      location: "Gulshan 1, Dhaka",
+      price: "$$$$",
+      rating: 4.7,
+      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title: "Amari Dhaka",
+      category: "4-Star Boutique",
+      location: "Gulshan 2, Dhaka",
+      price: "$$$",
+      rating: 4.6,
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
     }
   ];
 }
@@ -60,30 +81,30 @@ if (!hotelEntries || hotelEntries.length === 0) {
     <p class="text-slate-300 mt-2 text-lg">Discover top luxury, boutique stays, and budget hotels in Gulshan 1 & 2.</p>
   </section>
 
-  <!-- Hotels Section -->
+  <!-- Hotels Grid Section -->
   <section class="py-12 max-w-6xl mx-auto px-4">
     <h2 class="text-2xl font-bold text-slate-900 mb-6">Hotels in Gulshan</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {hotelEntries.map((hotel) => (
+      {hotels.map((hotel) => (
         <div class="bg-white rounded-xl shadow-md p-4 border border-slate-200 flex flex-col sm:flex-row gap-4 hover:shadow-lg transition">
-          {hotel.data?.image && (
-            <img src={hotel.data.image} alt={hotel.data.title || hotel.data.name} class="w-full sm:w-44 h-36 object-cover rounded-lg" />
+          {hotel.image && (
+            <img src={hotel.image} alt={hotel.title} class="w-full sm:w-44 h-36 object-cover rounded-lg" />
           )}
           <div class="flex-1 flex flex-col justify-between">
             <div>
               <div class="flex justify-between items-center">
                 <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  {hotel.data?.category || 'Hotel'}
+                  {hotel.category}
                 </span>
-                <span class="text-sm font-bold text-amber-500">★ {hotel.data?.rating || '5.0'}</span>
+                <span class="text-sm font-bold text-amber-500">★ {hotel.rating}</span>
               </div>
-              <h3 class="text-lg font-bold text-slate-900 mt-1">{hotel.data?.title || hotel.data?.name || 'Gulshan Hotel'}</h3>
-              <p class="text-xs text-slate-500 mt-0.5">📍 {hotel.data?.location || 'Gulshan, Dhaka'}</p>
+              <h3 class="text-lg font-bold text-slate-900 mt-1">{hotel.title}</h3>
+              <p class="text-xs text-slate-500 mt-0.5">📍 {hotel.location}</p>
             </div>
 
             <div class="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center">
-              <span class="text-sm font-bold text-slate-900">{hotel.data?.price || '$$$$'}</span>
+              <span class="text-sm font-bold text-slate-900">{hotel.price}</span>
               <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded">
                 Available
               </span>
