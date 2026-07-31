@@ -1,8 +1,9 @@
-// src/content/config.ts
-import { z, defineCollection } from 'astro:content';
+// src/content.config.ts
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
-const hotelsCollection = defineCollection({
-  type: 'content',
+const hotels = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/hotels' }),
   schema: z.object({
     title: z.string().optional(),
     category: z.string().optional(),
@@ -14,6 +15,4 @@ const hotelsCollection = defineCollection({
   }),
 });
 
-export const collections = {
-  'hotels': hotelsCollection,
-};
+export const collections = { hotels };
