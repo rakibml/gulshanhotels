@@ -1,10 +1,10 @@
 ---
-title: gulshan hotels.com
-category: Budget Stay
+title: the westin hotel
+category: 5-Star Luxury
 location: Gulshan 2, Dhaka
-price: '58455'
+price: test
 rating: 5
-image: /images/uploads/14a6fbcc.avif
+image: /images/uploads/hero-gulshan.jpg
 featured: true
 ---
 
