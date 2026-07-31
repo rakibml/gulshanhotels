@@ -15,6 +15,7 @@ try {
       price: item.data?.price || '$$$$',
       rating: item.data?.rating || 4.8,
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      featured: item.data?.featured ?? true,
     }));
   }
 } catch (err) {
@@ -34,6 +35,7 @@ if (!hotels || hotels.length === 0) {
         price: item.frontmatter?.price || '$$$$',
         rating: item.frontmatter?.rating || 4.8,
         image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+        featured: item.frontmatter?.featured ?? true,
       }));
     }
   } catch (err) {
@@ -51,6 +53,7 @@ if (!hotels || hotels.length === 0) {
       price: "$$$$",
       rating: 4.8,
       image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      featured: true,
     },
     {
       title: "Renaissance Dhaka Gulshan Hotel",
@@ -59,6 +62,7 @@ if (!hotels || hotels.length === 0) {
       price: "$$$$",
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      featured: false,
     },
     {
       title: "Amari Dhaka",
@@ -67,23 +71,27 @@ if (!hotels || hotels.length === 0) {
       price: "$$$",
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      featured: false,
     }
   ];
 }
+
+// অ্যাডমিন প্যানেল থেকে Featured চিহ্ন দেওয়া হোটেলটি ডাইনামিকালি বেছে নেওয়া হচ্ছে
+const featuredHotel = hotels.find((h: any) => h.featured === true) || hotels[0];
 ---
 
 <Layout title="Gulshan Hotels - Official Accommodation & Travel Guide in Gulshan, Dhaka">
   
-  <!-- Hero Banner Section with Authentic Gulshan Skyline Image -->
+  <!-- Hero Banner Section -->
   <section class="relative bg-slate-900 overflow-hidden">
     <!-- Background Image Banner -->
-    <div class="relative h-[320px] sm:h-[450px] w-full overflow-hidden">
+    <div class="relative h-[280px] sm:h-[400px] w-full overflow-hidden">
       <img 
         src="/hero-gulshan.jpg" 
         alt="Gulshan Dhaka City Skyline Evening View" 
         class="w-full h-full object-cover opacity-90" 
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
     </div>
 
     <!-- Organic Wave Curve Shape Divider -->
@@ -94,7 +102,7 @@ if (!hotels || hotels.length === 0) {
     </div>
   </section>
 
-  <!-- Welcome Authority Section with Featured Hotel Showcase -->
+  <!-- Welcome Authority Section with Dynamic Admin-Controlled Featured Showcase -->
   <section class="bg-slate-50 py-10 px-4 sm:px-8 lg:px-12 border-b border-slate-200 -mt-2">
     <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
       
@@ -117,8 +125,8 @@ if (!hotels || hotels.length === 0) {
           Gulshan is Dhaka’s most upscale neighborhood, known for its diplomatic district, 5-star luxury hotels, fine dining, and vibrant city life. Whether you're visiting for embassy appointments, international business, or leisure, we help you find the perfect hotel through unbiased reviews, real photos, and local insider tips.
         </p>
 
-        <!-- 4 Authority Badges Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200">
+        <!-- 4 Authority Badges Bar (Hidden on Mobile, Visible on PC/Tablet) -->
+        <div class="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200">
           <div class="flex items-center space-x-2.5">
             <span class="text-xl">🔍</span>
             <div>
@@ -153,30 +161,30 @@ if (!hotels || hotels.length === 0) {
         </div>
       </div>
 
-      <!-- Right Column (5 Columns): Featured Hotel Card (Editor's Choice) -->
+      <!-- Right Column (5 Columns): Dynamic Featured Hotel Card (Admin Controlled) -->
       <div class="lg:col-span-5">
         <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
-          <!-- Featured Image -->
+          <!-- Featured Image from Admin Panel -->
           <img 
-            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80" 
-            alt="The Westin Dhaka - Editor's Choice" 
+            src={featuredHotel?.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"} 
+            alt={featuredHotel?.title} 
             class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" 
           />
           <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
 
-          <!-- Top Badge: Editor's Choice -->
+          <!-- Top Badge: Editor's Choice / Sponsored -->
           <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md flex items-center space-x-1">
             <span>⭐ Editor's Choice</span>
           </div>
 
-          <!-- Bottom Overlay Content -->
+          <!-- Bottom Overlay Content Dynamic -->
           <div class="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
             <div>
               <span class="text-[11px] font-extrabold text-emerald-300 bg-slate-950/80 px-2.5 py-0.5 rounded border border-emerald-500/40">
-                5-Star Luxury • Gulshan 2
+                {featuredHotel?.category || '5-Star Luxury'} • {featuredHotel?.location || 'Gulshan'}
               </span>
-              <h3 class="text-2xl font-black text-white mt-1.5">The Westin Dhaka</h3>
-              <p class="text-xs text-amber-400 font-bold mt-0.5">★ ★ ★ ★ ★ <span class="text-white ml-1">4.8/5 Excellent</span></p>
+              <h3 class="text-2xl font-black text-white mt-1.5">{featuredHotel?.title}</h3>
+              <p class="text-xs text-amber-400 font-bold mt-0.5">★ ★ ★ ★ ★ <span class="text-white ml-1">{featuredHotel?.rating || '4.8'}/5 Excellent</span></p>
             </div>
 
             <a href="#hotels" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-lg shadow-lg transition shrink-0 ml-2">
