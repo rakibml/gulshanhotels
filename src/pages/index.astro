@@ -3,7 +3,33 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
-// ১. Astro Content Collections থেকে ডাটা লোড
+// ১. স্পন্সরড ডাটা লোড
+let sponsorData = null;
+try {
+  const rawSponsor = import.meta.glob('../content/sponsored/*.md', { eager: true });
+  const list = Object.values(rawSponsor);
+  if (list && list.length > 0) {
+    sponsorData = (list[0] as any).frontmatter;
+  }
+} catch (e) {
+  sponsorData = null;
+}
+
+// ডিফল্ট স্পন্সর ডাটা
+if (!sponsorData) {
+  sponsorData = {
+    enable: true,
+    badge: "⭐ Editor's Choice",
+    title: "The Westin Dhaka",
+    category: "5-Star Luxury • Gulshan 2",
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+    buttonText: "Check Best Deal ➔",
+    buttonLink: "https://agoda.com"
+  };
+}
+
+// ২. সাধারণ হোটেল লিস্ট লোড
 let hotels = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -15,14 +41,12 @@ try {
       price: item.data?.price || '$$$$',
       rating: item.data?.rating || 4.8,
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-      featured: item.data?.featured ?? true,
     }));
   }
 } catch (err) {
   hotels = [];
 }
 
-// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
 if (!hotels || hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -35,7 +59,6 @@ if (!hotels || hotels.length === 0) {
         price: item.frontmatter?.price || '$$$$',
         rating: item.frontmatter?.rating || 4.8,
         image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-        featured: item.frontmatter?.featured ?? true,
       }));
     }
   } catch (err) {
@@ -43,7 +66,6 @@ if (!hotels || hotels.length === 0) {
   }
 }
 
-// ৩. সেফটি ডিফল্ট ডাটা
 if (!hotels || hotels.length === 0) {
   hotels = [
     {
@@ -53,7 +75,6 @@ if (!hotels || hotels.length === 0) {
       price: "$$$$",
       rating: 4.8,
       image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-      featured: true,
     },
     {
       title: "Renaissance Dhaka Gulshan Hotel",
@@ -62,7 +83,6 @@ if (!hotels || hotels.length === 0) {
       price: "$$$$",
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-      featured: false,
     },
     {
       title: "Amari Dhaka",
@@ -71,20 +91,15 @@ if (!hotels || hotels.length === 0) {
       price: "$$$",
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-      featured: false,
     }
   ];
 }
-
-// অ্যাডমিন প্যানেল থেকে Featured চিহ্ন দেওয়া হোটেলটি ডাইনামিকালি বেছে নেওয়া হচ্ছে
-const featuredHotel = hotels.find((h: any) => h.featured === true) || hotels[0];
 ---
 
 <Layout title="Gulshan Hotels - Official Accommodation & Travel Guide in Gulshan, Dhaka">
   
   <!-- Hero Banner Section -->
   <section class="relative bg-slate-900 overflow-hidden">
-    <!-- Background Image Banner -->
     <div class="relative h-[280px] sm:h-[400px] w-full overflow-hidden">
       <img 
         src="/hero-gulshan.jpg" 
@@ -94,7 +109,6 @@ const featuredHotel = hotels.find((h: any) => h.featured === true) || hotels[0];
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
     </div>
 
-    <!-- Organic Wave Curve Shape Divider -->
     <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10">
       <svg class="relative block w-full h-10 sm:h-16 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="currentColor">
         <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"></path>
@@ -102,30 +116,26 @@ const featuredHotel = hotels.find((h: any) => h.featured === true) || hotels[0];
     </div>
   </section>
 
-  <!-- Welcome Authority Section with Dynamic Admin-Controlled Featured Showcase -->
+  <!-- Welcome Authority Section with Dynamic Sponsored Showcase -->
   <section class="bg-slate-50 py-10 px-4 sm:px-8 lg:px-12 border-b border-slate-200 -mt-2">
     <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
       
-      <!-- Left Column (7 Columns): Narrative & 4 Authority Badges -->
+      <!-- Left Column: Narrative & Authority Badges -->
       <div class="lg:col-span-7 space-y-4 text-left">
-        <!-- Subtitle with Green Underline -->
         <div class="inline-block border-b-2 border-emerald-600 pb-1">
           <span class="text-xs font-black uppercase tracking-widest text-emerald-800">
             WELCOME TO GULSHANHOTELS.COM
           </span>
         </div>
 
-        <!-- Main Title -->
         <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
           Your Trusted Guide To The Best Hotels In Gulshan
         </h1>
 
-        <!-- Description Paragraph -->
         <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
           Gulshan is Dhaka’s most upscale neighborhood, known for its diplomatic district, 5-star luxury hotels, fine dining, and vibrant city life. Whether you're visiting for embassy appointments, international business, or leisure, we help you find the perfect hotel through unbiased reviews, real photos, and local insider tips.
         </p>
 
-        <!-- 4 Authority Badges Bar (Hidden on Mobile, Visible on PC/Tablet) -->
         <div class="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200">
           <div class="flex items-center space-x-2.5">
             <span class="text-xl">🔍</span>
@@ -161,37 +171,57 @@ const featuredHotel = hotels.find((h: any) => h.featured === true) || hotels[0];
         </div>
       </div>
 
-      <!-- Right Column (5 Columns): Dynamic Featured Hotel Card (Admin Controlled) -->
+      <!-- Right Column: Sponsored Showcase (Dynamic Admin Controlled) -->
       <div class="lg:col-span-5">
-        <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
-          <!-- Featured Image from Admin Panel -->
-          <img 
-            src={featuredHotel?.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"} 
-            alt={featuredHotel?.title} 
-            class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" 
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+        {sponsorData && sponsorData.enable ? (
+          <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
+            <img 
+              src={sponsorData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"} 
+              alt={sponsorData.title} 
+              class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" 
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
 
-          <!-- Top Badge: Editor's Choice / Sponsored -->
-          <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md flex items-center space-x-1">
-            <span>⭐ Editor's Choice</span>
-          </div>
-
-          <!-- Bottom Overlay Content Dynamic -->
-          <div class="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
-            <div>
-              <span class="text-[11px] font-extrabold text-emerald-300 bg-slate-950/80 px-2.5 py-0.5 rounded border border-emerald-500/40">
-                {featuredHotel?.category || '5-Star Luxury'} • {featuredHotel?.location || 'Gulshan'}
-              </span>
-              <h3 class="text-2xl font-black text-white mt-1.5">{featuredHotel?.title}</h3>
-              <p class="text-xs text-amber-400 font-bold mt-0.5">★ ★ ★ ★ ★ <span class="text-white ml-1">{featuredHotel?.rating || '4.8'}/5 Excellent</span></p>
+            <!-- Custom Badge Text -->
+            <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md flex items-center space-x-1">
+              <span>{sponsorData.badge || "⭐ Editor's Choice"}</span>
             </div>
 
-            <a href="#hotels" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-lg shadow-lg transition shrink-0 ml-2">
-              Read Review ➔
+            <!-- Bottom Content & Target Link -->
+            <div class="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
+              <div>
+                <span class="text-[11px] font-extrabold text-emerald-300 bg-slate-950/80 px-2.5 py-0.5 rounded border border-emerald-500/40">
+                  {sponsorData.category || "5-Star Luxury • Gulshan 2"}
+                </span>
+                <h3 class="text-2xl font-black text-white mt-1.5">{sponsorData.title}</h3>
+                <p class="text-xs text-amber-400 font-bold mt-0.5">★ ★ ★ ★ ★ <span class="text-white ml-1">{sponsorData.rating || '4.8'}/5 Excellent</span></p>
+              </div>
+
+              <a 
+                href={sponsorData.buttonLink || "#hotels"} 
+                target="_blank"
+                rel="noopener noreferrer"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-lg shadow-lg transition shrink-0 ml-2"
+              >
+                {sponsorData.buttonText || "Check Best Deal ➔"}
+              </a>
+            </div>
+          </div>
+        ) : (
+          /* Feature Your Hotel Call to Action (When Sponsored is disabled) */
+          <div class="bg-gradient-to-br from-emerald-900 to-slate-900 p-8 rounded-2xl border border-emerald-700/50 text-white text-center space-y-4 shadow-xl">
+            <span class="bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase px-3 py-1 rounded-full border border-emerald-500/30">
+              Sponsored Opportunity
+            </span>
+            <h3 class="text-2xl font-black text-white">Feature Your Hotel Here!</h3>
+            <p class="text-xs text-slate-300">
+              Reach over 25,000+ diplomats, tourists, and business travelers visiting Gulshan monthly. Get maximum visibility for your hotel.
+            </p>
+            <a href="/about" class="inline-block bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase shadow transition">
+              Contact For Sponsorship ➔
             </a>
           </div>
-        </div>
+        )}
       </div>
 
     </div>
