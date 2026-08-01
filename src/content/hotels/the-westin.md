@@ -1,5 +1,6 @@
 ---
 title: the westin
+slug: the-westin
 category: 5-Star Luxury
 location: Gulshan 2, Dhaka
 fullAddress: Road 112, Gulshan 2, Diplomatic Zone, Dhaka 1212
