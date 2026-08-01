@@ -1,5 +1,5 @@
 ---
-enable: false
+enable: true
 badge: ⭐ sponsored
 title: The Westin Dhaka
 category: 5-Star Luxury • Gulshan 2
