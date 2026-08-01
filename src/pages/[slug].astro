@@ -1,0 +1,184 @@
+---
+// src/pages/[slug].astro
+import Layout from '../layouts/Layout.astro';
+
+// ১. Astro-কে বলে দেওয়া কোন কোন হোটেলের পেজ তৈরি হবে (URL Slug জেনারেট করা)
+export async function getStaticPaths() {
+  const hotelsData = [
+    {
+      slug: "ocean-view-grand-resort", // ইউআরএল হবে: gulshanhotels.com/ocean-view-grand-resort
+      title: "Ocean View Grand Resort",
+      location: "Cox's Bazar",
+      fullLocation: "Marine Drive, Cox's Bazar, Bangladesh",
+      price: "৳৪,৫০০",
+      rating: "4.9",
+      reviewsCount: "48",
+      host: "Royal Stay Ltd",
+      rooms: "2 Guests • 1 Bedroom • 1 King Bed • 1 Private Bath",
+      description: "Experience world-class luxury at Ocean View Grand Resort, situated right along the scenic Marine Drive in Cox's Bazar. Enjoy ocean view rooms, infinity pool, and premium hospitality.",
+      amenities: ["Infinity Pool", "High-speed Wi-Fi", "Air Conditioning", "Free Breakfast", "Free Parking", "Ocean View Balcony"],
+      mainImage: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80"
+      ]
+    },
+    {
+      slug: "mountain-breeze-hotel", // ইউআরএল হবে: gulshanhotels.com/mountain-breeze-hotel
+      title: "Mountain Breeze Hotel",
+      location: "Sylhet",
+      fullLocation: "Tea Garden Road, Sreemangal, Sylhet",
+      price: "৳৩,২০০",
+      rating: "4.8",
+      reviewsCount: "32",
+      host: "Green Valley",
+      rooms: "4 Guests • 2 Bedrooms • 2 Beds • 2 Baths",
+      description: "Nestled among green tea gardens in Sreemangal, Mountain Breeze Hotel offers peaceful natural surroundings, cozy rooms, and delicious local food.",
+      amenities: ["Free Wi-Fi", "Air Conditioning", "Free Breakfast", "Tea Garden View", "Parking Area"],
+      mainImage: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80"
+      ]
+    }
+  ];
+
+  return hotelsData.map((hotel) => ({
+    params: { slug: hotel.slug },
+    props: { hotel },
+  }));
+}
+
+// ২. ডায়নামিক পেজের বর্তমান হোটেলের ডাটা রিসিভ করা
+const { hotel } = Astro.props;
+---
+
+<Layout title={`${hotel.title} - GulshanHotels.com`}>
+  <main class="py-8 sm:py-12 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-8">
+    
+    <!-- 1. Breadcrumb & Title Section -->
+    <div class="border-b border-slate-200 pb-6">
+      <nav class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+        <a href="/" class="hover:text-emerald-600 transition">HOME</a>
+        <span>/</span>
+        <a href="/hotels" class="hover:text-emerald-600 transition">HOTELS</a>
+        <span>/</span>
+        <span class="text-slate-900">{hotel.title}</span>
+      </nav>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+            {hotel.title}
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2 font-semibold flex flex-wrap items-center gap-2">
+            <span class="text-amber-600 font-bold">★ {hotel.rating} ({hotel.reviewsCount} Reviews)</span>
+            <span>•</span>
+            <span class="flex items-center gap-1">
+              📍 {hotel.fullLocation}
+            </span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
+            🔗 Share
+          </button>
+          <button class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
+            ♥ Wishlist
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Image Gallery Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-2xl overflow-hidden max-h-[480px] shadow-sm">
+      <div class="md:col-span-2 md:row-span-2 h-[260px] md:h-[480px]">
+        <img src={hotel.mainImage} alt={hotel.title} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+      </div>
+      {hotel.gallery.map((img, index) => (
+        <div class="h-[130px] md:h-[234px]">
+          <img src={img} alt={`Gallery image ${index + 1}`} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        </div>
+      ))}
+    </div>
+
+    <!-- 3. Details Split Layout (2 Columns) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 pt-4">
+      
+      <!-- Left Column (70%) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <div class="flex items-center justify-between pb-6 border-b border-slate-200">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Hosted by {hotel.host}</h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">{hotel.rooms}</p>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-emerald-700 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+            {hotel.host.substring(0, 2).toUpperCase()}
+          </div>
+        </div>
+
+        <div class="space-y-3 pb-8 border-b border-slate-200">
+          <h3 class="text-xs font-black uppercase tracking-wider text-emerald-700">Overview</h3>
+          <h4 class="text-2xl font-bold text-slate-900">About this hotel</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            {hotel.description}
+          </p>
+        </div>
+
+        <div class="space-y-4 pb-8 border-b border-slate-200">
+          <h3 class="text-xs font-black uppercase tracking-wider text-emerald-700">Facilities</h3>
+          <h4 class="text-2xl font-bold text-slate-900">What this place offers</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {hotel.amenities.map((item) => (
+              <div class="p-3.5 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex items-center gap-2">
+                <span>✓</span> {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Sticky Booking Box (30%) -->
+      <div>
+        <div class="sticky top-24 bg-white p-6 rounded-2xl border border-slate-200 shadow-xl space-y-6">
+          
+          <div class="flex justify-between items-baseline border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-3xl font-black text-slate-900">{hotel.price}</span>
+              <span class="text-xs text-slate-500 font-medium"> / night</span>
+            </div>
+            <span class="text-xs font-extrabold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+              ★ {hotel.rating}
+            </span>
+          </div>
+
+          <div class="space-y-3">
+            <button class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs uppercase tracking-wider py-4 rounded-xl transition shadow-md active:scale-95">
+              Reserve / Book Now
+            </button>
+
+            <a href="https://wa.me/8801700000000" target="_blank" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition">
+              💬 Chat on WhatsApp
+            </a>
+
+            <a href="tel:+8801700000000" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition">
+              📞 Call Hotel (+880 1700-000000)
+            </a>
+          </div>
+
+          <p class="text-[11px] text-center text-slate-400 font-medium">Instant confirmation. Guaranteed best price.</p>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</Layout>
