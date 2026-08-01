@@ -2,11 +2,17 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
+// নিশ্চিতভাবে স্ট্যাটিক পেজ জেনারেট করার কমান্ড
+export const prerender = true;
+
 export async function getStaticPaths() {
   const hotelEntries = await getCollection('hotels');
+  
   return hotelEntries.map(entry => {
-    // the-westin.md থেকে .md বাদ দিয়ে মূল ইউআরএল বের করা
-    const cleanSlug = entry.slug || entry.id.replace(/\.md$/, '').replace(/^hotels\//, '');
+    // Astro-র যেকোনো ভার্সন থেকে নিখুঁতভাবে ইউআরএল স্লগ বের করা
+    const rawSlug = entry.data?.slug || entry.slug || entry.id || '';
+    const cleanSlug = rawSlug.replace(/\.md$/, '').replace(/^hotels\//, '').trim();
+
     return {
       params: { slug: cleanSlug },
       props: { entry },
@@ -15,11 +21,12 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const hotel = entry.data || {};
+const hotel = entry?.data || {};
 
-const title = hotel.title || "Hotel Details";
+// Fallback Values
+const title = hotel.title || "The Westin Dhaka";
 const locationTag = hotel.location || "Gulshan 2, Dhaka";
-const fullAddress = hotel.fullAddress || "Road 112, Gulshan 2, Diplomatic Zone, Dhaka 1212";
+const fullAddress = hotel.fullAddress || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212";
 const priceBDT = hotel.priceBDT || "৳১৫,০০০—";
 const priceUSD = hotel.priceUSD || "$130";
 const rating = hotel.rating || 4.8;
@@ -31,46 +38,87 @@ const phone = hotel.phone || "+880 2-9886510";
 
 <Layout title={`${title} - GulshanHotels Directory`}>
   
-  <main class="py-8 sm:py-12 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-8 font-sans text-slate-800">
-    
-    <!-- Title Section -->
-    <div class="border-b border-slate-200 pb-6">
-      <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b]">{title}</h1>
-      <p class="text-sm text-slate-600 mt-2 font-medium">📍 {fullAddress} • ★ {rating} ({reviewsCount} Verified Reviews)</p>
+  <!-- Header -->
+  <div class="py-6 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto border-b border-slate-200 font-sans">
+    <div class="flex items-center justify-between mb-3">
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <a href="/" class="hover:text-[#1a382b]">Home</a>
+        <span>/</span>
+        <a href="/hotels" class="hover:text-[#1a382b]">Hotels</a>
+        <span>/</span>
+        <span class="text-slate-900">{locationTag}</span>
+      </nav>
+
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        GulshanHotels Verified Directory
+      </span>
     </div>
 
-    <!-- Main Image -->
-    <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[460px]">
-      <img src={mainImg} alt={title} class="w-full h-full object-cover" />
-    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] tracking-tight">{title}</h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 font-medium flex flex-wrap items-center gap-2">
+          <span class="text-amber-700 font-bold">★ {rating} ({reviewsCount} Verified Reviews)</span>
+          <span>•</span>
+          <span class="flex items-center gap-1 text-slate-700">📍 {fullAddress}</span>
+        </p>
+      </div>
 
-    <!-- Split Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2 space-y-6">
-        <h2 class="font-serif text-2xl font-bold text-[#1a382b]">About {title}</h2>
-        <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
-          {hotel.body || `Welcome to ${title}. Located in ${locationTag}, offering world-class luxury accommodations and executive amenities.`}
+      <div class="flex items-center gap-2">
+        <button id="shareBtn" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">🔗 Share</button>
+        <button id="wishlistBtn" class="px-4 py-2 text-xs font-semibold text-rose-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">♥ Wishlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Gallery -->
+  <div class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto mt-6">
+    <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[480px] shadow-sm relative">
+      <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800 pt-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      
+      <!-- LEFT COLUMN -->
+      <div class="lg:col-span-2 space-y-12">
+        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+          <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3">
+            {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+              <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
+            )}
+          </div>
         </div>
       </div>
 
-      <!-- Sidebar -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-4 h-fit">
-        <div class="border-b border-slate-100 pb-3">
-          <span class="text-xs text-slate-400 font-bold block">Estimated Rate</span>
-          <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
-          <span class="text-xs text-slate-500"> / {priceUSD} per night</span>
+      <!-- RIGHT COLUMN (Sidebar) -->
+      <div>
+        <div class="sticky top-24 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Rate</span>
+            <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
+            <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
+          </div>
+
+          <div class="space-y-3">
+            <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
+              <span>Check price in official site</span>
+              <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            </a>
+
+            <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
+              📞 Direct Call: {phone}
+            </a>
+          </div>
         </div>
-
-        <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs py-3.5 px-4 rounded-xl flex items-center justify-between transition shadow-md">
-          <span>Check price in official site</span>
-          <span>➔</span>
-        </a>
-
-        <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
-          📞 Direct Call: {phone}
-        </a>
       </div>
-    </div>
 
+    </div>
   </main>
+
 </Layout>
