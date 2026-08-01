@@ -1,4 +1,3 @@
-// src/content.config.ts
 import { defineCollection, z } from 'astro:content';
 
 const hotelsCollection = defineCollection({
@@ -45,21 +44,6 @@ const hotelsCollection = defineCollection({
   }),
 });
 
-const sponsoredCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    enable: z.boolean().optional(),
-    badge: z.string().optional(),
-    title: z.string(),
-    category: z.string().optional(),
-    rating: z.number().optional(),
-    image: z.string().optional(),
-    buttonText: z.string().optional(),
-    buttonLink: z.string().optional(),
-  }),
-});
-
 export const collections = {
   hotels: hotelsCollection,
-  sponsored: sponsoredCollection,
 };
