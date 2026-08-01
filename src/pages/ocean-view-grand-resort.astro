@@ -28,35 +28,35 @@ import Layout from '../layouts/Layout.astro';
           </p>
         </div>
 
-        <!-- Share & Wishlist -->
+        <!-- Share & Wishlist Buttons -->
         <div class="flex items-center gap-3">
-          <button class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
+          <button id="shareBtn" class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm active:scale-95">
             🔗 Share
           </button>
-          <button class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm">
+          <button id="wishlistBtn" class="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider text-rose-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition shadow-sm active:scale-95">
             ♥ Wishlist
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 2. Image Gallery Grid -->
+    <!-- 2. Image Gallery Grid (Interactive Photos) -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-2xl overflow-hidden max-h-[480px] shadow-sm">
       <div class="md:col-span-2 md:row-span-2 h-[260px] md:h-[480px]">
-        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80" alt="Resort Front View" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80" alt="Resort Front View" class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
       </div>
       <div class="h-[130px] md:h-[234px]">
-        <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80" alt="Pool" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80" alt="Pool View" class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
       </div>
       <div class="h-[130px] md:h-[234px]">
-        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" alt="Bedroom" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" alt="Bedroom View" class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
       </div>
       <div class="h-[130px] md:h-[234px]">
-        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80" alt="Balcony View" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80" alt="Balcony View" class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
       </div>
       <div class="h-[130px] md:h-[234px] relative">
-        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80" alt="Dining" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-        <button class="absolute bottom-3 right-3 bg-slate-900/90 text-white text-xs font-black px-3.5 py-2 rounded-lg backdrop-blur-sm hover:bg-slate-900 transition">
+        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80" alt="Dining View" class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+        <button id="viewAllPhotosBtn" class="absolute bottom-3 right-3 bg-slate-900/90 text-white text-xs font-black px-3.5 py-2 rounded-lg backdrop-blur-sm hover:bg-slate-900 transition">
           View All Photos 📷
         </button>
       </div>
@@ -149,7 +149,7 @@ import Layout from '../layouts/Layout.astro';
             </span>
           </div>
 
-          <!-- Date inputs -->
+          <!-- Date Selector -->
           <div class="border border-slate-200 rounded-xl overflow-hidden text-xs">
             <div class="grid grid-cols-2 border-b border-slate-200">
               <div class="p-3 border-r border-slate-200 bg-slate-50">
@@ -170,9 +170,9 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
-          <!-- CTA Buttons -->
+          <!-- Action Buttons -->
           <div class="space-y-3">
-            <button class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs uppercase tracking-wider py-4 rounded-xl transition shadow-md active:scale-95">
+            <button id="reserveBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs uppercase tracking-wider py-4 rounded-xl transition shadow-md active:scale-95">
               Reserve / Book Now
             </button>
 
@@ -229,4 +229,169 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
   </main>
+
+  <!-- ================= POPUPS / MODALS ================= -->
+
+  <!-- A. Fullscreen Image Lightbox Modal -->
+  <div id="imageModal" class="fixed inset-0 z-50 bg-black/95 hidden flex-col items-center justify-center p-4">
+    <button id="closeModalBtn" class="absolute top-6 right-6 text-white text-3xl font-bold hover:text-gray-300 z-50">
+      &times;
+    </button>
+    <div class="relative max-w-5xl w-full flex items-center justify-center">
+      <button id="prevImgBtn" class="absolute left-2 sm:left-4 text-white text-3xl font-bold bg-white/20 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md">
+        &#10094;
+      </button>
+      <img id="modalImage" class="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl" src="" alt="Full view" />
+      <button id="nextImgBtn" class="absolute right-2 sm:right-4 text-white text-3xl font-bold bg-white/20 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md">
+        &#10095;
+      </button>
+    </div>
+    <span id="imgCounter" class="text-white text-xs font-bold mt-4">1 / 5</span>
+  </div>
+
+  <!-- B. Booking Form Modal -->
+  <div id="bookingModal" class="fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200">
+      <button id="closeBookingBtn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl font-bold">
+        &times;
+      </button>
+      
+      <h3 class="text-2xl font-bold text-slate-900">Book Ocean View Grand Resort</h3>
+      <p class="text-xs text-slate-500">Please fill in your details to complete room reservation.</p>
+
+      <form id="bookingForm" class="space-y-3 pt-2">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Your Full Name</label>
+          <input type="text" required placeholder="Enter your name" class="w-full border border-slate-200 p-2.5 rounded-lg text-xs focus:outline-none focus:border-emerald-600 bg-slate-50" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone Number</label>
+          <input type="tel" required placeholder="+880 1700-000000" class="w-full border border-slate-200 p-2.5 rounded-lg text-xs focus:outline-none focus:border-emerald-600 bg-slate-50" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Special Requests (Optional)</label>
+          <textarea rows="2" placeholder="Any specific requirements..." class="w-full border border-slate-200 p-2.5 rounded-lg text-xs focus:outline-none focus:border-emerald-600 bg-slate-50"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition mt-2">
+          Confirm Reservation ➔
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Gallery Image Lightbox Popup
+      const galleryImgs = document.querySelectorAll('.gallery-img');
+      const viewAllBtn = document.getElementById('viewAllPhotosBtn');
+      const imageModal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImage');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const prevBtn = document.getElementById('prevImgBtn');
+      const nextBtn = document.getElementById('nextImgBtn');
+      const imgCounter = document.getElementById('imgCounter');
+
+      const imgList = Array.from(galleryImgs).map(img => img.src);
+      let currentIndex = 0;
+
+      function openModal(index) {
+        currentIndex = index;
+        if(modalImg) modalImg.src = imgList[currentIndex];
+        if(imgCounter) imgCounter.innerText = `${currentIndex + 1} / ${imgList.length}`;
+        imageModal?.classList.remove('hidden');
+        imageModal?.classList.add('flex');
+      }
+
+      function closeModalFunc() {
+        imageModal?.classList.add('hidden');
+        imageModal?.classList.remove('flex');
+      }
+
+      galleryImgs.forEach((img, idx) => {
+        img.addEventListener('click', () => openModal(idx));
+      });
+
+      if(viewAllBtn) viewAllBtn.addEventListener('click', () => openModal(0));
+      if(closeModalBtn) closeModalBtn.addEventListener('click', closeModalFunc);
+
+      if(prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          currentIndex = (currentIndex - 1 + imgList.length) % imgList.length;
+          modalImg.src = imgList[currentIndex];
+          imgCounter.innerText = `${currentIndex + 1} / ${imgList.length}`;
+        });
+      }
+
+      if(nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          currentIndex = (currentIndex + 1) % imgList.length;
+          modalImg.src = imgList[currentIndex];
+          imgCounter.innerText = `${currentIndex + 1} / ${imgList.length}`;
+        });
+      }
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') {
+          closeModalFunc();
+          closeBookingModalFunc();
+        }
+      });
+
+      // 2. Wishlist Button Toggle
+      const wishlistBtn = document.getElementById('wishlistBtn');
+      let isSaved = false;
+      if(wishlistBtn) {
+        wishlistBtn.addEventListener('click', () => {
+          isSaved = !isSaved;
+          if(isSaved) {
+            wishlistBtn.innerHTML = '❤️ Saved';
+            wishlistBtn.classList.add('bg-rose-50', 'border-rose-300');
+          } else {
+            wishlistBtn.innerHTML = '♥ Wishlist';
+            wishlistBtn.classList.remove('bg-rose-50', 'border-rose-300');
+          }
+        });
+      }
+
+      // 3. Share Button Logic
+      const shareBtn = document.getElementById('shareBtn');
+      if(shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Hotel link copied to clipboard! 📋');
+        });
+      }
+
+      // 4. Reserve / Booking Modal
+      const reserveBtn = document.getElementById('reserveBtn');
+      const bookingModal = document.getElementById('bookingModal');
+      const closeBookingBtn = document.getElementById('closeBookingBtn');
+      const bookingForm = document.getElementById('bookingForm');
+
+      function openBookingModalFunc() {
+        bookingModal?.classList.remove('hidden');
+        bookingModal?.classList.add('flex');
+      }
+
+      function closeBookingModalFunc() {
+        bookingModal?.classList.add('hidden');
+        bookingModal?.classList.remove('flex');
+      }
+
+      if(reserveBtn) reserveBtn.addEventListener('click', openBookingModalFunc);
+      if(closeBookingBtn) closeBookingBtn.addEventListener('click', closeBookingModalFunc);
+
+      if(bookingForm) {
+        bookingForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Thank you! Your reservation request has been submitted. We will contact you shortly.');
+          closeBookingModalFunc();
+        });
+      }
+    });
+  </script>
+
 </Layout>
