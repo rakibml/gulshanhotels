@@ -1,13 +1,14 @@
+// src/content.config.ts
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders'; // Astro v5 Loader
 
-// রেকর্ড টাইপ দেওয়া হলো যেন কোনো ফিল্ডের কারণে বিল্ড ফেইল না করে
 const hotels = defineCollection({
-  type: 'content',
-  schema: z.record(z.any()).or(z.object({ title: z.string().optional() })),
+  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/hotels" }),
+  schema: z.record(z.any()),
 });
 
 const sponsored = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/content/sponsored" }),
   schema: z.record(z.any()),
 });
 
