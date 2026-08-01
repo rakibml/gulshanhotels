@@ -1,227 +1,168 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>All Hotels - Stay with Us</title>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="font-sans bg-gray-50 text-gray-800">
+---
+// ১. আপনার Tailwind CSS ফাইলটি এখানে ইমপোর্ট করুন (যেখানে @import "tailwindcss"; লেখা আছে)
+import '../styles/global.css'; // আপনার CSS ফাইলের পাথ অনুযায়ী নাম দিন
 
-  <!-- 1. Header & Search Filter Section -->
-  <section class="bg-[#f8faf9] py-12 px-4 sm:px-6 lg:px-8 border-b border-gray-200">
-    <div class="max-w-[1280px] mx-auto text-center">
-      <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] mb-3">
-        Explore All Hotels
-      </h1>
-      <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
-        Find your perfect stay from our curated collection of luxury hotels, resorts, and lodges across Bangladesh.
-      </p>
+// ২. আপনার যদি হেডার-ফুটার লেআউট থাকে তবে সেটা ব্যবহার করুন (ঐচ্ছিক)
+// import MainLayout from '../layouts/MainLayout.astro';
+---
 
-      <!-- Search & Filter Controls -->
-      <div class="mt-8 bg-white p-3 sm:p-4 rounded-2xl shadow-lg border border-gray-100 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-        
-        <!-- Search Keyword Input -->
-        <div class="flex flex-col">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Search</label>
-          <input type="text" id="searchInput" placeholder="Hotel name or keyword..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b]" />
-        </div>
+<section class="bg-[#f8faf9] py-12 px-4 sm:px-6 lg:px-8 border-b border-gray-200">
+  <div class="max-w-[1280px] mx-auto text-center">
+    <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] mb-3">
+      Explore All Hotels
+    </h1>
+    <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+      Find your perfect stay from our curated collection of luxury hotels, resorts, and lodges across Bangladesh.
+    </p>
 
-        <!-- Location Filter -->
-        <div class="flex flex-col">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Location</label>
-          <select id="locationSelect" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b] bg-white">
-            <option value="all">All Locations</option>
-            <option value="Cox's Bazar">Cox's Bazar</option>
-            <option value="Sylhet">Sylhet</option>
-            <option value="Dhaka">Dhaka</option>
-            <option value="Rangamati">Rangamati</option>
-          </select>
-        </div>
-
-        <!-- Filter Action Button -->
-        <div class="flex items-end">
-          <button id="resetFilterBtn" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-semibold text-sm py-2.5 rounded-lg transition-all">
-            Reset Filters
-          </button>
-        </div>
-
+    <!-- Search & Filter Controls -->
+    <div class="mt-8 bg-white p-3 sm:p-4 rounded-2xl shadow-lg border border-gray-100 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+      
+      <div class="flex flex-col">
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Search</label>
+        <input type="text" id="searchInput" placeholder="Hotel name or keyword..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b]" />
       </div>
+
+      <div class="flex flex-col">
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Location</label>
+        <select id="locationSelect" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b] bg-white">
+          <option value="all">All Locations</option>
+          <option value="Cox's Bazar">Cox's Bazar</option>
+          <option value="Sylhet">Sylhet</option>
+          <option value="Dhaka">Dhaka</option>
+          <option value="Rangamati">Rangamati</option>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button id="resetFilterBtn" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-semibold text-sm py-2.5 rounded-lg transition-all">
+          Reset Filters
+        </button>
+      </div>
+
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 2. Hotel Grid Section -->
-  <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
-    
-    <!-- Results Summary -->
-    <div class="flex justify-between items-center mb-8">
-      <p class="text-sm text-gray-600 font-medium">
-        Showing <span id="hotelCount" class="font-bold text-[#1a382b]">0</span> Hotels
-      </p>
-    </div>
+<!-- Hotel Grid Section -->
+<section class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
+  <div class="flex justify-between items-center mb-8">
+    <p class="text-sm text-gray-600 font-medium">
+      Showing <span id="hotelCount" class="font-bold text-[#1a382b]">0</span> Hotels
+    </p>
+  </div>
 
-    <!-- Cards Container / Grid -->
-    <div id="hotelsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- JavaScript এর মাধ্যমে হোটেল কার্ডগুলো এখানে রেন্ডার হবে -->
-    </div>
+  <div id="hotelsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 
-    <!-- Empty Result State -->
-    <div id="noResults" class="hidden text-center py-16">
-      <p class="text-lg font-semibold text-gray-500">No hotels found matching your filter criteria.</p>
-    </div>
+  <div id="noResults" class="hidden text-center py-16">
+    <p class="text-lg font-semibold text-gray-500">No hotels found matching your filter criteria.</p>
+  </div>
+</section>
 
-  </section>
+<script>
+  const hotelsData = [
+    {
+      id: 1,
+      title: "Ocean View Grand Resort",
+      location: "Cox's Bazar",
+      fullLocation: "Cox's Bazar, Bangladesh",
+      rooms: "1 Bed, 1 Bath",
+      host: "Royal Stay Ltd",
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      id: 2,
+      title: "Mountain Breeze Hotel",
+      location: "Sylhet",
+      fullLocation: "Sylhet, Bangladesh",
+      rooms: "2 Bed, 2 Bath",
+      host: "Green Valley",
+      image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      id: 3,
+      title: "PANORAMIC PALACE HOTEL",
+      location: "Dhaka",
+      fullLocation: "Dhaka, Bangladesh",
+      rooms: "3 Bed, 3.5 Bath",
+      host: "Luxury Living",
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      id: 4,
+      title: "Lakeview Heritage Suites",
+      location: "Rangamati",
+      fullLocation: "Rangamati, Bangladesh",
+      rooms: "2 Bed, 2 Bath",
+      host: "Eco Resorts",
+      image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80"
+    }
+  ];
 
-  <!-- 3. JavaScript for Dynamic Hotel Loading & Filter -->
-  <script>
-    // হোটেলের ডাটা লিস্ট (নতুন হোটেল এড করতে এই লিস্টে অবজেক্ট যোগ করুন)
-    const hotelsData = [
-      {
-        id: 1,
-        title: "Ocean View Grand Resort",
-        location: "Cox's Bazar",
-        fullLocation: "Cox's Bazar, Bangladesh",
-        rooms: "1 Bed, 1 Bath",
-        host: "Royal Stay Ltd",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 2,
-        title: "Mountain Breeze Hotel",
-        location: "Sylhet",
-        fullLocation: "Sylhet, Bangladesh",
-        rooms: "2 Bed, 2 Bath",
-        host: "Green Valley",
-        image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 3,
-        title: "PANORAMIC PALACE HOTEL",
-        location: "Dhaka",
-        fullLocation: "Dhaka, Bangladesh",
-        rooms: "3 Bed, 3.5 Bath",
-        host: "Luxury Living",
-        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 4,
-        title: "Lakeview Heritage Suites",
-        location: "Rangamati",
-        fullLocation: "Rangamati, Bangladesh",
-        rooms: "2 Bed, 2 Bath",
-        host: "Eco Resorts",
-        image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 5,
-        title: "Seagull Beach Front Hotel",
-        location: "Cox's Bazar",
-        fullLocation: "Cox's Bazar, Bangladesh",
-        rooms: "2 Bed, 2 Bath",
-        host: "Seagull Group",
-        image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 6,
-        title: "Tea Garden Valley Lodge",
-        location: "Sylhet",
-        fullLocation: "Sreemangal, Sylhet",
-        rooms: "1 Bed, 1 Bath",
-        host: "Nature Stays",
-        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 7,
-        title: "The Capital Crown Suite",
-        location: "Dhaka",
-        fullLocation: "Gulshan, Dhaka",
-        rooms: "1 Bed, 1.5 Bath",
-        host: "Crown Hospitality",
-        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80"
-      },
-      {
-        id: 8,
-        title: "Hill Crest Eco Resort",
-        location: "Rangamati",
-        fullLocation: "Kaptai, Rangamati",
-        rooms: "3 Bed, 2 Bath",
-        host: "Hillside Group",
-        image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=600&q=80"
-      }
-    ];
+  const container = document.getElementById('hotelsContainer');
+  const hotelCount = document.getElementById('hotelCount');
+  const searchInput = document.getElementById('searchInput');
+  const locationSelect = document.getElementById('locationSelect');
+  const resetFilterBtn = document.getElementById('resetFilterBtn');
+  const noResults = document.getElementById('noResults');
 
-    // DOM Elements
-    const container = document.getElementById('hotelsContainer');
-    const hotelCount = document.getElementById('hotelCount');
-    const searchInput = document.getElementById('searchInput');
-    const locationSelect = document.getElementById('locationSelect');
-    const resetFilterBtn = document.getElementById('resetFilterBtn');
-    const noResults = document.getElementById('noResults');
+  function renderHotels(list) {
+    if (!container || !hotelCount) return;
+    container.innerHTML = '';
+    hotelCount.innerText = list.length;
 
-    // হোটেল রেন্ডার করার ফাংশন
-    function renderHotels(list) {
-      container.innerHTML = '';
-      hotelCount.innerText = list.length;
+    if (list.length === 0) {
+      noResults?.classList.remove('hidden');
+      return;
+    } else {
+      noResults?.classList.add('hidden');
+    }
 
-      if (list.length === 0) {
-        noResults.classList.remove('hidden');
-        return;
-      } else {
-        noResults.classList.add('hidden');
-      }
-
-      list.forEach(hotel => {
-        const cardHTML = `
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
-            <div class="h-[200px] w-full overflow-hidden">
-              <img class="w-full h-full object-cover rounded-t-2xl hover:scale-105 transition-transform duration-500" src="${hotel.image}" alt="${hotel.title}" />
+    list.forEach(hotel => {
+      const cardHTML = `
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+          <div class="h-[200px] w-full overflow-hidden">
+            <img class="w-full h-full object-cover rounded-t-2xl hover:scale-105 transition-transform duration-500" src="${hotel.image}" alt="${hotel.title}" />
+          </div>
+          <div class="p-5 flex flex-col flex-1">
+            <h3 class="font-serif text-lg font-bold text-[#1a382b] mb-2 line-clamp-1">${hotel.title}</h3>
+            <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
+              <svg class="w-3.5 h-3.5 fill-[#a87247]" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span>${hotel.fullLocation}</span>
             </div>
-            <div class="p-5 flex flex-col flex-1">
-              <h3 class="font-serif text-lg font-bold text-[#1a382b] mb-2 line-clamp-1">${hotel.title}</h3>
-              <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
-                <svg class="w-3.5 h-3.5 fill-[#a87247]" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                <span>${hotel.fullLocation}</span>
-              </div>
-              <div class="mt-auto flex items-center justify-between text-xs">
-                <span class="font-semibold text-gray-800">${hotel.rooms}</span>
-                <span class="bg-[#f1f5f3] text-[#1a382b] px-3 py-1.5 rounded-md font-semibold text-[11px]">Host: ${hotel.host}</span>
-              </div>
+            <div class="mt-auto flex items-center justify-between text-xs">
+              <span class="font-semibold text-gray-800">${hotel.rooms}</span>
+              <span class="bg-[#f1f5f3] text-[#1a382b] px-3 py-1.5 rounded-md font-semibold text-[11px]">Host: ${hotel.host}</span>
             </div>
           </div>
-        `;
-        container.insertAdjacentHTML('beforeend', cardHTML);
-      });
-    }
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', cardHTML);
+    });
+  }
 
-    // ফিল্টারিং ফাংশন
-    function filterHotels() {
-      const searchValue = searchInput.value.toLowerCase().trim();
-      const selectedLocation = locationSelect.value;
+  function filterHotels() {
+    const searchValue = searchInput.value.toLowerCase().trim();
+    const selectedLocation = locationSelect.value;
 
-      const filtered = hotelsData.filter(hotel => {
-        const matchesSearch = hotel.title.toLowerCase().includes(searchValue) || hotel.fullLocation.toLowerCase().includes(searchValue);
-        const matchesLocation = selectedLocation === 'all' || hotel.location === selectedLocation;
+    const filtered = hotelsData.filter(hotel => {
+      const matchesSearch = hotel.title.toLowerCase().includes(searchValue) || hotel.fullLocation.toLowerCase().includes(searchValue);
+      const matchesLocation = selectedLocation === 'all' || hotel.location === selectedLocation;
 
-        return matchesSearch && matchesLocation;
-      });
-
-      renderHotels(filtered);
-    }
-
-    // Event Listeners
-    searchInput.addEventListener('input', filterHotels);
-    locationSelect.addEventListener('change', filterHotels);
-
-    resetFilterBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      locationSelect.value = 'all';
-      renderHotels(hotelsData);
+      return matchesSearch && matchesLocation;
     });
 
-    // প্রথমবার সমস্ত হোটেল লোড করা
-    renderHotels(hotelsData);
-  </script>
+    renderHotels(filtered);
+  }
 
-</body>
-</html>
+  searchInput?.addEventListener('input', filterHotels);
+  locationSelect?.addEventListener('change', filterHotels);
+
+  resetFilterBtn?.addEventListener('click', () => {
+    searchInput.value = '';
+    locationSelect.value = 'all';
+    renderHotels(hotelsData);
+  });
+
+  renderHotels(hotelsData);
+</script>
