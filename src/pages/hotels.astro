@@ -1,63 +1,69 @@
 ---
-// ১. আপনার Tailwind CSS ফাইলটি এখানে ইমপোর্ট করুন (যেখানে @import "tailwindcss"; লেখা আছে)
-import '../styles/global.css'; // আপনার CSS ফাইলের পাথ অনুযায়ী নাম দিন
-
-// ২. আপনার যদি হেডার-ফুটার লেআউট থাকে তবে সেটা ব্যবহার করুন (ঐচ্ছিক)
-// import MainLayout from '../layouts/MainLayout.astro';
+// src/pages/hotels.astro
+import Layout from '../layouts/Layout.astro';
 ---
 
-<section class="bg-[#f8faf9] py-12 px-4 sm:px-6 lg:px-8 border-b border-gray-200">
-  <div class="max-w-[1280px] mx-auto text-center">
-    <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] mb-3">
-      Explore All Hotels
-    </h1>
-    <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
-      Find your perfect stay from our curated collection of luxury hotels, resorts, and lodges across Bangladesh.
-    </p>
+<Layout title="All Hotels - GulshanHotels.com">
+  <main>
+    
+    <!-- 1. Header & Search Filter Section -->
+    <section class="bg-[#f8faf9] py-12 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+      <div class="max-w-[1280px] mx-auto text-center">
+        <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] mb-3">
+          Explore All Hotels
+        </h1>
+        <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
+          Find your perfect stay from our curated collection of luxury hotels, resorts, and lodges across Bangladesh.
+        </p>
 
-    <!-- Search & Filter Controls -->
-    <div class="mt-8 bg-white p-3 sm:p-4 rounded-2xl shadow-lg border border-gray-100 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-      
-      <div class="flex flex-col">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Search</label>
-        <input type="text" id="searchInput" placeholder="Hotel name or keyword..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b]" />
+        <!-- Search & Filter Controls -->
+        <div class="mt-8 bg-white p-3 sm:p-4 rounded-2xl shadow-lg border border-slate-100 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+          
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">Search</label>
+            <input type="text" id="searchInput" placeholder="Hotel name or keyword..." class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#1a382b]" />
+          </div>
+
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 px-1">Location</label>
+            <select id="locationSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#1a382b] bg-white">
+              <option value="all">All Locations</option>
+              <option value="Cox's Bazar">Cox's Bazar</option>
+              <option value="Sylhet">Sylhet</option>
+              <option value="Dhaka">Dhaka</option>
+              <option value="Rangamati">Rangamati</option>
+            </select>
+          </div>
+
+          <div class="flex items-end">
+            <button id="resetFilterBtn" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-semibold text-sm py-2.5 rounded-lg transition-all">
+              Reset Filters
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Hotel Grid Section -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
+      <div class="flex justify-between items-center mb-8">
+        <p class="text-sm text-slate-600 font-medium">
+          Showing <span id="hotelCount" class="font-bold text-[#1a382b]">0</span> Hotels
+        </p>
       </div>
 
-      <div class="flex flex-col">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">Location</label>
-        <select id="locationSelect" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a382b] bg-white">
-          <option value="all">All Locations</option>
-          <option value="Cox's Bazar">Cox's Bazar</option>
-          <option value="Sylhet">Sylhet</option>
-          <option value="Dhaka">Dhaka</option>
-          <option value="Rangamati">Rangamati</option>
-        </select>
+      <!-- Hotel Grid Container -->
+      <div id="hotelsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+      <!-- Empty State -->
+      <div id="noResults" class="hidden text-center py-16">
+        <p class="text-lg font-semibold text-slate-500">No hotels found matching your filter criteria.</p>
       </div>
+    </section>
 
-      <div class="flex items-end">
-        <button id="resetFilterBtn" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-semibold text-sm py-2.5 rounded-lg transition-all">
-          Reset Filters
-        </button>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- Hotel Grid Section -->
-<section class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
-  <div class="flex justify-between items-center mb-8">
-    <p class="text-sm text-gray-600 font-medium">
-      Showing <span id="hotelCount" class="font-bold text-[#1a382b]">0</span> Hotels
-    </p>
-  </div>
-
-  <div id="hotelsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-
-  <div id="noResults" class="hidden text-center py-16">
-    <p class="text-lg font-semibold text-gray-500">No hotels found matching your filter criteria.</p>
-  </div>
-</section>
+  </main>
+</Layout>
 
 <script>
   const hotelsData = [
@@ -101,15 +107,15 @@ import '../styles/global.css'; // আপনার CSS ফাইলের পা�
 
   const container = document.getElementById('hotelsContainer');
   const hotelCount = document.getElementById('hotelCount');
-  const searchInput = document.getElementById('searchInput');
-  const locationSelect = document.getElementById('locationSelect');
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+  const locationSelect = document.getElementById('locationSelect') as HTMLSelectElement;
   const resetFilterBtn = document.getElementById('resetFilterBtn');
   const noResults = document.getElementById('noResults');
 
   function renderHotels(list) {
     if (!container || !hotelCount) return;
     container.innerHTML = '';
-    hotelCount.innerText = list.length;
+    hotelCount.innerText = list.length.toString();
 
     if (list.length === 0) {
       noResults?.classList.remove('hidden');
@@ -120,18 +126,18 @@ import '../styles/global.css'; // আপনার CSS ফাইলের পা�
 
     list.forEach(hotel => {
       const cardHTML = `
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
           <div class="h-[200px] w-full overflow-hidden">
             <img class="w-full h-full object-cover rounded-t-2xl hover:scale-105 transition-transform duration-500" src="${hotel.image}" alt="${hotel.title}" />
           </div>
           <div class="p-5 flex flex-col flex-1">
             <h3 class="font-serif text-lg font-bold text-[#1a382b] mb-2 line-clamp-1">${hotel.title}</h3>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
+            <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-6">
               <svg class="w-3.5 h-3.5 fill-[#a87247]" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
               <span>${hotel.fullLocation}</span>
             </div>
             <div class="mt-auto flex items-center justify-between text-xs">
-              <span class="font-semibold text-gray-800">${hotel.rooms}</span>
+              <span class="font-semibold text-slate-800">${hotel.rooms}</span>
               <span class="bg-[#f1f5f3] text-[#1a382b] px-3 py-1.5 rounded-md font-semibold text-[11px]">Host: ${hotel.host}</span>
             </div>
           </div>
@@ -142,8 +148,8 @@ import '../styles/global.css'; // আপনার CSS ফাইলের পা�
   }
 
   function filterHotels() {
-    const searchValue = searchInput.value.toLowerCase().trim();
-    const selectedLocation = locationSelect.value;
+    const searchValue = searchInput?.value.toLowerCase().trim() || '';
+    const selectedLocation = locationSelect?.value || 'all';
 
     const filtered = hotelsData.filter(hotel => {
       const matchesSearch = hotel.title.toLowerCase().includes(searchValue) || hotel.fullLocation.toLowerCase().includes(searchValue);
@@ -159,8 +165,8 @@ import '../styles/global.css'; // আপনার CSS ফাইলের পা�
   locationSelect?.addEventListener('change', filterHotels);
 
   resetFilterBtn?.addEventListener('click', () => {
-    searchInput.value = '';
-    locationSelect.value = 'all';
+    if (searchInput) searchInput.value = '';
+    if (locationSelect) locationSelect.value = 'all';
     renderHotels(hotelsData);
   });
 
