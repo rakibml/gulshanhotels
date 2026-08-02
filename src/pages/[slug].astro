@@ -1,4 +1,5 @@
 ---
+// src/pages/[slug].astro
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
@@ -6,8 +7,8 @@ export async function getStaticPaths() {
   const hotelEntries = await getCollection('hotels');
   
   return hotelEntries.map(entry => {
-    // Astro-র ফাইল আইডি থেকে নিখুঁত ইউআরএল স্লগ (e.g. 'the-westin') বের করা
-    const cleanSlug = entry.id.replace(/\.md$/, '').replace(/^hotels\//, '').trim();
+    // Astro v4 / v5 ফাইল আইডি থেকে স্লগ এক্সট্র্যাক্ট করা
+    const cleanSlug = entry.slug || entry.id.replace(/\.md$/, '').replace(/^hotels\//, '').trim();
     return {
       params: { slug: cleanSlug },
       props: { entry },
@@ -18,6 +19,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const hotel = entry?.data || {};
 
+// CMS থেকে ডাটা ক্যাচ করা এবং ফলব্যাক মান সেট করা
 const title = hotel.title || "The Westin Dhaka";
 const locationTag = hotel.location || "Gulshan 2, Dhaka";
 const fullAddress = hotel.fullAddress || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212";
@@ -28,54 +30,409 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
+const whatsapp = hotel.whatsapp || "8801700000000";
+const mapUrl = hotel.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.59834612345!2d90.4132!3d23.7925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7a0f3d6118b%3A0x6a2c3a51f22e830!2sGulshan%202%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd";
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
-  <main class="py-8 sm:py-12 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-8 font-sans text-slate-800">
-    
-    <!-- Title Section -->
-    <div class="border-b border-slate-200 pb-6">
-      <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b]">{title}</h1>
-      <p class="text-sm text-slate-600 mt-2 font-medium">📍 {fullAddress} • ★ {rating} ({reviewsCount} Verified Reviews)</p>
+  
+  <!-- 1. Header & Title Section -->
+  <div class="py-6 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto border-b border-slate-200 font-sans">
+    <div class="flex items-center justify-between mb-3">
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <a href="/" class="hover:text-[#1a382b]">Home</a>
+        <span>/</span>
+        <a href="/hotels" class="hover:text-[#1a382b]">Hotels</a>
+        <span>/</span>
+        <span class="text-slate-900">{locationTag}</span>
+      </nav>
+
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        GulshanHotels Verified Directory
+      </span>
     </div>
 
-    <!-- Main Image -->
-    <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[480px] shadow-sm relative">
-      <img src={mainImg} alt={title} class="w-full h-full object-cover" />
-    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] tracking-tight">{title}</h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 font-medium flex flex-wrap items-center gap-2">
+          <span class="text-amber-700 font-bold">★ {rating} ({reviewsCount} Verified Reviews)</span>
+          <span>•</span>
+          <span class="flex items-center gap-1 text-slate-700">📍 {fullAddress}</span>
+        </p>
+      </div>
 
-    <!-- Content Split -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="flex items-center gap-2">
+        <button id="shareBtn" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">🔗 Share</button>
+        <button id="wishlistBtn" class="px-4 py-2 text-xs font-semibold text-rose-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">♥ Wishlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Image Gallery Grid -->
+  <div class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto mt-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 rounded-2xl overflow-hidden max-h-[320px] sm:max-h-[460px] shadow-xs relative">
+      <div class="col-span-2 md:col-span-2 md:row-span-2 h-[220px] sm:h-[320px] md:h-[460px]">
+        <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+      </div>
+      <div class="hidden sm:block h-[150px] md:h-[224px]">
+        <img src={hotel.gallery?.[0] || mainImg} alt="Gallery 1" class="gallery-img w-full h-full object-cover cursor-pointer" />
+      </div>
+      <div class="hidden sm:block h-[150px] md:h-[224px]">
+        <img src={hotel.gallery?.[1] || mainImg} alt="Gallery 2" class="gallery-img w-full h-full object-cover cursor-pointer" />
+      </div>
+      <div class="hidden md:block h-[224px]">
+        <img src={hotel.gallery?.[2] || mainImg} alt="Gallery 3" class="gallery-img w-full h-full object-cover cursor-pointer" />
+      </div>
+      <div class="hidden md:block h-[224px] relative">
+        <img src={hotel.gallery?.[3] || mainImg} alt="Gallery 4" class="gallery-img w-full h-full object-cover cursor-pointer" />
+      </div>
+
+      <button id="viewAllPhotosBtn" class="absolute bottom-3 right-3 bg-white/90 text-slate-800 text-xs font-bold px-3.5 py-2 rounded-lg border border-slate-200 shadow-md hover:bg-white transition cursor-pointer">
+        📷 View All Photos
+      </button>
+    </div>
+  </div>
+
+  <!-- Sticky Section Navigation Tabs Bar -->
+  <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
+    <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
+      <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
+      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Amenities</a>
+      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">What's nearby</a>
+      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Essential Details</a>
+      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">House Rules</a>
+      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">FAQs</a>
+      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Reviews</a>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
       
-      <!-- Left Body -->
-      <div class="lg:col-span-2 space-y-6">
-        <h2 class="font-serif text-2xl font-bold text-[#1a382b]">About {title}</h2>
-        <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
-          {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-            <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
-          )}
+      <!-- LEFT COLUMN (70%) -->
+      <div class="lg:col-span-2 space-y-12">
+        
+        <!-- 1. OVERVIEW & MAP SECTION -->
+        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
+          <div>
+            <span class="text-xs sm:text-sm font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal mt-3 space-y-3">
+              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, corporate facilities, and diplomatic security.</p>
+              )}
+            </div>
+          </div>
+
+          <!-- Google Map Embed Code -->
+          <div class="space-y-2 pt-2">
+            <div class="flex justify-between items-center">
+              <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
+              <a href="https://maps.google.com" target="_blank" class="text-xs sm:text-sm font-bold text-[#1a382b] hover:underline">Open in Google Maps ↗</a>
+            </div>
+            <div class="w-full h-[320px] rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
+              <iframe 
+                title="Gulshan Hotel Location"
+                src={mapUrl}
+                class="w-full h-full border-0" 
+                allowfullscreen="" 
+                loading="lazy">
+              </iframe>
+            </div>
+          </div>
         </div>
+
+        <!-- 2. FEATURED AMENITIES SECTION -->
+        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+          <div class="space-y-1 mb-8">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">AMENITIES</span>
+            <h3 class="text-2xl sm:text-3xl font-black tracking-tight">Featured Amenities <span class="text-slate-400 font-normal text-lg">({hotel.amenities?.length || 18})</span></h3>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-y-5 gap-x-3">
+              {(hotel.amenities || [
+                "Indoor Heated Pool", "Continental Breakfast*", "Exercise Room",
+                "Family Friendly", "Free Hot Breakfast", "Fitness Center",
+                "Free WiFi", "Snack Shop*", "Copy Machine*"
+              ]).map(item => (
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-[#342f47] border border-slate-700/50 flex items-center justify-center text-indigo-300 shrink-0 shadow-xs">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-xs sm:text-sm font-bold text-slate-200">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div class="lg:col-span-5 relative pl-3 pb-3">
+              <div class="absolute inset-0 bg-[#fdb813] rounded-2xl transform translate-x-3 translate-y-3 z-0"></div>
+              <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl h-[210px] sm:h-[250px]">
+                <img id="amenitySliderImg" src={mainImg} alt="Amenity" class="w-full h-full object-cover transition-all duration-300" />
+                <button id="amenityPrevBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md cursor-pointer">&#10094;</button>
+                <button id="amenityNextBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md cursor-pointer">&#10095;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-slate-700/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <button id="openAllAmenitiesBtn" class="px-6 py-2.5 border border-white hover:bg-white hover:text-slate-900 font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer">View all amenities</button>
+            <span class="text-[11px] text-slate-400 italic">*May require an additional cost</span>
+          </div>
+        </div>
+
+        <!-- 3. WHAT'S NEARBY SECTION -->
+        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
+          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🍽️</div>
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Dining / Bars</h4>
+              </div>
+              <div class="space-y-3.5 text-xs sm:text-sm">
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Chef's Table Courtside</h5><p class="text-slate-500 font-medium text-xs">Adjacent (200 m)</p></div>
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">North End Coffee Roasters</h5><p class="text-slate-500 font-medium text-xs">Adjacent (250 m)</p></div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🏛️</div>
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Attractions</h4>
+              </div>
+              <div class="space-y-3.5 text-xs sm:text-sm">
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Pink City Shopping Complex</h5><p class="text-slate-500 font-medium text-xs">0.2 mi</p></div>
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">US Embassy & Diplomatic Zone</h5><p class="text-slate-500 font-medium text-xs">1.1 mi</p></div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🏢</div>
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Business & Medical</h4>
+              </div>
+              <div class="space-y-3.5 text-xs sm:text-sm">
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">United Hospital Gulshan</h5><p class="text-slate-500 font-medium text-xs">1.2 mi</p></div>
+                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Hazrat Shahjalal Intl Airport</h5><p class="text-slate-500 font-medium text-xs">5.8 mi</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ESSENTIAL DETAILS -->
+        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
+          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🕒</div>
+              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Check-In</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{hotel.houseRules?.checkIn || "12:00 PM"}</p></div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">⏰</div>
+              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Check-Out</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{hotel.houseRules?.checkOut || "11:00 AM"}</p></div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">📞</div>
+              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Phone Number</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{phone}</p></div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">⚡</div>
+              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Power Backup</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">24/7 Full Generator</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. HOUSE RULES -->
+        <div id="rules" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">House rules</h3>
+          <div class="divide-y divide-slate-100 text-xs sm:text-sm">
+            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div class="font-bold text-slate-900 text-sm sm:text-base">Check-in / Check-out</div>
+              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.checkIn || "From 12:00 PM"} — {hotel.houseRules?.checkOut || "Until 11:00 AM"}</div>
+            </div>
+            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div class="font-bold text-slate-900 text-sm sm:text-base">Cancellation / prepayment</div>
+              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.cancellation || "Free cancellation up to 48 hours before arrival."}</div>
+            </div>
+            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div class="font-bold text-slate-900 text-sm sm:text-base">Payment options</div>
+              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.payment || "Accepts Cash, Credit Cards (Visa/MasterCard), bKash, and Nagad."}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. FAQs -->
+        <div id="faq" class="space-y-4 pb-8 border-b border-slate-200">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">FREQUENTLY ASKED QUESTIONS</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Hotel FAQs</h3>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            {(hotel.faqs || [
+              { question: "গুলশান ১ ও ২ গোলচত্বর থেকে হোটেলটি কত দূরে?", answer: "হোটেলটি গুলশান ২ সার্কেল থেকে মাত্র ৩ মিনিট হাঁটার দূরত্বে অবস্থিত।" },
+              { question: "এয়ারপোর্ট শাটল সার্ভিস কি এভেলেবল?", answer: "হ্যাঁ, ২৪ ঘণ্টা এয়ারপোর্ট পিকআপ ও ড্রপ-অফ সুবিধা দেওয়া হয়।" }
+            ]).map(faq => (
+              <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Q: {faq.question}</h4>
+                <p class="text-slate-600 leading-relaxed font-normal">A: {faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- 7. Guest Reviews -->
+        <div id="reviews" class="space-y-4">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">VERIFIED FEEDBACK</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Guest Reviews (★ {rating} out of 5)</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {(hotel.reviews || [
+              { author: "Rahat Hasan", date: "July 2026", comment: "An amazing stay in the heart of Gulshan 2! Excellent security and fast Wi-Fi." },
+              { author: "Sultana Ahmed", date: "June 2026", comment: "Very convenient location near embassies. Breakfast buffet was delicious." }
+            ]).map(rev => (
+              <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#f0f4f1] text-[#1a382b] font-bold flex items-center justify-center text-xs">{rev.author.substring(0, 2).toUpperCase()}</div>
+                  <div><h4 class="font-bold text-xs sm:text-sm text-slate-900">{rev.author}</h4><p class="text-[10px] text-slate-400">{rev.date}</p></div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">"{rev.comment}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
 
-      <!-- Right Sidebar Hub -->
-      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-4 h-fit">
-        <div class="border-b border-slate-100 pb-3">
-          <span class="text-xs text-slate-400 font-bold block uppercase">Estimated Rate</span>
-          <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
-          <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
+      <!-- RIGHT COLUMN (30% Sidebar with Stay22 Widget) -->
+      <div>
+        <div class="sticky top-24 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
+          
+          <div class="flex justify-between items-baseline border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Rate</span>
+              <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
+              <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
+            </div>
+            <span class="text-xs font-bold text-[#1a382b] bg-[#f0f4f1] px-2.5 py-1 rounded-full border border-emerald-100">
+              Verified
+            </span>
+          </div>
+
+          <!-- 🌟 Stay22 Realtime Live Price Widget -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Realtime Rates & Map</span>
+            <iframe
+              src={`https://www.stay22.com/embed/gm?lat=23.7925&lng=90.4167&hotelname=${encodeURIComponent(title)}&lmaId=6a6f2f890ba4510dcd28ab5c`}
+              width="100%"
+              height="260"
+              class="w-full rounded-xl border border-slate-200 shadow-xs"
+              frameborder="0"
+              allowfullscreen>
+            </iframe>
+          </div>
+
+          <!-- 3 Professional Action Buttons -->
+          <div class="space-y-3 pt-2 border-t border-slate-100">
+            <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
+              <span class="flex items-center gap-2">🌐 Check price in official site</span>
+              <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            </a>
+
+            <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs sm:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
+              💬 Instant WhatsApp Reservation
+            </button>
+
+            <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
+              📞 Direct Call: {phone}
+            </a>
+          </div>
+
+          <p class="text-[11px] text-center text-slate-400 font-medium pt-2 border-t border-slate-100">
+            Official directory listing. Direct connection with property management.
+          </p>
+
         </div>
-
-        <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
-          <span>Check price in official site</span>
-          <span class="group-hover:translate-x-1 transition-transform">➔</span>
-        </a>
-
-        <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
-          📞 Direct Call: {phone}
-        </a>
       </div>
 
     </div>
-
   </main>
+
+  <!-- MOBILE PINNED BOTTOM BAR WITH DOLLAR PRICE -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
+    <div>
+      <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
+      <span class="text-base font-black text-slate-900">{priceUSD} <span class="text-xs font-normal text-slate-500">/ {priceBDT}</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href={`tel:${phone.replace(/\s+/g, '')}`} class="p-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold">📞</a>
+      <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-xl shadow-md">
+        Check Official Price ➔
+      </a>
+    </div>
+  </div>
+
+  <!-- ALL AMENITIES MODAL POPUP -->
+  <div id="allAmenitiesModal" class="custom-modal fixed inset-0 z-50 bg-black/75 hidden items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+      <button id="closeAllAmenitiesBtn" class="absolute top-4 right-4 text-slate-800 text-xl font-black w-9 h-9 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center cursor-pointer">&times;</button>
+      <h3 class="text-2xl font-serif font-bold text-slate-900">All Featured Amenities ({hotel.amenities?.length || 28})</h3>
+      <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-slate-700">
+        {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle"]).map(a => (
+          <div>✓ {a}</div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive JS -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      function closeAllModals() {
+        document.querySelectorAll('.custom-modal').forEach(m => {
+          m.classList.add('hidden');
+          m.classList.remove('flex');
+        });
+      }
+
+      function openModalWithHistory(modalEl) {
+        if (!modalEl) return;
+        modalEl.classList.remove('hidden');
+        modalEl.classList.add('flex');
+        history.pushState({ modalOpen: true }, '');
+      }
+
+      window.addEventListener('popstate', closeAllModals);
+
+      const openAllAmenitiesBtn = document.getElementById('openAllAmenitiesBtn');
+      const allAmenitiesModal = document.getElementById('allAmenitiesModal');
+      const closeAllAmenitiesBtn = document.getElementById('closeAllAmenitiesBtn');
+
+      if(openAllAmenitiesBtn) openAllAmenitiesBtn.addEventListener('click', () => openModalWithHistory(allAmenitiesModal));
+      if(closeAllAmenitiesBtn) closeAllAmenitiesBtn.addEventListener('click', closeAllModals);
+
+      const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
+      if(sidebarWhatsAppBtn) {
+        sidebarWhatsAppBtn.addEventListener('click', () => {
+          const hotelName = document.querySelector('h1')?.innerText || "Gulshan Hotel";
+          const textMessage = `Hello! I would like to request room availability and details for ${hotelName} via GulshanHotels Directory.`;
+          window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(textMessage)}`, '_blank');
+        });
+      }
+
+      const shareBtn = document.getElementById('shareBtn');
+      if(shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(window.location.href);
+          alert('Hotel directory link copied to clipboard! 📋');
+        });
+      }
+    });
+  </script>
+
 </Layout>
