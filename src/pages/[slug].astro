@@ -31,6 +31,16 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
+
+// Default Dates for Date Inputs
+const today = new Date();
+const checkinDefault = new Date(today);
+checkinDefault.setDate(checkinDefault.getDate() + 2);
+const checkoutDefault = new Date(today);
+checkoutDefault.setDate(checkoutDefault.getDate() + 5);
+
+const checkinStr = checkinDefault.toISOString().split('T')[0];
+const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -89,7 +99,7 @@ const phone = hotel.phone || "+880 2-9886510";
   <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
       
-      <!-- LEFT COLUMN -->
+      <!-- LEFT COLUMN (70%) -->
       <div class="lg:col-span-2 space-y-12">
         
         <!-- Overview -->
@@ -103,25 +113,59 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
-        <!-- 📸 TRIPADVISOR STYLE LIVE RATES COMPARISON (STRICTLY FILTERED FOR THIS HOTEL ONLY) -->
-        <div id="rates" class="space-y-4">
-          <div class="flex justify-between items-center pb-2">
-            <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Compare Live Rates</h3>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              ● Stay22 Direct API Verified
-            </span>
+        <!-- 📸 REFERENCE input_file_40.png : TRIPADVISOR STYLE LIVE RATES COMPARISON WITH TRAVEL DATES FILTER BAR -->
+        <div id="rates" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+          
+          <div class="space-y-1 border-b border-slate-100 pb-4">
+            <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">View prices for your travel dates</h3>
+            <p class="text-xs text-slate-500 font-medium">Select your stay dates below to instantly update live rates across all booking partners</p>
+          </div>
+
+          <!-- 🌟 TRIPADVISOR TOP FILTER BAR (input_file_40.png) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Check In -->
+            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
+              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <div class="flex flex-col text-left w-full">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Check In</span>
+                <input type="date" id="filterCheckIn" value={checkinStr} class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+              </div>
+            </div>
+
+            <!-- Check Out -->
+            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
+              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <div class="flex flex-col text-left w-full">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Check Out</span>
+                <input type="date" id="filterCheckOut" value={checkoutStr} class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+              </div>
+            </div>
+
+            <!-- Rooms / Guests -->
+            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
+              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              <div class="flex flex-col text-left w-full">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Rooms/Guests</span>
+                <select id="filterGuests" class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full">
+                  <option value="1">1 Room, 1 Guest</option>
+                  <option value="2" selected>1 Room, 2 Guests</option>
+                  <option value="3">1 Room, 3 Guests</option>
+                  <option value="4">2 Rooms, 4 Guests</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <!-- Dynamic TripAdvisor Style Cards Container -->
-          <div id="dynamicOtaContainer" class="space-y-3">
+          <div id="dynamicOtaContainer" class="space-y-3 pt-2">
             <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
-              Checking live rates for {title}...
+              Checking live rates for selected travel dates...
             </div>
           </div>
 
           <!-- TripAdvisor Disclaimer Note -->
           <p class="text-xs text-slate-500 pt-2 leading-relaxed">
-            Prices are provided by our partners and reflect base nightly room rates. Taxes & mandatory fees excluded. Please see partner sites for final booking breakdown.
+            Prices are provided by our partners, and reflect nightly room rates, including any mandatory fees. Taxes not included. Please see our partners for more details.
           </p>
         </div>
 
@@ -166,10 +210,13 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </main>
 
-  <!-- ⚡ JS: STRICTLY FILTER SUPPLIERS ONLY FOR THE TARGETED HOTEL -->
-  <script is:inline define:vars={{ title, officialWebsite, priceUSD, priceBDT }}>
+  <!-- ⚡ JS: TRIPADVISOR TRAVEL DATES FILTER + LIVE PRICE RENDERER -->
+  <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
+      const filterCheckIn = document.getElementById('filterCheckIn');
+      const filterCheckOut = document.getElementById('filterCheckOut');
+      const filterGuests = document.getElementById('filterGuests');
 
       function parsePriceNumber(suppObj) {
         if (!suppObj) return null;
@@ -182,117 +229,112 @@ const phone = hotel.phone || "+880 2-9886510";
         return null;
       }
 
-      try {
-        const targetHotelTitle = title.trim();
-        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(targetHotelTitle)}`;
-        const response = await fetch(workerUrl);
+      // 🔄 Function to fetch live rates for selected travel dates
+      async function fetchLiveRates() {
+        if (!container) return;
+        
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
+            Checking live rates for selected travel dates...
+          </div>
+        `;
 
-        if (response.ok && container) {
-          const data = await response.json();
-          
-          if (data && data.results && data.results.length > 0) {
+        const checkinVal = filterCheckIn?.value || '';
+        const checkoutVal = filterCheckOut?.value || '';
+        const adultsVal = filterGuests?.value || '2';
+
+        try {
+          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${checkinVal}&checkout=${checkoutVal}&adults=${adultsVal}`;
+          const response = await fetch(workerUrl);
+
+          if (response.ok) {
+            const data = await response.json();
             
-            const targetSuppliers = [];
-            const seenKeys = new Set();
+            if (data && data.results && data.results.length > 0) {
+              const suppliersList = [];
 
-            // 🎯 STRICT FILTERING: Only process items belonging to THIS exact hotel!
-            data.results.forEach(item => {
-              const itemName = (item.name || "").toLowerCase().trim();
-              const targetName = targetHotelTitle.toLowerCase().trim();
+              data.results.forEach(item => {
+                const itemName = (item.name || "").toLowerCase();
+                const targetName = title.toLowerCase();
 
-              // Check if item belongs to the targeted hotel
-              const isTargetHotel = itemName === targetName || 
-                itemName.includes(targetName) || 
-                targetName.includes(itemName) ||
-                (targetName.split(' ')[0].length > 3 && itemName.includes(targetName.split(' ')[0]));
-
-              if (isTargetHotel && item.suppliers) {
-                Object.keys(item.suppliers).forEach(key => {
-                  const supp = item.suppliers[key];
-                  if (supp && supp.link && !seenKeys.has(key)) {
-                    seenKeys.add(key);
-                    targetSuppliers.push({
-                      key: key,
-                      name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
-                      link: supp.link,
-                      logo: supp.media?.logoSquare || null,
-                      totalPrice: parsePriceNumber(supp)
+                if (itemName.includes(targetName.substring(0, 5)) || targetName.includes(itemName.substring(0, 5))) {
+                  if (item.suppliers) {
+                    Object.keys(item.suppliers).forEach(key => {
+                      const supp = item.suppliers[key];
+                      if (supp && supp.link) {
+                        suppliersList.push({
+                          key: key,
+                          name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
+                          link: supp.link,
+                          logo: supp.media?.logoSquare || null,
+                          totalPrice: parsePriceNumber(supp)
+                        });
+                      }
                     });
                   }
-                });
-              }
-            });
-
-            // Sort by Price (Lowest First)
-            targetSuppliers.sort((a, b) => {
-              if (a.totalPrice && b.totalPrice) return a.totalPrice - b.totalPrice;
-              if (a.totalPrice) return -1;
-              if (b.totalPrice) return 1;
-              return 0;
-            });
-
-            // Render TripAdvisor Style Cards ONLY for the targeted hotel
-            if (targetSuppliers.length > 0) {
-              container.innerHTML = ''; // Clear loading message
-
-              targetSuppliers.forEach((supp, index) => {
-                const isLowest = index === 0 && supp.totalPrice;
-                
-                // Pre-tax base rate calculation (~15% tax excluded)
-                const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
-
-                const priceDisplay = basePriceNum 
-                  ? `<div class="text-right">
-                       <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">$${basePriceNum}</span>
-                       <span class="text-[10px] text-slate-500 font-bold block">+ taxes & fees</span>
-                     </div>`
-                  : `<span class="font-serif font-black text-slate-900 text-base sm:text-lg">Check rate</span>`;
-
-                const buttonClass = isLowest
-                  ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full transition shadow-xs text-xs sm:text-sm`
-                  : `border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-6 py-2.5 rounded-full transition text-xs sm:text-sm`;
-
-                const lowestBadge = isLowest 
-                  ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest base rate at</span>` 
-                  : ``;
-
-                const logoHtml = supp.logo 
-                  ? `<img src="${supp.logo}" alt="${supp.name}" class="h-6 sm:h-7 object-contain" />` 
-                  : `<span class="font-extrabold text-slate-900 text-base sm:text-lg">${supp.name}</span>`;
-
-                const cardHTML = `
-                  <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-slate-300 transition shadow-xs">
-                    <div class="flex items-center gap-3">
-                      ${logoHtml}
-                    </div>
-
-                    <div class="flex items-center gap-4 sm:gap-6 ml-auto">
-                      <div class="text-right">
-                        ${lowestBadge}
-                        ${priceDisplay}
-                      </div>
-                      <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
-                        View deal
-                      </a>
-                    </div>
-                  </div>
-                `;
-                container.insertAdjacentHTML('beforeend', cardHTML);
+                }
               });
 
-            } else {
-              renderTripAdvisorFallback();
-            }
+              // Sort Lowest Price First
+              suppliersList.sort((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : 0));
 
-          } else {
-            renderTripAdvisorFallback();
+              if (suppliersList.length > 0) {
+                container.innerHTML = '';
+
+                suppliersList.forEach((supp, index) => {
+                  const isLowest = index === 0 && supp.totalPrice;
+                  const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
+                  const priceDisplay = basePriceNum ? `$${basePriceNum}` : `Check rate`;
+
+                  const buttonClass = isLowest
+                    ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full transition shadow-xs text-xs sm:text-sm`
+                    : `border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-6 py-2.5 rounded-full transition text-xs sm:text-sm`;
+
+                  const lowestBadge = isLowest 
+                    ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest base rate at</span>` 
+                    : ``;
+
+                  const logoHtml = supp.logo 
+                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-6 sm:h-7 object-contain" />` 
+                    : `<span class="font-extrabold text-slate-900 text-base sm:text-lg">${supp.name}</span>`;
+
+                  const cardHTML = `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-slate-300 transition shadow-xs">
+                      <div class="flex items-center gap-3">
+                        ${logoHtml}
+                      </div>
+
+                      <div class="flex items-center gap-4 sm:gap-6 ml-auto">
+                        <div class="text-right">
+                          ${lowestBadge}
+                          <div class="text-right">
+                            <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">${priceDisplay}</span>
+                            ${basePriceNum ? `<span class="text-[10px] text-slate-500 font-bold block">+ taxes & fees</span>` : ''}
+                          </div>
+                        </div>
+                        <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
+                          View deal
+                        </a>
+                      </div>
+                    </div>
+                  `;
+                  container.insertAdjacentHTML('beforeend', cardHTML);
+                });
+
+              } else {
+                renderFallback();
+              }
+
+            } else {
+              renderFallback();
+            }
           }
+        } catch (err) {
+          renderFallback();
         }
-      } catch (err) {
-        renderTripAdvisorFallback();
       }
 
-      function renderTripAdvisorFallback() {
+      function renderFallback() {
         if (!container) return;
         container.innerHTML = `
           <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
@@ -306,7 +348,15 @@ const phone = hotel.phone || "+880 2-9886510";
         `;
       }
 
-      // WhatsApp
+      // Event Listeners for Date Inputs
+      filterCheckIn?.addEventListener('change', fetchLiveRates);
+      filterCheckOut?.addEventListener('change', fetchLiveRates);
+      filterGuests?.addEventListener('change', fetchLiveRates);
+
+      // Initial Fetch
+      fetchLiveRates();
+
+      // WhatsApp Handler
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
       if(sidebarWhatsAppBtn) {
         sidebarWhatsAppBtn.addEventListener('click', () => {
