@@ -1,4 +1,31 @@
 ---
+---
+// Astro Server-Side API Fetch (ব্রাউজারে কোনো সিকিউরিটি এরর হবে না)
+let liveAgodaPrice = "Check Live Rate ➔";
+let liveBookingPrice = "Check Live Rate ➔";
+
+try {
+  const res = await fetch(`https://api.stay22.com/v1/vectors?hotel=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`, {
+    headers: {
+      'Authorization': `Bearer ${STAY22_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    if (data?.results?.[0]?.rates) {
+      const agoda = data.results[0].rates.find(r => r.vendor?.toLowerCase().includes('agoda'));
+      const booking = data.results[0].rates.find(r => r.vendor?.toLowerCase().includes('booking'));
+      
+      if (agoda) liveAgodaPrice = `$${agoda.price} / ৳${Math.round(agoda.price * 110)}`;
+      if (booking) liveBookingPrice = `$${booking.price} / ৳${Math.round(booking.price * 110)}`;
+    }
+  }
+} catch (e) {
+  console.log("Stay22 Server API pending.");
+}
+---
 // src/pages/[slug].astro
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
