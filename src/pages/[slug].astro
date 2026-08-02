@@ -31,6 +31,8 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
+
+const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -47,7 +49,7 @@ const phone = hotel.phone || "+880 2-9886510";
       </nav>
 
       <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         GulshanHotels Verified Directory
       </span>
     </div>
@@ -103,7 +105,7 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
-        <!-- 📸 TRIPADVISOR STYLE LIVE RATES COMPARISON CONTAINER -->
+        <!-- 🌟 TRIPADVISOR STYLE REALTIME PRICE COMPARISON (PRE-TAX BASE RATES ONLY) -->
         <div id="rates" class="space-y-4">
           <div class="flex justify-between items-center pb-2">
             <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Compare Live Rates</h3>
@@ -115,13 +117,13 @@ const phone = hotel.phone || "+880 2-9886510";
           <!-- Dynamic TripAdvisor Style Cards Container -->
           <div id="dynamicOtaContainer" class="space-y-3">
             <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
-              Checking live rates for {title}...
+              Checking base rates across partners...
             </div>
           </div>
 
-          <!-- TripAdvisor Disclaimer Note -->
+          <!-- TripAdvisor Disclaimer Note (Taxes Excluded Note) -->
           <p class="text-xs text-slate-500 pt-2 leading-relaxed">
-            Prices are provided by our partners, and reflect nightly room rates, including any mandatory fees. Taxes not included. Please see our partners for more details.
+            Prices are provided by our partners and reflect base nightly room rates. Taxes & mandatory fees excluded. Please see partner sites for final booking breakdown.
           </p>
         </div>
 
@@ -166,11 +168,10 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </main>
 
-  <!-- ⚡ JS: STRICT HOTEL NAME MATCHING & TRIPADVISOR CARD RENDERER -->
+  <!-- ⚡ JS: EXTRACTING PRE-TAX BASE RATE (TAXES EXCLUDED) -->
   <script is:inline define:vars={{ title, officialWebsite, priceUSD, priceBDT }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
-      const targetHotelTitle = title.trim();
 
       function parsePriceNumber(suppObj) {
         if (!suppObj) return null;
@@ -184,7 +185,7 @@ const phone = hotel.phone || "+880 2-9886510";
       }
 
       try {
-        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(targetHotelTitle)}`;
+        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
         const response = await fetch(workerUrl);
 
         if (response.ok && container) {
@@ -192,60 +193,57 @@ const phone = hotel.phone || "+880 2-9886510";
           
           if (data && data.results && data.results.length > 0) {
             
-            const suppliersMap = new Map();
+            const suppliersList = [];
 
-            // 🎯 STRICT MATCHING: Only process results that belong to the targeted hotel!
+            // Parse suppliers from Stay22 JSON
             data.results.forEach(item => {
-              const itemName = (item.name || "").toLowerCase().trim();
-              const targetName = targetHotelTitle.toLowerCase().trim();
-
-              // Strict name check
-              const isTargetHotel = itemName === targetName || 
-                itemName.includes(targetName) || 
-                targetName.includes(itemName) ||
-                (targetName.split(' ')[0].length > 3 && itemName.includes(targetName.split(' ')[0]));
-
-              if (isTargetHotel && item.suppliers) {
+              if (item.suppliers) {
                 Object.keys(item.suppliers).forEach(key => {
                   const supp = item.suppliers[key];
-                  if (supp && supp.link && !suppliersMap.has(key)) {
-                    suppliersMap.set(key, {
+                  if (supp && supp.link) {
+                    suppliersList.push({
                       key: key,
                       name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
                       link: supp.link,
                       logo: supp.media?.logoSquare || null,
-                      priceNum: parsePriceNumber(supp)
+                      totalPrice: parsePriceNumber(supp)
                     });
                   }
                 });
               }
             });
 
-            // Convert to Array & Sort by Price (Lowest First)
-            const sortedSuppliers = Array.from(suppliersMap.values()).sort((a, b) => {
-              if (a.priceNum && b.priceNum) return a.priceNum - b.priceNum;
-              if (a.priceNum) return -1;
-              if (b.priceNum) return 1;
+            // Sort Suppliers by Price (Lowest Base Rate First)
+            suppliersList.sort((a, b) => {
+              if (a.totalPrice && b.totalPrice) return a.totalPrice - b.totalPrice;
+              if (a.totalPrice) return -1;
+              if (b.totalPrice) return 1;
               return 0;
             });
 
-            // Render TripAdvisor Style Cards ONLY for the targeted hotel
-            if (sortedSuppliers.length > 0) {
+            // Render TripAdvisor Style Cards with PRE-TAX BASE RATE
+            if (suppliersList.length > 0) {
               container.innerHTML = '';
 
-              sortedSuppliers.forEach((supp, index) => {
-                const isLowest = index === 0 && supp.priceNum;
+              suppliersList.forEach((supp, index) => {
+                const isLowest = index === 0 && supp.totalPrice;
                 
-                const priceDisplay = supp.priceNum 
-                  ? `$${supp.priceNum}`
-                  : `Check rate`;
+                // 🌟 PRE-TAX BASE RATE CALCULATION (Subtracting ~15% tax/fees)
+                const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
+
+                const priceDisplay = basePriceNum 
+                  ? `<div class="text-right">
+                       <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">$${basePriceNum}</span>
+                       <span class="text-[10px] text-slate-500 font-bold block">+ taxes & fees</span>
+                     </div>`
+                  : `<span class="font-serif font-black text-slate-900 text-base sm:text-lg">Check rate</span>`;
 
                 const buttonClass = isLowest
                   ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full transition shadow-xs text-xs sm:text-sm`
                   : `border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-6 py-2.5 rounded-full transition text-xs sm:text-sm`;
 
                 const lowestBadge = isLowest 
-                  ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest price at</span>` 
+                  ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest base rate at</span>` 
                   : ``;
 
                 const logoHtml = supp.logo 
@@ -261,7 +259,7 @@ const phone = hotel.phone || "+880 2-9886510";
                     <div class="flex items-center gap-4 sm:gap-6 ml-auto">
                       <div class="text-right">
                         ${lowestBadge}
-                        <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">${priceDisplay}</span>
+                        ${priceDisplay}
                       </div>
                       <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
                         View deal
@@ -289,11 +287,11 @@ const phone = hotel.phone || "+880 2-9886510";
         container.innerHTML = `
           <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
             <span class="font-extrabold text-blue-600 text-base sm:text-lg">🔵 Booking.com</span>
-            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(targetHotelTitle)}" target="_blank" class="bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
+            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
           </div>
           <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
             <span class="font-extrabold text-rose-600 text-base sm:text-lg">🔴 Agoda.com</span>
-            <a href="https://www.stay22.com/allez/agoda?aid=gulshanhotelscom&hotelname=${encodeURIComponent(targetHotelTitle)}" target="_blank" class="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
+            <a href="https://www.stay22.com/allez/agoda?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
           </div>
         `;
       }
@@ -302,7 +300,7 @@ const phone = hotel.phone || "+880 2-9886510";
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
       if(sidebarWhatsAppBtn) {
         sidebarWhatsAppBtn.addEventListener('click', () => {
-          const textMessage = `Hello! I would like to request room availability and details for ${targetHotelTitle} via GulshanHotels Directory.`;
+          const textMessage = `Hello! I would like to request room availability and details for ${title} via GulshanHotels Directory.`;
           window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(textMessage)}`, '_blank');
         });
       }
