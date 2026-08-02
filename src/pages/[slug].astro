@@ -31,8 +31,6 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
-
-const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -105,7 +103,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           </div>
         </div>
 
-        <!-- 🌟 REALTIME PRICE COMPARISON TABLE -->
+        <!-- 🌟 DYNAMIC REALTIME PRICE COMPARISON TABLE (DYNAMICALLY GENERATED FROM STAY22 JSON) -->
         <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -113,63 +111,17 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
               <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Live Rates Across Major Platforms</h3>
             </div>
             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              ● Stay22 Direct Travel API
+              ● Stay22 Direct API Verified
             </span>
           </div>
 
-          <!-- Realtime Rate Comparison Table -->
-          <div class="divide-y divide-slate-100 text-xs sm:text-sm">
-            
-            <!-- Booking.com Deal -->
-            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-blue-600 text-sm sm:text-base">🔵 Booking.com</span>
-                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
-              </div>
-              <div class="flex items-center gap-3 ml-auto">
-                <span id="bookingLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
-                <a id="bookingDealBtn" href={`https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
-              </div>
+          <!-- Dynamic Container: JS will automatically insert rows for suppliers found in Stay22 JSON! -->
+          <div id="dynamicOtaContainer" class="divide-y divide-slate-100 text-xs sm:text-sm">
+            <div class="py-4 text-center text-slate-500 font-medium animate-pulse">
+              Fetching live rates from Stay22 API...
             </div>
-
-            <!-- Expedia / Hotels.com Deal -->
-            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Expedia / Hotels.com</span>
-              </div>
-              <div class="flex items-center gap-3 ml-auto">
-                <span id="expediaLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
-                <a id="expediaDealBtn" href={`https://www.stay22.com/allez/expedia?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
-              </div>
-            </div>
-
-            <!-- Official Direct Hotel Rate -->
-            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50/70 p-3 rounded-xl">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-[#1a382b] text-sm sm:text-base">🏨 Direct Hotel Rate</span>
-                <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Official Rate</span>
-              </div>
-              <div class="flex items-center gap-3 ml-auto">
-                <span class="font-serif font-black text-[#1a382b] text-base sm:text-lg">{priceUSD} / {priceBDT}</span>
-                <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">Book Direct ➔</a>
-              </div>
-            </div>
-
           </div>
 
-          <p class="text-[11px] text-center text-slate-400 font-medium italic pt-1 border-t border-slate-100">
-            Realtime deals fetched live via Stay22 Direct Travel API. Rates subject to room availability.
-          </p>
-        </div>
-
-        <!-- Featured Amenities -->
-        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
-          <h3 class="text-2xl font-bold">Featured Amenities</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
-            {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle"]).map(a => (
-              <div class="flex items-center gap-2">✓ {a}</div>
-            ))}
-          </div>
         </div>
 
       </div>
@@ -203,21 +155,18 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
     </div>
   </main>
 
-  <!-- ⚡ JS: PARSING OBJECT PRICE CORRECTLY FROM WORKER -->
-  <script is:inline define:vars={{ title }}>
+  <!-- ⚡ JS: DYNAMICALLY PARSING STAY22 SUPPLIERS (LOGO, PRICE & DEAL LINKS) -->
+  <script is:inline define:vars={{ title, priceUSD, priceBDT, officialWebsite }}>
     document.addEventListener('DOMContentLoaded', async () => {
-      const bookingPriceEl = document.getElementById('bookingLivePrice');
-      const expediaPriceEl = document.getElementById('expediaLivePrice');
-      const bookingDealBtn = document.getElementById('bookingDealBtn');
-      const expediaDealBtn = document.getElementById('expediaDealBtn');
+      const container = document.getElementById('dynamicOtaContainer');
 
-      // Helper function to extract price number safely from Object or Primitive
-      function extractPriceNumber(priceObj) {
-        if (priceObj == null) return null;
-        if (typeof priceObj === 'number') return priceObj;
-        if (typeof priceObj === 'string') return parseFloat(priceObj) || null;
-        if (typeof priceObj === 'object') {
-          const val = priceObj.amount || priceObj.value || priceObj.total || priceObj.net || priceObj.price;
+      // Helper to safely extract numeric price
+      function parsePrice(p) {
+        if (p == null) return null;
+        if (typeof p === 'number') return p;
+        if (typeof p === 'string') return parseFloat(p) || null;
+        if (typeof p === 'object') {
+          const val = p.amount || p.value || p.total || p.net || p.price;
           return val ? parseFloat(val) : null;
         }
         return null;
@@ -227,55 +176,108 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
         const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
         const response = await fetch(workerUrl);
 
-        if (response.ok) {
+        if (response.ok && container) {
           const data = await response.json();
+          
           if (data && data.results && data.results.length > 0) {
             
-            let bookingItem = null;
-            let expediaItem = null;
+            const suppliersMap = new Map();
 
+            // 1. Loop through all results matching this hotel to find OTA suppliers
             data.results.forEach(item => {
-              if (item.suppliers?.booking) bookingItem = item.suppliers.booking;
-              if (item.suppliers?.expedia) expediaItem = item.suppliers.expedia;
-              if (item.suppliers?.hotelscom && !expediaItem) expediaItem = item.suppliers.hotelscom;
+              if (item.name && item.name.toLowerCase().includes(title.toLowerCase().substring(0, 8))) {
+                if (item.suppliers) {
+                  Object.keys(item.suppliers).forEach(key => {
+                    const supp = item.suppliers[key];
+                    if (supp && supp.link && !suppliersMap.has(key)) {
+                      suppliersMap.set(key, {
+                        key: key,
+                        name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
+                        link: supp.link,
+                        logo: supp.media?.logoSquare || null,
+                        priceNum: parsePrice(supp.price || supp.rate || item.price)
+                      });
+                    }
+                  });
+                }
+              }
             });
 
-            // Extract numeric price safely
-            const bookingNum = bookingItem ? extractPriceNumber(bookingItem.price || bookingItem.rate) : null;
-            const expediaNum = expediaItem ? extractPriceNumber(expediaItem.price || expediaItem.rate) : null;
+            // 2. Render dynamic OTA rows if found
+            if (suppliersMap.size > 0) {
+              container.innerHTML = ''; // Clear loading state
 
-            if (bookingPriceEl) {
-              if (bookingNum) {
-                bookingPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${bookingNum} / ৳${Math.round(bookingNum * 110)}</span>`;
-              } else {
-                bookingPriceEl.innerHTML = `<span class="font-bold text-slate-600 text-xs">Check Rate ➔</span>`;
-              }
+              suppliersMap.forEach((supp, key) => {
+                const priceDisplay = supp.priceNum 
+                  ? `$${supp.priceNum} / ৳${Math.round(supp.priceNum * 110)}`
+                  : `Check Rate ➔`;
+
+                const logoHtml = supp.logo 
+                  ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 object-contain" />` 
+                  : `<span class="font-bold text-slate-800">${supp.name}</span>`;
+
+                const rowHTML = `
+                  <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                      ${logoHtml}
+                      <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
+                    </div>
+                    <div class="flex items-center gap-3 ml-auto">
+                      <span class="font-serif font-black text-slate-900 text-base sm:text-lg">${priceDisplay}</span>
+                      <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">
+                        View Deal ➔
+                      </a>
+                    </div>
+                  </div>
+                `;
+                container.insertAdjacentHTML('beforeend', rowHTML);
+              });
+
+              // Add Direct Hotel Official Rate row at the bottom
+              const directRowHTML = `
+                <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50/70 p-3 rounded-xl mt-2">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-[#1a382b] text-sm sm:text-base">🏨 Direct Hotel Rate</span>
+                    <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Official Rate</span>
+                  </div>
+                  <div class="flex items-center gap-3 ml-auto">
+                    <span class="font-serif font-black text-[#1a382b] text-base sm:text-lg">${priceUSD} / ${priceBDT}</span>
+                    <a href="${officialWebsite}" target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">
+                      Book Direct ➔
+                    </a>
+                  </div>
+                </div>
+              `;
+              container.insertAdjacentHTML('beforeend', directRowHTML);
+
+            } else {
+              renderDefaultRows();
             }
 
-            if (expediaPriceEl) {
-              if (expediaNum) {
-                expediaPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${expediaNum} / ৳${Math.round(expediaNum * 110)}</span>`;
-              } else {
-                expediaPriceEl.innerHTML = `<span class="font-bold text-slate-600 text-xs">Check Rate ➔</span>`;
-              }
-            }
-
-            if (bookingDealBtn && bookingItem?.link) bookingDealBtn.href = bookingItem.link;
-            if (expediaDealBtn && expediaItem?.link) expediaDealBtn.href = expediaItem.link;
+          } else {
+            renderDefaultRows();
           }
         }
       } catch (err) {
-        console.log("Stay22 Live Rates processed safely.");
+        renderDefaultRows();
       }
 
-      // WhatsApp Handler
-      const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
-      if(sidebarWhatsAppBtn) {
-        sidebarWhatsAppBtn.addEventListener('click', () => {
-          const hotelTitle = document.querySelector('h1')?.innerText || "Gulshan Hotel";
-          const textMessage = `Hello! I would like to request room availability and details for ${hotelTitle} via GulshanHotels Directory.`;
-          window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(textMessage)}`, '_blank');
-        });
+      function renderDefaultRows() {
+        if (!container) return;
+        container.innerHTML = `
+          <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+            <span class="font-bold text-blue-600 text-sm sm:text-base">🔵 Booking.com</span>
+            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#1a382b] text-white px-4 py-2 rounded-xl text-xs font-bold">View Deal on Booking.com ➔</a>
+          </div>
+          <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+            <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Expedia / Hotels.com</span>
+            <a href="https://www.stay22.com/allez/expedia?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">View Deal on Expedia ➔</a>
+          </div>
+          <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50 p-3 rounded-xl">
+            <span class="font-bold text-[#1a382b] text-sm sm:text-base">🏨 Direct Hotel Rate</span>
+            <a href="${officialWebsite}" target="_blank" class="bg-[#1a382b] text-white px-4 py-2 rounded-xl text-xs font-bold">Book Direct ➔</a>
+          </div>
+        `;
       }
     });
   </script>
