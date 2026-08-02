@@ -49,7 +49,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
       </nav>
 
       <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         GulshanHotels Verified Directory
       </span>
     </div>
@@ -105,7 +105,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           </div>
         </div>
 
-        <!-- 🌟 REALTIME PRICE COMPARISON TABLE (NO HARDCODED FAKE PRICES) -->
+        <!-- 🌟 REALTIME PRICE COMPARISON TABLE -->
         <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -113,7 +113,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
               <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Live Rates Across Major Platforms</h3>
             </div>
             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              ● Live Stay22 Direct Travel API
+              ● Stay22 Direct Travel API
             </span>
           </div>
 
@@ -127,7 +127,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
                 <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
               </div>
               <div class="flex items-center gap-3 ml-auto">
-                <span id="bookingLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Fetching live rate...</span>
+                <span id="bookingLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
                 <a id="bookingDealBtn" href={`https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
               </div>
             </div>
@@ -138,7 +138,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
                 <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Expedia / Hotels.com</span>
               </div>
               <div class="flex items-center gap-3 ml-auto">
-                <span id="expediaLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Fetching live rate...</span>
+                <span id="expediaLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
                 <a id="expediaDealBtn" href={`https://www.stay22.com/allez/expedia?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
               </div>
             </div>
@@ -203,13 +203,25 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
     </div>
   </main>
 
-  <!-- ⚡ JS: FETCHING REALTIME PRICES FROM WORKER WITH DATES INCLUDED -->
+  <!-- ⚡ JS: PARSING OBJECT PRICE CORRECTLY FROM WORKER -->
   <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const bookingPriceEl = document.getElementById('bookingLivePrice');
       const expediaPriceEl = document.getElementById('expediaLivePrice');
       const bookingDealBtn = document.getElementById('bookingDealBtn');
       const expediaDealBtn = document.getElementById('expediaDealBtn');
+
+      // Helper function to extract price number safely from Object or Primitive
+      function extractPriceNumber(priceObj) {
+        if (priceObj == null) return null;
+        if (typeof priceObj === 'number') return priceObj;
+        if (typeof priceObj === 'string') return parseFloat(priceObj) || null;
+        if (typeof priceObj === 'object') {
+          const val = priceObj.amount || priceObj.value || priceObj.total || priceObj.net || priceObj.price;
+          return val ? parseFloat(val) : null;
+        }
+        return null;
+      }
 
       try {
         const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
@@ -219,38 +231,41 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           const data = await response.json();
           if (data && data.results && data.results.length > 0) {
             
-            let bookingRate = null;
-            let expediaRate = null;
+            let bookingItem = null;
+            let expediaItem = null;
 
             data.results.forEach(item => {
-              if (item.suppliers?.booking) bookingRate = item.suppliers.booking;
-              if (item.suppliers?.expedia) expediaRate = item.suppliers.expedia;
-              if (item.suppliers?.hotelscom && !expediaRate) expediaRate = item.suppliers.hotelscom;
+              if (item.suppliers?.booking) bookingItem = item.suppliers.booking;
+              if (item.suppliers?.expedia) expediaItem = item.suppliers.expedia;
+              if (item.suppliers?.hotelscom && !expediaItem) expediaItem = item.suppliers.hotelscom;
             });
 
-            // Update Price & Links in DOM dynamically
+            // Extract numeric price safely
+            const bookingNum = bookingItem ? extractPriceNumber(bookingItem.price || bookingItem.rate) : null;
+            const expediaNum = expediaItem ? extractPriceNumber(expediaItem.price || expediaItem.rate) : null;
+
             if (bookingPriceEl) {
-              if (bookingRate?.price) {
-                bookingPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${bookingRate.price} / ৳${Math.round(bookingRate.price * 110)}</span>`;
+              if (bookingNum) {
+                bookingPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${bookingNum} / ৳${Math.round(bookingNum * 110)}</span>`;
               } else {
                 bookingPriceEl.innerHTML = `<span class="font-bold text-slate-600 text-xs">Check Rate ➔</span>`;
               }
             }
 
             if (expediaPriceEl) {
-              if (expediaRate?.price) {
-                expediaPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${expediaRate.price} / ৳${Math.round(expediaRate.price * 110)}</span>`;
+              if (expediaNum) {
+                expediaPriceEl.innerHTML = `<span class="font-black text-slate-900 text-base">$${expediaNum} / ৳${Math.round(expediaNum * 110)}</span>`;
               } else {
                 expediaPriceEl.innerHTML = `<span class="font-bold text-slate-600 text-xs">Check Rate ➔</span>`;
               }
             }
 
-            if (bookingDealBtn && bookingRate?.link) bookingDealBtn.href = bookingRate.link;
-            if (expediaDealBtn && expediaRate?.link) expediaDealBtn.href = expediaRate.link;
+            if (bookingDealBtn && bookingItem?.link) bookingDealBtn.href = bookingItem.link;
+            if (expediaDealBtn && expediaItem?.link) expediaDealBtn.href = expediaItem.link;
           }
         }
       } catch (err) {
-        console.log("Stay22 Realtime API Processed.");
+        console.log("Stay22 Live Rates processed safely.");
       }
 
       // WhatsApp Handler
