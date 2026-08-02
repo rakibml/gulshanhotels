@@ -76,12 +76,21 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </div>
 
+  <!-- Sticky Nav Bar -->
+  <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
+    <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
+      <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
+      <a href="#rates" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Compare Rates</a>
+      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
+    </div>
+  </div>
+
   <!-- Main Content Layout -->
-  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800 pt-8">
+  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
       
       <!-- LEFT COLUMN -->
-      <div class="lg:col-span-2 space-y-12">
+      <div class="lg:col-span-2 space-y-10">
         
         <!-- Overview -->
         <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
@@ -94,28 +103,36 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
-        <!-- 🌟 DIRECT CLOUDFLARE WORKER DATA DISPLAY CONTAINER -->
-        <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
-            <div>
-              <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block">REALTIME PRICE COMPARISON</span>
-              <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Live Rates Across Major Platforms</h3>
-            </div>
-            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              ● Stay22 Direct API
+        <!-- 📸 REFERENCE input_file_37.png : TRIPADVISOR STYLE LIVE RATES COMPARISON CONTAINER -->
+        <div id="rates" class="space-y-4">
+          <div class="flex justify-between items-center pb-2">
+            <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Compare Live Rates</h3>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              ● Stay22 Direct API Verified
             </span>
           </div>
 
-          <!-- Cloudflare Worker থেকে আসা ডাটা সরাসরি এখানে শো করবে -->
-          <div id="dynamicOtaContainer" class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <div class="py-4 text-center text-slate-500 font-medium animate-pulse">
-              Loading live rates from Cloudflare Worker...
+          <!-- Dynamic TripAdvisor Style Cards Container -->
+          <div id="dynamicOtaContainer" class="space-y-3">
+            <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
+              Checking live rates across partners...
             </div>
           </div>
 
-          <p class="text-[11px] text-center text-slate-400 font-medium italic pt-1 border-t border-slate-100">
-            Realtime deals fetched directly from Cloudflare Worker. Rates subject to room availability.
+          <!-- TripAdvisor Disclaimer Note -->
+          <p class="text-xs text-slate-500 pt-2 leading-relaxed">
+            Prices are provided by our partners, and reflect nightly room rates, including any mandatory fees. Taxes not included. Please see our partners for more details.
           </p>
+        </div>
+
+        <!-- Featured Amenities -->
+        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
+          <h3 class="text-2xl font-bold">Featured Amenities</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
+            {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle"]).map(a => (
+              <div class="flex items-center gap-2">✓ {a}</div>
+            ))}
+          </div>
         </div>
 
       </div>
@@ -130,12 +147,10 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
 
           <div class="space-y-3">
-            {officialWebsite !== "#" && (
-              <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
-                <span>Check price in official site</span>
-                <span class="group-hover:translate-x-1 transition-transform">➔</span>
-              </a>
-            )}
+            <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
+              <span>Check price in official site</span>
+              <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            </a>
 
             <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs sm:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
               💬 Instant WhatsApp Reservation
@@ -151,76 +166,136 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </main>
 
-  <!-- ⚡ JS: DIRECTLY RENDER CLOUDFLARE WORKER JSON DATA TO HTML -->
-  <script is:inline>
+  <!-- ⚡ JS: TRIPADVISOR STYLE DYNAMIC CARD RENDERER (input_file_37.png) -->
+  <script is:inline define:vars={{ title, officialWebsite }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
-      const hotelTitle = document.querySelector('h1')?.innerText || "The Westin Dhaka";
+
+      function parsePriceNumber(p) {
+        if (p == null) return null;
+        if (typeof p === 'number') return p;
+        if (typeof p === 'string') return parseFloat(p) || null;
+        if (typeof p === 'object') {
+          const val = p.total || p.amount || p.value || p.net || p.price;
+          return val ? parseFloat(val) : null;
+        }
+        return null;
+      }
 
       try {
-        // Cloudflare Worker URL
-        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`;
+        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
         const response = await fetch(workerUrl);
 
         if (response.ok && container) {
           const data = await response.json();
-
+          
           if (data && data.results && data.results.length > 0) {
-            container.innerHTML = ''; // Clear loading message
+            
+            const suppliersList = [];
 
-            // 1. Loop directly over results returned by Cloudflare Worker
+            // 1. Collect all OTA suppliers from API response
             data.results.forEach(item => {
               if (item.suppliers) {
-                Object.keys(item.suppliers).forEach(supplierKey => {
-                  const supp = item.suppliers[supplierKey];
-
-                  // Extract price from total or amount
-                  let rawPrice = "Check Rate ➔";
-                  if (supp.price && supp.price.total) {
-                    rawPrice = `$${supp.price.total} / ৳${Math.round(supp.price.total * 110)}`;
-                  } else if (supp.price && typeof supp.price === 'number') {
-                    rawPrice = `$${supp.price} / ৳${Math.round(supp.price * 110)}`;
+                Object.keys(item.suppliers).forEach(key => {
+                  const supp = item.suppliers[key];
+                  if (supp && supp.link) {
+                    suppliersList.push({
+                      key: key,
+                      name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
+                      link: supp.link,
+                      logo: supp.media?.logoSquare || null,
+                      priceNum: parsePriceNumber(supp.price || supp.rate || item.price)
+                    });
                   }
-
-                  // Supplier Logo or Name
-                  const logoHtml = supp.media && supp.media.logoSquare 
-                    ? `<img src="${supp.media.logoSquare}" alt="${supplierKey}" class="h-6 object-contain" />` 
-                    : `<span class="font-bold text-slate-800 capitalize">${supplierKey}</span>`;
-
-                  // Directly Append Row HTML
-                  const rowHTML = `
-                    <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
-                      <div class="flex items-center gap-3">
-                        ${logoHtml}
-                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
-                      </div>
-                      <div class="flex items-center gap-3 ml-auto">
-                        <span class="font-serif font-black text-slate-900 text-base sm:text-lg">${rawPrice}</span>
-                        <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">
-                          View Deal ➔
-                        </a>
-                      </div>
-                    </div>
-                  `;
-                  container.insertAdjacentHTML('beforeend', rowHTML);
                 });
               }
             });
 
+            // 2. Sort Suppliers by Price (Lowest Price First - TripAdvisor style!)
+            suppliersList.sort((a, b) => {
+              if (a.priceNum && b.priceNum) return a.priceNum - b.priceNum;
+              if (a.priceNum) return -1;
+              if (b.priceNum) return 1;
+              return 0;
+            });
+
+            // 3. Render TripAdvisor Style Individual White Cards (input_file_37.png)
+            if (suppliersList.length > 0) {
+              container.innerHTML = ''; // Clear loading spinner
+
+              suppliersList.forEach((supp, index) => {
+                const isLowest = index === 0 && supp.priceNum;
+                
+                const priceDisplay = supp.priceNum 
+                  ? `$${supp.priceNum}`
+                  : `Check rate`;
+
+                // TripAdvisor Style Button: Solid Green for Lowest / Top Deal, Outline for others!
+                const buttonClass = isLowest
+                  ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full transition shadow-xs text-xs sm:text-sm`
+                  : `border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-6 py-2.5 rounded-full transition text-xs sm:text-sm`;
+
+                const lowestBadge = isLowest 
+                  ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest price at</span>` 
+                  : ``;
+
+                const logoHtml = supp.logo 
+                  ? `<img src="${supp.logo}" alt="${supp.name}" class="h-6 sm:h-7 object-contain" />` 
+                  : `<span class="font-extrabold text-slate-900 text-base sm:text-lg">${supp.name}</span>`;
+
+                const cardHTML = `
+                  <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-slate-300 transition shadow-xs">
+                    <!-- Left: Provider Logo / Name -->
+                    <div class="flex items-center gap-3">
+                      ${logoHtml}
+                    </div>
+
+                    <!-- Right: Price & TripAdvisor Style View Deal Button -->
+                    <div class="flex items-center gap-4 sm:gap-6 ml-auto">
+                      <div class="text-right">
+                        ${lowestBadge}
+                        <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">${priceDisplay}</span>
+                      </div>
+                      <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
+                        View deal
+                      </a>
+                    </div>
+                  </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+              });
+
+            } else {
+              renderTripAdvisorFallback();
+            }
+
           } else {
-            container.innerHTML = `<div class="py-3 text-center text-slate-500">Live rates currently unavailable for this hotel.</div>`;
+            renderTripAdvisorFallback();
           }
         }
       } catch (err) {
-        console.log("Error loading Cloudflare Worker response:", err);
+        renderTripAdvisorFallback();
       }
 
-      // WhatsApp Handler
+      function renderTripAdvisorFallback() {
+        if (!container) return;
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
+            <span class="font-extrabold text-blue-600 text-base sm:text-lg">🔵 Booking.com</span>
+            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
+            <span class="font-extrabold text-rose-600 text-base sm:text-lg">🔴 Agoda.com</span>
+            <a href="https://www.stay22.com/allez/agoda?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
+          </div>
+        `;
+      }
+
+      // WhatsApp
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
       if(sidebarWhatsAppBtn) {
         sidebarWhatsAppBtn.addEventListener('click', () => {
-          const hotelTitle = document.querySelector('h1')?.innerText || "Gulshan Hotel";
-          const textMessage = `Hello! I would like to request room availability and details for ${hotelTitle} via GulshanHotels Directory.`;
+          const textMessage = `Hello! I would like to request room availability and details for ${title} via GulshanHotels Directory.`;
           window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(textMessage)}`, '_blank');
         });
       }
