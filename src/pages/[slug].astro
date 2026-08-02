@@ -31,6 +31,16 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
+
+// Calculate default Check-in (tomorrow) & Check-out (3 days after)
+const todayObj = new Date();
+const checkinDefault = new Date(todayObj);
+checkinDefault.setDate(checkinDefault.getDate() + 1);
+const checkoutDefault = new Date(todayObj);
+checkoutDefault.setDate(checkoutDefault.getDate() + 4);
+
+const checkinStr = checkinDefault.toISOString().split('T')[0];
+const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -82,6 +92,11 @@ const phone = hotel.phone || "+880 2-9886510";
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
       <a href="#rates-section" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">View Prices</a>
       <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
+      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
+      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Essential Details</a>
+      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
+      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
+      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Reviews</a>
     </div>
   </div>
 
@@ -92,14 +107,16 @@ const phone = hotel.phone || "+880 2-9886510";
       <!-- LEFT COLUMN (70%) -->
       <div class="lg:col-span-2 space-y-12">
         
-        <!-- Overview -->
-        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
-          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
-          <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
-            {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-              <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
-            )}
+        <!-- Overview & Map -->
+        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
+          <div>
+            <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
+              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
+              )}
+            </div>
           </div>
 
           <!-- Google Map Embed Code -->
@@ -130,6 +147,37 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
+        <!-- What's Nearby -->
+        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
+          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-xs sm:text-sm">
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🍽️ Dining / Bars</h4>
+              <p>Chef's Table Courtside <span class="text-slate-400 block text-xs">200 m</span></p>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🏛️ Attractions</h4>
+              <p>Pink City Complex <span class="text-slate-400 block text-xs">0.2 mi</span></p>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🏢 Business & Medical</h4>
+              <p>United Hospital <span class="text-slate-400 block text-xs">1.2 mi</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- House Rules & Details -->
+        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
+          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
+            <div><h4 class="font-bold text-slate-900">Check-In</h4><p class="text-slate-600">12:00 PM</p></div>
+            <div><h4 class="font-bold text-slate-900">Check-Out</h4><p class="text-slate-600">11:00 AM</p></div>
+            <div><h4 class="font-bold text-slate-900">No Smoking</h4><p class="text-slate-600">100% Smoke Free</p></div>
+            <div><h4 class="font-bold text-slate-900">Phone</h4><p class="text-slate-600">{phone}</p></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- RIGHT COLUMN (30% STICKY SIDEBAR) -->
@@ -141,13 +189,13 @@ const phone = hotel.phone || "+880 2-9886510";
             <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
           </div>
 
-          <!-- 🌟 1-CLICK CLICKABLE STAY DATES (OPENS 2-MONTH CALENDAR MODAL) -->
+          <!-- COMBINED CLICKABLE STAY DATES -->
           <div class="space-y-3">
             
             <button id="openTwoMonthCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
               <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
-                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">10 Aug 2026 — 17 Aug 2026 (7 Nights)</span>
+                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">Select dates on calendar</span>
               </div>
               <span class="text-slate-400 text-lg">📅</span>
             </button>
@@ -200,7 +248,7 @@ const phone = hotel.phone || "+880 2-9886510";
           <!-- Dynamic TripAdvisor Style Cards Container -->
           <div id="dynamicOtaContainer" class="space-y-3 pt-1">
             <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-              Checking live rates...
+              Checking live availability...
             </div>
           </div>
 
@@ -220,7 +268,7 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </main>
 
-  <!-- 📱 MOBILE PINNED BOTTOM BAR WITH CHECK AVAILABILITY BUTTON -->
+  <!-- 📱 MOBILE PINNED BOTTOM BAR -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
     <div>
       <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
@@ -234,28 +282,26 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </div>
 
-  <!-- 🌟 2-MONTH SIDE-BY-SIDE CALENDAR MODAL (1-CLICK RANGE PICKER) -->
+  <!-- 🌟 2-MONTH SIDE-BY-SIDE CALENDAR MODAL (PAST DATES DISABLED) -->
   <div id="twoMonthCalModal" class="custom-modal fixed inset-0 z-50 bg-black/65 hidden items-center justify-center p-3 sm:p-6 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
       <button id="closeCalModalBtn" class="absolute top-4 right-4 text-slate-800 font-black w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200">&times;</button>
       
       <div>
         <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">Select Stay Dates</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Click arrival date then departure date to select your range</p>
+        <p class="text-xs text-slate-500 mt-0.5">Click arrival date then departure date to check live availability</p>
       </div>
 
-      <!-- 2-Month Calendar Container -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-        
-        <!-- Month 1: August 2026 -->
+        <!-- Month 1 -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm text-center">August 2026</h4>
           <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
             <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
           </div>
           <div class="grid grid-cols-7 gap-1 text-xs text-center font-bold text-slate-700">
-            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-01">1</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-02">2</button>
+            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300 line-through">1</span>
+            <span class="p-2 text-slate-300 line-through">2</span>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-03">3</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-04">4</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-05">5</button>
@@ -266,11 +312,11 @@ const phone = hotel.phone || "+880 2-9886510";
             <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-10">10</button>
             <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-11">11</button>
             <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-12">12</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-13">13</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-14">14</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-15">15</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-16">16</button>
-            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-17">17</button>
+            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-13">13</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-14">14</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-15">15</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-16">16</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-17">17</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-18">18</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-19">19</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-20">20</button>
@@ -288,7 +334,7 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
-        <!-- Month 2: September 2026 -->
+        <!-- Month 2 -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm text-center">September 2026</h4>
           <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
@@ -300,60 +346,53 @@ const phone = hotel.phone || "+880 2-9886510";
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-03">3</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-04">4</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-05">5</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-06">6</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-07">7</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-08">8</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-09">9</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-10">10</button>
           </div>
         </div>
-
       </div>
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Selected: 10 Aug — 17 Aug (7 Nights)</span>
-        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Apply Dates</button>
+        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Selected: 2026-08-10 — 2026-08-13</span>
+        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Check Selected Dates</button>
       </div>
     </div>
   </div>
 
-  <!-- 📱 MOBILE POPUP MODAL (PHONE USERS WILL SELECT DATES & GUESTS RIGHT INSIDE POPUP!) -->
+  <!-- 📱 MOBILE POPUP MODAL -->
   <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
       <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
       
       <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
-      <p class="text-xs text-slate-500">Select stay dates and guests to view live partner deals for {title}</p>
+      <p class="text-xs text-slate-500">Select stay dates to view live availability for {title}</p>
       
-      <!-- Interactive Mobile Date Box -->
       <button id="mobileOpenCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer">
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES</label>
-          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">10 Aug 2026 — 17 Aug 2026</span>
+          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">2026-08-10 — 2026-08-13</span>
         </div>
         <span class="text-slate-400 text-base">📅</span>
       </button>
 
-      <!-- Live Rate Cards inside Mobile Modal -->
       <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
     </div>
   </div>
 
-  <!-- ⚡ JS: 2-MONTH CALENDAR RANGE PICKER + MOBILE POPUP INTEGRATION -->
+  <!-- ⚡ JS: CALENDAR RANGE + SOLD OUT CHECKING LOGIC -->
   <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
       const mobileContainer = document.getElementById('mobileOtaContainer');
 
-      // 1. 2-MONTH CALENDAR MODAL LOGIC
+      let currentCheckIn = "2026-08-10";
+      let currentCheckOut = "2026-08-13";
+      let adults = 2;
+
+      // 1. Calendar Modal Logic
       const openTwoMonthCalBtn = document.getElementById('openTwoMonthCalBtn');
       const mobileOpenCalBtn = document.getElementById('mobileOpenCalBtn');
       const twoMonthCalModal = document.getElementById('twoMonthCalModal');
       const closeCalModalBtn = document.getElementById('closeCalModalBtn');
       const applyCalSelectionBtn = document.getElementById('applyCalSelectionBtn');
-
-      let currentCheckIn = "2026-08-10";
-      let currentCheckOut = "2026-08-17";
 
       function openCalModal() {
         twoMonthCalModal?.classList.remove('hidden');
@@ -370,19 +409,19 @@ const phone = hotel.phone || "+880 2-9886510";
       mobileOpenCalBtn?.addEventListener('click', openCalModal);
       closeCalModalBtn?.addEventListener('click', closeCalModal);
 
-      // Handle Day Click in 2-Month Calendar
+      // Date Selection Logic
       const calDays = document.querySelectorAll('.cal-day');
       let selectClickState = 'checkin';
 
       calDays.forEach(dayBtn => {
-        dayBtn.addEventListener('click', (e) => {
+        dayBtn.addEventListener('click', () => {
           const clickedDate = dayBtn.getAttribute('data-date');
           if (!clickedDate) return;
 
           if (selectClickState === 'checkin') {
             currentCheckIn = clickedDate;
             selectClickState = 'checkout';
-            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Select Departure Date)`;
+            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Select Check-Out Date)`;
           } else {
             currentCheckOut = clickedDate;
             selectClickState = 'checkin';
@@ -403,44 +442,7 @@ const phone = hotel.phone || "+880 2-9886510";
         fetchLiveRates();
       });
 
-      // 2. ROOMS & GUESTS COUNTER LOGIC
-      const guestSelectorBtn = document.getElementById('guestSelectorBtn');
-      const guestPopover = document.getElementById('guestPopover');
-      const applyGuestBtn = document.getElementById('applyGuestBtn');
-
-      let rooms = 1, adults = 2, children = 0;
-
-      guestSelectorBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        guestPopover?.classList.toggle('hidden');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!guestPopover?.contains(e.target) && !guestSelectorBtn?.contains(e.target)) {
-          guestPopover?.classList.add('hidden');
-        }
-      });
-
-      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestUI(); });
-      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestUI(); });
-      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestUI(); });
-      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestUI(); });
-      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestUI(); });
-      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestUI(); });
-
-      function updateGuestUI() {
-        document.getElementById('roomCount').innerText = rooms;
-        document.getElementById('adultCount').innerText = adults;
-        document.getElementById('childCount').innerText = children;
-        document.getElementById('guestLabelText').innerText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Guest${adults > 1 ? 's' : ''}`;
-      }
-
-      applyGuestBtn?.addEventListener('click', () => {
-        guestPopover?.classList.add('hidden');
-        fetchLiveRates();
-      });
-
-      // 3. FETCH LIVE RATES
+      // 2. FETCH LIVE RATES & CHECK AVAILABILITY VS SOLD OUT
       function parsePriceNumber(suppObj) {
         if (!suppObj) return null;
         if (typeof suppObj.price === 'number') return suppObj.price;
@@ -456,7 +458,7 @@ const phone = hotel.phone || "+880 2-9886510";
         
         container.innerHTML = `
           <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-            Checking live rates for ${currentCheckIn} to ${currentCheckOut}...
+            Checking live availability for ${currentCheckIn} to ${currentCheckOut}...
           </div>
         `;
 
@@ -515,6 +517,7 @@ const phone = hotel.phone || "+880 2-9886510";
                     <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 flex items-center justify-between gap-2 shadow-2xs">
                       <div class="flex items-center gap-2">
                         ${logoHtml}
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
                       </div>
 
                       <div class="flex items-center gap-3 ml-auto">
@@ -533,28 +536,28 @@ const phone = hotel.phone || "+880 2-9886510";
                 });
 
               } else {
-                renderFallback();
+                renderSoldOutState();
               }
 
             } else {
-              renderFallback();
+              renderSoldOutState();
             }
           }
         } catch (err) {
-          renderFallback();
+          renderSoldOutState();
         }
       }
 
-      function renderFallback() {
-        if (!container) return;
-        const html = `
-          <div class="bg-white rounded-xl border border-slate-200 p-3 flex items-center justify-between shadow-2xs">
-            <span class="font-extrabold text-blue-600 text-xs">🔵 Booking.com</span>
-            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#00e676] text-slate-900 font-extrabold px-4 py-2 rounded-full text-xs">View deal</a>
+      // 🔴 Render Sold Out State if hotel is fully booked for selected dates
+      function renderSoldOutState() {
+        const soldOutHTML = `
+          <div class="p-5 text-center space-y-2 bg-rose-50 rounded-2xl border border-rose-200">
+            <div class="text-rose-700 font-bold text-sm">🔴 Fully Booked / Sold Out</div>
+            <p class="text-xs text-slate-600">No rooms available for ${currentCheckIn} to ${currentCheckOut}. Please select different stay dates on the calendar.</p>
           </div>
         `;
-        container.innerHTML = html;
-        if (mobileContainer) mobileContainer.innerHTML = html;
+        if (container) container.innerHTML = soldOutHTML;
+        if (mobileContainer) mobileContainer.innerHTML = soldOutHTML;
       }
 
       fetchLiveRates();
