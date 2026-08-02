@@ -35,9 +35,9 @@ const phone = hotel.phone || "+880 2-9886510";
 // Default Dates
 const today = new Date();
 const checkinDefault = new Date(today);
-checkinDefault.setDate(checkinDefault.getDate() + 15);
+checkinDefault.setDate(checkinDefault.getDate() + 8);
 const checkoutDefault = new Date(today);
-checkoutDefault.setDate(checkoutDefault.getDate() + 26);
+checkoutDefault.setDate(checkoutDefault.getDate() + 17);
 
 const checkinStr = checkinDefault.toISOString().split('T')[0];
 const checkoutStr = checkoutDefault.toISOString().split('T')[0];
@@ -92,11 +92,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
       <a href="#rates-section" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">View Prices</a>
       <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
-      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
-      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Essential Details</a>
-      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
-      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
-      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Reviews</a>
     </div>
   </div>
 
@@ -107,19 +102,16 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <!-- LEFT COLUMN (70%) -->
       <div class="lg:col-span-2 space-y-12">
         
-        <!-- 1. Overview & Map -->
-        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
-          <div>
-            <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
-            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
-            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
-              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
-              )}
-            </div>
+        <!-- Overview -->
+        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+          <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
+            {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+              <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
+            )}
           </div>
 
-          <!-- Google Map Embed Code -->
           <div class="space-y-2 pt-2">
             <div class="flex justify-between items-center">
               <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
@@ -137,7 +129,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           </div>
         </div>
 
-        <!-- 2. Featured Amenities -->
+        <!-- Featured Amenities -->
         <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
           <h3 class="text-2xl font-bold">Featured Amenities</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
@@ -147,82 +139,9 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           </div>
         </div>
 
-        <!-- 3. What's Nearby -->
-        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
-          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-xs sm:text-sm">
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🍽️ Dining / Bars</h4>
-              <p>Chef's Table Courtside <span class="text-slate-400 block text-xs">200 m</span></p>
-              <p>North End Coffee <span class="text-slate-400 block text-xs">250 m</span></p>
-            </div>
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🏛️ Attractions</h4>
-              <p>Pink City Complex <span class="text-slate-400 block text-xs">0.2 mi</span></p>
-              <p>US Embassy <span class="text-slate-400 block text-xs">1.1 mi</span></p>
-            </div>
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🏢 Business & Medical</h4>
-              <p>United Hospital <span class="text-slate-400 block text-xs">1.2 mi</span></p>
-              <p>Intl Airport <span class="text-slate-400 block text-xs">5.8 mi</span></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Essential Details -->
-        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
-          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
-          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
-            <div><h4 class="font-bold text-slate-900">Check-In</h4><p class="text-slate-600">12:00 PM</p></div>
-            <div><h4 class="font-bold text-slate-900">Check-Out</h4><p class="text-slate-600">11:00 AM</p></div>
-            <div><h4 class="font-bold text-slate-900">No Smoking</h4><p class="text-slate-600">100% Smoke Free</p></div>
-            <div><h4 class="font-bold text-slate-900">Phone</h4><p class="text-slate-600">{phone}</p></div>
-          </div>
-        </div>
-
-        <!-- 5. House Rules -->
-        <div id="rules" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">House rules</h3>
-          <div class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <div class="py-3.5 grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="font-bold text-slate-900">Check-in / Check-out</div>
-              <div class="md:col-span-2 text-slate-700">From 12:00 PM — Until 11:00 AM</div>
-            </div>
-            <div class="py-3.5 grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="font-bold text-slate-900">Cancellation / prepayment</div>
-              <div class="md:col-span-2 text-slate-700">Free cancellation up to 48 hours before arrival.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6. FAQs -->
-        <div id="faq" class="space-y-4 pb-8 border-b border-slate-200">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">FAQs</span>
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Hotel FAQs</h3>
-          <div class="space-y-3 text-xs sm:text-sm">
-            <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
-              <h4 class="font-bold text-slate-900">Q: গুলশান ১ ও ২ গোলচত্বর থেকে হোটেলটি কত দূরে?</h4>
-              <p class="text-slate-600">A: হোটেলটি গুলশান ২ সার্কেল থেকে মাত্র ৩ মিনিট হাঁটার দূরত্বে অবস্থিত।</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 7. Guest Reviews -->
-        <div id="reviews" class="space-y-4">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">REVIEWS</span>
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Guest Reviews (★ {rating} out of 5)</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
-              <h4 class="font-bold text-xs sm:text-sm text-slate-900">Rahat Hasan</h4>
-              <p class="text-xs text-slate-600">"An amazing stay in the heart of Gulshan 2! Excellent security and fast Wi-Fi."</p>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <!-- 📸 RIGHT COLUMN (30% STICKY SIDEBAR - input_file_41.png RESTRUCTURED) -->
+      <!-- RIGHT COLUMN (30% STICKY SIDEBAR) -->
       <div id="rates-section">
         <div class="sticky top-20 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xl space-y-5">
           
@@ -231,34 +150,75 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
           </div>
 
-          <!-- 🌟 COMBINED CLICKABLE DATE RANGE & GUESTS PICKER BOX -->
+          <!-- 🌟 FULLY CLICKABLE DATE RANGE & CUSTOMIZABLE GUEST COUNTER -->
           <div class="space-y-3">
             
-            <!-- Single Combined Date Range Input -->
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition">
-              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Stay Dates (Check In — Check Out)</label>
+            <!-- 1. FULLY CLICKABLE DATE BOX (ক্লিকের সাথে সাথে পিক করবে) -->
+            <div id="dateBoxContainer" class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition cursor-pointer select-none">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
               <div class="grid grid-cols-2 gap-2 text-xs">
-                <input type="date" id="filterCheckIn" value={checkinStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
-                <input type="date" id="filterCheckOut" value={checkoutStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-400">📅</span>
+                  <input type="date" id="filterCheckIn" value={checkinStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-400">📅</span>
+                  <input type="date" id="filterCheckOut" value={checkoutStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+                </div>
               </div>
             </div>
 
-            <!-- Rooms / Guests Selector -->
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition">
-              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rooms & Guests</label>
-              <select id="filterGuests" class="w-full bg-transparent font-bold text-slate-800 text-xs focus:outline-none cursor-pointer">
-                <option value="1">1 Room, 1 Guest</option>
-                <option value="2" selected>1 Room, 2 Guests</option>
-                <option value="3">1 Room, 3 Guests</option>
-                <option value="4">2 Rooms, 4 Guests</option>
-              </select>
+            <!-- 2. CUSTOMIZABLE ROOMS & GUESTS SELECTOR WITH + AND - COUNTERS -->
+            <div class="relative">
+              <button id="guestSelectorBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">ROOMS & GUESTS</label>
+                  <span id="guestLabelText" class="font-bold text-slate-800 text-xs">1 Room, 2 Guests</span>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" id="guestArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+
+              <!-- Guest Counter Popover -->
+              <div id="guestPopover" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 z-40 space-y-3">
+                <!-- Rooms -->
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-800">Rooms</span>
+                  <div class="flex items-center gap-3">
+                    <button type="button" id="roomDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <span id="roomCount" class="text-xs font-bold w-4 text-center">1</span>
+                    <button type="button" id="roomInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
+                  </div>
+                </div>
+
+                <!-- Adults -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-2">
+                  <span class="text-xs font-bold text-slate-800">Adults</span>
+                  <div class="flex items-center gap-3">
+                    <button type="button" id="adultDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <span id="adultCount" class="text-xs font-bold w-4 text-center">2</span>
+                    <button type="button" id="adultInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
+                  </div>
+                </div>
+
+                <!-- Children -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-2">
+                  <span class="text-xs font-bold text-slate-800">Children</span>
+                  <div class="flex items-center gap-3">
+                    <button type="button" id="childDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <span id="childCount" class="text-xs font-bold w-4 text-center">0</span>
+                    <button type="button" id="childInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
+                  </div>
+                </div>
+
+                <button type="button" id="applyGuestBtn" class="w-full bg-[#1a382b] text-white text-xs font-bold py-2 rounded-xl mt-1 cursor-pointer">Done</button>
+              </div>
             </div>
 
           </div>
 
-          <!-- Dynamic TripAdvisor Style Cards Stacked Vertically in Sidebar -->
+          <!-- Dynamic TripAdvisor Style Cards Container -->
           <div id="dynamicOtaContainer" class="space-y-3 pt-1">
-            <div class="p-5 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
+            <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
               Checking live rates...
             </div>
           </div>
@@ -284,7 +244,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
     </div>
   </main>
 
-  <!-- 📱 MOBILE PINNED BOTTOM BAR WITH CHECK AVAILABILITY BUTTON -->
+  <!-- 📱 MOBILE PINNED BOTTOM BAR -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
     <div>
       <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
@@ -298,27 +258,89 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
     </div>
   </div>
 
-  <!-- 📱 MOBILE POPUP MODAL FOR CHECK AVAILABILITY -->
+  <!-- 📱 MOBILE POPUP MODAL -->
   <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
       <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
       <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
       <p class="text-xs text-slate-500">Select dates to view live partner deals for {title}</p>
       
-      <!-- Mobile Rates Duplicate Container -->
       <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
     </div>
   </div>
 
-  <!-- ⚡ JS: TRIPADVISOR COMPACT SIDEBAR RENDERER + MOBILE POPUP -->
+  <!-- ⚡ JS: CLICKABLE DATE BOX + CUSTOM ROOMS & GUESTS COUNTER + TRIPADVISOR RENDERER -->
   <script is:inline define:vars={{ title, officialWebsite }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
       const mobileContainer = document.getElementById('mobileOtaContainer');
       const filterCheckIn = document.getElementById('filterCheckIn');
       const filterCheckOut = document.getElementById('filterCheckOut');
-      const filterGuests = document.getElementById('filterGuests');
+      const dateBoxContainer = document.getElementById('dateBoxContainer');
 
+      // 1. FULLY CLICKABLE DATE BOX LOGIC
+      dateBoxContainer?.addEventListener('click', (e) => {
+        if (e.target !== filterCheckOut && filterCheckIn) {
+          if ('showPicker' in HTMLInputElement.prototype) {
+            filterCheckIn.showPicker();
+          } else {
+            filterCheckIn.focus();
+          }
+        }
+      });
+
+      // 2. CUSTOMIZABLE ROOMS & GUESTS COUNTER LOGIC
+      const guestSelectorBtn = document.getElementById('guestSelectorBtn');
+      const guestPopover = document.getElementById('guestPopover');
+      const applyGuestBtn = document.getElementById('applyGuestBtn');
+      const guestLabelText = document.getElementById('guestLabelText');
+
+      let rooms = 1;
+      let adults = 2;
+      let children = 0;
+
+      const roomCount = document.getElementById('roomCount');
+      const adultCount = document.getElementById('adultCount');
+      const childCount = document.getElementById('childCount');
+
+      function updateGuestLabel() {
+        if (roomCount) roomCount.innerText = rooms.toString();
+        if (adultCount) adultCount.innerText = adults.toString();
+        if (childCount) childCount.innerText = children.toString();
+
+        let label = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}`;
+        if (children > 0) label += `, ${children} Child${children > 1 ? 'ren' : ''}`;
+
+        if (guestLabelText) guestLabelText.innerText = label;
+      }
+
+      guestSelectorBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        guestPopover?.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!guestPopover?.contains(e.target) && !guestSelectorBtn?.contains(e.target)) {
+          guestPopover?.classList.add('hidden');
+        }
+      });
+
+      // Increment / Decrement Buttons
+      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestLabel(); });
+      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestLabel(); });
+
+      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestLabel(); });
+      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestLabel(); });
+
+      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestLabel(); });
+      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestLabel(); });
+
+      applyGuestBtn?.addEventListener('click', () => {
+        guestPopover?.classList.add('hidden');
+        fetchLiveRates();
+      });
+
+      // 3. FETCH LIVE RATES
       function parsePriceNumber(suppObj) {
         if (!suppObj) return null;
         if (typeof suppObj.price === 'number') return suppObj.price;
@@ -335,16 +357,15 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         
         container.innerHTML = `
           <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-            Checking live rates...
+            Checking live rates for selected stay...
           </div>
         `;
 
         const checkinVal = filterCheckIn?.value || '';
         const checkoutVal = filterCheckOut?.value || '';
-        const adultsVal = filterGuests?.value || '2';
 
         try {
-          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${checkinVal}&checkout=${checkoutVal}&adults=${adultsVal}`;
+          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${checkinVal}&checkout=${checkoutVal}&adults=${adults}`;
           const response = await fetch(workerUrl);
 
           if (response.ok) {
@@ -375,7 +396,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
                 }
               });
 
-              // Sort Lowest Base Price First
               suppliersList.sort((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : 0));
 
               if (suppliersList.length > 0) {
@@ -443,30 +463,29 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 
       filterCheckIn?.addEventListener('change', fetchLiveRates);
       filterCheckOut?.addEventListener('change', fetchLiveRates);
-      filterGuests?.addEventListener('change', fetchLiveRates);
 
       fetchLiveRates();
 
-      // Mobile Modal Handlers
+      // Mobile Modal
       const mobileCheckBtn = document.getElementById('mobileCheckBtn');
       const mobileRatesModal = document.getElementById('mobileRatesModal');
       const closeMobileRatesBtn = document.getElementById('closeMobileRatesBtn');
 
-      function openMobileModal() {
+      mobileCheckBtn?.addEventListener('click', () => {
         mobileRatesModal?.classList.remove('hidden');
         mobileRatesModal?.classList.add('flex');
         history.pushState({ modalOpen: true }, '');
-      }
+      });
 
-      function closeMobileModal() {
+      closeMobileRatesBtn?.addEventListener('click', () => {
         mobileRatesModal?.classList.add('hidden');
         mobileRatesModal?.classList.remove('flex');
-      }
+      });
 
-      mobileCheckBtn?.addEventListener('click', openMobileModal);
-      closeMobileRatesBtn?.addEventListener('click', closeMobileModal);
-
-      window.addEventListener('popstate', closeMobileModal);
+      window.addEventListener('popstate', () => {
+        mobileRatesModal?.classList.add('hidden');
+        mobileRatesModal?.classList.remove('flex');
+      });
 
       // WhatsApp
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
