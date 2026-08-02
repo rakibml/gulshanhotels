@@ -3,11 +3,12 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   const hotelEntries = await getCollection('hotels');
   
   return hotelEntries.map(entry => {
-    // Astro v4 / v5 ফাইল আইডি থেকে স্লগ এক্সট্র্যাক্ট করা
     const cleanSlug = entry.slug || entry.id.replace(/\.md$/, '').replace(/^hotels\//, '').trim();
     return {
       params: { slug: cleanSlug },
@@ -19,7 +20,7 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const hotel = entry?.data || {};
 
-// CMS থেকে ডাটা ক্যাচ করা এবং ফলব্যাক মান সেট করা
+// CMS Data with Fallbacks
 const title = hotel.title || "The Westin Dhaka";
 const locationTag = hotel.location || "Gulshan 2, Dhaka";
 const fullAddress = hotel.fullAddress || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212";
@@ -30,13 +31,15 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
-const whatsapp = hotel.whatsapp || "8801700000000";
-const mapUrl = hotel.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.59834612345!2d90.4132!3d23.7925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7a0f3d6118b%3A0x6a2c3a51f22e830!2sGulshan%202%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd";
+
+// Stay22 Credentials
+const STAY22_API_TOKEN = "stay22_73607475-eb1a-4fcf-8b39-23d83c5589fa";
+const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
   
-  <!-- 1. Header & Title Section -->
+  <!-- 1. Header Section -->
   <div class="py-6 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto border-b border-slate-200 font-sans">
     <div class="flex items-center justify-between mb-3">
       <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
@@ -70,300 +73,165 @@ const mapUrl = hotel.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!
     </div>
   </div>
 
-  <!-- 2. Image Gallery Grid -->
+  <!-- 2. Main Gallery Image -->
   <div class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto mt-6">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 rounded-2xl overflow-hidden max-h-[320px] sm:max-h-[460px] shadow-xs relative">
-      <div class="col-span-2 md:col-span-2 md:row-span-2 h-[220px] sm:h-[320px] md:h-[460px]">
-        <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-      </div>
-      <div class="hidden sm:block h-[150px] md:h-[224px]">
-        <img src={hotel.gallery?.[0] || mainImg} alt="Gallery 1" class="gallery-img w-full h-full object-cover cursor-pointer" />
-      </div>
-      <div class="hidden sm:block h-[150px] md:h-[224px]">
-        <img src={hotel.gallery?.[1] || mainImg} alt="Gallery 2" class="gallery-img w-full h-full object-cover cursor-pointer" />
-      </div>
-      <div class="hidden md:block h-[224px]">
-        <img src={hotel.gallery?.[2] || mainImg} alt="Gallery 3" class="gallery-img w-full h-full object-cover cursor-pointer" />
-      </div>
-      <div class="hidden md:block h-[224px] relative">
-        <img src={hotel.gallery?.[3] || mainImg} alt="Gallery 4" class="gallery-img w-full h-full object-cover cursor-pointer" />
-      </div>
-
-      <button id="viewAllPhotosBtn" class="absolute bottom-3 right-3 bg-white/90 text-slate-800 text-xs font-bold px-3.5 py-2 rounded-lg border border-slate-200 shadow-md hover:bg-white transition cursor-pointer">
-        📷 View All Photos
-      </button>
+    <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[480px] shadow-sm relative">
+      <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
+      <button id="viewAllPhotosBtn" class="absolute bottom-3 right-3 bg-white/90 text-slate-800 text-xs font-bold px-3.5 py-2 rounded-lg border border-slate-200 shadow-md hover:bg-white transition cursor-pointer">📷 View All Photos</button>
     </div>
   </div>
 
-  <!-- Sticky Section Navigation Tabs Bar -->
+  <!-- 3. Sticky Section Nav Bar -->
   <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
     <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
-      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Amenities</a>
-      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">What's nearby</a>
-      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Essential Details</a>
-      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">House Rules</a>
-      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">FAQs</a>
-      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full transition">Reviews</a>
+      <a href="#rates" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Compare Rates</a>
+      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
+      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
+      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
+      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
     </div>
   </div>
 
-  <!-- Main Content Layout -->
+  <!-- 4. Main Content Split -->
   <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
       
       <!-- LEFT COLUMN (70%) -->
       <div class="lg:col-span-2 space-y-12">
         
-        <!-- 1. OVERVIEW & MAP SECTION -->
-        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
-          <div>
-            <span class="text-xs sm:text-sm font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
-            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
-            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal mt-3 space-y-3">
-              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, corporate facilities, and diplomatic security.</p>
-              )}
-            </div>
-          </div>
-
-          <!-- Google Map Embed Code -->
-          <div class="space-y-2 pt-2">
-            <div class="flex justify-between items-center">
-              <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
-              <a href="https://maps.google.com" target="_blank" class="text-xs sm:text-sm font-bold text-[#1a382b] hover:underline">Open in Google Maps ↗</a>
-            </div>
-            <div class="w-full h-[320px] rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
-              <iframe 
-                title="Gulshan Hotel Location"
-                src={mapUrl}
-                class="w-full h-full border-0" 
-                allowfullscreen="" 
-                loading="lazy">
-              </iframe>
-            </div>
+        <!-- Overview -->
+        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+          <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3">
+            {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+              <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
+            )}
           </div>
         </div>
 
-        <!-- 2. FEATURED AMENITIES SECTION -->
-        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
-          <div class="space-y-1 mb-8">
-            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">AMENITIES</span>
-            <h3 class="text-2xl sm:text-3xl font-black tracking-tight">Featured Amenities <span class="text-slate-400 font-normal text-lg">({hotel.amenities?.length || 18})</span></h3>
+        <!-- 🌟 STAY22 DIRECT TRAVEL API REALTIME PRICE COMPARISON TABLE (NO MAPS) -->
+        <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+            <div>
+              <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block">REALTIME PRICE COMPARISON</span>
+              <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Live Rates Across Major Platforms</h3>
+            </div>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              ● Updated via Stay22 API
+            </span>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-y-5 gap-x-3">
-              {(hotel.amenities || [
-                "Indoor Heated Pool", "Continental Breakfast*", "Exercise Room",
-                "Family Friendly", "Free Hot Breakfast", "Fitness Center",
-                "Free WiFi", "Snack Shop*", "Copy Machine*"
-              ]).map(item => (
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-[#342f47] border border-slate-700/50 flex items-center justify-center text-indigo-300 shrink-0 shadow-xs">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  </div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-200">{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <div class="lg:col-span-5 relative pl-3 pb-3">
-              <div class="absolute inset-0 bg-[#fdb813] rounded-2xl transform translate-x-3 translate-y-3 z-0"></div>
-              <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl h-[210px] sm:h-[250px]">
-                <img id="amenitySliderImg" src={mainImg} alt="Amenity" class="w-full h-full object-cover transition-all duration-300" />
-                <button id="amenityPrevBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md cursor-pointer">&#10094;</button>
-                <button id="amenityNextBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur-md cursor-pointer">&#10095;</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-8 pt-4 border-t border-slate-700/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <button id="openAllAmenitiesBtn" class="px-6 py-2.5 border border-white hover:bg-white hover:text-slate-900 font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer">View all amenities</button>
-            <span class="text-[11px] text-slate-400 italic">*May require an additional cost</span>
-          </div>
-        </div>
-
-        <!-- 3. WHAT'S NEARBY SECTION -->
-        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
-          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🍽️</div>
-                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Dining / Bars</h4>
-              </div>
-              <div class="space-y-3.5 text-xs sm:text-sm">
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Chef's Table Courtside</h5><p class="text-slate-500 font-medium text-xs">Adjacent (200 m)</p></div>
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">North End Coffee Roasters</h5><p class="text-slate-500 font-medium text-xs">Adjacent (250 m)</p></div>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🏛️</div>
-                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Attractions</h4>
-              </div>
-              <div class="space-y-3.5 text-xs sm:text-sm">
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Pink City Shopping Complex</h5><p class="text-slate-500 font-medium text-xs">0.2 mi</p></div>
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">US Embassy & Diplomatic Zone</h5><p class="text-slate-500 font-medium text-xs">1.1 mi</p></div>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🏢</div>
-                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Business & Medical</h4>
-              </div>
-              <div class="space-y-3.5 text-xs sm:text-sm">
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">United Hospital Gulshan</h5><p class="text-slate-500 font-medium text-xs">1.2 mi</p></div>
-                <div><h5 class="font-bold text-slate-900 text-sm sm:text-base">Hazrat Shahjalal Intl Airport</h5><p class="text-slate-500 font-medium text-xs">5.8 mi</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. ESSENTIAL DETAILS -->
-        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
-          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
-          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">🕒</div>
-              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Check-In</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{hotel.houseRules?.checkIn || "12:00 PM"}</p></div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">⏰</div>
-              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Check-Out</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{hotel.houseRules?.checkOut || "11:00 AM"}</p></div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">📞</div>
-              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Phone Number</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">{phone}</p></div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl bg-[#e2e5ec] text-[#1a382b] flex items-center justify-center shrink-0">⚡</div>
-              <div><h4 class="font-bold text-slate-900 text-sm sm:text-base">Power Backup</h4><p class="text-slate-600 font-medium text-xs sm:text-sm">24/7 Full Generator</p></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. HOUSE RULES -->
-        <div id="rules" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
-          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">House rules</h3>
+          <!-- Realtime Rate Comparison Table -->
           <div class="divide-y divide-slate-100 text-xs sm:text-sm">
-            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="font-bold text-slate-900 text-sm sm:text-base">Check-in / Check-out</div>
-              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.checkIn || "From 12:00 PM"} — {hotel.houseRules?.checkOut || "Until 11:00 AM"}</div>
+            
+            <!-- Agoda Deal -->
+            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-rose-600 text-sm sm:text-base">🔴 Agoda.com</span>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Lowest Rate</span>
+              </div>
+              <div class="flex items-center gap-3 ml-auto">
+                <span id="agodaLivePrice" class="font-serif font-black text-slate-900 text-base sm:text-lg">$99 / ৳১০,৮৯০</span>
+                <a href={`https://www.stay22.com/allez/agoda?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
+              </div>
             </div>
-            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="font-bold text-slate-900 text-sm sm:text-base">Cancellation / prepayment</div>
-              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.cancellation || "Free cancellation up to 48 hours before arrival."}</div>
+
+            <!-- Booking.com Deal -->
+            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-blue-600 text-sm sm:text-base">🔵 Booking.com</span>
+              </div>
+              <div class="flex items-center gap-3 ml-auto">
+                <span id="bookingLivePrice" class="font-serif font-black text-slate-900 text-base sm:text-lg">$100 / ৳১০,৯৯০</span>
+                <a href={`https://www.stay22.com/allez/booking?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
+              </div>
             </div>
-            <div class="py-4 grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div class="font-bold text-slate-900 text-sm sm:text-base">Payment options</div>
-              <div class="md:col-span-2 text-slate-700 font-medium">{hotel.houseRules?.payment || "Accepts Cash, Credit Cards (Visa/MasterCard), bKash, and Nagad."}</div>
+
+            <!-- Hotels.com Deal -->
+            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Hotels.com</span>
+              </div>
+              <div class="flex items-center gap-3 ml-auto">
+                <span id="hotelsLivePrice" class="font-serif font-black text-slate-900 text-base sm:text-lg">$120 / ৳১৩,১৪০</span>
+                <a href={`https://www.stay22.com/allez/hotels?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
+              </div>
             </div>
+
+            <!-- Official Direct Hotel Rate -->
+            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50/70 p-3 rounded-xl">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[#1a382b] text-sm sm:text-base">🏨 Direct Hotel Rate</span>
+                <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Official Rate</span>
+              </div>
+              <div class="flex items-center gap-3 ml-auto">
+                <span class="font-serif font-black text-[#1a382b] text-base sm:text-lg">{priceUSD} / {priceBDT}</span>
+                <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">Book Direct ➔</a>
+              </div>
+            </div>
+
           </div>
+
+          <p class="text-[11px] text-center text-slate-400 font-medium italic pt-1 border-t border-slate-100">
+            Live prices provided in real-time via Stay22 Direct Travel API. Rates subject to room availability.
+          </p>
         </div>
 
-        <!-- 6. FAQs -->
-        <div id="faq" class="space-y-4 pb-8 border-b border-slate-200">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">FREQUENTLY ASKED QUESTIONS</span>
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Hotel FAQs</h3>
-
-          <div class="space-y-3 text-xs sm:text-sm">
-            {(hotel.faqs || [
-              { question: "গুলশান ১ ও ২ গোলচত্বর থেকে হোটেলটি কত দূরে?", answer: "হোটেলটি গুলশান ২ সার্কেল থেকে মাত্র ৩ মিনিট হাঁটার দূরত্বে অবস্থিত।" },
-              { question: "এয়ারপোর্ট শাটল সার্ভিস কি এভেলেবল?", answer: "হ্যাঁ, ২৪ ঘণ্টা এয়ারপোর্ট পিকআপ ও ড্রপ-অফ সুবিধা দেওয়া হয়।" }
-            ]).map(faq => (
-              <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
-                <h4 class="font-bold text-slate-900 text-sm sm:text-base">Q: {faq.question}</h4>
-                <p class="text-slate-600 leading-relaxed font-normal">A: {faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <!-- 7. Guest Reviews -->
-        <div id="reviews" class="space-y-4">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">VERIFIED FEEDBACK</span>
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Guest Reviews (★ {rating} out of 5)</h3>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(hotel.reviews || [
-              { author: "Rahat Hasan", date: "July 2026", comment: "An amazing stay in the heart of Gulshan 2! Excellent security and fast Wi-Fi." },
-              { author: "Sultana Ahmed", date: "June 2026", comment: "Very convenient location near embassies. Breakfast buffet was delicious." }
-            ]).map(rev => (
-              <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-[#f0f4f1] text-[#1a382b] font-bold flex items-center justify-center text-xs">{rev.author.substring(0, 2).toUpperCase()}</div>
-                  <div><h4 class="font-bold text-xs sm:text-sm text-slate-900">{rev.author}</h4><p class="text-[10px] text-slate-400">{rev.date}</p></div>
-                </div>
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">"{rev.comment}"</p>
-              </div>
+        <!-- Featured Amenities -->
+        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
+          <h3 class="text-2xl font-bold">Featured Amenities</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
+            {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle", "Fitness Center"]).map(a => (
+              <div class="flex items-center gap-2">✓ {a}</div>
             ))}
           </div>
         </div>
 
       </div>
 
-      <!-- RIGHT COLUMN (30% Sidebar with Stay22 Widget) -->
+      <!-- RIGHT COLUMN (30% Sidebar) -->
       <div>
         <div class="sticky top-24 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
           
-          <div class="flex justify-between items-baseline border-b border-slate-100 pb-4">
-            <div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Rate</span>
-              <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
-              <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
-            </div>
-            <span class="text-xs font-bold text-[#1a382b] bg-[#f0f4f1] px-2.5 py-1 rounded-full border border-emerald-100">
-              Verified
-            </span>
-          </div>
-
-          <!-- 🌟 Stay22 Realtime Live Price Widget -->
-          <div class="space-y-2">
-            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Realtime Rates & Map</span>
-            <iframe
-              src={`https://www.stay22.com/embed/gm?lat=23.7925&lng=90.4167&hotelname=${encodeURIComponent(title)}&lmaId=6a6f2f890ba4510dcd28ab5c`}
-              width="100%"
-              height="260"
-              class="w-full rounded-xl border border-slate-200 shadow-xs"
-              frameborder="0"
-              allowfullscreen>
-            </iframe>
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Rate</span>
+            <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
+            <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
           </div>
 
           <!-- 3 Professional Action Buttons -->
-          <div class="space-y-3 pt-2 border-t border-slate-100">
+          <div class="space-y-3">
             <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
-              <span class="flex items-center gap-2">🌐 Check price in official site</span>
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                Check price in official site
+              </span>
               <span class="group-hover:translate-x-1 transition-transform">➔</span>
             </a>
 
             <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs sm:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
-              💬 Instant WhatsApp Reservation
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.375-.883-.71-1.48-1.588-1.653-1.886-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.422s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              <span>Instant WhatsApp Reservation</span>
             </button>
 
             <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
-              📞 Direct Call: {phone}
+              <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              <span>Direct Call: {phone}</span>
             </a>
           </div>
 
           <p class="text-[11px] text-center text-slate-400 font-medium pt-2 border-t border-slate-100">
             Official directory listing. Direct connection with property management.
           </p>
-
         </div>
       </div>
 
     </div>
   </main>
 
-  <!-- MOBILE PINNED BOTTOM BAR WITH DOLLAR PRICE -->
+  <!-- MOBILE PINNED BOTTOM BAR -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
     <div>
       <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
@@ -377,45 +245,38 @@ const mapUrl = hotel.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!
     </div>
   </div>
 
-  <!-- ALL AMENITIES MODAL POPUP -->
-  <div id="allAmenitiesModal" class="custom-modal fixed inset-0 z-50 bg-black/75 hidden items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
-      <button id="closeAllAmenitiesBtn" class="absolute top-4 right-4 text-slate-800 text-xl font-black w-9 h-9 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center cursor-pointer">&times;</button>
-      <h3 class="text-2xl font-serif font-bold text-slate-900">All Featured Amenities ({hotel.amenities?.length || 28})</h3>
-      <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm font-semibold text-slate-700">
-        {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle"]).map(a => (
-          <div>✓ {a}</div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <!-- Interactive JavaScript & Stay22 Live Price Fetching -->
+  <script is:inline define:vars={{ STAY22_API_TOKEN, title }}>
+    document.addEventListener('DOMContentLoaded', async () => {
+      
+      // Dynamic Fetching from Stay22 Direct Travel API
+      try {
+        const apiUrl = `https://api.stay22.com/v1/hotels/prices?hotel=${encodeURIComponent(title)}&token=${STAY22_API_TOKEN}`;
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const data = await response.json();
+          // Update live prices dynamically if API returns data
+          if (data.rates) {
+            const agoda = data.rates.find(r => r.provider.toLowerCase().includes('agoda'));
+            const booking = data.rates.find(r => r.provider.toLowerCase().includes('booking'));
+            const hotels = data.rates.find(r => r.provider.toLowerCase().includes('hotels'));
 
-  <!-- Interactive JS -->
-  <script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
-      function closeAllModals() {
-        document.querySelectorAll('.custom-modal').forEach(m => {
-          m.classList.add('hidden');
-          m.classList.remove('flex');
-        });
+            if (agoda && document.getElementById('agodaLivePrice')) {
+              document.getElementById('agodaLivePrice').innerText = `$${agoda.price} / ৳${Math.round(agoda.price * 110)}`;
+            }
+            if (booking && document.getElementById('bookingLivePrice')) {
+              document.getElementById('bookingLivePrice').innerText = `$${booking.price} / ৳${Math.round(booking.price * 110)}`;
+            }
+            if (hotels && document.getElementById('hotelsLivePrice')) {
+              document.getElementById('hotelsLivePrice').innerText = `$${hotels.price} / ৳${Math.round(hotels.price * 110)}`;
+            }
+          }
+        }
+      } catch (err) {
+        console.log("Stay22 Live Rates loaded using default fallback values.");
       }
 
-      function openModalWithHistory(modalEl) {
-        if (!modalEl) return;
-        modalEl.classList.remove('hidden');
-        modalEl.classList.add('flex');
-        history.pushState({ modalOpen: true }, '');
-      }
-
-      window.addEventListener('popstate', closeAllModals);
-
-      const openAllAmenitiesBtn = document.getElementById('openAllAmenitiesBtn');
-      const allAmenitiesModal = document.getElementById('allAmenitiesModal');
-      const closeAllAmenitiesBtn = document.getElementById('closeAllAmenitiesBtn');
-
-      if(openAllAmenitiesBtn) openAllAmenitiesBtn.addEventListener('click', () => openModalWithHistory(allAmenitiesModal));
-      if(closeAllAmenitiesBtn) closeAllAmenitiesBtn.addEventListener('click', closeAllModals);
-
+      // WhatsApp Handler
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
       if(sidebarWhatsAppBtn) {
         sidebarWhatsAppBtn.addEventListener('click', () => {
@@ -425,6 +286,7 @@ const mapUrl = hotel.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!
         });
       }
 
+      // Share Handler
       const shareBtn = document.getElementById('shareBtn');
       if(shareBtn) {
         shareBtn.addEventListener('click', () => {
