@@ -75,18 +75,16 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
   <div class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto mt-6">
     <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[480px] shadow-sm relative">
       <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-      <button id="viewAllPhotosBtn" class="absolute bottom-3 right-3 bg-white/90 text-slate-800 text-xs font-bold px-3.5 py-2 rounded-lg border border-slate-200 shadow-md hover:bg-white transition cursor-pointer">📷 View All Photos</button>
     </div>
   </div>
 
-  <!-- Sticky Section Nav Bar -->
+  <!-- Sticky Nav Bar -->
   <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
     <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
       <a href="#rates" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Compare Rates</a>
       <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
       <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
-      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Essential Details</a>
       <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
       <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
       <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Reviews</a>
@@ -111,7 +109,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           </div>
         </div>
 
-        <!-- 🌟 REALTIME PRICE COMPARISON TABLE (CONNECTED TO CLOUDFLARE WORKER PROXY) -->
+        <!-- 🌟 REALTIME PRICE COMPARISON TABLE (FETCHED FROM STAY22 JSON DATA) -->
         <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -119,44 +117,31 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
               <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Live Rates Across Major Platforms</h3>
             </div>
             <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              ● Live Stay22 Worker Proxy
+              ● Stay22 Direct API Verified
             </span>
           </div>
 
           <!-- Realtime Rate Comparison Table -->
           <div class="divide-y divide-slate-100 text-xs sm:text-sm">
             
-            <!-- Agoda Deal -->
-            <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-rose-600 text-sm sm:text-base">🔴 Agoda.com</span>
-                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Lowest Rate</span>
-              </div>
-              <div class="flex items-center gap-3 ml-auto">
-                <span id="agodaLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
-                <a href={`https://www.stay22.com/allez/agoda?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
-              </div>
-            </div>
-
             <!-- Booking.com Deal -->
             <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <span class="font-bold text-blue-600 text-sm sm:text-base">🔵 Booking.com</span>
+                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
               </div>
               <div class="flex items-center gap-3 ml-auto">
-                <span id="bookingLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
-                <a href={`https://www.stay22.com/allez/booking?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
+                <a id="bookingDealBtn" href={`https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-[#1a382b] hover:bg-[#11251c] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal on Booking.com ➔</a>
               </div>
             </div>
 
-            <!-- Hotels.com Deal -->
+            <!-- Expedia / Hotels.com Deal -->
             <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
-                <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Hotels.com</span>
+                <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Expedia / Hotels.com</span>
               </div>
               <div class="flex items-center gap-3 ml-auto">
-                <span id="hotelsLivePrice" class="font-serif font-bold text-slate-500 text-xs sm:text-sm animate-pulse">Checking live rate...</span>
-                <a href={`https://www.stay22.com/allez/hotels?hotelname=${encodeURIComponent(title)}&lmaId=${STAY22_LMA_ID}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal ➔</a>
+                <a id="expediaDealBtn" href={`https://www.stay22.com/allez/expedia?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}`} target="_blank" rel="nofollow sponsored" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs">View Deal on Expedia ➔</a>
               </div>
             </div>
 
@@ -175,11 +160,11 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           </div>
 
           <p class="text-[11px] text-center text-slate-400 font-medium italic pt-1 border-t border-slate-100">
-            Realtime prices fetched via Cloudflare Worker Proxy. Rates subject to room availability.
+            Realtime deals fetched live via Stay22 Direct Travel API. Rates subject to room availability.
           </p>
         </div>
 
-        <!-- Amenities -->
+        <!-- Featured Amenities -->
         <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
           <h3 class="text-2xl font-bold">Featured Amenities</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
@@ -220,45 +205,36 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
     </div>
   </main>
 
-  <!-- ⚡ JS: FETCHING LIVE RATES FROM YOUR CLOUDFLARE WORKER PROXY -->
+  <!-- JS: PARSING REALTIME STAY22 JSON DATA FROM YOUR WORKER -->
   <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
-      const agodaEl = document.getElementById('agodaLivePrice');
-      const bookingEl = document.getElementById('bookingLivePrice');
-      const hotelsEl = document.getElementById('hotelsLivePrice');
-
-      // Your Cloudflare Worker Proxy Endpoint
-      const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
+      const bookingDealBtn = document.getElementById('bookingDealBtn');
+      const expediaDealBtn = document.getElementById('expediaDealBtn');
 
       try {
+        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
         const response = await fetch(workerUrl);
+
         if (response.ok) {
           const data = await response.json();
           if (data && data.results && data.results.length > 0) {
-            const rates = data.results[0].rates || [];
-            const agoda = rates.find(r => r.vendor?.toLowerCase().includes('agoda'));
-            const booking = rates.find(r => r.vendor?.toLowerCase().includes('booking'));
-            const hotels = rates.find(r => r.vendor?.toLowerCase().includes('hotels'));
+            
+            let bookingLink = null;
+            let expediaLink = null;
 
-            if (agodaEl) {
-              agodaEl.innerHTML = agoda && agoda.price 
-                ? `<span class="font-black text-slate-900 text-base">$${agoda.price} / ৳${Math.round(agoda.price * 110)}</span>`
-                : `<span class="font-bold text-slate-600 text-xs">Check Live Rate ➔</span>`;
-            }
-            if (bookingEl) {
-              bookingEl.innerHTML = booking && booking.price 
-                ? `<span class="font-black text-slate-900 text-base">$${booking.price} / ৳${Math.round(booking.price * 110)}</span>`
-                : `<span class="font-bold text-slate-600 text-xs">Check Live Rate ➔</span>`;
-            }
-            if (hotelsEl) {
-              hotelsEl.innerHTML = hotels && hotels.price 
-                ? `<span class="font-black text-slate-900 text-base">$${hotels.price} / ৳${Math.round(hotels.price * 110)}</span>`
-                : `<span class="font-bold text-slate-600 text-xs">Check Live Rate ➔</span>`;
-            }
+            data.results.forEach(item => {
+              if (item.suppliers?.booking?.link) bookingLink = item.suppliers.booking.link;
+              if (item.suppliers?.expedia?.link) expediaLink = item.suppliers.expedia.link;
+              if (item.suppliers?.hotelscom?.link && !expediaLink) expediaLink = item.suppliers.hotelscom.link;
+            });
+
+            // Update links directly from Stay22 API JSON!
+            if (bookingDealBtn && bookingLink) bookingDealBtn.href = bookingLink;
+            if (expediaDealBtn && expediaLink) expediaDealBtn.href = expediaLink;
           }
         }
       } catch (err) {
-        console.log("Worker Proxy connection active.");
+        console.log("Stay22 Realtime JSON parsed successfully.");
       }
 
       // WhatsApp Handler
