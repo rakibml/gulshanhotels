@@ -47,7 +47,7 @@ const phone = hotel.phone || "+880 2-9886510";
       </nav>
 
       <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         GulshanHotels Verified Directory
       </span>
     </div>
@@ -76,17 +76,8 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </div>
 
-  <!-- Sticky Nav Bar -->
-  <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
-    <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
-      <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
-      <a href="#rates" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Compare Rates</a>
-      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
-    </div>
-  </div>
-
   <!-- Main Content Layout -->
-  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
+  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800 pt-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
       
       <!-- LEFT COLUMN -->
@@ -103,7 +94,7 @@ const phone = hotel.phone || "+880 2-9886510";
           </div>
         </div>
 
-        <!-- 🌟 DYNAMIC REALTIME PRICE COMPARISON TABLE (DYNAMICALLY GENERATED FROM STAY22 JSON) -->
+        <!-- 🌟 DYNAMIC REALTIME PRICE COMPARISON TABLE (STAY22 JSON PARSED) -->
         <div id="rates" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
             <div>
@@ -115,10 +106,10 @@ const phone = hotel.phone || "+880 2-9886510";
             </span>
           </div>
 
-          <!-- Dynamic Container: JS will automatically insert rows for suppliers found in Stay22 JSON! -->
+          <!-- Container for Dynamic Suppliers -->
           <div id="dynamicOtaContainer" class="divide-y divide-slate-100 text-xs sm:text-sm">
             <div class="py-4 text-center text-slate-500 font-medium animate-pulse">
-              Fetching live rates from Stay22 API...
+              Fetching live rates & deals from Stay22 API...
             </div>
           </div>
 
@@ -155,13 +146,12 @@ const phone = hotel.phone || "+880 2-9886510";
     </div>
   </main>
 
-  <!-- ⚡ JS: DYNAMICALLY PARSING STAY22 SUPPLIERS (LOGO, PRICE & DEAL LINKS) -->
+  <!-- ⚡ JS: PARSING LOGO, PRICE & LINKS FROM STAY22 JSON -->
   <script is:inline define:vars={{ title, priceUSD, priceBDT, officialWebsite }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
 
-      // Helper to safely extract numeric price
-      function parsePrice(p) {
+      function parsePriceNumber(p) {
         if (p == null) return null;
         if (typeof p === 'number') return p;
         if (typeof p === 'string') return parseFloat(p) || null;
@@ -183,9 +173,9 @@ const phone = hotel.phone || "+880 2-9886510";
             
             const suppliersMap = new Map();
 
-            // 1. Loop through all results matching this hotel to find OTA suppliers
+            // 1. Parse JSON results for matching hotel suppliers
             data.results.forEach(item => {
-              if (item.name && item.name.toLowerCase().includes(title.toLowerCase().substring(0, 8))) {
+              if (item.name && item.name.toLowerCase().includes(title.toLowerCase().substring(0, 6))) {
                 if (item.suppliers) {
                   Object.keys(item.suppliers).forEach(key => {
                     const supp = item.suppliers[key];
@@ -195,7 +185,7 @@ const phone = hotel.phone || "+880 2-9886510";
                         name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
                         link: supp.link,
                         logo: supp.media?.logoSquare || null,
-                        priceNum: parsePrice(supp.price || supp.rate || item.price)
+                        priceNum: parsePriceNumber(supp.price || supp.rate || item.price)
                       });
                     }
                   });
@@ -205,20 +195,20 @@ const phone = hotel.phone || "+880 2-9886510";
 
             // 2. Render dynamic OTA rows if found
             if (suppliersMap.size > 0) {
-              container.innerHTML = ''; // Clear loading state
+              container.innerHTML = '';
 
-              suppliersMap.forEach((supp, key) => {
+              suppliersMap.forEach((supp) => {
                 const priceDisplay = supp.priceNum 
                   ? `$${supp.priceNum} / ৳${Math.round(supp.priceNum * 110)}`
-                  : `Check Rate ➔`;
+                  : `Check Live Rate ➔`;
 
                 const logoHtml = supp.logo 
-                  ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 object-contain" />` 
+                  ? `<img src="${supp.logo}" alt="${supp.name}" class="h-6 object-contain" />` 
                   : `<span class="font-bold text-slate-800">${supp.name}</span>`;
 
                 const rowHTML = `
                   <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-3">
                       ${logoHtml}
                       <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
                     </div>
@@ -233,7 +223,7 @@ const phone = hotel.phone || "+880 2-9886510";
                 container.insertAdjacentHTML('beforeend', rowHTML);
               });
 
-              // Add Direct Hotel Official Rate row at the bottom
+              // Add Direct Hotel Official Rate row
               const directRowHTML = `
                 <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50/70 p-3 rounded-xl mt-2">
                   <div class="flex items-center gap-2">
@@ -251,18 +241,18 @@ const phone = hotel.phone || "+880 2-9886510";
               container.insertAdjacentHTML('beforeend', directRowHTML);
 
             } else {
-              renderDefaultRows();
+              renderDefaultFallback();
             }
 
           } else {
-            renderDefaultRows();
+            renderDefaultFallback();
           }
         }
       } catch (err) {
-        renderDefaultRows();
+        renderDefaultFallback();
       }
 
-      function renderDefaultRows() {
+      function renderDefaultFallback() {
         if (!container) return;
         container.innerHTML = `
           <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
@@ -272,10 +262,6 @@ const phone = hotel.phone || "+880 2-9886510";
           <div class="py-3.5 flex items-center justify-between flex-wrap gap-2">
             <span class="font-bold text-purple-600 text-sm sm:text-base">🟣 Expedia / Hotels.com</span>
             <a href="https://www.stay22.com/allez/expedia?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">View Deal on Expedia ➔</a>
-          </div>
-          <div class="py-3.5 flex items-center justify-between flex-wrap gap-2 bg-slate-50 p-3 rounded-xl">
-            <span class="font-bold text-[#1a382b] text-sm sm:text-base">🏨 Direct Hotel Rate</span>
-            <a href="${officialWebsite}" target="_blank" class="bg-[#1a382b] text-white px-4 py-2 rounded-xl text-xs font-bold">Book Direct ➔</a>
           </div>
         `;
       }
