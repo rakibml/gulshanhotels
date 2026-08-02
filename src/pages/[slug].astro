@@ -32,12 +32,12 @@ const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
 
-// Default Dates for Date Inputs
+// Default Dates
 const today = new Date();
 const checkinDefault = new Date(today);
-checkinDefault.setDate(checkinDefault.getDate() + 2);
+checkinDefault.setDate(checkinDefault.getDate() + 15);
 const checkoutDefault = new Date(today);
-checkoutDefault.setDate(checkoutDefault.getDate() + 5);
+checkoutDefault.setDate(checkoutDefault.getDate() + 26);
 
 const checkinStr = checkinDefault.toISOString().split('T')[0];
 const checkoutStr = checkoutDefault.toISOString().split('T')[0];
@@ -90,8 +90,13 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
   <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
     <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
-      <a href="#rates" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Compare Rates</a>
+      <a href="#rates-section" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">View Prices</a>
       <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
+      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
+      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Essential Details</a>
+      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
+      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
+      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Reviews</a>
     </div>
   </div>
 
@@ -102,74 +107,37 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <!-- LEFT COLUMN (70%) -->
       <div class="lg:col-span-2 space-y-12">
         
-        <!-- Overview -->
-        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
-          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
-          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
-          <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3">
-            {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-              <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
-            )}
+        <!-- 1. Overview & Map -->
+        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
+          <div>
+            <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
+            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
+              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
+                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
+              )}
+            </div>
+          </div>
+
+          <!-- Google Map Embed Code -->
+          <div class="space-y-2 pt-2">
+            <div class="flex justify-between items-center">
+              <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
+              <a href="https://maps.google.com" target="_blank" class="text-xs sm:text-sm font-bold text-[#1a382b] hover:underline">Open in Google Maps ↗</a>
+            </div>
+            <div class="w-full h-[320px] rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
+              <iframe 
+                title="Gulshan Hotel Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.59834612345!2d90.4132!3d23.7925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7a0f3d6118b%3A0x6a2c3a51f22e830!2sGulshan%202%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd" 
+                class="w-full h-full border-0" 
+                allowfullscreen="" 
+                loading="lazy">
+              </iframe>
+            </div>
           </div>
         </div>
 
-        <!-- 📸 REFERENCE input_file_40.png : TRIPADVISOR STYLE LIVE RATES COMPARISON WITH TRAVEL DATES FILTER BAR -->
-        <div id="rates" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
-          
-          <div class="space-y-1 border-b border-slate-100 pb-4">
-            <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">View prices for your travel dates</h3>
-            <p class="text-xs text-slate-500 font-medium">Select your stay dates below to instantly update live rates across all booking partners</p>
-          </div>
-
-          <!-- 🌟 TRIPADVISOR TOP FILTER BAR (input_file_40.png) -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <!-- Check In -->
-            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
-              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              <div class="flex flex-col text-left w-full">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Check In</span>
-                <input type="date" id="filterCheckIn" value={checkinStr} class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
-              </div>
-            </div>
-
-            <!-- Check Out -->
-            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
-              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              <div class="flex flex-col text-left w-full">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Check Out</span>
-                <input type="date" id="filterCheckOut" value={checkoutStr} class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
-              </div>
-            </div>
-
-            <!-- Rooms / Guests -->
-            <div class="bg-white border border-slate-300 rounded-full px-4 py-2.5 flex items-center gap-3 shadow-2xs hover:border-slate-400 transition">
-              <svg class="w-5 h-5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-              <div class="flex flex-col text-left w-full">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Rooms/Guests</span>
-                <select id="filterGuests" class="text-xs font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full">
-                  <option value="1">1 Room, 1 Guest</option>
-                  <option value="2" selected>1 Room, 2 Guests</option>
-                  <option value="3">1 Room, 3 Guests</option>
-                  <option value="4">2 Rooms, 4 Guests</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dynamic TripAdvisor Style Cards Container -->
-          <div id="dynamicOtaContainer" class="space-y-3 pt-2">
-            <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
-              Checking live rates for selected travel dates...
-            </div>
-          </div>
-
-          <!-- TripAdvisor Disclaimer Note -->
-          <p class="text-xs text-slate-500 pt-2 leading-relaxed">
-            Prices are provided by our partners, and reflect nightly room rates, including any mandatory fees. Taxes not included. Please see our partners for more details.
-          </p>
-        </div>
-
-        <!-- Featured Amenities -->
+        <!-- 2. Featured Amenities -->
         <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
           <h3 class="text-2xl font-bold">Featured Amenities</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
@@ -179,41 +147,174 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           </div>
         </div>
 
+        <!-- 3. What's Nearby -->
+        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
+          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-xs sm:text-sm">
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🍽️ Dining / Bars</h4>
+              <p>Chef's Table Courtside <span class="text-slate-400 block text-xs">200 m</span></p>
+              <p>North End Coffee <span class="text-slate-400 block text-xs">250 m</span></p>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🏛️ Attractions</h4>
+              <p>Pink City Complex <span class="text-slate-400 block text-xs">0.2 mi</span></p>
+              <p>US Embassy <span class="text-slate-400 block text-xs">1.1 mi</span></p>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-bold text-slate-900 text-sm">🏢 Business & Medical</h4>
+              <p>United Hospital <span class="text-slate-400 block text-xs">1.2 mi</span></p>
+              <p>Intl Airport <span class="text-slate-400 block text-xs">5.8 mi</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Essential Details -->
+        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
+          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
+            <div><h4 class="font-bold text-slate-900">Check-In</h4><p class="text-slate-600">12:00 PM</p></div>
+            <div><h4 class="font-bold text-slate-900">Check-Out</h4><p class="text-slate-600">11:00 AM</p></div>
+            <div><h4 class="font-bold text-slate-900">No Smoking</h4><p class="text-slate-600">100% Smoke Free</p></div>
+            <div><h4 class="font-bold text-slate-900">Phone</h4><p class="text-slate-600">{phone}</p></div>
+          </div>
+        </div>
+
+        <!-- 5. House Rules -->
+        <div id="rules" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">House rules</h3>
+          <div class="divide-y divide-slate-100 text-xs sm:text-sm">
+            <div class="py-3.5 grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div class="font-bold text-slate-900">Check-in / Check-out</div>
+              <div class="md:col-span-2 text-slate-700">From 12:00 PM — Until 11:00 AM</div>
+            </div>
+            <div class="py-3.5 grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div class="font-bold text-slate-900">Cancellation / prepayment</div>
+              <div class="md:col-span-2 text-slate-700">Free cancellation up to 48 hours before arrival.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. FAQs -->
+        <div id="faq" class="space-y-4 pb-8 border-b border-slate-200">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">FAQs</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Hotel FAQs</h3>
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div class="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
+              <h4 class="font-bold text-slate-900">Q: গুলশান ১ ও ২ গোলচত্বর থেকে হোটেলটি কত দূরে?</h4>
+              <p class="text-slate-600">A: হোটেলটি গুলশান ২ সার্কেল থেকে মাত্র ৩ মিনিট হাঁটার দূরত্বে অবস্থিত।</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Guest Reviews -->
+        <div id="reviews" class="space-y-4">
+          <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">REVIEWS</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1a382b]">Guest Reviews (★ {rating} out of 5)</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
+              <h4 class="font-bold text-xs sm:text-sm text-slate-900">Rahat Hasan</h4>
+              <p class="text-xs text-slate-600">"An amazing stay in the heart of Gulshan 2! Excellent security and fast Wi-Fi."</p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- RIGHT COLUMN (Sidebar) -->
-      <div>
-        <div class="sticky top-24 bg-white p-6 rounded-2xl border border-slate-200 shadow-lg space-y-6">
-          <div class="border-b border-slate-100 pb-4">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Rate</span>
-            <span class="font-serif text-3xl font-bold text-[#1a382b]">{priceBDT}</span>
-            <span class="text-xs text-slate-500 font-medium"> / {priceUSD} per night</span>
+      <!-- 📸 RIGHT COLUMN (30% STICKY SIDEBAR - input_file_41.png RESTRUCTURED) -->
+      <div id="rates-section">
+        <div class="sticky top-20 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xl space-y-5">
+          
+          <div class="border-b border-slate-100 pb-3">
+            <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">View prices for travel dates</h3>
+            <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
           </div>
 
+          <!-- 🌟 COMBINED CLICKABLE DATE RANGE & GUESTS PICKER BOX -->
           <div class="space-y-3">
-            <a href={officialWebsite} target="_blank" rel="nofollow sponsored" class="w-full bg-[#1a382b] hover:bg-[#11251c] text-white font-bold text-xs sm:text-sm py-4 px-4 rounded-xl flex items-center justify-between transition shadow-md group">
-              <span>Check price in official site</span>
-              <span class="group-hover:translate-x-1 transition-transform">➔</span>
-            </a>
+            
+            <!-- Single Combined Date Range Input -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Stay Dates (Check In — Check Out)</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <input type="date" id="filterCheckIn" value={checkinStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+                <input type="date" id="filterCheckOut" value={checkoutStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
+              </div>
+            </div>
 
-            <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs sm:text-sm py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
+            <!-- Rooms / Guests Selector -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rooms & Guests</label>
+              <select id="filterGuests" class="w-full bg-transparent font-bold text-slate-800 text-xs focus:outline-none cursor-pointer">
+                <option value="1">1 Room, 1 Guest</option>
+                <option value="2" selected>1 Room, 2 Guests</option>
+                <option value="3">1 Room, 3 Guests</option>
+                <option value="4">2 Rooms, 4 Guests</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Dynamic TripAdvisor Style Cards Stacked Vertically in Sidebar -->
+          <div id="dynamicOtaContainer" class="space-y-3 pt-1">
+            <div class="p-5 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
+              Checking live rates...
+            </div>
+          </div>
+
+          <!-- Direct Actions -->
+          <div class="pt-3 border-t border-slate-100 space-y-2">
+            <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
               💬 Instant WhatsApp Reservation
             </button>
-
-            <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition text-center">
+            <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 transition text-center">
               📞 Direct Call: {phone}
             </a>
           </div>
+
+          <!-- Disclaimer Note -->
+          <p class="text-[10px] text-slate-400 text-center leading-tight">
+            Prices provided by partners. Base room rates shown. Taxes & fees excluded.
+          </p>
+
         </div>
       </div>
 
     </div>
   </main>
 
-  <!-- ⚡ JS: TRIPADVISOR TRAVEL DATES FILTER + LIVE PRICE RENDERER -->
-  <script is:inline define:vars={{ title }}>
+  <!-- 📱 MOBILE PINNED BOTTOM BAR WITH CHECK AVAILABILITY BUTTON -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
+    <div>
+      <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
+      <span class="text-base font-black text-slate-900">{priceUSD} <span class="text-xs font-normal text-slate-500">/ {priceBDT}</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href={`tel:${phone.replace(/\s+/g, '')}`} class="p-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold">📞</a>
+      <button id="mobileCheckBtn" class="bg-[#1a382b] text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-xl shadow-md cursor-pointer">
+        Check Availability
+      </button>
+    </div>
+  </div>
+
+  <!-- 📱 MOBILE POPUP MODAL FOR CHECK AVAILABILITY -->
+  <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
+      <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
+      <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
+      <p class="text-xs text-slate-500">Select dates to view live partner deals for {title}</p>
+      
+      <!-- Mobile Rates Duplicate Container -->
+      <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
+    </div>
+  </div>
+
+  <!-- ⚡ JS: TRIPADVISOR COMPACT SIDEBAR RENDERER + MOBILE POPUP -->
+  <script is:inline define:vars={{ title, officialWebsite }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
+      const mobileContainer = document.getElementById('mobileOtaContainer');
       const filterCheckIn = document.getElementById('filterCheckIn');
       const filterCheckOut = document.getElementById('filterCheckOut');
       const filterGuests = document.getElementById('filterGuests');
@@ -229,13 +330,12 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         return null;
       }
 
-      // 🔄 Function to fetch live rates for selected travel dates
       async function fetchLiveRates() {
         if (!container) return;
         
         container.innerHTML = `
-          <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
-            Checking live rates for selected travel dates...
+          <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
+            Checking live rates...
           </div>
         `;
 
@@ -275,11 +375,12 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
                 }
               });
 
-              // Sort Lowest Price First
+              // Sort Lowest Base Price First
               suppliersList.sort((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : 0));
 
               if (suppliersList.length > 0) {
                 container.innerHTML = '';
+                if (mobileContainer) mobileContainer.innerHTML = '';
 
                 suppliersList.forEach((supp, index) => {
                   const isLowest = index === 0 && supp.totalPrice;
@@ -287,30 +388,23 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
                   const priceDisplay = basePriceNum ? `$${basePriceNum}` : `Check rate`;
 
                   const buttonClass = isLowest
-                    ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full transition shadow-xs text-xs sm:text-sm`
-                    : `border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-6 py-2.5 rounded-full transition text-xs sm:text-sm`;
-
-                  const lowestBadge = isLowest 
-                    ? `<span class="text-[11px] font-bold text-rose-600 block text-right -mb-1">Lowest base rate at</span>` 
-                    : ``;
+                    ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-4 py-2 rounded-full transition shadow-xs text-xs`
+                    : `border border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-4 py-2 rounded-full transition text-xs`;
 
                   const logoHtml = supp.logo 
-                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-6 sm:h-7 object-contain" />` 
-                    : `<span class="font-extrabold text-slate-900 text-base sm:text-lg">${supp.name}</span>`;
+                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 sm:h-6 object-contain" />` 
+                    : `<span class="font-extrabold text-slate-900 text-xs sm:text-sm">${supp.name}</span>`;
 
                   const cardHTML = `
-                    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-slate-300 transition shadow-xs">
-                      <div class="flex items-center gap-3">
+                    <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 flex items-center justify-between gap-2 shadow-2xs">
+                      <div class="flex items-center gap-2">
                         ${logoHtml}
                       </div>
 
-                      <div class="flex items-center gap-4 sm:gap-6 ml-auto">
+                      <div class="flex items-center gap-3 ml-auto">
                         <div class="text-right">
-                          ${lowestBadge}
-                          <div class="text-right">
-                            <span class="font-serif font-black text-slate-900 text-lg sm:text-2xl">${priceDisplay}</span>
-                            ${basePriceNum ? `<span class="text-[10px] text-slate-500 font-bold block">+ taxes & fees</span>` : ''}
-                          </div>
+                          <span class="font-serif font-black text-slate-900 text-sm sm:text-base">${priceDisplay}</span>
+                          ${basePriceNum ? `<span class="text-[9px] text-slate-400 font-bold block -mt-1">+taxes</span>` : ''}
                         </div>
                         <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
                           View deal
@@ -319,6 +413,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
                     </div>
                   `;
                   container.insertAdjacentHTML('beforeend', cardHTML);
+                  if (mobileContainer) mobileContainer.insertAdjacentHTML('beforeend', cardHTML);
                 });
 
               } else {
@@ -336,27 +431,44 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 
       function renderFallback() {
         if (!container) return;
-        container.innerHTML = `
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
-            <span class="font-extrabold text-blue-600 text-base sm:text-lg">🔵 Booking.com</span>
-            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xs">
-            <span class="font-extrabold text-rose-600 text-base sm:text-lg">🔴 Agoda.com</span>
-            <a href="https://www.stay22.com/allez/agoda?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold px-6 py-2.5 rounded-full text-xs sm:text-sm">View deal</a>
+        const html = `
+          <div class="bg-white rounded-xl border border-slate-200 p-3 flex items-center justify-between shadow-2xs">
+            <span class="font-extrabold text-blue-600 text-xs">🔵 Booking.com</span>
+            <a href="https://www.stay22.com/allez/booking?aid=gulshanhotelscom&hotelname=${encodeURIComponent(title)}" target="_blank" class="bg-[#00e676] text-slate-900 font-extrabold px-4 py-2 rounded-full text-xs">View deal</a>
           </div>
         `;
+        container.innerHTML = html;
+        if (mobileContainer) mobileContainer.innerHTML = html;
       }
 
-      // Event Listeners for Date Inputs
       filterCheckIn?.addEventListener('change', fetchLiveRates);
       filterCheckOut?.addEventListener('change', fetchLiveRates);
       filterGuests?.addEventListener('change', fetchLiveRates);
 
-      // Initial Fetch
       fetchLiveRates();
 
-      // WhatsApp Handler
+      // Mobile Modal Handlers
+      const mobileCheckBtn = document.getElementById('mobileCheckBtn');
+      const mobileRatesModal = document.getElementById('mobileRatesModal');
+      const closeMobileRatesBtn = document.getElementById('closeMobileRatesBtn');
+
+      function openMobileModal() {
+        mobileRatesModal?.classList.remove('hidden');
+        mobileRatesModal?.classList.add('flex');
+        history.pushState({ modalOpen: true }, '');
+      }
+
+      function closeMobileModal() {
+        mobileRatesModal?.classList.add('hidden');
+        mobileRatesModal?.classList.remove('flex');
+      }
+
+      mobileCheckBtn?.addEventListener('click', openMobileModal);
+      closeMobileRatesBtn?.addEventListener('click', closeMobileModal);
+
+      window.addEventListener('popstate', closeMobileModal);
+
+      // WhatsApp
       const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
       if(sidebarWhatsAppBtn) {
         sidebarWhatsAppBtn.addEventListener('click', () => {
