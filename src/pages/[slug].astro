@@ -31,16 +31,6 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
-
-// Calculate default Check-in (tomorrow) & Check-out (3 days after)
-const todayObj = new Date();
-const checkinDefault = new Date(todayObj);
-checkinDefault.setDate(checkinDefault.getDate() + 1);
-const checkoutDefault = new Date(todayObj);
-checkoutDefault.setDate(checkoutDefault.getDate() + 4);
-
-const checkinStr = checkinDefault.toISOString().split('T')[0];
-const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -57,7 +47,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       </nav>
 
       <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         GulshanHotels Verified Directory
       </span>
     </div>
@@ -92,11 +82,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
       <a href="#rates-section" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">View Prices</a>
       <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
-      <a href="#nearby" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">What's nearby</a>
-      <a href="#details" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Essential Details</a>
-      <a href="#rules" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">House Rules</a>
-      <a href="#faq" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">FAQs</a>
-      <a href="#reviews" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Reviews</a>
     </div>
   </div>
 
@@ -108,7 +93,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <div class="lg:col-span-2 space-y-12">
         
         <!-- Overview & Map -->
-        <div id="overview" class="space-y-6 pb-8 border-b border-slate-200">
+        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
           <div>
             <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
             <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
@@ -119,7 +104,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             </div>
           </div>
 
-          <!-- Google Map Embed Code -->
           <div class="space-y-2 pt-2">
             <div class="flex justify-between items-center">
               <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
@@ -147,37 +131,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           </div>
         </div>
 
-        <!-- What's Nearby -->
-        <div id="nearby" class="space-y-6 pb-8 border-b border-slate-200">
-          <div><h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">What's nearby</h3></div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-xs sm:text-sm">
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🍽️ Dining / Bars</h4>
-              <p>Chef's Table Courtside <span class="text-slate-400 block text-xs">200 m</span></p>
-            </div>
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🏛️ Attractions</h4>
-              <p>Pink City Complex <span class="text-slate-400 block text-xs">0.2 mi</span></p>
-            </div>
-            <div class="space-y-2">
-              <h4 class="font-bold text-slate-900 text-sm">🏢 Business & Medical</h4>
-              <p>United Hospital <span class="text-slate-400 block text-xs">1.2 mi</span></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- House Rules & Details -->
-        <div id="details" class="bg-[#f8f9fa] p-6 sm:p-8 rounded-2xl space-y-6">
-          <span class="text-xs font-bold text-amber-700 uppercase tracking-widest block mb-1">INFO</span>
-          <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Essential details</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs sm:text-sm">
-            <div><h4 class="font-bold text-slate-900">Check-In</h4><p class="text-slate-600">12:00 PM</p></div>
-            <div><h4 class="font-bold text-slate-900">Check-Out</h4><p class="text-slate-600">11:00 AM</p></div>
-            <div><h4 class="font-bold text-slate-900">No Smoking</h4><p class="text-slate-600">100% Smoke Free</p></div>
-            <div><h4 class="font-bold text-slate-900">Phone</h4><p class="text-slate-600">{phone}</p></div>
-          </div>
-        </div>
-
       </div>
 
       <!-- RIGHT COLUMN (30% STICKY SIDEBAR) -->
@@ -189,25 +142,25 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
           </div>
 
-          <!-- COMBINED CLICKABLE STAY DATES -->
+          <!-- 🌟 CLICKABLE STAY DATES BUTTON -->
           <div class="space-y-3">
             
             <button id="openTwoMonthCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
               <div>
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
-                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">Select dates on calendar</span>
+                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">2026-08-10 — 2026-08-13</span>
               </div>
               <span class="text-slate-400 text-lg">📅</span>
             </button>
 
-            <!-- CUSTOMIZABLE ROOMS & GUESTS COUNTER -->
+            <!-- GUESTS SELECTOR WITH POPUP COUNTER -->
             <div class="relative">
               <button id="guestSelectorBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
                 <div>
                   <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">ROOMS & GUESTS</label>
                   <span id="guestLabelText" class="font-bold text-slate-800 text-xs">1 Room, 2 Guests</span>
                 </div>
-                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" id="guestArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <svg class="w-4 h-4 text-slate-400" id="guestArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
               </button>
 
               <!-- Guest Counter Popover -->
@@ -248,7 +201,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           <!-- Dynamic TripAdvisor Style Cards Container -->
           <div id="dynamicOtaContainer" class="space-y-3 pt-1">
             <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-              Checking live availability...
+              Checking live rates...
             </div>
           </div>
 
@@ -282,8 +235,8 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
     </div>
   </div>
 
-  <!-- 🌟 2-MONTH SIDE-BY-SIDE CALENDAR MODAL (PAST DATES DISABLED) -->
-  <div id="twoMonthCalModal" class="custom-modal fixed inset-0 z-50 bg-black/65 hidden items-center justify-center p-3 sm:p-6 backdrop-blur-xs">
+  <!-- 🌟 2-MONTH CALENDAR MODAL (Z-INDEX 60 IS SET SO IT OPENS ON TOP OF MOBILE POPUP!) -->
+  <div id="twoMonthCalModal" class="custom-modal fixed inset-0 z-60 bg-black/70 hidden items-center justify-center p-3 sm:p-6 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
       <button id="closeCalModalBtn" class="absolute top-4 right-4 text-slate-800 font-black w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200">&times;</button>
       
@@ -293,7 +246,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-        <!-- Month 1 -->
+        <!-- Month 1: August 2026 -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm text-center">August 2026</h4>
           <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
@@ -309,10 +262,10 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-07">7</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-08">8</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-09">9</button>
-            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-10">10</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-11">11</button>
-            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-12">12</button>
-            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-13">13</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-10">10</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-11">11</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-12">12</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-13">13</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-14">14</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-15">15</button>
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-16">16</button>
@@ -334,7 +287,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           </div>
         </div>
 
-        <!-- Month 2 -->
+        <!-- Month 2: September 2026 -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-800 text-sm text-center">September 2026</h4>
           <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
@@ -348,16 +301,17 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-05">5</button>
           </div>
         </div>
+
       </div>
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Selected: 2026-08-10 — 2026-08-13</span>
-        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Check Selected Dates</button>
+        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Click Check-in Date</span>
+        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Apply Dates</button>
       </div>
     </div>
   </div>
 
-  <!-- 📱 MOBILE POPUP MODAL -->
+  <!-- 📱 MOBILE POPUP MODAL (Z-INDEX 50) -->
   <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
       <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
@@ -365,19 +319,21 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
       <p class="text-xs text-slate-500">Select stay dates to view live availability for {title}</p>
       
+      <!-- Mobile Date Box (Closes Mobile Modal and Opens 2-Month Calendar) -->
       <button id="mobileOpenCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer">
         <div>
           <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES</label>
-          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">2026-08-10 — 2026-08-13</span>
+          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">Click to select stay dates</span>
         </div>
         <span class="text-slate-400 text-base">📅</span>
       </button>
 
+      <!-- Live Rates Container in Mobile Popup -->
       <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
     </div>
   </div>
 
-  <!-- ⚡ JS: CALENDAR RANGE + SOLD OUT CHECKING LOGIC -->
+  <!-- ⚡ JS: DYNAMIC RANGE SELECTION + OVERLAY MODAL LAYERING -->
   <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
@@ -386,8 +342,10 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       let currentCheckIn = "2026-08-10";
       let currentCheckOut = "2026-08-13";
       let adults = 2;
+      let rooms = 1;
+      let children = 0;
 
-      // 1. Calendar Modal Logic
+      // 1. 2-MONTH CALENDAR MODAL LOGIC (Z-INDEX 60)
       const openTwoMonthCalBtn = document.getElementById('openTwoMonthCalBtn');
       const mobileOpenCalBtn = document.getElementById('mobileOpenCalBtn');
       const twoMonthCalModal = document.getElementById('twoMonthCalModal');
@@ -409,9 +367,34 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       mobileOpenCalBtn?.addEventListener('click', openCalModal);
       closeCalModalBtn?.addEventListener('click', closeCalModal);
 
-      // Date Selection Logic
+      // Dynamic Range Selection Logic
       const calDays = document.querySelectorAll('.cal-day');
       let selectClickState = 'checkin';
+
+      function updateCalendarHighlight() {
+        calDays.forEach(btn => {
+          const d = btn.getAttribute('data-date');
+          if (!d) return;
+
+          // Reset Base Style
+          btn.className = "cal-day font-bold p-2 rounded-lg cursor-pointer transition text-slate-700 hover:bg-slate-100";
+
+          const dTime = new Date(d).getTime();
+          const inTime = currentCheckIn ? new Date(currentCheckIn).getTime() : 0;
+          const outTime = currentCheckOut ? new Date(currentCheckOut).getTime() : 0;
+
+          if (d === currentCheckIn || d === currentCheckOut) {
+            btn.className = "cal-day font-bold p-2 rounded-lg bg-[#1a382b] text-white shadow-xs cursor-pointer";
+          } else if (inTime && outTime && dTime > inTime && dTime < outTime) {
+            btn.className = "cal-day font-bold p-2 rounded-lg bg-emerald-100 text-emerald-900 cursor-pointer";
+          }
+        });
+
+        const selectedText = `${currentCheckIn} — ${currentCheckOut}`;
+        document.getElementById('selectedDateRangeText').innerText = selectedText;
+        document.getElementById('mobileDateText').innerText = selectedText;
+        document.getElementById('calSelectionSummary').innerText = `Selected: ${selectedText}`;
+      }
 
       calDays.forEach(dayBtn => {
         dayBtn.addEventListener('click', () => {
@@ -420,19 +403,25 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 
           if (selectClickState === 'checkin') {
             currentCheckIn = clickedDate;
+            currentCheckOut = "";
             selectClickState = 'checkout';
-            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Select Check-Out Date)`;
+            updateCalendarHighlight();
+            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Now click Departure Date)`;
           } else {
-            currentCheckOut = clickedDate;
-            selectClickState = 'checkin';
-            
-            const selectedText = `${currentCheckIn} — ${currentCheckOut}`;
-            document.getElementById('selectedDateRangeText').innerText = selectedText;
-            document.getElementById('mobileDateText').innerText = selectedText;
-            document.getElementById('calSelectionSummary').innerText = `Selected: ${selectedText}`;
-
-            closeCalModal();
-            fetchLiveRates();
+            // Ensure checkout is after checkin
+            if (new Date(clickedDate) <= new Date(currentCheckIn)) {
+              currentCheckIn = clickedDate;
+              currentCheckOut = "";
+              selectClickState = 'checkout';
+              updateCalendarHighlight();
+              document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Now click Departure Date)`;
+            } else {
+              currentCheckOut = clickedDate;
+              selectClickState = 'checkin';
+              updateCalendarHighlight();
+              closeCalModal();
+              fetchLiveRates();
+            }
           }
         });
       });
@@ -442,7 +431,45 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         fetchLiveRates();
       });
 
-      // 2. FETCH LIVE RATES & CHECK AVAILABILITY VS SOLD OUT
+      // Initial Highlight
+      updateCalendarHighlight();
+
+      // 2. ROOMS & GUESTS COUNTER LOGIC
+      const guestSelectorBtn = document.getElementById('guestSelectorBtn');
+      const guestPopover = document.getElementById('guestPopover');
+      const applyGuestBtn = document.getElementById('applyGuestBtn');
+
+      guestSelectorBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        guestPopover?.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!guestPopover?.contains(e.target) && !guestSelectorBtn?.contains(e.target)) {
+          guestPopover?.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestUI(); });
+      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestUI(); });
+      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestUI(); });
+      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestUI(); });
+      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestUI(); });
+      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestUI(); });
+
+      function updateGuestUI() {
+        document.getElementById('roomCount').innerText = rooms;
+        document.getElementById('adultCount').innerText = adults;
+        document.getElementById('childCount').innerText = children;
+        document.getElementById('guestLabelText').innerText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Guest${adults > 1 ? 's' : ''}`;
+      }
+
+      applyGuestBtn?.addEventListener('click', () => {
+        guestPopover?.classList.add('hidden');
+        fetchLiveRates();
+      });
+
+      // 3. FETCH LIVE RATES & CHECK AVAILABILITY
       function parsePriceNumber(suppObj) {
         if (!suppObj) return null;
         if (typeof suppObj.price === 'number') return suppObj.price;
@@ -517,7 +544,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
                     <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 flex items-center justify-between gap-2 shadow-2xs">
                       <div class="flex items-center gap-2">
                         ${logoHtml}
-                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Available</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Available</span>
                       </div>
 
                       <div class="flex items-center gap-3 ml-auto">
@@ -548,12 +575,11 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         }
       }
 
-      // 🔴 Render Sold Out State if hotel is fully booked for selected dates
       function renderSoldOutState() {
         const soldOutHTML = `
           <div class="p-5 text-center space-y-2 bg-rose-50 rounded-2xl border border-rose-200">
             <div class="text-rose-700 font-bold text-sm">🔴 Fully Booked / Sold Out</div>
-            <p class="text-xs text-slate-600">No rooms available for ${currentCheckIn} to ${currentCheckOut}. Please select different stay dates on the calendar.</p>
+            <p class="text-xs text-slate-600">No rooms available for ${currentCheckIn} to ${currentCheckOut}. Please select different stay dates.</p>
           </div>
         `;
         if (container) container.innerHTML = soldOutHTML;
