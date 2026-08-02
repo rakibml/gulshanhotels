@@ -31,8 +31,6 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
-
-const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -105,7 +103,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           </div>
         </div>
 
-        <!-- 🌟 TRIPADVISOR STYLE REALTIME PRICE COMPARISON (PRE-TAX BASE RATES ONLY) -->
+        <!-- 📸 TRIPADVISOR STYLE LIVE RATES COMPARISON (STRICTLY FILTERED FOR THIS HOTEL ONLY) -->
         <div id="rates" class="space-y-4">
           <div class="flex justify-between items-center pb-2">
             <h3 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Compare Live Rates</h3>
@@ -117,11 +115,11 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           <!-- Dynamic TripAdvisor Style Cards Container -->
           <div id="dynamicOtaContainer" class="space-y-3">
             <div class="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border border-slate-200 animate-pulse">
-              Checking base rates across partners...
+              Checking live rates for {title}...
             </div>
           </div>
 
-          <!-- TripAdvisor Disclaimer Note (Taxes Excluded Note) -->
+          <!-- TripAdvisor Disclaimer Note -->
           <p class="text-xs text-slate-500 pt-2 leading-relaxed">
             Prices are provided by our partners and reflect base nightly room rates. Taxes & mandatory fees excluded. Please see partner sites for final booking breakdown.
           </p>
@@ -168,7 +166,7 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
     </div>
   </main>
 
-  <!-- ⚡ JS: EXTRACTING PRE-TAX BASE RATE (TAXES EXCLUDED) -->
+  <!-- ⚡ JS: STRICTLY FILTER SUPPLIERS ONLY FOR THE TARGETED HOTEL -->
   <script is:inline define:vars={{ title, officialWebsite, priceUSD, priceBDT }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
@@ -185,7 +183,8 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
       }
 
       try {
-        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`;
+        const targetHotelTitle = title.trim();
+        const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(targetHotelTitle)}`;
         const response = await fetch(workerUrl);
 
         if (response.ok && container) {
@@ -193,15 +192,26 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
           
           if (data && data.results && data.results.length > 0) {
             
-            const suppliersList = [];
+            const targetSuppliers = [];
+            const seenKeys = new Set();
 
-            // Parse suppliers from Stay22 JSON
+            // 🎯 STRICT FILTERING: Only process items belonging to THIS exact hotel!
             data.results.forEach(item => {
-              if (item.suppliers) {
+              const itemName = (item.name || "").toLowerCase().trim();
+              const targetName = targetHotelTitle.toLowerCase().trim();
+
+              // Check if item belongs to the targeted hotel
+              const isTargetHotel = itemName === targetName || 
+                itemName.includes(targetName) || 
+                targetName.includes(itemName) ||
+                (targetName.split(' ')[0].length > 3 && itemName.includes(targetName.split(' ')[0]));
+
+              if (isTargetHotel && item.suppliers) {
                 Object.keys(item.suppliers).forEach(key => {
                   const supp = item.suppliers[key];
-                  if (supp && supp.link) {
-                    suppliersList.push({
+                  if (supp && supp.link && !seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    targetSuppliers.push({
                       key: key,
                       name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
                       link: supp.link,
@@ -213,22 +223,22 @@ const STAY22_LMA_ID = "6a6f2f890ba4510dcd28ab5c";
               }
             });
 
-            // Sort Suppliers by Price (Lowest Base Rate First)
-            suppliersList.sort((a, b) => {
+            // Sort by Price (Lowest First)
+            targetSuppliers.sort((a, b) => {
               if (a.totalPrice && b.totalPrice) return a.totalPrice - b.totalPrice;
               if (a.totalPrice) return -1;
               if (b.totalPrice) return 1;
               return 0;
             });
 
-            // Render TripAdvisor Style Cards with PRE-TAX BASE RATE
-            if (suppliersList.length > 0) {
-              container.innerHTML = '';
+            // Render TripAdvisor Style Cards ONLY for the targeted hotel
+            if (targetSuppliers.length > 0) {
+              container.innerHTML = ''; // Clear loading message
 
-              suppliersList.forEach((supp, index) => {
+              targetSuppliers.forEach((supp, index) => {
                 const isLowest = index === 0 && supp.totalPrice;
                 
-                // 🌟 PRE-TAX BASE RATE CALCULATION (Subtracting ~15% tax/fees)
+                // Pre-tax base rate calculation (~15% tax excluded)
                 const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
 
                 const priceDisplay = basePriceNum 
