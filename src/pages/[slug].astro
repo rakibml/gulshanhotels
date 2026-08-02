@@ -31,16 +31,6 @@ const reviewsCount = hotel.reviewsCount || "120";
 const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
 const phone = hotel.phone || "+880 2-9886510";
-
-// Default Dates
-const today = new Date();
-const checkinDefault = new Date(today);
-checkinDefault.setDate(checkinDefault.getDate() + 8);
-const checkoutDefault = new Date(today);
-checkoutDefault.setDate(checkoutDefault.getDate() + 17);
-
-const checkinStr = checkinDefault.toISOString().split('T')[0];
-const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 ---
 
 <Layout title={`${title} - GulshanHotels Directory`}>
@@ -57,7 +47,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       </nav>
 
       <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         GulshanHotels Verified Directory
       </span>
     </div>
@@ -112,6 +102,7 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             )}
           </div>
 
+          <!-- Google Map Embed Code -->
           <div class="space-y-2 pt-2">
             <div class="flex justify-between items-center">
               <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
@@ -150,25 +141,18 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
           </div>
 
-          <!-- 🌟 FULLY CLICKABLE DATE RANGE & CUSTOMIZABLE GUEST COUNTER -->
+          <!-- 🌟 1-CLICK CLICKABLE STAY DATES (OPENS 2-MONTH CALENDAR MODAL) -->
           <div class="space-y-3">
             
-            <!-- 1. FULLY CLICKABLE DATE BOX (ক্লিকের সাথে সাথে পিক করবে) -->
-            <div id="dateBoxContainer" class="bg-slate-50 border border-slate-200 rounded-2xl p-3 hover:border-slate-300 transition cursor-pointer select-none">
-              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div class="flex items-center gap-1">
-                  <span class="text-slate-400">📅</span>
-                  <input type="date" id="filterCheckIn" value={checkinStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
-                </div>
-                <div class="flex items-center gap-1">
-                  <span class="text-slate-400">📅</span>
-                  <input type="date" id="filterCheckOut" value={checkoutStr} class="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer w-full" />
-                </div>
+            <button id="openTwoMonthCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
+                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">10 Aug 2026 — 17 Aug 2026 (7 Nights)</span>
               </div>
-            </div>
+              <span class="text-slate-400 text-lg">📅</span>
+            </button>
 
-            <!-- 2. CUSTOMIZABLE ROOMS & GUESTS SELECTOR WITH + AND - COUNTERS -->
+            <!-- CUSTOMIZABLE ROOMS & GUESTS COUNTER -->
             <div class="relative">
               <button id="guestSelectorBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
                 <div>
@@ -180,31 +164,28 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
 
               <!-- Guest Counter Popover -->
               <div id="guestPopover" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 z-40 space-y-3">
-                <!-- Rooms -->
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-slate-800">Rooms</span>
                   <div class="flex items-center gap-3">
-                    <button type="button" id="roomDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <button type="button" id="roomDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
                     <span id="roomCount" class="text-xs font-bold w-4 text-center">1</span>
                     <button type="button" id="roomInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
                   </div>
                 </div>
 
-                <!-- Adults -->
                 <div class="flex items-center justify-between border-t border-slate-100 pt-2">
                   <span class="text-xs font-bold text-slate-800">Adults</span>
                   <div class="flex items-center gap-3">
-                    <button type="button" id="adultDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <button type="button" id="adultDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
                     <span id="adultCount" class="text-xs font-bold w-4 text-center">2</span>
                     <button type="button" id="adultInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
                   </div>
                 </div>
 
-                <!-- Children -->
                 <div class="flex items-center justify-between border-t border-slate-100 pt-2">
                   <span class="text-xs font-bold text-slate-800">Children</span>
                   <div class="flex items-center gap-3">
-                    <button type="button" id="childDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 disabled:opacity-30 cursor-pointer">-</button>
+                    <button type="button" id="childDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
                     <span id="childCount" class="text-xs font-bold w-4 text-center">0</span>
                     <button type="button" id="childInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
                   </div>
@@ -233,18 +214,13 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
             </a>
           </div>
 
-          <!-- Disclaimer Note -->
-          <p class="text-[10px] text-slate-400 text-center leading-tight">
-            Prices provided by partners. Base room rates shown. Taxes & fees excluded.
-          </p>
-
         </div>
       </div>
 
     </div>
   </main>
 
-  <!-- 📱 MOBILE PINNED BOTTOM BAR -->
+  <!-- 📱 MOBILE PINNED BOTTOM BAR WITH CHECK AVAILABILITY BUTTON -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
     <div>
       <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
@@ -258,61 +234,181 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
     </div>
   </div>
 
-  <!-- 📱 MOBILE POPUP MODAL -->
+  <!-- 🌟 2-MONTH SIDE-BY-SIDE CALENDAR MODAL (1-CLICK RANGE PICKER) -->
+  <div id="twoMonthCalModal" class="custom-modal fixed inset-0 z-50 bg-black/65 hidden items-center justify-center p-3 sm:p-6 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <button id="closeCalModalBtn" class="absolute top-4 right-4 text-slate-800 font-black w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200">&times;</button>
+      
+      <div>
+        <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">Select Stay Dates</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Click arrival date then departure date to select your range</p>
+      </div>
+
+      <!-- 2-Month Calendar Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+        
+        <!-- Month 1: August 2026 -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-800 text-sm text-center">August 2026</h4>
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-xs text-center font-bold text-slate-700">
+            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-01">1</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-02">2</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-03">3</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-04">4</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-05">5</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-06">6</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-07">7</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-08">8</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-09">9</button>
+            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-10">10</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-11">11</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-12">12</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-13">13</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-14">14</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-15">15</button>
+            <button type="button" class="cal-day p-2 bg-emerald-100 text-emerald-900 rounded-lg cursor-pointer" data-date="2026-08-16">16</button>
+            <button type="button" class="cal-day p-2 bg-[#1a382b] text-white rounded-lg cursor-pointer font-bold" data-date="2026-08-17">17</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-18">18</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-19">19</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-20">20</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-21">21</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-22">22</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-23">23</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-24">24</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-25">25</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-26">26</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-27">27</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-28">28</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-29">29</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-30">30</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-31">31</button>
+          </div>
+        </div>
+
+        <!-- Month 2: September 2026 -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-800 text-sm text-center">September 2026</h4>
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-xs text-center font-bold text-slate-700">
+            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-01">1</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-02">2</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-03">3</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-04">4</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-05">5</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-06">6</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-07">7</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-08">8</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-09">9</button>
+            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-10">10</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Selected: 10 Aug — 17 Aug (7 Nights)</span>
+        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Apply Dates</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 MOBILE POPUP MODAL (PHONE USERS WILL SELECT DATES & GUESTS RIGHT INSIDE POPUP!) -->
   <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
       <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
-      <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
-      <p class="text-xs text-slate-500">Select dates to view live partner deals for {title}</p>
       
+      <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
+      <p class="text-xs text-slate-500">Select stay dates and guests to view live partner deals for {title}</p>
+      
+      <!-- Interactive Mobile Date Box -->
+      <button id="mobileOpenCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES</label>
+          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">10 Aug 2026 — 17 Aug 2026</span>
+        </div>
+        <span class="text-slate-400 text-base">📅</span>
+      </button>
+
+      <!-- Live Rate Cards inside Mobile Modal -->
       <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
     </div>
   </div>
 
-  <!-- ⚡ JS: CLICKABLE DATE BOX + CUSTOM ROOMS & GUESTS COUNTER + TRIPADVISOR RENDERER -->
-  <script is:inline define:vars={{ title, officialWebsite }}>
+  <!-- ⚡ JS: 2-MONTH CALENDAR RANGE PICKER + MOBILE POPUP INTEGRATION -->
+  <script is:inline define:vars={{ title }}>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('dynamicOtaContainer');
       const mobileContainer = document.getElementById('mobileOtaContainer');
-      const filterCheckIn = document.getElementById('filterCheckIn');
-      const filterCheckOut = document.getElementById('filterCheckOut');
-      const dateBoxContainer = document.getElementById('dateBoxContainer');
 
-      // 1. FULLY CLICKABLE DATE BOX LOGIC
-      dateBoxContainer?.addEventListener('click', (e) => {
-        if (e.target !== filterCheckOut && filterCheckIn) {
-          if ('showPicker' in HTMLInputElement.prototype) {
-            filterCheckIn.showPicker();
+      // 1. 2-MONTH CALENDAR MODAL LOGIC
+      const openTwoMonthCalBtn = document.getElementById('openTwoMonthCalBtn');
+      const mobileOpenCalBtn = document.getElementById('mobileOpenCalBtn');
+      const twoMonthCalModal = document.getElementById('twoMonthCalModal');
+      const closeCalModalBtn = document.getElementById('closeCalModalBtn');
+      const applyCalSelectionBtn = document.getElementById('applyCalSelectionBtn');
+
+      let currentCheckIn = "2026-08-10";
+      let currentCheckOut = "2026-08-17";
+
+      function openCalModal() {
+        twoMonthCalModal?.classList.remove('hidden');
+        twoMonthCalModal?.classList.add('flex');
+        history.pushState({ modalOpen: true }, '');
+      }
+
+      function closeCalModal() {
+        twoMonthCalModal?.classList.add('hidden');
+        twoMonthCalModal?.classList.remove('flex');
+      }
+
+      openTwoMonthCalBtn?.addEventListener('click', openCalModal);
+      mobileOpenCalBtn?.addEventListener('click', openCalModal);
+      closeCalModalBtn?.addEventListener('click', closeCalModal);
+
+      // Handle Day Click in 2-Month Calendar
+      const calDays = document.querySelectorAll('.cal-day');
+      let selectClickState = 'checkin';
+
+      calDays.forEach(dayBtn => {
+        dayBtn.addEventListener('click', (e) => {
+          const clickedDate = dayBtn.getAttribute('data-date');
+          if (!clickedDate) return;
+
+          if (selectClickState === 'checkin') {
+            currentCheckIn = clickedDate;
+            selectClickState = 'checkout';
+            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Select Departure Date)`;
           } else {
-            filterCheckIn.focus();
+            currentCheckOut = clickedDate;
+            selectClickState = 'checkin';
+            
+            const selectedText = `${currentCheckIn} — ${currentCheckOut}`;
+            document.getElementById('selectedDateRangeText').innerText = selectedText;
+            document.getElementById('mobileDateText').innerText = selectedText;
+            document.getElementById('calSelectionSummary').innerText = `Selected: ${selectedText}`;
+
+            closeCalModal();
+            fetchLiveRates();
           }
-        }
+        });
       });
 
-      // 2. CUSTOMIZABLE ROOMS & GUESTS COUNTER LOGIC
+      applyCalSelectionBtn?.addEventListener('click', () => {
+        closeCalModal();
+        fetchLiveRates();
+      });
+
+      // 2. ROOMS & GUESTS COUNTER LOGIC
       const guestSelectorBtn = document.getElementById('guestSelectorBtn');
       const guestPopover = document.getElementById('guestPopover');
       const applyGuestBtn = document.getElementById('applyGuestBtn');
-      const guestLabelText = document.getElementById('guestLabelText');
 
-      let rooms = 1;
-      let adults = 2;
-      let children = 0;
-
-      const roomCount = document.getElementById('roomCount');
-      const adultCount = document.getElementById('adultCount');
-      const childCount = document.getElementById('childCount');
-
-      function updateGuestLabel() {
-        if (roomCount) roomCount.innerText = rooms.toString();
-        if (adultCount) adultCount.innerText = adults.toString();
-        if (childCount) childCount.innerText = children.toString();
-
-        let label = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}`;
-        if (children > 0) label += `, ${children} Child${children > 1 ? 'ren' : ''}`;
-
-        if (guestLabelText) guestLabelText.innerText = label;
-      }
+      let rooms = 1, adults = 2, children = 0;
 
       guestSelectorBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -325,15 +421,19 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         }
       });
 
-      // Increment / Decrement Buttons
-      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestLabel(); });
-      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestLabel(); });
+      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestUI(); });
+      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestUI(); });
+      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestUI(); });
+      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestUI(); });
+      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestUI(); });
+      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestUI(); });
 
-      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestLabel(); });
-      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestLabel(); });
-
-      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestLabel(); });
-      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestLabel(); });
+      function updateGuestUI() {
+        document.getElementById('roomCount').innerText = rooms;
+        document.getElementById('adultCount').innerText = adults;
+        document.getElementById('childCount').innerText = children;
+        document.getElementById('guestLabelText').innerText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Guest${adults > 1 ? 's' : ''}`;
+      }
 
       applyGuestBtn?.addEventListener('click', () => {
         guestPopover?.classList.add('hidden');
@@ -348,7 +448,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
           const val = suppObj.price.total || suppObj.price.amount || suppObj.price.value || suppObj.price.net;
           return val ? parseFloat(val) : null;
         }
-        if (typeof suppObj.rate === 'number') return suppObj.rate;
         return null;
       }
 
@@ -357,15 +456,12 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         
         container.innerHTML = `
           <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-            Checking live rates for selected stay...
+            Checking live rates for ${currentCheckIn} to ${currentCheckOut}...
           </div>
         `;
 
-        const checkinVal = filterCheckIn?.value || '';
-        const checkoutVal = filterCheckOut?.value || '';
-
         try {
-          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${checkinVal}&checkout=${checkoutVal}&adults=${adults}`;
+          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${currentCheckIn}&checkout=${currentCheckOut}&adults=${adults}`;
           const response = await fetch(workerUrl);
 
           if (response.ok) {
@@ -461,9 +557,6 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
         if (mobileContainer) mobileContainer.innerHTML = html;
       }
 
-      filterCheckIn?.addEventListener('change', fetchLiveRates);
-      filterCheckOut?.addEventListener('change', fetchLiveRates);
-
       fetchLiveRates();
 
       // Mobile Modal
@@ -483,6 +576,8 @@ const checkoutStr = checkoutDefault.toISOString().split('T')[0];
       });
 
       window.addEventListener('popstate', () => {
+        twoMonthCalModal?.classList.add('hidden');
+        twoMonthCalModal?.classList.remove('flex');
         mobileRatesModal?.classList.add('hidden');
         mobileRatesModal?.classList.remove('flex');
       });
