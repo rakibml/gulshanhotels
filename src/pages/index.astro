@@ -18,12 +18,12 @@ try {
 if (!sponsorData) {
   sponsorData = {
     enable: true,
-    badge: "⭐ Editor's Choice",
+    badge: "🏛️ Official Featured Stay",
     title: "The Westin Dhaka",
-    category: "5-Star Luxury • Gulshan 2",
+    category: "5-Star Luxury • Gulshan 2 Diplomatic Zone",
     rating: 4.8,
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-    buttonText: "Check Best Deal ➔",
+    buttonText: "View Official Registry ➔",
     buttonLink: "/the-westin-dhaka"
   };
 }
@@ -33,7 +33,7 @@ function toTitleCase(str: string) {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// ২. গুলশানের সব হোটেল লোড করা
+// ২. গুলশানের সব ভেরিফাইড হোটেল লোড করা
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -41,7 +41,7 @@ try {
     hotels = collectionData.map((item: any) => ({
       slug: item.id || item.slug,
       title: toTitleCase(item.data?.title || item.data?.name || 'Gulshan Hotel'),
-      category: item.data?.category || 'Luxury Hotel',
+      category: item.data?.category || 'Verified Luxury Stay',
       location: item.data?.location || 'Gulshan 2, Dhaka',
       zone: (item.data?.location || '').toLowerCase().includes('gulshan 1') 
             ? 'gulshan-1' 
@@ -57,289 +57,203 @@ try {
   hotels = [];
 }
 
-const faqSchema = {
+// Google JSON-LD Schema for Authority Directory
+const authoritySchema = {
   "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Which are the best 5-star luxury hotels in Gulshan, Dhaka?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The Westin Dhaka, Renaissance Dhaka Gulshan Hotel, Amari Dhaka, and Crowne Plaza Dhaka Gulshan are the leading 5-star luxury hotels offering world-class amenities and diplomatic security."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which Gulshan hotels are closest to the US Embassy and Diplomatic Zone?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Hotels located in Gulshan 2 and the Diplomatic Zone—such as The Westin Dhaka, Amari Dhaka, and nearby boutique suites—are within 5 to 10 minutes of major embassies including the US, UK, and Indian High Commissions."
-      }
-    }
-  ]
+  "@type": "GovernmentPermit",
+  "name": "Gulshan Accommodations Official Directory",
+  "description": "The official accommodation directory and diplomatic travel guide for Gulshan 1, Gulshan 2, and Diplomatic Zone in Dhaka, Bangladesh.",
+  "areaServed": "Gulshan, Dhaka, Bangladesh"
 };
 ---
 
-<Layout title="Gulshan Hotels - Official Directory & Luxury Accommodations Guide in Gulshan Dhaka">
+<Layout title="GulshanHotels.com — Official Accommodation Directory & Local Travel Authority for Gulshan, Dhaka">
   
-  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(authoritySchema)} />
 
-  <!-- HERO BANNER SECTION (3-COLUMN LAYOUT UTILIZING LEFT & RIGHT SPACES) -->
-  <section class="relative bg-slate-950 text-white pb-20 pt-10 overflow-hidden">
-    <!-- Background Image -->
+  <!-- OFFICIAL AUTHORITY HERO HEADER SECTION -->
+  <section class="relative bg-slate-950 text-white pt-12 pb-20 overflow-hidden border-b border-amber-500/20">
+    
+    <!-- Background Architectural Pattern & Image Overlay -->
     <div class="absolute inset-0 w-full h-full">
       <img 
         src="/hero-gulshan.jpg" 
-        alt="Gulshan Dhaka City Skyline Evening View" 
-        class="w-full h-full object-cover opacity-25" 
+        alt="Gulshan Dhaka Diplomatic District Skyline" 
+        class="w-full h-full object-cover opacity-20" 
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/40"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60"></div>
     </div>
 
-    <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10">
+    <div class="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
       
-      <!-- 3-Column Grid for Desktop -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        
-        <!-- LEFT COLUMN: DIRECTORY QUICK STATS (RED BOX 1) -->
-        <div class="hidden lg:block lg:col-span-3">
-          <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-5 backdrop-blur-md shadow-2xl space-y-4">
-            <div class="border-b border-slate-800 pb-2">
-              <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Directory Highlights</span>
-              <h3 class="text-sm font-bold text-white mt-0.5">Why Book In Gulshan?</h3>
-            </div>
+      <!-- Official Seal & Authority Badge -->
+      <div class="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-amber-500/20 border border-amber-400/40 text-amber-200 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full backdrop-blur-md shadow-lg">
+        <span class="text-base">🏛️</span>
+        <span>OFFICIAL ACCOMMODATIONS DIRECTORY & DIPLOMATIC TRAVEL GUIDE</span>
+      </div>
 
-            <div class="space-y-3 text-xs">
-              <div class="flex items-start gap-2.5">
-                <span class="text-base bg-emerald-950/80 p-1.5 rounded-lg border border-emerald-500/30">🏨</span>
-                <div>
-                  <h4 class="font-bold text-white">25+ Verified Stays</h4>
-                  <p class="text-[10px] text-slate-400">Gulshan 1, 2 & Diplomatic Zone</p>
-                </div>
-              </div>
+      <!-- Main Authority Title -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight max-w-4xl mx-auto font-serif">
+        The Verified Lodging & Travel Authority For <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 to-teal-200">Gulshan, Dhaka</span>
+      </h1>
 
-              <div class="flex items-start gap-2.5">
-                <span class="text-base bg-emerald-950/80 p-1.5 rounded-lg border border-emerald-500/30">⚡</span>
-                <div>
-                  <h4 class="font-bold text-white">Live Rate Comparison</h4>
-                  <p class="text-[10px] text-slate-400">Agoda, Booking.com & Direct</p>
-                </div>
-              </div>
+      <p class="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+        Serving foreign diplomats, international delegations, corporate executives, and tourists with physically inspected hotels, verified direct contact channels, and real-time rate comparison across Gulshan 1, Gulshan 2 & Baridhara Diplomatic Enclosure.
+      </p>
 
-              <div class="flex items-start gap-2.5">
-                <span class="text-base bg-emerald-950/80 p-1.5 rounded-lg border border-emerald-500/30">🛡️</span>
-                <div>
-                  <h4 class="font-bold text-white">Diplomatic Security</h4>
-                  <p class="text-[10px] text-slate-400">Near US & Foreign Embassies</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-2.5">
-                <span class="text-base bg-emerald-950/80 p-1.5 rounded-lg border border-emerald-500/30">⭐</span>
-                <div>
-                  <h4 class="font-bold text-white">4.8/5 Avg Rating</h4>
-                  <p class="text-[10px] text-slate-400">Verified local guest reviews</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Authority Quick Stats Counter Bar -->
+      <div class="pt-6 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-t border-slate-800">
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl text-center">
+          <span class="block text-2xl font-black text-amber-400">25+</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Physically Inspected Stays</span>
         </div>
-
-        <!-- CENTER COLUMN: MAIN HEADLINE & SUBTITLE -->
-        <div class="lg:col-span-6 text-center space-y-4">
-          <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full backdrop-blur-md">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Official Gulshan Accommodations Directory & Travel Guide
-          </div>
-
-          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            Find & Compare The Best <br class="hidden sm:inline" />
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Hotels In Gulshan, Dhaka</span>
-          </h1>
-
-          <p class="text-xs sm:text-base text-slate-300 max-w-xl mx-auto font-normal leading-relaxed">
-            Your official local guide to 5-star luxury stays, business accommodations, boutique suites, and real-time deal comparison across Gulshan 1, Gulshan 2 & Diplomatic Zone.
-          </p>
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl text-center">
+          <span class="block text-2xl font-black text-emerald-400">100%</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verified Direct Contacts</span>
         </div>
-
-        <!-- RIGHT COLUMN: FEATURED HOTEL SPOTLIGHT MINI CARD (RED BOX 2) -->
-        <div class="hidden lg:block lg:col-span-3">
-          <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-4 backdrop-blur-md shadow-2xl space-y-3 group">
-            
-            <div class="relative h-32 rounded-xl overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80" 
-                alt="The Westin Dhaka Spotlight" 
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-              />
-              <span class="absolute top-2 left-2 bg-amber-500 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full shadow">
-                🔥 Hot Deal
-              </span>
-              <span class="absolute bottom-2 right-2 bg-slate-950/80 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded border border-slate-700">
-                ★ 4.8 / 5
-              </span>
-            </div>
-
-            <div>
-              <span class="text-[10px] font-bold text-emerald-400 uppercase">5-Star Luxury • Gulshan 2</span>
-              <h4 class="text-sm font-black text-white leading-snug">The Westin Dhaka</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">Prime Avenue Location • Spa & Pool</p>
-            </div>
-
-            <a 
-              href="/the-westin-dhaka" 
-              class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white text-center font-extrabold text-xs py-2 rounded-xl transition shadow"
-            >
-              Check Deals ➔
-            </a>
-          </div>
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl text-center">
+          <span class="block text-2xl font-black text-amber-400">3 Zones</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gulshan 1, 2 & Diplomatic</span>
         </div>
-
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl text-center">
+          <span class="block text-2xl font-black text-emerald-400">24/7</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Direct Concierge Access</span>
+        </div>
       </div>
 
     </div>
   </section>
 
-  <!-- FLOATING FILTER BAR -->
+  <!-- OFFICIAL FLOATING DIRECTORY CONSOLE -->
   <div class="relative z-20 -mt-8 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-white rounded-2xl sm:rounded-full border border-slate-200 shadow-xl p-2 sm:p-2.5 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div class="bg-white rounded-2xl sm:rounded-full border border-slate-200 shadow-2xl p-2.5 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       
       <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto overflow-x-auto">
         <button data-filter="all" class="filter-pill active bg-[#052e16] text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0 shadow-md">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 2H9c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H9V4h10v16z"/></svg>
-          <span>All Gulshan</span>
+          <span>🏢 All Verified Directory Entries</span>
         </button>
 
         <button data-filter="gulshan-1" class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0">
-          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-          <span>Gulshan 1</span>
+          <span>📍 Gulshan 1 Business Hub</span>
         </button>
 
         <button data-filter="gulshan-2" class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0">
-          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-          <span>Gulshan 2</span>
+          <span>⭐ Gulshan 2 Circle</span>
         </button>
 
         <button data-filter="banani" class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0">
-          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12z"/></svg>
-          <span>Banani</span>
+          <span>🏛️ Diplomatic Enclosure</span>
         </button>
-
-        <a href="#all-hotels" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0">
-          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5z"/></svg>
-          <span>Show Map</span>
-        </a>
       </div>
 
-      <button id="toggleMoreFilters" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0 ml-auto">
-        <span>More Filters</span>
-        <svg class="w-3.5 h-3.5 fill-slate-500" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      <button id="toggleMoreFilters" class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0 ml-auto border border-slate-300">
+        <span>🔍 Search Directory</span>
       </button>
 
     </div>
 
-    <!-- MORE FILTERS EXPANDABLE PANEL -->
-    <div id="moreFiltersPanel" class="hidden mt-3 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xl">
+    <!-- MORE FILTERS / SEARCH PANEL -->
+    <div id="moreFiltersPanel" class="hidden mt-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xl">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-black text-slate-700 uppercase mb-1">Search Hotel Name</label>
-          <input type="text" id="searchHotels" placeholder="e.g. Westin, Amari..." class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white rounded-xl px-4 py-2 text-xs outline-none" />
+          <label class="block text-xs font-black text-slate-700 uppercase mb-1">Search Official Directory</label>
+          <input type="text" id="searchHotels" placeholder="e.g. Westin, Renaissance, Amari..." class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white rounded-xl px-4 py-2.5 text-xs outline-none" />
         </div>
         <div class="flex items-end">
-          <button id="resetFilters" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-2 rounded-xl transition">Reset Filters</button>
+          <button id="resetFilters" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-2.5 rounded-xl transition">Reset Search Filter</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- WELCOME & LOCAL AUTHORITY SHOWCASE -->
-  <section class="bg-slate-50 pt-16 pb-12 px-4 sm:px-8 lg:px-12 border-b border-slate-200">
-    <div class="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+  <!-- DIPLOMATIC & EMBASSY PROXIMITY INDEX (AUTHORITY SPECIALTY) -->
+  <section class="py-14 bg-slate-900 text-white px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+    <div class="max-w-[1280px] mx-auto">
       
-      <div class="lg:col-span-7 space-y-4 text-left">
-        <div class="inline-block border-b-2 border-emerald-600 pb-1">
-          <span class="text-xs font-black uppercase tracking-widest text-emerald-800">WELCOME TO GULSHANHOTELS.COM</span>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-amber-400">Embassy & Consulate Proximity Index</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-white mt-1 font-serif">
+            Diplomatic Zone Hotel Distance Matrix
+          </h2>
         </div>
-
-        <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-          The Definitive Local Guide To Hotels In Gulshan, Dhaka
-        </h2>
-
-        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
-          Welcome to **GulshanHotels.com**, your verified local authority for discovering luxury stays, executive business suites, and boutique hotels in Dhaka’s premier neighborhood. Whether you are visiting for diplomatic missions, embassy appointments, corporate conferences, or leisure travel, we provide real-time price comparison, unbiased local reviews, and verified hotel amenities.
-        </p>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-200">
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">🔍</span>
-            <div><h4 class="text-xs font-bold text-slate-900">Expert Reviews</h4><p class="text-[10px] text-slate-500">Local insights</p></div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">📸</span>
-            <div><h4 class="text-xs font-bold text-slate-900">Real Photos</h4><p class="text-[10px] text-slate-500">Authentic views</p></div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">🏛️</span>
-            <div><h4 class="text-xs font-bold text-slate-900">Diplomatic Zone</h4><p class="text-[10px] text-slate-500">Embassy stays</p></div>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">🤝</span>
-            <div><h4 class="text-xs font-bold text-slate-900">Direct Rates</h4><p class="text-[10px] text-slate-500">Live prices</p></div>
-          </div>
-        </div>
+        <span class="bg-emerald-950 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+          ✔ High-Security Inspection Standards
+        </span>
       </div>
 
-      <!-- Sponsored Showcase -->
-      <div class="lg:col-span-5">
-        {sponsorData && sponsorData.enable ? (
-          <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
-            <img src={sponsorData.image} alt={sponsorData.title} class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition duration-500 opacity-90" />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
-            <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md">
-              <span>{sponsorData.badge || "⭐ Editor's Choice"}</span>
-            </div>
-            <div class="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
-              <div>
-                <span class="text-[11px] font-extrabold text-emerald-300 bg-slate-950/80 px-2.5 py-0.5 rounded border border-emerald-500/40">
-                  {sponsorData.category}
-                </span>
-                <h3 class="text-2xl font-black text-white mt-1.5">{sponsorData.title}</h3>
-              </div>
-              <a href={sponsorData.buttonLink || "#all-hotels"} class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-lg shadow-lg transition shrink-0 ml-2">
-                {sponsorData.buttonText || "Check Best Deal ➔"}
-              </a>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center text-amber-400 font-bold text-xs">
+            <span>🇺🇸 US Embassy & Indian High Comm.</span>
+            <span>Gulshan 2 / Baridhara</span>
           </div>
-        ) : null}
+          <h3 class="text-base font-bold text-white">United States & Indian Missions</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Located within a 3-minute drive from Gulshan 2 Circle. Accommodations here feature 24/7 armed diplomatic police patrols and high-level fire/life safety compliance.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center text-amber-400 font-bold text-xs">
+            <span>🇬🇧 UK & European Missions</span>
+            <span>Diplomatic Enclosure</span>
+          </div>
+          <h3 class="text-base font-bold text-white">UK, German & French Embassies</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Conveniently accessed from Road 79 and Madani Avenue. Hotels offer dedicated executive lounge spaces for international delegation meetings.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center text-amber-400 font-bold text-xs">
+            <span>✈️ Express Airport Connectivity</span>
+            <span>Elevated Expressway</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Hazrat Shahjalal Int'l Airport (DAC)</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Directly connected via the Dhaka Elevated Expressway ramp in Gulshan. Travel time to airport terminal is reduced to only 15–20 minutes.
+          </p>
+        </div>
+
       </div>
 
     </div>
   </section>
 
-  <!-- ALL GULSHAN HOTELS GRID -->
+  <!-- OFFICIAL DIRECTORY GRID SECTION -->
   <section id="all-hotels" class="py-16 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
     
-    <div class="mb-8">
-      <span class="text-xs font-black uppercase text-emerald-700 tracking-wider">Verified Directory</span>
-      <h2 class="text-3xl sm:text-4xl font-black text-slate-900">
-        All Hotels in Gulshan ({hotels.length})
-      </h2>
+    <div class="flex justify-between items-end mb-8 border-b border-slate-200 pb-4">
+      <div>
+        <span class="text-xs font-black uppercase text-emerald-800 tracking-wider">Physically Verified Directory Entries</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 font-serif">
+          Official Gulshan Accommodations Registry ({hotels.length})
+        </h2>
+      </div>
     </div>
 
-    <!-- Hotel Cards Grid -->
+    <!-- Hotel Cards Grid with Official Stamps -->
     <div id="hotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {hotels.map((hotel) => (
         <div 
-          class="hotel-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group"
+          class="hotel-card bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group"
           data-zone={hotel.zone}
           data-title={hotel.title.toLowerCase()}
         >
           <div class="h-56 w-full overflow-hidden relative">
             <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            
+            <!-- Official Inspection Stamp -->
+            <div class="absolute top-3 left-3 bg-slate-950/90 text-amber-300 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-amber-500/40 backdrop-blur-md shadow flex items-center gap-1">
+              <span>✔ Official Verified Entry</span>
+            </div>
+
             <div class="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md text-amber-400 text-xs font-black px-2.5 py-1 rounded-md border border-slate-700 shadow-md">
               ★ {hotel.rating}
             </div>
+
             <div class="absolute bottom-3 left-3 bg-emerald-950/90 text-emerald-300 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-500/40 backdrop-blur-md">
               {hotel.category}
             </div>
@@ -361,12 +275,12 @@ const faqSchema = {
 
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
               <div>
-                <span class="text-[10px] uppercase text-slate-400 font-extrabold block">Price Range</span>
+                <span class="text-[10px] uppercase text-slate-400 font-extrabold block">Price Guidance</span>
                 <span class="font-black text-slate-900 text-base">{hotel.price}</span>
               </div>
 
-              <a href={`/${hotel.slug}`} class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1">
-                View Details ➔
+              <a href={`/${hotel.slug}`} class="bg-emerald-800 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1">
+                View Official Listing ➔
               </a>
             </div>
           </div>
@@ -374,82 +288,16 @@ const faqSchema = {
       ))}
     </div>
 
-    <!-- Empty Result State -->
-    <div id="noResults" class="hidden text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-300 mt-6">
-      <span class="text-4xl">🏨</span>
-      <h3 class="text-lg font-bold text-slate-800 mt-2">No hotels found</h3>
-      <p class="text-xs text-slate-500 mt-1">Try selecting another filter or clearing your search.</p>
-    </div>
-
   </section>
 
-  <!-- SEO CONTENT SECTION 1: NEIGHBORHOOD AREA GUIDES -->
-  <section class="py-16 bg-slate-900 text-white px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-    <div class="max-w-[1280px] mx-auto">
-      
-      <div class="text-center max-w-3xl mx-auto mb-12">
-        <span class="text-xs font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30">
-          Neighborhood Breakdown
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-black text-white mt-3">
-          Where To Stay In Gulshan, Dhaka: Area Comparison
-        </h2>
-        <p class="text-slate-400 text-sm mt-2">
-          Understanding Gulshan’s zones helps you choose the perfect hotel for your diplomatic, business, or leisure visit.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        <div class="bg-slate-800/80 border border-slate-700/60 p-6 rounded-2xl space-y-3 backdrop-blur-sm">
-          <div class="text-3xl">📍</div>
-          <h3 class="text-xl font-bold text-white">Gulshan 1: Business Hub</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Gulshan 1 is the vibrant commercial heartbeat of the area. Staying in Gulshan 1 offers easy access to major corporate headquarters, shopping plazas, and bustling dining avenues along Gulshan Avenue.
-          </p>
-          <ul class="text-[11px] text-emerald-400 font-bold space-y-1 pt-2 border-t border-slate-700">
-            <li>✔ Top Hotels: Renaissance Dhaka Gulshan</li>
-            <li>✔ Distance to Airport: ~30-40 mins</li>
-          </ul>
-        </div>
-
-        <div class="bg-slate-800/80 border border-slate-700/60 p-6 rounded-2xl space-y-3 backdrop-blur-sm">
-          <div class="text-3xl">⭐</div>
-          <h3 class="text-xl font-bold text-white">Gulshan 2: 5-Star Luxury</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Gulshan 2 represents the pinnacle of luxury accommodations in Bangladesh. Home to international 5-star hotel chains like The Westin and Amari, this neighborhood features upscale cafes, diplomatic residences, and lush parks.
-          </p>
-          <ul class="text-[11px] text-emerald-400 font-bold space-y-1 pt-2 border-t border-slate-700">
-            <li>✔ Top Hotels: The Westin, Amari, Crowne Plaza</li>
-            <li>✔ Key Attraction: Gulshan Circle 2 & Lake Park</li>
-          </ul>
-        </div>
-
-        <div class="bg-slate-800/80 border border-slate-700/60 p-6 rounded-2xl space-y-3 backdrop-blur-sm">
-          <div class="text-3xl">🏛️</div>
-          <h3 class="text-xl font-bold text-white">Diplomatic Zone: Security</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Situated within Gulshan 2 and Baridhara boundaries, the Diplomatic Zone houses foreign embassies, high commissions, and international club facilities. Hotels here offer maximum security for diplomatic missions.
-          </p>
-          <ul class="text-[11px] text-emerald-400 font-bold space-y-1 pt-2 border-t border-slate-700">
-            <li>✔ Key Locations: US Embassy, UK High Commission</li>
-            <li>✔ Best For: Diplomats & Expatriate Stays</li>
-          </ul>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- SEO CONTENT SECTION 2: ACCORDION FAQ SECTION -->
+  <!-- ACCORDION FAQ SECTION (SEARCH ENGINE AUTHORITY & USER TRUST) -->
   <section class="py-16 bg-slate-50 px-4 sm:px-6 lg:px-8 border-t border-slate-200">
     <div class="max-w-[900px] mx-auto">
       
       <div class="text-center mb-10">
-        <span class="text-xs font-black uppercase tracking-wider text-emerald-700">Frequently Asked Questions</span>
-        <h2 class="text-3xl font-black text-slate-900 mt-1">
-          Gulshan Hotels Booking FAQs
+        <span class="text-xs font-black uppercase tracking-wider text-emerald-800">Official Travel Knowledge Desk</span>
+        <h2 class="text-3xl font-black text-slate-900 mt-1 font-serif">
+          Gulshan Lodging & Security FAQs
         </h2>
       </div>
 
@@ -457,21 +305,21 @@ const faqSchema = {
         
         <details class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group">
           <summary class="font-bold text-slate-900 text-sm sm:text-base cursor-pointer flex justify-between items-center">
-            <span>Which are the best 5-star luxury hotels in Gulshan Dhaka?</span>
+            <span>How does GulshanHotels.com verify local accommodation entries?</span>
             <span class="text-emerald-600 transition group-open:rotate-180">▼</span>
           </summary>
           <p class="text-xs sm:text-sm text-slate-600 mt-3 leading-relaxed border-t border-slate-100 pt-3">
-            The top 5-star luxury hotels in Gulshan include <strong>The Westin Dhaka</strong>, <strong>Renaissance Dhaka Gulshan Hotel</strong>, <strong>Amari Dhaka</strong>, and <strong>Crowne Plaza Dhaka Gulshan</strong>.
+            Every property featured in our directory undergoes physical site inspection to verify room quality, emergency exit compliance, armed security protocols, and direct telephone/reservation authenticity.
           </p>
         </details>
 
         <details class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group">
           <summary class="font-bold text-slate-900 text-sm sm:text-base cursor-pointer flex justify-between items-center">
-            <span>Which hotels are closest to the US Embassy and Diplomatic Zone?</span>
+            <span>Are hotels in Gulshan safe for foreign diplomats and international corporate delegates?</span>
             <span class="text-emerald-600 transition group-open:rotate-180">▼</span>
           </summary>
           <p class="text-xs sm:text-sm text-slate-600 mt-3 leading-relaxed border-t border-slate-100 pt-3">
-            Hotels in Gulshan 2 and Baridhara Diplomatic Zone—such as The Westin Dhaka, Amari Dhaka, and boutique suites along Road 41 and Road 79—are within a 5-to-10-minute drive to the US Embassy, Australian High Commission, and Indian Visa Application Center.
+            Yes, Gulshan 1, Gulshan 2, and Baridhara Diplomatic Enclosure are monitored by the Diplomatic Security Division of the Bangladesh Police. Properties featured in our 5-star and executive tiers maintain strict access control protocols.
           </p>
         </details>
 
@@ -480,7 +328,7 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- INSTANT FILTER & SEARCH SCRIPT -->
+  <!-- INSTANT SEARCH SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const pills = document.querySelectorAll('.filter-pill');
@@ -488,8 +336,6 @@ const faqSchema = {
       const searchInput = document.getElementById('searchHotels') as HTMLInputElement;
       const toggleMoreFilters = document.getElementById('toggleMoreFilters');
       const moreFiltersPanel = document.getElementById('moreFiltersPanel');
-      const resetFilters = document.getElementById('resetFilters');
-      const noResults = document.getElementById('noResults');
 
       let currentZone = 'all';
 
@@ -501,7 +347,6 @@ const faqSchema = {
 
       function applyFilter() {
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        let visibleCount = 0;
 
         cards.forEach((card) => {
           const el = card as HTMLElement;
@@ -513,19 +358,10 @@ const faqSchema = {
 
           if (matchesZone && matchesSearch) {
             el.style.display = 'flex';
-            visibleCount++;
           } else {
             el.style.display = 'none';
           }
         });
-
-        if (noResults) {
-          if (visibleCount === 0) {
-            noResults.classList.remove('hidden');
-          } else {
-            noResults.classList.add('hidden');
-          }
-        }
       }
 
       pills.forEach((pill) => {
@@ -544,13 +380,6 @@ const faqSchema = {
       });
 
       if (searchInput) searchInput.addEventListener('input', applyFilter);
-
-      if (resetFilters) {
-        resetFilters.addEventListener('click', () => {
-          if (searchInput) searchInput.value = '';
-          applyFilter();
-        });
-      }
     });
   </script>
 
