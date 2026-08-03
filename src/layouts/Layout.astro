@@ -4,9 +4,13 @@ import '../styles/global.css';
 
 interface Props {
 	title: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const { 
+  title = "Gulshan Hotels — Official Directory & Best Deals in Gulshan, Dhaka",
+  description = "Find and compare 5-star luxury, business, and boutique hotels in Gulshan 1, Gulshan 2, and Diplomatic Zone, Dhaka."
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -28,89 +32,218 @@ const { title } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<meta name="description" content={description} />
 
-    <!-- Google Luxury & Sans Fonts -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
 	</head>
-	<body class="bg-[#f8f9fa] font-['Plus_Jakarta_Sans'] text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-[#d4af37] selection:text-slate-950">
+	<body class="bg-slate-50 font-['Plus_Jakarta_Sans'] text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 		
-		<!-- Slot for Main Page -->
+		<!-- 100% WORKABLE HEADER -->
+		<header class="bg-white text-slate-900 sticky top-0 z-50 shadow-sm border-b border-slate-200">
+			<div class="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 flex justify-between items-center">
+				
+				<!-- Logo -->
+				<a href="/" class="flex flex-col group">
+					<span class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-none">
+						GULSHAN<span class="text-emerald-600">HOTELS</span>.COM
+					</span>
+					<span class="text-[10px] text-slate-500 tracking-[0.25em] font-black uppercase mt-1">
+						DHAKA • BANGLADESH
+					</span>
+				</a>
+
+				<!-- Navigation Menu -->
+				<nav class="hidden lg:flex items-center space-x-8 text-xs font-black tracking-wider uppercase text-slate-800">
+					<a href="/#all-hotels" class="hover:text-emerald-600 transition">All Gulshan Hotels</a>
+					<a href="/#all-hotels?zone=gulshan-1" class="hover:text-emerald-600 transition">Gulshan 1 Hotels</a>
+					<a href="/#all-hotels?zone=gulshan-2" class="hover:text-emerald-600 transition">Gulshan 2 Hotels</a>
+					<a href="/#all-hotels?zone=banani" class="hover:text-emerald-600 transition">Banani Hotels</a>
+					<a href="/about" class="hover:text-emerald-600 transition">About Us</a>
+				</nav>
+
+				<!-- Right Actions & Workable Heart Wishlist Icon -->
+				<div class="flex items-center space-x-3 sm:space-x-5">
+					
+					<!-- WORKABLE HEART WISHLIST BUTTON -->
+					<button id="open-wishlist-btn" class="relative text-slate-700 hover:text-rose-600 transition p-2 rounded-full hover:bg-rose-50 flex items-center gap-1 font-bold text-xs" aria-label="Saved Stays">
+						<span class="text-lg">♡</span>
+						<span id="wishlist-count-badge" class="bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
+					</button>
+
+					<!-- Browse Map Button -->
+					<a href="/#all-hotels" class="hidden sm:flex bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs tracking-wider uppercase px-4 py-2.5 rounded-lg transition items-center space-x-2 shadow-sm">
+						<svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+						<span>Browse Map</span>
+					</a>
+
+					<!-- Mobile Toggle Button -->
+					<button id="mobile-menu-btn" class="lg:hidden text-slate-800 hover:text-emerald-600 p-2 rounded-lg focus:outline-none hover:bg-slate-100">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+					</button>
+				</div>
+
+			</div>
+
+			<!-- Mobile Drawer -->
+			<div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-200 px-5 py-5 space-y-3 font-extrabold text-sm text-slate-800">
+				<a href="/#all-hotels" class="block py-1 hover:text-emerald-600">All Gulshan Hotels</a>
+				<a href="/#all-hotels?zone=gulshan-1" class="block py-1 hover:text-emerald-600">Gulshan 1 Hotels</a>
+				<a href="/#all-hotels?zone=gulshan-2" class="block py-1 hover:text-emerald-600">Gulshan 2 Hotels</a>
+				<a href="/#all-hotels?zone=banani" class="block py-1 hover:text-emerald-600">Banani Hotels</a>
+				<a href="/about" class="block py-1 hover:text-emerald-600">About Us</a>
+			</div>
+		</header>
+
+		<!-- WORKABLE WISHLIST DRAWER (SLIDES IN FROM RIGHT) -->
+		<div id="wishlist-drawer-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden transition-opacity">
+			<div class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col justify-between p-6 overflow-y-auto">
+				
+				<!-- Drawer Header -->
+				<div class="flex items-center justify-between border-b border-slate-200 pb-4">
+					<div class="flex items-center gap-2">
+						<span class="text-rose-600 text-xl">❤️</span>
+						<h3 class="font-black text-slate-900 text-base uppercase tracking-wider">Saved Hotels</h3>
+					</div>
+					<button id="close-wishlist-btn" class="text-slate-400 hover:text-slate-900 text-2xl font-bold p-1">&times;</button>
+				</div>
+
+				<!-- Wishlist Items List -->
+				<div id="wishlist-items-container" class="flex-grow py-6 space-y-4 overflow-y-auto">
+					<p class="text-xs text-slate-500 text-center py-10">No hotels saved yet. Click the ♡ icon on any hotel card to save it here!</p>
+				</div>
+
+				<!-- Drawer Footer -->
+				<div class="border-t border-slate-200 pt-4 flex justify-between items-center">
+					<button id="clear-wishlist-btn" class="text-xs font-bold text-slate-400 hover:text-rose-600 transition">Clear All</button>
+					<a href="/#all-hotels" class="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition">Explore Hotels</a>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Page Main Content -->
 		<div class="flex-grow">
 			<slot />
 		</div>
 
 		<!-- Footer -->
-		<footer class="bg-[#081220] text-slate-400 py-12 border-t border-slate-800 text-sm">
-			<div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-				
-				<!-- Logo & Socials -->
-				<div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-800">
-					<a href="/" class="flex items-center gap-3">
-						<div class="w-10 h-10 rounded-full border border-[#d4af37] flex items-center justify-center text-[#d4af37] font-serif font-black text-xl">
-							G
-						</div>
-						<div class="flex flex-col text-left">
-							<span class="text-xl font-black font-serif tracking-widest text-white leading-none">GULSHAN</span>
-							<span class="text-[9px] text-[#d4af37] tracking-[0.25em] font-bold uppercase mt-1">HOTELS</span>
-						</div>
-					</a>
-
-					<p class="text-xs text-slate-400 max-w-md text-center md:text-left">
-						Your trusted platform to discover and book the finest hotels in Gulshan, Dhaka.
-					</p>
-
-					<!-- Social Icons -->
-					<div class="flex items-center gap-3">
-						<a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 hover:border-[#d4af37] text-slate-300 hover:text-[#d4af37] flex items-center justify-center text-xs transition">f</a>
-						<a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 hover:border-[#d4af37] text-slate-300 hover:text-[#d4af37] flex items-center justify-center text-xs transition">📷</a>
-						<a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 hover:border-[#d4af37] text-slate-300 hover:text-[#d4af37] flex items-center justify-center text-xs transition">▶</a>
-						<a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 hover:border-[#d4af37] text-slate-300 hover:text-[#d4af37] flex items-center justify-center text-xs transition">in</a>
-						<a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 hover:border-[#d4af37] text-slate-300 hover:text-[#d4af37] flex items-center justify-center text-xs transition">🐦</a>
-					</div>
-				</div>
-
-				<!-- Quick Links -->
-				<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-xs text-slate-400 text-left">
-					<div>
-						<h4 class="font-bold text-white uppercase tracking-wider mb-3">Quick Links</h4>
-						<ul class="space-y-2">
-							<li><a href="#all-hotels" class="hover:text-[#d4af37] transition">All Hotels</a></li>
-							<li><a href="#featured" class="hover:text-[#d4af37] transition">Featured Stays</a></li>
-							<li><a href="#attractions" class="hover:text-[#d4af37] transition">Gulshan Attractions</a></li>
-						</ul>
-					</div>
-					<div>
-						<h4 class="font-bold text-white uppercase tracking-wider mb-3">Top Destinations</h4>
-						<ul class="space-y-2">
-							<li><a href="#all-hotels" class="hover:text-[#d4af37] transition">Gulshan 1</a></li>
-							<li><a href="#all-hotels" class="hover:text-[#d4af37] transition">Gulshan 2</a></li>
-							<li><a href="#all-hotels" class="hover:text-[#d4af37] transition">Diplomatic Zone</a></li>
-						</ul>
-					</div>
-					<div>
-						<h4 class="font-bold text-white uppercase tracking-wider mb-3">Support</h4>
-						<ul class="space-y-2">
-							<li><a href="/contact" class="hover:text-[#d4af37] transition">24/7 Concierge</a></li>
-							<li><a href="/contact" class="hover:text-[#d4af37] transition">FAQ</a></li>
-							<li><a href="/contact" class="hover:text-[#d4af37] transition">Privacy Policy</a></li>
-						</ul>
-					</div>
-					<div>
-						<h4 class="font-bold text-white uppercase tracking-wider mb-3">Contact Us</h4>
-						<p class="text-slate-400 leading-relaxed">Gulshan Avenue, Gulshan 2, Dhaka, Bangladesh.</p>
-					</div>
-				</div>
-
-				<!-- Bottom Copyright -->
-				<div class="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-					<p>© 2026 Gulshan Hotels. All Rights Reserved.</p>
-					<p>Made with ❤️ in Bangladesh</p>
-				</div>
-
+		<footer class="bg-slate-950 text-slate-400 py-8 border-t border-slate-800 text-center text-sm">
+			<div class="max-w-7xl mx-auto px-4">
+				<p>© 2026 GulshanHotels.com — Official Accommodation Directory for Gulshan, Dhaka.</p>
 			</div>
 		</footer>
+
+		<!-- CLIENT-SIDE WISHLIST & MOBILE MENU SCRIPT -->
+		<script is:inline>
+			document.addEventListener('DOMContentLoaded', () => {
+				// Mobile Menu Toggle
+				const mobileBtn = document.getElementById('mobile-menu-btn');
+				const mobileMenu = document.getElementById('mobile-menu');
+				if (mobileBtn && mobileMenu) {
+					mobileBtn.addEventListener('click', () => {
+						mobileMenu.classList.toggle('hidden');
+					});
+				}
+
+				// Wishlist System
+				const wishlistBtn = document.getElementById('open-wishlist-btn');
+				const closeWishlistBtn = document.getElementById('close-wishlist-btn');
+				const wishlistBackdrop = document.getElementById('wishlist-drawer-backdrop');
+				const badge = document.getElementById('wishlist-count-badge');
+				const itemsContainer = document.getElementById('wishlist-items-container');
+				const clearBtn = document.getElementById('clear-wishlist-btn');
+
+				function getWishlist() {
+					try {
+						return JSON.parse(localStorage.getItem('gulshan_wishlist') || '[]');
+					} catch (e) {
+						return [];
+					}
+				}
+
+				function saveWishlist(list) {
+					localStorage.setItem('gulshan_wishlist', JSON.stringify(list));
+					updateWishlistUI();
+				}
+
+				function updateWishlistUI() {
+					const list = getWishlist();
+					
+					// Update Badge
+					if (badge) {
+						if (list.length > 0) {
+							badge.textContent = list.length.toString();
+							badge.classList.remove('hidden');
+						} else {
+							badge.classList.add('hidden');
+						}
+					}
+
+					// Render Items
+					if (itemsContainer) {
+						if (list.length === 0) {
+							itemsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">No hotels saved yet. Click the ♡ icon on any hotel card to save it here!</p>';
+						} else {
+							itemsContainer.innerHTML = list.map(hotel => `
+								<div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+									<img src="${hotel.image}" alt="${hotel.title}" class="w-16 h-16 rounded-xl object-cover" />
+									<div class="flex-grow">
+										<h4 class="font-bold text-slate-900 text-xs">${hotel.title}</h4>
+										<p class="text-[10px] text-slate-500">${hotel.location}</p>
+										<span class="text-xs font-black text-emerald-700">${hotel.price}</span>
+									</div>
+									<button data-remove-slug="${hotel.slug}" class="remove-wishlist-item text-slate-400 hover:text-rose-600 text-lg font-bold p-1">&times;</button>
+								</div>
+							`).join('');
+
+							// Attach remove listeners
+							document.querySelectorAll('.remove-wishlist-item').forEach(btn => {
+								btn.addEventListener('click', (e) => {
+									const slug = e.currentTarget.getAttribute('data-remove-slug');
+									const updated = getWishlist().filter(item => item.slug !== slug);
+									saveWishlist(updated);
+								});
+							});
+						}
+					}
+				}
+
+				if (wishlistBtn && wishlistBackdrop) {
+					wishlistBtn.addEventListener('click', () => {
+						wishlistBackdrop.classList.remove('hidden');
+					});
+				}
+
+				if (closeWishlistBtn && wishlistBackdrop) {
+					closeWishlistBtn.addEventListener('click', () => {
+						wishlistBackdrop.classList.add('hidden');
+					});
+				}
+
+				if (clearBtn) {
+					clearBtn.addEventListener('click', () => {
+						saveWishlist([]);
+					});
+				}
+
+				// Global Toggle Event for Hotel Cards
+				window.toggleWishlistHotel = function(hotel) {
+					let list = getWishlist();
+					const exists = list.some(item => item.slug === hotel.slug);
+					if (exists) {
+						list = list.filter(item => item.slug !== hotel.slug);
+					} else {
+						list.push(hotel);
+					}
+					saveWishlist(list);
+				};
+
+				updateWishlistUI();
+			});
+		</script>
 
 	</body>
 </html>
