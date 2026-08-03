@@ -1,568 +1,87 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
-
-// ১. স্পন্সরড ডাটা লোড
-let sponsorData = null;
-try {
-  const rawSponsor = import.meta.glob('../content/sponsored/*.md', { eager: true });
-  const list = Object.values(rawSponsor);
-  if (list && list.length > 0) {
-    sponsorData = (list[0] as any).frontmatter;
-  }
-} catch (e) {
-  sponsorData = null;
-}
-
-if (!sponsorData) {
-  sponsorData = {
-    enable: true,
-    badge: "⭐ Editor's Choice",
-    title: "The Westin Dhaka",
-    category: "5-Star Luxury • Gulshan 2",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-    buttonText: "Check Best Deal ➔",
-    buttonLink: "/the-westin-dhaka"
-  };
-}
-
-function toTitleCase(str: string) {
-  if (!str) return 'Gulshan Hotel';
-  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-}
-
-// ২. গুলশানের সব ভেরিফাইড হোটেল ডাটা লোড
-let hotels: any[] = [];
-try {
-  const collectionData = await getCollection('hotels');
-  if (collectionData && collectionData.length > 0) {
-    hotels = collectionData.map((item: any) => ({
-      slug: item.id || item.slug,
-      title: toTitleCase(item.data?.title || item.data?.name || 'Gulshan Hotel'),
-      category: item.data?.category || 'Luxury Hotel',
-      location: item.data?.location || 'Gulshan, Dhaka',
-      zone: (item.data?.location || '').toLowerCase().includes('gulshan 1') 
-            ? 'gulshan-1' 
-            : (item.data?.location || '').toLowerCase().includes('banani')
-            ? 'banani'
-            : 'gulshan-2',
-      price: item.data?.price || '৳ 18,500',
-      rating: item.data?.rating || 4.9,
-      reviewsCount: item.data?.reviewsCount || '1,250',
-      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    }));
-  }
-} catch (err) {
-  hotels = [];
-}
-
-if (!hotels || hotels.length === 0) {
-  hotels = [
-    {
-      slug: "the-westin-dhaka",
-      title: "The Westin Dhaka",
-      category: "5-Star Luxury",
-      location: "Gulshan Avenue, Dhaka",
-      zone: "gulshan-2",
-      price: "৳ 18,500",
-      rating: 4.9,
-      reviewsCount: "1,250",
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      slug: "intercontinental-dhaka",
-      title: "InterContinental Dhaka",
-      category: "5-Star Premium",
-      location: "Gulshan, Dhaka",
-      zone: "gulshan-1",
-      price: "৳ 22,000",
-      rating: 4.8,
-      reviewsCount: "980",
-      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      slug: "le-meridien-dhaka",
-      title: "Le Méridien Dhaka",
-      category: "5-Star Luxury",
-      location: "Gulshan Circle 1, Dhaka",
-      zone: "gulshan-1",
-      price: "৳ 16,000",
-      rating: 4.8,
-      reviewsCount: "850",
-      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-    }
-  ];
-}
 ---
 
-<Layout title="Gulshan Hotels — Official Directory & Best Deals in Gulshan, Dhaka">
+<Layout title="Gulshan Hotels - Discover Gulshan's Finest Luxury Hotels">
   
-  <!-- 1. HERO SECTION (MATCHING SCREEN 1) -->
-  <section class="relative bg-[#081220] text-white overflow-hidden pb-12 sm:pb-20 rounded-b-[36px] sm:rounded-b-[48px] shadow-2xl">
+  <!-- HERO SECTION ONLY (Screen 1 Design) -->
+  <section class="relative bg-[#070D12] text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-[#D4AF37]/20 overflow-hidden">
     
-    <!-- Sunset Background Image (Place your image at public/hero-gulshan.jpg) -->
-    <div class="absolute inset-0 w-full h-full">
-      <img 
-        src="/hero-gulshan.jpg" 
-        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=85';"
-        alt="Gulshan Lake Sunset View" 
-        class="w-full h-full object-cover opacity-50 scale-105" 
-      />
-      <div class="absolute inset-0 bg-gradient-to-b from-[#081220]/90 via-[#081220]/50 to-[#081220]/95"></div>
-    </div>
+    <!-- Background Image with Soft Gradient Overlay -->
+    <div class="absolute inset-0 opacity-25 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg');"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-[#070D12] via-[#070D12]/60 to-transparent"></div>
 
-    <!-- Header Navigation Bar Overlay -->
-    <header class="relative z-30 w-full border-b border-white/10 bg-transparent py-4 px-4 sm:px-8 max-w-[1600px] mx-auto">
-      <div class="flex justify-between items-center">
-        
-        <!-- Logo -->
-        <a href="/" class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-full border border-[#d4af37] flex items-center justify-center text-[#d4af37] font-serif font-black text-lg">
-            G
-          </div>
-          <div class="flex flex-col text-left">
-            <span class="text-lg font-black font-serif tracking-widest text-white leading-none">GULSHAN</span>
-            <span class="text-[8px] text-[#d4af37] tracking-[0.2em] font-bold uppercase mt-0.5">HOTELS</span>
-          </div>
-        </a>
-
-        <!-- Desktop Navigation Menu -->
-        <nav class="hidden lg:flex items-center space-x-8 text-xs font-black tracking-wider uppercase text-slate-200">
-          <a href="/#all-hotels" class="hover:text-[#d4af37] transition">All Gulshan Hotels</a>
-          <a href="/#all-hotels?zone=gulshan-1" class="hover:text-[#d4af37] transition">Gulshan 1 Hotels</a>
-          <a href="/#all-hotels?zone=gulshan-2" class="hover:text-[#d4af37] transition">Gulshan 2 Hotels</a>
-          <a href="/#all-hotels?zone=banani" class="hover:text-[#d4af37] transition">Banani Hotels</a>
-          <a href="/about" class="hover:text-[#d4af37] transition">About Us</a>
-        </nav>
-
-        <!-- Right Utilities -->
-        <div class="flex items-center space-x-3">
-          <button id="open-wishlist-btn" class="text-white hover:text-[#d4af37] transition p-1.5 flex items-center gap-1 font-bold text-xs" aria-label="Saved Stays">
-            <span class="text-base">♡</span>
-          </button>
-          <button id="mobile-menu-btn" class="lg:hidden text-white hover:text-[#d4af37] p-1.5">
-            ☰
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Mobile Menu Drawer -->
-      <div id="mobile-menu" class="hidden lg:hidden bg-slate-900/95 border-t border-slate-800 px-5 py-5 space-y-3 font-extrabold text-xs uppercase text-white backdrop-blur-xl mt-3 rounded-2xl">
-        <a href="/#all-hotels" class="block py-1 hover:text-[#d4af37]">All Gulshan Hotels</a>
-        <a href="/#all-hotels?zone=gulshan-1" class="block py-1 hover:text-[#d4af37]">Gulshan 1 Hotels</a>
-        <a href="/#all-hotels?zone=gulshan-2" class="block py-1 hover:text-[#d4af37]">Gulshan 2 Hotels</a>
-        <a href="/#all-hotels?zone=banani" class="block py-1 hover:text-[#d4af37]">Banani Hotels</a>
-        <a href="/about" class="block py-1 hover:text-[#d4af37]">About Us</a>
-      </div>
-    </header>
-
-     <!-- HERO SECTION ONLY (Screen 1 Design) -->
-<section class="relative bg-[#070D12] text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-[#D4AF37]/20 overflow-hidden">
-  
-  <!-- Background Image with Soft Gradient Overlay -->
-  <div class="absolute inset-0 opacity-25 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg');"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-[#070D12] via-[#070D12]/60 to-transparent"></div>
-
-  <div class="relative max-w-4xl mx-auto text-center space-y-6">
-    
-    <!-- Crown Badge -->
-    <span class="bg-[#D4AF37]/10 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/30 inline-block shadow-sm">
-      👑 Dhaka's Premier Hotel Guide
-    </span>
-
-    <!-- Main Headline -->
-    <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white">
-      Discover Gulshan's Finest <span class="text-[#D4AF37]">Luxury Hotels</span>
-    </h1>
-    
-    <!-- Subtitle -->
-    <p class="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-      Compare, book and experience the best hotels in the heart of Dhaka.
-    </p>
-
-    <!-- Guest Reviews Avatars -->
-    <div class="flex items-center justify-center space-x-3 pt-1">
-      <div class="flex -space-x-2">
-        <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" />
-        <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" />
-        <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" />
-      </div>
-      <div class="text-left text-xs">
-        <span class="font-extrabold text-white block">5,000+ Happy Guests</span>
-        <span class="text-[#D4AF37] font-bold text-xs">★ ★ ★ ★ ★</span>
-      </div>
-    </div>
-
-    <!-- Search & Filter Card (Floating Dark Card) -->
-    <div class="bg-[#0E161C]/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-2xl border border-[#D4AF37]/30 max-w-3xl mx-auto text-left space-y-3 mt-8">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        
-        <!-- Destination Field -->
-        <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
-          <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Destination</label>
-          <select class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1">
-            <option class="bg-[#070D12]">Gulshan, Dhaka</option>
-            <option class="bg-[#070D12]">Gulshan 1 Circle</option>
-            <option class="bg-[#070D12]">Gulshan 2 Circle</option>
-            <option class="bg-[#070D12]">Diplomatic Zone</option>
-          </select>
-        </div>
-
-        <!-- Dates Field -->
-        <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
-          <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Check-in / Out</label>
-          <input type="text" value="Fri, 24 May - Sun, 26 May" class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1" readonly />
-        </div>
-
-        <!-- Guests Field -->
-        <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
-          <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Guests</label>
-          <select class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1">
-            <option class="bg-[#070D12]">2 Adults, 1 Room</option>
-            <option class="bg-[#070D12]">1 Adult, Single</option>
-            <option class="bg-[#070D12]">Family Stay</option>
-          </select>
-        </div>
-
-      </div>
-
-      <!-- Search Button -->
-      <a href="#hotels" class="w-full bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl transition text-center text-xs uppercase tracking-wider block shadow-xl">
-      🔍 Search Hotels
-</a>
-</div>
-</div>
-</section>
-
-  <!-- 2. "STAY YOUR WAY" CATEGORIES GRID (SCREEN 1) -->
-  <section id="stay-categories" class="py-14 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
-    
-    <span class="text-xs font-black uppercase text-[#c5a059] tracking-wider">Stay Your Way</span>
-    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 font-serif mt-1 mb-8">
-      Find the Perfect Stay
-    </h2>
-
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+    <div class="relative max-w-4xl mx-auto text-center space-y-6">
       
-      <!-- Card 1 -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
-          🛏️
-        </div>
-        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Luxury Hotels</h3>
-        <p class="text-[11px] text-slate-500 mt-1">Premium stays with world-class amenities</p>
-      </div>
+      <!-- Crown Badge -->
+      <span class="bg-[#D4AF37]/10 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/30 inline-block shadow-sm">
+        👑 Dhaka's Premier Hotel Guide
+      </span>
 
-      <!-- Card 2 -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
-          🏢
-        </div>
-        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Business Hotels</h3>
-        <p class="text-[11px] text-slate-500 mt-1">Perfect for work trips</p>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
-          🏛️
-        </div>
-        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Boutique Hotels</h3>
-        <p class="text-[11px] text-slate-500 mt-1">Unique local charm</p>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
-          🏷️
-        </div>
-        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Budget Hotels</h3>
-        <p class="text-[11px] text-slate-500 mt-1">Comfortable & affordable</p>
-      </div>
-
-    </div>
-
-    <!-- Exclusive Offers Banner Card -->
-    <div class="mt-8 bg-gradient-to-r from-[#081220] to-[#0d2238] rounded-3xl p-6 sm:p-8 text-white text-left flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border border-slate-800">
-      <div class="space-y-2">
-        <span class="bg-[#c5a059]/20 text-[#f3d081] text-[10px] font-bold uppercase px-3 py-1 rounded-full border border-[#c5a059]/30">
-          🏷️ Exclusive Offers
-        </span>
-        <h3 class="text-2xl font-black font-serif text-white">Luxury Stays. Exclusive Savings.</h3>
-        <p class="text-xs text-slate-300">Up to 30% Off on selected luxury hotels in Gulshan.</p>
-      </div>
-      <a href="#all-hotels" class="bg-[#f3d081] hover:bg-[#d4af37] text-slate-950 font-black text-xs uppercase px-6 py-3 rounded-xl transition shadow shrink-0">
-        View Offers ➔
-      </a>
-    </div>
-
-  </section>
-
-  <!-- 3. "FEATURED HOTELS" HANDPICKED LUXURY STAYS (SCREEN 2) -->
-  <section id="all-hotels" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
-    
-    <span class="text-xs font-black uppercase text-[#c5a059] tracking-wider">Featured Hotels</span>
-    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 font-serif mt-1 mb-6">
-      Handpicked Luxury Stays in Gulshan
-    </h2>
-
-    <!-- Filter Pills -->
-    <div class="flex flex-wrap items-center justify-center gap-2 mb-8">
-      <button data-filter="all" class="filter-tab active bg-[#d4af37] text-slate-950 font-extrabold text-xs px-5 py-2 rounded-full transition shadow">
-        All
-      </button>
-      <button data-filter="gulshan-1" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
-        Gulshan 1
-      </button>
-      <button data-filter="gulshan-2" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
-        Gulshan 2
-      </button>
-      <button data-filter="banani" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
-        Banani
-      </button>
-    </div>
-
-    <!-- Hotel Cards Grid -->
-    <div id="hotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-      {hotels.map((hotel) => (
-        <div 
-          class="hotel-card bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 overflow-hidden flex flex-col group"
-          data-zone={hotel.zone}
-          data-title={hotel.title.toLowerCase()}
-        >
-          <div class="h-56 w-full overflow-hidden relative">
-            <img 
-              src={hotel.image} 
-              alt={hotel.title} 
-              loading="lazy"
-              decoding="async"
-              class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-            />
-            <span class="absolute top-3 left-3 bg-[#081220]/80 text-[#f3d081] text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-[#d4af37]/40 backdrop-blur-md">
-              🏆 Top Rated
-            </span>
-            <button 
-              class="card-wishlist-btn absolute top-3 right-3 text-white text-lg bg-slate-950/40 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md hover:text-rose-500 transition"
-              data-hotel={JSON.stringify(hotel)}
-              aria-label="Save Hotel"
-            >
-              ♡
-            </button>
-          </div>
-
-          <div class="p-5 flex flex-col flex-1 justify-between space-y-4">
-            <div>
-              <h3 class="font-serif text-xl font-bold text-slate-900 group-hover:text-[#c5a059] transition">
-                {hotel.title}
-              </h3>
-              
-              <div class="flex items-center gap-1 text-xs text-amber-500 font-bold mt-1">
-                <span>★ {hotel.rating}</span>
-                <span class="text-slate-400 font-normal">({hotel.reviewsCount || '1,250'} reviews)</span>
-              </div>
-
-              <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                <span>📍</span> {hotel.location}
-              </p>
-
-              <!-- Amenities Pills -->
-              <div class="flex flex-wrap gap-1.5 mt-3">
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">📶 Free Wi-Fi</span>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">🏊 Pool</span>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">🧖 Spa</span>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <div>
-                <span class="text-[10px] text-slate-400 block font-bold">From</span>
-                <span class="font-black text-slate-900 text-base">{hotel.price} <span class="text-xs text-slate-500 font-normal">/ night</span></span>
-              </div>
-
-              <a href={`/${hotel.slug}`} class="bg-gradient-to-r from-[#e2b755] to-[#c59a3f] text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow transition hover:scale-105">
-                View Details
-              </a>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-
-    <!-- Testimonials Card -->
-    <div class="mt-12 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm max-w-lg mx-auto text-left space-y-3">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-[#c5a059] block text-center">What Our Guests Say</span>
-      <p class="text-xs text-slate-600 italic leading-relaxed text-center">
-        "Amazing experience! The hotel recommendations are accurate and the booking process is super easy."
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white">
+        Discover Gulshan's Finest <span class="text-[#D4AF37]">Luxury Hotels</span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <p class="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+        Compare, book and experience the best hotels in the heart of Dhaka.
       </p>
-      <div class="flex items-center justify-center gap-3 pt-2">
-        <img class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Sarah Ahmed" />
-        <div>
-          <h4 class="text-xs font-bold text-slate-900">Sarah Ahmed</h4>
-          <span class="text-[10px] text-slate-400 block">Verified Guest • ★★★★★</span>
+
+      <!-- Guest Reviews Avatars -->
+      <div class="flex items-center justify-center space-x-3 pt-1">
+        <div class="flex -space-x-2">
+          <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" />
+          <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" />
+          <img class="w-8 h-8 rounded-full border-2 border-[#070D12] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" />
         </div>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- 4. "WHY BOOK WITH GULSHAN HOTELS?" (SCREEN 3) -->
-  <section id="why-book" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
-    
-    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-serif mb-8">
-      Why Book With Gulshan Hotels?
-    </h2>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-      
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">🏷️</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">Best Price Guarantee</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">📅</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">Easy Booking</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">🛡️</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">Trusted & Secure</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">🎧</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">24/7 Support</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">🏅</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">Verified Hotels</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <span class="text-2xl">🎁</span>
-        <h3 class="text-xs font-bold text-slate-900 uppercase">Exclusive Deals</h3>
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- 5. "EXPLORE GULSHAN" ATTRACTIONS (SCREEN 3) -->
-  <section id="attractions" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
-    
-    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-serif mb-2">
-      Explore Gulshan
-    </h2>
-    <p class="text-xs text-slate-500 mb-8">Top Attractions Near Your Stay</p>
-
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-      
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80" alt="Gulshan Lake" />
-        <div class="p-3">
-          <h3 class="font-bold text-xs text-slate-900">Gulshan Lake</h3>
-          <span class="text-[10px] text-slate-500">2 min walk</span>
+        <div class="text-left text-xs">
+          <span class="font-extrabold text-white block">5,000+ Happy Guests</span>
+          <span class="text-[#D4AF37] font-bold text-xs">★ ★ ★ ★ ★</span>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=400&q=80" alt="Banani" />
-        <div class="p-3">
-          <h3 class="font-bold text-xs text-slate-900">Banani</h3>
-          <span class="text-[10px] text-slate-500">5 min drive</span>
-        </div>
-      </div>
+      <!-- Search & Filter Card (Floating Dark Card) -->
+      <div class="bg-[#0E161C]/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-2xl border border-[#D4AF37]/30 max-w-3xl mx-auto text-left space-y-3 mt-8">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          
+          <!-- Destination Field -->
+          <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
+            <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Destination</label>
+            <select class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1">
+              <option class="bg-[#070D12]">Gulshan, Dhaka</option>
+              <option class="bg-[#070D12]">Gulshan 1 Circle</option>
+              <option class="bg-[#070D12]">Gulshan 2 Circle</option>
+              <option class="bg-[#070D12]">Diplomatic Zone</option>
+            </select>
+          </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=400&q=80" alt="Gulshan Club" />
-        <div class="p-3">
-          <h3 class="font-bold text-xs text-slate-900">Gulshan Club</h3>
-          <span class="text-[10px] text-slate-500">3 min drive</span>
-        </div>
-      </div>
+          <!-- Dates Field -->
+          <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
+            <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Check-in / Out</label>
+            <input type="text" value="Fri, 24 May - Sun, 26 May" class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1" readonly />
+          </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80" alt="Embassy Area" />
-        <div class="p-3">
-          <h3 class="font-bold text-xs text-slate-900">Embassy Area</h3>
-          <span class="text-[10px] text-slate-500">4 min drive</span>
+          <!-- Guests Field -->
+          <div class="p-3 bg-[#070D12] rounded-xl border border-slate-800">
+            <label class="block text-[10px] font-bold text-[#E8D8B0]/80 uppercase tracking-wider">Guests</label>
+            <select class="w-full bg-transparent font-extrabold text-white text-xs focus:outline-none cursor-pointer mt-1">
+              <option class="bg-[#070D12]">2 Adults, 1 Room</option>
+              <option class="bg-[#070D12]">1 Adult, Single</option>
+              <option class="bg-[#070D12]">Family Stay</option>
+            </select>
+          </div>
+
         </div>
+
+        <!-- Search Button -->
+        <a href="#hotels" class="w-full bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl transition text-center text-xs uppercase tracking-wider block shadow-xl">
+          🔍 Search Hotels
+        </a>
       </div>
 
     </div>
-
   </section>
-
-  <!-- 6. NEWSLETTER SUBSCRIPTION CARD (SCREEN 3) -->
-  <section class="py-10 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
-    <div class="bg-[#081220] rounded-3xl p-6 sm:p-10 border border-slate-800 text-white text-center space-y-4 shadow-xl max-w-2xl mx-auto">
-      <span class="text-2xl">✉️</span>
-      <h3 class="text-2xl font-black font-serif text-white">Get Deals & Updates</h3>
-      <p class="text-xs text-slate-300">Subscribe to our newsletter and never miss an offer.</p>
-      
-      <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2">
-        <input type="email" placeholder="Enter your email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-[#d4af37]" />
-        <button class="bg-gradient-to-r from-[#e2b755] to-[#c59a3f] text-slate-950 font-black text-xs uppercase px-6 py-3 rounded-xl transition shadow shrink-0">
-          Subscribe
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- INSTANT FILTER & WISHLIST SCRIPT -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const tabs = document.querySelectorAll('.filter-tab');
-      const cards = document.querySelectorAll('.hotel-card');
-
-      let currentZone = 'all';
-
-      function applyFilter() {
-        cards.forEach((card) => {
-          const el = card as HTMLElement;
-          const zone = el.getAttribute('data-zone');
-
-          const matchesZone = currentZone === 'all' || zone === currentZone;
-
-          if (matchesZone) {
-            el.style.display = 'flex';
-          } else {
-            el.style.display = 'none';
-          }
-        });
-      }
-
-      tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-          tabs.forEach((t) => {
-            t.classList.remove('bg-[#d4af37]', 'text-slate-950', 'shadow');
-            t.classList.add('bg-white', 'text-slate-700');
-          });
-
-          tab.classList.remove('bg-white', 'text-slate-700');
-          tab.classList.add('bg-[#d4af37]', 'text-slate-950', 'shadow');
-
-          currentZone = tab.getAttribute('data-filter') || 'all';
-          applyFilter();
-        });
-      });
-
-      // Card Wishlist Buttons Click Event
-      document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const target = e.currentTarget as HTMLElement;
-          const hotelData = JSON.parse(target.getAttribute('data-hotel') || '{}');
-          if (window.toggleWishlistHotel) {
-            window.toggleWishlistHotel(hotelData);
-            target.classList.toggle('text-rose-500');
-          }
-        });
-      });
-    });
-  </script>
 
 </Layout>
