@@ -1,6 +1,89 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// ১. Astro Content Collections থেকে ডাটা লোড
+let hotels = [];
+try {
+  const collectionData = await getCollection('hotels');
+  if (collectionData && collectionData.length > 0) {
+    hotels = collectionData.map((item: any) => ({
+      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
+      category: item.data?.category || 'Luxury Hotel',
+      location: item.data?.location || 'Gulshan 2, Dhaka',
+      area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
+      price: item.data?.price || '$$$$',
+      rating: item.data?.rating || 4.8,
+      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+    }));
+  }
+} catch (err) {
+  hotels = [];
+}
+
+// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
+if (!hotels || hotels.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
+    const globList = Object.values(rawGlob);
+    if (globList && globList.length > 0) {
+      hotels = globList.map((item: any) => ({
+        title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
+        category: item.frontmatter?.category || 'Luxury Hotel',
+        location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
+        area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
+        price: item.frontmatter?.price || '$$$$',
+        rating: item.frontmatter?.rating || 4.8,
+        image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      }));
+    }
+  } catch (err) {
+    hotels = [];
+  }
+}
+
+// ৩. সেফটি ডিফল্ট ডাটা
+if (!hotels || hotels.length === 0) {
+  hotels = [
+    {
+      title: "The Westin Dhaka",
+      category: "5-Star Luxury",
+      location: "Gulshan 2, Dhaka",
+      area: "gulshan-2",
+      price: "৳ 18,500",
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title: "Renaissance Dhaka Gulshan Hotel",
+      category: "5-Star Premium",
+      location: "Gulshan 1, Dhaka",
+      area: "gulshan-1",
+      price: "৳ 22,000",
+      rating: 4.7,
+      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title: "Amari Dhaka",
+      category: "4-Star Boutique",
+      location: "Gulshan 2, Dhaka",
+      area: "gulshan-2",
+      price: "৳ 16,000",
+      rating: 4.6,
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title: "Hotel Sarina Banani",
+      category: "5-Star Hotel",
+      location: "Banani, Dhaka",
+      area: "banani",
+      price: "৳ 12,000",
+      rating: 4.5,
+      image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80",
+    }
+  ];
+}
 ---
 
 <Layout title="Gulshan Hotels - Discover Gulshan's Finest Luxury Hotels">
@@ -9,7 +92,7 @@ import Layout from '../layouts/Layout.astro';
   <section class="relative bg-[#070D12] text-white py-20 sm:py-32 px-4 sm:px-8 lg:px-12 overflow-hidden min-h-[380px] sm:min-h-[460px] flex items-center">
     
     <!-- Background Image with Soft Gradient Overlay -->
-    <div class="absolute inset-0 opacity-100 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
+    <div class="absolute inset-0 opacity-45 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
     <div class="absolute inset-0 bg-gradient-to-r from-[#070D12] via-[#070D12]/75 to-transparent"></div>
 
     <div class="relative max-w-[1600px] mx-auto w-full text-center sm:text-left space-y-5">
@@ -34,50 +117,134 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </section>
 
-  <!-- NEW SECTION: Floating Area Filter Bar (Matching input_file_89.png) -->
+  <!-- NEW WORKABLE FILTER BAR (PC Centered, Mobile Wrapped & Interactive) -->
   <section class="bg-slate-50 relative z-20 -mt-6 sm:-mt-8 px-4 sm:px-8 lg:px-12">
     <div class="max-w-[1600px] mx-auto">
-      <div class="bg-white p-2.5 sm:p-3.5 rounded-2xl shadow-xl border border-slate-200/80 flex items-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar">
+      <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-slate-200/90 flex flex-wrap items-center justify-center lg:justify-between gap-2.5 sm:gap-4">
         
-        <!-- Pill 1: All Gulshan (Active Dark Green Pill) -->
-        <button class="bg-[#07120E] text-white hover:bg-emerald-950 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 shadow-sm transition">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-          <span>All Gulshan</span>
-        </button>
+        <!-- Filter Pills Group -->
+        <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+          
+          <!-- Pill 1: All Gulshan (Active) -->
+          <button data-filter="all" class="filter-pill active-pill bg-[#07120E] text-white hover:bg-emerald-950 px-5 py-3 rounded-full text-xs sm:text-sm font-black flex items-center space-x-2 shadow-md transition">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <span>All Gulshan</span>
+          </button>
 
-        <!-- Pill 2: Gulshan 1 -->
-        <button class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 transition">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
-          <span>Gulshan 1</span>
-        </button>
+          <!-- Pill 2: Gulshan 1 -->
+          <button data-filter="gulshan-1" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+            <span>Gulshan 1</span>
+          </button>
 
-        <!-- Pill 3: Gulshan 2 -->
-        <button class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 transition">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
-          <span>Gulshan 2</span>
-        </button>
+          <!-- Pill 3: Gulshan 2 -->
+          <button data-filter="gulshan-2" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+            <span>Gulshan 2</span>
+          </button>
 
-        <!-- Pill 4: Banani -->
-        <button class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 transition">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-          <span>Banani</span>
-        </button>
+          <!-- Pill 4: Banani -->
+          <button data-filter="banani" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <span>Banani</span>
+          </button>
 
-        <!-- Pill 5: Show Map -->
-        <button class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 transition">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-          <span>Show Map</span>
-        </button>
+          <!-- Pill 5: Show Map Modal Button -->
+          <button id="show-map-btn" class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            <span>Show Map</span>
+          </button>
 
-        <!-- Pill 6: More Filters Dropdown -->
-        <button class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-full text-xs font-extrabold flex items-center space-x-2 shrink-0 transition sm:ml-auto">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+        </div>
+
+        <!-- More Filters Option -->
+        <a href="#hotels" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
           <span>More Filters</span>
-          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
+        </a>
 
       </div>
     </div>
   </section>
+
+  <!-- Section 3: Filterable Hotels Grid Section -->
+  <section id="hotels" class="py-16 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
+    <div class="flex justify-between items-end mb-8">
+      <div>
+        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Gulshan Accommodations</span>
+        <h2 class="text-3xl font-black text-slate-900 mt-1">Best Hotels in Gulshan</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {hotels.map((hotel) => (
+        <div data-area={hotel.area} class="hotel-card bg-white rounded-xl shadow-md p-4 border border-slate-200 flex flex-col justify-between hover:shadow-lg transition">
+          <div>
+            {hotel.image && (
+              <img src={hotel.image} alt={hotel.title} class="w-full h-48 object-cover rounded-lg" />
+            )}
+            <div class="mt-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
+                  {hotel.category}
+                </span>
+                <span class="text-sm font-bold text-amber-500">★ {hotel.rating}</span>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mt-2">{hotel.title}</h3>
+              <p class="text-xs text-slate-500 mt-0.5">📍 {hotel.location}</p>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+            <span class="text-base font-bold text-slate-900">{hotel.price}</span>
+            <button class="bg-emerald-900 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-lg text-xs transition">
+              View Details
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Interactive Filter & Map Script -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterBtns = document.querySelectorAll('.filter-pill');
+      const cards = document.querySelectorAll('.hotel-card');
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.getAttribute('data-filter');
+
+          // Toggle active pill style
+          filterBtns.forEach(b => {
+            b.classList.remove('bg-[#07120E]', 'text-white');
+            b.classList.add('bg-white', 'text-slate-800');
+          });
+
+          btn.classList.remove('bg-white', 'text-slate-800');
+          btn.classList.add('bg-[#07120E]', 'text-white');
+
+          // Filter hotel cards
+          cards.forEach(card => {
+            const area = card.getAttribute('data-area');
+            if (filter === 'all' || area === filter) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Show Map Scroll
+      const mapBtn = document.getElementById('show-map-btn');
+      if (mapBtn) {
+        mapBtn.addEventListener('click', () => {
+          alert('📍 Interactive Gulshan Hotel Map View - Hotels located near Gulshan 1, Gulshan 2 & Diplomatic Zone!');
+        });
+      }
+    });
+  </script>
 
 </Layout>
