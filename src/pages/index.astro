@@ -28,7 +28,7 @@ if (!sponsorData) {
   };
 }
 
-// ২. গুলশানের সব হোটেল কন্টেন্ট কালকশন থেকে লোড করা
+// ২. গুলশানের সব হোটেল লোড করা
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -40,6 +40,8 @@ try {
       location: item.data?.location || 'Gulshan 2, Dhaka',
       zone: (item.data?.location || '').toLowerCase().includes('gulshan 1') 
             ? 'gulshan-1' 
+            : (item.data?.location || '').toLowerCase().includes('banani')
+            ? 'banani'
             : (item.data?.location || '').toLowerCase().includes('diplomatic') 
             ? 'diplomatic-zone' 
             : 'gulshan-2',
@@ -52,7 +54,6 @@ try {
   hotels = [];
 }
 
-// ব্যাকআপ ডামি ডাটা (যদি ফোল্ডার ফাঁকা থাকে)
 if (!hotels || hotels.length === 0) {
   hotels = [
     {
@@ -86,11 +87,11 @@ if (!hotels || hotels.length === 0) {
       image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
     },
     {
-      slug: "crowne-plaza-dhaka-gulshan",
-      title: "Crowne Plaza Dhaka Gulshan",
+      slug: "hotel-sarina-banani",
+      title: "Hotel Sarina Dhaka",
       category: "5-Star Luxury",
-      location: "Diplomatic Zone, Gulshan 2",
-      zone: "diplomatic-zone",
+      location: "Banani, Dhaka",
+      zone: "banani",
       price: "$$$$",
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
@@ -99,10 +100,10 @@ if (!hotels || hotels.length === 0) {
 }
 ---
 
-<Layout title="Gulshan Hotels - Official Directory & Travel Guide in Gulshan, Dhaka">
+<Layout title="Gulshan Hotels - Official Accommodation & Travel Guide in Gulshan, Dhaka">
   
   <!-- HERO BANNER SECTION -->
-  <section class="relative bg-slate-950 overflow-hidden text-white">
+  <section class="relative bg-slate-950 overflow-hidden text-white pb-12 sm:pb-16">
     <div class="absolute inset-0 w-full h-full">
       <img 
         src="/hero-gulshan.jpg" 
@@ -112,7 +113,7 @@ if (!hotels || hotels.length === 0) {
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/30"></div>
     </div>
 
-    <div class="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32 text-center">
+    <div class="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
       <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-6 backdrop-blur-md">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         Official Gulshan Accommodations Directory
@@ -123,27 +124,119 @@ if (!hotels || hotels.length === 0) {
       </h1>
 
       <p class="mt-4 text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
-        Your unbiased local guide to luxury stays, business accommodations, and real-time deal comparison across Gulshan 1, Gulshan 2 & Diplomatic Zone.
+        Your unbiased local guide to luxury stays, business accommodations, and real-time deal comparison.
       </p>
-
-      <!-- Jump to Hotels CTA Button -->
-      <div class="mt-8 flex justify-center">
-        <a href="#all-hotels" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm px-8 py-3.5 rounded-xl transition shadow-xl shadow-emerald-900/40 flex items-center gap-2">
-          🔍 Browse All Hotels
-        </a>
-      </div>
-    </div>
-
-    <!-- Wave Divider -->
-    <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-      <svg class="relative block w-full h-8 sm:h-14 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="currentColor">
-        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"></path>
-      </svg>
     </div>
   </section>
 
+  <!-- FLOATING FILTER BAR (MATCHING YOUR IMAGE DESIGN) -->
+  <div class="relative z-20 -mt-7 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl sm:rounded-full border border-slate-200 shadow-xl p-2 sm:p-2.5 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      
+      <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto overflow-x-auto">
+        <!-- 1. All Gulshan Button -->
+        <button 
+          data-filter="all" 
+          class="filter-pill active bg-[#052e16] hover:bg-[#022c22] text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0 shadow-md"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M19 2H9c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H9V4h10v16zM5 6H3v14c0 1.1.9 2 2 2h12v-2H5V6zm6 2h2v2h-2V8zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-8h2v2h-2V8zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/>
+          </svg>
+          <span>All Gulshan</span>
+        </button>
+
+        <!-- 2. Gulshan 1 Button -->
+        <button 
+          data-filter="gulshan-1" 
+          class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0"
+        >
+          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span>Gulshan 1</span>
+        </button>
+
+        <!-- 3. Gulshan 2 Button -->
+        <button 
+          data-filter="gulshan-2" 
+          class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0"
+        >
+          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span>Gulshan 2</span>
+        </button>
+
+        <!-- 4. Banani Button -->
+        <button 
+          data-filter="banani" 
+          class="filter-pill bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0"
+        >
+          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24">
+            <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+          </svg>
+          <span>Banani</span>
+        </button>
+
+        <!-- 5. Show Map Button -->
+        <a 
+          href="#map-section" 
+          class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0"
+        >
+          <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24">
+            <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+          </svg>
+          <span>Show Map</span>
+        </a>
+      </div>
+
+      <!-- 6. More Filters Dropdown Trigger Button -->
+      <button 
+        id="toggleMoreFilters" 
+        class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full transition flex items-center gap-2 shrink-0 ml-auto"
+      >
+        <svg class="w-4 h-4 stroke-slate-700 fill-none stroke-[2]" viewBox="0 0 24 24">
+          <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round"/>
+        </svg>
+        <span>More Filters</span>
+        <svg class="w-3.5 h-3.5 fill-slate-500" viewBox="0 0 24 24">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- MORE FILTERS EXPANDABLE PANEL (SEARCH & EXTRA OPTIONS) -->
+    <div id="moreFiltersPanel" class="hidden mt-3 bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xl transition-all">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase mb-1">Search Hotel Name</label>
+          <input 
+            type="text" 
+            id="searchHotels" 
+            placeholder="e.g. Westin, Amari..." 
+            class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white rounded-xl px-4 py-2 text-xs text-slate-800 outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-black text-slate-700 uppercase mb-1">Star Rating</label>
+          <select id="filterRating" class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white rounded-xl px-3 py-2 text-xs text-slate-800 outline-none">
+            <option value="all">All Ratings</option>
+            <option value="5">5 Star Luxury</option>
+            <option value="4">4 Star Boutique</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button id="resetFilters" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-2.5 rounded-xl transition">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- WELCOME AUTHORITY & SPONSORED SHOWCASE -->
-  <section class="bg-slate-50 py-10 px-4 sm:px-8 lg:px-12 border-b border-slate-200">
+  <section class="bg-slate-50 pt-16 pb-10 px-4 sm:px-8 lg:px-12 border-b border-slate-200">
     <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
       
       <div class="lg:col-span-7 space-y-4 text-left">
@@ -160,64 +253,29 @@ if (!hotels || hotels.length === 0) {
         <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
           Gulshan is Dhaka’s most upscale neighborhood, known for its diplomatic district, 5-star luxury hotels, fine dining, and vibrant city life. Whether you're visiting for embassy appointments, international business, or leisure, we help you find the perfect hotel through unbiased reviews, real photos, and local insider tips.
         </p>
-
-        <div class="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200">
-          <div class="flex items-center space-x-2.5">
-            <span class="text-xl">🔍</span>
-            <div>
-              <h3 class="text-xs font-bold text-slate-900">Expert Reviews</h3>
-              <p class="text-[10px] text-slate-500">In-depth insights</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-2.5">
-            <span class="text-xl">📸</span>
-            <div>
-              <h3 class="text-xs font-bold text-slate-900">Real Photos</h3>
-              <p class="text-[10px] text-slate-500">Authentic views</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-2.5">
-            <span class="text-xl">⚖️</span>
-            <div>
-              <h3 class="text-xs font-bold text-slate-900">Pros & Cons</h3>
-              <p class="text-[10px] text-slate-500">Honest breakdowns</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-2.5">
-            <span class="text-xl">🤝</span>
-            <div>
-              <h3 class="text-xs font-bold text-slate-900">Unbiased Stays</h3>
-              <p class="text-[10px] text-slate-500">Local recommendations</p>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- Sponsored Hotel Card -->
+      <!-- Sponsored Card -->
       <div class="lg:col-span-5">
         {sponsorData && sponsorData.enable ? (
           <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
             <img 
-              src={sponsorData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"} 
+              src={sponsorData.image} 
               alt={sponsorData.title} 
-              class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" 
+              class="w-full h-72 sm:h-80 object-cover group-hover:scale-105 transition duration-500 opacity-90" 
             />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
 
-            <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md flex items-center space-x-1">
+            <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-[11px] font-black uppercase px-3 py-1 rounded-full shadow-md">
               <span>{sponsorData.badge || "⭐ Editor's Choice"}</span>
             </div>
 
             <div class="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
               <div>
                 <span class="text-[11px] font-extrabold text-emerald-300 bg-slate-950/80 px-2.5 py-0.5 rounded border border-emerald-500/40">
-                  {sponsorData.category || "5-Star Luxury • Gulshan 2"}
+                  {sponsorData.category}
                 </span>
                 <h3 class="text-2xl font-black text-white mt-1.5">{sponsorData.title}</h3>
-                <p class="text-xs text-amber-400 font-bold mt-0.5">★ ★ ★ ★ ★ <span class="text-white ml-1">{sponsorData.rating || '4.8'}/5 Excellent</span></p>
               </div>
 
               <a 
@@ -228,78 +286,20 @@ if (!hotels || hotels.length === 0) {
               </a>
             </div>
           </div>
-        ) : (
-          <div class="bg-gradient-to-br from-emerald-900 to-slate-900 p-8 rounded-2xl border border-emerald-700/50 text-white text-center space-y-4 shadow-xl">
-            <span class="bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase px-3 py-1 rounded-full border border-emerald-500/30">
-              Sponsored Opportunity
-            </span>
-            <h3 class="text-2xl font-black text-white">Feature Your Hotel Here!</h3>
-            <p class="text-xs text-slate-300">
-              Reach over 25,000+ diplomats, tourists, and business travelers visiting Gulshan monthly. Get maximum visibility for your hotel.
-            </p>
-            <a href="/contact" class="inline-block bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase shadow transition">
-              Contact For Sponsorship ➔
-            </a>
-          </div>
-        )}
+        ) : null}
       </div>
 
     </div>
   </section>
 
-  <!-- ALL GULSHAN HOTELS GRID WITH SEARCH & INTERACTIVE FILTER TABS -->
+  <!-- ALL GULSHAN HOTELS GRID SECTION -->
   <section id="all-hotels" class="py-16 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
     
-    <!-- Header & Search Bar -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
-      <div>
-        <span class="text-xs font-black uppercase text-emerald-700 tracking-wider">Official Directory</span>
-        <h2 class="text-3xl sm:text-4xl font-black text-slate-900">
-          All Gulshan Hotels ({hotels.length})
-        </h2>
-        <p class="text-sm text-slate-500 mt-1">
-          Explore all verified hotels in Gulshan 1, Gulshan 2, and Diplomatic Zone
-        </p>
-      </div>
-
-      <!-- Live Search Box -->
-      <div class="w-full md:w-72 relative">
-        <input 
-          type="text" 
-          id="searchHotels" 
-          placeholder="Search hotel name..." 
-          class="w-full bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 shadow-sm outline-none transition"
-        />
-        <span class="absolute right-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
-      </div>
-    </div>
-
-    <!-- Filter Pills/Tabs -->
-    <div class="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4">
-      <button 
-        data-filter="all" 
-        class="filter-tab active bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow transition"
-      >
-        All Hotels ({hotels.length})
-      </button>
-      <button 
-        data-filter="gulshan-1" 
-        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
-      >
-        📍 Gulshan 1
-      </button>
-      <button 
-        data-filter="gulshan-2" 
-        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
-      >
-        📍 Gulshan 2
-      </button>
-      <button 
-        data-filter="diplomatic-zone" 
-        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
-      >
-        🏛️ Diplomatic Zone
-      </button>
+    <div class="mb-8">
+      <span class="text-xs font-black uppercase text-emerald-700 tracking-wider">Verified Accommodations</span>
+      <h2 class="text-3xl sm:text-4xl font-black text-slate-900">
+        Gulshan Hotels Directory ({hotels.length})
+      </h2>
     </div>
 
     <!-- Hotel Cards Grid -->
@@ -309,6 +309,7 @@ if (!hotels || hotels.length === 0) {
           class="hotel-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group"
           data-zone={hotel.zone}
           data-title={hotel.title.toLowerCase()}
+          data-rating={hotel.rating}
         >
           <div class="h-56 w-full overflow-hidden relative">
             <img 
@@ -360,34 +361,48 @@ if (!hotels || hotels.length === 0) {
     <div id="noResults" class="hidden text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-300 mt-6">
       <span class="text-4xl">🏨</span>
       <h3 class="text-lg font-bold text-slate-800 mt-2">No hotels found</h3>
-      <p class="text-xs text-slate-500 mt-1">Try clearing your search or selecting a different filter.</p>
+      <p class="text-xs text-slate-500 mt-1">Try selecting another filter or clearing your search.</p>
     </div>
 
   </section>
 
-  <!-- INSTANT CLIENT-SIDE FILTER & SEARCH SCRIPT -->
+  <!-- INSTANT FILTER & SEARCH SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const tabs = document.querySelectorAll('.filter-tab');
+      const pills = document.querySelectorAll('.filter-pill');
       const cards = document.querySelectorAll('.hotel-card');
       const searchInput = document.getElementById('searchHotels') as HTMLInputElement;
+      const ratingSelect = document.getElementById('filterRating') as HTMLSelectElement;
+      const toggleMoreFilters = document.getElementById('toggleMoreFilters');
+      const moreFiltersPanel = document.getElementById('moreFiltersPanel');
+      const resetFilters = document.getElementById('resetFilters');
       const noResults = document.getElementById('noResults');
 
-      let currentFilter = 'all';
+      let currentZone = 'all';
 
-      function filterHotels() {
+      // Toggle More Filters Box
+      if (toggleMoreFilters && moreFiltersPanel) {
+        toggleMoreFilters.addEventListener('click', () => {
+          moreFiltersPanel.classList.toggle('hidden');
+        });
+      }
+
+      function applyFilter() {
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const rating = ratingSelect ? ratingSelect.value : 'all';
         let visibleCount = 0;
 
         cards.forEach((card) => {
           const el = card as HTMLElement;
           const zone = el.getAttribute('data-zone');
           const title = el.getAttribute('data-title') || '';
+          const cardRating = parseFloat(el.getAttribute('data-rating') || '0');
 
-          const matchesFilter = currentFilter === 'all' || zone === currentFilter;
+          const matchesZone = currentZone === 'all' || zone === currentZone;
           const matchesSearch = query === '' || title.includes(query);
+          const matchesRating = rating === 'all' || (rating === '5' && cardRating >= 4.7) || (rating === '4' && cardRating < 4.7);
 
-          if (matchesFilter && matchesSearch) {
+          if (matchesZone && matchesSearch && matchesRating) {
             el.style.display = 'flex';
             visibleCount++;
           } else {
@@ -404,23 +419,31 @@ if (!hotels || hotels.length === 0) {
         }
       }
 
-      tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-          tabs.forEach((t) => {
-            t.classList.remove('bg-emerald-600', 'text-white', 'shadow');
-            t.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+      // Pill Click Events
+      pills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+          pills.forEach((p) => {
+            p.classList.remove('bg-[#052e16]', 'text-white', 'shadow-md');
+            p.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-800');
           });
 
-          tab.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
-          tab.classList.add('bg-emerald-600', 'text-white', 'shadow');
+          pill.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-800');
+          pill.classList.add('bg-[#052e16]', 'text-white', 'shadow-md');
 
-          currentFilter = tab.getAttribute('data-filter') || 'all';
-          filterHotels();
+          currentZone = pill.getAttribute('data-filter') || 'all';
+          applyFilter();
         });
       });
 
-      if (searchInput) {
-        searchInput.addEventListener('input', filterHotels);
+      if (searchInput) searchInput.addEventListener('input', applyFilter);
+      if (ratingSelect) ratingSelect.addEventListener('change', applyFilter);
+
+      if (resetFilters) {
+        resetFilters.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          if (ratingSelect) ratingSelect.value = 'all';
+          applyFilter();
+        });
       }
     });
   </script>
