@@ -33,7 +33,7 @@ function toTitleCase(str: string) {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// ২. গুলশানের সব ভেরিফাইড হোটেল লোড করা
+// ২. গুলশানের সব ভেরিফাইড হোটেল ডাটা লোড
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -42,246 +42,294 @@ try {
       slug: item.id || item.slug,
       title: toTitleCase(item.data?.title || item.data?.name || 'Gulshan Hotel'),
       category: item.data?.category || 'Luxury Hotel',
-      location: item.data?.location || 'Gulshan 2, Dhaka',
+      location: item.data?.location || 'Gulshan, Dhaka',
       zone: (item.data?.location || '').toLowerCase().includes('gulshan 1') 
             ? 'gulshan-1' 
             : (item.data?.location || '').toLowerCase().includes('banani')
             ? 'banani'
             : 'gulshan-2',
-      price: item.data?.price || '$$$$',
-      rating: item.data?.rating || 4.8,
+      price: item.data?.price || '৳ 18,500',
+      rating: item.data?.rating || 4.9,
+      reviewsCount: item.data?.reviewsCount || '1,250',
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
     }));
   }
 } catch (err) {
   hotels = [];
 }
+
+// ব্যাকআপ ডামি ডাটা (মকআপ ইমেজের মতো)
+if (!hotels || hotels.length === 0) {
+  hotels = [
+    {
+      slug: "the-westin-dhaka",
+      title: "The Westin Dhaka",
+      category: "5-Star Luxury",
+      location: "Gulshan Avenue, Dhaka",
+      zone: "gulshan-2",
+      price: "৳ 18,500",
+      rating: 4.9,
+      reviewsCount: "1,250",
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      slug: "intercontinental-dhaka",
+      title: "InterContinental Dhaka",
+      category: "5-Star Premium",
+      location: "Gulshan, Dhaka",
+      zone: "gulshan-1",
+      price: "৳ 22,000",
+      rating: 4.8,
+      reviewsCount: "980",
+      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      slug: "le-meridien-dhaka",
+      title: "Le Méridien Dhaka",
+      category: "5-Star Luxury",
+      location: "Gulshan Circle 1, Dhaka",
+      zone: "gulshan-1",
+      price: "৳ 16,000",
+      rating: 4.8,
+      reviewsCount: "850",
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+    }
+  ];
+}
 ---
 
-<Layout title="Gulshan Hotels - Official Destination Directory & Accommodations Guide in Gulshan, Dhaka">
+<Layout title="GulshanHotels.com — Discover Gulshan's Finest Luxury Hotels">
   
-  <!-- MY PIGEON FORGE STYLE HERO BANNER -->
-  <section class="relative bg-slate-900 text-white min-h-[440px] sm:min-h-[520px] flex flex-col justify-center overflow-hidden pb-16 sm:pb-20 pt-12 sm:pt-16">
+  <!-- 1. HERO SECTION (MATCHING MOCKUP IMAGE 1 & 2) -->
+  <section class="relative bg-[#081220] text-white overflow-hidden pb-12 sm:pb-20 rounded-b-[36px] sm:rounded-b-[48px] shadow-2xl">
     
-    <!-- High-Resolution Gulshan Evening Background Photo -->
+    <!-- Sunset Gulshan Lake Background Photo (Image 2) -->
     <div class="absolute inset-0 w-full h-full">
       <img 
         src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=85" 
-        alt="Gulshan Dhaka Skyline Evening View" 
-        class="w-full h-full object-cover opacity-90 scale-105" 
+        alt="Gulshan Lake Sunset View" 
+        class="w-full h-full object-cover opacity-45 scale-105" 
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/30"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-[#081220]/90 via-[#081220]/50 to-[#081220]/95"></div>
     </div>
 
-    <!-- Center Content -->
-    <div class="relative z-10 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3 sm:space-y-5 my-auto">
+    <!-- Header Navigation Bar Overlay -->
+    <header class="relative z-30 w-full border-b border-white/10 bg-transparent py-4 px-4 sm:px-8 max-w-[1400px] mx-auto">
+      <div class="flex justify-between items-center">
+        
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-full border border-[#d4af37] flex items-center justify-center text-[#d4af37] font-serif font-black text-lg">
+            G
+          </div>
+          <div class="flex flex-col text-left">
+            <span class="text-lg font-black font-serif tracking-widest text-white leading-none">GULSHAN</span>
+            <span class="text-[8px] text-[#d4af37] tracking-[0.2em] font-bold uppercase mt-0.5">HOTELS</span>
+          </div>
+        </a>
+
+        <!-- Desktop Menu -->
+        <nav class="hidden lg:flex items-center space-x-8 text-xs font-bold tracking-widest uppercase text-slate-200">
+          <a href="#featured" class="hover:text-[#d4af37] transition">Hotels</a>
+          <a href="#stay-categories" class="hover:text-[#d4af37] transition">Categories</a>
+          <a href="#why-book" class="hover:text-[#d4af37] transition">Why Us</a>
+          <a href="#attractions" class="hover:text-[#d4af37] transition">Explore Gulshan</a>
+        </nav>
+
+        <!-- Right Utilities -->
+        <div class="flex items-center space-x-3">
+          <button class="text-white hover:text-[#d4af37] transition p-1.5" aria-label="Saved Stays">
+            ♡
+          </button>
+          <button id="mobile-menu-btn" class="lg:hidden text-white hover:text-[#d4af37] p-1.5">
+            ☰
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Hero Center Content -->
+    <div class="relative z-10 max-w-[1280px] mx-auto px-4 sm:px-6 pt-8 sm:pt-14 pb-12 text-center space-y-4">
       
-      <!-- Official Badge -->
-      <div class="inline-flex items-center gap-2 bg-emerald-600/90 border border-emerald-400/50 text-white text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg backdrop-blur-md">
-        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-        Official Gulshan Accommodations Directory
+      <!-- Crown Pill Badge -->
+      <div class="inline-flex items-center gap-1.5 bg-[#0d1c2d]/80 border border-[#d4af37]/40 text-[#f3d081] text-[10px] sm:text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-lg">
+        <span>👑</span>
+        <span>Dhaka's Premier Hotel Guide</span>
       </div>
 
-      <!-- Main Headline (MyPigeonForge Style) -->
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight max-w-4xl mx-auto font-serif drop-shadow-lg">
-        Your Gulshan Stay <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-amber-300">Starts Here</span>
+      <!-- Hero Title -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-serif text-white tracking-tight leading-tight max-w-3xl mx-auto">
+        Discover Gulshan's Finest <br class="hidden sm:inline" />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#f3d081] via-[#d4af37] to-[#e2b755]">
+          Luxury Hotels
+        </span>
       </h1>
 
-      <p class="text-xs sm:text-base text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed drop-shadow">
-        Find & compare the best 5-star luxury hotels, executive business suites, and diplomatic lodging in Dhaka, Bangladesh.
+      <p class="text-xs sm:text-sm text-slate-200 max-w-md mx-auto leading-relaxed">
+        Compare, book and experience the best hotels in the heart of Dhaka.
       </p>
 
-    </div>
-
-    <!-- Smooth Wave Curve Divider at Bottom of Hero -->
-    <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-      <svg class="relative block w-full h-10 sm:h-16 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="currentColor">
-        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"></path>
-      </svg>
-    </div>
-
-  </section>
-
-  <!-- FLOATING VACATION / STAY PLANNER WIDGET (MY PIGEON FORGE STYLE) -->
-  <div class="relative z-20 -mt-10 sm:-mt-14 max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-7 space-y-4 text-slate-800">
-      
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-emerald-700 text-lg sm:text-xl">🏨</span>
-          <h2 class="text-sm sm:text-base font-black text-slate-900 uppercase tracking-wider">
-            Find Your Perfect Gulshan Hotel
-          </h2>
+      <!-- Social Proof Badges -->
+      <div class="pt-1 flex items-center justify-center gap-2 text-xs text-slate-300">
+        <div class="flex -space-x-1.5">
+          <img class="w-6 h-6 rounded-full border border-slate-700 object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Guest" />
+          <img class="w-6 h-6 rounded-full border border-slate-700 object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Guest" />
+          <img class="w-6 h-6 rounded-full border border-slate-700 object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Guest" />
         </div>
-        <span class="text-xs font-bold text-slate-400 hidden sm:inline">100% Verified Directory</span>
+        <span class="font-bold text-white text-[11px]">5,000+ Happy Guests</span>
+        <span class="text-amber-400 text-xs">★★★★★</span>
       </div>
 
-      <!-- Area Zone Filter Tabs & Search Box Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-        
-        <!-- Zone Pills Selector (Col 7) -->
-        <div class="md:col-span-7 flex flex-wrap items-center gap-2">
-          <button data-filter="all" class="filter-tab active bg-emerald-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow">
-            🏢 All Gulshan ({hotels.length})
-          </button>
-          <button data-filter="gulshan-1" class="filter-tab bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
-            📍 Gulshan 1
-          </button>
-          <button data-filter="gulshan-2" class="filter-tab bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
-            📍 Gulshan 2
-          </button>
-          <button data-filter="banani" class="filter-tab bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
-            🏛️ Diplomatic Zone
-          </button>
-        </div>
+    </div>
 
-        <!-- Search Input & CTA Button (Col 5) -->
-        <div class="md:col-span-5 flex items-center gap-2">
-          <div class="relative w-full">
-            <input 
-              type="text" 
-              id="searchHotels" 
-              placeholder="Search hotel name..." 
-              class="w-full bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white rounded-xl px-4 py-2.5 text-xs text-slate-900 outline-none transition shadow-inner"
-            />
-            <span class="absolute right-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
+    <!-- FLOATING SEARCH & BOOKING CARD (MATCHING SCREEN 1) -->
+    <div class="relative z-20 max-w-[1100px] mx-auto px-4 w-full">
+      <div class="bg-[#0c1827]/90 border border-slate-700/60 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-md text-white space-y-4">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
+          
+          <!-- Destination Field -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3">
+            <span class="block text-[10px] uppercase text-slate-400 font-bold">Destination</span>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-xs font-extrabold text-white">Gulshan, Dhaka</span>
+              <span class="text-slate-400 text-xs">📍</span>
+            </div>
           </div>
 
-          <a href="#all-hotels" class="bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs px-6 py-2.5 rounded-xl transition shrink-0 shadow-md flex items-center gap-1.5">
-            <span>Search</span>
-            <span>➔</span>
-          </a>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- QUICK ACTION PILLS (MY PIGEON FORGE CATEGORIES) -->
-  <section class="pt-8 pb-6 px-4 max-w-[1300px] mx-auto text-center">
-    <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs font-extrabold">
-      <span class="text-slate-400 uppercase text-[11px] mr-2">Quick Stays:</span>
-      
-      <a href="#all-hotels" class="bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 text-slate-700 px-4 py-2 rounded-full shadow-sm transition flex items-center gap-1.5">
-        <span>⭐ 5-Star Luxury Hotels</span>
-      </a>
-
-      <a href="#all-hotels" class="bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 text-slate-700 px-4 py-2 rounded-full shadow-sm transition flex items-center gap-1.5">
-        <span>🏨 Executive Business Suites</span>
-      </a>
-
-      <a href="#all-hotels" class="bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 text-slate-700 px-4 py-2 rounded-full shadow-sm transition flex items-center gap-1.5">
-        <span>🏛️ Diplomatic Enclosure</span>
-      </a>
-
-      <a href="#all-hotels" class="bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 text-slate-700 px-4 py-2 rounded-full shadow-sm transition flex items-center gap-1.5">
-        <span>✨ Boutique Stays</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- TRUST & AUTHORITY PILLARS BAR -->
-  <section class="py-8 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-        <span class="text-2xl p-2 bg-emerald-50 text-emerald-700 rounded-xl">🛡️</span>
-        <div>
-          <h3 class="text-xs font-black text-slate-900 uppercase">100% Verified</h3>
-          <p class="text-[10px] text-slate-500">Physically inspected stays</p>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-        <span class="text-2xl p-2 bg-emerald-50 text-emerald-700 rounded-xl">⚡</span>
-        <div>
-          <h3 class="text-xs font-black text-slate-900 uppercase">Live Price Match</h3>
-          <p class="text-[10px] text-slate-500">Agoda, Booking & Direct</p>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-        <span class="text-2xl p-2 bg-emerald-50 text-emerald-700 rounded-xl">🏛️</span>
-        <div>
-          <h3 class="text-xs font-black text-slate-900 uppercase">Diplomatic Zone</h3>
-          <p class="text-[10px] text-slate-500">Near US & Foreign Embassies</p>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-        <span class="text-2xl p-2 bg-emerald-50 text-emerald-700 rounded-xl">📞</span>
-        <div>
-          <h3 class="text-xs font-black text-slate-900 uppercase">Direct Booking</h3>
-          <p class="text-[10px] text-slate-500">WhatsApp & Direct Calls</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- FEATURED SPONSORED SHOWCASE -->
-  {sponsorData && sponsorData.enable ? (
-    <section class="pb-10 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
-      <div class="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 bg-slate-900 text-white grid grid-cols-1 lg:grid-cols-12 items-center">
-        
-        <div class="lg:col-span-7 h-64 sm:h-80 relative overflow-hidden">
-          <img src={sponsorData.image} alt={sponsorData.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90" />
-          <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
-          
-          <div class="absolute top-4 left-4 bg-amber-500 text-slate-950 text-xs font-black uppercase px-3.5 py-1 rounded-full shadow-lg">
-            {sponsorData.badge || "⭐ Featured Choice"}
+          <!-- Dates Fields -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 flex justify-between">
+            <div>
+              <span class="block text-[10px] uppercase text-slate-400 font-bold">Check-in</span>
+              <span class="text-xs font-extrabold text-white mt-1 block">Fri, 24 May</span>
+            </div>
+            <div class="border-l border-slate-800 pl-3">
+              <span class="block text-[10px] uppercase text-slate-400 font-bold">Check-out</span>
+              <span class="text-xs font-extrabold text-white mt-1 block">Sun, 26 May</span>
+            </div>
           </div>
-        </div>
 
-        <div class="lg:col-span-5 p-6 sm:p-8 space-y-4">
-          <span class="text-xs font-black uppercase text-emerald-400 bg-emerald-950 px-3 py-1 rounded-md border border-emerald-500/30">
-            {sponsorData.category}
-          </span>
-          
-          <h2 class="text-2xl sm:text-3xl font-black text-white">{sponsorData.title}</h2>
-          
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Gulshan's premier luxury stay with world-class amenities, heated pool, diplomatic security, and fine dining restaurants.
-          </p>
+          <!-- Guests Field -->
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3">
+            <span class="block text-[10px] uppercase text-slate-400 font-bold">Guests</span>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-xs font-extrabold text-white">2 Adults, 1 Room</span>
+              <span class="text-slate-400 text-xs">👤</span>
+            </div>
+          </div>
 
-          <div class="pt-2 flex items-center justify-between">
-            <span class="text-amber-400 font-bold text-xs">★ {sponsorData.rating} / 5 Excellent</span>
-            
-            <a 
-              href={sponsorData.buttonLink || "/the-westin-dhaka"} 
-              class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg transition"
-            >
-              {sponsorData.buttonText || "Check Best Price ➔"}
+          <!-- Search Button -->
+          <div class="flex items-center">
+            <a href="#featured" class="w-full bg-gradient-to-r from-[#e2b755] to-[#c59a3f] hover:from-[#f3d081] hover:to-[#e2b755] text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>🔍 Search Hotels</span>
             </a>
           </div>
+
         </div>
 
       </div>
-    </section>
-  ) : null}
+    </div>
 
-  <!-- MAIN HOTEL DIRECTORY GRID -->
-  <section id="all-hotels" class="py-10 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-slate-800">
+  </section>
+
+  <!-- 2. "STAY YOUR WAY" CATEGORIES GRID (MATCHING SCREEN 1) -->
+  <section id="stay-categories" class="py-14 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
     
-    <div class="flex justify-between items-end mb-8 border-b border-slate-200 pb-4">
-      <div>
-        <span class="text-xs font-black uppercase text-emerald-800 tracking-wider">Official Accommodations</span>
-        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 font-serif">
-          All Gulshan Hotels ({hotels.length})
-        </h2>
+    <span class="text-xs font-black uppercase text-[#c5a059] tracking-wider">Stay Your Way</span>
+    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 font-serif mt-1 mb-8">
+      Find the Perfect Stay
+    </h2>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+      
+      <!-- Card 1 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
+          🛏️
+        </div>
+        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Luxury Hotels</h3>
+        <p class="text-[11px] text-slate-500 mt-1">Premium stays with world-class amenities</p>
       </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
+          🏢
+        </div>
+        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Business Hotels</h3>
+        <p class="text-[11px] text-slate-500 mt-1">Perfect for work trips</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
+          🏛️
+        </div>
+        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Boutique Hotels</h3>
+        <p class="text-[11px] text-slate-500 mt-1">Unique local charm</p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition group cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-[#c5a059] flex items-center justify-center text-lg mb-3">
+          🏷️
+        </div>
+        <h3 class="font-bold text-slate-900 text-sm group-hover:text-[#c5a059] transition">Budget Hotels</h3>
+        <p class="text-[11px] text-slate-500 mt-1">Comfortable & affordable</p>
+      </div>
+
+    </div>
+
+    <!-- Exclusive Offers Banner Card -->
+    <div class="mt-8 bg-gradient-to-r from-[#081220] to-[#0d2238] rounded-3xl p-6 sm:p-8 text-white text-left flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl border border-slate-800">
+      <div class="space-y-2">
+        <span class="bg-[#c5a059]/20 text-[#f3d081] text-[10px] font-bold uppercase px-3 py-1 rounded-full border border-[#c5a059]/30">
+          🏷️ Exclusive Offers
+        </span>
+        <h3 class="text-2xl font-black font-serif text-white">Luxury Stays. Exclusive Savings.</h3>
+        <p class="text-xs text-slate-300">Up to 30% Off on selected luxury hotels in Gulshan.</p>
+      </div>
+      <a href="#all-hotels" class="bg-[#f3d081] hover:bg-[#d4af37] text-slate-950 font-black text-xs uppercase px-6 py-3 rounded-xl transition shadow shrink-0">
+        View Offers ➔
+      </a>
+    </div>
+
+  </section>
+
+  <!-- 3. "FEATURED HOTELS" HANDPICKED LUXURY STAYS (MATCHING SCREEN 2) -->
+  <section id="featured" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
+    
+    <span class="text-xs font-black uppercase text-[#c5a059] tracking-wider">Featured Hotels</span>
+    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 font-serif mt-1 mb-6">
+      Handpicked Luxury Stays in Gulshan
+    </h2>
+
+    <!-- Filter Pills -->
+    <div class="flex flex-wrap items-center justify-center gap-2 mb-8">
+      <button data-filter="all" class="filter-tab active bg-[#d4af37] text-slate-950 font-extrabold text-xs px-5 py-2 rounded-full transition shadow">
+        All
+      </button>
+      <button data-filter="luxury" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
+        Luxury
+      </button>
+      <button data-filter="business" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
+        Business
+      </button>
+      <button data-filter="boutique" class="filter-tab bg-white border border-slate-200 text-slate-700 font-bold text-xs px-5 py-2 rounded-full hover:bg-slate-100 transition">
+        Boutique
+      </button>
     </div>
 
     <!-- Hotel Cards Grid -->
-    <div id="hotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="hotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
       {hotels.map((hotel) => (
         <div 
-          class="hotel-card bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group"
+          class="hotel-card bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition duration-300 overflow-hidden flex flex-col group"
           data-zone={hotel.zone}
           data-title={hotel.title.toLowerCase()}
         >
-          <div class="h-48 sm:h-56 w-full overflow-hidden relative">
+          <div class="h-56 w-full overflow-hidden relative">
             <img 
               src={hotel.image} 
               alt={hotel.title} 
@@ -289,42 +337,45 @@ try {
               decoding="async"
               class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
             />
-            
-            <div class="absolute top-3 left-3 bg-slate-950/90 text-emerald-300 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-500/40 backdrop-blur-md shadow">
-              ✔ Verified Entry
-            </div>
-
-            <div class="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md text-amber-400 text-xs font-black px-2.5 py-1 rounded-md border border-slate-700 shadow-md">
-              ★ {hotel.rating}
-            </div>
-
-            <div class="absolute bottom-3 left-3 bg-emerald-950/90 text-emerald-300 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-500/40 backdrop-blur-md">
-              {hotel.category}
-            </div>
+            <span class="absolute top-3 left-3 bg-[#081220]/80 text-[#f3d081] text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-[#d4af37]/40 backdrop-blur-md">
+              🏆 Top Rated
+            </span>
+            <button class="absolute top-3 right-3 text-white text-lg bg-slate-950/40 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md hover:text-[#d4af37]">
+              ♡
+            </button>
           </div>
 
-          <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between">
+          <div class="p-5 flex flex-col flex-1 justify-between space-y-4">
             <div>
-              <h3 class="font-serif text-lg sm:text-xl font-bold text-slate-900 mb-1.5 sm:mb-2 group-hover:text-emerald-800 transition">
+              <h3 class="font-serif text-xl font-bold text-slate-900 group-hover:text-[#c5a059] transition">
                 {hotel.title}
               </h3>
+              
+              <div class="flex items-center gap-1 text-xs text-amber-500 font-bold mt-1">
+                <span>★ {hotel.rating}</span>
+                <span class="text-slate-400 font-normal">({hotel.reviewsCount} reviews)</span>
+              </div>
 
-              <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-4 sm:mb-6">
-                <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-                <span class="line-clamp-1">{hotel.location}</span>
+              <p class="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                <span>📍</span> {hotel.location}
+              </p>
+
+              <!-- Amenities Pills -->
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">📶 Free Wi-Fi</span>
+                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">🏊 Pool</span>
+                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">🧖 Spa</span>
               </div>
             </div>
 
-            <div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
               <div>
-                <span class="text-[10px] uppercase text-slate-400 font-extrabold block">Price Range</span>
-                <span class="font-black text-slate-900 text-sm sm:text-base">{hotel.price}</span>
+                <span class="text-[10px] text-slate-400 block font-bold">From</span>
+                <span class="font-black text-slate-900 text-base">{hotel.price} <span class="text-xs text-slate-500 font-normal">/ night</span></span>
               </div>
 
-              <a href={`/${hotel.slug}`} class="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1">
-                Compare Rates ➔
+              <a href={`/${hotel.slug}`} class="bg-gradient-to-r from-[#e2b755] to-[#c59a3f] text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow transition hover:scale-105">
+                View Details
               </a>
             </div>
           </div>
@@ -332,29 +383,144 @@ try {
       ))}
     </div>
 
+    <!-- Testimonials Card -->
+    <div class="mt-12 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm max-w-lg mx-auto text-left space-y-3">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-[#c5a059] block text-center">What Our Guests Say</span>
+      <p class="text-xs text-slate-600 italic leading-relaxed text-center">
+        "Amazing experience! The hotel recommendations are accurate and the booking process is super easy."
+      </p>
+      <div class="flex items-center justify-center gap-3 pt-2">
+        <img class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Sarah Ahmed" />
+        <div>
+          <h4 class="text-xs font-bold text-slate-900">Sarah Ahmed</h4>
+          <span class="text-[10px] text-slate-400 block">Verified Guest • ★★★★★</span>
+        </div>
+      </div>
+    </div>
+
   </section>
 
-  <!-- INSTANT FILTER & SEARCH SCRIPT -->
+  <!-- 4. "WHY BOOK WITH GULSHAN HOTELS?" (MATCHING SCREEN 3) -->
+  <section id="why-book" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
+    
+    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-serif mb-8">
+      Why Book With Gulshan Hotels?
+    </h2>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+      
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">🏷️</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">Best Price Guarantee</h3>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">📅</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">Easy Booking</h3>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">🛡️</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">Trusted & Secure</h3>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">🎧</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">24/7 Support</h3>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">🏅</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">Verified Hotels</h3>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <span class="text-2xl">🎁</span>
+        <h3 class="text-xs font-bold text-slate-900 uppercase">Exclusive Deals</h3>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- 5. "EXPLORE GULSHAN" ATTRACTIONS (MATCHING SCREEN 3) -->
+  <section id="attractions" class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto text-center">
+    
+    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-serif mb-2">
+      Explore Gulshan
+    </h2>
+    <p class="text-xs text-slate-500 mb-8">Top Attractions Near Your Stay</p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+      
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80" alt="Gulshan Lake" />
+        <div class="p-3">
+          <h3 class="font-bold text-xs text-slate-900">Gulshan Lake</h3>
+          <span class="text-[10px] text-slate-500">2 min walk</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=400&q=80" alt="Banani" />
+        <div class="p-3">
+          <h3 class="font-bold text-xs text-slate-900">Banani</h3>
+          <span class="text-[10px] text-slate-500">5 min drive</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=400&q=80" alt="Gulshan Club" />
+        <div class="p-3">
+          <h3 class="font-bold text-xs text-slate-900">Gulshan Club</h3>
+          <span class="text-[10px] text-slate-500">3 min drive</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <img class="h-32 w-full object-cover" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80" alt="Embassy Area" />
+        <div class="p-3">
+          <h3 class="font-bold text-xs text-slate-900">Embassy Area</h3>
+          <span class="text-[10px] text-slate-500">4 min drive</span>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- 6. NEWSLETTER SUBSCRIPTION CARD (MATCHING SCREEN 3) -->
+  <section class="py-10 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
+    <div class="bg-[#081220] rounded-3xl p-6 sm:p-10 border border-slate-800 text-white text-center space-y-4 shadow-xl max-w-2xl mx-auto">
+      <span class="text-2xl">✉️</span>
+      <h3 class="text-2xl font-black font-serif text-white">Get Deals & Updates</h3>
+      <p class="text-xs text-slate-300">Subscribe to our newsletter and never miss an offer.</p>
+      
+      <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2">
+        <input type="email" placeholder="Enter your email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-[#d4af37]" />
+        <button class="bg-gradient-to-r from-[#e2b755] to-[#c59a3f] text-slate-950 font-black text-xs uppercase px-6 py-3 rounded-xl transition shadow shrink-0">
+          Subscribe
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTANT FILTER SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tabs = document.querySelectorAll('.filter-tab');
       const cards = document.querySelectorAll('.hotel-card');
-      const searchInput = document.getElementById('searchHotels') as HTMLInputElement;
 
       let currentZone = 'all';
 
       function applyFilter() {
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
         cards.forEach((card) => {
           const el = card as HTMLElement;
           const zone = el.getAttribute('data-zone');
-          const title = el.getAttribute('data-title') || '';
 
           const matchesZone = currentZone === 'all' || zone === currentZone;
-          const matchesSearch = query === '' || title.includes(query);
 
-          if (matchesZone && matchesSearch) {
+          if (matchesZone) {
             el.style.display = 'flex';
           } else {
             el.style.display = 'none';
@@ -365,19 +531,17 @@ try {
       tabs.forEach((tab) => {
         tab.addEventListener('click', () => {
           tabs.forEach((t) => {
-            t.classList.remove('bg-emerald-700', 'text-white', 'shadow');
-            t.classList.add('bg-slate-100', 'text-slate-700');
+            t.classList.remove('bg-[#d4af37]', 'text-slate-950', 'shadow');
+            t.classList.add('bg-white', 'text-slate-700');
           });
 
-          tab.classList.remove('bg-slate-100', 'text-slate-700');
-          tab.classList.add('bg-emerald-700', 'text-white', 'shadow');
+          tab.classList.remove('bg-white', 'text-slate-700');
+          tab.classList.add('bg-[#d4af37]', 'text-slate-950', 'shadow');
 
           currentZone = tab.getAttribute('data-filter') || 'all';
           applyFilter();
         });
       });
-
-      if (searchInput) searchInput.addEventListener('input', applyFilter);
     });
   </script>
 
