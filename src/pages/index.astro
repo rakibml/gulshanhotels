@@ -15,7 +15,6 @@ try {
   sponsorData = null;
 }
 
-// ডিফল্ট স্পন্সর ডাটা
 if (!sponsorData) {
   sponsorData = {
     enable: true,
@@ -25,11 +24,11 @@ if (!sponsorData) {
     rating: 4.8,
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
     buttonText: "Check Best Deal ➔",
-    buttonLink: "/hotels"
+    buttonLink: "/the-westin-dhaka"
   };
 }
 
-// ২. সাধারণ হোটেল লিস্ট লোড (Content Collection)
+// ২. গুলশানের সব হোটেল কন্টেন্ট কালকশন থেকে লোড করা
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -39,6 +38,11 @@ try {
       title: item.data?.title || item.data?.name || 'Gulshan Hotel',
       category: item.data?.category || 'Luxury Hotel',
       location: item.data?.location || 'Gulshan 2, Dhaka',
+      zone: (item.data?.location || '').toLowerCase().includes('gulshan 1') 
+            ? 'gulshan-1' 
+            : (item.data?.location || '').toLowerCase().includes('diplomatic') 
+            ? 'diplomatic-zone' 
+            : 'gulshan-2',
       price: item.data?.price || '$$$$',
       rating: item.data?.rating || 4.8,
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
@@ -48,14 +52,15 @@ try {
   hotels = [];
 }
 
-// ব্যাকআপ ডামি ডাটা (যদি কোনো ফোল্ডারে ফাইল না থাকে)
+// ব্যাকআপ ডামি ডাটা (যদি ফোল্ডার ফাঁকা থাকে)
 if (!hotels || hotels.length === 0) {
   hotels = [
     {
       slug: "the-westin-dhaka",
       title: "The Westin Dhaka",
       category: "5-Star Luxury",
-      location: "Main Avenue, Gulshan 2, Dhaka",
+      location: "Gulshan 2, Dhaka",
+      zone: "gulshan-2",
       price: "$$$$",
       rating: 4.8,
       image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
@@ -64,7 +69,8 @@ if (!hotels || hotels.length === 0) {
       slug: "renaissance-dhaka-gulshan",
       title: "Renaissance Dhaka Gulshan Hotel",
       category: "5-Star Premium",
-      location: "SE(B) 98 Gulshan Avenue, Gulshan 1",
+      location: "Gulshan 1, Dhaka",
+      zone: "gulshan-1",
       price: "$$$$",
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
@@ -73,7 +79,8 @@ if (!hotels || hotels.length === 0) {
       slug: "amari-dhaka",
       title: "Amari Dhaka",
       category: "4-Star Boutique",
-      location: "47 Road 41, Gulshan 2, Dhaka",
+      location: "Gulshan 2, Dhaka",
+      zone: "gulshan-2",
       price: "$$$",
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
@@ -82,7 +89,8 @@ if (!hotels || hotels.length === 0) {
       slug: "crowne-plaza-dhaka-gulshan",
       title: "Crowne Plaza Dhaka Gulshan",
       category: "5-Star Luxury",
-      location: "Gulshan 2, Dhaka",
+      location: "Diplomatic Zone, Gulshan 2",
+      zone: "diplomatic-zone",
       price: "$$$$",
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
@@ -91,11 +99,10 @@ if (!hotels || hotels.length === 0) {
 }
 ---
 
-<Layout title="Gulshan Hotels - Official Accommodation & Travel Guide in Gulshan, Dhaka">
+<Layout title="Gulshan Hotels - Official Directory & Travel Guide in Gulshan, Dhaka">
   
-  <!-- HERO BANNER SECTION (UPDATED WITH OVERLAY CONTENT & QUICK SEARCH) -->
+  <!-- HERO BANNER SECTION -->
   <section class="relative bg-slate-950 overflow-hidden text-white">
-    <!-- Background Image -->
     <div class="absolute inset-0 w-full h-full">
       <img 
         src="/hero-gulshan.jpg" 
@@ -105,43 +112,29 @@ if (!hotels || hotels.length === 0) {
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/30"></div>
     </div>
 
-    <!-- Hero Content Overlay -->
     <div class="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32 text-center">
-      
-      <!-- Verified Badge -->
       <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-6 backdrop-blur-md">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         Official Gulshan Accommodations Directory
       </div>
 
-      <!-- Main Headline -->
       <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight max-w-4xl mx-auto drop-shadow-md">
-        Discover & Compare The Best Hotels In <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Gulshan, Dhaka</span>
+        Discover & Compare Hotels In <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Gulshan, Dhaka</span>
       </h1>
 
       <p class="mt-4 text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
         Your unbiased local guide to luxury stays, business accommodations, and real-time deal comparison across Gulshan 1, Gulshan 2 & Diplomatic Zone.
       </p>
 
-      <!-- Quick Area Filter Buttons -->
-      <div class="mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
-        <a href="/hotels" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition shadow-lg shadow-emerald-900/30">
-          All Hotels
-        </a>
-        <a href="/hotels?zone=gulshan-1" class="bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition backdrop-blur-md">
-          📍 Gulshan 1
-        </a>
-        <a href="/hotels?zone=gulshan-2" class="bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition backdrop-blur-md">
-          📍 Gulshan 2
-        </a>
-        <a href="/hotels?zone=diplomatic-zone" class="bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition backdrop-blur-md">
-          🏛️ Diplomatic Zone
+      <!-- Jump to Hotels CTA Button -->
+      <div class="mt-8 flex justify-center">
+        <a href="#all-hotels" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm px-8 py-3.5 rounded-xl transition shadow-xl shadow-emerald-900/40 flex items-center gap-2">
+          🔍 Browse All Hotels
         </a>
       </div>
-
     </div>
 
-    <!-- Wave Curve Divider -->
+    <!-- Wave Divider -->
     <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
       <svg class="relative block w-full h-8 sm:h-14 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="currentColor">
         <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"></path>
@@ -153,7 +146,6 @@ if (!hotels || hotels.length === 0) {
   <section class="bg-slate-50 py-10 px-4 sm:px-8 lg:px-12 border-b border-slate-200">
     <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
       
-      <!-- Left Column: Narrative & Authority Badges -->
       <div class="lg:col-span-7 space-y-4 text-left">
         <div class="inline-block border-b-2 border-emerald-600 pb-1">
           <span class="text-xs font-black uppercase tracking-widest text-emerald-800">
@@ -204,7 +196,7 @@ if (!hotels || hotels.length === 0) {
         </div>
       </div>
 
-      <!-- Right Column: Sponsored Showcase (Dynamic Admin Controlled) -->
+      <!-- Sponsored Hotel Card -->
       <div class="lg:col-span-5">
         {sponsorData && sponsorData.enable ? (
           <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
@@ -229,7 +221,7 @@ if (!hotels || hotels.length === 0) {
               </div>
 
               <a 
-                href={sponsorData.buttonLink || "/hotels"} 
+                href={sponsorData.buttonLink || "#all-hotels"} 
                 class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-lg shadow-lg transition shrink-0 ml-2"
               >
                 {sponsorData.buttonText || "Check Best Deal ➔"}
@@ -255,99 +247,180 @@ if (!hotels || hotels.length === 0) {
     </div>
   </section>
 
-  <!-- DYNAMIC FEATURED HOTELS CAROUSEL SECTION -->
-  <section class="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto font-sans text-gray-800">
+  <!-- ALL GULSHAN HOTELS GRID WITH SEARCH & INTERACTIVE FILTER TABS -->
+  <section id="all-hotels" class="py-16 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto">
     
-    <!-- Section Header -->
-    <div class="flex justify-between items-center mb-6">
+    <!-- Header & Search Bar -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
       <div>
-        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
-          Featured Gulshan Hotels
+        <span class="text-xs font-black uppercase text-emerald-700 tracking-wider">Official Directory</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900">
+          All Gulshan Hotels ({hotels.length})
         </h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-1">Explore top-rated luxury & boutique stays in Gulshan 1, 2 & Diplomatic Zone</p>
+        <p class="text-sm text-slate-500 mt-1">
+          Explore all verified hotels in Gulshan 1, Gulshan 2, and Diplomatic Zone
+        </p>
       </div>
-      <a href="/hotels" class="text-xs sm:text-sm font-bold text-emerald-700 border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 transition flex items-center gap-1">
-        See All Hotels &rarr;
-      </a>
+
+      <!-- Live Search Box -->
+      <div class="w-full md:w-72 relative">
+        <input 
+          type="text" 
+          id="searchHotels" 
+          placeholder="Search hotel name..." 
+          class="w-full bg-white border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 shadow-sm outline-none transition"
+        />
+        <span class="absolute right-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
+      </div>
     </div>
 
-    <!-- Carousel Wrapper -->
-    <div class="relative group">
-      
-      <!-- Prev Button -->
-      <button id="prevBtn" aria-label="Previous" class="absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 active:scale-95 transition">
-        &#10094;
+    <!-- Filter Pills/Tabs -->
+    <div class="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4">
+      <button 
+        data-filter="all" 
+        class="filter-tab active bg-emerald-600 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow transition"
+      >
+        All Hotels ({hotels.length})
       </button>
+      <button 
+        data-filter="gulshan-1" 
+        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
+      >
+        📍 Gulshan 1
+      </button>
+      <button 
+        data-filter="gulshan-2" 
+        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
+      >
+        📍 Gulshan 2
+      </button>
+      <button 
+        data-filter="diplomatic-zone" 
+        class="filter-tab bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition"
+      >
+        🏛️ Diplomatic Zone
+      </button>
+    </div>
 
-      <!-- Dynamic Carousel Track -->
-      <div id="carouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        
-        {hotels.map((hotel) => (
-          <div class="w-[280px] sm:w-[300px] shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group/card">
-            <div class="h-[200px] w-full overflow-hidden relative">
-              <img 
-                class="w-full h-full object-cover rounded-t-2xl group-hover/card:scale-105 transition duration-500" 
-                src={hotel.image} 
-                alt={hotel.title} 
-              />
-              <div class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-amber-400 text-xs font-black px-2.5 py-1 rounded-md border border-slate-700">
-                ★ {hotel.rating}
-              </div>
+    <!-- Hotel Cards Grid -->
+    <div id="hotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {hotels.map((hotel) => (
+        <div 
+          class="hotel-card bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col group"
+          data-zone={hotel.zone}
+          data-title={hotel.title.toLowerCase()}
+        >
+          <div class="h-56 w-full overflow-hidden relative">
+            <img 
+              src={hotel.image} 
+              alt={hotel.title} 
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+            />
+            <div class="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md text-amber-400 text-xs font-black px-2.5 py-1 rounded-md border border-slate-700 shadow-md">
+              ★ {hotel.rating}
             </div>
-            
-            <div class="p-5 flex flex-col flex-1">
-              <span class="text-[11px] font-extrabold uppercase text-emerald-700 tracking-wider mb-1">
-                {hotel.category}
-              </span>
-              <h3 class="font-serif text-lg font-bold text-slate-900 mb-2 line-clamp-1 group-hover/card:text-emerald-700 transition">
+            <div class="absolute bottom-3 left-3 bg-emerald-900/90 text-emerald-200 text-[10px] font-black uppercase px-2.5 py-1 rounded-md border border-emerald-500/40 backdrop-blur-md">
+              {hotel.category}
+            </div>
+          </div>
+
+          <div class="p-5 flex flex-col flex-1 justify-between">
+            <div>
+              <h3 class="font-serif text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-700 transition">
                 {hotel.title}
               </h3>
-              
+
               <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-6">
-                <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <span class="line-clamp-1">{hotel.location}</span>
               </div>
-              
-              <div class="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
-                <span class="font-black text-slate-900 text-sm">{hotel.price}</span>
-                <a 
-                  href={`/${hotel.slug}`} 
-                  class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg font-extrabold text-xs transition"
-                >
-                  View Details
-                </a>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase text-slate-400 font-extrabold block">Price Range</span>
+                <span class="font-black text-slate-900 text-base">{hotel.price}</span>
               </div>
+
+              <a 
+                href={`/${hotel.slug}`} 
+                class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-1"
+              >
+                View Details ➔
+              </a>
             </div>
           </div>
-        ))}
+        </div>
+      ))}
+    </div>
 
-      </div>
-
-      <!-- Next Button -->
-      <button id="nextBtn" aria-label="Next" class="absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 active:scale-95 transition">
-        &#10095;
-      </button>
+    <!-- Empty Result State -->
+    <div id="noResults" class="hidden text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-300 mt-6">
+      <span class="text-4xl">🏨</span>
+      <h3 class="text-lg font-bold text-slate-800 mt-2">No hotels found</h3>
+      <p class="text-xs text-slate-500 mt-1">Try clearing your search or selecting a different filter.</p>
     </div>
 
   </section>
 
-  <!-- JS SCRIPT FOR CAROUSEL SCROLLING -->
+  <!-- INSTANT CLIENT-SIDE FILTER & SEARCH SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const track = document.getElementById('carouselTrack');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
+      const tabs = document.querySelectorAll('.filter-tab');
+      const cards = document.querySelectorAll('.hotel-card');
+      const searchInput = document.getElementById('searchHotels') as HTMLInputElement;
+      const noResults = document.getElementById('noResults');
 
-      if (track && prevBtn && nextBtn) {
-        prevBtn.addEventListener('click', () => {
-          track.scrollBy({ left: -320, behavior: 'smooth' });
+      let currentFilter = 'all';
+
+      function filterHotels() {
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const el = card as HTMLElement;
+          const zone = el.getAttribute('data-zone');
+          const title = el.getAttribute('data-title') || '';
+
+          const matchesFilter = currentFilter === 'all' || zone === currentFilter;
+          const matchesSearch = query === '' || title.includes(query);
+
+          if (matchesFilter && matchesSearch) {
+            el.style.display = 'flex';
+            visibleCount++;
+          } else {
+            el.style.display = 'none';
+          }
         });
 
-        nextBtn.addEventListener('click', () => {
-          track.scrollBy({ left: 320, behavior: 'smooth' });
+        if (noResults) {
+          if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+          } else {
+            noResults.classList.add('hidden');
+          }
+        }
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          tabs.forEach((t) => {
+            t.classList.remove('bg-emerald-600', 'text-white', 'shadow');
+            t.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+          });
+
+          tab.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+          tab.classList.add('bg-emerald-600', 'text-white', 'shadow');
+
+          currentFilter = tab.getAttribute('data-filter') || 'all';
+          filterHotels();
         });
+      });
+
+      if (searchInput) {
+        searchInput.addEventListener('input', filterHotels);
       }
     });
   </script>
