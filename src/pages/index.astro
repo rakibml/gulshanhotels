@@ -9,12 +9,15 @@ try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
     hotels = collectionData.map((item: any) => ({
+      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
       title: item.data?.title || item.data?.name || 'Gulshan Hotel',
       category: item.data?.category || 'Luxury Hotel',
       location: item.data?.location || 'Gulshan 2, Dhaka',
       area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-      price: item.data?.price || '$$$$',
-      rating: item.data?.rating || 4.8,
+      price: item.data?.price || '৳ 18,500',
+      rating: item.data?.rating || 4.7,
+      reviews: item.data?.reviewsCount || '1,248',
+      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
     }));
   }
@@ -26,230 +29,335 @@ try {
 if (!hotels || hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const globList = Object.values(rawGlob);
+    const globList = Object.entries(rawGlob);
     if (globList && globList.length > 0) {
-      hotels = globList.map((item: any) => ({
-        title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
-        category: item.frontmatter?.category || 'Luxury Hotel',
-        location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
-        area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-        price: item.frontmatter?.price || '$$$$',
-        rating: item.frontmatter?.rating || 4.8,
-        image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-      }));
+      hotels = globList.map(([filePath, item]: [string, any]) => {
+        const filename = filePath.split('/').pop()?.replace('.md', '') || 'hotel';
+        return {
+          slug: filename,
+          title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
+          category: item.frontmatter?.category || 'Luxury Hotel',
+          location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
+          area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
+          price: item.frontmatter?.price || '৳ 18,500',
+          rating: item.frontmatter?.rating || 4.7,
+          reviews: item.frontmatter?.reviewsCount || '1,248',
+          description: item.frontmatter?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
+          image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+        };
+      });
     }
   } catch (err) {
     hotels = [];
   }
 }
 
-// ৩. সেফটি ডিফল্ট ডাটা
+// ৩. সেফটি ডিফল্ট ডাটা (ছবি ৯৪-এর হুবহু ডাটা)
 if (!hotels || hotels.length === 0) {
   hotels = [
     {
+      slug: "the-westin-dhaka",
       title: "The Westin Dhaka",
-      category: "5-Star Luxury",
-      location: "Gulshan 2, Dhaka",
+      category: "Luxury Hotel",
+      location: "Gulshan 2",
       area: "gulshan-2",
-      price: "৳ 18,500",
-      rating: 4.8,
+      price: "৳ 18,500 / night",
+      rating: 4.7,
+      reviews: "1,248",
+      description: "Premium business hotel with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
       image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
     },
     {
-      title: "Renaissance Dhaka Gulshan Hotel",
-      category: "5-Star Premium",
-      location: "Gulshan 1, Dhaka",
-      area: "gulshan-1",
-      price: "৳ 22,000",
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-    },
-    {
+      slug: "amari-dhaka",
       title: "Amari Dhaka",
-      category: "4-Star Boutique",
-      location: "Gulshan 2, Dhaka",
+      category: "Luxury Hotel",
+      location: "Gulshan 2",
       area: "gulshan-2",
-      price: "৳ 16,000",
+      price: "৳ 16,000 / night",
       rating: 4.6,
+      reviews: "982",
+      description: "Modern rooms, rooftop pool and easy access to embassies and corporate offices in Gulshan Circle 2.",
       image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
     },
     {
-      title: "Hotel Sarina Banani",
-      category: "5-Star Hotel",
-      location: "Banani, Dhaka",
-      area: "banani",
-      price: "৳ 12,000",
+      slug: "renaissance-dhaka",
+      title: "Renaissance Dhaka",
+      category: "Luxury Hotel",
+      location: "Gulshan 1",
+      area: "gulshan-1",
+      price: "৳ 22,000 / night",
+      rating: 4.7,
+      reviews: "1,102",
+      description: "Stylish hotel with spacious rooms, multiple dining options and warm hospitality in Gulshan 1.",
+      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      slug: "lakeshore-hotel",
+      title: "Lakeshore Hotel",
+      category: "Luxury Hotel",
+      location: "Gulshan 2",
+      area: "gulshan-2",
+      price: "৳ 14,000 / night",
       rating: 4.5,
+      reviews: "763",
+      description: "A peaceful retreat with comfortable rooms, great service and beautiful lakeside views.",
       image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80",
     }
   ];
 }
 ---
 
-<Layout title="Gulshan Hotels - Discover Gulshan's Finest Luxury Hotels">
+<Layout title="Gulshan Hotels - All Hotels in Gulshan, Dhaka">
   
-  <!-- HERO SECTION (Header-aligned padding max-w-[1550px]) -->
+  <!-- HERO SECTION -->
   <section class="relative bg-[#070D12] text-white py-20 sm:py-32 overflow-hidden min-h-[380px] sm:min-h-[460px] flex items-center">
-    
-    <!-- Background Image with Soft Gradient Overlay -->
     <div class="absolute inset-0 opacity-45 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
     <div class="absolute inset-0 bg-gradient-to-r from-[#070D12] via-[#070D12]/75 to-transparent"></div>
 
     <div class="relative max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 w-full text-center sm:text-left space-y-5">
-      
-      <!-- Crown Badge -->
       <div class="flex justify-center sm:justify-start">
         <span class="bg-[#D4AF37]/15 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/40 shadow-md">
           👑 Dhaka's Premier Hotel Guide
         </span>
       </div>
 
-      <!-- Main Headline -->
       <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white max-w-4xl">
         Discover Gulshan's Finest <span class="text-[#D4AF37]">Luxury Hotels</span>
       </h1>
       
-      <!-- Subtitle -->
       <p class="text-sm sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
         Compare, book and experience the best hotels in the heart of Dhaka.
       </p>
-
     </div>
   </section>
 
-  <!-- FLOATING AREA FILTER BAR (Header-aligned padding) -->
+  <!-- FLOATING AREA FILTER BAR -->
   <section class="bg-[#F8FAF9] relative z-20 -mt-6 sm:-mt-8">
     <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
       <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-slate-200/90 flex flex-wrap items-center justify-center lg:justify-between gap-2.5 sm:gap-4">
         
-        <!-- Filter Pills Group -->
         <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-          
-          <!-- Pill 1: All Gulshan (Active) -->
           <button data-filter="all" class="filter-pill active-pill bg-[#07120E] text-white hover:bg-emerald-950 px-5 py-3 rounded-full text-xs sm:text-sm font-black flex items-center space-x-2 shadow-md transition">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 v5m-4 0h4"></path></svg>
             <span>All Gulshan</span>
           </button>
 
-          <!-- Pill 2: Gulshan 1 -->
           <button data-filter="gulshan-1" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
             <span>Gulshan 1</span>
           </button>
 
-          <!-- Pill 3: Gulshan 2 -->
           <button data-filter="gulshan-2" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
             <span>Gulshan 2</span>
           </button>
 
-          <!-- Pill 4: Banani -->
           <button data-filter="banani" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 v5m-4 0h4"></path></svg>
             <span>Banani</span>
           </button>
-
-          <!-- Pill 5: Show Map Button -->
-          <button id="show-map-btn" class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-            <span>Show Map</span>
-          </button>
-
         </div>
-
-        <!-- More Filters -->
-        <a href="#hotels" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-          <span>More Filters</span>
-        </a>
 
       </div>
     </div>
   </section>
 
-  <!-- HOTEL CARDS SECTION (Eye-Comfort Soft Cream Background: bg-[#F8FAF9]) -->
+  <!-- "ALL HOTELS IN GULSHAN" GRID SECTION (Matching input_file_94.png) -->
   <section id="hotels" class="bg-[#F8FAF9] py-16">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
       
-      <!-- Section Heading -->
-      <div class="flex justify-between items-end mb-8">
+      <!-- Top Title Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
-          <span class="text-xs font-black text-emerald-700 uppercase tracking-widest">GULSHAN ACCOMMODATIONS</span>
-          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">Best Hotels in Gulshan</h2>
+          <h2 class="text-3xl font-black text-slate-900 tracking-tight">All Hotels in Gulshan</h2>
+          <p class="text-xs text-slate-500 font-bold mt-1">Showing {hotels.length} hotels in Gulshan 1 & 2</p>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs font-bold text-slate-700">
+          <span>Sort by:</span>
+          <select class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none cursor-pointer">
+            <option>Recommended</option>
+            <option>Highest Rated</option>
+            <option>Price: Low to High</option>
+          </select>
         </div>
       </div>
 
-      <!-- Hotel Cards Grid (Clean White Cards on Soft Cream BG) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 4-Column Hotel Cards Grid (Matching input_file_94.png) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {hotels.map((hotel) => (
-          <div data-area={hotel.area} class="hotel-card bg-white rounded-2xl shadow-md border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300 group">
-            <div>
-              {hotel.image && (
-                <div class="relative h-52 overflow-hidden">
-                  <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <span class="absolute top-3 left-3 bg-[#0B1813] text-emerald-400 text-[10px] font-black uppercase px-2.5 py-1 rounded-md shadow border border-emerald-500/30">
-                    {hotel.category}
-                  </span>
+          <div data-area={hotel.area} class="hotel-card bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-lg transition duration-300 group">
+            
+            <!-- Top Image & Heart Icon -->
+            <div class="relative h-48 overflow-hidden bg-slate-900">
+              <a href={`/${hotel.slug}`} class="block w-full h-full">
+                <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </a>
+              
+              <!-- Heart Wishlist Button -->
+              <button class="absolute top-3 right-3 bg-slate-950/60 hover:bg-slate-950 text-white p-2 rounded-full backdrop-blur-xs transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+              </button>
+            </div>
+
+            <!-- Card Body Content -->
+            <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
+              <div>
+                <a href={`/${hotel.slug}`} class="block font-black text-slate-900 text-lg hover:text-emerald-700 transition leading-snug">
+                  {hotel.title}
+                </a>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">
+                  {hotel.location} • <span class="text-slate-700">{hotel.category}</span>
+                </p>
+
+                <div class="flex items-center space-x-1 text-amber-500 font-bold text-xs mt-1.5">
+                  ★ <span class="text-slate-900 font-black ml-0.5">{hotel.rating}</span>
+                  <span class="text-slate-500 font-normal">Excellent ({hotel.reviews} reviews)</span>
                 </div>
-              )}
-              <div class="p-5">
-                <div class="flex justify-between items-center">
-                  <p class="text-xs font-bold text-slate-500">📍 {hotel.location}</p>
-                  <span class="text-sm font-black text-amber-500">★ {hotel.rating}</span>
+
+                <p class="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">
+                  {hotel.description}
+                </p>
+
+                <!-- Amenity Icons -->
+                <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-500 pt-3">
+                  <span class="flex items-center space-x-1"><span>📶</span><span>Wi-Fi</span></span>
+                  <span class="flex items-center space-x-1"><span>🏊</span><span>Pool</span></span>
+                  <span class="flex items-center space-x-1"><span>💆</span><span>Spa</span></span>
+                  <span class="flex items-center space-x-1"><span>🏋️</span><span>Gym</span></span>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 mt-2 group-hover:text-emerald-700 transition">{hotel.title}</h3>
+              </div>
+
+              <!-- 2 Action Buttons (Check Price & Full Details) -->
+              <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 mt-3">
+                
+                <!-- Button 1: Check Price (Opens Popup Modal) -->
+                <button 
+                  data-title={hotel.title}
+                  data-image={hotel.image}
+                  data-rating={hotel.rating}
+                  data-price={hotel.price}
+                  class="open-price-modal bg-[#07120E] hover:bg-emerald-950 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition text-center cursor-pointer"
+                >
+                  Check Price
+                </button>
+
+                <!-- Button 2: Full Details (Navigates to /the-westin-dhaka) -->
+                <a 
+                  href={`/${hotel.slug}`} 
+                  class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition text-center"
+                >
+                  Full Details
+                </a>
+
               </div>
             </div>
 
-            <div class="p-5 pt-0 border-t border-slate-100 flex justify-between items-center mt-2">
-              <span class="text-lg font-black text-slate-900">{hotel.price}</span>
-              <button class="bg-[#0B1813] hover:bg-emerald-800 text-white font-black px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow transition">
-                View Details
-              </button>
-            </div>
           </div>
         ))}
       </div>
 
+      <!-- Bottom View More Hotels Button -->
+      <div class="text-center pt-6">
+        <button class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-black px-8 py-3 rounded-2xl text-xs uppercase tracking-wider shadow-sm transition flex items-center space-x-2 mx-auto cursor-pointer">
+          <span>View More Hotels</span>
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+      </div>
+
     </div>
   </section>
 
-  <!-- Interactive Filter & Map Script -->
+  <!-- INTERACTIVE CHECK PRICE POPUP MODAL -->
+  <div id="priceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative border border-slate-200">
+      
+      <!-- Close Button -->
+      <button id="closePriceModal" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
+      
+      <div class="flex items-center space-x-4 border-b border-slate-100 pb-4">
+        <img id="modalImg" src="" class="w-20 h-20 object-cover rounded-2xl border border-slate-200 shadow-sm" />
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Live Rate Check</span>
+          <h3 id="modalTitle" class="text-2xl font-black text-slate-900 mt-1 leading-snug">Hotel Name</h3>
+          <p id="modalRating" class="text-xs font-bold text-amber-500 mt-0.5">★ 4.8 / 5 Excellent</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-black uppercase text-slate-400 block">Estimated Rate</span>
+            <span id="modalPrice" class="text-xl font-black text-slate-900">৳ 18,500</span>
+          </div>
+          <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">Available</span>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed text-center">
+          Check live rates, available room types, and exclusive discounts on Agoda or contact hotel reservation directly.
+        </p>
+      </div>
+
+      <!-- Modal Action Buttons -->
+      <div class="space-y-2 pt-2">
+        <a 
+          href="https://agoda.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="w-full bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider text-center block shadow-lg transition"
+        >
+          Check Rates on Agoda ➔
+        </a>
+
+        <a 
+          href="https://wa.me/8801700000000" 
+          target="_blank" 
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs uppercase tracking-wider text-center block transition"
+        >
+          💬 WhatsApp Reservation Inquiry
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Interactive Check Price Modal Script -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
-      const filterBtns = document.querySelectorAll('.filter-pill');
-      const cards = document.querySelectorAll('.hotel-card');
+      const modal = document.getElementById('priceModal');
+      const closeBtn = document.getElementById('closePriceModal');
+      const openBtns = document.querySelectorAll('.open-price-modal');
 
-      filterBtns.forEach(btn => {
+      const modalTitle = document.getElementById('modalTitle');
+      const modalImg = document.getElementById('modalImg');
+      const modalRating = document.getElementById('modalRating');
+      const modalPrice = document.getElementById('modalPrice');
+
+      openBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          const filter = btn.getAttribute('data-filter');
+          const title = btn.getAttribute('data-title');
+          const image = btn.getAttribute('data-image');
+          const rating = btn.getAttribute('data-rating');
+          const price = btn.getAttribute('data-price');
 
-          filterBtns.forEach(b => {
-            b.classList.remove('bg-[#07120E]', 'text-white');
-            b.classList.add('bg-white', 'text-slate-800');
-          });
+          if (modalTitle) modalTitle.innerText = title || 'Gulshan Hotel';
+          if (modalImg) modalImg.src = image || '';
+          if (modalRating) modalRating.innerText = `★ ${rating || '4.8'} / 5 Excellent`;
+          if (modalPrice) modalPrice.innerText = price || '৳ 18,500';
 
-          btn.classList.remove('bg-white', 'text-slate-800');
-          btn.classList.add('bg-[#07120E]', 'text-white');
-
-          cards.forEach(card => {
-            const area = card.getAttribute('data-area');
-            if (filter === 'all' || area === filter) {
-              card.style.display = 'flex';
-            } else {
-              card.style.display = 'none';
-            }
-          });
+          modal?.classList.remove('hidden');
+          modal?.classList.add('flex');
         });
       });
 
-      // Show Map Alert
-      const mapBtn = document.getElementById('show-map-btn');
-      if (mapBtn) {
-        mapBtn.addEventListener('click', () => {
-          alert('📍 Interactive Gulshan Hotel Map View - Hotels located near Gulshan 1, Gulshan 2 & Diplomatic Zone!');
-        });
-      }
+      closeBtn?.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+      });
     });
   </script>
 
