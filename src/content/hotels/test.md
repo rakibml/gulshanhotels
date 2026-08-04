@@ -1,6 +1,6 @@
 ---
-title: test
-slug: the-hil-rakin
+title: Sheraton Dhaka
+slug: Sheraton-Dhaka
 category: 4-Star Boutique
 location: Gulshan 2, Dhaka
 fullAddress: sdfsdafsdf
