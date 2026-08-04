@@ -3,6 +3,7 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
+// ১. Astro Content Collections থেকে ডাটা লোড
 let hotels = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -24,6 +25,7 @@ try {
   hotels = [];
 }
 
+// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
 if (!hotels || hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -50,6 +52,7 @@ if (!hotels || hotels.length === 0) {
   }
 }
 
+// ৩. সেফটি ডিফল্ট ডাটা
 if (!hotels || hotels.length === 0) {
   hotels = [
     {
@@ -94,26 +97,40 @@ if (!hotels || hotels.length === 0) {
 
 <Layout title="Gulshan Hotels - Official Accommodation Directory in Gulshan, Dhaka">
   
-  <!-- HERO SECTION -->
-  <section class="relative bg-[#070D12] text-white py-20 sm:py-32 overflow-hidden min-h-[380px] sm:min-h-[460px] flex items-center">
-    <div class="absolute inset-0 opacity-45 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-[#070D12] via-[#070D12]/75 to-transparent"></div>
+  <!-- HERO SECTION (Tall Spacious Pattern matching input_file_0.png) -->
+  <section class="relative bg-[#070D12] text-white py-16 sm:py-28 px-4 sm:px-8 lg:px-12 overflow-hidden min-h-[500px] sm:min-h-[620px] flex items-center justify-center border-b border-[#D4AF37]/20">
+    
+    <!-- Full-Width Background Image with Gradient Overlay -->
+    <div class="absolute inset-0">
+      <img 
+        src="/hero-gulshan.jpg.webp" 
+        alt="Gulshan Dhaka City Sunset Skyline" 
+        class="w-full h-full object-cover object-center scale-105 transition-transform duration-1000 opacity-80" 
+      />
+      <!-- Multi-layer Gradient Overlay -->
+      <div class="absolute inset-0 bg-gradient-to-b from-[#070D12]/80 via-[#070D12]/50 to-[#070D12]"></div>
+    </div>
 
-    <div class="relative max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 w-full text-center sm:text-left space-y-5">
-      <div class="flex justify-center sm:justify-start">
-        <span class="bg-[#D4AF37]/15 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/40 shadow-md flex items-center gap-2">
+    <div class="relative max-w-4xl mx-auto w-full text-center space-y-6 z-10 py-6">
+      
+      <!-- Crown Badge (SVG Vector Icon) -->
+      <div class="flex justify-center">
+        <span class="bg-[#070D12]/80 backdrop-blur-md text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-xl flex items-center gap-2">
           <svg class="w-3.5 h-3.5 text-[#D4AF37]" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
-          Dhaka's Premier Hotel Guide
+          <span>Dhaka's Premier Hotel Guide</span>
         </span>
       </div>
 
-      <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white max-w-4xl">
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white drop-shadow-md max-w-3xl mx-auto">
         Discover Gulshan's Finest <span class="text-[#D4AF37]">Luxury Hotels</span>
       </h1>
       
-      <p class="text-sm sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
+      <!-- Subtitle -->
+      <p class="text-xs sm:text-base text-slate-200 max-w-xl mx-auto leading-relaxed drop-shadow font-medium">
         Compare, book and experience the best hotels in the heart of Dhaka.
       </p>
+
     </div>
   </section>
 
