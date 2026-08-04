@@ -20,11 +20,11 @@ const { title } = Astro.props;
 	</head>
 	<body class="bg-[#090E13] font-sans text-slate-100 antialiased min-h-screen flex flex-col justify-between pt-16">
 		
-		<!-- Section 1: Smart Hide-on-Scroll Header with Soft Cream/Gold Theme -->
+		<!-- Section 1: Smart Hide-on-Scroll Header -->
 		<header id="main-header" class="bg-[#0C1217]/95 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-50 border-b border-[#D4AF37]/25 shadow-xl transition-transform duration-300">
 			<div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 py-3 flex justify-between items-center">
 				
-				<!-- Geometric Gold Emblem Logo (Matching input_file_87.png) -->
+				<!-- Logo -->
 				<a href="/" class="flex items-center space-x-3 group">
 					<div class="shrink-0 p-0.5">
 						<svg class="w-8 h-8 sm:w-10 sm:h-10 text-[#D4AF37] group-hover:scale-105 transition-transform" viewBox="0 0 100 100" fill="none" stroke="currentColor">
@@ -43,7 +43,7 @@ const { title } = Astro.props;
 					</div>
 				</a>
 
-				<!-- Desktop Navigation Menu (Soft Cream Fonts) -->
+				<!-- Desktop Navigation Menu -->
 				<nav class="hidden lg:flex items-center space-x-8 text-xs font-black tracking-wider uppercase text-[#E8D8B0]">
 					<a href="/" class="text-[#D4AF37] font-extrabold transition border-b-2 border-[#D4AF37] pb-0.5">HOME</a>
 					<a href="/#hotels" class="hover:text-[#D4AF37] transition">HOTELS IN GULSHAN</a>
@@ -55,15 +55,12 @@ const { title } = Astro.props;
 
 				<!-- Right Options -->
 				<div class="flex items-center space-x-3">
-					
-					<!-- Workable Wishlist Heart Icon with Counter Badge -->
-					<button id="wishlist-btn" class="relative text-[#E8D8B0] hover:text-[#D4AF37] transition p-2 rounded-full hover:bg-slate-900 focus:outline-none">
+					<button id="wishlist-btn" class="relative text-[#E8D8B0] hover:text-[#D4AF37] transition p-2 rounded-full hover:bg-slate-900 focus:outline-none cursor-pointer">
 						<svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
 						<span id="wishlist-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
 					</button>
 
-					<!-- Mobile Hamburger Toggle -->
-					<button id="mobile-menu-btn" class="lg:hidden text-[#E8D8B0] hover:text-[#D4AF37] p-2 rounded-lg focus:outline-none">
+					<button id="mobile-menu-btn" class="lg:hidden text-[#E8D8B0] hover:text-[#D4AF37] p-2 rounded-lg focus:outline-none cursor-pointer">
 						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
 					</button>
 				</div>
@@ -87,13 +84,14 @@ const { title } = Astro.props;
 				<div>
 					<div class="flex justify-between items-center border-b border-slate-800 pb-4">
 						<h3 class="text-lg font-black text-[#D4AF37] uppercase tracking-wider flex items-center space-x-2">
-							<span>❤️ Saved Favorites</span>
+							<svg class="w-5 h-5 text-red-500 fill-red-500" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+							<span>Saved Favorites</span>
 						</h3>
-						<button id="close-wishlist" class="text-slate-400 hover:text-white p-1 text-2xl font-bold">&times;</button>
+						<button id="close-wishlist" class="text-slate-400 hover:text-white p-1 text-2xl font-bold cursor-pointer">&times;</button>
 					</div>
 
 					<div id="wishlist-items" class="py-6 space-y-4 text-xs text-slate-300">
-						<p class="text-center text-slate-400 py-8">No saved hotels yet. Click the ❤️ icon on any hotel card to add it to your favorites!</p>
+						<p class="text-center text-slate-400 py-8">No saved hotels yet. Click the heart icon on any hotel card to add it to your favorites!</p>
 					</div>
 				</div>
 
@@ -105,10 +103,9 @@ const { title } = Astro.props;
 			</div>
 		</div>
 
-		<!-- Smart Scroll Header & Wishlist Drawer JavaScript -->
+		<!-- Scripts -->
 		<script is:inline>
 			document.addEventListener('DOMContentLoaded', () => {
-				// 1. Smart Hide-on-Scroll Header
 				let lastScrollY = window.scrollY;
 				const header = document.getElementById('main-header');
 
@@ -124,7 +121,6 @@ const { title } = Astro.props;
 					lastScrollY = currentScrollY;
 				});
 
-				// 2. Mobile Menu Toggle
 				const btn = document.getElementById('mobile-menu-btn');
 				const menu = document.getElementById('mobile-menu');
 				if (btn && menu) {
@@ -133,7 +129,6 @@ const { title } = Astro.props;
 					});
 				}
 
-				// 3. Workable Wishlist Drawer Toggle
 				const wishlistBtn = document.getElementById('wishlist-btn');
 				const wishlistModal = document.getElementById('wishlist-modal');
 				const closeWishlist = document.getElementById('close-wishlist');
@@ -157,11 +152,10 @@ const { title } = Astro.props;
 			<slot />
 		</div>
 
-		<!-- Footer (Soft Cream/Gold Theme) -->
+		<!-- Footer -->
 		<footer class="bg-[#06090D] text-slate-400 pt-16 pb-8 border-t border-[#D4AF37]/20 mt-16">
 			<div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
 				
-				<!-- Newsletter Card -->
 				<div class="bg-gradient-to-r from-[#0C1217] via-[#0C1217] to-emerald-950/40 p-8 sm:p-10 rounded-3xl border border-[#D4AF37]/30 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
 					<div class="space-y-2">
 						<div class="flex items-center justify-center md:justify-start space-x-2 text-[#D4AF37]">
@@ -178,16 +172,13 @@ const { title } = Astro.props;
 							placeholder="Enter your email" 
 							class="bg-[#06090D] border border-slate-800 text-white px-5 py-3.5 rounded-xl text-xs focus:outline-none focus:border-[#D4AF37] w-full sm:w-80" 
 						/>
-						<button class="bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black px-8 py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition">
+						<button class="bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black px-8 py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition cursor-pointer">
 							Subscribe
 						</button>
 					</div>
 				</div>
 
-				<!-- Main Footer Columns -->
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center sm:text-left pt-4">
-					
-					<!-- Column 1: Brand Bio & Socials -->
 					<div class="space-y-4">
 						<a href="/" class="flex items-center justify-center sm:justify-start space-x-3">
 							<svg class="w-8 h-8 text-[#D4AF37]" viewBox="0 0 100 100" fill="none" stroke="currentColor">
@@ -202,7 +193,6 @@ const { title } = Astro.props;
 						</p>
 					</div>
 
-					<!-- Column 2: Quick Links -->
 					<div>
 						<h4 class="font-black text-white text-xs uppercase tracking-widest mb-4">Quick Links</h4>
 						<ul class="space-y-2.5 text-xs text-slate-400">
@@ -213,7 +203,6 @@ const { title } = Astro.props;
 						</ul>
 					</div>
 
-					<!-- Column 3: Top Categories -->
 					<div>
 						<h4 class="font-black text-white text-xs uppercase tracking-widest mb-4">Top Categories</h4>
 						<ul class="space-y-2.5 text-xs text-slate-400">
@@ -224,20 +213,21 @@ const { title } = Astro.props;
 						</ul>
 					</div>
 
-					<!-- Column 4: Disclosure -->
 					<div>
 						<h4 class="font-black text-white text-xs uppercase tracking-widest mb-4">Affiliate Disclosure</h4>
 						<p class="text-[11px] text-slate-500 leading-relaxed">
 							GulshanHotels.com is a participant in official hotel affiliate programs. We earn a small commission when you book through our links at no extra cost to you.
 						</p>
 					</div>
-
 				</div>
 
-				<!-- Copyright Bottom Bar -->
 				<div class="pt-8 border-t border-slate-900 text-center text-slate-500 text-[11px] flex flex-col sm:flex-row justify-between items-center gap-2">
 					<p>© 2026 Gulshan Hotels. All Rights Reserved.</p>
-					<p>Made with <span class="text-red-500">❤️</span> in Bangladesh</p>
+					<p class="flex items-center gap-1 justify-center">
+						<span>Made with</span>
+						<svg class="w-3.5 h-3.5 text-red-500 fill-red-500 inline" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+						<span>in Bangladesh</span>
+					</p>
 				</div>
 
 			</div>
