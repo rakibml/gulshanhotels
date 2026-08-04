@@ -3,47 +3,86 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
-// ১. Astro Content Collections থেকে ডাটা লোড
+// ১. Astro = await response.json();
+
+            if (data && data.results && data.results.length > 0) {
+               Content Collections থেকে ডাটা লোড
 let hotels = [];
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
     hotels = collectionData.map((item: any) => ({
-      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
+      slug: item.id?.replace(/\.md$/, '')const suppliersList = [];
+
+              data.results.forEach(item => {
+                const itemName = (item.name || "").toLowerCase();
+                 || item.slug || 'hotel',
       title: item.data?.title || item.data?.name || 'Gulshan Hotel',
-      category: item.data?.category || 'Luxury Hotel',
+      const targetName = hotelName.toLowerCase();
+
+                if (itemName.includes(targetName.substring(0,category: item.data?.category || 'Luxury Hotel',
       location: item.data?.location || 'Gulshan 2, Dhaka',
-      area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-      price: item.data?.price || '৳ 18,500',
-      rating: item.data?.rating || 4.7,
+      area: (item.data?.location || 'Gulshan 2').toLowerCase 5)) || targetName.includes(itemName.substring(0, 5))) {
+                  if (item().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '')..suppliers) {
+                    Object.keys(item.suppliers).forEach(key => {
+                      const supp =toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
+      price: item.data?.price || '$$$$',
+      rating: item.data?.rating || 4.8, item.suppliers[key];
+                      if (supp && supp.link) {
+                        suppliersList.push({
       reviews: item.data?.reviewsCount || '1,248',
-      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
-      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      description: item.
+                          key: key,
+                          name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotelsdata?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
+      image: item.data?.image || 'https://images.unsplash.com/photo-15.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
+66073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
     }));
   }
 } catch (err) {
   hotels = [];
 }
 
-// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
+// ২. কালেকশন ফাঁ                          link: supp.link,
+                          logo: supp.media?.logoSquare || null,
+                          totalPrice: parsePriceNumber(supp)কা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
 if (!hotels || hotels.length === 0) {
-  try {
+  try
+                        });
+                      }
+                    });
+                  }
+                }
+              });
+
+              suppliersList.sort {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
     const globList = Object.entries(rawGlob);
-    if (globList && globList.length > 0) {
+    if (globList && globList.length((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : > 0) {
       hotels = globList.map(([filePath, item]: [string, any]) => {
         const filename = filePath.split('/').pop()?.replace('.md', '') || 'hotel';
         return {
-          slug: filename,
-          title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
+          slug: 0));
+
+              if (suppliersList.length > 0) {
+                otaContainer.innerHTML = ''; filename,
+          title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel
+
+                suppliersList.forEach((supp, index) => {
+                  const isLowest = index === 0 &&',
           category: item.frontmatter?.category || 'Luxury Hotel',
           location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
-          area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-          price: item.frontmatter?.price || '৳ 18,500',
-          rating: item.frontmatter?.rating || 4.7,
+          area: (item.frontmatter?.location || ' supp.totalPrice;
+                  const basePriceNum = supp.totalPrice ? Math.round(supp.totalGulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-Price / 1.15) : null;
+                  const priceDisplay = basePriceNum ? `$${base2',
+          price: item.frontmatter?.price || '$$$$',
+          rating: item.frontmatter?.rating || 4.PriceNum}` : `Check rate`;
+
+                  const buttonClass = isLowest
+                    ? `bg-8,
           reviews: item.frontmatter?.reviewsCount || '1,248',
-          description: item.frontmatter?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
-          image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+          description: item.frontmatter[#00e676] hover:bg-[#00c853] text-slate-900 font?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
+          image: item.frontmatter?.image || 'https://images.unsplash.com/photo-156607377-extrabold px-4 py-2 rounded-full transition shadow-xs text-xs`
+                    :1259-6a8506099945?auto=format&fit= `border border-slate-900 hover:bg-slate-900 hover:text-white textcrop&w=800&q=80',
         };
       });
     }
@@ -52,77 +91,110 @@ if (!hotels || hotels.length === 0) {
   }
 }
 
-// ৩. সেফটি ডিফল্ট ডাটা (ছবি ৯৪-এর হুবহু ডাটা)
+// ৩. সেফটি ডি-slate-900 font-bold px-4 py-2 rounded-full transition text-xs`;
+
+ফল্ট ডাটা
 if (!hotels || hotels.length === 0) {
-  hotels = [
+  hotels =                  const logoHtml = supp.logo 
+                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 sm:h-6 object-contain" />` 
+                    : `<span [
     {
       slug: "the-westin-dhaka",
       title: "The Westin Dhaka",
       category: "Luxury Hotel",
-      location: "Gulshan 2",
+      location: "Gulshan 2, Dhaka",
       area: "gulshan-2",
       price: "৳ 18,500 / night",
       rating: 4.7,
       reviews: "1,248",
-      description: "Premium business hotel with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      description: "Premium business hotel class="font-extrabold text-slate-900 text-xs sm:text-sm">${supp with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
+      image: "https.name}</span>`;
+
+                  const cardHTML = `
+                    <div class="bg-white rounded-xl://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=80 border border-slate-200 p-3 sm:p-3.5 flex items-center justify-0&q=80",
     },
     {
-      slug: "amari-dhaka",
+      slug: "amari-dhaka",between gap-2 shadow-2xs">
+                      <div class="flex items-center gap-2">
+
       title: "Amari Dhaka",
       category: "Luxury Hotel",
-      location: "Gulshan 2",
+      location: "Gulshan 2, Dhaka",
       area: "gulshan-2",
       price: "৳ 16,000 / night",
       rating: 4.6,
-      reviews: "982",
-      description: "Modern rooms, rooftop pool and easy access to embassies and corporate offices in Gulshan Circle 2.",
-      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      reviews: "982                        ${logoHtml}
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px]",
+      description: "Modern rooms, rooftop pool and easy access to embassies and corporate offices in Gulshan Circle  font-bold px-2 py-0.5 rounded-full">Available</span>
+                      </div>
+
+                      <div2.",
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=8 class="flex items-center gap-3 ml-auto">
+                        <div class="text-right">
+00&q=80",
     },
     {
-      slug: "renaissance-dhaka",
-      title: "Renaissance Dhaka",
+      slug: "renaissance-dhaka                          <span class="font-serif font-black text-slate-900 text-sm sm:text",
+      title: "Renaissance Dhaka Gulshan Hotel",
       category: "Luxury Hotel",
-      location: "Gulshan 1",
+      location: "Gulshan 1, Dhaka",
       area: "gulshan-1",
-      price: "৳ 22,000 / night",
+      price: "৳ -base">${priceDisplay}</span>
+                          ${basePriceNum ? `<span class="text-[9px] text22,000 / night",
       rating: 4.7,
-      reviews: "1,102",
+      reviews: "1-slate-400 font-bold block -mt-1">+taxes</span>` : ''}
+                        </div>,102",
       description: "Stylish hotel with spacious rooms, multiple dining options and warm hospitality in Gulshan 1.",
-      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      slug: "lakeshore-hotel",
-      title: "Lakeshore Hotel",
-      category: "Luxury Hotel",
-      location: "Gulshan 2",
-      area: "gulshan-2",
-      price: "৳ 14,000 / night",
-      rating: 4.5,
-      reviews: "763",
-      description: "A peaceful retreat with comfortable rooms, great service and beautiful lakeside views.",
-      image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-15827
+                        <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">19478250-c89cae4dc85b?auto=format&
+                          View deal
+                        </a>
+                      </div>
+                    </div>
+                  `;
+                  otaContainer.insertAdjacentHTML('fit=crop&w=800&q=80",
     }
   ];
 }
 ---
 
-<Layout title="Gulshan Hotels - All Hotels in Gulshan, Dhaka">
+<Layout title="Gulshan Hotels - Official Accommodation Directory in Gulshan, Dhaka">
   
   <!-- HERO SECTION -->
-  <section class="relative bg-[#070D12] text-white py-20 sm:py-32 overflow-hidden min-h-[380px] sm:min-h-[460px] flex items-center">
-    <div class="absolute inset-0 opacity-45 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-[#070D12] via-[#070D12]/75 to-transparent"></div>
+  <section class="relative bg-[#070D12] text-white py-20 sm:pybeforeend', cardHTML);
+                });
 
-    <div class="relative max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 w-full text-center sm:text-left space-y-5">
-      <div class="flex justify-center sm:justify-start">
-        <span class="bg-[#D4AF37]/15 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/40 shadow-md">
+              } else {
+                renderModalSoldOut(hotelName);
+              }
+
+-32 overflow-hidden min-h-[380px] sm:min-h-            } else {
+              renderModalSoldOut(hotelName);
+            }
+          }
+        } catch (err) {
+          [460px] flex items-center">
+    <div class="absolute inset-0 opacity-45 bg-cover bg-center" style="background-image: url('/hero-gulshan.jpg.webp');"></div>
+renderModalSoldOut(hotelName);
+        }
+      }
+
+      function renderModalSoldOut(hotelName    <div class="absolute inset-0 bg-gradient-to-r from-[#070D12] via-[#070D12]/75 to-transparent"></div>
+
+    <div class="relative) {
+        if (otaContainer) {
+          otaContainer.innerHTML = `
+            <div class="p-4 text- max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 w-full text-center sm:text-left space-y-5">
+      <divcenter space-y-1 bg-rose-50 rounded-2xl border border-rose-200">
+              <div class="flex justify-center sm:justify-start">
+        <span class="bg-[#D4AF37]/15 text-[#E8D8B0] text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-[#D4AF37]/40 shadow- class="text-rose-700 font-bold text-xs">🔴 Rates Updating for ${hotelName}</div>
+              <md">
           👑 Dhaka's Premier Hotel Guide
         </span>
       </div>
 
       <h1 class="text-3xl sm:text-6xl font-black tracking-tight leading-tight text-white max-w-4xl">
-        Discover Gulshan's Finest <span class="text-[#D4AF37]">Luxury Hotels</span>
+        Discover Gulshan's Finest <span class="text-p class="text-[11px] text-slate-600">Please click Full Details to check live dates[#D4AF37]">Luxury Hotels</span>
       </h1>
       
       <p class="text-sm sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
@@ -131,234 +203,53 @@ if (!hotels || hotels.length === 0) {
     </div>
   </section>
 
-  <!-- FLOATING AREA FILTER BAR -->
+  <!-- or contact via WhatsApp below.</p>
+            </div>
+          `;
+        }
+      }
+
+      openBtns.forEach(btn => FLOATING AREA FILTER BAR -->
   <section class="bg-[#F8FAF9] relative z-20 -mt-6 sm:-mt-8">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
-      <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-slate-200/90 flex flex-wrap items-center justify-center lg:justify-between gap-2.5 sm:gap-4">
+    <div class="max-w- {
+        btn.addEventListener('click', () => {
+          const title = btn.getAttribute('data-title[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+      <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-slate') || 'The Westin Dhaka';
+          const image = btn.getAttribute('data-image') || '';
+          const rating =-200/90 flex flex-wrap items-center justify-center lg:justify-between gap-2.5 sm:gap- btn.getAttribute('data-rating') || '4.8';
+
+          if (modalTitle) modalTitle.4">
         
         <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-          <button data-filter="all" class="filter-pill active-pill bg-[#07120E] text-white hover:bg-emerald-950 px-5 py-3 rounded-full text-xs sm:text-sm font-black flex items-center space-x-2 shadow-md transition">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 v5m-4 0h4"></path></svg>
-            <span>All Gulshan</span>
-          </button>
-
-          <button data-filter="gulshan-1" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <span>Gulshan 1</span>
-          </button>
-
-          <button data-filter="gulshan-2" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <span>Gulshan 2</span>
-          </button>
-
-          <button data-filter="banani" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-3 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition">
-            <span>Banani</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- "ALL HOTELS IN GULSHAN" GRID SECTION (Matching input_file_94.png) -->
-  <section id="hotels" class="bg-[#F8FAF9] py-16">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
-      
-      <!-- Top Title Bar -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-        <div>
-          <h2 class="text-3xl font-black text-slate-900 tracking-tight">All Hotels in Gulshan</h2>
-          <p class="text-xs text-slate-500 font-bold mt-1">Showing {hotels.length} hotels in Gulshan 1 & 2</p>
-        </div>
-
-        <div class="flex items-center space-x-3 text-xs font-bold text-slate-700">
-          <span>Sort by:</span>
-          <select class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none cursor-pointer">
-            <option>Recommended</option>
-            <option>Highest Rated</option>
-            <option>Price: Low to High</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 4-Column Hotel Cards Grid (Matching input_file_94.png) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {hotels.map((hotel) => (
-          <div data-area={hotel.area} class="hotel-card bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-lg transition duration-300 group">
-            
-            <!-- Top Image & Heart Icon -->
-            <div class="relative h-48 overflow-hidden bg-slate-900">
-              <a href={`/${hotel.slug}`} class="block w-full h-full">
-                <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              </a>
-              
-              <!-- Heart Wishlist Button -->
-              <button class="absolute top-3 right-3 bg-slate-950/60 hover:bg-slate-950 text-white p-2 rounded-full backdrop-blur-xs transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-              </button>
-            </div>
-
-            <!-- Card Body Content -->
-            <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-              <div>
-                <a href={`/${hotel.slug}`} class="block font-black text-slate-900 text-lg hover:text-emerald-700 transition leading-snug">
-                  {hotel.title}
-                </a>
-                <p class="text-xs font-semibold text-slate-500 mt-0.5">
-                  {hotel.location} • <span class="text-slate-700">{hotel.category}</span>
-                </p>
-
-                <div class="flex items-center space-x-1 text-amber-500 font-bold text-xs mt-1.5">
-                  ★ <span class="text-slate-900 font-black ml-0.5">{hotel.rating}</span>
-                  <span class="text-slate-500 font-normal">Excellent ({hotel.reviews} reviews)</span>
-                </div>
-
-                <p class="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">
-                  {hotel.description}
-                </p>
-
-                <!-- Amenity Icons -->
-                <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-500 pt-3">
-                  <span class="flex items-center space-x-1"><span>📶</span><span>Wi-Fi</span></span>
-                  <span class="flex items-center space-x-1"><span>🏊</span><span>Pool</span></span>
-                  <span class="flex items-center space-x-1"><span>💆</span><span>Spa</span></span>
-                  <span class="flex items-center space-x-1"><span>🏋️</span><span>Gym</span></span>
-                </div>
-              </div>
-
-              <!-- 2 Action Buttons (Check Price & Full Details) -->
-              <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 mt-3">
-                
-                <!-- Button 1: Check Price (Opens Popup Modal) -->
-                <button 
-                  data-title={hotel.title}
-                  data-image={hotel.image}
-                  data-rating={hotel.rating}
-                  data-price={hotel.price}
-                  class="open-price-modal bg-[#07120E] hover:bg-emerald-950 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition text-center cursor-pointer"
-                >
-                  Check Price
-                </button>
-
-                <!-- Button 2: Full Details (Navigates to /the-westin-dhaka) -->
-                <a 
-                  href={`/${hotel.slug}`} 
-                  class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition text-center"
-                >
-                  Full Details
-                </a>
-
-              </div>
-            </div>
-
-          </div>
-        ))}
-      </div>
-
-      <!-- Bottom View More Hotels Button -->
-      <div class="text-center pt-6">
-        <button class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-black px-8 py-3 rounded-2xl text-xs uppercase tracking-wider shadow-sm transition flex items-center space-x-2 mx-auto cursor-pointer">
-          <span>View More Hotels</span>
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- INTERACTIVE CHECK PRICE POPUP MODAL -->
-  <div id="priceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative border border-slate-200">
-      
-      <!-- Close Button -->
-      <button id="closePriceModal" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
-      
-      <div class="flex items-center space-x-4 border-b border-slate-100 pb-4">
-        <img id="modalImg" src="" class="w-20 h-20 object-cover rounded-2xl border border-slate-200 shadow-sm" />
-        <div>
-          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Live Rate Check</span>
-          <h3 id="modalTitle" class="text-2xl font-black text-slate-900 mt-1 leading-snug">Hotel Name</h3>
-          <p id="modalRating" class="text-xs font-bold text-amber-500 mt-0.5">★ 4.8 / 5 Excellent</p>
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center">
-          <div>
-            <span class="text-[10px] font-black uppercase text-slate-400 block">Estimated Rate</span>
-            <span id="modalPrice" class="text-xl font-black text-slate-900">৳ 18,500</span>
-          </div>
-          <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">Available</span>
-        </div>
-
-        <p class="text-xs text-slate-600 leading-relaxed text-center">
-          Check live rates, available room types, and exclusive discounts on Agoda or contact hotel reservation directly.
-        </p>
-      </div>
-
-      <!-- Modal Action Buttons -->
-      <div class="space-y-2 pt-2">
-        <a 
-          href="https://agoda.com" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="w-full bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider text-center block shadow-lg transition"
-        >
-          Check Rates on Agoda ➔
-        </a>
-
-        <a 
-          href="https://wa.me/8801700000000" 
-          target="_blank" 
-          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs uppercase tracking-wider text-center block transition"
-        >
-          💬 WhatsApp Reservation Inquiry
-        </a>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Interactive Check Price Modal Script -->
-  <script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
-      const modal = document.getElementById('priceModal');
-      const closeBtn = document.getElementById('closePriceModal');
-      const openBtns = document.querySelectorAll('.open-price-modal');
-
-      const modalTitle = document.getElementById('modalTitle');
-      const modalImg = document.getElementById('modalImg');
-      const modalRating = document.getElementById('modalRating');
-      const modalPrice = document.getElementById('modalPrice');
-
-      openBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const title = btn.getAttribute('data-title');
-          const image = btn.getAttribute('data-image');
-          const rating = btn.getAttribute('data-rating');
-          const price = btn.getAttribute('data-price');
-
-          if (modalTitle) modalTitle.innerText = title || 'Gulshan Hotel';
-          if (modalImg) modalImg.src = image || '';
-          if (modalRating) modalRating.innerText = `★ ${rating || '4.8'} / 5 Excellent`;
-          if (modalPrice) modalPrice.innerText = price || '৳ 18,500';
+          <button data-filter="all" class="filter-pill active-innerText = title;
+          if (modalImg) modalImg.src = image;
+          if (modalRatingpill bg-[#07120E] text-white hover:bg-emerald-950 px-) modalRating.innerText = `★ ${rating} Excellent`;
 
           modal?.classList.remove('hidden');
-          modal?.classList.add('flex');
+5 py-3 rounded-full text-xs sm:text-sm font-black flex items-center space-x-2 shadow-md transition">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><          modal?.classList.add('flex');
+
+          // Trigger Real-Time Worker API Call for this hotel
+          fetchRealtimeRatesForpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2Modal(title);
         });
       });
 
       closeBtn?.addEventListener('click', () => {
-        modal?.classList.add('hidden');
+         0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-modal?.classList.add('hidden');
         modal?.classList.remove('flex');
       });
 
-      modal?.addEventListener('click', (e) => {
+      modal1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 ?.addEventListener('click', (e) => {
         if (e.target === modal) {
-          modal.classList.add('hidden');
+          modal011 v5m-4 0h4"></path></svg>
+            <span>All Gulshan</span>
+          </button.classList.add('hidden');
           modal.classList.remove('flex');
         }
       });
-    });
+>
+
+          <button data-filter="gulshan-1" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-    });
   </script>
 
 </Layout>
