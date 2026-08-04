@@ -1,625 +1,146 @@
 ---
 // src/pages/[slug].astro
-import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const hotelEntries = await getCollection('hotels');
-  
-  return hotelEntries.map(entry => {
-    const cleanSlug = entry.slug || entry.id.replace(/\.md$/, '').replace(/^hotels\//, '').trim();
-    return {
-      params: { slug: cleanSlug },
-      props: { entry },
-    };
-  });
+  let globList = [];
+  try {
+    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
+    globList = Object.entries(rawGlob).map(([filePath, file]: [string, any]) => {
+      const filename = filePath.split('/').pop()?.replace('.md', '') || 'hotel';
+      return {
+        params: { slug: filename },
+        props: { hotel: file.frontmatter, content: file.Content },
+      };
+    });
+  } catch (e) {
+    globList = [];
+  }
+
+  if (globList.length === 0) {
+    globList = [
+      {
+        params: { slug: 'amari-dhaka' },
+        props: {
+          hotel: {
+            title: 'Amari Dhaka',
+            category: '4-Star Boutique',
+            location: 'Gulshan 2, Dhaka',
+            price: '৳ 16,000 / night',
+            rating: 4.8,
+            image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
+          },
+          content: null
+        }
+      },
+      {
+        params: { slug: 'the-westin-dhaka' },
+        props: {
+          hotel: {
+            title: 'The Westin Dhaka',
+            category: '5-Star Luxury',
+            location: 'Gulshan 2, Dhaka',
+            price: '৳ 18,500 / night',
+            rating: 4.9,
+            image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+          },
+          content: null
+        }
+      },
+      {
+        params: { slug: 'renaissance-dhaka' },
+        props: {
+          hotel: {
+            title: 'Renaissance Dhaka Gulshan Hotel',
+            category: '5-Star Premium',
+            location: 'Gulshan 1, Dhaka',
+            price: '৳ 22,000 / night',
+            rating: 4.7,
+            image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80',
+          },
+          content: null
+        }
+      }
+    ];
+  }
+
+  return globList;
 }
 
-const { entry } = Astro.props;
-const hotel = entry?.data || {};
-
-// CMS Data
-const title = hotel.title || "The Westin Dhaka";
-const locationTag = hotel.location || "Gulshan 2, Dhaka";
-const fullAddress = hotel.fullAddress || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212";
-const priceBDT = hotel.priceBDT || "৳১৫,০০০—";
-const priceUSD = hotel.priceUSD || "$130";
-const rating = hotel.rating || 4.8;
-const reviewsCount = hotel.reviewsCount || "120";
-const mainImg = hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
-const officialWebsite = hotel.officialWebsite || "https://westindhaka.com";
-const phone = hotel.phone || "+880 2-9886510";
+const { hotel } = Astro.props;
 ---
 
-<Layout title={`${title} - GulshanHotels Directory`}>
-  
-  <!-- Header Section -->
-  <div class="py-6 px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto border-b border-slate-200 font-sans">
-    <div class="flex items-center justify-between mb-3">
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-        <a href="/" class="hover:text-[#1a382b]">Home</a>
-        <span>/</span>
-        <a href="/hotels" class="hover:text-[#1a382b]">Hotels</a>
-        <span>/</span>
-        <span class="text-slate-900">{locationTag}</span>
-      </nav>
-
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#f0f4f1] text-[#1a382b] text-xs font-bold rounded-full border border-emerald-200 shadow-xs">
-        <svg class="w-3.5 h-3.5 fill-[#1a382b]" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-        GulshanHotels Verified Directory
-      </span>
-    </div>
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h1 class="font-serif text-3xl sm:text-5xl font-bold text-[#1a382b] tracking-tight">{title}</h1>
-        <p class="text-xs sm:text-sm text-slate-600 mt-2 font-medium flex flex-wrap items-center gap-2">
-          <span class="text-amber-700 font-bold">★ {rating} ({reviewsCount} Verified Reviews)</span>
-          <span>•</span>
-          <span class="flex items-center gap-1 text-slate-700">📍 {fullAddress}</span>
-        </p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button id="shareBtn" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">🔗 Share</button>
-        <button id="wishlistBtn" class="px-4 py-2 text-xs font-semibold text-rose-600 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition cursor-pointer">♥ Wishlist</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Image Gallery -->
-  <div class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto mt-6">
-    <div class="rounded-2xl overflow-hidden h-[300px] sm:h-[480px] shadow-sm relative">
-      <img src={mainImg} alt={title} class="gallery-img w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" />
-    </div>
-  </div>
-
-  <!-- Sticky Nav Bar -->
-  <div class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-slate-200 py-3.5 my-6 shadow-xs overflow-x-auto scrollbar-none">
-    <div class="flex items-center gap-3 sm:gap-4 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 text-sm sm:text-base font-bold text-slate-700 whitespace-nowrap">
-      <a href="#overview" class="px-5 py-2.5 bg-[#211f2e] text-white rounded-full">Overview</a>
-      <a href="#rates-section" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">View Prices</a>
-      <a href="#amenities" class="px-5 py-2.5 hover:bg-slate-100 rounded-full">Amenities</a>
-    </div>
-  </div>
-
-  <!-- Main Content Layout -->
-  <main class="px-4 sm:px-6 lg:px-12 max-w-[1600px] mx-auto space-y-12 pb-28 lg:pb-12 font-sans text-slate-800">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+<Layout title={`${hotel?.title || 'Hotel Review'} - GulshanHotels.com`}>
+  <main class="bg-[#F8FAF9] py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
+    <div class="max-w-[1200px] mx-auto space-y-8">
       
-      <!-- LEFT COLUMN (70%) -->
-      <div class="lg:col-span-2 space-y-12">
+      <!-- Back Link -->
+      <a href="/#hotels" class="inline-flex items-center space-x-2 text-xs font-black uppercase text-emerald-800 hover:text-emerald-600 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Back to All Hotels</span>
+      </a>
+
+      <!-- Main Hotel Details Banner Card -->
+      <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200/90 grid grid-cols-1 md:grid-cols-12 gap-0">
         
-        <!-- Overview & Map -->
-        <div id="overview" class="space-y-4 pb-8 border-b border-slate-200">
-          <div>
-            <span class="text-xs font-bold text-[#a87247] uppercase tracking-wider block mb-1">PROPERTY OVERVIEW</span>
-            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[#1a382b]">About {title}</h2>
-            <div class="text-sm sm:text-base text-slate-700 leading-relaxed font-normal space-y-3 mt-3">
-              {entry?.body ? <div class="prose max-w-none">{entry.body}</div> : (
-                <p>Welcome to {title}. Situated in the heart of {locationTag}, offering world-class luxury accommodations, business facilities, and diplomatic security.</p>
-              )}
-            </div>
-          </div>
+        <!-- Image Container -->
+        <div class="md:col-span-6 relative h-72 sm:h-[420px]">
+          <img src={hotel?.image} alt={hotel?.title} class="w-full h-full object-cover" />
+          <span class="absolute top-4 left-4 bg-[#0B1813] text-emerald-400 text-xs font-black uppercase px-3 py-1 rounded-lg border border-emerald-500/30 shadow">
+            {hotel?.category || 'Luxury Hotel'}
+          </span>
+        </div>
 
-          <div class="space-y-2 pt-2">
+        <!-- Details Box -->
+        <div class="md:col-span-6 p-6 sm:p-10 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
             <div class="flex justify-between items-center">
-              <h3 class="font-serif text-xl font-bold text-[#1a382b]">Interactive Location Map</h3>
-              <a href="https://maps.google.com" target="_blank" class="text-xs sm:text-sm font-bold text-[#1a382b] hover:underline">Open in Google Maps ↗</a>
-            </div>
-            <div class="w-full h-[320px] rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
-              <iframe 
-                title="Gulshan Hotel Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.59834612345!2d90.4132!3d23.7925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7a0f3d6118b%3A0x6a2c3a51f22e830!2sGulshan%202%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd" 
-                class="w-full h-full border-0" 
-                allowfullscreen="" 
-                loading="lazy">
-              </iframe>
-            </div>
-          </div>
-        </div>
-
-        <!-- Featured Amenities -->
-        <div id="amenities" class="bg-[#211f2e] text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-6">
-          <h3 class="text-2xl font-bold">Featured Amenities</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm font-semibold text-slate-200">
-            {(hotel.amenities || ["Indoor Heated Pool", "Free WiFi", "24/7 Power Generator", "Free Breakfast", "Airport Shuttle"]).map(a => (
-              <div class="flex items-center gap-2">✓ {a}</div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-
-      <!-- RIGHT COLUMN (30% STICKY SIDEBAR) -->
-      <div id="rates-section">
-        <div class="sticky top-20 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xl space-y-5">
-          
-          <div class="border-b border-slate-100 pb-3">
-            <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">View prices for travel dates</h3>
-            <p class="text-[11px] text-slate-500 font-medium mt-0.5">Select stay dates to update live rates</p>
-          </div>
-
-          <!-- 🌟 CLICKABLE STAY DATES BUTTON -->
-          <div class="space-y-3">
-            
-            <button id="openTwoMonthCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
-              <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES (CHECK IN — CHECK OUT)</label>
-                <span id="selectedDateRangeText" class="font-bold text-slate-800 text-xs">2026-08-10 — 2026-08-13</span>
-              </div>
-              <span class="text-slate-400 text-lg">📅</span>
-            </button>
-
-            <!-- GUESTS SELECTOR WITH POPUP COUNTER -->
-            <div class="relative">
-              <button id="guestSelectorBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer select-none">
-                <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">ROOMS & GUESTS</label>
-                  <span id="guestLabelText" class="font-bold text-slate-800 text-xs">1 Room, 2 Guests</span>
-                </div>
-                <svg class="w-4 h-4 text-slate-400" id="guestArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-
-              <!-- Guest Counter Popover -->
-              <div id="guestPopover" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 z-40 space-y-3">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Rooms</span>
-                  <div class="flex items-center gap-3">
-                    <button type="button" id="roomDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
-                    <span id="roomCount" class="text-xs font-bold w-4 text-center">1</span>
-                    <button type="button" id="roomInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between border-t border-slate-100 pt-2">
-                  <span class="text-xs font-bold text-slate-800">Adults</span>
-                  <div class="flex items-center gap-3">
-                    <button type="button" id="adultDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
-                    <span id="adultCount" class="text-xs font-bold w-4 text-center">2</span>
-                    <button type="button" id="adultInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between border-t border-slate-100 pt-2">
-                  <span class="text-xs font-bold text-slate-800">Children</span>
-                  <div class="flex items-center gap-3">
-                    <button type="button" id="childDec" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">-</button>
-                    <span id="childCount" class="text-xs font-bold w-4 text-center">0</span>
-                    <button type="button" id="childInc" class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-sm font-bold hover:bg-slate-100 cursor-pointer">+</button>
-                  </div>
-                </div>
-
-                <button type="button" id="applyGuestBtn" class="w-full bg-[#1a382b] text-white text-xs font-bold py-2 rounded-xl mt-1 cursor-pointer">Done</button>
-              </div>
+              <span class="text-xs font-bold text-slate-500 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                <span>{hotel?.location}</span>
+              </span>
+              <span class="text-amber-500 font-black text-sm flex items-center gap-1">
+                <svg class="w-4 h-4 text-amber-500 fill-amber-500" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span>{hotel?.rating || '4.8'} / 5</span>
+              </span>
             </div>
 
-          </div>
+            <h1 class="text-3xl sm:text-4xl font-black text-slate-900">{hotel?.title}</h1>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pt-2">
+              Experience world-class hospitality in the heart of Gulshan, Dhaka. Featuring luxury suites, fine dining, rooftop swimming pool, and spa facilities.
+            </p>
 
-          <!-- Dynamic TripAdvisor Style Cards Container -->
-          <div id="dynamicOtaContainer" class="space-y-3 pt-1">
-            <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-              Checking live rates...
+            <div class="flex flex-wrap gap-2 pt-2">
+              <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200">Free High-Speed Wi-Fi</span>
+              <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200">Swimming Pool</span>
+              <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200">Spa & Wellness</span>
+              <span class="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200">Fitness Gym</span>
             </div>
           </div>
 
-          <!-- Direct Actions -->
-          <div class="pt-3 border-t border-slate-100 space-y-2">
-            <button id="sidebarWhatsAppBtn" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer">
-              💬 Instant WhatsApp Reservation
-            </button>
-            <a href={`tel:${phone.replace(/\s+/g, '')}`} class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 transition text-center">
-              📞 Direct Call: {phone}
+          <!-- Price & Agoda Affiliate Button -->
+          <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span class="text-[10px] text-slate-400 font-black uppercase block">Estimated Rate</span>
+              <span class="text-2xl font-black text-slate-900">{hotel?.price}</span>
+            </div>
+
+            <a 
+              href="https://agoda.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="w-full sm:w-auto bg-[#D4AF37] hover:bg-amber-400 text-slate-950 font-black px-8 py-3.5 rounded-xl text-xs uppercase tracking-wider text-center shadow-lg transition"
+            >
+              Check Deals on Agoda ➔
             </a>
           </div>
-
         </div>
+
       </div>
 
     </div>
   </main>
-
-  <!-- 📱 MOBILE PINNED BOTTOM BAR -->
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between">
-    <div>
-      <span class="text-[10px] text-slate-400 block font-bold uppercase">Estimated Rate</span>
-      <span class="text-base font-black text-slate-900">{priceUSD} <span class="text-xs font-normal text-slate-500">/ {priceBDT}</span></span>
-    </div>
-    <div class="flex items-center gap-2">
-      <a href={`tel:${phone.replace(/\s+/g, '')}`} class="p-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold">📞</a>
-      <button id="mobileCheckBtn" class="bg-[#1a382b] text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-xl shadow-md cursor-pointer">
-        Check Availability
-      </button>
-    </div>
-  </div>
-
-  <!-- 🌟 2-MONTH CALENDAR MODAL (Z-INDEX 60 IS SET SO IT OPENS ON TOP OF MOBILE POPUP!) -->
-  <div id="twoMonthCalModal" class="custom-modal fixed inset-0 z-60 bg-black/70 hidden items-center justify-center p-3 sm:p-6 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 space-y-5 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
-      <button id="closeCalModalBtn" class="absolute top-4 right-4 text-slate-800 font-black w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200">&times;</button>
-      
-      <div>
-        <h3 class="font-serif text-xl sm:text-2xl font-bold text-slate-900">Select Stay Dates</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Click arrival date then departure date to check live availability</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-        <!-- Month 1: August 2026 -->
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-800 text-sm text-center">August 2026</h4>
-          <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
-            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-          </div>
-          <div class="grid grid-cols-7 gap-1 text-xs text-center font-bold text-slate-700">
-            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300 line-through">1</span>
-            <span class="p-2 text-slate-300 line-through">2</span>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-03">3</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-04">4</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-05">5</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-06">6</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-07">7</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-08">8</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-09">9</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-10">10</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-11">11</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-12">12</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-13">13</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-14">14</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-15">15</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-16">16</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-17">17</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-18">18</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-19">19</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-20">20</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-21">21</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-22">22</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-23">23</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-24">24</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-25">25</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-26">26</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-27">27</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-28">28</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-29">29</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-30">30</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-08-31">31</button>
-          </div>
-        </div>
-
-        <!-- Month 2: September 2026 -->
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-800 text-sm text-center">September 2026</h4>
-          <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-1">
-            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-          </div>
-          <div class="grid grid-cols-7 gap-1 text-xs text-center font-bold text-slate-700">
-            <span class="p-2 text-slate-300"></span><span class="p-2 text-slate-300"></span><button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-01">1</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-02">2</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-03">3</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-04">4</button>
-            <button type="button" class="cal-day p-2 hover:bg-slate-100 rounded-lg cursor-pointer" data-date="2026-09-05">5</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-        <span id="calSelectionSummary" class="text-xs font-bold text-slate-700">Click Check-in Date</span>
-        <button id="applyCalSelectionBtn" class="bg-[#1a382b] text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer">Apply Dates</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 📱 MOBILE POPUP MODAL (Z-INDEX 50) -->
-  <div id="mobileRatesModal" class="custom-modal fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative border border-slate-200 max-h-[85vh] overflow-y-auto">
-      <button id="closeMobileRatesBtn" class="absolute top-4 right-4 text-slate-800 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
-      
-      <h3 class="font-serif text-xl font-bold text-slate-900">Check Rates & Availability</h3>
-      <p class="text-xs text-slate-500">Select stay dates to view live availability for {title}</p>
-      
-      <!-- Mobile Date Box (Closes Mobile Modal and Opens 2-Month Calendar) -->
-      <button id="mobileOpenCalBtn" type="button" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-left hover:border-slate-300 transition flex items-center justify-between cursor-pointer">
-        <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider cursor-pointer">SELECT STAY DATES</label>
-          <span id="mobileDateText" class="font-bold text-slate-800 text-xs">Click to select stay dates</span>
-        </div>
-        <span class="text-slate-400 text-base">📅</span>
-      </button>
-
-      <!-- Live Rates Container in Mobile Popup -->
-      <div id="mobileOtaContainer" class="space-y-3 pt-2"></div>
-    </div>
-  </div>
-
-  <!-- ⚡ JS: DYNAMIC RANGE SELECTION + OVERLAY MODAL LAYERING -->
-  <script is:inline define:vars={{ title }}>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const container = document.getElementById('dynamicOtaContainer');
-      const mobileContainer = document.getElementById('mobileOtaContainer');
-
-      let currentCheckIn = "2026-08-10";
-      let currentCheckOut = "2026-08-13";
-      let adults = 2;
-      let rooms = 1;
-      let children = 0;
-
-      // 1. 2-MONTH CALENDAR MODAL LOGIC (Z-INDEX 60)
-      const openTwoMonthCalBtn = document.getElementById('openTwoMonthCalBtn');
-      const mobileOpenCalBtn = document.getElementById('mobileOpenCalBtn');
-      const twoMonthCalModal = document.getElementById('twoMonthCalModal');
-      const closeCalModalBtn = document.getElementById('closeCalModalBtn');
-      const applyCalSelectionBtn = document.getElementById('applyCalSelectionBtn');
-
-      function openCalModal() {
-        twoMonthCalModal?.classList.remove('hidden');
-        twoMonthCalModal?.classList.add('flex');
-        history.pushState({ modalOpen: true }, '');
-      }
-
-      function closeCalModal() {
-        twoMonthCalModal?.classList.add('hidden');
-        twoMonthCalModal?.classList.remove('flex');
-      }
-
-      openTwoMonthCalBtn?.addEventListener('click', openCalModal);
-      mobileOpenCalBtn?.addEventListener('click', openCalModal);
-      closeCalModalBtn?.addEventListener('click', closeCalModal);
-
-      // Dynamic Range Selection Logic
-      const calDays = document.querySelectorAll('.cal-day');
-      let selectClickState = 'checkin';
-
-      function updateCalendarHighlight() {
-        calDays.forEach(btn => {
-          const d = btn.getAttribute('data-date');
-          if (!d) return;
-
-          // Reset Base Style
-          btn.className = "cal-day font-bold p-2 rounded-lg cursor-pointer transition text-slate-700 hover:bg-slate-100";
-
-          const dTime = new Date(d).getTime();
-          const inTime = currentCheckIn ? new Date(currentCheckIn).getTime() : 0;
-          const outTime = currentCheckOut ? new Date(currentCheckOut).getTime() : 0;
-
-          if (d === currentCheckIn || d === currentCheckOut) {
-            btn.className = "cal-day font-bold p-2 rounded-lg bg-[#1a382b] text-white shadow-xs cursor-pointer";
-          } else if (inTime && outTime && dTime > inTime && dTime < outTime) {
-            btn.className = "cal-day font-bold p-2 rounded-lg bg-emerald-100 text-emerald-900 cursor-pointer";
-          }
-        });
-
-        const selectedText = `${currentCheckIn} — ${currentCheckOut}`;
-        document.getElementById('selectedDateRangeText').innerText = selectedText;
-        document.getElementById('mobileDateText').innerText = selectedText;
-        document.getElementById('calSelectionSummary').innerText = `Selected: ${selectedText}`;
-      }
-
-      calDays.forEach(dayBtn => {
-        dayBtn.addEventListener('click', () => {
-          const clickedDate = dayBtn.getAttribute('data-date');
-          if (!clickedDate) return;
-
-          if (selectClickState === 'checkin') {
-            currentCheckIn = clickedDate;
-            currentCheckOut = "";
-            selectClickState = 'checkout';
-            updateCalendarHighlight();
-            document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Now click Departure Date)`;
-          } else {
-            // Ensure checkout is after checkin
-            if (new Date(clickedDate) <= new Date(currentCheckIn)) {
-              currentCheckIn = clickedDate;
-              currentCheckOut = "";
-              selectClickState = 'checkout';
-              updateCalendarHighlight();
-              document.getElementById('calSelectionSummary').innerText = `Check-In: ${currentCheckIn} (Now click Departure Date)`;
-            } else {
-              currentCheckOut = clickedDate;
-              selectClickState = 'checkin';
-              updateCalendarHighlight();
-              closeCalModal();
-              fetchLiveRates();
-            }
-          }
-        });
-      });
-
-      applyCalSelectionBtn?.addEventListener('click', () => {
-        closeCalModal();
-        fetchLiveRates();
-      });
-
-      // Initial Highlight
-      updateCalendarHighlight();
-
-      // 2. ROOMS & GUESTS COUNTER LOGIC
-      const guestSelectorBtn = document.getElementById('guestSelectorBtn');
-      const guestPopover = document.getElementById('guestPopover');
-      const applyGuestBtn = document.getElementById('applyGuestBtn');
-
-      guestSelectorBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        guestPopover?.classList.toggle('hidden');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!guestPopover?.contains(e.target) && !guestSelectorBtn?.contains(e.target)) {
-          guestPopover?.classList.add('hidden');
-        }
-      });
-
-      document.getElementById('roomInc')?.addEventListener('click', () => { rooms++; updateGuestUI(); });
-      document.getElementById('roomDec')?.addEventListener('click', () => { if (rooms > 1) rooms--; updateGuestUI(); });
-      document.getElementById('adultInc')?.addEventListener('click', () => { adults++; updateGuestUI(); });
-      document.getElementById('adultDec')?.addEventListener('click', () => { if (adults > 1) adults--; updateGuestUI(); });
-      document.getElementById('childInc')?.addEventListener('click', () => { children++; updateGuestUI(); });
-      document.getElementById('childDec')?.addEventListener('click', () => { if (children > 0) children--; updateGuestUI(); });
-
-      function updateGuestUI() {
-        document.getElementById('roomCount').innerText = rooms;
-        document.getElementById('adultCount').innerText = adults;
-        document.getElementById('childCount').innerText = children;
-        document.getElementById('guestLabelText').innerText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Guest${adults > 1 ? 's' : ''}`;
-      }
-
-      applyGuestBtn?.addEventListener('click', () => {
-        guestPopover?.classList.add('hidden');
-        fetchLiveRates();
-      });
-
-      // 3. FETCH LIVE RATES & CHECK AVAILABILITY
-      function parsePriceNumber(suppObj) {
-        if (!suppObj) return null;
-        if (typeof suppObj.price === 'number') return suppObj.price;
-        if (typeof suppObj.price === 'object' && suppObj.price !== null) {
-          const val = suppObj.price.total || suppObj.price.amount || suppObj.price.value || suppObj.price.net;
-          return val ? parseFloat(val) : null;
-        }
-        return null;
-      }
-
-      async function fetchLiveRates() {
-        if (!container) return;
-        
-        container.innerHTML = `
-          <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-            Checking live availability for ${currentCheckIn} to ${currentCheckOut}...
-          </div>
-        `;
-
-        try {
-          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}&checkin=${currentCheckIn}&checkout=${currentCheckOut}&adults=${adults}`;
-          const response = await fetch(workerUrl);
-
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data && data.results && data.results.length > 0) {
-              const suppliersList = [];
-
-              data.results.forEach(item => {
-                const itemName = (item.name || "").toLowerCase();
-                const targetName = title.toLowerCase();
-
-                if (itemName.includes(targetName.substring(0, 5)) || targetName.includes(itemName.substring(0, 5))) {
-                  if (item.suppliers) {
-                    Object.keys(item.suppliers).forEach(key => {
-                      const supp = item.suppliers[key];
-                      if (supp && supp.link) {
-                        suppliersList.push({
-                          key: key,
-                          name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
-                          link: supp.link,
-                          logo: supp.media?.logoSquare || null,
-                          totalPrice: parsePriceNumber(supp)
-                        });
-                      }
-                    });
-                  }
-                }
-              });
-
-              suppliersList.sort((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : 0));
-
-              if (suppliersList.length > 0) {
-                container.innerHTML = '';
-                if (mobileContainer) mobileContainer.innerHTML = '';
-
-                suppliersList.forEach((supp, index) => {
-                  const isLowest = index === 0 && supp.totalPrice;
-                  const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
-                  const priceDisplay = basePriceNum ? `$${basePriceNum}` : `Check rate`;
-
-                  const buttonClass = isLowest
-                    ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-4 py-2 rounded-full transition shadow-xs text-xs`
-                    : `border border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-4 py-2 rounded-full transition text-xs`;
-
-                  const logoHtml = supp.logo 
-                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 sm:h-6 object-contain" />` 
-                    : `<span class="font-extrabold text-slate-900 text-xs sm:text-sm">${supp.name}</span>`;
-
-                  const cardHTML = `
-                    <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 flex items-center justify-between gap-2 shadow-2xs">
-                      <div class="flex items-center gap-2">
-                        ${logoHtml}
-                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Available</span>
-                      </div>
-
-                      <div class="flex items-center gap-3 ml-auto">
-                        <div class="text-right">
-                          <span class="font-serif font-black text-slate-900 text-sm sm:text-base">${priceDisplay}</span>
-                          ${basePriceNum ? `<span class="text-[9px] text-slate-400 font-bold block -mt-1">+taxes</span>` : ''}
-                        </div>
-                        <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
-                          View deal
-                        </a>
-                      </div>
-                    </div>
-                  `;
-                  container.insertAdjacentHTML('beforeend', cardHTML);
-                  if (mobileContainer) mobileContainer.insertAdjacentHTML('beforeend', cardHTML);
-                });
-
-              } else {
-                renderSoldOutState();
-              }
-
-            } else {
-              renderSoldOutState();
-            }
-          }
-        } catch (err) {
-          renderSoldOutState();
-        }
-      }
-
-      function renderSoldOutState() {
-        const soldOutHTML = `
-          <div class="p-5 text-center space-y-2 bg-rose-50 rounded-2xl border border-rose-200">
-            <div class="text-rose-700 font-bold text-sm">🔴 Fully Booked / Sold Out</div>
-            <p class="text-xs text-slate-600">No rooms available for ${currentCheckIn} to ${currentCheckOut}. Please select different stay dates.</p>
-          </div>
-        `;
-        if (container) container.innerHTML = soldOutHTML;
-        if (mobileContainer) mobileContainer.innerHTML = soldOutHTML;
-      }
-
-      fetchLiveRates();
-
-      // Mobile Modal
-      const mobileCheckBtn = document.getElementById('mobileCheckBtn');
-      const mobileRatesModal = document.getElementById('mobileRatesModal');
-      const closeMobileRatesBtn = document.getElementById('closeMobileRatesBtn');
-
-      mobileCheckBtn?.addEventListener('click', () => {
-        mobileRatesModal?.classList.remove('hidden');
-        mobileRatesModal?.classList.add('flex');
-        history.pushState({ modalOpen: true }, '');
-      });
-
-      closeMobileRatesBtn?.addEventListener('click', () => {
-        mobileRatesModal?.classList.add('hidden');
-        mobileRatesModal?.classList.remove('flex');
-      });
-
-      window.addEventListener('popstate', () => {
-        twoMonthCalModal?.classList.add('hidden');
-        twoMonthCalModal?.classList.remove('flex');
-        mobileRatesModal?.classList.add('hidden');
-        mobileRatesModal?.classList.remove('flex');
-      });
-
-      // WhatsApp
-      const sidebarWhatsAppBtn = document.getElementById('sidebarWhatsAppBtn');
-      if(sidebarWhatsAppBtn) {
-        sidebarWhatsAppBtn.addEventListener('click', () => {
-          const textMessage = `Hello! I would like to request room availability and details for ${title} via GulshanHotels Directory.`;
-          window.open(`https://wa.me/8801700000000?text=${encodeURIComponent(textMessage)}`, '_blank');
-        });
-      }
-    });
-  </script>
-
 </Layout>
