@@ -5,7 +5,7 @@ location: Gulshan 2, Dhaka
 price: $$$$
 rating: 4.8
 image: /images/uploads/hero-gulshan.jpg
-popular: true
+popular: false
 priceUSD: sadfasdf
 priceBDT: sfasdf
 fullAddress: sdfsdafsdf
