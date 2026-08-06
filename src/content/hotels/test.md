@@ -1,20 +1,21 @@
 ---
 title: Sheraton Dhaka
-slug: Sheraton-Dhaka
 category: 4-Star Boutique
 location: Gulshan 2, Dhaka
-fullAddress: sdfsdafsdf
-priceBDT: sfasdf
-priceUSD: sadfasdf
+price: $$$$
 rating: 4.8
-reviewsCount: '50'
 image: /images/uploads/hero-gulshan.jpg
+popular: true
+priceUSD: sadfasdf
+priceBDT: sfasdf
+fullAddress: sdfsdafsdf
+slug: Sheraton-Dhaka
+reviewsCount: '50'
 phone: '0195585585'
 whatsapp: '5658587425'
 officialWebsite: gulshanhotels.com
 mapEmbedUrl: ''
 editorNote: ''
-price: $$$$
 ---
 
 sdfasdfassfsfasfasd
