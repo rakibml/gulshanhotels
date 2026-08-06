@@ -1,98 +1,6 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
-
-// ১. Astro Content Collections থেকে ডাটা লোড
-let hotels = [];
-try {
-  const collectionData = await getCollection('hotels');
-  if (collectionData && collectionData.length > 0) {
-    hotels = collectionData.map((item: any) => ({
-      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
-      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
-      category: item.data?.category || 'Luxury Hotel',
-      location: item.data?.location || 'Gulshan 2, Dhaka',
-      area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-      price: item.data?.price || '$$$$',
-      rating: item.data?.rating || 4.8,
-      reviews: item.data?.reviewsCount || '1,248',
-      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
-      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    }));
-  }
-} catch (err) {
-  hotels = [];
-}
-
-// ২. কালেকশন ফাঁকা থাকলে Relative Glob দিয়ে ফাইল স্ক্যান
-if (!hotels || hotels.length === 0) {
-  try {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const globList = Object.entries(rawGlob);
-    if (globList && globList.length > 0) {
-      hotels = globList.map(([filePath, item]: [string, any]) => {
-        const filename = filePath.split('/').pop()?.replace('.md', '') || 'hotel';
-        return {
-          slug: filename,
-          title: item.frontmatter?.title || item.frontmatter?.name || 'Gulshan Hotel',
-          category: item.frontmatter?.category || 'Luxury Hotel',
-          location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
-          area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-          price: item.frontmatter?.price || '$$$$',
-          rating: item.frontmatter?.rating || 4.8,
-          reviews: item.frontmatter?.reviewsCount || '1,248',
-          description: item.frontmatter?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
-          image: item.frontmatter?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-        };
-      });
-    }
-  } catch (err) {
-    hotels = [];
-  }
-}
-
-// ৩. সেফটি ডিফল্ট ডাটা
-if (!hotels || hotels.length === 0) {
-  hotels = [
-    {
-      slug: "the-westin-dhaka",
-      title: "The Westin Dhaka",
-      category: "Luxury Hotel",
-      location: "Gulshan 2, Dhaka",
-      area: "gulshan-2",
-      price: "৳ 18,500 / night",
-      rating: 4.7,
-      reviews: "1,248",
-      description: "Premium business hotel with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      slug: "amari-dhaka",
-      title: "Amari Dhaka",
-      category: "Luxury Hotel",
-      location: "Gulshan 2, Dhaka",
-      area: "gulshan-2",
-      price: "৳ 16,000 / night",
-      rating: 4.6,
-      reviews: "982",
-      description: "Modern rooms, rooftop pool and easy access to embassies and corporate offices in Gulshan Circle 2.",
-      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      slug: "renaissance-dhaka",
-      title: "Renaissance Dhaka Gulshan Hotel",
-      category: "Luxury Hotel",
-      location: "Gulshan 1, Dhaka",
-      area: "gulshan-1",
-      price: "৳ 22,000 / night",
-      rating: 4.7,
-      reviews: "1,102",
-      description: "Stylish hotel with spacious rooms, multiple dining options and warm hospitality in Gulshan 1.",
-      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-    }
-  ];
-}
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
@@ -128,84 +36,83 @@ if (!hotels || hotels.length === 0) {
     </div>
   </section>
 
-  <!-- WELCOME AUTHORITY SECTION (Social Icons placed right next to GulshanHotels.com \ | /) -->
-  <section class="bg-white py-10 sm:py-14 border-b border-slate-200">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+  <!-- WELCOME AUTHORITY SECTION (Rich Full-Width Text Layout) -->
+  <section class="bg-white py-10 sm:py-16 border-b border-slate-200">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
       
-      <div class="max-w-5xl space-y-3 text-left">
-        <!-- Subtitle with Green Underline -->
-        <div class="inline-block border-b-2 border-[#0d3b23] pb-1">
-          <span class="text-xs font-black uppercase tracking-widest text-[#0d3b23]">
-            WELCOME TO
-          </span>
+      <!-- Subtitle with Green Underline -->
+      <div class="inline-block border-b-2 border-[#0d3b23] pb-1">
+        <span class="text-xs font-black uppercase tracking-widest text-[#0d3b23]">
+          WELCOME TO
+        </span>
+      </div>
+
+      <!-- Main Title, Slash Lines & Inline Social Logos -->
+      <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+        <h2 class="font-serif text-3xl sm:text-5xl font-black text-[#0d3b23] tracking-tight">
+          GulshanHotels.com
+        </h2>
+
+        <!-- 3 Accent Slash Lines \ | / -->
+        <div class="hidden sm:flex items-center space-x-1 text-emerald-600 font-light text-2xl tracking-tighter opacity-80">
+          <span>\</span><span>|</span><span>/</span>
         </div>
 
-        <!-- Main Title & Inline Social Media Icons (Right Next to \ | /) -->
-        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-          <h2 class="font-serif text-3xl sm:text-5xl font-black text-[#0d3b23] tracking-tight">
-            GulshanHotels.com
-          </h2>
+        <!-- 3 Clickable Social Media Logo Buttons -->
+        <div class="flex items-center space-x-2.5 sm:ml-2">
+          <!-- Facebook Logo Button -->
+          <a 
+            href="https://facebook.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            title="Facebook" 
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1877F2] hover:bg-[#166FE5] text-white flex items-center justify-center shadow-md hover:scale-110 transition-all duration-300"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 3.865 10.99 9.1 11.823v-8.367h-3.04v-3.456h3.04v-2.636c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.456h-2.796v8.367c5.235-.833 9.1-5.833 9.1-11.823z"/></svg>
+          </a>
 
-          <!-- 3 Accent Slash Lines \ | / -->
-          <div class="hidden sm:flex items-center space-x-1 text-emerald-600 font-light text-2xl tracking-tighter opacity-80">
-            <span>\</span><span>|</span><span>/</span>
-          </div>
+          <!-- Instagram Logo Button -->
+          <a 
+            href="https://instagram.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            title="Instagram" 
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 hover:opacity-90 text-white flex items-center justify-center shadow-md hover:scale-110 transition-all duration-300"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
 
-          <!-- 3 Clickable Social Media Logo Buttons (Placed right next to Title in the Red Box) -->
-          <div class="flex items-center space-x-2.5 sm:ml-2">
-            <!-- Facebook Logo Button -->
-            <a 
-              href="https://facebook.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="Facebook" 
-              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1877F2] hover:bg-[#166FE5] text-white flex items-center justify-center shadow-sm hover:scale-110 transition-all duration-300"
-            >
-              <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 3.865 10.99 9.1 11.823v-8.367h-3.04v-3.456h3.04v-2.636c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.456h-2.796v8.367c5.235-.833 9.1-5.833 9.1-11.823z"/></svg>
-            </a>
-
-            <!-- Instagram Logo Button -->
-            <a 
-              href="https://instagram.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="Instagram" 
-              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 hover:opacity-90 text-white flex items-center justify-center shadow-sm hover:scale-110 transition-all duration-300"
-            >
-              <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            </a>
-
-            <!-- Twitter / X Logo Button -->
-            <a 
-              href="https://twitter.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              title="Twitter (X)" 
-              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-950 hover:bg-black text-white flex items-center justify-center shadow-sm hover:scale-110 transition-all duration-300 border border-slate-800"
-            >
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-          </div>
-
+          <!-- Twitter / X Logo Button -->
+          <a 
+            href="https://twitter.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            title="Twitter (X)" 
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-950 hover:bg-black text-white flex items-center justify-center shadow-md hover:scale-110 transition-all duration-300 border border-slate-800"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
         </div>
+      </div>
 
-        <!-- Truncated (~120 Words) Authority Description with Read More -->
-        <div class="text-slate-700 text-sm sm:text-base leading-relaxed pt-2 font-normal space-y-3">
+      <!-- Rich Full-Width Authority Description Paragraphs (Fills Entire Right Side) -->
+      <div class="text-slate-700 text-sm sm:text-base leading-relaxed pt-2 font-normal space-y-4 max-w-none">
+        <p>
+          At Gulshan, business meets diplomatic luxury. For international business leaders, foreign diplomats, non-resident Bangladeshis, and discerning travelers, <strong>GulshanHotels.com</strong> is where their journey begins. As the official local accommodation and travel directory for Gulshan 1, Gulshan 2, and the Diplomatic Zone, this is your one trusted source for verified 5-star luxury hotels, embassy proximity guides, fine dining, and real-time deal comparisons.
+        </p>
+
+        <!-- Hidden Expanded Portion (Toggled on Read More click) -->
+        <div id="extended-content" class="hidden space-y-4 pt-1">
           <p>
-            At Gulshan, business meets diplomatic luxury. For travelers from around the world, <strong>GulshanHotels.com</strong> is where their journey begins. As the official local accommodation and travel directory for Gulshan 1, Gulshan 2, and the Diplomatic Zone, this is your one trusted source for verified 5-star luxury hotels, embassy proximity guides, fine dining, and real-time deal comparisons. We analyze consumer forum data and traveler reviews to uncover hidden checkout fees, identify maintenance gaps, and help you book smarter.
+            Whether you are visiting Gulshan for foreign embassy visa interviews (US Embassy, IVAC Indian Visa Center, UK Visa Application Centre, Saudi Embassy), high-profile corporate summits, or a weekend urban getaway, Gulshan offers Bangladesh's most secure and vibrant hospitality ecosystem.
           </p>
+          <p>
+            Our independent audit team routinely inspects room amenities, high-speed Wi-Fi speeds, swimming pool hygiene, rooftop dining options, and airport shuttle reliability across all major properties including The Westin Dhaka, Renaissance Dhaka, Amari Dhaka, and Lakeshore Hotel. We analyze consumer forum data and traveler reviews to uncover hidden checkout fees, identify maintenance gaps, and help you book smarter.
+          </p>
+        </div>
 
-          <!-- Hidden Expanded Portion -->
-          <div id="extended-content" class="hidden space-y-3 pt-1">
-            <p>
-              Whether you are visiting Gulshan for foreign embassy visa interviews (US Embassy, IVAC Indian Visa Center, UK Visa Application Centre), high-profile corporate summits, or a weekend urban getaway, Gulshan offers Bangladesh's most secure and vibrant hospitality ecosystem.
-            </p>
-            <p>
-              Our independent audit team routinely inspects room amenities, high-speed Wi-Fi speeds, swimming pool hygiene, rooftop dining options, and airport shuttle reliability across all major properties including The Westin Dhaka, Renaissance Dhaka, Amari Dhaka, and Lakeshore Hotel.
-            </p>
-          </div>
-
-          <!-- Read More / Read Less Toggle Button -->
+        <!-- Read More / Read Less Toggle Button -->
+        <div>
           <button 
             id="read-more-btn" 
             type="button" 
@@ -215,178 +122,14 @@ if (!hotels || hotels.length === 0) {
             <svg id="read-more-arrow" class="w-3.5 h-3.5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
           </button>
         </div>
-
       </div>
 
     </div>
   </section>
 
-  <!-- FLOATING AREA FILTER BAR -->
-  <section class="bg-[#F8FAF9] py-8 border-b border-slate-200">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
-      <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-        
-        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
-          <button data-filter="all" class="filter-pill active-pill bg-[#0d3b23] text-white hover:bg-emerald-950 px-5 py-2.5 rounded-full text-xs sm:text-sm font-black flex items-center space-x-2 shadow-sm transition cursor-pointer">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 v5m-4 0h4"></path></svg>
-            <span>All Gulshan</span>
-          </button>
-
-          <button data-filter="gulshan-1" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition cursor-pointer">
-            <span>Gulshan 1</span>
-          </button>
-
-          <button data-filter="gulshan-2" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition cursor-pointer">
-            <span>Gulshan 2</span>
-          </button>
-
-          <button data-filter="banani" class="filter-pill bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center space-x-2 transition cursor-pointer">
-            <span>Banani</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ALL HOTELS IN GULSHAN GRID SECTION -->
-  <section id="hotels" class="bg-[#F8FAF9] py-16">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
-      
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-        <div>
-          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Verified Gulshan Hotels</h3>
-          <p class="text-xs text-slate-500 font-bold mt-1">Showing {hotels.length} hotels in Gulshan 1 & 2</p>
-        </div>
-      </div>
-
-      <!-- 4-Column Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {hotels.map((hotel) => (
-          <div data-area={hotel.area} class="hotel-card bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-lg transition duration-300 group">
-            
-            <div class="relative h-48 overflow-hidden bg-slate-900">
-              <a href={`/${hotel.slug}`} class="block w-full h-full">
-                <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              </a>
-            </div>
-
-            <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-              <div>
-                <a href={`/${hotel.slug}`} class="block font-black text-slate-900 text-lg hover:text-[#0d3b23] transition leading-snug">
-                  {hotel.title}
-                </a>
-                <p class="text-xs font-semibold text-slate-500 mt-0.5 flex items-center gap-1">
-                  <svg class="w-3 h-3 text-slate-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                  <span>{hotel.location} • <strong class="text-slate-700">{hotel.category}</strong></span>
-                </p>
-
-                <div class="flex items-center space-x-1 text-amber-500 font-bold text-xs mt-1.5">
-                  <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                  <span class="text-slate-900 font-black ml-0.5">{hotel.rating}</span>
-                  <span class="text-slate-500 font-normal">Excellent ({hotel.reviews} reviews)</span>
-                </div>
-
-                <p class="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">
-                  {hotel.description}
-                </p>
-
-                <div class="flex items-center space-x-3 text-[11px] font-semibold text-slate-500 pt-3">
-                  <span class="flex items-center space-x-1">
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a10 10 0 0114.142 0"/></svg>
-                    <span>Wi-Fi</span>
-                  </span>
-                  <span class="flex items-center space-x-1">
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span>Pool</span>
-                  </span>
-                  <span class="flex items-center space-x-1">
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    <span>Spa</span>
-                  </span>
-                </div>
-              </div>
-
-              <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 mt-3">
-                <button 
-                  data-title={hotel.title}
-                  data-image={hotel.image}
-                  data-rating={hotel.rating}
-                  data-price={hotel.price}
-                  class="open-price-modal bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition text-center cursor-pointer"
-                >
-                  Check Price
-                </button>
-
-                <a 
-                  href={`/${hotel.slug}`} 
-                  class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition text-center"
-                >
-                  Full Details
-                </a>
-              </div>
-            </div>
-
-          </div>
-        ))}
-      </div>
-
-    </div>
-  </section>
-
-  <!-- REAL-TIME WORKER API CHECK PRICE POPUP MODAL -->
-  <div id="priceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 transition-opacity">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative border border-slate-200 max-h-[90vh] overflow-y-auto">
-      
-      <button id="closePriceModal" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 font-black w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-lg cursor-pointer">&times;</button>
-      
-      <div>
-        <h3 class="font-serif text-2xl font-bold text-slate-900">View prices for travel dates</h3>
-        <p class="text-xs text-slate-500 font-medium mt-0.5">Live rates fetched directly from Worker API</p>
-      </div>
-
-      <div class="flex items-center space-x-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-        <img id="modalImg" src="" class="w-14 h-14 object-cover rounded-xl border border-slate-200 shadow-xs shrink-0" />
-        <div class="overflow-hidden">
-          <h4 id="modalTitle" class="text-base font-black text-slate-900 truncate">Hotel Name</h4>
-          <p id="modalRating" class="text-xs font-bold text-amber-500 mt-0.5 flex items-center gap-1">
-            <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-            <span>4.8 Excellent</span>
-          </p>
-        </div>
-      </div>
-
-      <!-- Dynamic Real-Time Worker API Rates Container -->
-      <div id="homepageOtaContainer" class="space-y-3 pt-1">
-        <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-          Checking live rates...
-        </div>
-      </div>
-
-      <div class="pt-3 border-t border-slate-100 space-y-2">
-        <a 
-          href="https://wa.me/8801700000000?text=Hello!%20I%20would%20like%20to%20inquire%20about%20room%20rates." 
-          target="_blank" 
-          class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition text-center"
-        >
-          <span>Instant WhatsApp Reservation</span>
-        </a>
-
-        <a 
-          href="tel:+8801700000000" 
-          class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2 transition text-center"
-        >
-          <span>Direct Call: +880 1700-000000</span>
-        </a>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- WORKER API & READ MORE SCRIPTS -->
+  <!-- Script for Read More Toggle -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Read More Toggle Logic
       const readBtn = document.getElementById('read-more-btn');
       const extContent = document.getElementById('extended-content');
       const readText = document.getElementById('read-more-text');
@@ -406,161 +149,6 @@ if (!hotels || hotels.length === 0) {
           }
         });
       }
-
-      // 2. Real-Time Worker API Modal Logic
-      const modal = document.getElementById('priceModal');
-      const closeBtn = document.getElementById('closePriceModal');
-      const openBtns = document.querySelectorAll('.open-price-modal');
-
-      const modalTitle = document.getElementById('modalTitle');
-      const modalImg = document.getElementById('modalImg');
-      const modalRating = document.getElementById('modalRating');
-      const otaContainer = document.getElementById('homepageOtaContainer');
-
-      function parsePriceNumber(suppObj) {
-        if (!suppObj) return null;
-        if (typeof suppObj.price === 'number') return suppObj.price;
-        if (typeof suppObj.price === 'object' && suppObj.price !== null) {
-          const val = suppObj.price.total || suppObj.price.amount || suppObj.price.value || suppObj.price.net;
-          return val ? parseFloat(val) : null;
-        }
-        return null;
-      }
-
-      async function fetchRealtimeRatesForModal(hotelName) {
-        if (!otaContainer) return;
-
-        otaContainer.innerHTML = `
-          <div class="p-4 text-center text-slate-500 text-xs font-medium bg-slate-50 rounded-2xl border border-slate-200 animate-pulse">
-            Checking live rates for ${hotelName}...
-          </div>
-        `;
-
-        try {
-          const checkin = "2026-08-10";
-          const checkout = "2026-08-13";
-          const adults = 2;
-          const workerUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}&checkin=${checkin}&checkout=${checkout}&adults=${adults}`;
-          const response = await fetch(workerUrl);
-
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data && data.results && data.results.length > 0) {
-              const suppliersList = [];
-
-              data.results.forEach(item => {
-                const itemName = (item.name || "").toLowerCase();
-                const targetName = hotelName.toLowerCase();
-
-                if (itemName.includes(targetName.substring(0, 5)) || targetName.includes(itemName.substring(0, 5))) {
-                  if (item.suppliers) {
-                    Object.keys(item.suppliers).forEach(key => {
-                      const supp = item.suppliers[key];
-                      if (supp && supp.link) {
-                        suppliersList.push({
-                          key: key,
-                          name: key.toUpperCase() === 'HOTELSCOM' ? 'Hotels.com' : key.charAt(0).toUpperCase() + key.slice(1) + '.com',
-                          link: supp.link,
-                          logo: supp.media?.logoSquare || null,
-                          totalPrice: parsePriceNumber(supp)
-                        });
-                      }
-                    });
-                  }
-                }
-              });
-
-              suppliersList.sort((a, b) => (a.totalPrice && b.totalPrice ? a.totalPrice - b.totalPrice : 0));
-
-              if (suppliersList.length > 0) {
-                otaContainer.innerHTML = '';
-
-                suppliersList.forEach((supp, index) => {
-                  const isLowest = index === 0 && supp.totalPrice;
-                  const basePriceNum = supp.totalPrice ? Math.round(supp.totalPrice / 1.15) : null;
-                  const priceDisplay = basePriceNum ? `$${basePriceNum}` : `Check rate`;
-
-                  const buttonClass = isLowest
-                    ? `bg-[#00e676] hover:bg-[#00c853] text-slate-900 font-extrabold px-4 py-2 rounded-full transition shadow-xs text-xs`
-                    : `border border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold px-4 py-2 rounded-full transition text-xs`;
-
-                  const logoHtml = supp.logo 
-                    ? `<img src="${supp.logo}" alt="${supp.name}" class="h-5 sm:h-6 object-contain" />` 
-                    : `<span class="font-extrabold text-slate-900 text-xs sm:text-sm">${supp.name}</span>`;
-
-                  const cardHTML = `
-                    <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 flex items-center justify-between gap-2 shadow-2xs">
-                      <div class="flex items-center gap-2">
-                        ${logoHtml}
-                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Available</span>
-                      </div>
-
-                      <div class="flex items-center gap-3 ml-auto">
-                        <div class="text-right">
-                          <span class="font-serif font-black text-slate-900 text-sm sm:text-base">${priceDisplay}</span>
-                          ${basePriceNum ? `<span class="text-[9px] text-slate-400 font-bold block -mt-1">+taxes</span>` : ''}
-                        </div>
-                        <a href="${supp.link}" target="_blank" rel="nofollow sponsored" class="${buttonClass}">
-                          View deal
-                        </a>
-                      </div>
-                    </div>
-                  `;
-                  otaContainer.insertAdjacentHTML('beforeend', cardHTML);
-                });
-
-              } else {
-                renderModalSoldOut(hotelName);
-              }
-            } else {
-              renderModalSoldOut(hotelName);
-            }
-          }
-        } catch (err) {
-          renderModalSoldOut(hotelName);
-        }
-      }
-
-      function renderModalSoldOut(hotelName) {
-        if (otaContainer) {
-          otaContainer.innerHTML = `
-            <div class="p-4 text-center space-y-1 bg-rose-50 rounded-2xl border border-rose-200">
-              <div class="text-rose-700 font-bold text-xs">🔴 Rates Updating for ${hotelName}</div>
-              <p class="text-[11px] text-slate-600">Please click Full Details to check live dates or contact via WhatsApp below.</p>
-            </div>
-          `;
-        }
-      }
-
-      openBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const title = btn.getAttribute('data-title') || 'The Westin Dhaka';
-          const image = btn.getAttribute('data-image') || '';
-          const rating = btn.getAttribute('data-rating') || '4.8';
-
-          if (modalTitle) modalTitle.innerText = title;
-          if (modalImg) modalImg.src = image;
-          if (modalRating) modalRating.innerText = `★ ${rating} Excellent`;
-
-          modal?.classList.remove('hidden');
-          modal?.classList.add('flex');
-
-          fetchRealtimeRatesForModal(title);
-        });
-      });
-
-      closeBtn?.addEventListener('click', () => {
-        modal?.classList.add('hidden');
-        modal?.classList.remove('flex');
-      });
-
-      modal?.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-        }
-      });
     });
   </script>
 
