@@ -22,7 +22,6 @@ const hotelRating = data.rating;
 const reviewsCount = data.reviewsCount;
 const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
-// Fallback Gallery Images
 const galleryImages = data.gallery && data.gallery.length > 0 ? data.gallery : [
   hotelImage,
   "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
@@ -31,7 +30,6 @@ const galleryImages = data.gallery && data.gallery.length > 0 ? data.gallery : [
   "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
 ];
 
-// Amenities List
 const amenitiesList = data.amenities && data.amenities.length > 0 ? data.amenities : [
   "High-Speed Free Wi-Fi",
   "Swimming Pool & Jacuzzi",
@@ -44,7 +42,6 @@ const amenitiesList = data.amenities && data.amenities.length > 0 ? data.ameniti
   "24/7 Security & CCTV"
 ];
 
-// Nearby Places
 const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.nearby_places : [
   { name: "Gulshan Lake Park", distance: "250m" },
   { name: "Chef's Table Gulshan", distance: "400m" },
@@ -57,48 +54,37 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
 
 <Layout title={`${hotelTitle} — Verified Hotel in Gulshan, Dhaka`}>
 
-  <!-- 1. HOTEL NAME & HEADER SECTION -->
-  <section class="bg-slate-900 text-white pt-8 pb-8 px-4 sm:px-8 border-b border-slate-800">
-    <div class="max-w-[1400px] mx-auto space-y-4">
+  <!-- 1. TOP HEADER & TITLE (NORMAL LIGHT BACKGROUND & NO WISHLIST BTN) -->
+  <section class="bg-[#f7f5f0] text-slate-900 pt-8 pb-6 px-4 sm:px-8 border-b border-slate-200">
+    <div class="max-w-[1400px] mx-auto space-y-3">
       
       <!-- Breadcrumb -->
-      <div class="flex items-center gap-2 text-xs text-slate-400">
-        <a href="/" class="hover:text-emerald-400 transition">Home</a>
+      <div class="flex items-center gap-2 text-xs text-slate-500">
+        <a href="/" class="hover:text-emerald-700 transition">Home</a>
         <span>/</span>
-        <a href="/#all-hotels" class="hover:text-emerald-400 transition">Gulshan Hotels</a>
+        <a href="/#all-hotels" class="hover:text-emerald-700 transition">Gulshan Hotels</a>
         <span>/</span>
-        <span class="text-slate-200">{hotelTitle}</span>
+        <span class="text-slate-800 font-bold">{hotelTitle}</span>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-500/30">
-            {hotelCategory}
-          </span>
+      <div>
+        <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-2">
+          {hotelCategory}
+        </span>
 
-          <h1 class="text-3xl sm:text-5xl font-black font-serif text-white mt-2">{hotelTitle}</h1>
-          
-          <p class="text-xs sm:text-sm text-slate-300 mt-2 flex items-center gap-2">
-            <span>📍 {hotelLocation}</span>
-            {hotelRating && (
-              <>
-                <span>•</span>
-                <span class="text-amber-400 font-bold">★ {hotelRating}</span>
-                {reviewsCount && <span class="text-slate-400">({reviewsCount} reviews)</span>}
-              </>
-            )}
-          </p>
-        </div>
-
-        <!-- WORKABLE WISHLIST BUTTON -->
-        <button 
-          id="singleWishlistBtn" 
-          class="bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-bold px-5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-2 cursor-pointer shadow-md"
-          data-hotel={JSON.stringify({slug: hotel.id || hotel.slug, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage})}
-        >
-          <span id="wishlistHeartIcon" class="text-base">♡</span>
-          <span id="wishlistText">Wishlist</span>
-        </button>
+        <!-- TITLE (NORMAL DARK TEXT ON LIGHT BACKGROUND) -->
+        <h1 class="text-3xl sm:text-5xl font-black font-serif text-slate-900 leading-tight">{hotelTitle}</h1>
+        
+        <p class="text-xs sm:text-sm text-slate-600 mt-2 flex flex-wrap items-center gap-2">
+          <span>📍 {hotelLocation}</span>
+          {hotelRating && (
+            <>
+              <span>•</span>
+              <span class="text-amber-600 font-bold">★ {hotelRating}</span>
+              {reviewsCount && <span class="text-slate-500">({reviewsCount} reviews)</span>}
+            </>
+          )}
+        </p>
       </div>
 
     </div>
@@ -106,14 +92,12 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
 
   <!-- 2. HOTEL IMAGES (BOOKING.COM STYLE GALLERY GRID) -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden relative shadow-2xl">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden shadow-sm">
       
-      <!-- Big Main Cover Photo (Cols 2) -->
       <div class="md:col-span-2 h-[320px] sm:h-[420px] relative overflow-hidden group">
         <img src={galleryImages[0]} alt={hotelTitle} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
       </div>
 
-      <!-- 4 Thumbnails Grid (Cols 2) -->
       <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-3 h-[420px]">
         {galleryImages.slice(1, 5).map((img: string, idx: number) => (
           <div class="h-[204px] relative overflow-hidden group rounded-xl">
@@ -125,15 +109,15 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
   </section>
 
-  <!-- MAIN PAGE CONTENT (UNIFIED CONTINUOUS CONTAINER LEFT 70% + STICKY SIDEBAR 30%) -->
+  <!-- MAIN PAGE CONTENT (NO OUTER BORDER / BOX AROUND LEFT COLUMN) -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
     
-    <!-- UNIFIED CONTINUOUS LEFT COLUMN (NO SEPARATE BOX BORDERS) -->
-    <div class="lg:col-span-8 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-10 text-slate-800">
+    <!-- LEFT MAIN COLUMN (NO OUTER BORDER OR BOX) -->
+    <div class="lg:col-span-8 space-y-10 text-slate-800">
       
       <!-- 1. OVERVIEW -->
-      <div id="overview" class="space-y-3">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Hotel Overview</h2>
+      <div id="overview" class="border-b border-slate-200 pb-8 space-y-3">
+        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
         <div class="prose prose-slate text-xs sm:text-sm leading-relaxed text-slate-600">
           {hotel.body ? <Fragment set:html={hotel.body} /> : (
@@ -145,14 +129,13 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       </div>
 
       <!-- 2. LOCATION & LIVE GOOGLE MAP -->
-      <div id="location" class="pt-8 border-t border-slate-200 space-y-4">
-        <div class="border-b border-slate-100 pb-3">
+      <div id="location" class="border-b border-slate-200 pb-8 space-y-4">
+        <div>
           <h2 class="text-2xl font-black font-serif text-slate-900">Location & Map</h2>
           <p class="text-xs text-slate-500 mt-1">📍 {hotelLocation}</p>
         </div>
 
-        <!-- Live Google Map Embed Code -->
-        <div class="rounded-2xl overflow-hidden border border-slate-200 h-72 sm:h-80 shadow-inner">
+        <div class="rounded-2xl overflow-hidden border border-slate-200 h-72 sm:h-80 shadow-sm">
           <iframe 
             src={`https://maps.google.com/maps?q=${encodeURIComponent(hotelTitle + ' ' + hotelLocation)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
             class="w-full h-full border-0" 
@@ -164,12 +147,12 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       </div>
 
       <!-- 3. HOTEL AMENITIES -->
-      <div id="amenities" class="pt-8 border-t border-slate-200 space-y-4">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Hotel Amenities</h2>
+      <div id="amenities" class="border-b border-slate-200 pb-8 space-y-4">
+        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Amenities</h2>
         
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
           {amenitiesList.map((item: string) => (
-            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center gap-2 font-bold text-slate-800">
+            <div class="bg-white p-3 rounded-2xl border border-slate-200 flex items-center gap-2 font-bold text-slate-800 shadow-sm">
               <span class="text-emerald-600">✔</span>
               <span>{item}</span>
             </div>
@@ -178,12 +161,12 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       </div>
 
       <!-- 4. WHAT'S NEARBY -->
-      <div id="nearby" class="pt-8 border-t border-slate-200 space-y-4">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">What's Nearby</h2>
+      <div id="nearby" class="border-b border-slate-200 pb-8 space-y-4">
+        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">What's Nearby</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {nearbyPlaces.map((place: any) => (
-            <div class="flex justify-between items-center p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="flex justify-between items-center p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
               <span class="font-bold text-slate-800">📍 {place.name}</span>
               <span class="text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">{place.distance}</span>
             </div>
@@ -192,30 +175,28 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       </div>
 
       <!-- 5. HOTEL INFORMATION & ESSENTIAL DETAILS -->
-      <div id="information" class="pt-8 border-t border-slate-200 space-y-6">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Hotel Information & Rules</h2>
+      <div id="information" class="space-y-6">
+        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Information & Rules</h2>
         
-        <!-- Grid Specs -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-slate-400 block font-bold">Check-In</span>
             <span class="font-black text-slate-900 text-sm mt-0.5 block">2:00 PM</span>
           </div>
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-slate-400 block font-bold">Check-Out</span>
             <span class="font-black text-slate-900 text-sm mt-0.5 block">12:00 PM</span>
           </div>
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-slate-400 block font-bold">Smoking Policy</span>
             <span class="font-black text-slate-900 text-sm mt-0.5 block">Non-Smoking</span>
           </div>
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-slate-400 block font-bold">Power Backup</span>
             <span class="font-black text-emerald-700 text-sm mt-0.5 block">24/7 Generator</span>
           </div>
         </div>
 
-        <!-- House Rules -->
         <div class="space-y-2 pt-2">
           <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider text-slate-500">General Policies</h3>
           <ul class="text-xs text-slate-600 space-y-2">
@@ -279,49 +260,5 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       Check Price ➔
     </a>
   </div>
-
-  <!-- WISHLIST FUNCTIONALITY SCRIPT -->
-  <script is:inline define:vars={{ hotelTitle, hotelLocation, hotelPrice, hotelImage, hotelId: hotel.id || hotel.slug }}>
-    document.addEventListener('DOMContentLoaded', () => {
-      const wishlistBtn = document.getElementById('singleWishlistBtn');
-      const heartIcon = document.getElementById('wishlistHeartIcon');
-      const textSpan = document.getElementById('wishlistText');
-
-      function getWishlist() {
-        try { return JSON.parse(localStorage.getItem('gulshan_wishlist') || '[]'); } 
-        catch (e) { return []; }
-      }
-
-      function isSaved() {
-        return getWishlist().some(item => item.slug === hotelId);
-      }
-
-      function updateWishlistButtonUI() {
-        if (!wishlistBtn || !heartIcon || !textSpan) return;
-        if (isSaved()) {
-          wishlistBtn.classList.remove('bg-slate-800');
-          wishlistBtn.classList.add('bg-rose-600', 'text-white');
-          heartIcon.textContent = '❤️';
-          textSpan.textContent = 'Saved';
-        } else {
-          wishlistBtn.classList.remove('bg-rose-600', 'text-white');
-          wishlistBtn.classList.add('bg-slate-800');
-          heartIcon.textContent = '♡';
-          textSpan.textContent = 'Wishlist';
-        }
-      }
-
-      if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', () => {
-          const hotelData = { slug: hotelId, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage };
-          if (window.toggleWishlistHotel) {
-            window.toggleWishlistHotel(hotelData);
-            updateWishlistButtonUI();
-          }
-        });
-        updateWishlistButtonUI();
-      }
-    });
-  </script>
 
 </Layout>
