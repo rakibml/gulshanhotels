@@ -42,12 +42,12 @@ const amenitiesList = data.amenities && data.amenities.length > 0 ? data.ameniti
   "24/7 Security & CCTV"
 ];
 
-// Interactive What's Nearby Accordion Items with Information
+// Interactive What's Nearby Accordion Items
 const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.nearby_places : [
   { 
     name: "Gulshan Lake Park", 
     distance: "250m",
-    details: "A serene waterfront park featuring walking trails, lush greenery, and sunset lake views. Perfect for morning jogs, fresh air, and relaxed evening strolls." 
+    details: "A serene waterfront park featuring walking trails, lush greenery, and sunset lake views. Perfect for morning jogs and relaxed evening strolls." 
   },
   { 
     name: "Chef's Table Gulshan", 
@@ -75,9 +75,67 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     details: "Direct express highway ramp connecting Gulshan to Hazrat Shahjalal International Airport (DAC) in less than 15-20 minutes, bypassing central city traffic." 
   }
 ];
+
+// BOOKING.COM STYLE FAQS (FROM CMS OR REAL-WORLD DEFAULTS)
+const faqList = data.faqs && data.faqs.length > 0 ? data.faqs : [
+  {
+    question: `What kind of breakfast is served at ${hotelTitle}?`,
+    answer: `Guests staying at ${hotelTitle} can enjoy a highly-rated breakfast during their stay. Options include: Continental, Halal, Asian, American, Full English, À la carte, and Buffet.`
+  },
+  {
+    question: `Does ${hotelTitle} have a restaurant on site?`,
+    answer: `Yes, ${hotelTitle} features multiple on-site dining options including multi-cuisine restaurants, bakeries, and rooftop lounges.`
+  },
+  {
+    question: `Does ${hotelTitle} have a pool or hot tub?`,
+    answer: `Yes, this hotel features a rooftop swimming pool, wellness jacuzzi, and lounge area for staying guests.`
+  },
+  {
+    question: `What is there to do at ${hotelTitle}?`,
+    answer: `Guests can enjoy fitness center workouts, luxury spa massages, rooftop swimming, fine dining experiences, and nearby walking tours around Gulshan Lake.`
+  },
+  {
+    question: `What type of room can I book at ${hotelTitle}?`,
+    answer: `Room options include Executive King Rooms, Deluxe Twin Rooms, Junior Suites, and Presidential Diplomatic Suites.`
+  },
+  {
+    question: `How far is ${hotelTitle} from the center of Dhaka and the airport?`,
+    answer: `Located in Gulshan 2, the hotel is approximately 10 km from central Dhaka and only 15-20 minutes from Hazrat Shahjalal International Airport (DAC) via the Dhaka Elevated Expressway.`
+  },
+  {
+    question: `What are the check-in and check-out times at ${hotelTitle}?`,
+    answer: `Standard check-in time begins at 2:00 PM and check-out is until 12:00 PM.`
+  },
+  {
+    question: `Is ${hotelTitle} popular with families and diplomatic delegates?`,
+    answer: `Yes, ${hotelTitle} is very popular with families, foreign diplomats, and corporate business delegates due to its high-security diplomatic location and world-class amenities.`
+  }
+];
+
+// Split FAQs into 2 Columns for Booking.com 2-Column Grid
+const halfFaqIndex = Math.ceil(faqList.length / 2);
+const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
+const rightColumnFaqs = faqList.slice(halfFaqIndex);
+
+// Dynamic Google FAQPage Schema
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqList.map((item: any) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
 ---
 
 <Layout title={`${hotelTitle} — Verified Hotel in Gulshan, Dhaka`}>
+
+  <!-- GOOGLE FAQ SCHEMA FOR RICH SEARCH SNIPPETS -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
   <!-- 1. TOP HEADER & TITLE -->
   <section class="bg-[#f7f5f0] text-slate-900 pt-8 pb-6 px-4 sm:px-8 border-b border-slate-200">
@@ -120,9 +178,10 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
   </section>
 
-  <!-- 2. HOTEL IMAGES (GALLERY GRID) -->
+  <!-- 2. HOTEL IMAGES (BOOKING.COM STYLE GALLERY GRID) -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden shadow-sm">
+      
       <div class="md:col-span-2 h-[320px] sm:h-[420px] relative overflow-hidden group">
         <img src={galleryImages[0]} alt={hotelTitle} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
       </div>
@@ -134,6 +193,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
           </div>
         ))}
       </div>
+
     </div>
   </section>
 
@@ -146,6 +206,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       <!-- 1. OVERVIEW -->
       <div id="overview" class="border-b border-slate-200 pb-8 space-y-3">
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
+        
         <div class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700">
           {hotel.body ? <Fragment set:html={hotel.body} /> : (
             <p>
@@ -190,7 +251,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
         </div>
       </div>
 
-      <!-- 4. WHAT'S NEARBY & LOCAL INSIGHTS (INTERACTIVE FAQ-STYLE ACCORDION DROPDOWN) -->
+      <!-- 4. WHAT'S NEARBY & LOCAL INSIGHTS -->
       <div id="nearby" class="border-b border-slate-200 pb-8 space-y-4">
         <div>
           <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">
@@ -201,7 +262,6 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
           </p>
         </div>
         
-        <!-- Accordion List -->
         <div class="space-y-3 pt-2">
           {nearbyPlaces.map((place: any) => (
             <details class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group transition">
@@ -230,7 +290,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       </div>
 
       <!-- 5. HOTEL INFORMATION & ESSENTIAL DETAILS -->
-      <div id="information" class="space-y-6">
+      <div id="information" class="border-b border-slate-200 pb-8 space-y-6">
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Information & Rules</h2>
         
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2">
@@ -264,6 +324,48 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
               <span>Pets policy is subject to hotel management approval.</span>
             </li>
           </ul>
+        </div>
+      </div>
+
+      <!-- 6. BOOKING.COM STYLE 2-COLUMN FAQ SECTION (EXACT MATCH TO YOUR SCREENSHOT) -->
+      <div id="faqs" class="space-y-6 pt-2">
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">
+          FAQs about {hotelTitle}
+        </h2>
+
+        <!-- 2-Column Responsive FAQ Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          
+          <!-- Left Column FAQs -->
+          <div class="space-y-4">
+            {leftColumnFaqs.map((faq: any) => (
+              <details class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group transition">
+                <summary class="flex justify-between items-center p-4 cursor-pointer select-none font-bold text-slate-900 text-sm sm:text-base hover:text-emerald-700 transition">
+                  <span>{faq.question}</span>
+                  <span class="text-slate-400 text-xs shrink-0 ml-2 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div class="p-4 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60">
+                  {faq.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+
+          <!-- Right Column FAQs -->
+          <div class="space-y-4">
+            {rightColumnFaqs.map((faq: any) => (
+              <details class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group transition">
+                <summary class="flex justify-between items-center p-4 cursor-pointer select-none font-bold text-slate-900 text-sm sm:text-base hover:text-emerald-700 transition">
+                  <span>{faq.question}</span>
+                  <span class="text-slate-400 text-xs shrink-0 ml-2 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div class="p-4 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60">
+                  {faq.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+
         </div>
       </div>
 
@@ -314,5 +416,16 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
 
   </section>
+
+  <!-- MOBILE PINNED BOTTOM BAR -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950 text-white border-t border-slate-800 p-3 px-5 flex justify-between items-center shadow-2xl backdrop-blur-md">
+    <div>
+      <span class="text-[10px] text-slate-400 block font-bold">Starting Rate</span>
+      <span class="font-black text-emerald-400 text-base">{hotelPrice || 'Check Price'}</span>
+    </div>
+    <a href="#information" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition">
+      Check Price ➔
+    </a>
+  </div>
 
 </Layout>
