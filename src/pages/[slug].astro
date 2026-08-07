@@ -54,7 +54,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
 
 <Layout title={`${hotelTitle} — Verified Hotel in Gulshan, Dhaka`}>
 
-  <!-- 1. TOP HEADER & TITLE (NORMAL LIGHT BACKGROUND & NO WISHLIST BTN) -->
+  <!-- 1. TOP HEADER & TITLE -->
   <section class="bg-[#f7f5f0] text-slate-900 pt-8 pb-6 px-4 sm:px-8 border-b border-slate-200">
     <div class="max-w-[1400px] mx-auto space-y-3">
       
@@ -72,15 +72,20 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
           {hotelCategory}
         </span>
 
-        <!-- TITLE (NORMAL DARK TEXT ON LIGHT BACKGROUND) -->
         <h1 class="text-3xl sm:text-5xl font-black font-serif text-slate-900 leading-tight">{hotelTitle}</h1>
         
         <p class="text-xs sm:text-sm text-slate-600 mt-2 flex flex-wrap items-center gap-2">
-          <span>📍 {hotelLocation}</span>
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            {hotelLocation}
+          </span>
           {hotelRating && (
             <>
               <span>•</span>
-              <span class="text-amber-600 font-bold">★ {hotelRating}</span>
+              <span class="text-amber-600 font-bold flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 fill-amber-500" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                {hotelRating}
+              </span>
               {reviewsCount && <span class="text-slate-500">({reviewsCount} reviews)</span>}
             </>
           )}
@@ -109,10 +114,10 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
   </section>
 
-  <!-- MAIN PAGE CONTENT (NO OUTER BORDER / BOX AROUND LEFT COLUMN) -->
+  <!-- MAIN PAGE CONTENT -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
     
-    <!-- LEFT MAIN COLUMN (NO OUTER BORDER OR BOX) -->
+    <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-10 text-slate-800">
       
       <!-- 1. OVERVIEW -->
@@ -132,7 +137,10 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       <div id="location" class="border-b border-slate-200 pb-8 space-y-4">
         <div>
           <h2 class="text-2xl font-black font-serif text-slate-900">Location & Map</h2>
-          <p class="text-xs text-slate-500 mt-1">📍 {hotelLocation}</p>
+          <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            {hotelLocation}
+          </p>
         </div>
 
         <div class="rounded-2xl overflow-hidden border border-slate-200 h-72 sm:h-80 shadow-sm">
@@ -146,28 +154,31 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
         </div>
       </div>
 
-      <!-- 3. HOTEL AMENITIES -->
+      <!-- 3. HOTEL AMENITIES (VECTOR CHECKMARK SVG ICONS) -->
       <div id="amenities" class="border-b border-slate-200 pb-8 space-y-4">
         <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Amenities</h2>
         
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
           {amenitiesList.map((item: string) => (
             <div class="bg-white p-3 rounded-2xl border border-slate-200 flex items-center gap-2 font-bold text-slate-800 shadow-sm">
-              <span class="text-emerald-600">✔</span>
+              <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
               <span>{item}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <!-- 4. WHAT'S NEARBY -->
+      <!-- 4. WHAT'S NEARBY (VECTOR MAP PIN SVG ICONS) -->
       <div id="nearby" class="border-b border-slate-200 pb-8 space-y-4">
         <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">What's Nearby</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {nearbyPlaces.map((place: any) => (
             <div class="flex justify-between items-center p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
-              <span class="font-bold text-slate-800">📍 {place.name}</span>
+              <span class="font-bold text-slate-800 flex items-center gap-2">
+                <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                {place.name}
+              </span>
               <span class="text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">{place.distance}</span>
             </div>
           ))}
@@ -200,15 +211,21 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
         <div class="space-y-2 pt-2">
           <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider text-slate-500">General Policies</h3>
           <ul class="text-xs text-slate-600 space-y-2">
-            <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✔</span> Valid Government Photo ID (NID / Passport) is required at check-in.</li>
-            <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✔</span> Pets policy is subject to hotel management approval.</li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>Valid Government Photo ID (NID / Passport) is required at check-in.</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>Pets policy is subject to hotel management approval.</span>
+            </li>
           </ul>
         </div>
       </div>
 
     </div>
 
-    <!-- RIGHT STICKY ACTION SIDEBAR (30%) -->
+    <!-- RIGHT STICKY ACTION SIDEBAR (30%) WITH VECTOR SVG BUTTON ICONS -->
     <div class="lg:col-span-4">
       <div class="sticky top-[90px] bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
         
@@ -220,27 +237,31 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
           </div>
         )}
 
-        <!-- ACTION BUTTONS -->
+        <!-- ACTION BUTTONS WITH VECTOR SVG ICONS -->
         <div class="space-y-3 pt-2">
           {data.officialSite ? (
-            <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
-              Check Official Site Price ➔
+            <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>Check Official Site Price</span>
+              <span>➔</span>
             </a>
           ) : (
-            <a href="#information" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
-              Book Your Stay ➔
+            <a href="#information" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>Book Your Stay</span>
+              <span>➔</span>
             </a>
           )}
 
           {data.whatsapp && (
-            <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
-              💬 Instant WhatsApp Reservation
+            <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <span>Instant WhatsApp Reservation</span>
             </a>
           )}
 
           {data.phone && (
-            <a href={`tel:${data.phone}`} class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
-              📞 Direct Call Desk
+            <a href={`tel:${data.phone}`} class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.01 5.45 5.45l2.2-2.23c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1v3.5c0 .55-.45 1-1 1C9.39 20 2 12.61 2 3c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              <span>Direct Call Desk</span>
             </a>
           )}
         </div>
