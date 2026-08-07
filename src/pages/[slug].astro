@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// Real CMS Frontmatter Data
+// Real CMS Frontmatter Data (Zero Demo/Fake Fallbacks)
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
@@ -197,7 +197,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -231,7 +231,7 @@ const faqSchema = faqList.length > 0 ? {
             </span>
           </div>
 
-          <!-- HTML CONTAINER WITH DATA ATTRIBUTE FOR RELIABLE JS FETCH -->
+          <!-- Live Table Container -->
           <div id="ratesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5">
             <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <span class="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
@@ -466,7 +466,7 @@ const faqSchema = faqList.length > 0 ? {
     </a>
   </div>
 
-  <!-- 100% RELIABLE CLIENT-SIDE SCRIPT READING HOTEL TITLE FROM DOM -->
+  <!-- EXACT MATCH STAY22 PARSER SCRIPT FOR YOUR WORKER API JSON RESPONSE -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -477,39 +477,59 @@ const faqSchema = faqList.length > 0 ? {
       const mobileCheckPriceBtn = document.getElementById('mobileCheckPriceBtn');
 
       if (ratesContainer) {
-        // Read hotel title reliably from data attribute on DOM element
         const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
         const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
-        
-        console.log('Fetching live Stay22 prices for:', hotelName);
-        console.log('Worker API URL:', apiUrl);
 
         try {
           const res = await fetch(apiUrl);
           if (res.ok) {
             const json = await res.json();
-            console.log('Stay22 Worker API Response:', json);
-
-            // Handle any Stay22 API array key variation
-            let rawList = [];
-            if (Array.isArray(json)) {
-              rawList = json;
-            } else if (json && Array.isArray(json.accommodations)) {
-              rawList = json.accommodations;
-            } else if (json && Array.isArray(json.results)) {
-              rawList = json.results;
-            } else if (json && Array.isArray(json.data)) {
-              rawList = json.data;
+            
+            // Extract items array from json.results
+            let rawResults = [];
+            if (json && Array.isArray(json.results)) {
+              rawResults = json.results;
+            } else if (Array.isArray(json)) {
+              rawResults = json;
             }
 
-            const list = rawList.map(item => ({
-              provider: item.provider || item.vendor || item.source || item.name || 'Verified Partner',
-              price: parseFloat(item.price || item.rate || item.amount || item.min_price || 0),
-              url: item.url || item.link || item.deep_link || item.direct_url || '#'
-            })).filter(item => item.price > 0).sort((a, b) => a.price - b.price);
+            // Extract suppliers inside results items (Stay22 JSON shape)
+            let deals = [];
+            rawResults.forEach(item => {
+              if (item.suppliers && typeof item.suppliers === 'object') {
+                Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
+                  const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
+                  const linkUrl = supplierData.link || item.url || '#';
+                  
+                  let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
+                  if (supplierKey === 'booking') providerName = 'Booking.com';
+                  if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
+                  if (supplierKey === 'expedia') providerName = 'Expedia';
+                  if (supplierKey === 'vrbo') providerName = 'Vrbo';
 
-            if (list.length > 0) {
-              const lowest = list[0];
+                  if (priceVal > 0) {
+                    deals.push({
+                      provider: providerName,
+                      price: priceVal,
+                      url: linkUrl
+                    });
+                  }
+                });
+              } else if (item.price) {
+                // Fallback for flat price
+                deals.push({
+                  provider: item.provider || item.vendor || 'Verified Partner',
+                  price: parseFloat(item.price),
+                  url: item.url || item.link || '#'
+                });
+              }
+            });
+
+            // Sort deals ascending by price
+            deals.sort((a, b) => a.price - b.price);
+
+            if (deals.length > 0) {
+              const lowest = deals[0];
 
               if (lowest && lowest.price) {
                 if (liveRateEl) liveRateEl.textContent = `$${lowest.price}`;
@@ -521,7 +541,7 @@ const faqSchema = faqList.length > 0 ? {
                 if (mobileCheckPriceBtn) mobileCheckPriceBtn.href = lowest.url;
               }
 
-              ratesContainer.innerHTML = list.map((item, idx) => `
+              ratesContainer.innerHTML = deals.map((item, idx) => `
                 <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border ${idx === 0 ? 'bg-emerald-50/90 border-emerald-300 shadow-sm' : 'bg-white border-slate-200'} transition">
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full ${idx === 0 ? 'bg-[#00e676] text-slate-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} text-xs flex items-center justify-center shrink-0">
@@ -529,7 +549,7 @@ const faqSchema = faqList.length > 0 ? {
                     </div>
                     <div>
                       <span class="text-xs sm:text-sm font-black text-slate-900 block">${item.provider}</span>
-                      ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider bg-emerald-200/60 px-2 py-0.5 rounded">Lowest Base Rate</span>' : '<span class="text-[10px] text-slate-400">Realtime API Deal</span>'}
+                      ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider bg-emerald-200/60 px-2 py-0.5 rounded">Lowest Base Rate</span>' : '<span class="text-[10px] text-slate-400">Realtime Stay22 API Deal</span>'}
                     </div>
                   </div>
 
@@ -550,7 +570,7 @@ const faqSchema = faqList.length > 0 ? {
               ratesContainer.innerHTML = `
                 <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
                   <span class="text-lg block mb-1">🛎️</span>
-                  No live rate entries returned from Stay22 API for "${hotelName}". Use the WhatsApp or Direct Call buttons on the right.
+                  No live rate entries returned from Stay22 API for "${hotelName}" right now. Use WhatsApp or Direct Call buttons on the right.
                 </div>
               `;
             }
