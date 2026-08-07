@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// Real CMS Frontmatter Data (Zero Demo/Fake Fallbacks)
+// Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
@@ -92,7 +92,6 @@ const faqSchema = faqList.length > 0 ? {
           </span>
         )}
 
-        <!-- Main Title -->
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black font-serif text-slate-900 leading-tight">{hotelTitle}</h1>
         
         {hotelLocation && (
@@ -197,7 +196,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -485,7 +484,6 @@ const faqSchema = faqList.length > 0 ? {
           if (res.ok) {
             const json = await res.json();
             
-            // Extract items array from json.results
             let rawResults = [];
             if (json && Array.isArray(json.results)) {
               rawResults = json.results;
@@ -493,10 +491,18 @@ const faqSchema = faqList.length > 0 ? {
               rawResults = json;
             }
 
-            // Extract suppliers inside results items (Stay22 JSON shape)
+            // Extract significant keywords from hotelName for precise filtering
+            const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
+            const targetKeywords = hotelName.toLowerCase()
+              .split(/\s+/)
+              .filter(word => word.length > 2 && !ignoreWords.includes(word));
+
             let deals = [];
             rawResults.forEach(item => {
-              if (item.suppliers && typeof item.suppliers === 'object') {
+              const itemName = (item.name || '').toLowerCase();
+              const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
+
+              if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
                 Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
                   const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
                   const linkUrl = supplierData.link || item.url || '#';
@@ -514,13 +520,6 @@ const faqSchema = faqList.length > 0 ? {
                       url: linkUrl
                     });
                   }
-                });
-              } else if (item.price) {
-                // Fallback for flat price
-                deals.push({
-                  provider: item.provider || item.vendor || 'Verified Partner',
-                  price: parseFloat(item.price),
-                  url: item.url || item.link || '#'
                 });
               }
             });
@@ -570,7 +569,7 @@ const faqSchema = faqList.length > 0 ? {
               ratesContainer.innerHTML = `
                 <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
                   <span class="text-lg block mb-1">🛎️</span>
-                  No live rate entries returned from Stay22 API for "${hotelName}" right now. Use WhatsApp or Direct Call buttons on the right.
+                  No live rate entries returned from Stay22 API for "${hotelName}". Use WhatsApp or Direct Call buttons on the right.
                 </div>
               `;
             }
