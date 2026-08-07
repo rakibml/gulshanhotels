@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// Real CMS Frontmatter Data (Zero Demo/Fake Fallbacks)
+// Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
@@ -43,7 +43,7 @@ const halfFaqIndex = Math.ceil(faqList.length / 2);
 const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
 const rightColumnFaqs = faqList.slice(halfFaqIndex);
 
-// Section Toggles from Admin Panel
+// Section Toggles
 const showRates = data.enable_rates !== false;
 const showAmenities = data.enable_amenities !== false && amenitiesList.length > 0;
 const showNearby = data.enable_nearby !== false && nearbyPlaces.length > 0;
@@ -217,7 +217,7 @@ const faqSchema = faqList.length > 0 ? {
         </button>
       </div>
 
-      <!-- 2. REALTIME STAY22 API RATE COMPARISON TABLE (#rates) -->
+      <!-- 2. REALTIME WORKER API RATE COMPARISON TABLE (#rates) -->
       {showRates && (
         <div id="rates" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-4">
           <div class="flex justify-between items-center border-b border-slate-200 pb-3">
@@ -231,11 +231,11 @@ const faqSchema = faqList.length > 0 ? {
             </span>
           </div>
 
-          <!-- 100% REALTIME API TABLE CONTAINER (ZERO DEMO RATES) -->
+          <!-- Live Table Container -->
           <div id="ratesTableContainer" class="space-y-2.5">
             <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <span class="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-              <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
+              <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API via Cloudflare Worker...</p>
             </div>
           </div>
         </div>
@@ -428,8 +428,13 @@ const faqSchema = faqList.length > 0 ? {
             <span>➔</span>
           </a>
 
-          {data.whatsapp && (
+          {data.whatsapp ? (
             <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <span>Instant WhatsApp Reservation</span>
+            </a>
+          ) : (
+            <a href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
               <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>Instant WhatsApp Reservation</span>
             </a>
@@ -461,87 +466,102 @@ const faqSchema = faqList.length > 0 ? {
     </a>
   </div>
 
-  <!-- 100% REALTIME API FETCHING SCRIPT (ZERO DEMO/STATIC FALLBACKS) -->
+  <!-- CLIENT-SIDE SCRIPTS FOR REALTIME API PARSER, GALLERY & OVERVIEW TRUNCATOR -->
   <script is:inline define:vars={{ hotelTitle }}>
     document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
       const ratesContainer = document.getElementById('ratesTableContainer');
       const liveRateEl = document.getElementById('liveStartingRate');
       const mobileRateEl = document.getElementById('mobileStartingRate');
       const checkPriceBtn = document.getElementById('checkPriceBtn');
       const mobileCheckPriceBtn = document.getElementById('mobileCheckPriceBtn');
 
-      if (!ratesContainer) return;
+      if (ratesContainer) {
+        try {
+          const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
+          if (res.ok) {
+            const json = await res.json();
 
-      try {
-        const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
-        
-        if (res.ok) {
-          const json = await res.json();
-
-          if (json && json.accommodations && json.accommodations.length > 0) {
-            // Sort live API accommodations by price ascending
-            const list = json.accommodations.sort((a, b) => (a.price || 0) - (b.price || 0));
-            const lowest = list[0];
-
-            if (lowest && lowest.price) {
-              if (liveRateEl) liveRateEl.textContent = `$${lowest.price}`;
-              if (mobileRateEl) mobileRateEl.textContent = `$${lowest.price}`;
+            // Handle any Stay22 API array key variation
+            let rawList = [];
+            if (Array.isArray(json)) {
+              rawList = json;
+            } else if (json && Array.isArray(json.accommodations)) {
+              rawList = json.accommodations;
+            } else if (json && Array.isArray(json.results)) {
+              rawList = json.results;
+            } else if (json && Array.isArray(json.data)) {
+              rawList = json.data;
             }
 
-            if (lowest && lowest.url) {
-              if (checkPriceBtn) checkPriceBtn.href = lowest.url;
-              if (mobileCheckPriceBtn) mobileCheckPriceBtn.href = lowest.url;
+            const list = rawList.map(item => ({
+              provider: item.provider || item.vendor || item.source || item.name || 'Verified Partner',
+              price: parseFloat(item.price || item.rate || item.amount || item.min_price || 0),
+              url: item.url || item.link || item.deep_link || item.direct_url || '#'
+            })).filter(item => item.price > 0).sort((a, b) => a.price - b.price);
+
+            if (list.length > 0) {
+              const lowest = list[0];
+
+              if (lowest && lowest.price) {
+                if (liveRateEl) liveRateEl.textContent = `$${lowest.price}`;
+                if (mobileRateEl) mobileRateEl.textContent = `$${lowest.price}`;
+              }
+
+              if (lowest && lowest.url && lowest.url !== '#') {
+                if (checkPriceBtn) checkPriceBtn.href = lowest.url;
+                if (mobileCheckPriceBtn) mobileCheckPriceBtn.href = lowest.url;
+              }
+
+              ratesContainer.innerHTML = list.map((item, idx) => `
+                <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border ${idx === 0 ? 'bg-emerald-50/90 border-emerald-300 shadow-sm' : 'bg-white border-slate-200'} transition">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full ${idx === 0 ? 'bg-[#00e676] text-slate-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} text-xs flex items-center justify-center shrink-0">
+                      ${idx === 0 ? '🏆' : (idx + 1)}
+                    </div>
+                    <div>
+                      <span class="text-xs sm:text-sm font-black text-slate-900 block">${item.provider}</span>
+                      ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider bg-emerald-200/60 px-2 py-0.5 rounded">Lowest Base Rate</span>' : '<span class="text-[10px] text-slate-400">Realtime API Deal</span>'}
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="text-right">
+                      <span class="text-base sm:text-lg font-black text-slate-900 block">$${item.price}</span>
+                      <span class="text-[9px] text-slate-400 block">/ night</span>
+                    </div>
+
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="${idx === 0 ? 'bg-[#00e676] hover:bg-[#00c853] text-slate-950 font-black' : 'bg-slate-900 hover:bg-slate-800 text-white font-bold'} text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1 shadow-sm shrink-0">
+                      <span>View Deal</span>
+                      <span>➔</span>
+                    </a>
+                  </div>
+                </div>
+              `).join('');
+            } else {
+              ratesContainer.innerHTML = `
+                <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
+                  <span class="text-lg block mb-1">🛎️</span>
+                  No live rates returned from Stay22 API for "${hotelTitle}" right now. Please use the WhatsApp or Direct Call buttons on the right.
+                </div>
+              `;
             }
-
-            // Render REALTIME Accommodation Table ONLY
-            ratesContainer.innerHTML = list.map((item, idx) => `
-              <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border ${idx === 0 ? 'bg-emerald-50/90 border-emerald-300 shadow-sm' : 'bg-white border-slate-200'} transition">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full ${idx === 0 ? 'bg-[#00e676] text-slate-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} text-xs flex items-center justify-center shrink-0">
-                    ${idx === 0 ? '🏆' : (idx + 1)}
-                  </div>
-                  <div>
-                    <span class="text-xs sm:text-sm font-black text-slate-900 block">${item.provider || 'Verified Partner'}</span>
-                    ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider bg-emerald-200/60 px-2 py-0.5 rounded">Lowest Base Rate</span>' : '<span class="text-[10px] text-slate-400">Realtime API Deal</span>'}
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-3 sm:gap-4">
-                  <div class="text-right">
-                    <span class="text-base sm:text-lg font-black text-slate-900 block">$${item.price}</span>
-                    <span class="text-[9px] text-slate-400 block">/ night</span>
-                  </div>
-
-                  <a href="${item.url || '#'}" target="_blank" rel="noopener noreferrer" class="${idx === 0 ? 'bg-[#00e676] hover:bg-[#00c853] text-slate-950 font-black' : 'bg-slate-900 hover:bg-slate-800 text-white font-bold'} text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1 shadow-sm shrink-0">
-                    <span>View Deal</span>
-                    <span>➔</span>
-                  </a>
-                </div>
-              </div>
-            `).join('');
           } else {
             ratesContainer.innerHTML = `
               <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
                 <span class="text-lg block mb-1">🛎️</span>
-                No live rates returned from Stay22 API for "${hotelTitle}" right now. Please use the WhatsApp or Direct Call buttons on the right.
+                Stay22 API service temporarily unavailable. Please use WhatsApp or Direct Call desk on the right.
               </div>
             `;
           }
-        } else {
+        } catch (e) {
           ratesContainer.innerHTML = `
             <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
               <span class="text-lg block mb-1">🛎️</span>
-              Stay22 API service temporarily unavailable. Please use WhatsApp or Direct Call desk on the right.
+              Unable to connect to live pricing API. Use the direct contact buttons on the right.
             </div>
           `;
         }
-      } catch (e) {
-        ratesContainer.innerHTML = `
-          <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
-            <span class="text-lg block mb-1">🛎️</span>
-            Unable to connect to live pricing API. Use the direct contact buttons on the right.
-          </div>
-        `;
       }
 
       // 2. Gallery Slider Logic
