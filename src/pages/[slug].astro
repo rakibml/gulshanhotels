@@ -196,7 +196,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -216,7 +216,7 @@ const faqSchema = faqList.length > 0 ? {
         </button>
       </div>
 
-      <!-- 2. REALTIME STAY22 API RATE COMPARISON TABLE (#rates) -->
+      <!-- 2. REALTIME WORKER API RATE COMPARISON TABLE (#rates WITH ORIGINAL LOGOS) -->
       {showRates && (
         <div id="rates" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-4">
           <div class="flex justify-between items-center border-b border-slate-200 pb-3">
@@ -465,7 +465,7 @@ const faqSchema = faqList.length > 0 ? {
     </a>
   </div>
 
-  <!-- EXACT MATCH STAY22 PARSER SCRIPT FOR YOUR WORKER API JSON RESPONSE -->
+  <!-- SCRIPT WITH ORIGINAL BRAND LOGO RENDERING -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -491,7 +491,6 @@ const faqSchema = faqList.length > 0 ? {
               rawResults = json;
             }
 
-            // Extract significant keywords from hotelName for precise filtering
             const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
             const targetKeywords = hotelName.toLowerCase()
               .split(/\s+/)
@@ -507,6 +506,11 @@ const faqSchema = faqList.length > 0 ? {
                   const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
                   const linkUrl = supplierData.link || item.url || '#';
                   
+                  // Extract Original Logo Image from Stay22 API Response
+                  const logoUrl = (supplierData.media && supplierData.media.logoSquare) 
+                    ? supplierData.media.logoSquare 
+                    : `https://r2.stay22.com/2025_${supplierKey}.png`;
+
                   let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
                   if (supplierKey === 'booking') providerName = 'Booking.com';
                   if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
@@ -517,7 +521,8 @@ const faqSchema = faqList.length > 0 ? {
                     deals.push({
                       provider: providerName,
                       price: priceVal,
-                      url: linkUrl
+                      url: linkUrl,
+                      logo: logoUrl
                     });
                   }
                 });
@@ -542,10 +547,23 @@ const faqSchema = faqList.length > 0 ? {
 
               ratesContainer.innerHTML = deals.map((item, idx) => `
                 <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border ${idx === 0 ? 'bg-emerald-50/90 border-emerald-300 shadow-sm' : 'bg-white border-slate-200'} transition">
+                  
                   <div class="flex items-center gap-3">
+                    <!-- Rank Icon -->
                     <div class="w-8 h-8 rounded-full ${idx === 0 ? 'bg-[#00e676] text-slate-950 font-black' : 'bg-slate-100 text-slate-700 font-bold'} text-xs flex items-center justify-center shrink-0">
                       ${idx === 0 ? '🏆' : (idx + 1)}
                     </div>
+
+                    <!-- ORIGINAL BRAND LOGO IMAGE -->
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+                      <img 
+                        src="${item.logo}" 
+                        alt="${item.provider} logo" 
+                        class="w-full h-full object-contain"
+                        onerror="this.style.display='none'"
+                      />
+                    </div>
+
                     <div>
                       <span class="text-xs sm:text-sm font-black text-slate-900 block">${item.provider}</span>
                       ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider bg-emerald-200/60 px-2 py-0.5 rounded">Lowest Base Rate</span>' : '<span class="text-[10px] text-slate-400">Realtime Stay22 API Deal</span>'}
@@ -563,6 +581,7 @@ const faqSchema = faqList.length > 0 ? {
                       <span>➔</span>
                     </a>
                   </div>
+
                 </div>
               `).join('');
             } else {
