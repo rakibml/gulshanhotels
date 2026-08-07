@@ -197,7 +197,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -217,7 +217,7 @@ const faqSchema = faqList.length > 0 ? {
         </button>
       </div>
 
-      <!-- 2. REALTIME WORKER API RATE COMPARISON TABLE (#rates) -->
+      <!-- 2. REALTIME STAY22 API RATE COMPARISON TABLE (#rates) -->
       {showRates && (
         <div id="rates" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-4">
           <div class="flex justify-between items-center border-b border-slate-200 pb-3">
@@ -231,8 +231,8 @@ const faqSchema = faqList.length > 0 ? {
             </span>
           </div>
 
-          <!-- Live Table Container -->
-          <div id="ratesTableContainer" class="space-y-2.5">
+          <!-- HTML CONTAINER WITH DATA ATTRIBUTE FOR RELIABLE JS FETCH -->
+          <div id="ratesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5">
             <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <span class="inline-block w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
               <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API via Cloudflare Worker...</p>
@@ -430,7 +430,7 @@ const faqSchema = faqList.length > 0 ? {
 
           {data.whatsapp ? (
             <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>Instant WhatsApp Reservation</span>
             </a>
           ) : (
@@ -466,8 +466,8 @@ const faqSchema = faqList.length > 0 ? {
     </a>
   </div>
 
-  <!-- CLIENT-SIDE SCRIPTS FOR REALTIME API PARSER, GALLERY & OVERVIEW TRUNCATOR -->
-  <script is:inline define:vars={{ hotelTitle }}>
+  <!-- 100% RELIABLE CLIENT-SIDE SCRIPT READING HOTEL TITLE FROM DOM -->
+  <script is:inline>
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
       const ratesContainer = document.getElementById('ratesTableContainer');
@@ -477,10 +477,18 @@ const faqSchema = faqList.length > 0 ? {
       const mobileCheckPriceBtn = document.getElementById('mobileCheckPriceBtn');
 
       if (ratesContainer) {
+        // Read hotel title reliably from data attribute on DOM element
+        const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
+        const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
+        
+        console.log('Fetching live Stay22 prices for:', hotelName);
+        console.log('Worker API URL:', apiUrl);
+
         try {
-          const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
+          const res = await fetch(apiUrl);
           if (res.ok) {
             const json = await res.json();
+            console.log('Stay22 Worker API Response:', json);
 
             // Handle any Stay22 API array key variation
             let rawList = [];
@@ -542,7 +550,7 @@ const faqSchema = faqList.length > 0 ? {
               ratesContainer.innerHTML = `
                 <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
                   <span class="text-lg block mb-1">🛎️</span>
-                  No live rates returned from Stay22 API for "${hotelTitle}" right now. Please use the WhatsApp or Direct Call buttons on the right.
+                  No live rate entries returned from Stay22 API for "${hotelName}". Use the WhatsApp or Direct Call buttons on the right.
                 </div>
               `;
             }
@@ -550,15 +558,16 @@ const faqSchema = faqList.length > 0 ? {
             ratesContainer.innerHTML = `
               <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
                 <span class="text-lg block mb-1">🛎️</span>
-                Stay22 API service temporarily unavailable. Please use WhatsApp or Direct Call desk on the right.
+                Worker API returned HTTP ${res.status}. Use WhatsApp or Direct Call buttons on the right.
               </div>
             `;
           }
         } catch (e) {
+          console.error('Rate fetch error:', e);
           ratesContainer.innerHTML = `
             <div class="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-600 text-xs font-medium">
               <span class="text-lg block mb-1">🛎️</span>
-              Unable to connect to live pricing API. Use the direct contact buttons on the right.
+              Unable to connect to live pricing API. Use direct contact buttons on the right.
             </div>
           `;
         }
