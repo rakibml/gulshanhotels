@@ -14,7 +14,6 @@ try {
       category: item.data?.category || 'Luxury Hotel',
       location: item.data?.location || 'Gulshan 2, Dhaka',
       area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-      price: item.data?.price || '৳ 18,500 / night',
       rating: item.data?.rating || 4.8,
       reviews: item.data?.reviewsCount || '1,248',
       description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
@@ -40,7 +39,6 @@ if (!hotels || hotels.length === 0) {
           category: item.frontmatter?.category || 'Luxury Hotel',
           location: item.frontmatter?.location || 'Gulshan 2, Dhaka',
           area: (item.frontmatter?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.frontmatter?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
-          price: item.frontmatter?.price || '৳ 18,500 / night',
           rating: item.frontmatter?.rating || 4.8,
           reviews: item.frontmatter?.reviewsCount || '1,248',
           description: item.frontmatter?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
@@ -63,7 +61,6 @@ if (!hotels || hotels.length === 0) {
       category: "5-Star Luxury",
       location: "Gulshan 2, Dhaka",
       area: "gulshan-2",
-      price: "৳ 18,500 / night",
       rating: 4.8,
       reviews: "1,248",
       description: "Premium business hotel with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
@@ -76,7 +73,6 @@ if (!hotels || hotels.length === 0) {
       category: "5-Star Premium",
       location: "Gulshan 1, Dhaka",
       area: "gulshan-1",
-      price: "৳ 22,000 / night",
       rating: 4.7,
       reviews: "1,102",
       description: "Stylish hotel with spacious rooms, multiple dining options and warm hospitality in Gulshan 1.",
@@ -89,7 +85,6 @@ if (!hotels || hotels.length === 0) {
       category: "4-Star Boutique",
       location: "Gulshan 2, Dhaka",
       area: "gulshan-2",
-      price: "৳ 16,000 / night",
       rating: 4.6,
       reviews: "982",
       description: "Modern rooms, rooftop pool and easy access to embassies and corporate offices in Gulshan Circle 2.",
@@ -99,8 +94,16 @@ if (!hotels || hotels.length === 0) {
   ];
 }
 
-// অ্যাডমিন প্যানেল থেকে 'Popular' সিলেক্ট করা হোটেলগুলো ফিল্টার করা
-const popularHotels = hotels.filter((h: any) => h.popular !== false);
+function toTitleCase(str: string) {
+  if (!str) return 'Gulshan Hotel';
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
+// টাইটেল ফিল্টার ও সেফ ফরম্যাট
+const popularHotels = hotels.map((h: any) => ({
+  ...h,
+  title: toTitleCase(h.title)
+}));
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
@@ -200,11 +203,11 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
     </div>
   </section>
 
-  <!-- SECTION: "POPULAR HOTELS IN GULSHAN" -->
+  <!-- SECTION: "POPULAR HOTELS IN GULSHAN" (SIDE-BY-SIDE HORIZONTAL CAROUSEL ONLY) -->
   <section id="popular-hotels" class="bg-[#F8FAF9] py-16 border-b border-slate-200">
-    <div class="max-w-[1550px] mx-auto px-6 sm:px-20 lg:px-28 space-y-8">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
       
-      <!-- Section Header -->
+      <!-- Section Header with Left/Right Arrow Navigation -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span class="text-xs font-black text-emerald-800 uppercase tracking-widest bg-emerald-100/60 px-3 py-1 rounded-full border border-emerald-200">
@@ -214,15 +217,27 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
           <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Handpicked luxury and executive hotels recommended by our local audit team.</p>
         </div>
 
-        <a href="#all-hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider flex items-center space-x-1 shrink-0">
-          <span>View All Hotels ➔</span>
-        </a>
+        <div class="flex items-center gap-3">
+          <!-- Left/Right Arrow Buttons -->
+          <div class="flex items-center gap-2">
+            <button id="popularPrevBtn" aria-label="Previous" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer">
+              ❮
+            </button>
+            <button id="popularNextBtn" aria-label="Next" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer">
+              ❯
+            </button>
+          </div>
+
+          <a href="#all-hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider flex items-center space-x-1 shrink-0 ml-2">
+            <span>View All Hotels ➔</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Popular Hotels 3-Column Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {popularHotels.map((hotel) => (
-          <div class="bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300 group">
+      <!-- SIDE-BY-SIDE HORIZONTAL SCROLL CAROUSEL TRACK (NO MULTI-ROW GRID!) -->
+      <div id="popularCarouselTrack" class="flex gap-6 overflow-x-auto scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {popularHotels.map((hotel: any) => (
+          <div class="w-[300px] sm:w-[350px] shrink-0 bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300 group">
             
             <div>
               {hotel.image && (
@@ -246,7 +261,7 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
                   </span>
                 </div>
 
-                <a href={`/${hotel.slug}`} class="block text-2xl font-black text-slate-900 group-hover:text-emerald-800 transition">
+                <a href={`/${hotel.slug}`} class="block text-2xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
                   {hotel.title}
                 </a>
 
@@ -256,31 +271,22 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
               </div>
             </div>
 
-            <!-- Price & Action Buttons -->
-            <div class="p-6 pt-0 border-t border-slate-100 flex items-center justify-between mt-4">
-              <div>
-                <span class="text-[10px] text-slate-400 font-black uppercase block">From</span>
-                <span class="text-lg font-black text-slate-900">{hotel.price}</span>
-              </div>
+            <!-- Action Buttons ONLY (No Static Price text) -->
+            <div class="p-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <button 
+                data-title={hotel.title}
+                data-slug={hotel.slug}
+                class="open-price-modal flex-1 bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-3 px-3 rounded-xl text-xs uppercase tracking-wider shadow transition cursor-pointer text-center"
+              >
+                Check Price
+              </button>
 
-              <div class="flex items-center space-x-2">
-                <!-- Check Price Button (Triggers Live Stay22 API Modal) -->
-                <button 
-                  data-title={hotel.title}
-                  data-slug={hotel.slug}
-                  class="open-price-modal bg-[#0d3b23] hover:bg-emerald-900 text-white font-black px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition cursor-pointer"
-                >
-                  Check Price
-                </button>
-
-                <!-- Full Details Button -->
-                <a 
-                  href={`/${hotel.slug}`} 
-                  class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition text-center"
-                >
-                  Details
-                </a>
-              </div>
+              <a 
+                href={`/${hotel.slug}`} 
+                class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold py-3 px-3 rounded-xl text-xs uppercase tracking-wider transition text-center"
+              >
+                Details
+              </a>
             </div>
 
           </div>
@@ -314,7 +320,7 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
       <!-- Modal Footer Actions -->
       <div class="pt-3 border-t border-slate-800">
         <a id="modalWhatsappBtn" href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+          <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
           <span>Instant WhatsApp Reservation</span>
         </a>
       </div>
@@ -322,7 +328,7 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
     </div>
   </div>
 
-  <!-- CLIENT SCRIPTS FOR READ MORE & LIVE STAY22 MODAL -->
+  <!-- CLIENT SCRIPTS FOR READ MORE, CAROUSEL & LIVE STAY22 MODAL -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
       // 1. Read More Toggle Script
@@ -346,7 +352,22 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
         });
       }
 
-      // 2. Realtime Stay22 API Price Comparison Modal Script
+      // 2. Popular Hotels Carousel Scroll Arrows
+      const track = document.getElementById('popularCarouselTrack');
+      const prevBtn = document.getElementById('popularPrevBtn');
+      const nextBtn = document.getElementById('popularNextBtn');
+
+      if (track && prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+          track.scrollBy({ left: -360, behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+          track.scrollBy({ left: 360, behavior: 'smooth' });
+        });
+      }
+
+      // 3. Realtime Stay22 API Price Comparison Modal Script
       const priceModal = document.getElementById('priceModal');
       const closePriceModalBtn = document.getElementById('closePriceModalBtn');
       const modalHotelTitle = document.getElementById('modalHotelTitle');
