@@ -6,7 +6,7 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   const hotels = await getCollection('hotels');
   return hotels.map((entry: any) => ({
-    params: { slug: entry.id || entry.slug },
+    params: { slug: entry.id },
     props: { hotel: entry },
   }));
 }
@@ -16,17 +16,23 @@ const data = hotel.data || {};
 
 // Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelCategory = data.category;
-const hotelLocation = data.location;
-const hotelPrice = data.price;
+const hotelCategory = data.category || "Luxury Stay";
+const hotelLocation = data.location || "Gulshan, Dhaka";
+const hotelPrice = data.price || "";
 const hotelRating = data.rating;
 const reviewsCount = data.reviewsCount;
-const hotelImage = data.image;
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
 // Gallery Images
 const galleryImages = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
-  : (hotelImage ? [hotelImage] : []);
+  : [
+      hotelImage,
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+    ];
 
 const totalPhotos = galleryImages.length;
 const remainingCount = totalPhotos > 4 ? totalPhotos - 4 : 0;
@@ -44,6 +50,7 @@ const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
 const rightColumnFaqs = faqList.slice(halfFaqIndex);
 
 // Section Toggles
+const showRates = data.enable_rates !== false;
 const showAmenities = data.enable_amenities !== false && amenitiesList.length > 0;
 const showNearby = data.enable_nearby !== false && nearbyPlaces.length > 0;
 const showDetails = data.enable_details !== false;
@@ -51,7 +58,7 @@ const showRules = data.enable_rules !== false;
 const showFaqs = data.enable_faqs !== false && faqList.length > 0;
 const customSections = data.custom_sections || [];
 
-// Google FAQ Schema
+// Dynamic Google FAQ Schema
 const faqSchema = faqList.length > 0 ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -195,7 +202,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -389,14 +396,13 @@ const faqSchema = faqList.length > 0 ? {
     <div class="lg:col-span-4">
       <div class="sticky top-[80px] bg-slate-900 text-white p-5 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
         
-        <!-- Starting Rate Header -->
-        <div class="border-b border-slate-800 pb-4">
+        <div>
           <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
           <span id="liveStartingRate" class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice || 'Check Live Price'}</span>
           <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
         </div>
 
-        <!-- EMBEDDED REALTIME RATE COMPARISON TABLE (MOVED TO RIGHT SIDEBAR) -->
+        <!-- EMBEDDED REALTIME RATE COMPARISON TABLE -->
         {showRates && (
           <div class="space-y-3">
             <h3 class="text-xs font-black uppercase text-slate-300 tracking-wider">Compare Live Rates</h3>
@@ -411,7 +417,19 @@ const faqSchema = faqList.length > 0 ? {
         )}
 
         <!-- ACTION BUTTONS -->
-        <div class="space-y-2.5 pt-2 border-t border-slate-800">
+        <div class="space-y-2.5 pt-1 border-t border-slate-800">
+          {data.officialSite ? (
+            <a id="checkPriceBtn" href={data.officialSite} target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>Check Official Site Price</span>
+              <span>➔</span>
+            </a>
+          ) : (
+            <a id="checkPriceBtn" href="https://agoda.com" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>Check Official Site Price</span>
+              <span>➔</span>
+            </a>
+          )}
+
           {data.whatsapp ? (
             <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
               <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
@@ -450,13 +468,14 @@ const faqSchema = faqList.length > 0 ? {
     </a>
   </div>
 
-  <!-- CLIENT-SIDE SCRIPT FOR RIGHT SIDEBAR RATE COMPARISON & LOGO DISPLAY -->
+  <!-- CLIENT-SIDE SCRIPTS FOR REALTIME API PARSER, GALLERY SLIDER & OVERVIEW TRUNCATOR -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Fetch Realtime API Rates & Render in Right Sidebar
+      // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
       const ratesContainer = document.getElementById('ratesTableContainer');
       const liveRateEl = document.getElementById('liveStartingRate');
       const mobileRateEl = document.getElementById('mobileStartingRate');
+      const checkPriceBtn = document.getElementById('checkPriceBtn');
       const mobileCheckPriceBtn = document.getElementById('mobileCheckPriceBtn');
 
       if (ratesContainer) {
@@ -524,6 +543,7 @@ const faqSchema = faqList.length > 0 ? {
               }
 
               if (lowest && lowest.url && lowest.url !== '#') {
+                if (checkPriceBtn) checkPriceBtn.href = lowest.url;
                 if (mobileCheckPriceBtn) mobileCheckPriceBtn.href = lowest.url;
               }
 
