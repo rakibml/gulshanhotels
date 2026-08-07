@@ -14,16 +14,16 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// 100% Real CMS Frontmatter Data
+// Real CMS Data
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
-const hotelPrice = data.price;
+const hotelPrice = data.price || "$120 - $250";
 const hotelRating = data.rating;
 const reviewsCount = data.reviewsCount;
-const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+const hotelImage = data.image;
 
-// Gallery Images (Only real images from CMS or high-res fallbacks)
+// Gallery Images
 const galleryImages = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
   : [
@@ -49,7 +49,7 @@ const halfFaqIndex = Math.ceil(faqList.length / 2);
 const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
 const rightColumnFaqs = faqList.slice(halfFaqIndex);
 
-// Section Toggles from Admin Panel
+// Section Toggles
 const showRates = data.enable_rates !== false;
 const showAmenities = data.enable_amenities !== false && amenitiesList.length > 0;
 const showNearby = data.enable_nearby !== false && nearbyPlaces.length > 0;
@@ -58,7 +58,7 @@ const showRules = data.enable_rules !== false;
 const showFaqs = data.enable_faqs !== false && faqList.length > 0;
 const customSections = data.custom_sections || [];
 
-// Dynamic Google FAQ Schema
+// Google FAQ Schema
 const faqSchema = faqList.length > 0 ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -98,7 +98,6 @@ const faqSchema = faqList.length > 0 ? {
           </span>
         )}
 
-        <!-- Main Title -->
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black font-serif text-slate-900 leading-tight">{hotelTitle}</h1>
         
         {hotelLocation && (
@@ -124,10 +123,10 @@ const faqSchema = faqList.length > 0 ? {
     </div>
   </section>
 
-  <!-- 2. EXACT MATCH GALLERY COMPONENT (MATCHING MOCKUP SCREENSHOT) -->
+  <!-- 2. PHOTO GALLERY (MOBILE-FIRST MATCHING YOUR MOCKUP) -->
   <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
     
-    <!-- Top Main Image Container with Arrows & Counter Badge -->
+    <!-- Top Main Image Slider -->
     <div class="relative w-full h-[280px] xs:h-[340px] sm:h-[480px] lg:h-[540px] rounded-3xl overflow-hidden shadow-md group">
       <img 
         id="mainGalleryImg" 
@@ -137,7 +136,7 @@ const faqSchema = faqList.length > 0 ? {
         class="w-full h-full object-cover transition-all duration-300" 
       />
 
-      <!-- Left Navigation Arrow (<) -->
+      <!-- Left Arrow -->
       {galleryImages.length > 1 && (
         <button 
           id="galleryPrevBtn" 
@@ -148,7 +147,7 @@ const faqSchema = faqList.length > 0 ? {
         </button>
       )}
 
-      <!-- Right Navigation Arrow (>) -->
+      <!-- Right Arrow -->
       {galleryImages.length > 1 && (
         <button 
           id="galleryNextBtn" 
@@ -159,7 +158,7 @@ const faqSchema = faqList.length > 0 ? {
         </button>
       )}
 
-      <!-- Image Counter Badge (1 / 28) -->
+      <!-- Counter Badge -->
       <div class="absolute bottom-3.5 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs sm:text-sm font-bold px-3 py-1 rounded-full shadow-md z-10">
         <span id="galleryCurrentIdx">1</span> / <span>{totalPhotos}</span>
       </div>
@@ -168,27 +167,22 @@ const faqSchema = faqList.length > 0 ? {
     <!-- Bottom 4 Thumbnails Row -->
     {galleryImages.length > 1 && (
       <div class="grid grid-cols-4 gap-2 sm:gap-3 mt-2.5 sm:mt-3">
-        
-        <!-- Thumbnail 1 -->
         <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-emerald-600 transition cursor-pointer" data-index="0">
           <img src={galleryImages[0]} alt="Thumbnail 1" class="w-full h-full object-cover" />
         </button>
 
-        <!-- Thumbnail 2 -->
         {galleryImages[1] && (
           <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer" data-index="1">
             <img src={galleryImages[1]} alt="Thumbnail 2" class="w-full h-full object-cover" />
           </button>
         )}
 
-        <!-- Thumbnail 3 -->
         {galleryImages[2] && (
           <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer" data-index="2">
             <img src={galleryImages[2]} alt="Thumbnail 3" class="w-full h-full object-cover" />
           </button>
         )}
 
-        <!-- Thumbnail 4 (With "+24 View all" Overlay) -->
         {galleryImages[3] && (
           <button id="openLightboxBtn" class="h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative group text-white transition cursor-pointer">
             <img src={galleryImages[3]} alt="Thumbnail 4" class="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -198,7 +192,6 @@ const faqSchema = faqList.length > 0 ? {
             </div>
           </button>
         )}
-
       </div>
     )}
 
@@ -210,7 +203,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (WITH AUTOMATIC 150-WORD READ MORE TOGGLE) -->
+      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -269,7 +262,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 4. WHAT'S NEARBY & ACCORDION DROPDOWN -->
+      <!-- 4. WHAT'S NEARBY ACCORDION -->
       {showNearby && (
         <div id="nearby" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3.5 sm:space-y-4">
           <div>
@@ -359,7 +352,6 @@ const faqSchema = faqList.length > 0 ? {
           </h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-start">
-            
             <div class="space-y-3">
               {leftColumnFaqs.map((faq: any) => (
                 <details class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group transition">
@@ -387,7 +379,6 @@ const faqSchema = faqList.length > 0 ? {
                 </details>
               ))}
             </div>
-
           </div>
         </div>
       )}
@@ -402,35 +393,31 @@ const faqSchema = faqList.length > 0 ? {
 
     </div>
 
-    <!-- RIGHT STICKY ACTION SIDEBAR (30% DESKTOP) -->
+    <!-- RIGHT STICKY ACTION SIDEBAR (DYNAMIC LIVE RATE UPDATED VIA WORKER API) -->
     <div class="lg:col-span-4">
       <div class="sticky top-[80px] bg-slate-900 text-white p-5 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
         
-        {hotelPrice && (
-          <div>
-            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
-            <span class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice}</span>
-            <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
-          </div>
-        )}
+        <div>
+          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
+          <span id="liveStartingRate" class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice || 'Check Live Price'}</span>
+          <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
+        </div>
 
         <!-- ACTION BUTTONS -->
         <div class="space-y-2.5 pt-1">
-          {data.officialSite ? (
-            <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-              <span>Check Official Site Price</span>
-              <span>➔</span>
+          <a id="checkPriceBtn" href={data.officialSite || "https://agoda.com"} target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+            <span>Check Official Site Price</span>
+            <span>➔</span>
+          </a>
+
+          {data.whatsapp ? (
+            <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <span>Instant WhatsApp Reservation</span>
             </a>
           ) : (
-            <a href="#information" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-              <span>Book Your Stay</span>
-              <span>➔</span>
-            </a>
-          )}
-
-          {data.whatsapp && (
-            <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+            <a href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>Instant WhatsApp Reservation</span>
             </a>
           )}
@@ -452,25 +439,47 @@ const faqSchema = faqList.length > 0 ? {
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 text-white border-t border-slate-800 p-2.5 px-4 flex justify-between items-center shadow-2xl backdrop-blur-md">
     <div>
       <span class="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">Starting Rate</span>
-      <span class="font-black text-emerald-400 text-sm sm:text-base">{hotelPrice || 'Check Price'}</span>
+      <span id="mobileStartingRate" class="font-black text-emerald-400 text-sm sm:text-base">{hotelPrice || 'Check Price'}</span>
     </div>
 
-    {data.whatsapp ? (
-      <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5">
-        <span>Reserve Now</span>
-        <span>➔</span>
-      </a>
-    ) : (
-      <a href="#information" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition">
-        Check Price ➔
-      </a>
-    )}
+    <a id="mobileCheckPriceBtn" href={data.officialSite || "https://agoda.com"} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5">
+      <span>Check Price</span>
+      <span>➔</span>
+    </a>
   </div>
 
-  <!-- SCRIPT FOR GALLERY SLIDER & OVERVIEW TRUNCATOR -->
-  <script is:inline>
-    document.addEventListener('DOMContentLoaded', () => {
-      // 1. Gallery Slider Logic
+  <!-- CLIENT-SIDE SCRIPTS FOR GALLERY SLIDER, WORKER API & OVERVIEW TRUNCATOR -->
+  <script is:inline define:vars={{ hotelTitle }}>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Fetch Live Rates via Cloudflare Worker Proxy
+      const liveRateEl = document.getElementById('liveStartingRate');
+      const mobileRateEl = document.getElementById('mobileStartingRate');
+      const checkPriceBtn = document.getElementById('checkPriceBtn');
+      const mobileCheckPriceBtn = document.getElementById('mobileCheckPriceBtn');
+
+      try {
+        const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
+        const json = await res.json();
+
+        if (json && json.accommodations && json.accommodations.length > 0) {
+          const sorted = json.accommodations.sort((a, b) => (a.price || 0) - (b.price || 0));
+          const lowest = sorted[0];
+
+          if (lowest && lowest.price) {
+            if (liveRateEl) liveRateEl.textContent = `$${lowest.price}`;
+            if (mobileRateEl) mobileRateEl.textContent = `$${lowest.price}`;
+          }
+
+          if (lowest && lowest.url) {
+            if (checkPriceBtn) checkPriceBtn.href = lowest.url;
+            if (mobileCheckPriceBtn) mobileCheckPriceBtn.href = lowest.url;
+          }
+        }
+      } catch (e) {
+        console.log('Live rate fetch error:', e);
+      }
+
+      // 2. Gallery Slider Logic
       const mainImg = document.getElementById('mainGalleryImg');
       const prevBtn = document.getElementById('galleryPrevBtn');
       const nextBtn = document.getElementById('galleryNextBtn');
@@ -509,7 +518,7 @@ const faqSchema = faqList.length > 0 ? {
         });
       }
 
-      // 2. Overview 150-Word Truncator Logic
+      // 3. Overview 150-Word Truncator Logic
       const overviewTextEl = document.getElementById('overview-text');
       const toggleBtn = document.getElementById('toggleOverviewBtn');
 
