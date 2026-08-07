@@ -28,7 +28,6 @@ const showNearby = data.enable_nearby !== false && data.nearby_places && data.ne
 const showDetails = data.enable_details !== false;
 const showRules = data.enable_rules !== false;
 const showFaqs = data.enable_faqs !== false && data.faqs && data.faqs.length > 0;
-const showReviews = data.enable_reviews === true;
 const customSections = data.custom_sections || [];
 ---
 
@@ -38,6 +37,7 @@ const customSections = data.custom_sections || [];
   <section class="bg-slate-900 text-white pt-8 pb-6 px-4 sm:px-8 border-b border-slate-800">
     <div class="max-w-[1400px] mx-auto space-y-3">
       
+      <!-- Breadcrumb -->
       <div class="flex items-center gap-2 text-xs text-slate-400">
         <a href="/" class="hover:text-emerald-400 transition">Home</a>
         <span>/</span>
@@ -48,11 +48,9 @@ const customSections = data.custom_sections || [];
 
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
-            ✔ GulshanHotels Verified Directory
-          </div>
-          <h1 class="text-3xl sm:text-5xl font-black font-serif text-white">{hotelTitle}</h1>
-          <p class="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-2">
+          <!-- (Verified Badge Removed as Requested) -->
+          <h1 class="text-3xl sm:text-5xl font-black font-serif text-white mt-1">{hotelTitle}</h1>
+          <p class="text-xs sm:text-sm text-slate-300 mt-2 flex items-center gap-2">
             <span>📍 {hotelLocation}</span>
             {data.rating && (
               <>
@@ -64,9 +62,15 @@ const customSections = data.custom_sections || [];
           </p>
         </div>
 
+        <!-- 100% WORKABLE WISHLIST BUTTON -->
         <div class="flex items-center gap-2">
-          <button id="saveHotelBtn" class="card-wishlist-btn bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5" data-hotel={JSON.stringify({slug: hotel.id || hotel.slug, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage})}>
-            <span>♡ Wishlist</span>
+          <button 
+            id="singleWishlistBtn" 
+            class="bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-bold px-5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-2 cursor-pointer shadow-md"
+            data-hotel={JSON.stringify({slug: hotel.id || hotel.slug, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage})}
+          >
+            <span id="wishlistHeartIcon" class="text-base">♡</span>
+            <span id="wishlistText">Wishlist</span>
           </button>
         </div>
       </div>
@@ -91,15 +95,15 @@ const customSections = data.custom_sections || [];
     </div>
   </section>
 
-  <!-- STICKY DYNAMIC NAV BAR -->
-  <div class="sticky top-[60px] z-40 bg-white border-y border-slate-200 shadow-sm py-3 px-4 sm:px-8">
+  <!-- NORMAL NON-STICKY SECTION NAV BAR (LOCKING REMOVED) -->
+  <div class="bg-white border-y border-slate-200 shadow-sm py-3.5 px-4 sm:px-8 my-4">
     <div class="max-w-[1400px] mx-auto flex items-center gap-6 overflow-x-auto text-xs font-bold text-slate-600 [scrollbar-width:none]">
       <a href="#overview" class="hover:text-emerald-700 whitespace-nowrap">Overview</a>
-      {showRates && <a href="#rates" class="hover:text-emerald-700 whitespace-nowrap text-emerald-700">Rates</a>}
+      {showRates && <a href="#rates" class="hover:text-emerald-700 whitespace-nowrap text-emerald-700">Compare Rates</a>}
       {showAmenities && <a href="#amenities" class="hover:text-emerald-700 whitespace-nowrap">Amenities</a>}
       {showNearby && <a href="#nearby" class="hover:text-emerald-700 whitespace-nowrap">Nearby</a>}
-      {showDetails && <a href="#details" class="hover:text-emerald-700 whitespace-nowrap">Details</a>}
-      {showRules && <a href="#rules" class="hover:text-emerald-700 whitespace-nowrap">Rules</a>}
+      {showDetails && <a href="#details" class="hover:text-emerald-700 whitespace-nowrap">Essential Details</a>}
+      {showRules && <a href="#rules" class="hover:text-emerald-700 whitespace-nowrap">House Rules</a>}
       {showFaqs && <a href="#faqs" class="hover:text-emerald-700 whitespace-nowrap">FAQs</a>}
       {customSections.map((sec: any, idx: number) => (
         <a href={`#custom-sec-${idx}`} class="hover:text-emerald-700 whitespace-nowrap">{sec.title}</a>
@@ -108,16 +112,15 @@ const customSections = data.custom_sections || [];
   </div>
 
   <!-- MAIN PAGE CONTENT (LEFT 70% + RIGHT 30% STICKY SIDEBAR) -->
-  <section class="py-10 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+  <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
     
     <!-- LEFT COLUMN (70%) -->
-    <div class="lg:col-span-8 space-y-10 text-slate-800">
+    <div class="lg:col-span-8 space-y-8 text-slate-800">
       
       <!-- 1. OVERVIEW & MAP -->
       <div id="overview" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-2xl font-black font-serif text-slate-900">Hotel Overview</h2>
         
-        <!-- Render Content from Markdown or Default Overview -->
         <div class="prose prose-slate text-xs sm:text-sm leading-relaxed">
           {hotel.body ? <Fragment set:html={hotel.body} /> : <p>Located in the heart of Gulshan, {hotelTitle} offers executive lodging with world-class hospitality and easy access to foreign embassies and commercial centers.</p>}
         </div>
@@ -133,43 +136,43 @@ const customSections = data.custom_sections || [];
         </div>
       </div>
 
-      <!-- 2. REALTIME RATE COMPARISON TABLE (Show ONLY if enabled in CMS) -->
+      <!-- 2. REALTIME RATE COMPARISON TABLE (NORMAL WHITE BACKGROUND) -->
       {showRates && (
-        <div id="rates" class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div id="rates" class="bg-white text-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-4">
             <div>
-              <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400">Live Rate Comparison</span>
-              <h2 class="text-2xl font-black font-serif text-white">Compare Rates</h2>
+              <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700">Live Rate Comparison</span>
+              <h2 class="text-2xl font-black font-serif text-slate-900">Compare Rates</h2>
             </div>
-            <span class="bg-emerald-950 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+            <span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
               ⚡ Direct Stay22 API
             </span>
           </div>
 
           <div id="ratesTableContainer" class="space-y-3">
             <div class="text-center py-6 space-y-2">
-              <span class="inline-block w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-              <p class="text-xs text-slate-400">Fetching live rates from Agoda, Booking.com & Official sites...</p>
+              <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+              <p class="text-xs text-slate-500">Fetching live rates from Agoda, Booking.com & Official sites...</p>
             </div>
           </div>
         </div>
       )}
 
-      <!-- 3. AMENITIES SECTION (Show ONLY if items exist in CMS) -->
+      <!-- 3. HOTEL AMENITIES (NORMAL WHITE BACKGROUND) -->
       {showAmenities && (
-        <div id="amenities" class="bg-[#192b21] text-white p-6 sm:p-8 rounded-3xl border border-emerald-800/40 shadow-xl space-y-6">
-          <h2 class="text-2xl font-black font-serif text-white border-b border-emerald-800/40 pb-3">Hotel Amenities</h2>
+        <div id="amenities" class="bg-white text-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Hotel Amenities</h2>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
             {data.amenities.map((item: string) => (
-              <div class="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-800/30 flex items-center gap-2">
-                <span>✔</span><span>{item}</span>
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center gap-2 font-bold text-slate-800">
+                <span class="text-emerald-600">✔</span><span>{item}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <!-- 4. WHAT'S NEARBY (Show ONLY if items exist in CMS) -->
+      <!-- 4. WHAT'S NEARBY -->
       {showNearby && (
         <div id="nearby" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">What's Nearby</h2>
@@ -214,13 +217,13 @@ const customSections = data.custom_sections || [];
         <div id="rules" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">House Rules</h2>
           <ul class="text-xs text-slate-600 space-y-2">
-            <li class="flex items-center gap-2"><span>✔</span> Valid Government Photo ID (NID/Passport) required at check-in.</li>
-            <li class="flex items-center gap-2"><span>✔</span> Pets policy subject to hotel management approval.</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✔</span> Valid Government Photo ID (NID/Passport) required at check-in.</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-600 font-bold">✔</span> Pets policy subject to hotel management approval.</li>
           </ul>
         </div>
       )}
 
-      <!-- 7. FAQS (Show ONLY if added in CMS) -->
+      <!-- 7. FAQS -->
       {showFaqs && (
         <div id="faqs" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Frequently Asked Questions</h2>
@@ -235,7 +238,7 @@ const customSections = data.custom_sections || [];
         </div>
       )}
 
-      <!-- 8. CUSTOM SECTIONS ADDED FROM ADMIN PANEL -->
+      <!-- 8. CUSTOM EXTRA SECTIONS -->
       {customSections.map((sec: any, idx: number) => (
         <div id={`custom-sec-${idx}`} class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">{sec.title}</h2>
@@ -247,7 +250,7 @@ const customSections = data.custom_sections || [];
 
     <!-- RIGHT STICKY ACTION SIDEBAR (30%) -->
     <div class="lg:col-span-4">
-      <div class="sticky top-[110px] bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+      <div class="sticky top-[90px] bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
         
         {hotelPrice && (
           <div>
@@ -256,7 +259,7 @@ const customSections = data.custom_sections || [];
           </div>
         )}
 
-        <!-- 3 ACTION BUTTONS (Pulls numbers/links from CMS) -->
+        <!-- 3 ACTION BUTTONS -->
         <div class="space-y-3 pt-2">
           {data.officialSite ? (
             <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
@@ -286,9 +289,61 @@ const customSections = data.custom_sections || [];
 
   </section>
 
-  <!-- FETCH LIVE RATES SCRIPT -->
-  <script is:inline define:vars={{ hotelTitle }}>
+  <!-- MOBILE PINNED BOTTOM BAR -->
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950 text-white border-t border-slate-800 p-3 px-5 flex justify-between items-center shadow-2xl backdrop-blur-md">
+    <div>
+      <span class="text-[10px] text-slate-400 block font-bold">Starting Rate</span>
+      <span class="font-black text-emerald-400 text-base">{hotelPrice || 'Check Rates'}</span>
+    </div>
+    <a href="#rates" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition">
+      Check Price ➔
+    </a>
+  </div>
+
+  <!-- CLIENT-SIDE SCRIPT FOR RATES & WISHLIST BUTTON -->
+  <script is:inline define:vars={{ hotelTitle, hotelLocation, hotelPrice, hotelImage, hotelId: hotel.id || hotel.slug }}>
     document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Wishlist Button Functionality
+      const wishlistBtn = document.getElementById('singleWishlistBtn');
+      const heartIcon = document.getElementById('wishlistHeartIcon');
+      const textSpan = document.getElementById('wishlistText');
+
+      function getWishlist() {
+        try { return JSON.parse(localStorage.getItem('gulshan_wishlist') || '[]'); } 
+        catch (e) { return []; }
+      }
+
+      function isSaved() {
+        return getWishlist().some(item => item.slug === hotelId);
+      }
+
+      function updateWishlistButtonUI() {
+        if (!wishlistBtn || !heartIcon || !textSpan) return;
+        if (isSaved()) {
+          wishlistBtn.classList.remove('bg-slate-800');
+          wishlistBtn.classList.add('bg-rose-600', 'text-white');
+          heartIcon.textContent = '❤️';
+          textSpan.textContent = 'Saved';
+        } else {
+          wishlistBtn.classList.remove('bg-rose-600', 'text-white');
+          wishlistBtn.classList.add('bg-slate-800');
+          heartIcon.textContent = '♡';
+          textSpan.textContent = 'Wishlist';
+        }
+      }
+
+      if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', () => {
+          const hotelData = { slug: hotelId, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage };
+          if (window.toggleWishlistHotel) {
+            window.toggleWishlistHotel(hotelData);
+            updateWishlistButtonUI();
+          }
+        });
+        updateWishlistButtonUI();
+      }
+
+      // 2. Fetch Live Rates Table
       const container = document.getElementById('ratesTableContainer');
       if (!container) return;
 
@@ -300,24 +355,24 @@ const customSections = data.custom_sections || [];
           const list = json.accommodations.sort((a, b) => (a.price || 0) - (b.price || 0));
           
           container.innerHTML = list.map((item, idx) => `
-            <div class="flex items-center justify-between p-3.5 rounded-2xl border ${idx === 0 ? 'bg-emerald-950/80 border-emerald-500/60' : 'bg-slate-800/80 border-slate-700/60'}">
+            <div class="flex items-center justify-between p-3.5 rounded-2xl border ${idx === 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200'}">
               <div>
-                <span class="text-xs font-bold text-white block">${item.provider || 'Verified Partner'}</span>
-                ${idx === 0 ? '<span class="text-[10px] font-black text-[#00e676] uppercase">Lowest Base Rate</span>' : ''}
+                <span class="text-xs font-bold text-slate-900 block">${item.provider || 'Verified Partner'}</span>
+                ${idx === 0 ? '<span class="text-[10px] font-black text-emerald-700 uppercase">Lowest Base Rate</span>' : ''}
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-base font-black text-white">$${item.price || '120'}</span>
-                <a href="${item.url || '#'}" target="_blank" class="${idx === 0 ? 'bg-[#00e676] text-slate-950 font-black' : 'bg-emerald-600 text-white'} text-xs px-3.5 py-2 rounded-xl transition">
+                <span class="text-base font-black text-slate-900">$${item.price || '120'}</span>
+                <a href="${item.url || '#'}" target="_blank" class="${idx === 0 ? 'bg-emerald-600 text-white font-black' : 'bg-slate-800 text-white'} text-xs px-3.5 py-2 rounded-xl transition">
                   View deal ➔
                 </a>
               </div>
             </div>
           `).join('');
         } else {
-          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
+          container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
         }
       } catch (e) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
       }
     });
   </script>
