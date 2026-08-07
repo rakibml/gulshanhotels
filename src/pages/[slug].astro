@@ -42,13 +42,38 @@ const amenitiesList = data.amenities && data.amenities.length > 0 ? data.ameniti
   "24/7 Security & CCTV"
 ];
 
+// Interactive What's Nearby Accordion Items with Information
 const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.nearby_places : [
-  { name: "Gulshan Lake Park", distance: "250m" },
-  { name: "Chef's Table Gulshan", distance: "400m" },
-  { name: "US Embassy & Diplomatic Enclosure", distance: "1.2km" },
-  { name: "Pink City Shopping Complex", distance: "500m" },
-  { name: "United Hospital Gulshan", distance: "850m" },
-  { name: "Dhaka Elevated Expressway Ramp", distance: "1.5km" }
+  { 
+    name: "Gulshan Lake Park", 
+    distance: "250m",
+    details: "A serene waterfront park featuring walking trails, lush greenery, and sunset lake views. Perfect for morning jogs, fresh air, and relaxed evening strolls." 
+  },
+  { 
+    name: "Chef's Table Gulshan", 
+    distance: "400m",
+    details: "Dhaka’s premier artisanal food hall featuring over 20+ international cuisines, specialty coffee roasters, gourmet bakeries, and family-friendly indoor dining." 
+  },
+  { 
+    name: "US Embassy & Diplomatic Enclosure", 
+    distance: "1.2km",
+    details: "High-security diplomatic district housing the US, UK, Australian, and Indian High Commissions. Conveniently reachable within a 5-minute drive from the hotel." 
+  },
+  { 
+    name: "Pink City Shopping Complex", 
+    distance: "500m",
+    details: "One of Gulshan's most popular luxury shopping centers, famous for high-end boutique fashion, traditional Bangladeshi sarees, jewelry, and handicrafts." 
+  },
+  { 
+    name: "United Hospital Gulshan", 
+    distance: "850m",
+    details: "A leading 24/7 multi-specialty tertiary care hospital in Bangladesh providing world-class emergency medical services, pharmacy, and diagnostic facilities." 
+  },
+  { 
+    name: "Dhaka Elevated Expressway Ramp", 
+    distance: "1.5km",
+    details: "Direct express highway ramp connecting Gulshan to Hazrat Shahjalal International Airport (DAC) in less than 15-20 minutes, bypassing central city traffic." 
+  }
 ];
 ---
 
@@ -95,10 +120,9 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
   </section>
 
-  <!-- 2. HOTEL IMAGES (BOOKING.COM STYLE GALLERY GRID) -->
+  <!-- 2. HOTEL IMAGES (GALLERY GRID) -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden shadow-sm">
-      
       <div class="md:col-span-2 h-[320px] sm:h-[420px] relative overflow-hidden group">
         <img src={galleryImages[0]} alt={hotelTitle} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
       </div>
@@ -110,11 +134,10 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
           </div>
         ))}
       </div>
-
     </div>
   </section>
 
-  <!-- MAIN PAGE CONTENT (NO INDIVIDUAL ITEM BOX BORDERS & LARGER TEXT) -->
+  <!-- MAIN PAGE CONTENT -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
     
     <!-- LEFT MAIN COLUMN -->
@@ -123,7 +146,6 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
       <!-- 1. OVERVIEW -->
       <div id="overview" class="border-b border-slate-200 pb-8 space-y-3">
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
-        
         <div class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700">
           {hotel.body ? <Fragment set:html={hotel.body} /> : (
             <p>
@@ -154,7 +176,7 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
         </div>
       </div>
 
-      <!-- 3. HOTEL AMENITIES (NO ITEM BORDER BOXES & LARGER TEXT) -->
+      <!-- 3. HOTEL AMENITIES -->
       <div id="amenities" class="border-b border-slate-200 pb-8 space-y-4">
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Amenities</h2>
         
@@ -168,24 +190,46 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
         </div>
       </div>
 
-      <!-- 4. WHAT'S NEARBY (NO ITEM BORDER BOXES & LARGER TEXT) -->
+      <!-- 4. WHAT'S NEARBY & LOCAL INSIGHTS (INTERACTIVE FAQ-STYLE ACCORDION DROPDOWN) -->
       <div id="nearby" class="border-b border-slate-200 pb-8 space-y-4">
-        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">What's Nearby</h2>
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">
+            What's Nearby & Local Insights
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-2">
+            Click on any landmark below to view distance and local traveler tips:
+          </p>
+        </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm sm:text-base">
+        <!-- Accordion List -->
+        <div class="space-y-3 pt-2">
           {nearbyPlaces.map((place: any) => (
-            <div class="flex justify-between items-center py-2 border-b border-slate-100">
-              <span class="font-bold text-slate-800 flex items-center gap-2">
-                <svg class="w-5 h-5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                {place.name}
-              </span>
-              <span class="text-emerald-700 font-extrabold text-sm">{place.distance}</span>
-            </div>
+            <details class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group transition">
+              <summary class="flex justify-between items-center p-4 cursor-pointer select-none hover:bg-slate-50 transition">
+                <span class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2.5">
+                  <svg class="w-5 h-5 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  {place.name}
+                </span>
+
+                <div class="flex items-center gap-3">
+                  <span class="text-emerald-700 font-extrabold text-xs sm:text-sm bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
+                    {place.distance}
+                  </span>
+                  <span class="text-slate-400 text-xs group-open:rotate-180 transition-transform">▼</span>
+                </div>
+              </summary>
+
+              <div class="p-4 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60">
+                {place.details || "Conveniently located near the hotel with easy access by foot or short taxi drive."}
+              </div>
+            </details>
           ))}
         </div>
       </div>
 
-      <!-- 5. HOTEL INFORMATION & ESSENTIAL DETAILS (LARGER TEXT) -->
+      <!-- 5. HOTEL INFORMATION & ESSENTIAL DETAILS -->
       <div id="information" class="space-y-6">
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Information & Rules</h2>
         
@@ -270,16 +314,5 @@ const nearbyPlaces = data.nearby_places && data.nearby_places.length > 0 ? data.
     </div>
 
   </section>
-
-  <!-- MOBILE PINNED BOTTOM BAR -->
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950 text-white border-t border-slate-800 p-3 px-5 flex justify-between items-center shadow-2xl backdrop-blur-md">
-    <div>
-      <span class="text-[10px] text-slate-400 block font-bold">Starting Rate</span>
-      <span class="font-black text-emerald-400 text-base">{hotelPrice || 'Check Price'}</span>
-    </div>
-    <a href="#information" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition">
-      Check Price ➔
-    </a>
-  </div>
 
 </Layout>
