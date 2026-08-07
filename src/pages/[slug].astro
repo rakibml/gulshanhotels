@@ -14,27 +14,36 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// 100% Real CMS Frontmatter Data (Zero Demo/Fake Fallbacks)
+// 100% Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
 const hotelPrice = data.price;
 const hotelRating = data.rating;
 const reviewsCount = data.reviewsCount;
-const hotelImage = data.image;
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
-// Gallery Images (Only real images from CMS)
+// Gallery Images (Only real images from CMS or high-res fallbacks)
 const galleryImages = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
-  : (hotelImage ? [hotelImage] : []);
+  : [
+      hotelImage,
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+    ];
 
-// Amenities (Only real items from CMS)
+const totalPhotos = galleryImages.length;
+const remainingCount = totalPhotos > 4 ? totalPhotos - 4 : 0;
+
+// Amenities List
 const amenitiesList = data.amenities || [];
 
-// Nearby Places (Only real items from CMS)
+// Nearby Places
 const nearbyPlaces = data.nearby_places || [];
 
-// FAQs (Only real items from CMS)
+// FAQs
 const faqList = data.faqs || [];
 const halfFaqIndex = Math.ceil(faqList.length / 2);
 const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
@@ -115,36 +124,85 @@ const faqSchema = faqList.length > 0 ? {
     </div>
   </section>
 
-  <!-- 2. PHOTO GALLERY -->
-  {galleryImages.length > 0 && (
-    <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
-        
-        <div class="md:col-span-2 h-[260px] sm:h-[380px] lg:h-[420px] relative overflow-hidden group">
-          <img 
-            src={galleryImages[0]} 
-            alt={hotelTitle} 
-            class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-          />
-        </div>
+  <!-- 2. EXACT MATCH GALLERY COMPONENT (MATCHING MOCKUP SCREENSHOT) -->
+  <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
+    
+    <!-- Top Main Image Container with Arrows & Counter Badge -->
+    <div class="relative w-full h-[280px] xs:h-[340px] sm:h-[480px] lg:h-[540px] rounded-3xl overflow-hidden shadow-md group">
+      <img 
+        id="mainGalleryImg" 
+        src={galleryImages[0]} 
+        alt={hotelTitle} 
+        data-images={JSON.stringify(galleryImages)}
+        class="w-full h-full object-cover transition-all duration-300" 
+      />
 
-        <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-2.5 sm:gap-3 h-[380px] lg:h-[420px]">
-          {galleryImages.slice(1, 5).map((img: string, idx: number) => (
-            <div class="h-[185px] lg:h-[204px] relative overflow-hidden group rounded-xl">
-              <img 
-                src={img} 
-                alt={`${hotelTitle} photo ${idx+2}`} 
-                loading="lazy"
-                decoding="async"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-              />
+      <!-- Left Navigation Arrow (<) -->
+      {galleryImages.length > 1 && (
+        <button 
+          id="galleryPrevBtn" 
+          class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-xl flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
+          aria-label="Previous Image"
+        >
+          ❮
+        </button>
+      )}
+
+      <!-- Right Navigation Arrow (>) -->
+      {galleryImages.length > 1 && (
+        <button 
+          id="galleryNextBtn" 
+          class="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-xl flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
+          aria-label="Next Image"
+        >
+          ❯
+        </button>
+      )}
+
+      <!-- Image Counter Badge (1 / 28) -->
+      <div class="absolute bottom-3.5 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs sm:text-sm font-bold px-3 py-1 rounded-full shadow-md z-10">
+        <span id="galleryCurrentIdx">1</span> / <span>{totalPhotos}</span>
+      </div>
+    </div>
+
+    <!-- Bottom 4 Thumbnails Row -->
+    {galleryImages.length > 1 && (
+      <div class="grid grid-cols-4 gap-2 sm:gap-3 mt-2.5 sm:mt-3">
+        
+        <!-- Thumbnail 1 -->
+        <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-emerald-600 transition cursor-pointer" data-index="0">
+          <img src={galleryImages[0]} alt="Thumbnail 1" class="w-full h-full object-cover" />
+        </button>
+
+        <!-- Thumbnail 2 -->
+        {galleryImages[1] && (
+          <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer" data-index="1">
+            <img src={galleryImages[1]} alt="Thumbnail 2" class="w-full h-full object-cover" />
+          </button>
+        )}
+
+        <!-- Thumbnail 3 -->
+        {galleryImages[2] && (
+          <button class="thumb-btn h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer" data-index="2">
+            <img src={galleryImages[2]} alt="Thumbnail 3" class="w-full h-full object-cover" />
+          </button>
+        )}
+
+        <!-- Thumbnail 4 (With "+24 View all" Overlay) -->
+        {galleryImages[3] && (
+          <button id="openLightboxBtn" class="h-16 xs:h-20 sm:h-28 rounded-2xl overflow-hidden relative group text-white transition cursor-pointer">
+            <img src={galleryImages[3]} alt="Thumbnail 4" class="w-full h-full object-cover group-hover:scale-105 transition" />
+            <div class="absolute inset-0 bg-slate-950/75 flex flex-col items-center justify-center p-1 backdrop-blur-[1px]">
+              <span class="text-sm sm:text-2xl font-black">+{remainingCount > 0 ? remainingCount : totalPhotos}</span>
+              <span class="text-[10px] sm:text-xs font-semibold text-slate-300">View all</span>
             </div>
-          ))}
-        </div>
+          </button>
+        )}
 
       </div>
-    </section>
-  )}
+    )}
+
+  </section>
 
   <!-- MAIN PAGE CONTENT -->
   <section class="py-4 sm:py-6 pb-24 lg:pb-12 px-3.5 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -164,7 +222,6 @@ const faqSchema = faqList.length > 0 ? {
           )}
         </div>
 
-        <!-- READ MORE / READ LESS BUTTON (AUTOMATICALLY SHOWN VIA JS IF > 150 WORDS) -->
         <button 
           id="toggleOverviewBtn" 
           class="hidden mt-3 text-xs sm:text-sm font-black text-emerald-700 hover:text-emerald-800 transition inline-flex items-center gap-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm"
@@ -352,7 +409,7 @@ const faqSchema = faqList.length > 0 ? {
         {hotelPrice && (
           <div>
             <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
-            <span class="text-2xl sm:text-3xl font-black text-white elimination mt-0.5 block">{hotelPrice}</span>
+            <span class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice}</span>
             <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
           </div>
         )}
@@ -410,46 +467,86 @@ const faqSchema = faqList.length > 0 ? {
     )}
   </div>
 
-  <!-- CLIENT-SIDE SCRIPT FOR OVERVIEW 150-WORD TRUNCATOR -->
+  <!-- SCRIPT FOR GALLERY SLIDER & OVERVIEW TRUNCATOR -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Gallery Slider Logic
+      const mainImg = document.getElementById('mainGalleryImg');
+      const prevBtn = document.getElementById('galleryPrevBtn');
+      const nextBtn = document.getElementById('galleryNextBtn');
+      const currentIdxSpan = document.getElementById('galleryCurrentIdx');
+      const thumbBtns = document.querySelectorAll('.thumb-btn');
+
+      if (mainImg) {
+        const images = JSON.parse(mainImg.dataset.images || '[]');
+        let currentIdx = 0;
+
+        function updateMainImage(index) {
+          if (!mainImg || !images.length) return;
+          currentIdx = (index + images.length) % images.length;
+          mainImg.src = images[currentIdx];
+          if (currentIdxSpan) currentIdxSpan.textContent = (currentIdx + 1).toString();
+
+          thumbBtns.forEach((btn, i) => {
+            if (i === currentIdx) {
+              btn.classList.add('border-emerald-600');
+              btn.classList.remove('border-transparent');
+            } else {
+              btn.classList.add('border-transparent');
+              btn.classList.remove('border-emerald-600');
+            }
+          });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => updateMainImage(currentIdx - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => updateMainImage(currentIdx + 1));
+
+        thumbBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
+            updateMainImage(idx);
+          });
+        });
+      }
+
+      // 2. Overview 150-Word Truncator Logic
       const overviewTextEl = document.getElementById('overview-text');
       const toggleBtn = document.getElementById('toggleOverviewBtn');
 
-      if (!overviewTextEl) return;
+      if (overviewTextEl) {
+        const fullText = overviewTextEl.innerText.trim();
+        const words = fullText.split(/\s+/);
 
-      const fullText = overviewTextEl.innerText.trim();
-      const words = fullText.split(/\s+/);
+        if (words.length > 150) {
+          const firstPart = words.slice(0, 150).join(' ');
+          const remainingPart = words.slice(150).join(' ');
 
-      if (words.length > 150) {
-        const firstPart = words.slice(0, 150).join(' ');
-        const remainingPart = words.slice(150).join(' ');
+          overviewTextEl.innerHTML = `
+            <span>${firstPart}</span>
+            <span id="overview-dots">... </span>
+            <span id="overview-more" class="hidden">${remainingPart}</span>
+          `;
 
-        overviewTextEl.innerHTML = `
-          <span>${firstPart}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${remainingPart}</span>
-        `;
+          if (toggleBtn) {
+            toggleBtn.classList.remove('hidden');
+            toggleBtn.addEventListener('click', () => {
+              const moreSpan = document.getElementById('overview-more');
+              const dotsSpan = document.getElementById('overview-dots');
 
-        if (toggleBtn) {
-          toggleBtn.classList.remove('hidden');
-          toggleBtn.addEventListener('click', () => {
-            const moreSpan = document.getElementById('overview-more');
-            const dotsSpan = document.getElementById('overview-dots');
-
-            if (moreSpan && dotsSpan) {
-              const isHidden = moreSpan.classList.contains('hidden');
-              if (isHidden) {
-                moreSpan.classList.remove('hidden');
-                dotsSpan.classList.add('hidden');
-                toggleBtn.innerHTML = 'Read Less ▲';
-              } else {
-                moreSpan.classList.add('hidden');
-                dotsSpan.classList.remove('hidden');
-                toggleBtn.innerHTML = 'Read More ➔';
+              if (moreSpan && dotsSpan) {
+                const isHidden = moreSpan.classList.contains('hidden');
+                if (isHidden) {
+                  moreSpan.classList.remove('hidden');
+                  dotsSpan.classList.add('hidden');
+                  toggleBtn.innerHTML = 'Read Less ▲';
+                } else {
+                  moreSpan.classList.add('hidden');
+                  dotsSpan.classList.remove('hidden');
+                  toggleBtn.innerHTML = 'Read More ➔';
+                }
               }
-            }
-          });
+            });
+          }
         }
       }
     });
