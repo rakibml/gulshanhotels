@@ -14,69 +14,25 @@ export async function getStaticPaths() {
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-const hotelTitle = data.title || data.name || "Gulshan Hotel";
-const hotelCategory = data.category || "5-Star Luxury Stay";
-const hotelLocation = data.location || "Gulshan 2, Dhaka, Bangladesh";
-const hotelRating = data.rating || 4.8;
-const hotelPrice = data.price || "$$$$";
+const hotelTitle = data.title || "Gulshan Hotel";
+const hotelCategory = data.category || "Luxury Stay";
+const hotelLocation = data.location || "Gulshan, Dhaka";
+const hotelPrice = data.price || "";
 const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+const galleryImages = data.gallery && data.gallery.length > 0 ? data.gallery : [hotelImage];
 
-// Fallback Gallery Images
-const galleryImages = data.gallery || [
-  hotelImage,
-  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
-];
-
-// Google JSON-LD Schema
-const lodgingSchema = {
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  "name": hotelTitle,
-  "image": hotelImage,
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Gulshan, Dhaka",
-    "addressCountry": "Bangladesh"
-  },
-  "starRating": {
-    "@type": "Rating",
-    "ratingValue": hotelRating
-  },
-  "priceRange": hotelPrice
-};
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": `What are the check-in and check-out times at ${hotelTitle}?`,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Standard check-in time is from 2:00 PM and check-out is until 12:00 PM."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": `Does ${hotelTitle} offer airport shuttle services?`,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, airport transfer services are available upon request."
-      }
-    }
-  ]
-};
+// Section Toggles
+const showRates = data.enable_rates !== false;
+const showAmenities = data.enable_amenities !== false && data.amenities && data.amenities.length > 0;
+const showNearby = data.enable_nearby !== false && data.nearby_places && data.nearby_places.length > 0;
+const showDetails = data.enable_details !== false;
+const showRules = data.enable_rules !== false;
+const showFaqs = data.enable_faqs !== false && data.faqs && data.faqs.length > 0;
+const showReviews = data.enable_reviews === true;
+const customSections = data.custom_sections || [];
 ---
 
 <Layout title={`${hotelTitle} — Verified Hotel in Gulshan, Dhaka`}>
-  
-  <!-- SCHEMAS -->
-  <script type="application/ld+json" set:html={JSON.stringify(lodgingSchema)} />
-  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
   <!-- TOP HEADER BREADCRUMB & TITLE -->
   <section class="bg-slate-900 text-white pt-8 pb-6 px-4 sm:px-8 border-b border-slate-800">
@@ -98,17 +54,18 @@ const faqSchema = {
           <h1 class="text-3xl sm:text-5xl font-black font-serif text-white">{hotelTitle}</h1>
           <p class="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-2">
             <span>📍 {hotelLocation}</span>
-            <span>•</span>
-            <span class="text-amber-400 font-bold">★ {hotelRating} / 5</span>
+            {data.rating && (
+              <>
+                <span>•</span>
+                <span class="text-amber-400 font-bold">★ {data.rating}</span>
+                {data.reviewsCount && <span class="text-slate-400">({data.reviewsCount} reviews)</span>}
+              </>
+            )}
           </p>
         </div>
 
-        <!-- Share & Wishlist -->
         <div class="flex items-center gap-2">
-          <button id="shareBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
-            <span>🔗 Share</span>
-          </button>
-          <button id="saveHotelBtn" class="bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+          <button id="saveHotelBtn" class="card-wishlist-btn bg-slate-800 hover:bg-rose-600 text-slate-200 hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5" data-hotel={JSON.stringify({slug: hotel.id || hotel.slug, title: hotelTitle, location: hotelLocation, price: hotelPrice, image: hotelImage})}>
             <span>♡ Wishlist</span>
           </button>
         </div>
@@ -117,42 +74,36 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- IMAGE GALLERY GRID WITH LIGHTBOX TRIGGER -->
+  <!-- IMAGE GALLERY GRID -->
   <section class="py-6 px-4 sm:px-8 max-w-[1400px] mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden relative shadow-2xl">
-      
-      <!-- Main Cover Photo (Cols 2) -->
-      <div class="md:col-span-2 h-[320px] sm:h-[450px] relative overflow-hidden group cursor-pointer">
+      <div class="md:col-span-2 h-[320px] sm:h-[420px] relative overflow-hidden group">
         <img src={galleryImages[0]} alt={hotelTitle} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
       </div>
 
-      <!-- 4 Grid Thumbnails -->
-      <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-3 h-[450px]">
-        {galleryImages.slice(1, 5).map((img, idx) => (
-          <div class="h-[218px] relative overflow-hidden group cursor-pointer rounded-xl">
+      <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-3 h-[420px]">
+        {galleryImages.slice(1, 5).map((img: string, idx: number) => (
+          <div class="h-[204px] relative overflow-hidden group rounded-xl">
             <img src={img} alt={`${hotelTitle} gallery ${idx+2}`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
           </div>
         ))}
       </div>
-
-      <!-- View All Photos Button -->
-      <button id="openGalleryBtn" class="absolute bottom-4 right-4 bg-slate-950/85 hover:bg-slate-900 text-white font-bold text-xs px-5 py-2.5 rounded-xl border border-slate-700 backdrop-blur-md shadow-xl transition">
-        📸 View All Photos ({galleryImages.length})
-      </button>
-
     </div>
   </section>
 
-  <!-- STICKY SECTION NAV BAR -->
+  <!-- STICKY DYNAMIC NAV BAR -->
   <div class="sticky top-[60px] z-40 bg-white border-y border-slate-200 shadow-sm py-3 px-4 sm:px-8">
     <div class="max-w-[1400px] mx-auto flex items-center gap-6 overflow-x-auto text-xs font-bold text-slate-600 [scrollbar-width:none]">
       <a href="#overview" class="hover:text-emerald-700 whitespace-nowrap">Overview</a>
-      <a href="#rates" class="hover:text-emerald-700 whitespace-nowrap text-emerald-700">Compare Rates</a>
-      <a href="#amenities" class="hover:text-emerald-700 whitespace-nowrap">Amenities</a>
-      <a href="#nearby" class="hover:text-emerald-700 whitespace-nowrap">What's Nearby</a>
-      <a href="#details" class="hover:text-emerald-700 whitespace-nowrap">Essential Details</a>
-      <a href="#rules" class="hover:text-emerald-700 whitespace-nowrap">House Rules</a>
-      <a href="#faqs" class="hover:text-emerald-700 whitespace-nowrap">FAQs</a>
+      {showRates && <a href="#rates" class="hover:text-emerald-700 whitespace-nowrap text-emerald-700">Rates</a>}
+      {showAmenities && <a href="#amenities" class="hover:text-emerald-700 whitespace-nowrap">Amenities</a>}
+      {showNearby && <a href="#nearby" class="hover:text-emerald-700 whitespace-nowrap">Nearby</a>}
+      {showDetails && <a href="#details" class="hover:text-emerald-700 whitespace-nowrap">Details</a>}
+      {showRules && <a href="#rules" class="hover:text-emerald-700 whitespace-nowrap">Rules</a>}
+      {showFaqs && <a href="#faqs" class="hover:text-emerald-700 whitespace-nowrap">FAQs</a>}
+      {customSections.map((sec: any, idx: number) => (
+        <a href={`#custom-sec-${idx}`} class="hover:text-emerald-700 whitespace-nowrap">{sec.title}</a>
+      ))}
     </div>
   </div>
 
@@ -160,14 +111,16 @@ const faqSchema = {
   <section class="py-10 px-4 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
     
     <!-- LEFT COLUMN (70%) -->
-    <div class="lg:col-span-8 space-y-12 text-slate-800">
+    <div class="lg:col-span-8 space-y-10 text-slate-800">
       
       <!-- 1. OVERVIEW & MAP -->
       <div id="overview" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="text-2xl font-black font-serif text-slate-900">Hotel Overview</h2>
-        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          {data.description || `${hotelTitle} is located in the heart of Gulshan, Dhaka. Surrounded by high-security diplomatic enclosures, premier shopping centers, and fine dining avenues, it provides world-class hospitality, executive business suites, and luxurious spa amenities.`}
-        </p>
+        
+        <!-- Render Content from Markdown or Default Overview -->
+        <div class="prose prose-slate text-xs sm:text-sm leading-relaxed">
+          {hotel.body ? <Fragment set:html={hotel.body} /> : <p>Located in the heart of Gulshan, {hotelTitle} offers executive lodging with world-class hospitality and easy access to foreign embassies and commercial centers.</p>}
+        </div>
 
         <!-- Google Map Embed -->
         <div class="rounded-2xl overflow-hidden border border-slate-200 h-64 mt-4">
@@ -180,148 +133,115 @@ const faqSchema = {
         </div>
       </div>
 
-      <!-- 2. REALTIME TRIPADVISOR-STYLE RATE COMPARISON TABLE (#rates) -->
-      <div id="rates" class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-          <div>
-            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400">Live Rate Comparison</span>
-            <h2 class="text-2xl font-black font-serif text-white">Compare Best Deals</h2>
+      <!-- 2. REALTIME RATE COMPARISON TABLE (Show ONLY if enabled in CMS) -->
+      {showRates && (
+        <div id="rates" class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400">Live Rate Comparison</span>
+              <h2 class="text-2xl font-black font-serif text-white">Compare Rates</h2>
+            </div>
+            <span class="bg-emerald-950 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+              ⚡ Direct Stay22 API
+            </span>
           </div>
-          <span class="bg-emerald-950 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
-            ⚡ Direct Stay22 API
-          </span>
-        </div>
 
-        <!-- Dynamic Rate Comparison Table Container -->
-        <div id="ratesTableContainer" class="space-y-3">
-          <div class="text-center py-8 space-y-2">
-            <span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-            <p class="text-xs text-slate-400">Fetching live rates from Agoda, Booking.com & Official sites...</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. FEATURED AMENITIES (#amenities) -->
-      <div id="amenities" class="bg-[#211f2e] text-white p-6 sm:p-8 rounded-3xl border border-purple-900/40 shadow-xl space-y-6">
-        <div class="flex justify-between items-center border-b border-purple-800/40 pb-4">
-          <h2 class="text-2xl font-black font-serif text-white">Featured Amenities</h2>
-          <button id="openAmenitiesModalBtn" class="bg-purple-950 hover:bg-purple-900 text-purple-200 text-xs font-bold px-4 py-2 rounded-xl border border-purple-500/30 transition">
-            View All 28 Amenities ➔
-          </button>
-        </div>
-
-        <!-- 9 Vector SVG Icon Grid -->
-        <div class="grid grid-cols-3 sm:grid-cols-3 gap-4 text-xs">
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>📶</span><span>High-Speed Wi-Fi</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🏊</span><span>Swimming Pool</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🧖</span><span>Luxury Spa</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🏋️</span><span>Fitness Gym</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🍽️</span><span>Fine Dining</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🍸</span><span>Rooftop Bar</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🚗</span><span>Free Valet Parking</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>✈️</span><span>Airport Transfer</span>
-          </div>
-          <div class="bg-purple-950/50 p-3 rounded-2xl border border-purple-800/30 flex items-center gap-2">
-            <span>🛡️</span><span>24/7 Security</span>
+          <div id="ratesTableContainer" class="space-y-3">
+            <div class="text-center py-6 space-y-2">
+              <span class="inline-block w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+              <p class="text-xs text-slate-400">Fetching live rates from Agoda, Booking.com & Official sites...</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <!-- 4. WHAT'S NEARBY (#nearby) -->
-      <div id="nearby" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">What's Nearby</h2>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-          <!-- Dining -->
-          <div class="space-y-2">
-            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">🍽️ Dining & Bars</h3>
-            <ul class="space-y-1.5 text-slate-600">
-              <li class="flex justify-between"><span>Chef's Table Gulshan</span><span class="font-bold">200m</span></li>
-              <li class="flex justify-between"><span>Izumi Japanese</span><span class="font-bold">450m</span></li>
-            </ul>
-          </div>
-          <!-- Attractions -->
-          <div class="space-y-2">
-            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">🌳 Attractions</h3>
-            <ul class="space-y-1.5 text-slate-600">
-              <li class="flex justify-between"><span>Gulshan Lake Park</span><span class="font-bold">350m</span></li>
-              <li class="flex justify-between"><span>Gulshan Pink City</span><span class="font-bold">600m</span></li>
-            </ul>
-          </div>
-          <!-- Business & Medical -->
-          <div class="space-y-2">
-            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">🏛️ Business & Embassies</h3>
-            <ul class="space-y-1.5 text-slate-600">
-              <li class="flex justify-between"><span>US Embassy</span><span class="font-bold">1.2km</span></li>
-              <li class="flex justify-between"><span>United Hospital</span><span class="font-bold">900m</span></li>
-            </ul>
+      <!-- 3. AMENITIES SECTION (Show ONLY if items exist in CMS) -->
+      {showAmenities && (
+        <div id="amenities" class="bg-[#192b21] text-white p-6 sm:p-8 rounded-3xl border border-emerald-800/40 shadow-xl space-y-6">
+          <h2 class="text-2xl font-black font-serif text-white border-b border-emerald-800/40 pb-3">Hotel Amenities</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            {data.amenities.map((item: string) => (
+              <div class="bg-emerald-950/60 p-3 rounded-2xl border border-emerald-800/30 flex items-center gap-2">
+                <span>✔</span><span>{item}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      <!-- 5. ESSENTIAL DETAILS (#details) -->
-      <div id="details" class="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-4">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Essential Details</h2>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div class="bg-white p-3 rounded-2xl border border-slate-200">
-            <span class="text-slate-400 block font-bold">Check-In</span>
-            <span class="font-black text-slate-900 text-sm">2:00 PM</span>
-          </div>
-          <div class="bg-white p-3 rounded-2xl border border-slate-200">
-            <span class="text-slate-400 block font-bold">Check-Out</span>
-            <span class="font-black text-slate-900 text-sm">12:00 PM</span>
-          </div>
-          <div class="bg-white p-3 rounded-2xl border border-slate-200">
-            <span class="text-slate-400 block font-bold">Smoking</span>
-            <span class="font-black text-slate-900 text-sm">Non-Smoking</span>
-          </div>
-          <div class="bg-white p-3 rounded-2xl border border-slate-200">
-            <span class="text-slate-400 block font-bold">Power Backup</span>
-            <span class="font-black text-emerald-700 text-sm">24/7 Generator</span>
+      <!-- 4. WHAT'S NEARBY (Show ONLY if items exist in CMS) -->
+      {showNearby && (
+        <div id="nearby" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">What's Nearby</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            {data.nearby_places.map((place: any) => (
+              <div class="flex justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <span class="font-bold text-slate-800">{place.name}</span>
+                <span class="text-emerald-700 font-extrabold">{place.distance}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      <!-- 6. HOUSE RULES (#rules) -->
-      <div id="rules" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">House Rules</h2>
-        <ul class="text-xs text-slate-600 space-y-2.5">
-          <li class="flex items-center gap-2"><span>✔</span> Valid Government Photo ID (NID/Passport) required at check-in.</li>
-          <li class="flex items-center gap-2"><span>✔</span> Pets are not allowed unless specified.</li>
-          <li class="flex items-center gap-2"><span>✔</span> Extra bed charges may apply depending on room capacity.</li>
-        </ul>
-      </div>
-
-      <!-- 7. FAQS (#faqs) -->
-      <div id="faqs" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Frequently Asked Questions</h2>
-        <div class="space-y-3">
-          <details class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
-            <summary class="font-bold text-slate-900 cursor-pointer">What are the check-in and check-out times?</summary>
-            <p class="text-slate-600 mt-2">Check-in begins at 2:00 PM and check-out is until 12:00 PM.</p>
-          </details>
-          <details class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
-            <summary class="font-bold text-slate-900 cursor-pointer">Is breakfast included in the rate?</summary>
-            <p class="text-slate-600 mt-2">Complimentary buffet breakfast is included in executive room categories.</p>
-          </details>
+      <!-- 5. ESSENTIAL DETAILS -->
+      {showDetails && (
+        <div id="details" class="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-4">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Essential Details</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+            <div class="bg-white p-3 rounded-2xl border border-slate-200">
+              <span class="text-slate-400 block font-bold">Check-In</span>
+              <span class="font-black text-slate-900 text-sm">2:00 PM</span>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-slate-200">
+              <span class="text-slate-400 block font-bold">Check-Out</span>
+              <span class="font-black text-slate-900 text-sm">12:00 PM</span>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-slate-200">
+              <span class="text-slate-400 block font-bold">Smoking</span>
+              <span class="font-black text-slate-900 text-sm">Non-Smoking</span>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-slate-200">
+              <span class="text-slate-400 block font-bold">Power Backup</span>
+              <span class="font-black text-emerald-700 text-sm">24/7 Generator</span>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      <!-- 6. HOUSE RULES -->
+      {showRules && (
+        <div id="rules" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">House Rules</h2>
+          <ul class="text-xs text-slate-600 space-y-2">
+            <li class="flex items-center gap-2"><span>✔</span> Valid Government Photo ID (NID/Passport) required at check-in.</li>
+            <li class="flex items-center gap-2"><span>✔</span> Pets policy subject to hotel management approval.</li>
+          </ul>
+        </div>
+      )}
+
+      <!-- 7. FAQS (Show ONLY if added in CMS) -->
+      {showFaqs && (
+        <div id="faqs" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">Frequently Asked Questions</h2>
+          <div class="space-y-3">
+            {data.faqs.map((faq: any) => (
+              <details class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <summary class="font-bold text-slate-900 cursor-pointer">{faq.question}</summary>
+                <p class="text-slate-600 mt-2 leading-relaxed">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- 8. CUSTOM SECTIONS ADDED FROM ADMIN PANEL -->
+      {customSections.map((sec: any, idx: number) => (
+        <div id={`custom-sec-${idx}`} class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h2 class="text-2xl font-black font-serif text-slate-900 border-b border-slate-100 pb-3">{sec.title}</h2>
+          <div class="text-xs sm:text-sm text-slate-600 leading-relaxed" set:html={sec.content} />
+        </div>
+      ))}
 
     </div>
 
@@ -329,40 +249,42 @@ const faqSchema = {
     <div class="lg:col-span-4">
       <div class="sticky top-[110px] bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
         
-        <div>
-          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Estimated Starting Rate</span>
-          <span class="text-3xl font-black text-white">{hotelPrice}</span>
-          <span class="text-xs text-slate-400 block mt-0.5">/ night + taxes & fees</span>
-        </div>
+        {hotelPrice && (
+          <div>
+            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
+            <span class="text-3xl font-black text-white">{hotelPrice}</span>
+          </div>
+        )}
 
-        <!-- 3 ACTION BUTTONS -->
+        <!-- 3 ACTION BUTTONS (Pulls numbers/links from CMS) -->
         <div class="space-y-3 pt-2">
-          <a href="#rates" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
-            Check Official Site Price ➔
-          </a>
-          <a href={`https://wa.me/8801700000000?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
-            💬 Instant WhatsApp Reservation
-          </a>
-          <a href="tel:+8801700000000" class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
-            📞 Direct Call Desk
-          </a>
+          {data.officialSite ? (
+            <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
+              Check Official Site Price ➔
+            </a>
+          ) : (
+            <a href="#rates" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs text-center py-3.5 rounded-xl shadow-lg transition">
+              Compare Live Rates ➔
+            </a>
+          )}
+
+          {data.whatsapp && (
+            <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about ' + hotelTitle)}`} target="_blank" class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
+              💬 Instant WhatsApp Reservation
+            </a>
+          )}
+
+          {data.phone && (
+            <a href={`tel:${data.phone}`} class="block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs text-center py-3 rounded-xl border border-slate-700 transition">
+              📞 Direct Call Desk
+            </a>
+          )}
         </div>
 
       </div>
     </div>
 
   </section>
-
-  <!-- MOBILE PINNED BOTTOM BAR -->
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950 text-white border-t border-slate-800 p-3 px-5 flex justify-between items-center shadow-2xl backdrop-blur-md">
-    <div>
-      <span class="text-[10px] text-slate-400 block font-bold">Estimated Rate</span>
-      <span class="font-black text-emerald-400 text-base">{hotelPrice}</span>
-    </div>
-    <a href="#rates" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition">
-      Check Price ➔
-    </a>
-  </div>
 
   <!-- FETCH LIVE RATES SCRIPT -->
   <script is:inline define:vars={{ hotelTitle }}>
@@ -392,10 +314,10 @@ const faqSchema = {
             </div>
           `).join('');
         } else {
-          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Live rates currently being updated. Contact direct desk above for best deals.</p>';
+          container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
         }
       } catch (e) {
-        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Direct rates available. Click the WhatsApp or Direct Call button above.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Direct booking available. Use the WhatsApp or Direct Call buttons on the right.</p>';
       }
     });
   </script>
