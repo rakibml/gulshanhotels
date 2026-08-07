@@ -112,6 +112,7 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
     <div class="absolute inset-0 w-full h-full">
       <img 
         src="/hero-gulshan.jpg.webp" 
+        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=2000&q=85';"
         alt="Gulshan Dhaka City Skyline" 
         class="w-full h-full object-cover object-center opacity-80" 
       />
@@ -199,7 +200,7 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
     </div>
   </section>
 
-  <!-- NEW SECTION: "POPULAR HOTELS IN GULSHAN" (Controlled from Admin Panel) -->
+  <!-- SECTION: "POPULAR HOTELS IN GULSHAN" -->
   <section id="popular-hotels" class="bg-[#F8FAF9] py-16 border-b border-slate-200">
     <div class="max-w-[1550px] mx-auto px-6 sm:px-20 lg:px-28 space-y-8">
       
@@ -213,12 +214,12 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
           <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Handpicked luxury and executive hotels recommended by our local audit team.</p>
         </div>
 
-        <a href="#hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider flex items-center space-x-1 shrink-0">
+        <a href="#all-hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider flex items-center space-x-1 shrink-0">
           <span>View All Hotels ➔</span>
         </a>
       </div>
 
-      <!-- Popular Hotels 3-Column Grid (Admin Panel Controlled) -->
+      <!-- Popular Hotels 3-Column Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {popularHotels.map((hotel) => (
           <div class="bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300 group">
@@ -263,16 +264,16 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
               </div>
 
               <div class="flex items-center space-x-2">
+                <!-- Check Price Button (Triggers Live Stay22 API Modal) -->
                 <button 
                   data-title={hotel.title}
-                  data-image={hotel.image}
-                  data-rating={hotel.rating}
-                  data-price={hotel.price}
+                  data-slug={hotel.slug}
                   class="open-price-modal bg-[#0d3b23] hover:bg-emerald-900 text-white font-black px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-sm transition cursor-pointer"
                 >
                   Check Price
                 </button>
 
+                <!-- Full Details Button -->
                 <a 
                   href={`/${hotel.slug}`} 
                   class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition text-center"
@@ -289,9 +290,42 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
     </div>
   </section>
 
-  <!-- Script for Read More Toggle -->
+  <!-- REALTIME STAY22 PRICE COMPARISON POPUP MODAL -->
+  <div id="priceModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md text-white space-y-4 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Live Stay22 API Match</span>
+          <h3 id="modalHotelTitle" class="text-base font-black text-white font-serif">Compare Platform Rates</h3>
+        </div>
+        <button id="closePriceModalBtn" class="text-slate-400 hover:text-white text-2xl font-bold p-1 cursor-pointer">&times;</button>
+      </div>
+
+      <!-- Modal Rates Container -->
+      <div id="modalRatesContainer" class="space-y-2.5">
+        <div class="text-center py-8 bg-slate-950/60 rounded-2xl border border-slate-800 space-y-2">
+          <span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+          <p class="text-xs font-bold text-slate-300">Fetching live rates from Stay22 API...</p>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="pt-3 border-t border-slate-800">
+        <a id="modalWhatsappBtn" href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+          <span>Instant WhatsApp Reservation</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CLIENT SCRIPTS FOR READ MORE & LIVE STAY22 MODAL -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Read More Toggle Script
       const readBtn = document.getElementById('read-more-btn');
       const extContent = document.getElementById('extended-content');
       const readText = document.getElementById('read-more-text');
@@ -311,6 +345,132 @@ const popularHotels = hotels.filter((h: any) => h.popular !== false);
           }
         });
       }
+
+      // 2. Realtime Stay22 API Price Comparison Modal Script
+      const priceModal = document.getElementById('priceModal');
+      const closePriceModalBtn = document.getElementById('closePriceModalBtn');
+      const modalHotelTitle = document.getElementById('modalHotelTitle');
+      const modalRatesContainer = document.getElementById('modalRatesContainer');
+      const modalWhatsappBtn = document.getElementById('modalWhatsappBtn');
+
+      if (closePriceModalBtn && priceModal) {
+        closePriceModalBtn.addEventListener('click', () => {
+          priceModal.classList.add('hidden');
+        });
+      }
+
+      if (priceModal) {
+        priceModal.addEventListener('click', (e) => {
+          if (e.target === priceModal) {
+            priceModal.classList.add('hidden');
+          }
+        });
+      }
+
+      document.querySelectorAll('.open-price-modal').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const target = e.currentTarget;
+          const hotelTitle = target.getAttribute('data-title') || 'Hotel Details';
+
+          if (modalHotelTitle) modalHotelTitle.textContent = hotelTitle;
+          if (modalWhatsappBtn) {
+            modalWhatsappBtn.href = `https://wa.me/8801700000000?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`;
+          }
+
+          if (modalRatesContainer) {
+            modalRatesContainer.innerHTML = `
+              <div class="text-center py-8 bg-slate-950/60 rounded-2xl border border-slate-800 space-y-2">
+                <span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                <p class="text-xs font-bold text-slate-300">Fetching real-time prices for ${hotelTitle}...</p>
+              </div>
+            `;
+          }
+
+          if (priceModal) priceModal.classList.remove('hidden');
+
+          try {
+            const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
+            if (res.ok) {
+              const json = await res.json();
+              
+              let rawResults = [];
+              if (json && Array.isArray(json.results)) {
+                rawResults = json.results;
+              } else if (Array.isArray(json)) {
+                rawResults = json;
+              }
+
+              const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
+              const targetKeywords = hotelTitle.toLowerCase()
+                .split(/\s+/)
+                .filter(word => word.length > 2 && !ignoreWords.includes(word));
+
+              let deals = [];
+              rawResults.forEach(item => {
+                const itemName = (item.name || '').toLowerCase();
+                const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
+
+                if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
+                  Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
+                    const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
+                    const linkUrl = supplierData.link || item.url || '#';
+                    
+                    const logoUrl = (supplierData.media && supplierData.media.logoSquare) 
+                      ? supplierData.media.logoSquare 
+                      : `https://r2.stay22.com/2025_${supplierKey}.png`;
+
+                    let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
+                    if (supplierKey === 'booking') providerName = 'Booking.com';
+                    if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
+                    if (supplierKey === 'expedia') providerName = 'Expedia';
+                    if (supplierKey === 'vrbo') providerName = 'Vrbo';
+
+                    if (priceVal > 0) {
+                      deals.push({
+                        provider: providerName,
+                        price: priceVal,
+                        url: linkUrl,
+                        logo: logoUrl
+                      });
+                    }
+                  });
+                }
+              });
+
+              deals.sort((a, b) => a.price - b.price);
+
+              if (deals.length > 0 && modalRatesContainer) {
+                modalRatesContainer.innerHTML = deals.map((item, idx) => `
+                  <div class="flex items-center justify-between p-3 rounded-xl border ${idx === 0 ? 'bg-emerald-950/80 border-emerald-500/60' : 'bg-slate-950/60 border-slate-800'} transition">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                        <img src="${item.logo}" alt="${item.provider} logo" class="w-full h-full object-contain" onerror="this.style.display='none'" />
+                      </div>
+                      <div>
+                        <span class="text-xs font-bold text-white block leading-tight">${item.provider}</span>
+                        ${idx === 0 ? '<span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Lowest Rate</span>' : ''}
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-black text-white">$${item.price}</span>
+                      <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="${idx === 0 ? 'bg-[#00e676] text-slate-950' : 'bg-emerald-600 text-white'} text-[11px] font-extrabold px-3 py-1.5 rounded-lg transition shadow-md">
+                        View deal ➔
+                      </a>
+                    </div>
+                  </div>
+                `).join('');
+              } else if (modalRatesContainer) {
+                modalRatesContainer.innerHTML = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">No live rate entries returned from Stay22 API for "${hotelTitle}". Use WhatsApp below.</div>`;
+              }
+            }
+          } catch (err) {
+            if (modalRatesContainer) {
+              modalRatesContainer.innerHTML = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">Unable to connect to live pricing API. Use WhatsApp below.</div>`;
+            }
+          }
+        });
+      });
     });
   </script>
 
