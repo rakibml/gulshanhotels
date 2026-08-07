@@ -43,8 +43,8 @@ const halfFaqIndex = Math.ceil(faqList.length / 2);
 const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
 const rightColumnFaqs = faqList.slice(halfFaqIndex);
 
-// Section Toggles
-const showRates = data.enable_rates !== false;
+// Section Toggles from CMS
+const showRates = data.enable_rates === true; // ONLY SHOW IF ENABLED IN CMS
 const showAmenities = data.enable_amenities !== false && amenitiesList.length > 0;
 const showNearby = data.enable_nearby !== false && nearbyPlaces.length > 0;
 const showDetails = data.enable_details !== false;
@@ -120,8 +120,6 @@ const faqSchema = faqList.length > 0 ? {
   <!-- 2. PHOTO GALLERY SLIDER -->
   {galleryImages.length > 0 && (
     <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
-      
-      <!-- Main Image Slider -->
       <div class="relative w-full h-[280px] xs:h-[340px] sm:h-[480px] lg:h-[540px] rounded-3xl overflow-hidden shadow-md group">
         <img 
           id="mainGalleryImg" 
@@ -186,7 +184,6 @@ const faqSchema = faqList.length > 0 ? {
           )}
         </div>
       )}
-
     </section>
   )}
 
@@ -196,7 +193,7 @@ const faqSchema = faqList.length > 0 ? {
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
+      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -386,17 +383,19 @@ const faqSchema = faqList.length > 0 ? {
 
     </div>
 
-    <!-- RIGHT STICKY ACTION SIDEBAR (EYE-SOOTHING LUXURY EMERALD PALETTE) -->
+    <!-- RIGHT STICKY ACTION SIDEBAR (DYNAMIC CMS-CONTROLLED ACTION CHANNELS) -->
     <div class="lg:col-span-4">
       <div class="sticky top-[80px] bg-slate-950 text-white p-5 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
         
-        <div>
-          <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
-          <span id="liveStartingRate" class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice || 'Check Live Price'}</span>
-          <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
-        </div>
+        {hotelPrice && (
+          <div>
+            <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
+            <span id="liveStartingRate" class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice}</span>
+            <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
+          </div>
+        )}
 
-        <!-- EMBEDDED REALTIME RATE COMPARISON TABLE -->
+        <!-- 1. OTA COMPARISON TABLE (Rendered ONLY if enable_rates is TRUE in CMS) -->
         {showRates && (
           <div class="space-y-3">
             <h3 class="text-xs font-black uppercase text-slate-300 tracking-wider">Compare Live Rates</h3>
@@ -410,16 +409,19 @@ const faqSchema = faqList.length > 0 ? {
           </div>
         )}
 
-        <!-- ACTION BUTTONS -->
+        <!-- 2. DIRECT ACTION BUTTONS (Rendered ONLY if fields exist in CMS) -->
         <div class="space-y-2.5 pt-2 border-t border-slate-800">
-          {data.whatsapp ? (
+          
+          {data.officialSite && (
+            <a id="checkPriceBtn" href={data.officialSite} target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm py-3 sm:py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>Check Official Site Price</span>
+              <span>➔</span>
+            </a>
+          )}
+
+          {data.whatsapp && (
             <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-800 transition flex items-center justify-center gap-2">
               <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
-              <span>Instant WhatsApp Reservation</span>
-            </a>
-          ) : (
-            <a href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-800 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>Instant WhatsApp Reservation</span>
             </a>
           )}
@@ -437,24 +439,35 @@ const faqSchema = faqList.length > 0 ? {
 
   </section>
 
-  <!-- MOBILE PINNED BOTTOM BAR (OPENS POPUP MODAL ON CLICK) -->
+  <!-- MOBILE PINNED BOTTOM BAR -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 text-white border-t border-slate-800 p-2.5 px-4 flex justify-between items-center shadow-2xl backdrop-blur-md">
     <div>
       <span class="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">Starting Rate</span>
       <span id="mobileStartingRate" class="font-black text-emerald-400 text-sm sm:text-base">{hotelPrice || 'Check Price'}</span>
     </div>
 
-    <button id="openMobileModalBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
-      <span>Check Price</span>
-      <span>➔</span>
-    </button>
+    {showRates ? (
+      <button id="openMobileModalBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+        <span>Check Live Rates</span>
+        <span>➔</span>
+      </button>
+    ) : (
+      data.officialSite ? (
+        <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition">
+          Book Official ➔
+        </a>
+      ) : (
+        <a href={`https://wa.me/${data.whatsapp || '8801700000000'}`} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition">
+          WhatsApp Us ➔
+        </a>
+      )
+    )}
   </div>
 
-  <!-- MOBILE LIVE RATES POPUP MODAL (POPUP ON MOBILE CLICK) -->
+  <!-- MOBILE LIVE RATES POPUP MODAL -->
   <div id="mobileRatesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-3 sm:p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 w-full max-w-md text-white space-y-4 shadow-2xl relative max-h-[85vh] overflow-y-auto">
       
-      <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
           <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Live Stay22 API Match</span>
@@ -463,7 +476,6 @@ const faqSchema = faqList.length > 0 ? {
         <button id="closeMobileModalBtn" class="text-slate-400 hover:text-white text-2xl font-bold p-1 cursor-pointer">&times;</button>
       </div>
 
-      <!-- Modal Body (Renders Live Rates) -->
       <div id="mobileModalRatesContainer" class="space-y-2">
         <div class="text-center py-6 bg-slate-950/60 rounded-2xl border border-slate-800">
           <span class="inline-block w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
@@ -471,7 +483,6 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       </div>
 
-      <!-- Modal Actions -->
       <div class="pt-2 border-t border-slate-800 space-y-2">
         {data.whatsapp && (
           <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 text-slate-200 font-bold text-xs py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
@@ -492,7 +503,6 @@ const faqSchema = faqList.length > 0 ? {
       const liveRateEl = document.getElementById('liveStartingRate');
       const mobileRateEl = document.getElementById('mobileStartingRate');
 
-      // Mobile Modal Elements
       const openMobileModalBtn = document.getElementById('openMobileModalBtn');
       const closeMobileModalBtn = document.getElementById('closeMobileModalBtn');
       const mobileRatesModal = document.getElementById('mobileRatesModal');
@@ -570,7 +580,6 @@ const faqSchema = faqList.length > 0 ? {
               }
             });
 
-            // Sort deals ascending by price
             deals.sort((a, b) => a.price - b.price);
 
             if (deals.length > 0) {
@@ -581,7 +590,6 @@ const faqSchema = faqList.length > 0 ? {
                 if (mobileRateEl) mobileRateEl.textContent = `$${lowest.price}`;
               }
 
-              // EYE-SOOTHING SOFT EMERALD RENDER FOR SIDEBAR & MOBILE MODAL
               const renderHtml = deals.map((item, idx) => `
                 <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl border ${idx === 0 ? 'bg-emerald-950/60 border-emerald-500/50' : 'bg-slate-950/60 border-slate-800'} transition">
                   
@@ -615,7 +623,7 @@ const faqSchema = faqList.length > 0 ? {
               if (mobileModalContainer) mobileModalContainer.innerHTML = renderHtml;
 
             } else {
-              const emptyHtml = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">No live rates returned from Stay22 API right now. Use WhatsApp or Direct Call.</div>`;
+              const emptyHtml = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">No live rate entries returned from Stay22 API for "${hotelName}". Use WhatsApp or Direct Call.</div>`;
               ratesContainer.innerHTML = emptyHtml;
               if (mobileModalContainer) mobileModalContainer.innerHTML = emptyHtml;
             }
