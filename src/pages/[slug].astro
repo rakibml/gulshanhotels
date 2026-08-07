@@ -49,7 +49,7 @@ const showRules = data.enable_rules !== false;
 const showFaqs = data.enable_faqs !== false && faqList.length > 0;
 const customSections = data.custom_sections || [];
 
-// Dynamic Google FAQ Schema (Rendered ONLY if FAQs exist in CMS)
+// Dynamic Google FAQ Schema
 const faqSchema = faqList.length > 0 ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -66,10 +66,10 @@ const faqSchema = faqList.length > 0 ? {
 
 <Layout title={`${hotelTitle} — Verified Hotel in Gulshan, Dhaka`}>
 
-  <!-- GOOGLE FAQ SCHEMA FOR SEARCH ENGINE SNIPPETS -->
+  <!-- GOOGLE FAQ SCHEMA -->
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
 
-  <!-- 1. MOBILE-FRIENDLY TOP HEADER & BREADCRUMB -->
+  <!-- 1. TOP HEADER & BREADCRUMB -->
   <section class="bg-[#f7f5f0] text-slate-900 pt-6 sm:pt-8 pb-5 sm:pb-6 px-3.5 sm:px-8 border-b border-slate-200">
     <div class="max-w-[1400px] mx-auto space-y-3">
       
@@ -115,7 +115,7 @@ const faqSchema = faqList.length > 0 ? {
     </div>
   </section>
 
-  <!-- 2. RESPONSIVE PHOTO GALLERY -->
+  <!-- 2. PHOTO GALLERY -->
   {galleryImages.length > 0 && (
     <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
@@ -146,23 +146,31 @@ const faqSchema = faqList.length > 0 ? {
     </section>
   )}
 
-  <!-- MAIN PAGE CONTENT (ADDED BOTTOM PADDING FOR MOBILE PINNED BAR) -->
+  <!-- MAIN PAGE CONTENT -->
   <section class="py-4 sm:py-6 pb-24 lg:pb-12 px-3.5 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
     
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW -->
+      <!-- 1. OVERVIEW (WITH AUTOMATIC 150-WORD READ MORE TOGGLE) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
-        <div class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700">
+        <div id="overview-text" class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700">
           {hotel.body ? <Fragment set:html={hotel.body} /> : (
             <p>
-              Located in Gulshan, <strong>{hotelTitle}</strong> offers executive lodging with world-class hospitality, Wi-Fi, and convenient access to commercial centers and foreign embassies.
+              Located in the heart of Gulshan, <strong>{hotelTitle}</strong> offers executive lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and easy access to foreign embassies, commercial corporate headquarters, and shopping plazas.
             </p>
           )}
         </div>
+
+        <!-- READ MORE / READ LESS BUTTON (AUTOMATICALLY SHOWN VIA JS IF > 150 WORDS) -->
+        <button 
+          id="toggleOverviewBtn" 
+          class="hidden mt-3 text-xs sm:text-sm font-black text-emerald-700 hover:text-emerald-800 transition inline-flex items-center gap-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm"
+        >
+          Read More ➔
+        </button>
       </div>
 
       <!-- 2. LOCATION & LIVE GOOGLE MAP -->
@@ -188,7 +196,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 3. HOTEL AMENITIES (Only Real CMS Data) -->
+      <!-- 3. HOTEL AMENITIES -->
       {showAmenities && (
         <div id="amenities" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3.5 sm:space-y-4">
           <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Amenities</h2>
@@ -204,7 +212,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 4. WHAT'S NEARBY & ACCORDION DROPDOWN (Only Real CMS Data) -->
+      <!-- 4. WHAT'S NEARBY & ACCORDION DROPDOWN -->
       {showNearby && (
         <div id="nearby" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3.5 sm:space-y-4">
           <div>
@@ -244,7 +252,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 5. HOTEL INFORMATION & ESSENTIAL DETAILS -->
+      <!-- 5. HOTEL INFORMATION -->
       {showDetails && (
         <div id="information" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-4 sm:space-y-6">
           <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Information</h2>
@@ -286,7 +294,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 6. FAQS ACCORDION (Only Real CMS Data) -->
+      <!-- 6. FAQS ACCORDION -->
       {showFaqs && (
         <div id="faqs" class="space-y-4 pt-1">
           <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">
@@ -327,7 +335,7 @@ const faqSchema = faqList.length > 0 ? {
         </div>
       )}
 
-      <!-- 7. CUSTOM EXTRA SECTIONS (From CMS) -->
+      <!-- 7. CUSTOM EXTRA SECTIONS -->
       {customSections.map((sec: any, idx: number) => (
         <div id={`custom-sec-${idx}`} class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
           <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">{sec.title}</h2>
@@ -344,7 +352,7 @@ const faqSchema = faqList.length > 0 ? {
         {hotelPrice && (
           <div>
             <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Starting Rate</span>
-            <span class="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{hotelPrice}</span>
+            <span class="text-2xl sm:text-3xl font-black text-white elimination mt-0.5 block">{hotelPrice}</span>
             <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
           </div>
         )}
@@ -383,7 +391,7 @@ const faqSchema = faqList.length > 0 ? {
 
   </section>
 
-  <!-- MOBILE PINNED BOTTOM BAR (ULTRA TOUCH FRIENDLY) -->
+  <!-- MOBILE PINNED BOTTOM BAR -->
   <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 text-white border-t border-slate-800 p-2.5 px-4 flex justify-between items-center shadow-2xl backdrop-blur-md">
     <div>
       <span class="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">Starting Rate</span>
@@ -401,5 +409,50 @@ const faqSchema = faqList.length > 0 ? {
       </a>
     )}
   </div>
+
+  <!-- CLIENT-SIDE SCRIPT FOR OVERVIEW 150-WORD TRUNCATOR -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const overviewTextEl = document.getElementById('overview-text');
+      const toggleBtn = document.getElementById('toggleOverviewBtn');
+
+      if (!overviewTextEl) return;
+
+      const fullText = overviewTextEl.innerText.trim();
+      const words = fullText.split(/\s+/);
+
+      if (words.length > 150) {
+        const firstPart = words.slice(0, 150).join(' ');
+        const remainingPart = words.slice(150).join(' ');
+
+        overviewTextEl.innerHTML = `
+          <span>${firstPart}</span>
+          <span id="overview-dots">... </span>
+          <span id="overview-more" class="hidden">${remainingPart}</span>
+        `;
+
+        if (toggleBtn) {
+          toggleBtn.classList.remove('hidden');
+          toggleBtn.addEventListener('click', () => {
+            const moreSpan = document.getElementById('overview-more');
+            const dotsSpan = document.getElementById('overview-dots');
+
+            if (moreSpan && dotsSpan) {
+              const isHidden = moreSpan.classList.contains('hidden');
+              if (isHidden) {
+                moreSpan.classList.remove('hidden');
+                dotsSpan.classList.add('hidden');
+                toggleBtn.innerHTML = 'Read Less ▲';
+              } else {
+                moreSpan.classList.add('hidden');
+                dotsSpan.classList.remove('hidden');
+                toggleBtn.innerHTML = 'Read More ➔';
+              }
+            }
+          });
+        }
+      }
+    });
+  </script>
 
 </Layout>
