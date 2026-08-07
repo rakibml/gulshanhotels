@@ -1,5 +1,5 @@
 ---
-title: Renaissance Dhaka Gulshan Hotel
+title: Renaissance Dhaka Gulshan
 category: 4 star
 location: 78 Gulshan Avenue, Gulshan, 1212 Dhaka, Bangladesh Excellent location – rated 9.4/10!(score from 139 reviews) Real guests • Real stays • Real opinions
 price: 100-250
@@ -8,22 +8,22 @@ reviewsCount: null
 image: https://cf.bstatic.com/xdata/images/hotel/max1024x768/643187472.jpg?k=6a40c758950c77c46640a54fbced15bc94bede347384e06d5a4c419039af63bd&o=
 gallery:
   - https://cf.bstatic.com/xdata/images/hotel/max1024x768/643187476.jpg?k=97b82f3fe98e91027080337fbd0fd7db1ad3b4ebf1b5937231eea17f9ccab469&o=
+enable_rates: true
 officialSite: ''
 whatsapp: ''
 phone: ''
-enable_rates: true
 enable_amenities: true
 enable_nearby: true
 enable_details: true
 enable_rules: true
 enable_faqs: true
-enable_reviews: true
 amenities:
   - Free parking
 faqs:
   - question: vbfdgvfd
     answer: fdgfdgfdgfdgdfsg
 custom_sections: []
+enable_reviews: true
 ---
 
 ### Get the celebrity treatment with world-class service at Renaissance Dhaka Gulshan Hotel
