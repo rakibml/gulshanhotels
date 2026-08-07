@@ -11,7 +11,7 @@ gallery:
 officialSite: https://www.booking.com/hotel/bd/renaissance-dhaka-gulshan-dhaka.html?ssne=Dhaka&ssne_untouched=Dhaka&highlighted_hotels=6044188&ss=Dhaka&dest_id=-2737683&dest_type=city&hp_avform=1&origin=hp&do_availability_check=1&label=gog235jc-10CAcoFEIHZ3Vsc2hhbkgzWANoFIgBAZgBM7gBF8gBDNgBA-gBAfgBAYgCAagCAbgC7szW0wbAAgHSAiRmMjFkZjNmMS1hNTVjLTRkZDEtYTQxZC01NTBmZjhkOWViYTDYAgHgAgE&sid=c61facf40186c7cb4285aab69e5ae69e&aid=356980&lang=en-us&sb=1&src_elem=sb&src=hotel&checkin=2026-08-10&checkout=2026-08-11&group_adults=1&no_rooms=1&group_children=0#availability_target
 whatsapp: '01945529869'
 phone: ''
-enable_rates: false
+enable_rates: true
 enable_amenities: true
 enable_nearby: true
 enable_details: true
