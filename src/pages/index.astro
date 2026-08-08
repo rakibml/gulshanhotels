@@ -5,12 +5,12 @@ import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 
-// Vite/Astro Native Eager Glob Import (সরাসরি আপনার আসল .md ফাইল থেকে ডাটা রিড করবে)
-const rawHotels = import.meta.glob('/src/content/hotels/*.md', { eager: true });
+// Astro Native Glob Loader (Cloudflare Pages-এ ১০০% সাকসেসফুলি বিল্ড হবে)
+const rawHotels = await Astro.glob('../content/hotels/*.md');
 
-const popularHotels = Object.entries(rawHotels).map(([filepath, file: any]) => {
-  // ফাইলপাথ থেকে ফাইলনেম এক্সট্র্যাক্ট করা (যেমন: "/src/content/hotels/the-westin.md" -> "the-westin")
-  const slugFromFile = filepath.split('/').pop()?.replace(/\.md$/, '') || 'hotel';
+const popularHotels = rawHotels.map((file: any) => {
+  // ফাইলপাথ থেকে ফাইলনেম বের করা
+  const slugFromFile = file.file.split('/').pop()?.replace(/\.md$/, '') || 'hotel';
   const frontmatter = file.frontmatter || {};
 
   return {
