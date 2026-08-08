@@ -6,12 +6,13 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-// সরাসরি আপনার src/content/hotels ফোল্ডার থেকে আসল ডাটা লোড
+// Astro v7 কন্টেন্ট কালেকশন থেকে ফাইল লোড
 const collectionData = await getCollection('hotels');
 
+// রিয়েল ফাইল ডাটা ম্যাপিং
 const popularHotels = collectionData.map((item: any) => ({
-  ...item.data, // CMS ও মার্কডাউন ফাইলের সব ফ্রন্টম্যাটার ডাটা
-  slug: item.slug || item.id?.replace(/\.md$/, '') || 'hotel',
+  ...item.data,
+  slug: item.data?.slug || item.id,
 }));
 ---
 
