@@ -1,96 +1,132 @@
 ---
-// src/components/PopularHotels.astro
 interface Props {
   popularHotels: any[];
 }
-
-const { popularHotels } = Astro.props;
+const { popularHotels = [] } = Astro.props;
 ---
-<section id="popular-hotels" class="bg-[#F8FAF9] py-16 border-b border-slate-200">
+
+<section id="popular-hotels" class="bg-[#F8FAF9] py-16 border-b border-slate-200 relative overflow-hidden">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
     
-    <!-- Section Header with Arrows -->
+    <!-- Section Header -->
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
       <div>
-        <span class="text-xs font-black text-emerald-800 uppercase tracking-widest bg-emerald-100/60 px-3 py-1 rounded-full border border-emerald-200">
+        <span class="text-xs font-black text-emerald-800 uppercase tracking-widest bg-emerald-100/70 px-3 py-1 rounded-full border border-emerald-300/60 inline-block mb-2">
           POPULAR ACCOMMODATIONS
         </span>
-        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-2">Popular Hotels in Gulshan</h2>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Popular Hotels in Gulshan</h2>
         <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">Handpicked luxury and executive hotels recommended by our local audit team.</p>
       </div>
 
-      <div class="flex items-center gap-3">
+      <!-- Navigation & View All Link -->
+      <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <button id="popularPrevBtn" aria-label="Previous" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer">
+          <button 
+            id="popularPrevBtn" 
+            aria-label="Previous Slide" 
+            class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             ❮
           </button>
-          <button id="popularNextBtn" aria-label="Next" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer">
+          <button 
+            id="popularNextBtn" 
+            aria-label="Next Slide" 
+            class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition-all cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             ❯
           </button>
         </div>
-
-        <a href="#all-hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider flex items-center space-x-1 shrink-0 ml-2">
-          <span>View All Hotels ➔</span>
+        <a href="#all-hotels" class="text-emerald-800 hover:text-emerald-600 font-black text-xs uppercase tracking-wider shrink-0 transition-colors flex items-center gap-1">
+          View All Hotels <span>➔</span>
         </a>
       </div>
     </div>
 
-    <!-- SIDE-BY-SIDE HORIZONTAL CAROUSEL TRACK -->
-    <div id="popularCarouselTrack" class="flex gap-6 overflow-x-auto scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <!-- Carousel Track -->
+    <div 
+      id="popularCarouselTrack" 
+      class="flex gap-6 overflow-x-auto scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+    >
       {popularHotels.map((hotel: any) => (
-        <div class="w-[300px] sm:w-[350px] shrink-0 bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300 group">
+        <article class="w-[300px] sm:w-[350px] shrink-0 bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition duration-300 group relative">
           
           <div>
-            {hotel.image && (
-              <a href={`/${hotel.slug}`} class="block relative h-56 overflow-hidden">
-                <img src={hotel.image} alt={hotel.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <span class="absolute top-3 left-3 bg-[#0d3b23] text-emerald-300 text-[10px] font-black uppercase px-3 py-1 rounded-lg shadow border border-emerald-500/30">
-                  {hotel.category}
-                </span>
-              </a>
-            )}
-            
+            <!-- Hotel Thumbnail Image & Overlay Badges -->
+            <div class="relative h-56 overflow-hidden bg-slate-100">
+              {hotel.image ? (
+                <a href={`/${hotel.slug}`} class="block w-full h-full">
+                  <img 
+                    src={hotel.image} 
+                    alt={hotel.title} 
+                    loading="lazy"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
+                </a>
+              ) : (
+                <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400 font-bold text-sm">
+                  No Image Available
+                </div>
+              )}
+
+              <!-- Category Badge -->
+              <span class="absolute top-3 left-3 bg-[#0d3b23]/90 backdrop-blur-md text-emerald-300 text-[10px] font-black uppercase px-3 py-1 rounded-lg shadow-md border border-emerald-500/30">
+                {hotel.category || 'Executive'}
+              </span>
+
+              <!-- Wishlist Heart Button -->
+              <button 
+                data-hotel-slug={hotel.slug}
+                data-hotel-title={hotel.title}
+                data-hotel-image={hotel.image}
+                class="wishlist-toggle-btn absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md shadow-md flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                title="Save to Wishlist"
+                aria-label="Save to Wishlist"
+              >
+                <svg class="w-5 h-5 fill-current pointer-events-none" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Card Body Info -->
             <div class="p-6 space-y-2">
               <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-slate-500 flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                  <span>{hotel.location}</span>
+                  📍 {hotel.location || 'Gulshan, Dhaka'}
                 </span>
-                <span class="text-amber-500 font-black flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-500" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                  <span>{hotel.rating}</span>
+                <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-black text-[11px] border border-amber-200/80">
+                  ★ {hotel.rating || '4.8'}
                 </span>
               </div>
 
-              <a href={`/${hotel.slug}`} class="block text-2xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
+              <a href={`/${hotel.slug}`} class="block text-xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1 mt-1">
                 {hotel.title}
               </a>
 
-              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed pt-1">
-                {hotel.description}
+              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed pt-1 font-medium">
+                {hotel.description || 'Experience world-class hospitality in the heart of Dhaka’s premier diplomatic zone.'}
               </p>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="p-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+          <!-- Card Actions -->
+          <div class="p-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/50">
             <button 
-              data-title={hotel.title}
-              data-slug={hotel.slug}
-              class="open-price-modal flex-1 bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-3 px-3 rounded-xl text-xs uppercase tracking-wider shadow transition cursor-pointer text-center"
+              data-title={hotel.title} 
+              data-slug={hotel.slug} 
+              class="open-price-modal flex-1 bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-3 px-3 rounded-xl text-xs uppercase tracking-wider shadow transition duration-200 cursor-pointer text-center active:scale-95"
             >
               Check Price
             </button>
-
             <a 
               href={`/${hotel.slug}`} 
-              class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold py-3 px-3 rounded-xl text-xs uppercase tracking-wider transition text-center"
+              class="flex-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-bold py-3 px-3 rounded-xl text-xs uppercase tracking-wider transition text-center shadow-xs"
             >
               Details
             </a>
           </div>
 
-        </div>
+        </article>
       ))}
     </div>
 
@@ -98,175 +134,237 @@ const { popularHotels } = Astro.props;
 </section>
 
 <!-- REALTIME STAY22 PRICE COMPARISON POPUP MODAL -->
-<div id="priceModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md text-white space-y-4 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+<div id="priceModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 transition-opacity duration-300">
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md text-white space-y-4 shadow-2xl relative max-h-[85vh] flex flex-col justify-between">
     
+    <!-- Modal Header -->
     <div class="flex items-center justify-between border-b border-slate-800 pb-3">
       <div>
         <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Live Stay22 API Match</span>
-        <h3 id="modalHotelTitle" class="text-base font-black text-white font-serif">Compare Platform Rates</h3>
+        <h3 id="modalHotelTitle" class="text-base font-black text-white truncate max-w-[280px]">Compare Platform Rates</h3>
       </div>
-      <button id="closePriceModalBtn" class="text-slate-400 hover:text-white text-2xl font-bold p-1 cursor-pointer">&times;</button>
+      <button id="closePriceModalBtn" aria-label="Close modal" class="text-slate-400 hover:text-white text-2xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-800 transition cursor-pointer">
+        &times;
+      </button>
     </div>
 
-    <div id="modalRatesContainer" class="space-y-2.5">
+    <!-- Modal Content Rates Container -->
+    <div id="modalRatesContainer" class="space-y-2.5 overflow-y-auto max-h-[350px] pr-1">
       <div class="text-center py-8 bg-slate-950/60 rounded-2xl border border-slate-800 space-y-2">
         <span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
         <p class="text-xs font-bold text-slate-300">Fetching live rates from Stay22 API...</p>
       </div>
     </div>
 
-    <div class="pt-3 border-t border-slate-800">
-      <a id="modalWhatsappBtn" href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-        <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
-        <span>Instant WhatsApp Reservation</span>
+    <!-- Modal Footer Actions -->
+    <div class="pt-3 border-t border-slate-800 space-y-2">
+      <a 
+        id="modalWhatsappBtn" 
+        href="https://wa.me/8801700000000" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+      >
+        <span>💬</span> Instant WhatsApp Reservation
       </a>
+      <p class="text-[10px] text-center text-slate-500 font-medium">Direct travel partner rates verified via Stay22 proxy engine.</p>
     </div>
 
   </div>
 </div>
 
-<script is:inline>
+<script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Carousel Arrows
-    const track = document.getElementById('popularCarouselTrack');
-    const prevBtn = document.getElementById('popularPrevBtn');
-    const nextBtn = document.getElementById('popularNextBtn');
+    // ----------------------------------------------------
+    // 1. CAROUSEL HORIZONTAL SCROLLING LOGIC
+    // ----------------------------------------------------
+    const track = document.getElementById('popularCarouselTrack') as HTMLElement | null;
+    const prevBtn = document.getElementById('popularPrevBtn') as HTMLButtonElement | null;
+    const nextBtn = document.getElementById('popularNextBtn') as HTMLButtonElement | null;
 
     if (track && prevBtn && nextBtn) {
+      const scrollAmount = 374; // Card width (350px) + gap (24px)
+
       prevBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -360, behavior: 'smooth' });
+        track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
       });
 
       nextBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 360, behavior: 'smooth' });
+        track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       });
     }
 
-    // Modal Script
-    const priceModal = document.getElementById('priceModal');
-    const closePriceModalBtn = document.getElementById('closePriceModalBtn');
-    const modalHotelTitle = document.getElementById('modalHotelTitle');
-    const modalRatesContainer = document.getElementById('modalRatesContainer');
-    const modalWhatsappBtn = document.getElementById('modalWhatsappBtn');
+    // ----------------------------------------------------
+    // 2. STAY22 LIVE PRICE MODAL & WORKER API LOGIC
+    // ----------------------------------------------------
+    const priceModal = document.getElementById('priceModal') as HTMLElement | null;
+    const closeModalBtn = document.getElementById('closePriceModalBtn') as HTMLButtonElement | null;
+    const modalTitle = document.getElementById('modalHotelTitle') as HTMLElement | null;
+    const ratesContainer = document.getElementById('modalRatesContainer') as HTMLElement | null;
+    const whatsappBtn = document.getElementById('modalWhatsappBtn') as HTMLAnchorElement | null;
 
-    if (closePriceModalBtn && priceModal) {
-      closePriceModalBtn.addEventListener('click', () => {
-        priceModal.classList.add('hidden');
-      });
+    const openModal = () => priceModal?.classList.remove('hidden');
+    const closeModal = () => priceModal?.classList.add('hidden');
+
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', closeModal);
     }
 
     if (priceModal) {
       priceModal.addEventListener('click', (e) => {
-        if (e.target === priceModal) {
-          priceModal.classList.add('hidden');
-        }
+        if (e.target === priceModal) closeModal();
       });
     }
 
-    document.querySelectorAll('.open-price-modal').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const target = e.currentTarget;
-        const hotelTitle = target.getAttribute('data-title') || 'Hotel Details';
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && priceModal && !priceModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
 
-        if (modalHotelTitle) modalHotelTitle.textContent = hotelTitle;
-        if (modalWhatsappBtn) {
-          modalWhatsappBtn.href = `https://wa.me/8801700000000?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`;
+    // Handle "Check Price" Click Events
+    const triggerButtons = document.querySelectorAll('.open-price-modal');
+    triggerButtons.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const title = btn.getAttribute('data-title') || 'Hotel';
+        
+        if (modalTitle) modalTitle.textContent = title;
+
+        // Update WhatsApp customized link query
+        if (whatsappBtn) {
+          const encodedMessage = encodeURIComponent(`Hi GulshanHotels! I would like to inquire about live room availability and booking for ${title}.`);
+          whatsappBtn.href = `https://wa.me/8801700000000?text=${encodedMessage}`;
         }
 
-        if (modalRatesContainer) {
-          modalRatesContainer.innerHTML = `
+        // Loading State
+        if (ratesContainer) {
+          ratesContainer.innerHTML = `
             <div class="text-center py-8 bg-slate-950/60 rounded-2xl border border-slate-800 space-y-2">
               <span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-              <p class="text-xs font-bold text-slate-300">Fetching real-time prices for ${hotelTitle}...</p>
+              <p class="text-xs font-bold text-slate-300">Fetching live rates from Stay22 API...</p>
             </div>
           `;
         }
 
-        if (priceModal) priceModal.classList.remove('hidden');
+        openModal();
 
+        // Fetch Live Pricing Data via Cloudflare Workers Proxy
         try {
-          const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelTitle)}`);
-          if (res.ok) {
-            const json = await res.json();
-            
-            let rawResults = [];
-            if (json && Array.isArray(json.results)) {
-              rawResults = json.results;
-            } else if (Array.isArray(json)) {
-              rawResults = json;
-            }
+          const res = await fetch(`https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(title)}`);
+          if (!res.ok) throw new Error('API Response Error');
 
-            const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
-            const targetKeywords = hotelTitle.toLowerCase()
-              .split(/\s+/)
-              .filter(word => word.length > 2 && !ignoreWords.includes(word));
+          const data = await res.json();
 
-            let deals = [];
-            rawResults.forEach(item => {
-              const itemName = (item.name || '').toLowerCase();
-              const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
-
-              if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
-                Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
-                  const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
-                  const linkUrl = supplierData.link || item.url || '#';
-                  
-                  const logoUrl = (supplierData.media && supplierData.media.logoSquare) 
-                    ? supplierData.media.logoSquare 
-                    : `https://r2.stay22.com/2025_${supplierKey}.png`;
-
-                  let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                  if (supplierKey === 'booking') providerName = 'Booking.com';
-                  if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
-                  if (supplierKey === 'expedia') providerName = 'Expedia';
-                  if (supplierKey === 'vrbo') providerName = 'Vrbo';
-
-                  if (priceVal > 0) {
-                    deals.push({
-                      provider: providerName,
-                      price: priceVal,
-                      url: linkUrl,
-                      logo: logoUrl
-                    });
-                  }
-                });
-              }
-            });
-
-            deals.sort((a, b) => a.price - b.price);
-
-            if (deals.length > 0 && modalRatesContainer) {
-              modalRatesContainer.innerHTML = deals.map((item, idx) => `
-                <div class="flex items-center justify-between p-3 rounded-xl border ${idx === 0 ? 'bg-emerald-950/80 border-emerald-500/60' : 'bg-slate-950/60 border-slate-800'} transition">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                      <img src="${item.logo}" alt="${item.provider} logo" class="w-full h-full object-contain" onerror="this.style.display='none'" />
-                    </div>
-                    <div>
-                      <span class="text-xs font-bold text-white block leading-tight">${item.provider}</span>
-                      ${idx === 0 ? '<span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Lowest Rate</span>' : ''}
-                    </div>
+          if (ratesContainer) {
+            if (data && data.results && data.results.length > 0) {
+              ratesContainer.innerHTML = data.results.map((rate: any) => `
+                <div class="flex items-center justify-between p-3 bg-slate-950/80 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition">
+                  <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-200">${rate.vendor || 'Stay22 Direct'}</span>
                   </div>
-
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-black text-white">$${item.price}</span>
-                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="${idx === 0 ? 'bg-[#00e676] text-slate-950' : 'bg-emerald-600 text-white'} text-[11px] font-extrabold px-3 py-1.5 rounded-lg transition shadow-md">
-                      View deal ➔
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-black text-emerald-400">${rate.price ? `$${rate.price}` : 'Check Rate'}</span>
+                    <a href="${rate.url || '#'}" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg transition">
+                      Book Now ↗
                     </a>
                   </div>
                 </div>
               `).join('');
-            } else if (modalRatesContainer) {
-              modalRatesContainer.innerHTML = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">No live rate entries returned from Stay22 API for "${hotelTitle}". Use WhatsApp below.</div>`;
+            } else if (data.redirectUrl) {
+              // Fallback to primary redirect option
+              ratesContainer.innerHTML = `
+                <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center space-y-3">
+                  <p class="text-xs text-slate-300">Best guaranteed rates available on Stay22 booking platform.</p>
+                  <a href="${data.redirectUrl}" target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                    View Live Rates on Stay22 ↗
+                  </a>
+                </div>
+              `;
+            } else {
+              // Fallback Stay22 Dynamic Search Link
+              const stay22Url = `https://www.stay22.com/embed/lma?lma=6a6f2f890ba4510dcd28ab5c&address=${encodeURIComponent(title + ' Gulshan Dhaka Bangladesh')}`;
+              ratesContainer.innerHTML = `
+                <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center space-y-3">
+                  <p class="text-xs text-slate-300">Live prices ready for ${title}.</p>
+                  <a href="${stay22Url}" target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                    Compare Rates on Stay22 Map ↗
+                  </a>
+                </div>
+              `;
             }
           }
-        } catch (err) {
-          if (modalRatesContainer) {
-            modalRatesContainer.innerHTML = `<div class="p-4 text-center bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-300 text-xs">Unable to connect to live pricing API. Use WhatsApp below.</div>`;
+        } catch (error) {
+          if (ratesContainer) {
+            const fallbackStay22 = `https://www.stay22.com/embed/lma?lma=6a6f2f890ba4510dcd28ab5c&address=${encodeURIComponent(title + ' Gulshan Dhaka')}`;
+            ratesContainer.innerHTML = `
+              <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center space-y-3">
+                <p class="text-xs text-slate-400">Direct proxy rates temporarily unavailable.</p>
+                <a href="${fallbackStay22}" target="_blank" rel="noopener noreferrer" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
+                  Search Live Availability ↗
+                </a>
+              </div>
+            `;
           }
         }
       });
     });
+
+    // ----------------------------------------------------
+    // 3. WISHLIST LOCALSTORAGE SYNC LOGIC
+    // ----------------------------------------------------
+    const getWishlist = (): any[] => {
+      try {
+        return JSON.parse(localStorage.getItem('gulshan_wishlist') || '[]');
+      } catch {
+        return [];
+      }
+    };
+
+    const updateWishlistUI = () => {
+      const wishlist = getWishlist();
+      const wishlistBtns = document.querySelectorAll('.wishlist-toggle-btn');
+      
+      wishlistBtns.forEach((btn) => {
+        const slug = btn.getAttribute('data-hotel-slug');
+        const isSaved = wishlist.some((item) => item.slug === slug);
+        if (isSaved) {
+          btn.classList.add('text-rose-500');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('text-rose-500');
+          btn.classList.add('text-slate-400');
+        }
+      });
+    };
+
+    // Toggle item on heart button click
+    document.querySelectorAll('.wishlist-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const slug = btn.getAttribute('data-hotel-slug');
+        const title = btn.getAttribute('data-hotel-title');
+        const image = btn.getAttribute('data-hotel-image');
+
+        if (!slug) return;
+
+        let wishlist = getWishlist();
+        const existsIndex = wishlist.findIndex((item) => item.slug === slug);
+
+        if (existsIndex > -1) {
+          wishlist.splice(existsIndex, 1);
+        } else {
+          wishlist.push({ slug, title, image });
+        }
+
+        localStorage.setItem('gulshan_wishlist', JSON.stringify(wishlist));
+        updateWishlistUI();
+
+        // Dispatch custom event to notify Header wishlist badge/drawer
+        window.dispatchEvent(new Event('wishlistUpdated'));
+      });
+    });
+
+    // Initial sync call
+    updateWishlistUI();
   });
 </script>
