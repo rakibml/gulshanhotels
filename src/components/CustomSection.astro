@@ -1,23 +1,33 @@
 ---
-// src/components/CustomSection.astro
+// src/components/CustomSections.astro
 import { getCollection } from 'astro:content';
 
-let customSections = [];
+let customSections: any[] = [];
 try {
   const sections = await getCollection('homepage_sections');
-  customSections = sections.map((item: any) => item.data).filter((item: any) => item.enable !== false && item.title);
+  if (sections && sections.length > 0) {
+    customSections = sections
+      .map((item: any) => item.data)
+      .filter((item: any) => item.enable !== false && item.title && !item.title.toLowerCase().includes('popular'));
+  }
 } catch (e) {
   customSections = [];
 }
 ---
 
 {customSections.map((sec: any) => (
-  <section class="py-12 px-4 sm:px-8 max-w-[1550px] mx-auto text-slate-800">
+  <section class="py-12 px-4 sm:px-8 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200">
     <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-4">
-      <h2 class="text-2xl sm:text-4xl font-black font-serif text-[#0d3b23] border-b border-slate-100 pb-3">
+      {sec.badge && (
+        <span class="text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-100/60 px-3 py-1 rounded-full border border-emerald-200 inline-block">
+          {sec.badge}
+        </span>
+      )}
+      <h2 class="text-2xl sm:text-4xl font-black font-serif text-[#0d3b23]">
         {sec.title}
       </h2>
-      <div class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700" set:html={sec.content} />
+      {sec.subtitle && <p class="text-xs sm:text-sm text-slate-500 font-medium">{sec.subtitle}</p>}
+      {sec.body && <div class="prose prose-slate text-sm sm:text-base leading-relaxed text-slate-700 pt-2" set:html={sec.body} />}
     </div>
   </section>
 ))}
