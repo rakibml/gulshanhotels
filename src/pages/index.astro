@@ -6,22 +6,13 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-let popularHotels: any[] = [];
+// সরাসরি আপনার src/content/hotels ফোল্ডার থেকে আসল ডাটা লোড
+const collectionData = await getCollection('hotels');
 
-try {
-  const collectionData = await getCollection('hotels');
-  if (collectionData && collectionData.length > 0) {
-    popularHotels = collectionData.map((item: any) => ({
-      ...item.data, // CMS-এর সব ফিল্ড সংরক্ষণ করবে
-      slug: item.slug || item.id?.replace(/\.md$/, '') || 'hotel',
-      title: item.data?.title || 'Gulshan Hotel',
-      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    }));
-  }
-} catch (err) {
-  console.error("Hotels Collection Error:", err);
-  popularHotels = [];
-}
+const popularHotels = collectionData.map((item: any) => ({
+  ...item.data, // CMS ও মার্কডাউন ফাইলের সব ফ্রন্টম্যাটার ডাটা
+  slug: item.slug || item.id?.replace(/\.md$/, '') || 'hotel',
+}));
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
