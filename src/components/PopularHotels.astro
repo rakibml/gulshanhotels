@@ -32,104 +32,111 @@ const { popularHotels = [] } = Astro.props;
 
     <!-- Carousel Track -->
     <div id="popularCarouselTrack" class="flex gap-6 overflow-x-auto scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {popularHotels.map((hotel: any) => (
-        <article class="w-[300px] sm:w-[350px] shrink-0 bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition duration-300 group relative">
-          
-          <div>
-            <!-- Hotel Image & Badges -->
-            <div class="relative h-56 overflow-hidden bg-slate-100">
-              {hotel.image ? (
-                <a href={`/${hotel.slug}`} class="block w-full h-full">
-                  <img src={hotel.image} alt={hotel.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </a>
-              ) : (
-                <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400 font-bold text-sm">No Image Available</div>
-              )}
+      {popularHotels.map((item: any) => {
+        // Safe mapping for Astro Content Collections (handles item.data or raw item)
+        const hotel = item.data || item;
+        const slug = item.slug || hotel.slug;
 
-              <!-- 1. CATEGORY BADGE (CMS Controlled) -->
-              {hotel.showCategory !== false && hotel.category && (
-                <span class="absolute top-3 left-3 bg-[#0d3b23]/90 backdrop-blur-md text-emerald-300 text-[10px] font-black uppercase px-3 py-1 rounded-lg shadow-md border border-emerald-500/30">
-                  {hotel.category}
-                </span>
-              )}
-
-              <!-- Wishlist Heart Button -->
-              <button 
-                data-hotel-slug={hotel.slug}
-                data-hotel-title={hotel.title}
-                data-hotel-image={hotel.image}
-                class="wishlist-toggle-btn absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md shadow-md flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
-                title="Save to Wishlist"
-              >
-                <svg class="w-5 h-5 fill-current pointer-events-none" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-              </button>
-            </div>
-
-            <!-- Card Content Body -->
-            <div class="p-6 space-y-3">
-              
-              <!-- Location & Rating Row -->
-              <div class="flex justify-between items-start gap-2">
-                
-                <!-- 2. LOCATION & DETAILED ADDRESS (CMS Controlled) -->
-                {hotel.showLocation !== false && (hotel.location || hotel.locationDetail) && (
-                  <div class="space-y-0.5 flex-1">
-                    {hotel.location && (
-                      <span class="font-bold text-slate-600 flex items-center gap-1 text-xs">
-                        📍 {hotel.location}
-                      </span>
-                    )}
-                    {hotel.locationDetail && (
-                      <p class="text-[11px] text-slate-500 leading-snug font-normal pt-0.5">
-                        {hotel.locationDetail}
-                      </p>
-                    )}
-                  </div>
+        return (
+          <article class="w-[300px] sm:w-[350px] shrink-0 bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition duration-300 group relative">
+            
+            <div>
+              <!-- Hotel Image & Badges -->
+              <div class="relative h-56 overflow-hidden bg-slate-100">
+                {hotel.image ? (
+                  <a href={`/${slug}`} class="block w-full h-full">
+                    <img src={hotel.image} alt={hotel.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </a>
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-400 font-bold text-sm">No Image Available</div>
                 )}
 
-                <!-- 3. RATING BADGE (CMS Controlled) -->
-                {hotel.showRating !== false && hotel.rating && (
-                  <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-black text-[11px] border border-amber-200/80 shrink-0">
-                    ★ {hotel.rating}
+                <!-- 1. CATEGORY BADGE (CMS Controlled) -->
+                {hotel.showCategory !== false && hotel.category && (
+                  <span class="absolute top-3 left-3 bg-[#0d3b23]/90 backdrop-blur-md text-emerald-300 text-[10px] font-black uppercase px-3 py-1 rounded-lg shadow-md border border-emerald-500/30">
+                    {hotel.category}
                   </span>
                 )}
+
+                <!-- Wishlist Heart Button -->
+                <button 
+                  data-hotel-slug={slug}
+                  data-hotel-title={hotel.title}
+                  data-hotel-image={hotel.image}
+                  class="wishlist-toggle-btn absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md shadow-md flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                  title="Save to Wishlist"
+                  aria-label="Save to Wishlist"
+                >
+                  <svg class="w-5 h-5 fill-current pointer-events-none" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </button>
               </div>
 
-              <!-- Title -->
-              <a href={`/${hotel.slug}`} class="block text-xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
-                {hotel.title}
-              </a>
+              <!-- Card Content Body -->
+              <div class="p-6 space-y-3">
+                
+                <!-- Location & Rating Row -->
+                <div class="flex justify-between items-start gap-2">
+                  
+                  <!-- 2. LOCATION & DETAILED ADDRESS (CMS Controlled) -->
+                  {hotel.showLocation !== false && (hotel.location || hotel.locationDetail) && (
+                    <div class="space-y-0.5 flex-1">
+                      {hotel.location && (
+                        <span class="font-bold text-slate-600 flex items-center gap-1 text-xs">
+                          📍 {hotel.location}
+                        </span>
+                      )}
+                      {hotel.locationDetail && (
+                        <p class="text-[11px] text-slate-500 leading-snug font-normal pt-0.5">
+                          {hotel.locationDetail}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-              <!-- 4. DESCRIPTION (CMS Controlled) -->
-              {hotel.showDescription !== false && hotel.description && (
-                <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed font-medium">
-                  {hotel.description}
-                </p>
-              )}
+                  <!-- 3. RATING BADGE (CMS Controlled) -->
+                  {hotel.showRating !== false && hotel.rating && (
+                    <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-black text-[11px] border border-amber-200/80 shrink-0">
+                      ★ {hotel.rating}
+                    </span>
+                  )}
+                </div>
 
-            </div>
-          </div>
-
-          <!-- 5. BUTTON ACTIONS (CMS Controlled) -->
-          {(hotel.showCheckPrice !== false || hotel.showDetailsBtn !== false) && (
-            <div class="p-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/50">
-              {hotel.showCheckPrice !== false && (
-                <button data-title={hotel.title} data-slug={hotel.slug} class="open-price-modal flex-1 bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-3 px-3 rounded-xl text-xs uppercase tracking-wider shadow transition duration-200 cursor-pointer text-center active:scale-95">
-                  Check Price
-                </button>
-              )}
-              {hotel.showDetailsBtn !== false && (
-                <a href={`/${hotel.slug}`} class="flex-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-bold py-3 px-3 rounded-xl text-xs uppercase tracking-wider transition text-center shadow-xs">
-                  Details
+                <!-- Title -->
+                <a href={`/${slug}`} class="block text-xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
+                  {hotel.title}
                 </a>
-              )}
-            </div>
-          )}
 
-        </article>
-      ))}
+                <!-- 4. DESCRIPTION (CMS Controlled) -->
+                {hotel.showDescription !== false && hotel.description && (
+                  <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed font-medium">
+                    {hotel.description}
+                  </p>
+                )}
+
+              </div>
+            </div>
+
+            <!-- 5. BUTTON ACTIONS (CMS Controlled) -->
+            {(hotel.showCheckPrice !== false || hotel.showDetailsBtn !== false) && (
+              <div class="p-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/50">
+                {hotel.showCheckPrice !== false && (
+                  <button data-title={hotel.title} data-slug={slug} class="open-price-modal flex-1 bg-[#0d3b23] hover:bg-emerald-900 text-white font-black py-3 px-3 rounded-xl text-xs uppercase tracking-wider shadow transition duration-200 cursor-pointer text-center active:scale-95">
+                    Check Price
+                  </button>
+                )}
+                {hotel.showDetailsBtn !== false && (
+                  <a href={`/${slug}`} class="flex-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-bold py-3 px-3 rounded-xl text-xs uppercase tracking-wider transition text-center shadow-xs">
+                    Details
+                  </a>
+                )}
+              </div>
+            )}
+
+          </article>
+        );
+      })}
     </div>
 
   </div>
@@ -143,7 +150,7 @@ const { popularHotels = [] } = Astro.props;
         <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">Live Stay22 API Match</span>
         <h3 id="modalHotelTitle" class="text-base font-black text-white truncate max-w-[280px]">Compare Platform Rates</h3>
       </div>
-      <button id="closePriceModalBtn" class="text-slate-400 hover:text-white text-2xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-800 cursor-pointer">&times;</button>
+      <button id="closePriceModalBtn" aria-label="Close modal" class="text-slate-400 hover:text-white text-2xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-800 cursor-pointer">&times;</button>
     </div>
     <div id="modalRatesContainer" class="space-y-2.5 overflow-y-auto max-h-[350px] pr-1">
       <div class="text-center py-8 bg-slate-950/60 rounded-2xl border border-slate-800 space-y-2">
@@ -161,7 +168,7 @@ const { popularHotels = [] } = Astro.props;
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Carousel Scroll Logic
+    // 1. Carousel Controls
     const track = document.getElementById('popularCarouselTrack');
     const prevBtn = document.getElementById('popularPrevBtn');
     const nextBtn = document.getElementById('popularNextBtn');
@@ -171,7 +178,7 @@ const { popularHotels = [] } = Astro.props;
       nextBtn.addEventListener('click', () => track.scrollBy({ left: 374, behavior: 'smooth' }));
     }
 
-    // Modal & API Logic
+    // 2. Modal & Cloudflare Worker API Fetch
     const priceModal = document.getElementById('priceModal');
     const closeModalBtn = document.getElementById('closePriceModalBtn');
     const modalTitle = document.getElementById('modalHotelTitle');
@@ -212,7 +219,7 @@ const { popularHotels = [] } = Astro.props;
       });
     });
 
-    // Wishlist Logic
+    // 3. Wishlist Storage Sync
     const getWishlist = () => JSON.parse(localStorage.getItem('gulshan_wishlist') || '[]');
     const updateWishlistUI = () => {
       const wishlist = getWishlist();
