@@ -2,7 +2,7 @@
 title: Amari Dhaka
 slug: amari-dhaka
 image: /images/uploads/hero-gulshan.jpg
-showCategory: false
+showCategory: true
 category: 5-Star Luxury
 showLocation: true
 location: Gulshan 2, Dhaka
@@ -11,13 +11,13 @@ rating: ''
 description: ''
 showCheckPrice: true
 showDetailsBtn: true
-houseRules: null
-priceUSD: '189'
-priceBDT: '20000'
-fullAddress: HOUSE-47 Road No. 41, Dhaka 1212
-amenities: []
-enable_rates: true
 price: '100'
+enable_rates: true
+amenities: []
+fullAddress: HOUSE-47 Road No. 41, Dhaka 1212
+priceBDT: '20000'
+priceUSD: '189'
+houseRules: null
 reviewsCount: null
 gallery: []
 officialSite: ''
