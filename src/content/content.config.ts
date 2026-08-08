@@ -1,8 +1,9 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const hotelsCollection = defineCollection({
-  type: 'content', // 👈 Astro-র নেটিভ কন্টেন্ট লোডার (এটি ফাইল খুঁজে পেতে কখনো ফেইল করে না)
-  schema: z.object({}).passthrough(), // 👈 passthrough দেওয়ার ফলে Zod কোনো ফিল্ড নিয়েই এরর দেবে না
+  loader: glob({ pattern: '**/*.md', base: './src/content/hotels' }),
+  schema: z.object({}).passthrough(),
 });
 
 export const collections = {
