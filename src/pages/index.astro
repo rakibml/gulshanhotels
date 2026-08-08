@@ -4,20 +4,42 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
+import { getCollection } from 'astro:content';
 
-// Astro Native Glob Loader (Cloudflare Pages-এ ১০০% সাকসেসফুলি বিল্ড হবে)
-const rawHotels = await Astro.glob('../content/hotels/*.md');
+let popularHotels: any[] = [];
 
-const popularHotels = rawHotels.map((file: any) => {
-  // ফাইলপাথ থেকে ফাইলনেম বের করা
-  const slugFromFile = file.file.split('/').pop()?.replace(/\.md$/, '') || 'hotel';
-  const frontmatter = file.frontmatter || {};
+// ১. প্রথমে Astro Content Collection থেকে ডাটা আনার চেষ্টা করা
+try {
+  const collectionData = await getCollection('hotels');
+  if (collectionData && collectionData.length > 0) {
+    popularHotels = collectionData.map((item: any) => ({
+      ...item.data,
+      slug: item.data?.slug || item.id?.replace(/\.md$/, '') || 'hotel',
+    }));
+  }
+} catch (err) {
+  console.error("Content Collection Load Error:", err);
+}
 
-  return {
-    ...frontmatter,
-    slug: frontmatter.slug || slugFromFile,
-  };
-});
+// ২. যদি কালেকশন কোনো কারণে না পায়, তবে সেফভাবে Astro.glob দিয়ে ব্যাকআপ ডাটা রিড করা
+if (popularHotels.length === 0) {
+  try {
+    const rawHotels = await Astro.glob('../content/hotels/*.md');
+    popularHotels = rawHotels.map((file: any) => {
+      const filePath = file.file || file.url || '';
+      const slugFromFile = filePath ? filePath.split('/').pop()?.replace(/\.md$/, '') : 'hotel';
+      const frontmatter = file.frontmatter || {};
+
+      return {
+        ...frontmatter,
+        slug: frontmatter.slug || slugFromFile,
+      };
+    });
+  } catch (err) {
+    console.error("Astro Glob Error:", err);
+    popularHotels = [];
+  }
+}
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
