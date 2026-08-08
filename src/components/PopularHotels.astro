@@ -4,13 +4,12 @@ interface Props {
 }
 const { popularHotels = [] } = Astro.props;
 
-// Title Case Formatter ("the westin" -> "The Westin")
+// Title Case Formatter
 function toTitleCase(str: string) {
   if (!str) return 'Gulshan Hotel';
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// Map real frontmatter fields directly from your markdown files
 const displayHotels = popularHotels.map((item: any) => {
   const data = item.data || item;
   return {
@@ -30,9 +29,6 @@ const displayHotels = popularHotels.map((item: any) => {
 
     editorNote: data.editorNote || data.description || 'Premium hotel in Gulshan diplomatic zone.',
     showDescription: data.showDescription ?? true,
-
-    priceBDT: data.priceBDT || '',
-    priceUSD: data.priceUSD || '',
 
     showCheckPrice: data.showCheckPrice ?? true,
     showDetailsBtn: data.showDetailsBtn ?? true,
@@ -110,7 +106,7 @@ const displayHotels = popularHotels.map((item: any) => {
                 <!-- Location & Rating Row -->
                 <div class="flex justify-between items-start gap-2">
                   
-                  <!-- 2. LOCATION & FULL ADDRESS (From Real Frontmatter) -->
+                  <!-- 2. LOCATION & FULL ADDRESS -->
                   {hotel.showLocation !== false && (hotel.location || hotel.fullAddress) && (
                     <div class="space-y-0.5 flex-1">
                       {hotel.location && (
@@ -134,7 +130,7 @@ const displayHotels = popularHotels.map((item: any) => {
                   )}
                 </div>
 
-                <!-- Title (Formatted to Title Case) -->
+                <!-- Title -->
                 <a href={`/${hotel.slug}`} class="block text-xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
                   {hotel.title}
                 </a>
@@ -218,7 +214,7 @@ const displayHotels = popularHotels.map((item: any) => {
     const closeModalBtn = document.getElementById('closePriceModalBtn');
     const modalTitle = document.getElementById('modalHotelTitle');
     const ratesContainer = document.getElementById('modalRatesContainer');
-    const whatsappBtn = document.getElementById('modalWhatsappBtn') as HTMLAnchorElement | null;
+    const whatsappBtn = document.getElementById('modalWhatsappBtn');
 
     const closeModal = () => priceModal?.classList.add('hidden');
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
@@ -229,7 +225,7 @@ const displayHotels = popularHotels.map((item: any) => {
         const title = btn.getAttribute('data-title') || 'Hotel';
         if (modalTitle) modalTitle.textContent = title;
         if (whatsappBtn) {
-          whatsappBtn.href = `https://wa.me/8801700000000?text=${encodeURIComponent(`Hi GulshanHotels! Inquiring about ${title}`)}`;
+          whatsappBtn.setAttribute('href', `https://wa.me/8801700000000?text=${encodeURIComponent(`Hi GulshanHotels! Inquiring about ${title}`)}`);
         }
         if (ratesContainer) {
           ratesContainer.innerHTML = `<div class="text-center py-8"><span class="inline-block w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span><p class="text-xs text-slate-300 mt-2">Fetching live rates...</p></div>`;
@@ -260,7 +256,7 @@ const displayHotels = popularHotels.map((item: any) => {
       const wishlist = getWishlist();
       document.querySelectorAll('.wishlist-toggle-btn').forEach((btn) => {
         const slug = btn.getAttribute('data-hotel-slug');
-        if (wishlist.some((item: any) => item.slug === slug)) {
+        if (wishlist.some((item) => item.slug === slug)) {
           btn.classList.add('text-rose-500'); btn.classList.remove('text-slate-400');
         } else {
           btn.classList.remove('text-rose-500'); btn.classList.add('text-slate-400');
@@ -276,7 +272,7 @@ const displayHotels = popularHotels.map((item: any) => {
         const image = btn.getAttribute('data-hotel-image');
         if (!slug) return;
         let wishlist = getWishlist();
-        const idx = wishlist.findIndex((item: any) => item.slug === slug);
+        const idx = wishlist.findIndex((item) => item.slug === slug);
         if (idx > -1) wishlist.splice(idx, 1);
         else wishlist.push({ slug, title, image });
         localStorage.setItem('gulshan_wishlist', JSON.stringify(wishlist));
