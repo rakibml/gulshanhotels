@@ -4,25 +4,26 @@ const hotelsCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    slug: z.string(),
-    image: z.string().optional(),
+    // slug কে অপশনাল রাখা হয়েছে যেন ফাইল নেম থেকে অটোমেটিক নিতে পারে
+    slug: z.string().nullable().optional(),
+    image: z.string().nullable().optional(),
     
-    // Safety Defaults
-    showCategory: z.boolean().default(true),
-    category: z.string().optional(),
+    // Nullable + Optional + Transform (Cloudflare deployment safe)
+    showCategory: z.boolean().nullable().optional().transform((val) => val ?? true),
+    category: z.string().nullable().optional(),
     
-    showLocation: z.boolean().default(true),
-    location: z.string().optional(),
-    locationDetail: z.string().optional(),
+    showLocation: z.boolean().nullable().optional().transform((val) => val ?? true),
+    location: z.string().nullable().optional(),
+    locationDetail: z.string().nullable().optional(),
     
-    showRating: z.boolean().default(true),
-    rating: z.string().optional(),
+    showRating: z.boolean().nullable().optional().transform((val) => val ?? true),
+    rating: z.string().nullable().optional(),
     
-    showDescription: z.boolean().default(true),
-    description: z.string().optional(),
+    showDescription: z.boolean().nullable().optional().transform((val) => val ?? true),
+    description: z.string().nullable().optional(),
     
-    showCheckPrice: z.boolean().default(true),
-    showDetailsBtn: z.boolean().default(true),
+    showCheckPrice: z.boolean().nullable().optional().transform((val) => val ?? true),
+    showDetailsBtn: z.boolean().nullable().optional().transform((val) => val ?? true),
   }),
 });
 
