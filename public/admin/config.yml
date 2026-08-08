@@ -1,97 +1,31 @@
-backend:
-  name: github
-  repo: rakibml/gulshanhotels
-  branch: main
-
-media_folder: "public/images"
-public_folder: "/images"
-
 collections:
-  # 1. HOTELS DIRECTORY (Individual Hotel Pages)
   - name: "hotels"
-    label: "🏨 Hotels Directory"
+    label: "Hotels"
     folder: "src/content/hotels"
     create: true
-    slug: "{{title}}"
-    summary: "{{title}} - Link: /{{slug}}"
+    slug: "{{slug}}"
     fields:
-      - { label: "Hotel Title", name: "title", widget: "string" }
-      - { label: "Category", name: "category", widget: "string", default: "5-Star Luxury Stay" }
-      - { label: "Location", name: "location", widget: "string", default: "Gulshan 2, Dhaka" }
-      - { label: "Starting Price", name: "price", widget: "string", default: "$120 / night" }
-      - { label: "Rating", name: "rating", widget: "number", value_type: "float", required: false }
-      - { label: "Reviews Count", name: "reviewsCount", widget: "number", required: false }
-      - { label: "Show in Popular Hotels?", name: "popular", widget: "boolean", default: true }
-      - { label: "Cover Image", name: "image", widget: "image" }
-      - { label: "Photo Gallery", name: "gallery", widget: "list", field: { label: "Image", widget: "image" }, required: false }
-      - { label: "Show OTA Rate Comparison Table?", name: "enable_rates", widget: "boolean", default: true }
-      - { label: "Official Hotel Website Link", name: "officialSite", widget: "string", required: false }
-      - { label: "WhatsApp Reservation Number", name: "whatsapp", widget: "string", required: false }
-      - { label: "Direct Phone Number", name: "phone", widget: "string", required: false }
-      - { label: "Show Amenities Section?", name: "enable_amenities", widget: "boolean", default: true }
-      - { label: "Show What's Nearby?", name: "enable_nearby", widget: "boolean", default: true }
-      - { label: "Show Essential Details?", name: "enable_details", widget: "boolean", default: true }
-      - { label: "Show House Rules?", name: "enable_rules", widget: "boolean", default: true }
-      - { label: "Show FAQs?", name: "enable_faqs", widget: "boolean", default: true }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Image", name: "image", widget: "image" }
 
-      - label: "Amenities List"
-        name: "amenities"
-        widget: "list"
-        required: false
-        field:
-          label: "Amenity Name"
-          widget: "string"
+      # --- Category Badge Controls ---
+      - { label: "Show Category Badge?", name: "showCategory", widget: "boolean", default: true }
+      - { label: "Category Text (e.g., 5-Star Luxury, Budget Stay)", name: "category", widget: "string", required: false }
 
-      - label: "Nearby Places"
-        name: "nearby_places"
-        widget: "list"
-        required: false
-        fields:
-          - label: "Place Name"
-            name: "name"
-            widget: "string"
-          - label: "Distance"
-            name: "distance"
-            widget: "string"
+      # --- Location Controls ---
+      - { label: "Show Location Section?", name: "showLocation", widget: "boolean", default: true }
+      - { label: "Short Location (e.g., Gulshan 2, Dhaka)", name: "location", widget: "string", required: false }
+      - { label: "Detailed Address / Review Snippet (Optional)", name: "locationDetail", widget: "string", required: false }
 
-      - label: "Frequently Asked Questions"
-        name: "faqs"
-        widget: "list"
-        required: false
-        fields:
-          - label: "Question"
-            name: "question"
-            widget: "string"
-          - label: "Answer"
-            name: "answer"
-            widget: "text"
+      # --- Rating Controls ---
+      - { label: "Show Rating?", name: "showRating", widget: "boolean", default: true }
+      - { label: "Rating (e.g., 4.8)", name: "rating", widget: "string", required: false }
 
-      - label: "Custom Additional Sections"
-        name: "custom_sections"
-        widget: "list"
-        required: false
-        fields:
-          - label: "Section Title"
-            name: "title"
-            widget: "string"
-          - label: "Section Content"
-            name: "content"
-            widget: "markdown"
+      # --- Description Controls ---
+      - { label: "Show Description?", name: "showDescription", widget: "boolean", default: true }
+      - { label: "Description", name: "description", widget: "text", required: false }
 
-      - label: "Hotel Description"
-        name: "body"
-        widget: "markdown"
-
-  # 2. HOMEPAGE SECTIONS (Allows Unlimited New Sections via + Button)
-  - name: "homepage_sections"
-    label: "📄 Homepage Sections"
-    folder: "src/content/homepage"
-    create: true
-    slug: "{{title}}"
-    summary: "{{title}}"
-    fields:
-      - { label: "Show Section on Homepage?", name: "enable", widget: "boolean", default: true }
-      - { label: "Section Badge Text", name: "badge", widget: "string", required: false }
-      - { label: "Section Title", name: "title", widget: "string" }
-      - { label: "Section Subtitle / Description", name: "subtitle", widget: "string", required: false }
-      - { label: "Section Body Content", name: "body", widget: "markdown", required: false }
+      # --- Button Controls ---
+      - { label: "Show Check Price Button?", name: "showCheckPrice", widget: "boolean", default: true }
+      - { label: "Show Details Button?", name: "showDetailsBtn", widget: "boolean", default: true }
