@@ -4,16 +4,20 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
-import { getCollection } from 'astro:content';
 
-// Astro v7 কন্টেন্ট কালেকশন থেকে ফাইল লোড
-const collectionData = await getCollection('hotels');
+// Vite/Astro Native Eager Glob Import (সরাসরি আপনার আসল .md ফাইল থেকে ডাটা রিড করবে)
+const rawHotels = import.meta.glob('/src/content/hotels/*.md', { eager: true });
 
-// রিয়েল ফাইল ডাটা ম্যাপিং
-const popularHotels = collectionData.map((item: any) => ({
-  ...item.data,
-  slug: item.data?.slug || item.id,
-}));
+const popularHotels = Object.entries(rawHotels).map(([filepath, file: any]) => {
+  // ফাইলপাথ থেকে ফাইলনেম এক্সট্র্যাক্ট করা (যেমন: "/src/content/hotels/the-westin.md" -> "the-westin")
+  const slugFromFile = filepath.split('/').pop()?.replace(/\.md$/, '') || 'hotel';
+  const frontmatter = file.frontmatter || {};
+
+  return {
+    ...frontmatter,
+    slug: frontmatter.slug || slugFromFile,
+  };
+});
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
