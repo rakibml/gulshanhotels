@@ -1,0 +1,93 @@
+backend:
+  name: github
+  repo: rakibml/gulshanhotels
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+# ==================================================
+# SVELTIA CMS MODULAR COLLECTIONS
+# ==================================================
+collections:
+
+  # 1. HOTELS DIRECTORY (Individual Hotel Pages)
+  - name: "hotels"
+    label: "🏨 Hotels Directory"
+    folder: "src/content/hotels"
+    create: true
+    slug: "{{title}}"
+    summary: "{{title}} — [ Link: /{{slug}} ]"
+    fields:
+      - { label: "Hotel Name / Title", name: "title", widget: "string" }
+      - { label: "Category", name: "category", widget: "string", default: "5-Star Luxury Stay" }
+      - { label: "Location", name: "location", widget: "string", default: "Gulshan 2, Dhaka" }
+      - { label: "Starting Price", name: "price", widget: "string", default: "$120 / night" }
+      - { label: "Rating (e.g. 4.8)", name: "rating", widget: "number", value_type: "float", required: false }
+      - { label: "Reviews Count (e.g. 45)", name: "reviewsCount", widget: "number", required: false }
+      - { label: "Show in Popular Hotels Carousel?", name: "popular", widget: "boolean", default: true }
+      - { label: "Cover Image", name: "image", widget: "image" }
+      - { label: "Photo Gallery", name: "gallery", widget: "list", field: { label: "Image", widget: "image" }, required: false }
+      - { label: "Show OTA Rate Comparison Table?", name: "enable_rates", widget: "boolean", default: true }
+      - { label: "Official Hotel Website Link", name: "officialSite", widget: "string", required: false }
+      - { label: "WhatsApp Reservation Number", name: "whatsapp", widget: "string", required: false }
+      - { label: "Direct Phone Number", name: "phone", widget: "string", required: false }
+      - { label: "Show Amenities Section?", name: "enable_amenities", widget: "boolean", default: true }
+      - { label: "Show What's Nearby?", name: "enable_nearby", widget: "boolean", default: true }
+      - { label: "Show Essential Details?", name: "enable_details", widget: "boolean", default: true }
+      - { label: "Show House Rules?", name: "enable_rules", widget: "boolean", default: true }
+      - { label: "Show FAQs?", name: "enable_faqs", widget: "boolean", default: true }
+
+      - label: "Amenities List"
+        name: "amenities"
+        widget: "list"
+        required: false
+        field: { label: "Amenity Name", widget: "string" }
+
+      - label: "Nearby Places"
+        name: "nearby_places"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Place Name", name: "name", widget: "string" }
+          - { label: "Distance (e.g. 200m)", name: "distance", widget: "string" }
+          - { label: "Landmark Details", name: "details", widget: "text", required: false }
+
+      - label: "Frequently Asked Questions"
+        name: "faqs"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Question", name: "question", widget: "string" }
+          - { label: "Answer", name: "answer", widget: "text" }
+
+      - label: "Custom Additional Sections"
+        name: "custom_sections"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Section Title", name: "title", widget: "string" }
+          - { label: "Section Content", name: "content", widget: "markdown" }
+
+      - { label: "Hotel Description", name: "body", widget: "markdown" }
+
+  # 2. HOMEPAGE SECTIONS COLLECTION
+  - name: "homepage_sections"
+    label: "📄 Homepage Sections Control"
+    files:
+      - label: "Popular Hotels Section"
+        name: "popular_hotels"
+        file: "src/content/homepage/popular-hotels.json"
+        fields:
+          - { label: "Show Popular Hotels Section on Homepage?", name: "enable", widget: "boolean", default: true }
+          - { label: "Section Badge Text", name: "badge", widget: "string", default: "POPULAR ACCOMMODATIONS" }
+          - { label: "Section Main Title", name: "title", widget: "string", default: "Popular Hotels in Gulshan" }
+          - { label: "Section Subtitle", name: "subtitle", widget: "string", default: "Handpicked luxury and executive hotels recommended by our local audit team." }
+
+      - label: "New Custom Section"
+        name: "custom_section"
+        file: "src/content/homepage/custom-section.json"
+        fields:
+          - { label: "Show Custom Section on Homepage?", name: "enable", widget: "boolean", default: true }
+          - { label: "Section Title", name: "title", widget: "string" }
+          - { label: "Section Content / Body", name: "content", widget: "markdown" }
