@@ -3,32 +3,32 @@ backend:
   repo: rakibml/gulshanhotels
   branch: main
 
-media_folder: "public/images/hotels"
-public_folder: "/images/hotels"
+media_folder: "public/images"
+public_folder: "/images"
 
+# ==================================================
+# SVELTIA CMS MODULAR COLLECTIONS & MODULES
+# ==================================================
 collections:
+
+  # --------------------------------------------------
+  # MODULE 1: HOTELS DIRECTORY COLLECTION
+  # --------------------------------------------------
   - name: "hotels"
-    label: "Hotels Directory"
+    label: "🏨 Hotels Directory"
     folder: "src/content/hotels"
     create: true
     slug: "{{title}}"
     summary: "{{title}} — [ Link: /{{slug}} ]"
     fields:
-      # 1. Hotel Name / Title
+      # Main Details
       - { label: "Hotel Name / Title (e.g. The Westin Dhaka)", name: "title", widget: "string" }
-      
-      # 2. Hotel Category
       - { label: "Category", name: "category", widget: "string", default: "5-Star Luxury Stay" }
-      
-      # 3. Location
       - { label: "Location", name: "location", widget: "string", default: "Gulshan 2, Dhaka" }
-      
-      # 4. Starting Price
       - { label: "Starting Price", name: "price", widget: "string", default: "$120 / night" }
-      
-      # Real Ratings & Reviews
       - { label: "Rating (e.g. 4.8)", name: "rating", widget: "number", value_type: "float", required: false }
       - { label: "Reviews Count (e.g. 45)", name: "reviewsCount", widget: "number", required: false }
+      - { label: "Show in Popular Hotels Carousel?", name: "popular", widget: "boolean", default: true }
       
       # Images
       - { label: "Cover Image", name: "image", widget: "image" }
@@ -82,3 +82,36 @@ collections:
 
       # Overview Description
       - { label: "Hotel Description", name: "body", widget: "markdown" }
+
+  # --------------------------------------------------
+  # MODULE 2: SPONSORED HOTELS & FEATURED OFFERS
+  # --------------------------------------------------
+  - name: "sponsored"
+    label: "⭐ Sponsored Offers"
+    folder: "src/content/sponsored"
+    create: true
+    fields:
+      - { label: "Enable Sponsored Section?", name: "enable", widget: "boolean", default: true }
+      - { label: "Custom Badge Text", name: "badge", widget: "string", default: "⭐ Editor's Choice" }
+      - { label: "Hotel Title", name: "title", widget: "string" }
+      - { label: "Category", name: "category", widget: "string" }
+      - { label: "Rating", name: "rating", widget: "number", value_type: "float" }
+      - { label: "Hotel Cover Image", name: "image", widget: "image" }
+      - { label: "Button Action Text", name: "buttonText", widget: "string", default: "Check Best Deal ➔" }
+      - { label: "Target URL / Link", name: "buttonLink", widget: "string" }
+
+  # --------------------------------------------------
+  # MODULE 3: GENERAL SITE SETTINGS & SOCIAL LINKS
+  # --------------------------------------------------
+  - name: "settings"
+    label: "⚙️ Site Settings & Socials"
+    files:
+      - label: "Global Contact & Social Links"
+        name: "general"
+        file: "src/content/settings/general.json"
+        fields:
+          - { label: "Site Contact Email", name: "contactEmail", widget: "string" }
+          - { label: "Global WhatsApp Reservation Number", name: "whatsappNumber", widget: "string" }
+          - { label: "Facebook Page URL", name: "facebookUrl", widget: "string" }
+          - { label: "Instagram Page URL", name: "instagramUrl", widget: "string" }
+          - { label: "Twitter / X URL", name: "twitterUrl", widget: "string" }
