@@ -4,24 +4,38 @@ interface Props {
 }
 const { popularHotels = [] } = Astro.props;
 
-// Safe Data Normalization (Handles Astro Content Collections & plain JS objects)
+// Title Case Formatter ("the westin" -> "The Westin")
+function toTitleCase(str: string) {
+  if (!str) return 'Gulshan Hotel';
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
+// Map real frontmatter fields directly from your markdown files
 const displayHotels = popularHotels.map((item: any) => {
   const data = item.data || item;
   return {
-    title: data.title || 'Untitled Hotel',
+    title: toTitleCase(data.title || 'Gulshan Hotel'),
     slug: item.slug || data.slug || item.id?.replace(/\.md$/, '') || 'hotel',
-    image: data.image,
-    category: data.category,
-    showCategory: data.showCategory,
-    location: data.location,
-    locationDetail: data.locationDetail,
-    showLocation: data.showLocation,
-    rating: data.rating,
-    showRating: data.showRating,
-    description: data.description,
-    showDescription: data.showDescription,
-    showCheckPrice: data.showCheckPrice,
-    showDetailsBtn: data.showDetailsBtn,
+    image: data.image || '/images/uploads/hero-gulshan.jpg',
+    
+    category: data.category || '5-Star Luxury',
+    showCategory: data.showCategory ?? true,
+
+    location: data.location || 'Gulshan 2, Dhaka',
+    fullAddress: data.fullAddress || data.locationDetail || '',
+    showLocation: data.showLocation ?? true,
+
+    rating: data.rating ? String(data.rating) : '4.8',
+    showRating: data.showRating ?? true,
+
+    editorNote: data.editorNote || data.description || 'Premium hotel in Gulshan diplomatic zone.',
+    showDescription: data.showDescription ?? true,
+
+    priceBDT: data.priceBDT || '',
+    priceUSD: data.priceUSD || '',
+
+    showCheckPrice: data.showCheckPrice ?? true,
+    showDetailsBtn: data.showDetailsBtn ?? true,
   };
 });
 ---
@@ -96,17 +110,17 @@ const displayHotels = popularHotels.map((item: any) => {
                 <!-- Location & Rating Row -->
                 <div class="flex justify-between items-start gap-2">
                   
-                  <!-- 2. LOCATION & DETAILED ADDRESS -->
-                  {hotel.showLocation !== false && (hotel.location || hotel.locationDetail) && (
+                  <!-- 2. LOCATION & FULL ADDRESS (From Real Frontmatter) -->
+                  {hotel.showLocation !== false && (hotel.location || hotel.fullAddress) && (
                     <div class="space-y-0.5 flex-1">
                       {hotel.location && (
                         <span class="font-bold text-slate-600 flex items-center gap-1 text-xs">
                           📍 {hotel.location}
                         </span>
                       )}
-                      {hotel.locationDetail && (
+                      {hotel.fullAddress && (
                         <p class="text-[11px] text-slate-500 leading-snug font-normal pt-0.5">
-                          {hotel.locationDetail}
+                          {hotel.fullAddress}
                         </p>
                       )}
                     </div>
@@ -120,15 +134,15 @@ const displayHotels = popularHotels.map((item: any) => {
                   )}
                 </div>
 
-                <!-- Title -->
+                <!-- Title (Formatted to Title Case) -->
                 <a href={`/${hotel.slug}`} class="block text-xl font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
                   {hotel.title}
                 </a>
 
-                <!-- 4. DESCRIPTION -->
-                {hotel.showDescription !== false && hotel.description && (
+                <!-- 4. EDITOR NOTE / DESCRIPTION -->
+                {hotel.showDescription !== false && hotel.editorNote && (
                   <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed font-medium">
-                    {hotel.description}
+                    {hotel.editorNote}
                   </p>
                 )}
 
@@ -154,8 +168,8 @@ const displayHotels = popularHotels.map((item: any) => {
           </article>
         ))
       ) : (
-        <div class="w-full py-12 text-center text-slate-400 font-bold bg-white rounded-3xl border border-dashed border-slate-300 flex items-center justify-center">
-          📍 No hotels found to display. Please add hotels in CMS or check src/content/hotels.
+        <div class="w-full py-12 text-center text-slate-400 font-bold bg-white rounded-3xl border border-dashed border-slate-300">
+          📍 No hotels found to display.
         </div>
       )}
     </div>
