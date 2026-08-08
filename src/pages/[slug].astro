@@ -3,18 +3,49 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
+// 1. DYNAMIC STATIC PATHS GENERATOR (CLEANS .md EXTENSION FOR PERFECT URL MATCHING)
 export async function getStaticPaths() {
-  const hotels = await getCollection('hotels');
-  return hotels.map((entry: any) => ({
-    params: { slug: entry.id },
-    props: { hotel: entry },
-  }));
+  let hotels: any[] = [];
+  try {
+    hotels = await getCollection('hotels');
+  } catch (e) {
+    hotels = [];
+  }
+
+  // Backup glob scanner if getCollection returns empty
+  if (!hotels || hotels.length === 0) {
+    try {
+      const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
+      hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace('.md', ''),
+        data: item.frontmatter || {},
+        body: item.compiledContent ? item.compiledContent() : ''
+      }));
+    } catch (e) {
+      hotels = [];
+    }
+  }
+
+  return hotels.map((entry: any) => {
+    // Clean .md extension from entry.id so URL is /amari-dhaka NOT /amari-dhaka.md!
+    const rawId = entry.id || entry.slug || '';
+    const cleanSlug = rawId
+      .split('/')
+      .pop()
+      .replace(/\.md$/, '')
+      .toLowerCase();
+
+    return {
+      params: { slug: cleanSlug || 'hotel' },
+      props: { hotel: entry },
+    };
+  });
 }
 
 const { hotel } = Astro.props;
 const data = hotel.data || {};
 
-// Real CMS Frontmatter Data (Zero Demo/Fake Fallbacks)
+// Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category;
 const hotelLocation = data.location;
@@ -43,7 +74,7 @@ const halfFaqIndex = Math.ceil(faqList.length / 2);
 const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
 const rightColumnFaqs = faqList.slice(halfFaqIndex);
 
-// Section Toggles from Admin Panel
+// Section Toggles
 const showRates = data.enable_rates !== false;
 const showAmenities = data.enable_amenities !== false && amenitiesList.length > 0;
 const showNearby = data.enable_nearby !== false && nearbyPlaces.length > 0;
@@ -92,7 +123,6 @@ const faqSchema = faqList.length > 0 ? {
           </span>
         )}
 
-        <!-- Main Title -->
         <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black font-serif text-slate-900 leading-tight">{hotelTitle}</h1>
         
         {hotelLocation && (
@@ -118,7 +148,7 @@ const faqSchema = faqList.length > 0 ? {
     </div>
   </section>
 
-  <!-- 2. BOOKING.COM STYLE PHOTO GALLERY SLIDER -->
+  <!-- 2. PHOTO GALLERY SLIDER -->
   {galleryImages.length > 0 && (
     <section class="py-4 sm:py-6 px-3.5 sm:px-8 max-w-[1400px] mx-auto">
       
@@ -191,13 +221,13 @@ const faqSchema = faqList.length > 0 ? {
     </section>
   )}
 
-  <!-- MAIN PAGE CONTENT (UNIFIED CONTINUOUS FLOW, NO OUTER CARD BOX BORDERS) -->
+  <!-- MAIN PAGE CONTENT -->
   <section class="py-4 sm:py-6 pb-24 lg:pb-12 px-3.5 sm:px-8 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
     
     <!-- LEFT MAIN COLUMN -->
     <div class="lg:col-span-8 space-y-8 sm:space-y-10 text-slate-800">
       
-      <!-- 1. OVERVIEW (WITH 150-WORD TRUNCATOR TOGGLE) -->
+      <!-- 1. OVERVIEW (150-WORD TRUNCATOR) -->
       <div id="overview" class="border-b border-slate-200 pb-6 sm:pb-8 space-y-3">
         <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 border-b border-slate-200 pb-3">Hotel Overview</h2>
         
@@ -387,7 +417,7 @@ const faqSchema = faqList.length > 0 ? {
 
     </div>
 
-    <!-- RIGHT STICKY ACTION SIDEBAR WITH REALTIME STAY22 RATE COMPARISON TABLE -->
+    <!-- RIGHT STICKY ACTION SIDEBAR -->
     <div class="lg:col-span-4">
       <div class="sticky top-[80px] bg-slate-900 text-white p-5 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl space-y-5">
         
@@ -397,7 +427,7 @@ const faqSchema = faqList.length > 0 ? {
           <span class="text-[11px] text-slate-400 block mt-0.5">/ night + taxes & fees</span>
         </div>
 
-        <!-- EMBEDDED REALTIME RATE COMPARISON TABLE -->
+        <!-- 100% REALTIME STAY22 SUPPLIERS TABLE -->
         {showRates && (
           <div class="space-y-3">
             <h3 class="text-xs font-black uppercase text-slate-300 tracking-wider">Compare Live Rates</h3>
@@ -425,9 +455,14 @@ const faqSchema = faqList.length > 0 ? {
             </a>
           )}
 
-          {data.whatsapp && (
+          {data.whatsapp ? (
             <a href={`https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Hi, I want to inquire about reservation at ' + hotelTitle)}`} target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+              <span>Instant WhatsApp Reservation</span>
+            </a>
+          ) : (
+            <a href="https://wa.me/8801700000000" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm py-2.5 sm:py-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.892 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
               <span>Instant WhatsApp Reservation</span>
             </a>
           )}
@@ -446,28 +481,16 @@ const faqSchema = faqList.length > 0 ? {
   </section>
 
   <!-- MOBILE PINNED BOTTOM BAR -->
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 text-white border-t border-slate-800 p-2.5 px-4 flex justify-between items-center shadow-2xl backdrop-blur-md">
+  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 text-white border-t border-slate-800 p-2.5 px-4 flex justify-between items-center shadow-2xl backdrop-blur-md">
     <div>
       <span class="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">Starting Rate</span>
       <span id="mobileStartingRate" class="font-black text-emerald-400 text-sm sm:text-base">{hotelPrice || 'Check Price'}</span>
     </div>
 
-    {showRates ? (
-      <button id="openMobileModalBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
-        <span>Check Live Rates</span>
-        <span>➔</span>
-      </button>
-    ) : (
-      data.officialSite ? (
-        <a href={data.officialSite} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition">
-          Book Official ➔
-        </a>
-      ) : (
-        <a href={`https://wa.me/${data.whatsapp || '8801700000000'}`} target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition">
-          WhatsApp Us ➔
-        </a>
-      )
-    )}
+    <button id="openMobileModalBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+      <span>Check Live Rates</span>
+      <span>➔</span>
+    </button>
   </div>
 
   <!-- MOBILE LIVE RATES POPUP MODAL -->
@@ -500,7 +523,7 @@ const faqSchema = faqList.length > 0 ? {
     </div>
   </div>
 
-  <!-- CLIENT-SIDE SCRIPTS FOR REALTIME STAY22 API PARSER, MOBILE MODAL, GALLERY & OVERVIEW -->
+  <!-- CLIENT-SIDE SCRIPTS FOR REALTIME API PARSER, MOBILE MODAL, GALLERY & OVERVIEW -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
