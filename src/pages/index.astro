@@ -7,24 +7,19 @@ import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
 // ১. Astro Content Collections থেকে ডাটা লোড
-let hotels = [];
+let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
     hotels = collectionData.map((item: any) => ({
-      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
-      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
-      category: item.data?.category || 'Luxury Hotel',
-      location: item.data?.location || 'Gulshan 2, Dhaka',
-      price: item.data?.price || '৳ 18,500 / night',
-      rating: item.data?.rating || 4.8,
-      reviews: item.data?.reviewsCount || '1,248',
-      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
+      ...item.data, // 👈 এটি CMS-এর নতুন-পুরনো সব ফিল্ডকে (showCategory, locationDetail ইত্যাদি) হুবহু বজায় রাখবে
+      slug: item.id?.replace(/\.md$/, '') || item.slug || item.data?.slug || 'hotel',
+      title: item.data?.title || 'Gulshan Hotel',
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-      popular: item.data?.popular ?? true,
     }));
   }
 } catch (err) {
+  console.error("Hotels Collection Load Error:", err);
   hotels = [];
 }
 
@@ -34,10 +29,15 @@ function toTitleCase(str: string) {
 }
 
 // এডমিন প্যানেলের ফিল্টার করা পপুলার হোটেলসমূহ
-const popularHotels = hotels.map((h: any) => ({
-  ...h,
-  title: toTitleCase(h.title)
-})).filter((h: any) => h.popular !== false);
+const filteredHotels = hotels
+  .map((h: any) => ({
+    ...h,
+    title: toTitleCase(h.title)
+  }))
+  .filter((h: any) => h.popular !== false);
+
+// যদি ফিল্টারের পর ফাঁকা হয়ে যায়, তবে সরাসরি সব হোটেল দেখাবে যেন হোমপেজ কখনো ফাঁকা না থাকে
+const popularHotels = filteredHotels.length > 0 ? filteredHotels : hotels;
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
