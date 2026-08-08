@@ -6,38 +6,22 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-// ১. Astro Content Collections থেকে ডাটা লোড
-let hotels: any[] = [];
+let popularHotels: any[] = [];
+
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
-    hotels = collectionData.map((item: any) => ({
-      ...item.data, // 👈 এটি CMS-এর নতুন-পুরনো সব ফিল্ডকে (showCategory, locationDetail ইত্যাদি) হুবহু বজায় রাখবে
-      slug: item.id?.replace(/\.md$/, '') || item.slug || item.data?.slug || 'hotel',
+    popularHotels = collectionData.map((item: any) => ({
+      ...item.data, // CMS-এর সব ফিল্ড সংরক্ষণ করবে
+      slug: item.slug || item.id?.replace(/\.md$/, '') || 'hotel',
       title: item.data?.title || 'Gulshan Hotel',
       image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
     }));
   }
 } catch (err) {
-  console.error("Hotels Collection Load Error:", err);
-  hotels = [];
+  console.error("Hotels Collection Error:", err);
+  popularHotels = [];
 }
-
-function toTitleCase(str: string) {
-  if (!str) return 'Gulshan Hotel';
-  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-}
-
-// এডমিন প্যানেলের ফিল্টার করা পপুলার হোটেলসমূহ
-const filteredHotels = hotels
-  .map((h: any) => ({
-    ...h,
-    title: toTitleCase(h.title)
-  }))
-  .filter((h: any) => h.popular !== false);
-
-// যদি ফিল্টারের পর ফাঁকা হয়ে যায়, তবে সরাসরি সব হোটেল দেখাবে যেন হোমপেজ কখনো ফাঁকা না থাকে
-const popularHotels = filteredHotels.length > 0 ? filteredHotels : hotels;
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
