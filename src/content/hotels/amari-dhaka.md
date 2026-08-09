@@ -25,7 +25,16 @@ editorNote: |-
 amenities: []
 faqs:
   - question: fdsdd
-    answer: dafd
+    answer: |-
+      dafd ddsfas
+      ds
+      fds
+      fds
+      f
+      f
+      ds
+  - question: test 44
+    answer: '4444'
 custom_sections: []
 enable_rates: true
 enable_amenities: true
