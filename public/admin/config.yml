@@ -15,25 +15,70 @@ collections:
     format: "yaml-frontmatter"
     slug: "{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Slug", name: "slug", widget: "string" }
-      - { label: "Category", name: "category", widget: "string", required: false }
-      - { label: "Short Location", name: "location", widget: "string", required: false }
-      - { label: "Full Address", name: "fullAddress", widget: "string", required: false }
-      - { label: "Price (BDT)", name: "priceBDT", widget: "string", required: false }
-      - { label: "Price (USD)", name: "priceUSD", widget: "string", required: false }
-      - { label: "Rating", name: "rating", widget: "number", value_type: "float", required: false }
-      - { label: "Reviews Count", name: "reviewsCount", widget: "string", required: false }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Phone", name: "phone", widget: "string", required: false }
-      - { label: "WhatsApp Number", name: "whatsapp", widget: "string", required: false }
-      - { label: "Official Website", name: "officialWebsite", widget: "string", required: false }
-      - { label: "Editor Note / Short Summary", name: "editorNote", widget: "text", required: false }
+      # --- Basic Hotel Info ---
+      - { label: "Hotel Title", name: "title", widget: "string" }
+      - { label: "URL Slug", name: "slug", widget: "string" }
+      - { label: "Category (e.g., 5-Star Luxury)", name: "category", widget: "string", required: false }
+      - { label: "Short Location (e.g., Gulshan 2, Dhaka)", name: "location", widget: "string", required: false }
+      - { label: "Starting Price Text (e.g., $150 / ৳ 18,500)", name: "price", widget: "string", required: false }
+      - { label: "Rating (e.g., 4.8)", name: "rating", widget: "number", value_type: "float", required: false }
+      - { label: "Reviews Count (e.g., 1,248)", name: "reviewsCount", widget: "string", required: false }
 
-      # --- Show/Hide Controls ---
-      - { label: "Show Category Badge?", name: "showCategory", widget: "boolean", default: true, required: false }
-      - { label: "Show Location Section?", name: "showLocation", widget: "boolean", default: true, required: false }
-      - { label: "Show Rating?", name: "showRating", widget: "boolean", default: true, required: false }
-      - { label: "Show Description?", name: "showDescription", widget: "boolean", default: true, required: false }
-      - { label: "Show Check Price Button?", name: "showCheckPrice", widget: "boolean", default: true, required: false }
-      - { label: "Show Details Button?", name: "showDetailsBtn", widget: "boolean", default: true, required: false }
+      # --- Media & Gallery ---
+      - { label: "Main Featured Image", name: "image", widget: "image", required: false }
+      - label: "Gallery Images (Multiple Photos)"
+        name: "gallery"
+        widget: "list"
+        required: false
+        field: { label: "Photo", name: "photo", widget: "image" }
+
+      # --- Contact & Reservation Links ---
+      - { label: "Phone Number (e.g., +8801700000000)", name: "phone", widget: "string", required: false }
+      - { label: "WhatsApp Number (e.g., 8801700000000)", name: "whatsapp", widget: "string", required: false }
+      - { label: "Official Site Link", name: "officialSite", widget: "string", required: false }
+
+      # --- Overview & Description ---
+      - { label: "Editor Note / Overview Summary", name: "editorNote", widget: "text", required: false }
+
+      # --- Hotel Amenities List ---
+      - label: "Hotel Amenities (e.g., Free Wi-Fi, Rooftop Pool)"
+        name: "amenities"
+        widget: "list"
+        required: false
+        field: { label: "Amenity Name", name: "amenity", widget: "string" }
+
+      # --- What's Nearby & Landmarks ---
+      - label: "What's Nearby Places"
+        name: "nearby_places"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Place Name (e.g., US Embassy)", name: "name", widget: "string" }
+          - { label: "Distance (e.g., 5 mins walk / 1.2 km)", name: "distance", widget: "string" }
+          - { label: "Details / Local Tip", name: "details", widget: "text", required: false }
+
+      # --- Frequently Asked Questions (FAQs) ---
+      - label: "Hotel FAQs"
+        name: "faqs"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Question", name: "question", widget: "string" }
+          - { label: "Answer", name: "answer", widget: "text" }
+
+      # --- Custom Extra Sections ---
+      - label: "Custom Extra Sections"
+        name: "custom_sections"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Section Title", name: "title", widget: "string" }
+          - { label: "Section Content (HTML/Text)", name: "content", widget: "markdown" }
+
+      # --- Section Show/Hide Toggles ---
+      - { label: "Enable Compare Rates Section?", name: "enable_rates", widget: "boolean", default: true, required: false }
+      - { label: "Enable Amenities Section?", name: "enable_amenities", widget: "boolean", default: true, required: false }
+      - { label: "Enable Nearby Places Section?", name: "enable_nearby", widget: "boolean", default: true, required: false }
+      - { label: "Enable Hotel Details Section?", name: "enable_details", widget: "boolean", default: true, required: false }
+      - { label: "Enable Rules & Policies Section?", name: "enable_rules", widget: "boolean", default: true, required: false }
+      - { label: "Enable FAQs Section?", name: "enable_faqs", widget: "boolean", default: true, required: false }
