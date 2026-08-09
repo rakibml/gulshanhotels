@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   let hotels = [];
 
+  // ১. কালেকশন লোডার
   try {
     const collectionData = await getCollection('hotels');
     if (collectionData && collectionData.length > 0) {
@@ -19,6 +20,7 @@ export async function getStaticPaths() {
     hotels = [];
   }
 
+  // ২. রিয়েল মার্কডাউন ফাইল স্ক্যানার (Clean JS Syntax)
   if (!hotels || hotels.length === 0) {
     try {
       const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -32,6 +34,7 @@ export async function getStaticPaths() {
     }
   }
 
+  // ৩. ক্লাউডফেয়ার বিল্ড সেফটি চেক
   if (!hotels || hotels.length === 0) {
     return [
       {
@@ -56,7 +59,6 @@ export async function getStaticPaths() {
   });
 }
 
-// বাকি নিচের সব কোড আগের মতোই থাকবে...
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
@@ -102,7 +104,7 @@ const customSections = data.custom_sections || [];
 const faqSchema = faqList.length > 0 ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": faqList.map((item: any) => ({
+  "mainEntity": faqList.map((item) => ({
     "@type": "Question",
     "name": item.question,
     "acceptedAnswer": {
