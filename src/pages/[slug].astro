@@ -4,40 +4,34 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  let hotels: any[] = [];
+  let hotels = [];
 
-  // ১. সরাসরি ফাইল স্ক্যানার (Astro Loader-এর ওপর নির্ভর করবে না)
   try {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    hotels = Object.entries(rawGlob).map(([filePath, file: any]) => {
-      const slugFromFile = filePath.split('/').pop()?.replace(/\.md$/, '').toLowerCase() || 'hotel';
-      return {
-        id: slugFromFile,
-        data: file.frontmatter || {},
-        body: file.compiledContent ? file.compiledContent() : '',
-      };
-    });
-  } catch (err) {
+    const collectionData = await getCollection('hotels');
+    if (collectionData && collectionData.length > 0) {
+      hotels = collectionData.map((item) => ({
+        id: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
+        data: item.data || {},
+        body: item.body || '',
+      }));
+    }
+  } catch (e) {
     hotels = [];
   }
 
-  // ২. ব্যাকআপ কালেকশন লোডার
   if (!hotels || hotels.length === 0) {
     try {
-      const collectionData = await getCollection('hotels');
-      if (collectionData && collectionData.length > 0) {
-        hotels = collectionData.map((item: any) => ({
-          id: item.id?.replace(/\.md$/, '').toLowerCase() || item.slug || 'hotel',
-          data: item.data || {},
-          body: item.body || '',
-        }));
-      }
-    } catch (err) {
+      const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
+      hotels = Object.entries(rawGlob).map(([filePath, item]) => ({
+        id: filePath.split('/').pop()?.replace('.md', '') || 'hotel',
+        data: item.frontmatter || {},
+        body: typeof item.compiledContent === 'function' ? item.compiledContent() : '',
+      }));
+    } catch (e) {
       hotels = [];
     }
   }
 
-  // ৩. ক্লাউডফেয়ার বিল্ড সেফটি চেক
   if (!hotels || hotels.length === 0) {
     return [
       {
@@ -47,20 +41,22 @@ export async function getStaticPaths() {
     ];
   }
 
-  return hotels.map((entry: any) => {
-    const cleanSlug = (entry.id || entry.slug || 'hotel')
+  return hotels.map((entry) => {
+    const rawId = entry.id || entry.slug || '';
+    const cleanSlug = rawId
       .split('/')
       .pop()
       .replace(/\.md$/, '')
       .toLowerCase();
 
     return {
-      params: { slug: cleanSlug },
+      params: { slug: cleanSlug || 'hotel' },
       props: { hotel: entry },
     };
   });
 }
 
+// বাকি নিচের সব কোড আগের মতোই থাকবে...
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
