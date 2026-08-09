@@ -8,7 +8,7 @@ import { getCollection } from 'astro:content';
 
 let hotels: any[] = [];
 
-// ১. Astro Content Collections থেকে আপনার আসল ডাটা লোড
+// ১. Astro Content Collections
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
@@ -21,7 +21,7 @@ try {
   hotels = [];
 }
 
-// ২. ফাইল স্ক্যানার (NO DEMO BACKUP DATA)
+// ২. রিয়েল মার্কডাউন ফাইল স্ক্যানার (NO DEMO DATA)
 if (!hotels || hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -46,7 +46,6 @@ function toTitleCase(str: string) {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// শুধুমাত্র আপনার তৈরি করা আসল ফাইল রেন্ডার হবে
 const popularHotels = hotels.map((h: any) => ({
   ...h,
   title: toTitleCase(h.title || 'Hotel')
