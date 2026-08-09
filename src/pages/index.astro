@@ -6,26 +6,64 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-let popularHotels: any[] = [];
-
+// ১. Astro Content Collections থেকে হোটেল লোড
+let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
-    popularHotels = collectionData.map((item: any) => ({
-      ...item.data,
-      slug: item.data?.slug || item.id?.replace(/\.md$/, '') || 'hotel',
+    hotels = collectionData.map((item: any) => ({
+      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
+      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
+      category: item.data?.category || 'Luxury Hotel',
+      location: item.data?.location || 'Gulshan 2, Dhaka',
+      area: (item.data?.location || 'Gulshan 2').toLowerCase().includes('gulshan 1') ? 'gulshan-1' : (item.data?.location || '').toLowerCase().includes('banani') ? 'banani' : 'gulshan-2',
+      price: item.data?.price || '৳ 18,500 / night',
+      rating: item.data?.rating || 4.8,
+      reviews: item.data?.reviewsCount || '1,248',
+      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
+      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+      popular: item.data?.popular ?? true,
     }));
   }
 } catch (err) {
-  popularHotels = [];
+  hotels = [];
 }
+
+// ২. ব্যাকআপ ডাটা (যদি কোনো কারণে কালেকশন না পাওয়া যায়)
+if (!hotels || hotels.length === 0) {
+  hotels = [
+    {
+      slug: "the-westin-dhaka",
+      title: "The Westin Dhaka",
+      category: "5-Star Luxury",
+      location: "Gulshan 2, Dhaka",
+      area: "gulshan-2",
+      price: "৳ 18,500 / night",
+      rating: 4.8,
+      reviews: "1,248",
+      description: "Premium business hotel with elegant rooms, world-class dining and excellent meeting facilities in Gulshan 2.",
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      popular: true,
+    }
+  ];
+}
+
+function toTitleCase(str: string) {
+  if (!str) return 'Gulshan Hotel';
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
+const popularHotels = hotels.map((h: any) => ({
+  ...h,
+  title: toTitleCase(h.title)
+})).filter((h: any) => h.popular !== false);
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
-  <!-- 1. HERO BANNER -->
+  <!-- 1. HERO SECTION -->
   <Hero />
 
-  <!-- 2. WELCOME SECTION -->
+  <!-- 2. WELCOME AUTHORITY SECTION -->
   <WelcomeSection />
 
   <!-- 3. POPULAR HOTELS CAROUSEL SECTION -->
