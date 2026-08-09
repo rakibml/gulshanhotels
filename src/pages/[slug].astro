@@ -4,37 +4,31 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  let collectionData = [];
-  
+  let hotels: any[] = [];
+
   try {
-    collectionData = await getCollection('hotels');
-  } catch (e) {
-    collectionData = [];
+    const collectionData = await getCollection('hotels');
+    if (collectionData && collectionData.length > 0) {
+      hotels = collectionData.map((item: any) => ({
+        params: { slug: (item.data?.slug || item.id?.replace(/\.md$/, '') || 'hotel').toLowerCase() },
+        props: { hotel: item },
+      }));
+    }
+  } catch (err) {
+    hotels = [];
   }
 
-  // ক্লাউডফেয়ার বিল্ড সেফটি চেক (যদি কোনো ডাটা না থাকে)
-  if (!collectionData || collectionData.length === 0) {
+  // ক্লাউডফেয়ার বিল্ড সেফটি চেক
+  if (!hotels || hotels.length === 0) {
     return [
       {
         params: { slug: 'hotel' },
-        props: { hotel: { id: 'hotel', data: { title: 'Hotel Details' }, body: '' } },
+        props: { hotel: { data: { title: 'Hotel Details' } } },
       },
     ];
   }
 
-  return collectionData.map((item: any) => {
-    const rawSlug = item.data?.slug || item.id || 'hotel';
-    const cleanSlug = rawSlug
-      .split('/')
-      .pop()
-      .replace(/\.md$/, '')
-      .toLowerCase();
-
-    return {
-      params: { slug: cleanSlug },
-      props: { hotel: item },
-    };
-  });
+  return hotels;
 }
 
 const { hotel } = Astro.props;
