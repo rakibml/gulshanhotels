@@ -11,7 +11,7 @@ phone: ''
 whatsapp: ''
 officialSite: ''
 editorNote: Experience world-class luxury at Sheraton Dhaka with elegant suites and rooftop dining.
-priceUSD: $150
+priceUSD: "$150"
 priceBDT: '18500'
 fullAddress: 78 Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 showCategory: true
