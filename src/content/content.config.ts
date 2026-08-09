@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const hotels = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/hotels' }),
+  loader: glob({ base: 'src/content/hotels', pattern: '**/*.{md,mdx}' }),
   schema: z.object({}).passthrough(),
 });
 
