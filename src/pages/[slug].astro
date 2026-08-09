@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  let hotels = [];
+  let hotels: any[] = [];
 
   try {
     const collectionData = await getCollection('hotels');
@@ -25,7 +25,7 @@ export async function getStaticPaths() {
       hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
         id: filePath.split('/').pop()?.replace('.md', '') || 'hotel',
         data: item.frontmatter || {},
-        body: item.compiledContent ? item.compiledContent() : '',
+        body: typeof item.compiledContent === 'function' ? item.compiledContent() : '',
       }));
     } catch (e) {
       hotels = [];
