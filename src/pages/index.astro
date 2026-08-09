@@ -6,7 +6,6 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-// ১. Astro Content Collections থেকে হোটেল ডাটা লোড
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -33,7 +32,6 @@ function toTitleCase(str: string) {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
-// অ্যাডমিন প্যানেল ও গিটহাবের ভেরিফাইড পপুলার হোটেলসমূহ
 const popularHotels = hotels.map((h: any) => ({
   ...h,
   title: toTitleCase(h.title)
@@ -41,12 +39,12 @@ const popularHotels = hotels.map((h: any) => ({
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
-  <!-- 1. HERO BANNER SECTION -->
+  <!-- 1. HERO BANNER -->
   <Hero />
 
-  <!-- 2. WELCOME AUTHORITY SECTION -->
+  <!-- 2. WELCOME SECTION -->
   <WelcomeSection />
 
-  <!-- 3. POPULAR HOTELS CAROUSEL SECTION -->
+  <!-- 3. POPULAR HOTELS SECTION -->
   <PopularHotels popularHotels={popularHotels} />
 </Layout>
