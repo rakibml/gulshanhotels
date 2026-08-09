@@ -4,57 +4,35 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  let hotels = [];
-
-  // ১. কালেকশন লোডার
+  let collectionData = [];
+  
   try {
-    const collectionData = await getCollection('hotels');
-    if (collectionData && collectionData.length > 0) {
-      hotels = collectionData.map((item) => ({
-        id: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
-        data: item.data || {},
-        body: item.body || '',
-      }));
-    }
+    collectionData = await getCollection('hotels');
   } catch (e) {
-    hotels = [];
+    collectionData = [];
   }
 
-  // ২. রিয়েল মার্কডাউন ফাইল স্ক্যানার (Clean JS Syntax)
-  if (!hotels || hotels.length === 0) {
-    try {
-      const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-      hotels = Object.entries(rawGlob).map(([filePath, item]) => ({
-        id: filePath.split('/').pop()?.replace('.md', '') || 'hotel',
-        data: item.frontmatter || {},
-        body: typeof item.compiledContent === 'function' ? item.compiledContent() : '',
-      }));
-    } catch (e) {
-      hotels = [];
-    }
-  }
-
-  // ৩. ক্লাউডফেয়ার বিল্ড সেফটি চেক
-  if (!hotels || hotels.length === 0) {
+  // ক্লাউডফেয়ার বিল্ড সেফটি চেক (যদি কোনো ডাটা না থাকে)
+  if (!collectionData || collectionData.length === 0) {
     return [
       {
         params: { slug: 'hotel' },
-        props: { hotel: { data: { title: 'Hotel Details' }, body: '' } },
+        props: { hotel: { id: 'hotel', data: { title: 'Hotel Details' }, body: '' } },
       },
     ];
   }
 
-  return hotels.map((entry) => {
-    const rawId = entry.id || entry.slug || '';
-    const cleanSlug = rawId
+  return collectionData.map((item: any) => {
+    const rawSlug = item.data?.slug || item.id || 'hotel';
+    const cleanSlug = rawSlug
       .split('/')
       .pop()
       .replace(/\.md$/, '')
       .toLowerCase();
 
     return {
-      params: { slug: cleanSlug || 'hotel' },
-      props: { hotel: entry },
+      params: { slug: cleanSlug },
+      props: { hotel: item },
     };
   });
 }
@@ -104,7 +82,7 @@ const customSections = data.custom_sections || [];
 const faqSchema = faqList.length > 0 ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": faqList.map((item) => ({
+  "mainEntity": faqList.map((item: any) => ({
     "@type": "Question",
     "name": item.question,
     "acceptedAnswer": {
