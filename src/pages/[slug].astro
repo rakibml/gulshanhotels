@@ -3,45 +3,31 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
+// 1. DYNAMIC STATIC PATHS GENERATOR (CLEANS .md EXTENSION FOR PERFECT URL MATCHING)
 export async function getStaticPaths() {
   let hotels: any[] = [];
-
   try {
-    const collectionData = await getCollection('hotels');
-    if (collectionData && collectionData.length > 0) {
-      hotels = collectionData.map((item) => ({
-        id: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
-        data: item.data || {},
-        body: item.body || '',
-      }));
-    }
+    hotels = await getCollection('hotels');
   } catch (e) {
     hotels = [];
   }
 
+  // Backup glob scanner if getCollection returns empty
   if (!hotels || hotels.length === 0) {
     try {
       const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
       hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-        id: filePath.split('/').pop()?.replace('.md', '') || 'hotel',
+        id: filePath.split('/').pop()?.replace('.md', ''),
         data: item.frontmatter || {},
-        body: typeof item.compiledContent === 'function' ? item.compiledContent() : '',
+        body: item.compiledContent ? item.compiledContent() : ''
       }));
     } catch (e) {
       hotels = [];
     }
   }
 
-  if (!hotels || hotels.length === 0) {
-    return [
-      {
-        params: { slug: 'hotel' },
-        props: { hotel: { data: { title: 'Hotel Details' }, body: '' } },
-      },
-    ];
-  }
-
   return hotels.map((entry: any) => {
+    // Clean .md extension from entry.id so URL is /amari-dhaka NOT /amari-dhaka.md!
     const rawId = entry.id || entry.slug || '';
     const cleanSlug = rawId
       .split('/')
@@ -57,7 +43,7 @@ export async function getStaticPaths() {
 }
 
 const { hotel } = Astro.props;
-const data = hotel?.data || {};
+const data = hotel.data || {};
 
 // Real CMS Frontmatter Data
 const hotelTitle = data.title || data.name || "Hotel Details";
