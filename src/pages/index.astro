@@ -6,63 +6,28 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection } from 'astro:content';
 
-let hotels: any[] = [];
+let popularHotels: any[] = [];
 
-// ১. Astro Content Collections থেকে আসল হোটেল ডাটা লোড
 try {
   const collectionData = await getCollection('hotels');
   if (collectionData && collectionData.length > 0) {
-    hotels = collectionData.map((item: any) => ({
+    popularHotels = collectionData.map((item: any) => ({
       ...item.data,
-      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
+      slug: item.slug || item.id?.replace(/\.md$/, '') || 'hotel',
     }));
   }
 } catch (err) {
-  hotels = [];
+  popularHotels = [];
 }
-
-// ২. সেফটি ফাইল স্ক্যানার (যদি কালেকশন না পায়)
-if (!hotels || hotels.length === 0) {
-  try {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const globList = Object.entries(rawGlob);
-    if (globList && globList.length > 0) {
-      hotels = globList.map(([filePath, item]: [string, any]) => {
-        const filename = filePath.split('/').pop()?.replace(/\.md$/, '') || 'hotel';
-        const fm = item.frontmatter || {};
-        return {
-          ...fm,
-          slug: fm.slug || filename,
-        };
-      });
-    }
-  } catch (err) {
-    hotels = [];
-  }
-}
-
-// Title Case Formatter ("the westin" -> "The Westin")
-function toTitleCase(str: string) {
-  if (!str) return 'Gulshan Hotel';
-  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-}
-
-// আসল হোটেল ডাটা ফরম্যাটিং
-const popularHotels = hotels.map((h: any) => ({
-  ...h,
-  title: toTitleCase(h.title || 'Hotel')
-}));
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
-  
-  <!-- 1. HERO BANNER SECTION -->
+  <!-- 1. HERO BANNER -->
   <Hero />
 
-  <!-- 2. WELCOME AUTHORITY SECTION -->
+  <!-- 2. WELCOME SECTION -->
   <WelcomeSection />
 
-  <!-- 3. POPULAR HOTELS CAROUSEL COMPONENT -->
+  <!-- 3. POPULAR HOTELS SECTION -->
   <PopularHotels popularHotels={popularHotels} />
-
 </Layout>
