@@ -1,0 +1,292 @@
+---
+// src/components/hotel/HotelAmenitiesAndRooms.astro
+interface Props {
+  hotel: any;
+}
+
+const { hotel } = Astro.props;
+const data = hotel?.data || {};
+
+const hotelTitle = data.title || data.name || "Hotel Details";
+
+// Top 10 Primary Amenities with Vector Icons
+const primaryAmenities = [
+  { name: "Swimming Pool", icon: "🏊" },
+  { name: "Spa & Wellness", icon: "🧖" },
+  { name: "Fitness Center", icon: "🏋️" },
+  { name: "3 Restaurants", icon: "🍽️" },
+  { name: "Free Wi-Fi", icon: "📶" },
+  { name: "Free Parking", icon: "🚗" },
+  { name: "Airport Transfer", icon: "✈️" },
+  { name: "Meeting & Events", icon: "👔" },
+  { name: "24/7 Room Service", icon: "🛎️" },
+  { name: "Laundry Service", icon: "🧺" }
+];
+
+// Featured Rooms Data
+const featuredRooms = [
+  {
+    name: "Deluxe King Room",
+    price: "$120",
+    guests: "2 Guests",
+    bed: "1 King Bed",
+    size: "42 m²",
+    image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    name: "Executive Suite",
+    price: "$145",
+    guests: "2 Guests",
+    bed: "1 King Bed",
+    size: "58 m²",
+    image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    name: "Presidential Westin Suite",
+    price: "$290",
+    guests: "3 Guests",
+    bed: "1 Super King Bed",
+    size: "95 m²",
+    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80"
+  }
+];
+
+// All Rooms for Modal
+const allRooms = [
+  ...featuredRooms,
+  {
+    name: "Deluxe Twin Room",
+    price: "$130",
+    guests: "2 Guests",
+    bed: "2 Twin Beds",
+    size: "42 m²",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    name: "Diplomatic Corner Suite",
+    price: "$220",
+    guests: "3 Guests",
+    bed: "1 King Bed",
+    size: "72 m²",
+    image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80"
+  }
+];
+---
+
+<!-- 3RD COMPONENT: AMENITIES & FEATURED ROOMS (MATCHING SCREENSHOT PERFECTLY) -->
+<section id="amenities-and-rooms" class="py-10 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto text-slate-800 border-b border-slate-200">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+    
+    <!-- LEFT COLUMN: AMENITIES & SERVICES -->
+    <div class="lg:col-span-5 space-y-6 text-left">
+      <div class="border-b border-slate-100 pb-3">
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
+          Amenities & Services
+        </h2>
+      </div>
+
+      <!-- 10 Circular Vector Amenity Badges Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-3 gap-4 text-center">
+        {primaryAmenities.map((item) => (
+          <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500/50 hover:bg-emerald-50/50 transition group cursor-pointer">
+            <div class="w-11 h-11 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-xl text-slate-700 group-hover:scale-110 transition shrink-0">
+              {item.icon}
+            </div>
+            <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">{item.name}</span>
+          </div>
+        ))}
+      </div>
+
+      <!-- See More Amenities Button -->
+      <div>
+        <button 
+          id="openAmenitiesModalBtn" 
+          class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-900 font-extrabold text-xs uppercase tracking-wider px-6 py-3 rounded-xl border border-slate-300 transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>See More Amenities (28+)</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: FEATURED ROOMS -->
+    <div class="lg:col-span-7 space-y-6 text-left">
+      
+      <!-- Section Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
+          Featured Rooms
+        </h2>
+
+        <!-- View All Rooms Button -->
+        <button id="openAllRoomsBtn" class="text-[#e52429] hover:text-[#c91d22] font-extrabold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1 cursor-pointer">
+          <span>View All Rooms</span>
+          <span>➔</span>
+        </button>
+      </div>
+
+      <!-- 3 Room Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {featuredRooms.map((room) => (
+          <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group cursor-pointer open-room-modal-btn">
+            
+            <div>
+              <div class="h-36 w-full overflow-hidden relative">
+                <img src={room.image} alt={room.name} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              </div>
+
+              <div class="p-4 space-y-1.5">
+                <h3 class="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-emerald-800 transition">
+                  {room.name}
+                </h3>
+                
+                <div class="text-xs text-slate-500">
+                  From <span class="font-black text-slate-900">{room.price}</span> <span class="text-[10px]">/ night</span>
+                </div>
+
+                <div class="pt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                  <span class="bg-slate-100 px-2 py-0.5 rounded">👤 {room.guests}</span>
+                  <span class="bg-slate-100 px-2 py-0.5 rounded">🛏️ {room.bed}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- =================================================== -->
+<!-- 1. POPUP MODAL: ALL 28+ CATEGORIZED AMENITIES -->
+<!-- =================================================== -->
+<div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+    
+    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div>
+        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Complete List</span>
+        <h3 class="text-2xl font-black font-serif text-slate-900">All Hotel Amenities & Services</h3>
+      </div>
+      <button id="closeAmenitiesModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+
+    <!-- Categorized Amenities Grid -->
+    <div class="space-y-6 text-xs sm:text-sm text-slate-800">
+      
+      <div>
+        <h4 class="font-bold text-emerald-800 uppercase tracking-wider text-xs mb-2.5">🏊 Pool, Spa & Wellness</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Swimming Pool</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Jacuzzi & Hot Tub</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Full Body Sauna</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Wellness Massage Spa</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Fitness Center Gym</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-emerald-800 uppercase tracking-wider text-xs mb-2.5">🍽️ Food & Dining</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> 3 Fine Dining Restaurants</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Rooftop Lounge Bar</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Buffet Breakfast</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> 24/7 Room Service</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-emerald-800 uppercase tracking-wider text-xs mb-2.5">📶 Media & Services</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> High-Speed Free Wi-Fi</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Airport Transfer Shuttle</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Valet Parking</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Meeting & Banquet Halls</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> 24/7 Security CCTV</div>
+          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><span>✔</span> Laundry & Dry Cleaning</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- =================================================== -->
+<!-- 2. POPUP MODAL: ALL ROOMS & SUITES GALLERY -->
+<!-- =================================================== -->
+<div id="allRoomsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-3xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+    
+    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div>
+        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Accommodation Options</span>
+        <h3 class="text-2xl font-black font-serif text-slate-900">All Available Rooms & Suites</h3>
+      </div>
+      <button id="closeRoomsModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+
+    <!-- All Rooms List -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {allRooms.map((room) => (
+        <div class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden p-4 space-y-3 flex flex-col justify-between">
+          <div>
+            <img src={room.image} alt={room.name} class="w-full h-40 object-cover rounded-xl mb-3" />
+            <h4 class="font-bold text-slate-900 text-base">{room.name}</h4>
+            <div class="text-xs text-slate-500 mt-1 flex flex-wrap gap-2">
+              <span class="bg-white px-2 py-1 rounded border">👤 {room.guests}</span>
+              <span class="bg-white px-2 py-1 rounded border">🛏️ {room.bed}</span>
+              <span class="bg-white px-2 py-1 rounded border">📐 {room.size}</span>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+            <span class="font-black text-slate-900 text-base">{room.price} <span class="text-xs text-slate-500 font-normal">/ night</span></span>
+            <a href="#about-and-rates" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow">
+              Check Rates
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT SCRIPTS FOR BOTH MODALS -->
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Amenities Modal Script
+    const amenModal = document.getElementById('allAmenitiesModal');
+    const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
+    const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
+
+    if (openAmenBtn && amenModal) {
+      openAmenBtn.addEventListener('click', () => amenModal.classList.remove('hidden'));
+    }
+    if (closeAmenBtn && amenModal) {
+      closeAmenBtn.addEventListener('click', () => amenModal.classList.add('hidden'));
+    }
+
+    // 2. All Rooms Modal Script
+    const roomsModal = document.getElementById('allRoomsModal');
+    const openRoomsBtn = document.getElementById('openAllRoomsBtn');
+    const closeRoomsBtn = document.getElementById('closeRoomsModalBtn');
+
+    if (openRoomsBtn && roomsModal) {
+      openRoomsBtn.addEventListener('click', () => roomsModal.classList.remove('hidden'));
+    }
+    if (closeRoomsBtn && roomsModal) {
+      closeRoomsBtn.addEventListener('click', () => roomsModal.classList.add('hidden'));
+    }
+
+    document.querySelectorAll('.open-room-modal-btn').forEach(card => {
+      card.addEventListener('click', () => {
+        if (roomsModal) roomsModal.classList.remove('hidden');
+      });
+    });
+  });
+</script>
