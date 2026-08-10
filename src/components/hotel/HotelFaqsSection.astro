@@ -1,0 +1,119 @@
+---
+// src/components/hotel/HotelFaqsSection.astro
+interface Props {
+  hotel: any;
+}
+
+const { hotel } = Astro.props;
+const data = hotel?.data || {};
+
+const hotelTitle = data.title || data.name || "Hotel Details";
+
+// Booking.com Style Real-World FAQs (Pulls from CMS if provided, or defaults)
+const faqList = (data.faqs && data.faqs.length > 0) ? data.faqs : [
+  {
+    question: `What kind of breakfast is served at ${hotelTitle}?`,
+    answer: `Guests staying at ${hotelTitle} can enjoy a highly-rated breakfast during their stay. Breakfast option(s) include: Continental, Halal, Asian, American, Full English, À la carte, and Buffet.`
+  },
+  {
+    question: `Does ${hotelTitle} have a restaurant on site?`,
+    answer: `Yes, ${hotelTitle} features multiple on-site dining venues including fine dining restaurants, all-day multi-cuisine buffets, artisan bakeries, and rooftop lounges.`
+  },
+  {
+    question: `Does ${hotelTitle} have a pool or hot tub?`,
+    answer: `Yes, this hotel features a rooftop swimming pool, wellness jacuzzi, and lounge area for staying guests.`
+  },
+  {
+    question: `What is there to do at ${hotelTitle}?`,
+    answer: `Guests can enjoy fitness center workouts, luxury spa massages, rooftop swimming, fine dining experiences, and nearby walking tours around Gulshan Lake.`
+  },
+  {
+    question: `What type of room can I book at ${hotelTitle}?`,
+    answer: `Room options include Deluxe King Rooms, Deluxe Twin Rooms, Executive Suites, and Presidential Diplomatic Suites.`
+  },
+  {
+    question: `How far is ${hotelTitle} from the center of Dhaka and the airport?`,
+    answer: `Located in the heart of Gulshan, the hotel is approximately 10 km from central Dhaka and only 15-20 minutes from Hazrat Shahjalal International Airport (DAC) via the Dhaka Elevated Expressway.`
+  },
+  {
+    question: `What are the check-in and check-out times at ${hotelTitle}?`,
+    answer: `Standard check-in time begins at 2:00 PM and check-out is until 12:00 PM.`
+  },
+  {
+    question: `Is ${hotelTitle} popular with families and corporate guests?`,
+    answer: `Yes, ${hotelTitle} is very popular with families, foreign diplomats, and corporate business delegates due to its high-security diplomatic location and world-class amenities.`
+  }
+];
+
+// Split FAQs into 2 Columns for Booking.com Style 2-Column Grid
+const halfFaqIndex = Math.ceil(faqList.length / 2);
+const leftColumnFaqs = faqList.slice(0, halfFaqIndex);
+const rightColumnFaqs = faqList.slice(halfFaqIndex);
+
+// Dynamic Google FAQPage Schema Script
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqList.map((item: any) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.answer
+    }
+  }))
+};
+---
+
+<!-- GOOGLE FAQ SCHEMA FOR SEARCH ENGINE RICH SNIPPETS -->
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<!-- 7TH COMPONENT: FAQS SECTION (BOOKING.COM 2-COLUMN ACCORDION GRID) -->
+<section id="faqs" class="py-10 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto text-slate-800 border-b border-slate-200">
+  <div class="space-y-6">
+    
+    <!-- Section Header -->
+    <div class="border-b border-slate-100 pb-3">
+      <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
+        FAQs about {hotelTitle}
+      </h2>
+      <p class="text-xs text-slate-500 mt-1">Frequently asked questions by guests and travelers</p>
+    </div>
+
+    <!-- Booking.com Style 2-Column FAQ Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+      
+      <!-- Left Column FAQs -->
+      <div class="space-y-3.5">
+        {leftColumnFaqs.map((faq: any) => (
+          <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+            <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition">
+              <span class="pr-2">{faq.question}</span>
+              <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <!-- Right Column FAQs -->
+      <div class="space-y-3.5">
+        {rightColumnFaqs.map((faq: any) => (
+          <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+            <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition">
+              <span class="pr-2">{faq.question}</span>
+              <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+
+    </div>
+
+  </div>
+</section>
