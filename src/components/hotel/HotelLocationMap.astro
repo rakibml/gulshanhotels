@@ -1,0 +1,71 @@
+---
+// src/components/hotel/HotelLocationMap.astro
+interface Props {
+  hotel: any;
+}
+
+const { hotel } = Astro.props;
+const data = hotel?.data || {};
+
+const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelLocation = data.location || "Gulshan 2, Dhaka, Bangladesh";
+
+// Nearby landmarks with driving times
+const nearbyLandmarks = (data.nearby_places && data.nearby_places.length > 0) ? data.nearby_places : [
+  { name: "Gulshan Lake Park", distance: "5 min drive" },
+  { name: "United Hospital", distance: "6 min drive" },
+  { name: "Dhaka Airport (DAC)", distance: "15 min drive" },
+  { name: "Jamuna Future Park", distance: "12 min drive" }
+];
+---
+
+<!-- 5TH COMPONENT: PRIME LOCATION IN GULSHAN (EXACT MATCH TO SCREENSHOT) -->
+<section id="location-map" class="py-10 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto text-slate-800 border-b border-slate-200">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+    
+    <!-- Left Column: Narrative & Nearby Landmarks List -->
+    <div class="lg:col-span-5 space-y-6 text-left">
+      
+      <div class="space-y-2">
+        <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
+          Prime Location in Gulshan
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+          Located in the heart of {hotelLocation}, {hotelTitle} is close to embassies, business centers, shopping malls, and popular restaurants.
+        </p>
+      </div>
+
+      <!-- Vertical Nearby List with Vector Pin Icons -->
+      <div class="space-y-3 pt-2">
+        {nearbyLandmarks.map((item: any) => (
+          <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+            <div class="flex items-center gap-3 font-bold text-xs sm:text-sm text-slate-800">
+              <svg class="w-4 h-4 fill-[#c5a059] shrink-0" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <span>{item.name}</span>
+            </div>
+            <span class="text-xs font-semibold text-slate-400 shrink-0 ml-2">
+              {item.distance}
+            </span>
+          </div>
+        ))}
+      </div>
+
+    </div>
+
+    <!-- Right Column: Interactive Embedded Google Map -->
+    <div class="lg:col-span-7">
+      <div class="rounded-3xl overflow-hidden border border-slate-200/90 shadow-md h-[280px] sm:h-[350px] lg:h-[380px] relative group">
+        <iframe 
+          src={`https://maps.google.com/maps?q=${encodeURIComponent(hotelTitle + ' ' + hotelLocation)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+          class="w-full h-full border-0 contrast-[105%]" 
+          allowfullscreen 
+          loading="lazy"
+          title={`${hotelTitle} Location Map`}
+        ></iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
