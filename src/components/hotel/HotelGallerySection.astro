@@ -1,0 +1,185 @@
+---
+// src/components/hotel/HotelGallerySection.astro
+interface Props {
+  hotel: any;
+}
+
+const { hotel } = Astro.props;
+const data = hotel?.data || {};
+
+const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+
+// 5 Main Thumbnails for Row + Full Gallery
+const galleryImages = (data.gallery && data.gallery.length > 0) 
+  ? data.gallery 
+  : [
+      hotelImage,
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+    ];
+
+const totalPhotos = galleryImages.length;
+---
+
+<!-- 4TH COMPONENT: GALLERY SECTION (EXACT MATCH TO SCREENSHOT) -->
+<section id="hotel-gallery" class="py-10 px-4 sm:px-8 lg:px-12 max-w-[1600px] mx-auto text-slate-800 border-b border-slate-200">
+  <div class="space-y-5">
+    
+    <!-- Section Header Row -->
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
+        Gallery
+      </h2>
+
+      <!-- View All Photos Red Link -->
+      <button id="triggerGalleryModalBtn" class="text-[#e52429] hover:text-[#c91d22] font-extrabold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1 cursor-pointer transition">
+        <span>View All Photos</span>
+        {totalPhotos > 5 && <span>({totalPhotos})</span>}
+      </button>
+    </div>
+
+    <!-- 5 Image Row Grid (Exact Match to Screenshot) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      {galleryImages.slice(0, 5).map((img: string, idx: number) => (
+        <div 
+          class="open-lightbox-item h-40 sm:h-48 lg:h-52 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-200/80 cursor-pointer group transition duration-300 relative"
+          data-index={idx}
+        >
+          <img 
+            src={img} 
+            alt={`${hotelTitle} Photo ${idx + 1}`} 
+            loading="lazy"
+            decoding="async"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+          />
+          <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold">
+            🔍 Zoom
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<!-- =================================================== -->
+<!-- FULL SCREEN PHOTO LIGHTBOX MODAL -->
+<!-- =================================================== -->
+<div id="fullGalleryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white">
+  
+  <!-- Modal Header -->
+  <div class="flex items-center justify-between max-w-6xl mx-auto w-full border-b border-slate-800 pb-4">
+    <div>
+      <h3 class="text-lg font-black font-serif text-white">{hotelTitle}</h3>
+      <span class="text-xs text-slate-400">Photo Gallery</span>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <span class="text-xs font-bold bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+        <span id="modalCurrentIdx">1</span> / <span>{totalPhotos}</span>
+      </span>
+      <button id="closeGalleryModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+  </div>
+
+  <!-- Modal Main Image View -->
+  <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
+    <img id="modalLightboxImg" src={galleryImages[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+
+    <!-- Prev Arrow -->
+    <button id="modalPrevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">
+      ❮
+    </button>
+
+    <!-- Next Arrow -->
+    <button id="modalNextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">
+      ❯
+    </button>
+  </div>
+
+  <!-- Modal Footer Thumbnails -->
+  <div class="max-w-4xl mx-auto w-full overflow-x-auto flex gap-2 py-2 [scrollbar-width:none]">
+    {galleryImages.map((img: string, idx: number) => (
+      <button class="modal-thumb-btn w-16 h-12 rounded-xl overflow-hidden border-2 border-transparent shrink-0 opacity-70 hover:opacity-100 transition cursor-pointer" data-index={idx}>
+        <img src={img} alt={`Thumb ${idx+1}`} class="w-full h-full object-cover" />
+      </button>
+    ))}
+  </div>
+
+</div>
+
+<!-- LIGHTBOX SCRIPT -->
+<script is:inline define:vars={{ galleryImages }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('fullGalleryModal');
+    const triggerBtn = document.getElementById('triggerGalleryModalBtn');
+    const closeBtn = document.getElementById('closeGalleryModalBtn');
+    const modalImg = document.getElementById('modalLightboxImg');
+    const currentIdxSpan = document.getElementById('modalCurrentIdx');
+    const prevBtn = document.getElementById('modalPrevBtn');
+    const nextBtn = document.getElementById('modalNextBtn');
+    const modalThumbBtns = document.querySelectorAll('.modal-thumb-btn');
+
+    const images = galleryImages && galleryImages.length > 0 ? galleryImages : [];
+    let activeIdx = 0;
+
+    function showImage(idx) {
+      if (!modalImg || images.length === 0) return;
+      activeIdx = (idx + images.length) % images.length;
+      modalImg.src = images[activeIdx];
+      if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
+
+      modalThumbBtns.forEach((btn, i) => {
+        if (i === activeIdx) {
+          btn.classList.add('border-[#e52429]', 'opacity-100');
+          btn.classList.remove('border-transparent', 'opacity-70');
+        } else {
+          btn.classList.add('border-transparent', 'opacity-70');
+          btn.classList.remove('border-[#e52429]', 'opacity-100');
+        }
+      });
+    }
+
+    // Open Modal Events
+    if (triggerBtn && modal) {
+      triggerBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        showImage(0);
+      });
+    }
+
+    document.querySelectorAll('.open-lightbox-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-index') || '0', 10);
+        if (modal) modal.classList.remove('hidden');
+        showImage(idx);
+      });
+    });
+
+    // Close Modal Events
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    }
+
+    // Prev / Next Arrows
+    if (prevBtn) prevBtn.addEventListener('click', () => showImage(activeIdx - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => showImage(activeIdx + 1));
+
+    // Thumbnail Clicks inside Modal
+    modalThumbBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
+        showImage(idx);
+      });
+    });
+  });
+</script>
