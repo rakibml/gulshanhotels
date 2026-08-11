@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro
+// src/components/hotel/HotelHeader.astro (Booking.com Style 5-Photo Mosaic Grid)
 interface Props {
   hotel: any;
 }
@@ -9,12 +9,13 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category || "5-Star Luxury Stay";
-const hotelLocation = data.location || "Gulshan 2, Dhaka 1212, Bangladesh";
-const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80";
+const hotelLocation = data.location || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh";
+const hotelRating = data.rating || "4.8";
+const reviewsCount = data.reviewsCount || "1,248";
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialSite = data.officialSite || "https://www.agoda.com";
-const hotelDescription = data.description || "Experience timeless luxury and exceptional Bangladeshi hospitality in the heart of Gulshan, Dhaka.";
 
-// Gallery Images for Right Column (Top Large Box + 5 Bottom Thumbnails)
+// 5 Main Photos for Booking.com Mosaic Grid
 const galleryImages = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
   : [
@@ -28,141 +29,118 @@ const galleryImages = (data.gallery && data.gallery.length > 0)
 const totalPhotos = galleryImages.length;
 ---
 
-<!-- SPLIT-HERO GALLERY LAYOUT (MATCHING INPUT_FILE_36.PNG EXACTLY) -->
-<section class="bg-slate-950 text-white py-8 sm:py-12 border-b border-slate-800">
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 w-full">
+<!-- BOOKING.COM STYLE 5-PHOTO MOSAIC HEADER (EXACT MATCH TO REFERENCE IMAGE) -->
+<section class="bg-white text-slate-900 pt-6 pb-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto border-b border-slate-200">
+  <div class="space-y-6">
     
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+    <!-- TOP HEADER & TITLE AREA (CENTERED ELEGANT ALIGNMENT) -->
+    <div class="text-center max-w-4xl mx-auto space-y-3">
       
-      <!-- LEFT COLUMN: HOTEL DETAILS & BUTTONS (50% WIDTH) -->
-      <div class="lg:col-span-6 space-y-4 text-left">
-        
-        <!-- Breadcrumbs -->
-        <div class="flex items-center gap-2 text-xs text-slate-300 font-medium">
-          <a href="/" class="hover:text-emerald-400 transition">Home</a>
-          <span>›</span>
-          <a href="/#hotels" class="hover:text-emerald-400 transition">Hotels</a>
-          <span>›</span>
-          <span class="text-white font-bold">{hotelTitle}</span>
-        </div>
-
-        <!-- Category Pill Badge -->
-        <div>
-          <span class="bg-white/10 border border-white/20 text-slate-200 text-[11px] font-bold px-3.5 py-1 rounded-full backdrop-blur-md inline-block">
-            {hotelCategory}
-          </span>
-        </div>
-
-        <!-- Main Hotel Title -->
-        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white font-serif leading-tight tracking-tight drop-shadow-md">
-          {hotelTitle}
-        </h1>
-
-        <!-- Location Line with Vector SVG Pin Icon -->
-        <p class="text-xs sm:text-sm text-slate-200 font-medium flex items-center gap-2">
-          <svg class="w-4 h-4 fill-amber-400 shrink-0" width="16" height="16" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
-          <span>{hotelLocation}</span>
-        </p>
-
-        <!-- Short Catchphrase Description -->
-        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal pt-1">
-          {hotelDescription}
-        </p>
-
-        <!-- Official Vector SVG Amenities Quick Icons Row (Monochrome Soft White) -->
-        <div class="flex flex-wrap items-center gap-4 text-xs text-slate-200 pt-2">
-          
-          <!-- Wi-Fi -->
-          <span class="flex items-center gap-1.5 font-semibold">
-            <svg class="w-4 h-4 fill-white shrink-0" width="16" height="16" viewBox="0 0 24 24">
-              <path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/>
-            </svg>
-            Free Wi-Fi
-          </span>
-
-          <!-- Pool -->
-          <span class="flex items-center gap-1.5 font-semibold">
-            <svg class="w-4 h-4 fill-white shrink-0" width="16" height="16" viewBox="0 0 24 24">
-              <path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/>
-            </svg>
-            Pool
-          </span>
-
-          <!-- Spa -->
-          <span class="flex items-center gap-1.5 font-semibold">
-            <svg class="w-4 h-4 fill-white shrink-0" width="16" height="16" viewBox="0 0 24 24">
-              <path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/>
-            </svg>
-            Spa
-          </span>
-
-          <!-- Fitness Gym -->
-          <span class="flex items-center gap-1.5 font-semibold">
-            <svg class="w-4 h-4 fill-white shrink-0" width="16" height="16" viewBox="0 0 24 24">
-              <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/>
-            </svg>
-            Fitness Center
-          </span>
-
-          <!-- Parking -->
-          <span class="flex items-center gap-1.5 font-semibold">
-            <svg class="w-4 h-4 fill-white shrink-0" width="16" height="16" viewBox="0 0 24 24">
-              <path d="M13.2 11H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/>
-            </svg>
-            Free Parking
-          </span>
-        </div>
-
-        <!-- Action Buttons (Eye-Soothing Soft Forest Emerald & Glass) -->
-        <div class="flex flex-wrap items-center gap-3 pt-4">
-          <!-- Soft Forest Emerald Button -->
-          <a href="#about-and-rates" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-7 py-3.5 rounded-2xl shadow-xl transition hover:scale-105 border border-emerald-600/30">
-            View Prices ➔
-          </a>
-
-          <!-- Outlined Glass Secondary Button -->
-          <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-white/10 hover:bg-white/20 border border-white/25 text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-6 py-3.5 rounded-2xl transition backdrop-blur-md hover:scale-105 flex items-center gap-2">
-            <span>Official Website</span>
-            <svg class="w-3.5 h-3.5 fill-current shrink-0" width="14" height="14" viewBox="0 0 24 24">
-              <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-            </svg>
-          </a>
-        </div>
-
+      <!-- Breadcrumbs -->
+      <div class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
+        <a href="/" class="hover:text-emerald-700 transition">Home</a>
+        <span>›</span>
+        <a href="/#hotels" class="hover:text-emerald-700 transition">Hotels</a>
+        <span>›</span>
+        <span class="text-slate-800 font-bold">{hotelTitle}</span>
       </div>
 
-      <!-- RIGHT COLUMN: INTERACTIVE SPLIT GALLERY (50% WIDTH - MATCHING RED BOXES) -->
-      <div class="lg:col-span-6 space-y-3">
+      <!-- Category Pill Badge -->
+      <div>
+        <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
+          {hotelCategory}
+        </span>
+      </div>
+
+      <!-- Hotel Title -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-serif text-slate-900 tracking-tight leading-tight">
+        {hotelTitle}
+      </h1>
+
+      <!-- Location Line with Interactive Map Link -->
+      <p class="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center justify-center gap-2">
+        <span class="flex items-center gap-1">
+          <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>{hotelLocation}</span>
+        </span>
+        <a href="#location-map" class="text-emerald-800 font-black hover:underline inline-flex items-center gap-0.5">
+          <span>View in a map</span>
+          <span>➔</span>
+        </a>
+      </p>
+
+      <!-- Rating Line with Interactive Reviews Link -->
+      <div class="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold pt-1">
+        <span class="bg-amber-100 text-amber-900 border border-amber-300 font-black px-2 py-0.5 rounded-lg text-xs">
+          {hotelRating}
+        </span>
+        <a href="#guest-reviews" class="text-slate-700 font-black hover:text-emerald-800 hover:underline inline-flex items-center gap-1">
+          <span>{reviewsCount} reviews</span>
+          <span>➔</span>
+        </a>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-center gap-3 pt-3">
+        <a href="#about-and-rates" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs sm:text-sm uppercase tracking-wider px-7 py-3 rounded-2xl shadow-lg transition hover:scale-105">
+          View Prices ➔
+        </a>
+
+        <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-2xl transition border border-slate-300 hover:scale-105 flex items-center gap-1.5">
+          <span>Official Website</span>
+          <span>↗</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- BOOKING.COM ICONIC 5-PHOTO MOSAIC GRID (EXACT MATCH TO REFERENCE IMAGE) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3.5 pt-2">
+      
+      <!-- LEFT BIG MAIN COVER PHOTO (50% WIDTH) -->
+      <div class="lg:col-span-6 h-[300px] sm:h-[420px] lg:h-[460px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group relative cursor-pointer open-lightbox-trigger" data-index="0">
+        <img 
+          src={galleryImages[0]} 
+          alt={hotelTitle} 
+          class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+        />
+        <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs sm:text-sm font-bold backdrop-blur-[1px]">
+          🔍 Zoom Photo
+        </div>
+      </div>
+
+      <!-- RIGHT 4-PHOTO GRID (50% WIDTH - 2x2 GRID) -->
+      <div class="lg:col-span-6 grid grid-cols-2 gap-2.5 sm:gap-3.5 h-[300px] sm:h-[420px] lg:h-[460px]">
         
-        <!-- TOP LARGE FEATURED IMAGE BOX (BIG RED BOX FROM SCREENSHOT) -->
-        <div class="relative w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-slate-800/80 group">
-          <img 
-            id="splitMainHeroImg" 
-            src={galleryImages[0]} 
-            alt={hotelTitle} 
-            data-images={JSON.stringify(galleryImages)}
-            class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105" 
-          />
-
-          <!-- Photo Counter Badge -->
-          <div class="absolute bottom-4 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3.5 py-1 rounded-full shadow border border-slate-700">
-            <span id="splitCurrentIdx">1</span> / <span>{totalPhotos}</span>
+        {galleryImages[1] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="1">
+            <img src={galleryImages[1]} alt={`${hotelTitle} Photo 2`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
           </div>
-        </div>
+        )}
 
-        <!-- BOTTOM ROW: 5 SMALL THUMBNAIL PHOTOS (5 SMALL RED BOXES FROM SCREENSHOT) -->
-        <div class="grid grid-cols-5 gap-2 sm:gap-3">
-          {galleryImages.slice(0, 5).map((img: string, idx: number) => (
-            <button 
-              class="split-thumb-btn h-16 sm:h-20 lg:h-24 rounded-2xl overflow-hidden relative border-2 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-500' : 'border-transparent opacity-70 hover:opacity-100'}"
-              data-index={idx}
-            >
-              <img src={img} alt={`Thumb ${idx + 1}`} class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
-            </button>
-          ))}
-        </div>
+        {galleryImages[2] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="2">
+            <img src={galleryImages[2]} alt={`${hotelTitle} Photo 3`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+        )}
+
+        {galleryImages[3] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="3">
+            <img src={galleryImages[3]} alt={`${hotelTitle} Photo 4`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+        )}
+
+        {galleryImages[4] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="4">
+            <img src={galleryImages[4]} alt={`${hotelTitle} Photo 5`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            
+            <!-- FLOATING PHOTO COUNTER BADGE (MATCHING SCREENSHOT) -->
+            <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-lg border border-white/20 flex items-center gap-1.5">
+              <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>{totalPhotos > 5 ? `${totalPhotos}+` : `${totalPhotos} Photos`}</span>
+            </div>
+          </div>
+        )}
 
       </div>
 
@@ -171,36 +149,67 @@ const totalPhotos = galleryImages.length;
   </div>
 </section>
 
-<!-- INTERACTIVE GALLERY THUMBNAIL CLICK SCRIPT -->
-<script is:inline>
+<!-- FULL SCREEN PHOTO LIGHTBOX MODAL -->
+<div id="headerGalleryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white">
+  <div class="flex items-center justify-between max-w-6xl mx-auto w-full border-b border-slate-800 pb-4">
+    <div>
+      <h3 class="text-lg font-black font-serif text-white">{hotelTitle}</h3>
+      <span class="text-xs text-slate-400">Photo Gallery</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-xs font-bold bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+        <span id="headerModalIdx">1</span> / <span>{totalPhotos}</span>
+      </span>
+      <button id="closeHeaderModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+  </div>
+
+  <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
+    <img id="headerModalImg" src={galleryImages[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+    <button id="headerModalPrevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❮</button>
+    <button id="headerModalNextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❯</button>
+  </div>
+</div>
+
+<!-- LIGHTBOX JS SCRIPT -->
+<script is:inline define:vars={{ galleryImages }}>
   document.addEventListener('DOMContentLoaded', () => {
-    const mainImg = document.getElementById('splitMainHeroImg');
-    const currentIdxSpan = document.getElementById('splitCurrentIdx');
-    const thumbBtns = document.querySelectorAll('.split-thumb-btn');
+    const modal = document.getElementById('headerGalleryModal');
+    const closeBtn = document.getElementById('closeHeaderModalBtn');
+    const modalImg = document.getElementById('headerModalImg');
+    const idxSpan = document.getElementById('headerModalIdx');
+    const prevBtn = document.getElementById('headerModalPrevBtn');
+    const nextBtn = document.getElementById('headerModalNextBtn');
 
-    if (mainImg) {
-      const images = JSON.parse(mainImg.dataset.images || '[]');
+    const images = galleryImages && galleryImages.length > 0 ? galleryImages : [];
+    let activeIdx = 0;
 
-      thumbBtns.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
-          
-          if (images[idx]) {
-            mainImg.src = images[idx];
-            if (currentIdxSpan) currentIdxSpan.textContent = (idx + 1).toString();
+    function showImage(idx) {
+      if (!modalImg || images.length === 0) return;
+      activeIdx = (idx + images.length) % images.length;
+      modalImg.src = images[activeIdx];
+      if (idxSpan) idxSpan.textContent = (activeIdx + 1).toString();
+    }
 
-            thumbBtns.forEach((b, i) => {
-              if (i === idx) {
-                b.classList.add('border-emerald-500', 'opacity-100');
-                b.classList.remove('border-transparent', 'opacity-70');
-              } else {
-                b.classList.add('border-transparent', 'opacity-70');
-                b.classList.remove('border-emerald-500', 'opacity-100');
-              }
-            });
-          }
-        });
+    document.querySelectorAll('.open-lightbox-trigger').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-index') || '0', 10);
+        if (modal) modal.classList.remove('hidden');
+        showImage(idx);
+      });
+    });
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
       });
     }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => showImage(activeIdx - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => showImage(activeIdx + 1));
   });
 </script>
