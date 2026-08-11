@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Wide Full-Width Expanded Layout)
+// src/components/hotel/HotelHeader.astro (Wide Full-Width Expanded Layout)
 interface Props {
   hotel: any;
 }
@@ -8,309 +8,208 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelPrice = data.price || "$120 / night";
-const hotelCategory = data.category || "Luxury Hotel";
+const hotelCategory = data.category || "5-Star Luxury Stay";
+const hotelLocation = data.location || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh";
+const hotelRating = data.rating || "4.8";
+const reviewsCount = data.reviewsCount || "1,248";
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+const officialSite = data.officialSite || "https://www.agoda.com";
+
+// 5 Main Photos for Booking.com Mosaic Grid
+const galleryImages = (data.gallery && data.gallery.length > 0) 
+  ? data.gallery 
+  : [
+      hotelImage,
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+    ];
+
+const totalPhotos = galleryImages.length;
 ---
 
-<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON (WIDE EXPANDED LAYOUT) -->
-<section id="about-and-rates" class="py-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto text-slate-800 border-b border-slate-200">
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+<!-- 1ST COMPONENT: WIDE EXPANDED MOSAIC HEADER (FILLING LEFT & RIGHT MARGINS) -->
+<section class="bg-white text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200">
+  <div class="space-y-6">
     
-    <!-- LEFT COLUMN (ABOUT THE HOTEL & HOTEL POLICIES) -->
-    <div class="lg:col-span-7 space-y-8 text-left">
+    <!-- TOP HEADER & TITLE AREA -->
+    <div class="text-center max-w-5xl mx-auto space-y-3">
       
-      <!-- About the Hotel Section -->
-      <div class="space-y-4">
-        <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
-          About the Hotel
-        </h2>
-
-        <!-- Hotel Description with 150-Word Auto Truncator -->
-        <div id="overview-text" class="prose prose-slate text-xs sm:text-base leading-relaxed text-slate-600 font-normal">
-          {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-            <p>
-              The Westin Dhaka offers a perfect blend of luxury, comfort, and convenience in the premier business and diplomatic district of Gulshan. With elegantly designed rooms, world-class dining, and signature Westin service, guests are assured a rejuvenating stay whether for business or leisure.
-            </p>
-          )}
-        </div>
-
-        <button 
-          id="toggleOverviewBtn" 
-          class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-700 hover:text-emerald-800 transition inline-flex items-center gap-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm"
-        >
-          Read More ➔
-        </button>
+      <!-- Breadcrumbs -->
+      <div class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
+        <a href="/" class="hover:text-emerald-700 transition">Home</a>
+        <span>›</span>
+        <a href="/#hotels" class="hover:text-emerald-700 transition">Hotels</a>
+        <span>›</span>
+        <span class="text-slate-800 font-bold">{hotelTitle}</span>
       </div>
 
-      <!-- Hotel Policies & Quick Information Grid -->
-      <div class="pt-4 border-t border-slate-200/80 space-y-4">
-        <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">Hotel Policies & Essential Info</h3>
+      <!-- Category Pill Badge -->
+      <div>
+        <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
+          {hotelCategory}
+        </span>
+      </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
-          
-          <!-- Check-In SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Check-In</span>
-              <span class="font-bold text-slate-900">2:00 PM</span>
-            </div>
-          </div>
+      <!-- Hotel Title -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-serif text-slate-900 tracking-tight leading-tight">
+        {hotelTitle}
+      </h1>
 
-          <!-- Check-Out SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Check-Out</span>
-              <span class="font-bold text-slate-900">12:00 PM</span>
-            </div>
-          </div>
+      <!-- Location Line with Interactive Map Link -->
+      <p class="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center justify-center gap-2">
+        <span class="flex items-center gap-1">
+          <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>{hotelLocation}</span>
+        </span>
+        <a href="#location-map" class="text-emerald-800 font-black hover:underline inline-flex items-center gap-0.5">
+          <span>View in a map</span>
+          <span>➔</span>
+        </a>
+      </p>
 
-          <!-- Price SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Starting Price</span>
-              <span class="font-bold text-emerald-800">{hotelPrice}</span>
-            </div>
-          </div>
+      <!-- Rating Line with Interactive Reviews Link -->
+      <div class="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold pt-1">
+        <span class="bg-amber-100 text-amber-900 border border-amber-300 font-black px-2 py-0.5 rounded-lg text-xs">
+          {hotelRating}
+        </span>
+        <a href="#guest-reviews" class="text-slate-700 font-black hover:text-emerald-800 hover:underline inline-flex items-center gap-1">
+          <span>{reviewsCount} reviews</span>
+          <span>➔</span>
+        </a>
+      </div>
 
-          <!-- Property Type SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Property Type</span>
-              <span class="font-bold text-slate-900">{hotelCategory}</span>
-            </div>
-          </div>
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-center gap-3 pt-3">
+        <a href="#about-and-rates" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs sm:text-sm uppercase tracking-wider px-7 py-3 rounded-2xl shadow-lg transition hover:scale-105">
+          View Prices ➔
+        </a>
 
-          <!-- Power Backup SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Power Backup</span>
-              <span class="font-bold text-emerald-800">24/7 Generator</span>
-            </div>
-          </div>
-
-          <!-- Smoking Policy SVG -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
-            </div>
-            <div>
-              <span class="text-slate-400 text-[10px] block font-bold uppercase">Smoking</span>
-              <span class="font-bold text-slate-900">Non-Smoking</span>
-            </div>
-          </div>
-
-        </div>
+        <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-slate-100 hover:bg-slate-200 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-2xl transition border border-slate-300 hover:scale-105 flex items-center gap-1.5">
+          <span>Official Website</span>
+          <span>↗</span>
+        </a>
       </div>
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - STAY22 WORKER API COMPARISON) -->
-    <div class="lg:col-span-5">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5">
+    <!-- BOOKING.COM ICONIC 5-PHOTO MOSAIC GRID (WIDE FULL-WIDTH EXPANDED) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 pt-2">
+      
+      <!-- LEFT BIG MAIN COVER PHOTO (50% WIDTH) -->
+      <div class="lg:col-span-6 h-[320px] sm:h-[450px] lg:h-[520px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group relative cursor-pointer open-lightbox-trigger" data-index="0">
+        <img 
+          src={galleryImages[0]} 
+          alt={hotelTitle} 
+          class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+        />
+        <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs sm:text-sm font-bold backdrop-blur-[1px]">
+          🔍 Zoom Photo
+        </div>
+      </div>
+
+      <!-- RIGHT 4-PHOTO GRID (50% WIDTH - 2x2 GRID) -->
+      <div class="lg:col-span-6 grid grid-cols-2 gap-3 sm:gap-4 h-[320px] sm:h-[450px] lg:h-[520px]">
         
-        <!-- Card Header -->
-        <div class="space-y-1 text-left border-b border-slate-100 pb-4">
-          <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
-            Where can you book this hotel?
-          </h3>
-          <p class="text-xs text-slate-500 font-medium">
-            Compare prices from trusted travel partners.
-          </p>
-        </div>
-
-        <!-- Live Stay22 API Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5">
-          <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-            <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-            <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
+        {galleryImages[1] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="1">
+            <img src={galleryImages[1]} alt={`${hotelTitle} Photo 2`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
           </div>
-        </div>
+        )}
 
-        <!-- Amber Deal Tip Box -->
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
-          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
-            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
-          </svg>
-          <p class="leading-tight">
-            Compare prices before you book and get the best deal.
-          </p>
-        </div>
+        {galleryImages[2] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="2">
+            <img src={galleryImages[2]} alt={`${hotelTitle} Photo 3`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+        )}
+
+        {galleryImages[3] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="3">
+            <img src={galleryImages[3]} alt={`${hotelTitle} Photo 4`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+          </div>
+        )}
+
+        {galleryImages[4] && (
+          <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 group relative cursor-pointer open-lightbox-trigger" data-index="4">
+            <img src={galleryImages[4]} alt={`${hotelTitle} Photo 5`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            
+            <!-- FLOATING PHOTO COUNTER BADGE -->
+            <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-lg border border-white/20 flex items-center gap-1.5">
+              <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              <span>{totalPhotos > 5 ? `${totalPhotos}+` : `${totalPhotos} Photos`}</span>
+            </div>
+          </div>
+        )}
 
       </div>
+
     </div>
 
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH & OVERVIEW TRUNCATOR -->
-<script is:inline>
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
-    const ratesContainer = document.getElementById('aboutRatesTableContainer');
+<!-- FULL SCREEN PHOTO LIGHTBOX MODAL -->
+<div id="headerGalleryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white">
+  <div class="flex items-center justify-between max-w-6xl mx-auto w-full border-b border-slate-800 pb-4">
+    <div>
+      <h3 class="text-lg font-black font-serif text-white">{hotelTitle}</h3>
+      <span class="text-xs text-slate-400">Photo Gallery</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-xs font-bold bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+        <span id="headerModalIdx">1</span> / <span>{totalPhotos}</span>
+      </span>
+      <button id="closeHeaderModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+  </div>
 
-    if (ratesContainer) {
-      const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
-      const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
+  <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
+    <img id="headerModalImg" src={galleryImages[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+    <button id="headerModalPrevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❮</button>
+    <button id="headerModalNextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❯</button>
+  </div>
+</div>
 
-      try {
-        const res = await fetch(apiUrl);
-        if (res.ok) {
-          const json = await res.json();
-          
-          let rawResults = [];
-          if (json && Array.isArray(json.results)) {
-            rawResults = json.results;
-          } else if (Array.isArray(json)) {
-            rawResults = json;
-          }
+<!-- LIGHTBOX JS SCRIPT -->
+<script is:inline define:vars={{ galleryImages }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('headerGalleryModal');
+    const closeBtn = document.getElementById('closeHeaderModalBtn');
+    const modalImg = document.getElementById('headerModalImg');
+    const idxSpan = document.getElementById('headerModalIdx');
+    const prevBtn = document.getElementById('headerModalPrevBtn');
+    const nextBtn = document.getElementById('headerModalNextBtn');
 
-          const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
-          const targetKeywords = hotelName.toLowerCase()
-            .split(/\s+/)
-            .filter(word => word.length > 2 && !ignoreWords.includes(word));
+    const images = galleryImages && galleryImages.length > 0 ? galleryImages : [];
+    let activeIdx = 0;
 
-          let deals = [];
-          rawResults.forEach(item => {
-            const itemName = (item.name || '').toLowerCase();
-            const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
-
-            if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
-              Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
-                const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
-                const linkUrl = supplierData.link || item.url || '#';
-                
-                let logoUrl = (supplierData.media && supplierData.media.logoSquare) 
-                  ? supplierData.media.logoSquare 
-                  : `https://r2.stay22.com/2025_${supplierKey}.png`;
-
-                let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                if (supplierKey === 'booking') {
-                  providerName = 'Booking.com';
-                } else if (supplierKey === 'agoda') {
-                  providerName = 'Agoda';
-                  logoUrl = 'https://r2.stay22.com/2025_agoda.png';
-                } else if (supplierKey === 'hotelscom') {
-                  providerName = 'Hotels.com';
-                } else if (supplierKey === 'expedia') {
-                  providerName = 'Expedia';
-                } else if (supplierKey === 'vrbo') {
-                  providerName = 'Vrbo';
-                }
-
-                if (priceVal > 0) {
-                  deals.push({
-                    provider: providerName,
-                    price: priceVal,
-                    url: linkUrl,
-                    logo: logoUrl
-                  });
-
-                  if (supplierKey === 'booking') {
-                    const agodaLink = linkUrl.includes('stay22.com') 
-                      ? linkUrl.replace('/booking/', '/agoda/') 
-                      : `https://www.agoda.com/search?text=${encodeURIComponent(hotelName + ' Dhaka')}&cid=1891463`;
-                    
-                    deals.push({
-                      provider: 'Agoda',
-                      price: priceVal,
-                      url: agodaLink,
-                      logo: 'https://r2.stay22.com/2025_agoda.png'
-                    });
-                  }
-                }
-              });
-            }
-          });
-
-          // Sort deals ascending by price
-          deals.sort((a, b) => a.price - b.price);
-
-          if (deals.length > 0) {
-            ratesContainer.innerHTML = deals.map((item) => `
-              <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
-                    <img 
-                      src="${item.logo}" 
-                      alt="${item.provider} logo" 
-                      class="w-full h-full object-contain"
-                      onerror="this.src='https://r2.stay22.com/2025_agoda.png'"
-                    />
-                  </div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
-                </div>
-
-                <div class="flex items-center gap-3 sm:gap-4">
-                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
-                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
-                    View Deal
-                  </a>
-                </div>
-              </div>
-            `).join('');
-          } else {
-            ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${hotelName}" right now.</div>`;
-          }
-        }
-      } catch (e) {
-        console.error('Rate fetch error:', e);
-      }
+    function showImage(idx) {
+      if (!modalImg || images.length === 0) return;
+      activeIdx = (idx + images.length) % images.length;
+      modalImg.src = images[activeIdx];
+      if (idxSpan) idxSpan.textContent = (activeIdx + 1).toString();
     }
 
-    // 2. Overview 150-Word Truncator Logic
-    const overviewTextEl = document.getElementById('overview-text');
-    const toggleBtn = document.getElementById('toggleOverviewBtn');
+    document.querySelectorAll('.open-lightbox-trigger').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const idx = parseInt(e.currentTarget.getAttribute('data-index') || '0', 10);
+        if (modal) modal.classList.remove('hidden');
+        showImage(idx);
+      });
+    });
 
-    if (overviewTextEl) {
-      const fullText = overviewTextEl.innerText.trim();
-      const words = fullText.split(/\s+/);
-
-      if (words.length > 150) {
-        const firstPart = words.slice(0, 150).join(' ');
-        const remainingPart = words.slice(150).join(' ');
-
-        overviewTextEl.innerHTML = `
-          <span>${firstPart}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${remainingPart}</span>
-        `;
-
-        if (toggleBtn) {
-          toggleBtn.classList.remove('hidden');
-          toggleBtn.addEventListener('click', () => {
-            const moreSpan = document.getElementById('overview-more');
-            const dotsSpan = document.getElementById('overview-dots');
-
-            if (moreSpan && dotsSpan) {
-              const isHidden = moreSpan.classList.contains('hidden');
-              if (isHidden) {
-                moreSpan.classList.remove('hidden');
-                dotsSpan.classList.add('hidden');
-                toggleBtn.innerHTML = 'Read Less ▲';
-              } else {
-                moreSpan.classList.add('hidden');
-                dotsSpan.classList.remove('hidden');
-                toggleBtn.innerHTML = 'Read More ➔';
-              }
-            }
-          });
-        }
-      }
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
     }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => showImage(activeIdx - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => showImage(activeIdx + 1));
   });
 </script>
