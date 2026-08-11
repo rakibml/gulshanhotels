@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Strict Display: None & Agoda Vector Logo Fix)
+// src/components/hotel/HotelAboutAndRates.astro (Pure 100% Authentic Realtime Stay22 API Rates)
 interface Props {
   hotel: any;
 }
@@ -12,7 +12,7 @@ const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 ---
 
-<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
+<!-- 2ND COMPONENT: ABOUT HOTEL & PURE REALTIME STAY22 RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
@@ -159,7 +159,7 @@ const hotelCategory = data.category || "Luxury Hotel";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, AGODA VECTOR LOGO & STRICT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR REALTIME STAY22 API FETCH & STRICT 150-WORD TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -201,13 +201,8 @@ const hotelCategory = data.category || "Luxury Hotel";
                   : `https://r2.stay22.com/2025_${supplierKey}.png`;
 
                 let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                let isAgoda = false;
-
                 if (supplierKey === 'booking') {
                   providerName = 'Booking.com';
-                } else if (supplierKey === 'agoda') {
-                  providerName = 'Agoda';
-                  isAgoda = true;
                 } else if (supplierKey === 'hotelscom') {
                   providerName = 'Hotels.com';
                 } else if (supplierKey === 'expedia') {
@@ -221,23 +216,8 @@ const hotelCategory = data.category || "Luxury Hotel";
                     provider: providerName,
                     price: priceVal,
                     url: linkUrl,
-                    logo: logoUrl,
-                    isAgoda: isAgoda
+                    logo: logoUrl
                   });
-
-                  if (supplierKey === 'booking') {
-                    const agodaLink = linkUrl.includes('stay22.com') 
-                      ? linkUrl.replace('/booking/', '/agoda/') 
-                      : `https://www.agoda.com/search?text=${encodeURIComponent(hotelName + ' Dhaka')}&cid=1891463`;
-                    
-                    deals.push({
-                      provider: 'Agoda',
-                      price: priceVal,
-                      url: agodaLink,
-                      logo: '',
-                      isAgoda: true
-                    });
-                  }
                 }
               });
             }
@@ -247,40 +227,31 @@ const hotelCategory = data.category || "Luxury Hotel";
           deals.sort((a, b) => a.price - b.price);
 
           if (deals.length > 0) {
-            ratesContainer.innerHTML = deals.map((item) => {
-              // 100% Reliable Vector Brand Logo for Agoda (Prevents Broken Image Icons)
-              const agodaSvgHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" class="w-full h-full object-contain"><rect width="120" height="40" rx="8" fill="#ffffff"/><circle cx="16" cy="20" r="5" fill="#f44336"/><circle cx="28" cy="20" r="5" fill="#ff9800"/><circle cx="40" cy="20" r="5" fill="#4caf50"/><circle cx="52" cy="20" r="5" fill="#2196f3"/><circle cx="64" cy="20" r="5" fill="#9c27b0"/><text x="76" y="25" font-family="sans-serif" font-weight="900" font-size="13" fill="#333333">agoda</text></svg>`;
-
-              const logoImageHtml = item.isAgoda ? agodaSvgHtml : `
-                <img 
-                  src="${item.logo}" 
-                  alt="${item.provider} logo" 
-                  width="32"
-                  height="32"
-                  loading="lazy"
-                  class="w-full h-full object-contain"
-                  onerror="this.style.display='none';"
-                />
-              `;
-
-              return `
-                <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
-                      ${logoImageHtml}
-                    </div>
-                    <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+            ratesContainer.innerHTML = deals.map((item) => `
+              <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
+                    <img 
+                      src="${item.logo}" 
+                      alt="${item.provider} logo" 
+                      width="32"
+                      height="32"
+                      loading="lazy"
+                      class="w-full h-full object-contain"
+                      onerror="this.style.display='none';"
+                    />
                   </div>
-
-                  <div class="flex items-center gap-3 sm:gap-4">
-                    <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
-                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
-                      View Deal
-                    </a>
-                  </div>
+                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
                 </div>
-              `;
-            }).join('');
+
+                <div class="flex items-center gap-3 sm:gap-4">
+                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
+                    View Deal
+                  </a>
+                </div>
+              </div>
+            `).join('');
           } else {
             ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${hotelName}" right now.</div>`;
           }
@@ -308,7 +279,6 @@ const hotelCategory = data.category || "Luxury Hotel";
           <span id="overview-more" class="hidden">${remainingPart}</span>
         `;
 
-        // UNHIDE BUTTON ONLY IF TEXT IS STRICTLY OVER 150 WORDS!
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
@@ -329,7 +299,6 @@ const hotelCategory = data.category || "Luxury Hotel";
           }
         });
       } else {
-        // FORCEFULLY HIDE BUTTON IF WORDS <= 150
         toggleBtn.style.display = 'none';
       }
     }
