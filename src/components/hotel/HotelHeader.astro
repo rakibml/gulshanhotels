@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (Clean Mobile View + 5th Thumb 'More Photos' Popup)
+// src/components/hotel/HotelHeader.astro (100% Working Click Listeners & Back-Button Safety)
 interface Props {
   hotel: any;
 }
@@ -33,7 +33,7 @@ const totalPhotos = galleryImages.length;
 const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
 ---
 
-<!-- 1ST COMPONENT: HOTEL HERO BANNER (PERFECT MOBILE VIEW + 5TH THUMBNAIL POPUP) -->
+<!-- 1ST COMPONENT: HOTEL HERO BANNER (100% WORKING CLICK & POPUP MODAL) -->
 <section class="bg-[#F8FAF9] text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -98,28 +98,30 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
 
     </div>
 
-    <!-- RESPONSIVE HERO GALLERY (CLEAN MOBILE & DESKTOP LAYOUT) -->
+    <!-- RESPONSIVE HERO GALLERY (INTERACTIVE MAIN IMAGE & THUMBNAILS) -->
     <div class="max-w-5xl mx-auto space-y-3 pt-2">
       
-      <!-- 1. MAIN LARGE HERO COVER PHOTO -->
-      <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
+      <!-- 1. MAIN LARGE HERO COVER PHOTO (CLICKING OPENS LIGHTBOX) -->
+      <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900 cursor-pointer">
         <img 
           id="heroMainViewImg" 
           src={galleryImages[0]} 
           alt={hotelTitle} 
+          loading="eager"
+          decoding="async"
           data-images={JSON.stringify(galleryImages)}
           class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105" 
         />
 
         <!-- Left/Right Arrow Navigation over Main Image -->
         {galleryImages.length > 1 && (
-          <button id="heroPrevImgBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
+          <button id="heroPrevImgBtn" aria-label="Previous Image" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
             ❮
           </button>
         )}
 
         {galleryImages.length > 1 && (
-          <button id="heroNextImgBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
+          <button id="heroNextImgBtn" aria-label="Next Image" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
             ❯
           </button>
         )}
@@ -130,14 +132,14 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         </div>
       </div>
 
-      <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW (5TH THUMBNAIL HAS 'MORE PHOTOS' POPUP BADGE) -->
+      <!-- 2. EXACTLY 5 SMALL THUMBNAILS IN 1 ROW (CLICKABLE) -->
       <div class="grid grid-cols-5 gap-2 sm:gap-3">
         {galleryImages.slice(0, 4).map((img: string, idx: number) => (
           <button 
             class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : ''}"
             data-index={idx}
           >
-            <img src={img} alt={`Thumb ${idx + 1}`} class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
+            <img src={img} alt={`Thumb ${idx + 1}`} loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
           </button>
         ))}
 
@@ -148,7 +150,7 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
             class="h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
             data-index="4"
           >
-            <img src={galleryImages[4]} alt="More Photos" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
+            <img src={galleryImages[4]} alt="More Photos" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
             <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
               <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos > 0 ? remainingPhotos : totalPhotos}</span>
               <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
@@ -184,10 +186,12 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
   </div>
 </div>
 
-<!-- CLIENT SCRIPT FOR MAIN SLIDER & POPUP MODAL -->
+<!-- CLIENT SCRIPT WITH COMPLETE CLICK LISTENERS & BACK-BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
     const mainImg = document.getElementById('heroMainViewImg');
+    const prevBtn = document.getElementById('heroPrevImgBtn');
+    const nextBtn = document.getElementById('heroNextImgBtn');
     const currentIdxSpan = document.getElementById('heroCurrentIdx');
     const thumbBtns = document.querySelectorAll('.hero-thumb-btn');
 
@@ -203,37 +207,73 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
       const images = JSON.parse(mainImg.dataset.images || '[]');
       let activeIdx = 0;
 
+      // 1. Update Main Featured Image
       function updateMainImage(idx) {
         if (!mainImg || !images.length) return;
         activeIdx = (idx + images.length) % images.length;
         mainImg.src = images[activeIdx];
         if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
+
+        thumbBtns.forEach((btn, i) => {
+          if (i === activeIdx) {
+            btn.classList.add('border-emerald-600');
+            btn.classList.remove('border-transparent');
+          } else {
+            btn.classList.add('border-transparent');
+            btn.classList.remove('border-emerald-600');
+          }
+        });
       }
 
-      // SMART MOBILE BACK BUTTON LISTENER (PREVENTS EXITING SITE ON BACK BUTTON CLICK)
-      function openModalSafe() {
+      if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx + 1); });
+
+      // Click Thumbnails 1-4 -> Updates Main Image
+      thumbBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
+          updateMainImage(idx);
+        });
+      });
+
+      // 2. Lightbox Modal Control with Phone Back Button (popstate) Safety
+      function openModalSafe(startIdx) {
         if (!modal) return;
+        updateModalImage(startIdx !== undefined ? startIdx : activeIdx);
         modal.classList.remove('hidden');
-        history.pushState({ modalOpen: true }, ''); // Push state to browser history
+        try {
+          history.pushState({ modalOpen: true }, '');
+        } catch (e) {}
       }
 
       function closeModalSafe() {
         if (!modal) return;
         modal.classList.add('hidden');
-        if (history.state && history.state.modalOpen) {
-          history.back(); // Clean history state
-        }
       }
 
       // Handle Phone Physical / Gesture Back Button Press
-      window.addEventListener('popstate', (e) => {
+      window.addEventListener('popstate', () => {
         if (modal && !modal.classList.contains('hidden')) {
-          modal.classList.add('hidden'); // Close modal without leaving the site!
+          modal.classList.add('hidden');
         }
       });
 
-      if (openModalBtn) openModalBtn.addEventListener('click', () => openModalSafe());
-      if (closeModalBtn) closeModalBtn.addEventListener('click', () => closeModalSafe());
+      // Click Main Image -> Opens Lightbox Modal
+      mainImg.addEventListener('click', () => {
+        openModalSafe(activeIdx);
+      });
+
+      // Click 5th Thumbnail (+More Photos) -> Opens Lightbox Modal
+      if (openModalBtn) {
+        openModalBtn.addEventListener('click', () => {
+          openModalSafe(4);
+        });
+      }
+
+      // Close Modal Events
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => closeModalSafe());
+      }
 
       if (modal) {
         modal.addEventListener('click', (e) => {
@@ -241,6 +281,7 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         });
       }
 
+      // Modal Navigation Arrows
       function updateModalImage(idx) {
         if (!modalImg || !images.length) return;
         activeIdx = (idx + images.length) % images.length;
