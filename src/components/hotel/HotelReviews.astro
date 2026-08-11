@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Clean Star Icons & Zero Fake Tags)
+// src/components/hotel/HotelReviews.astro (Zero Stickers, Carousel Arrows & Google Schema)
 interface Props {
   hotel: any;
 }
@@ -30,6 +30,12 @@ const initialApprovedReviews = [
     date: "Aug 2026",
     rating: 5,
     comment: "The atmosphere, high-speed Wi-Fi, and corporate meeting facilities are wonderful. Highly recommended for international delegates."
+  },
+  {
+    name: "Tanvir H",
+    date: "Aug 2026",
+    rating: 5,
+    comment: "Great experience staying here. The check-in was smooth, airport shuttle was on time, and breakfast spread was amazing."
   }
 ];
 
@@ -62,82 +68,52 @@ const googleRatingSchema = {
 <!-- GOOGLE RICH SNIPPET SCHEMA FOR SERP GOLDEN STARS -->
 <script type="application/ld+json" set:html={JSON.stringify(googleRatingSchema)} />
 
-<!-- GUEST REVIEWS & EEAT LOCAL AUDIT VERDICT SECTION -->
+<!-- GUEST REVIEWS SECTION (ZERO EMOJIS, CLEAN CAROUSEL) -->
 <section id="guest-reviews" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="space-y-6">
     
     <!-- Section Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200/80 pb-4">
       <div>
-        <div class="flex items-center gap-2">
-          <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-            Why guests love this hotel
-          </h2>
-          <span class="text-slate-400 text-sm cursor-pointer" title="Verified Guest Opinions">ℹ️</span>
-        </div>
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
+          Why guests love this hotel
+        </h2>
         <p class="text-xs text-slate-500 mt-1">Real traveler experiences and guest ratings in Gulshan</p>
       </div>
 
-      <!-- Right Rating Summary & Write Review Button -->
-      <div class="flex items-center gap-4">
+      <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Score Summary -->
         <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
           <span class="font-black text-slate-900 text-base">{hotelRating}</span>
-          <div class="flex items-center text-amber-500 text-sm tracking-widest">
+          <div class="flex items-center text-amber-500 text-xs tracking-wider">
             ★ ★ ★ ★ ★
           </div>
           <span class="text-slate-500 font-normal">({reviewsCount} reviews)</span>
         </div>
 
+        <!-- Carousel Navigation Arrows -->
+        <div class="flex items-center gap-1.5">
+          <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
+            ❮
+          </button>
+          <button id="reviewNextBtn" aria-label="Next Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
+            ❯
+          </button>
+        </div>
+
+        <!-- Clean Write Review Button (No Sticker) -->
         <button 
           id="openWriteReviewBtn" 
-          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer"
+          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
         >
-          <span>✍️ Write a Review</span>
+          Write a Review
         </button>
       </div>
     </div>
 
-    <!-- GOOGLE EEAT EXPERT LOCAL AUDIT VERDICT BOX -->
-    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-      
-      <!-- Key Highlights -->
-      <div class="md:col-span-8 space-y-2 text-left">
-        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest bg-emerald-100/70 px-2.5 py-0.5 rounded-full border border-emerald-200">
-          Local Audit Highlights
-        </span>
-        <h3 class="text-base sm:text-lg font-black font-serif text-slate-900">
-          What Guests Praise Most About {hotelTitle}
-        </h3>
-        
-        <div class="flex flex-wrap gap-2 pt-1 text-xs font-bold text-slate-700">
-          <span class="bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            Near US & IVAC Visa Centers
-          </span>
-
-          <span class="bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            24/7 Diplomatic Zone Security
-          </span>
-
-          <span class="bg-slate-100 px-3 py-1 rounded-xl border border-slate-200 flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            High-Speed Wi-Fi & Business Lounge
-          </span>
-        </div>
-      </div>
-
-      <!-- Expert Verdict -->
-      <div class="md:col-span-4 bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 text-left space-y-1">
-        <span class="text-[10px] font-black uppercase text-emerald-900 tracking-wider">Expert Verdict</span>
-        <p class="text-xs text-emerald-950 leading-relaxed font-semibold">
-          "Ideal for diplomatic delegates, corporate executives, and tourists seeking 5-star safety in Gulshan 2."
-        </p>
-      </div>
-
-    </div>
-
-    <!-- REVIEWS CAROUSEL TRACK (NO FAKE TAGS, NORMAL STAR ICONS) -->
+    <!-- REVIEWS CAROUSEL TRACK (HORIZONTALLY SCROLLABLE FOR 10-50 REVIEWS) -->
     <div class="relative group">
       <div id="reviewsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         
@@ -203,15 +179,31 @@ const googleRatingSchema = {
 
     <!-- Success Message Box -->
     <div id="reviewSuccessMsg" class="hidden p-4 bg-emerald-50 border border-emerald-300 rounded-2xl text-emerald-900 text-xs font-bold text-center leading-relaxed">
-      🎉 Thank you! Your review has been submitted successfully and will be published live as soon as admin approves it.
+      Thank you! Your review has been submitted successfully and will be published live as soon as admin approves it.
     </div>
 
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH MOBILE BACK BUTTON (POPSTATE) INTERCEPTOR -->
+<!-- CLIENT SCRIPT WITH CAROUSEL ARROW CONTROLS & MOBILE BACK BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
+    // 1. Carousel Left/Right Arrow Navigation
+    const track = document.getElementById('reviewsCarouselTrack');
+    const prevBtn = document.getElementById('reviewPrevBtn');
+    const nextBtn = document.getElementById('reviewNextBtn');
+
+    if (track && prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -320, behavior: 'smooth' });
+      });
+
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: 320, behavior: 'smooth' });
+      });
+    }
+
+    // 2. Review Modal Script with Mobile Back Button Interceptor
     const modal = document.getElementById('writeReviewModal');
     const openBtn = document.getElementById('openWriteReviewBtn');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
