@@ -4,22 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GulshanHotels Admin - Sveltia CMS</title>
+    
+    <!-- Tell Sveltia CMS NOT to auto-initialize until our 6 YML files load -->
+    <script>
+      window.CMS_MANUAL_INIT = true;
+    </script>
   </head>
   <body>
-    <!-- JS-YAML & SVELTIA CMS SCRIPTS -->
+    <!-- JS-YAML & Sveltia CMS Scripts -->
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- AUTOMATICALLY FETCHES & COMBINES ALL 6 SECTION YML FILES -->
+    <!-- FETCHES YOUR 6 INDIVIDUAL YML FILES AND INITS CMS -->
     <script>
-      window.addEventListener('DOMContentLoaded', async () => {
+      document.addEventListener('DOMContentLoaded', async () => {
         try {
-          // 1. Fetch Main Config
+          // 1. Fetch main base config
           const mainRes = await fetch('/admin/config.yml');
           const mainText = await mainRes.text();
           const config = jsyaml.load(mainText) || {};
 
-          // 2. Fetch the 6 Modular Section Files from collections/hotel/
+          // 2. Fetch your 6 individual section YML files
           const sectionFiles = [
             '/admin/collections/hotel/1-header.yml',
             '/admin/collections/hotel/2-about-rates.yml',
@@ -29,7 +34,7 @@
             '/admin/collections/hotel/6-faqs.yml'
           ];
 
-          let combinedFields = [];
+          let allFields = [];
 
           for (const fileUrl of sectionFiles) {
             try {
@@ -38,15 +43,15 @@
                 const text = await res.text();
                 const fieldsArr = jsyaml.load(text);
                 if (Array.isArray(fieldsArr)) {
-                  combinedFields.push(...fieldsArr);
+                  allFields.push(...fieldsArr);
                 }
               }
-            } catch (e) {
-              console.log('Error loading section YML:', fileUrl, e);
+            } catch (err) {
+              console.warn('Could not load YML file:', fileUrl, err);
             }
           }
 
-          // 3. Register Hotel Collection
+          // 3. Attach merged fields to Hotels Collection
           const hotelCollection = {
             name: "hotels",
             label: "🏨 Hotels Directory",
@@ -54,18 +59,20 @@
             create: true,
             slug: "{{title}}",
             summary: "{{title}} - Link: /{{slug}}",
-            fields: combinedFields
+            fields: allFields
           };
 
           config.collections = config.collections || [];
           config.collections.push(hotelCollection);
 
-          // 4. Initialize Sveltia CMS
-          if (window.SveltiaCMS) {
+          // 4. Manually initialize Sveltia CMS after all 6 files are merged!
+          if (window.CMS) {
+            window.CMS.init({ config });
+          } else if (window.SveltiaCMS) {
             window.SveltiaCMS.init({ config });
           }
         } catch (e) {
-          console.error('Sveltia CMS Dynamic Loader Error:', e);
+          console.error('Manual CMS Init Error:', e);
         }
       });
     </script>
