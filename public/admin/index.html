@@ -4,9 +4,77 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GulshanHotels Admin - Sveltia CMS</title>
+    
+    <!-- Prevent Auto Init before loading 6 files -->
+    <script>
+      window.CMS_MANUAL_INIT = true;
+    </script>
   </head>
   <body>
-    <!-- Sveltia CMS Official Script -->
+    <!-- JS-YAML & Sveltia CMS Scripts -->
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+
+    <!-- AUTOMATICALLY FETCHES AND MERGES YOUR 6 YML FILES -->
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          // 1. Fetch main base config
+          const mainRes = await fetch('/admin/config.yml');
+          const mainText = await mainRes.text();
+          const config = jsyaml.load(mainText) || {};
+
+          // 2. Fetch your 6 individual section YML files
+          const sectionFiles = [
+            '/admin/collections/hotel/1-header.yml',
+            '/admin/collections/hotel/2-about-rates.yml',
+            '/admin/collections/hotel/3-amenities-rooms.yml',
+            '/admin/collections/hotel/4-location-map.yml',
+            '/admin/collections/hotel/5-reviews.yml',
+            '/admin/collections/hotel/6-faqs.yml'
+          ];
+
+          let allFields = [];
+
+          for (const fileUrl of sectionFiles) {
+            try {
+              const res = await fetch(fileUrl);
+              if (res.ok) {
+                const text = await res.text();
+                const fieldsArr = jsyaml.load(text);
+                if (Array.isArray(fieldsArr)) {
+                  allFields.push(...fieldsArr);
+                }
+              }
+            } catch (err) {
+              console.warn('Could not load YML file:', fileUrl, err);
+            }
+          }
+
+          // 3. Create Hotel Collection with merged fields from your 6 files
+          const hotelCollection = {
+            name: "hotels",
+            label: "🏨 Hotels Directory",
+            folder: "src/content/hotels",
+            create: true,
+            slug: "{{title}}",
+            summary: "{{title}} - Link: /{{slug}}",
+            fields: allFields
+          };
+
+          config.collections = config.collections || [];
+          config.collections.push(hotelCollection);
+
+          // 4. Manually initialize Sveltia CMS
+          if (window.CMS && typeof window.CMS.init === 'function') {
+            window.CMS.init({ config });
+          } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
+            window.SveltiaCMS.init({ config });
+          }
+        } catch (e) {
+          console.error('Manual CMS Init Error:', e);
+        }
+      });
+    </script>
   </body>
 </html>
