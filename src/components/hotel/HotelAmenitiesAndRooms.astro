@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (Agoda Signature Room Cards Upgrade)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (Interactive Card Photo Slider & Room Details Modal)
 interface Props {
   hotel: any;
 }
@@ -52,7 +52,7 @@ const agodaRoomTypes = [
     ]
   },
   {
-    name: "Presidential Diplomatic Suite, City View",
+    name: "Presidential Westin Suite, City View",
     price: "$290",
     size: "95 m² / 1022 ft²",
     guests: "Max 3 Adults",
@@ -67,7 +67,7 @@ const agodaRoomTypes = [
 ];
 ---
 
-<!-- 3RD COMPONENT: AMENITIES & AGODA SIGNATURE ROOM CARDS -->
+<!-- 3RD COMPONENT: AMENITIES & INTERACTIVE AGODA ROOM CARDS -->
 <section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
@@ -168,7 +168,7 @@ const agodaRoomTypes = [
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: AGODA SIGNATURE ROOM TYPES CAROUSEL -->
+    <!-- RIGHT COLUMN: SMART ALL ROOM TYPES CAROUSEL WITH CARD SLIDER -->
     <div class="lg:col-span-7 space-y-4 text-left">
       
       <!-- Section Header -->
@@ -203,23 +203,40 @@ const agodaRoomTypes = [
         <!-- AGODA SIGNATURE ROOM CARDS SLIDER -->
         <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {agodaRoomTypes.map((room) => (
-            <div class="w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
+            <div class="room-card-box w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
               
               <div>
-                <!-- AGODA PHOTO CAROUSEL HEADER -->
+                <!-- AGODA INTERACTIVE PHOTO CAROUSEL HEADER -->
                 <div class="h-44 w-full overflow-hidden relative group/roomimg">
-                  <img src={room.photos[0]} alt={room.name} class="room-card-photo w-full h-full object-cover group-hover/roomimg:scale-105 transition duration-500" />
+                  <img 
+                    src={room.photos[0]} 
+                    alt={room.name} 
+                    data-photos={JSON.stringify(room.photos)}
+                    class="room-card-main-img w-full h-full object-cover group-hover/roomimg:scale-105 transition duration-500 cursor-pointer" 
+                  />
                   
-                  <span class="absolute bottom-2.5 left-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-white/20">
+                  <!-- Card Image Arrow Left -->
+                  <button class="card-img-prev-btn absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-xs flex items-center justify-center backdrop-blur-md opacity-0 group-hover/roomimg:opacity-100 transition z-10 cursor-pointer">❮</button>
+                  
+                  <!-- Card Image Arrow Right -->
+                  <button class="card-img-next-btn absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-xs flex items-center justify-center backdrop-blur-md opacity-0 group-hover/roomimg:opacity-100 transition z-10 cursor-pointer">❯</button>
+
+                  <!-- Photo Counter Badge -->
+                  <span class="card-img-badge absolute bottom-2.5 left-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-white/20 pointer-events-none">
                     1 / {room.photos.length}
                   </span>
                 </div>
 
                 <!-- ROOM CONTENT -->
                 <div class="p-5 space-y-2 text-left">
-                  <a href="#about-and-rates" class="text-[11px] font-bold text-emerald-800 hover:underline inline-block">
+                  <!-- Room Photos and Details Link (Triggers Lightbox Modal) -->
+                  <button 
+                    class="open-room-detail-btn text-[11px] font-bold text-emerald-800 hover:underline inline-block cursor-pointer"
+                    data-room-name={room.name}
+                    data-room-photos={JSON.stringify(room.photos)}
+                  >
                     Room photos and details ➔
-                  </a>
+                  </button>
 
                   <h3 class="font-bold text-slate-900 text-base leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                     {room.name}
@@ -273,7 +290,9 @@ const agodaRoomTypes = [
   </div>
 </section>
 
-<!-- POPUP MODAL: ALL 28+ CATEGORIZED AMENITIES -->
+<!-- =================================================== -->
+<!-- 1. POPUP MODAL: ALL 28+ CATEGORIZED AMENITIES -->
+<!-- =================================================== -->
 <div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
     
@@ -326,10 +345,27 @@ const agodaRoomTypes = [
   </div>
 </div>
 
-<!-- CLIENT SCRIPTS FOR AMENITIES MODAL & ROOMS SLIDER WITH BACK BUTTON SAFETY -->
+<!-- =================================================== -->
+<!-- 2. POPUP MODAL: SELECTED ROOM PHOTOS & DETAILS -->
+<!-- =================================================== -->
+<div id="selectedRoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white">
+  <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4">
+    <div>
+      <h3 id="modalSelectedRoomName" class="text-lg font-black font-serif text-white">Room Details</h3>
+      <span class="text-xs text-slate-400">Room Photos Gallery</span>
+    </div>
+    <button id="closeSelectedRoomModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
+  </div>
+
+  <div class="relative max-w-4xl mx-auto my-auto w-full h-[60vh] flex items-center justify-center">
+    <img id="selectedRoomModalImg" src="" alt="Room Photo" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+  </div>
+</div>
+
+<!-- CLIENT SCRIPTS FOR CARD IMAGE SLIDER, ROOM DETAILS & MODAL BACK-BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Amenities Modal Script with Mobile Back-Button (popstate) Interceptor
+    // 1. Amenities Modal Script
     const amenModal = document.getElementById('allAmenitiesModal');
     const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
     const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
@@ -337,22 +373,13 @@ const agodaRoomTypes = [
     function openAmenModalSafe() {
       if (!amenModal) return;
       amenModal.classList.remove('hidden');
-      try {
-        history.pushState({ amenModalOpen: true }, '');
-      } catch (e) {}
+      try { history.pushState({ amenModalOpen: true }, ''); } catch (e) {}
     }
 
     function closeAmenModalSafe() {
       if (!amenModal) return;
       amenModal.classList.add('hidden');
     }
-
-    // Intercept Mobile Physical / Gesture Back Button
-    window.addEventListener('popstate', () => {
-      if (amenModal && !amenModal.classList.contains('hidden')) {
-        amenModal.classList.add('hidden');
-      }
-    });
 
     if (openAmenBtn) openAmenBtn.addEventListener('click', () => openAmenModalSafe());
     if (closeAmenBtn) closeAmenBtn.addEventListener('click', () => closeAmenModalSafe());
@@ -363,17 +390,101 @@ const agodaRoomTypes = [
       });
     }
 
-    // 2. Room Types Horizontal Carousel Side Arrow Controls
-    const track = document.getElementById('roomsCarouselTrack');
-    const prevBtn = document.getElementById('roomPrevBtn');
-    const nextBtn = document.getElementById('roomNextBtn');
+    // 2. Selected Room Modal Script
+    const roomModal = document.getElementById('selectedRoomModal');
+    const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
+    const modalRoomTitle = document.getElementById('modalSelectedRoomName');
+    const modalRoomImg = document.getElementById('selectedRoomModalImg');
 
-    if (track && prevBtn && nextBtn) {
-      prevBtn.addEventListener('click', () => {
+    function openRoomModalSafe(title, photoUrl) {
+      if (!roomModal) return;
+      if (modalRoomTitle) modalRoomTitle.textContent = title;
+      if (modalRoomImg) modalRoomImg.src = photoUrl;
+      roomModal.classList.remove('hidden');
+      try { history.pushState({ roomModalOpen: true }, ''); } catch (e) {}
+    }
+
+    function closeRoomModalSafe() {
+      if (!roomModal) return;
+      roomModal.classList.add('hidden');
+    }
+
+    // Intercept Mobile Physical / Gesture Back Button for Both Modals
+    window.addEventListener('popstate', () => {
+      if (amenModal && !amenModal.classList.contains('hidden')) {
+        amenModal.classList.add('hidden');
+      }
+      if (roomModal && !roomModal.classList.contains('hidden')) {
+        roomModal.classList.add('hidden');
+      }
+    });
+
+    if (closeRoomModalBtn) closeRoomModalBtn.addEventListener('click', () => closeRoomModalSafe());
+    if (roomModal) {
+      roomModal.addEventListener('click', (e) => {
+        if (e.target === roomModal) closeRoomModalSafe();
+      });
+    }
+
+    // 3. Room Card Photo Slider (Left ❮ & Right ❯ Arrow Click Listeners on Each Card)
+    document.querySelectorAll('.room-card-box').forEach((card) => {
+      const img = card.querySelector('.room-card-main-img');
+      const prevBtn = card.querySelector('.card-img-prev-btn');
+      const nextBtn = card.querySelector('.card-img-next-btn');
+      const badge = card.querySelector('.card-img-badge');
+      const detailsBtn = card.querySelector('.open-room-detail-btn');
+
+      if (img) {
+        const photos = JSON.parse(img.dataset.photos || '[]');
+        let currentPhotoIdx = 0;
+
+        function updateCardPhoto(idx) {
+          if (!photos.length) return;
+          currentPhotoIdx = (idx + photos.length) % photos.length;
+          img.src = photos[currentPhotoIdx];
+          if (badge) badge.textContent = `${currentPhotoIdx + 1} / ${photos.length}`;
+        }
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateCardPhoto(currentPhotoIdx - 1);
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateCardPhoto(currentPhotoIdx + 1);
+          });
+        }
+
+        // Open Room Details Modal on Photo Click or 'Room photos and details' Link Click
+        img.addEventListener('click', () => {
+          const roomTitle = detailsBtn?.getAttribute('data-room-name') || 'Room Details';
+          openRoomModalSafe(roomTitle, photos[currentPhotoIdx] || img.src);
+        });
+
+        if (detailsBtn) {
+          detailsBtn.addEventListener('click', () => {
+            const roomTitle = detailsBtn.getAttribute('data-room-name') || 'Room Details';
+            openRoomModalSafe(roomTitle, photos[currentPhotoIdx] || img.src);
+          });
+        }
+      }
+    });
+
+    // 4. Room Carousel Track Side Floating Arrows
+    const track = document.getElementById('roomsCarouselTrack');
+    const prevTrackBtn = document.getElementById('roomPrevBtn');
+    const nextTrackBtn = document.getElementById('roomNextBtn');
+
+    if (track && prevTrackBtn && nextTrackBtn) {
+      prevTrackBtn.addEventListener('click', () => {
         track.scrollBy({ left: -320, behavior: 'smooth' });
       });
 
-      nextBtn.addEventListener('click', () => {
+      nextTrackBtn.addEventListener('click', () => {
         track.scrollBy({ left: 320, behavior: 'smooth' });
       });
     }
