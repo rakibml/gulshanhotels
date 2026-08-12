@@ -6,7 +6,68 @@
     <title>GulshanHotels Admin - Sveltia CMS</title>
   </head>
   <body>
-    <!-- Sveltia CMS CDN Script -->
+    <!-- JS-YAML & SVELTIA CMS SCRIPTS -->
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+
+    <!-- AUTOMATICALLY FETCHES & COMBINES ALL 6 SECTION YML FILES -->
+    <script>
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          // 1. Fetch Main Config
+          const mainRes = await fetch('/admin/config.yml');
+          const mainText = await mainRes.text();
+          const config = jsyaml.load(mainText) || {};
+
+          // 2. Fetch the 6 Modular Section Files from collections/hotel/
+          const sectionFiles = [
+            '/admin/collections/hotel/1-header.yml',
+            '/admin/collections/hotel/2-about-rates.yml',
+            '/admin/collections/hotel/3-amenities-rooms.yml',
+            '/admin/collections/hotel/4-location-map.yml',
+            '/admin/collections/hotel/5-reviews.yml',
+            '/admin/collections/hotel/6-faqs.yml'
+          ];
+
+          let combinedFields = [];
+
+          for (const fileUrl of sectionFiles) {
+            try {
+              const res = await fetch(fileUrl);
+              if (res.ok) {
+                const text = await res.text();
+                const fieldsArr = jsyaml.load(text);
+                if (Array.isArray(fieldsArr)) {
+                  combinedFields.push(...fieldsArr);
+                }
+              }
+            } catch (e) {
+              console.log('Error loading section YML:', fileUrl, e);
+            }
+          }
+
+          // 3. Register Hotel Collection
+          const hotelCollection = {
+            name: "hotels",
+            label: "🏨 Hotels Directory",
+            folder: "src/content/hotels",
+            create: true,
+            slug: "{{title}}",
+            summary: "{{title}} - Link: /{{slug}}",
+            fields: combinedFields
+          };
+
+          config.collections = config.collections || [];
+          config.collections.push(hotelCollection);
+
+          // 4. Initialize Sveltia CMS
+          if (window.SveltiaCMS) {
+            window.SveltiaCMS.init({ config });
+          }
+        } catch (e) {
+          console.error('Sveltia CMS Dynamic Loader Error:', e);
+        }
+      });
+    </script>
   </body>
 </html>
