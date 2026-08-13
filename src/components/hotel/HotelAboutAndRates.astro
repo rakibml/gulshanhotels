@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Strict Hyperlink Visual Styling Fix)
+// src/components/hotel/HotelAboutAndRates.astro (HTML Link Protection & Fixed Green Links)
 interface Props {
   hotel: any;
 }
@@ -31,13 +31,15 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Forced Link Styling ([&_a]) -->
-        <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 cursor-pointer">
-          {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-            <p>
-              Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
-            </p>
-          )}
+        <!-- Hotel Description Container with Forced Green Link Styling ([&_a]) -->
+        <div id="overview-wrapper" class="relative">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+            {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+              <p>
+                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+              </p>
+            )}
+          </div>
         </div>
 
         <!-- Read More Button (Hidden by default, shown ONLY if text > 150 words) -->
@@ -50,7 +52,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
         </button>
       </div>
 
-      <!-- Hotel Policies & Quick Information Grid (High Contrast Text) -->
+      <!-- Hotel Policies & Quick Information Grid -->
       <div class="pt-4 border-t border-slate-200/80 space-y-4">
         <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Hotel Policies & Essential Info</h3>
 
@@ -165,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & STRICT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & HTML-PRESERVING 150-WORD TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -267,7 +269,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE ALL CMS LINKS IN DESCRIPTION (NEW TAB & STYLING)
+    // 2. ENHANCE ALL LINKS TO OPEN IN NEW TAB
     document.querySelectorAll('#overview-text a').forEach(link => {
       link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
       if (link.hostname !== window.location.hostname) {
@@ -276,41 +278,26 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     });
 
-    // 3. STRICT 150-WORD TRUNCATOR LOGIC
+    // 3. HTML-PRESERVING TRUNCATOR LOGIC (PRESERVES ALL <a> HYPERLINKS IN TACT)
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
     if (overviewTextEl && toggleBtn) {
-      const fullText = overviewTextEl.innerText.trim();
-      const words = fullText.split(/\s+/);
+      const words = overviewTextEl.innerText.trim().split(/\s+/);
 
       if (words.length > 150) {
-        const firstPart = words.slice(0, 150).join(' ');
-        const remainingPart = words.slice(150).join(' ');
-
-        overviewTextEl.innerHTML = `
-          <span>${firstPart}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${remainingPart}</span>
-        `;
-
+        // Apply CSS max-height truncation without touching or destroying inner HTML links!
+        overviewTextEl.classList.add('max-h-[140px]', 'overflow-hidden');
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
-          const moreSpan = document.getElementById('overview-more');
-          const dotsSpan = document.getElementById('overview-dots');
-
-          if (moreSpan && dotsSpan) {
-            const isHidden = moreSpan.classList.contains('hidden');
-            if (isHidden) {
-              moreSpan.classList.remove('hidden');
-              dotsSpan.classList.add('hidden');
-              toggleBtn.innerHTML = 'Read Less ▲';
-            } else {
-              moreSpan.classList.add('hidden');
-              dotsSpan.classList.remove('hidden');
-              toggleBtn.innerHTML = 'Read More ➔';
-            }
+          const isTruncated = overviewTextEl.classList.contains('max-h-[140px]');
+          if (isTruncated) {
+            overviewTextEl.classList.remove('max-h-[140px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read Less ▲';
+          } else {
+            overviewTextEl.classList.add('max-h-[140px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read More ➔';
           }
         });
       } else {
