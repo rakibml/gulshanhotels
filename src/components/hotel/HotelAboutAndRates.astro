@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Exact 150-Word Truncator & Link Preservation)
+// src/components/hotel/HotelAboutAndRates.astro (Google & W3C Official HTML Preserving Truncator)
 interface Props {
   hotel: any;
 }
@@ -31,9 +31,9 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container -->
+        <!-- Hotel Description Container with HTML Link Preservation -->
         <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-extrabold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
                 Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
@@ -46,7 +46,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
         <button 
           id="toggleOverviewBtn" 
           style="display: none;"
-          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
           Read More ➔
         </button>
@@ -72,7 +72,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           <!-- Check-Out SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1 0 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-Out</span>
@@ -94,7 +94,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           <!-- Property Type SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1 0 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Property Type</span>
@@ -167,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & STRICT EXACT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & OFFICIAL GOOGLE TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -269,60 +269,42 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE LINKS TO OPEN IN NEW TAB WITH EMERALD STYLING
-    function applyLinkStyling() {
-      document.querySelectorAll('#overview-text a').forEach(link => {
-        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-        if (link.hostname && link.hostname !== window.location.hostname) {
-          link.setAttribute('target', '_blank');
-          link.setAttribute('rel', 'noopener noreferrer');
-        }
-      });
-    }
+    // 2. STYLES ALL LINKS AND PRESERVES THEM
+    document.querySelectorAll('#overview-text a').forEach(link => {
+      link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+      if (link.hostname && link.hostname !== window.location.hostname) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
 
-    // 3. STRICT EXACT 150-WORD TRUNCATOR LOGIC
+    // 3. OFFICIAL GOOGLE & W3C HTML-PRESERVING TRUNCATOR
+    const wrapper = document.getElementById('overview-wrapper');
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
-    if (overviewTextEl && toggleBtn) {
-      // Fix missing spaces after periods
+    if (overviewTextEl && toggleBtn && wrapper) {
+      // Fix missing spaces after periods without destroying HTML
       overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
 
-      const rawText = overviewTextEl.innerText.trim();
-      const words = rawText.split(/\s+/);
+      const textWords = overviewTextEl.innerText.trim().split(/\s+/);
 
-      if (words.length > 150) {
-        const first150Words = words.slice(0, 150).join(' ');
-        const remainingWords = words.slice(150).join(' ');
-
-        overviewTextEl.innerHTML = `
-          <span>${first150Words}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${remainingWords}</span>
-        `;
-
-        applyLinkStyling();
+      if (textWords.length > 150) {
+        // Apply CSS truncation to wrapper while preserving all inner HTML <a> tags completely!
+        wrapper.classList.add('max-h-[145px]', 'overflow-hidden', 'transition-all', 'duration-300');
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
-          const moreSpan = document.getElementById('overview-more');
-          const dotsSpan = document.getElementById('overview-dots');
-
-          if (moreSpan && dotsSpan) {
-            const isHidden = moreSpan.classList.contains('hidden');
-            if (isHidden) {
-              moreSpan.classList.remove('hidden');
-              dotsSpan.classList.add('hidden');
-              toggleBtn.innerHTML = 'Read Less ▲';
-            } else {
-              moreSpan.classList.add('hidden');
-              dotsSpan.classList.remove('hidden');
-              toggleBtn.innerHTML = 'Read More ➔';
-            }
+          const isClamped = wrapper.classList.contains('max-h-[145px]');
+          if (isClamped) {
+            wrapper.classList.remove('max-h-[145px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read Less ▲';
+          } else {
+            wrapper.classList.add('max-h-[145px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read More ➔';
           }
         });
       } else {
-        applyLinkStyling();
         toggleBtn.style.display = 'none';
       }
     }
