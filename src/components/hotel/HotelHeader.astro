@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (100% Working Click Listeners & Back-Button Safety)
+// src/components/hotel/HotelHeader.astro (Review Removed, 30 Title Styles & Full Button Control)
 interface Props {
   hotel: any;
 }
@@ -10,11 +10,51 @@ const data = hotel?.data || {};
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelCategory = data.category || "5-Star Luxury Stay";
 const hotelLocation = data.location || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh";
-const hotelRating = data.rating || "4.8";
-const reviewsCount = data.reviewsCount || "1250";
 const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
-const officialSite = data.officialSite || "https://www.agoda.com";
+const officialSite = data.officialSite || "";
 const hotelDescription = data.description || "Experience timeless luxury and exceptional Bangladeshi hospitality in the heart of Gulshan, Dhaka.";
+
+// 1. Button Show/Hide Toggles from CMS (100% Admin Controllable)
+const showViewPrices = data.enable_view_prices !== false; // Default true
+const showOfficialSite = data.enable_official_site !== false && Boolean(officialSite); // Default true if link exists
+
+// 2. 30 Preset Typography & Color Styles for Hotel Title
+const selectedStyle = data.title_style || "style_1";
+
+const titleStyleMap: Record<string, string> = {
+  style_1: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight",
+  style_2: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 bg-clip-text text-transparent tracking-tight leading-tight",
+  style_3: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-950 bg-clip-text text-transparent tracking-tight leading-tight",
+  style_4: "font-sans text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 uppercase tracking-wider leading-tight",
+  style_5: "font-serif italic text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-normal leading-tight",
+  style_6: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tighter leading-tight",
+  style_7: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 drop-shadow-sm leading-tight",
+  style_8: "font-sans text-3xl sm:text-5xl lg:text-6xl font-light text-slate-800 tracking-widest uppercase leading-tight",
+  style_9: "font-serif text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 border-b-2 border-amber-400 pb-2 inline-block leading-tight",
+  style_10: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 decoration-emerald-500 underline underline-offset-8 decoration-4 leading-tight",
+  style_11: "font-sans text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight",
+  style_12: "font-serif text-3xl sm:text-5xl lg:text-6xl font-bold text-amber-900 tracking-tight leading-tight",
+  style_13: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-[#0d3b23] tracking-tight leading-tight",
+  style_14: "font-serif text-3xl sm:text-5xl lg:text-6xl font-normal text-slate-900 tracking-wide leading-tight",
+  style_15: "font-sans text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tighter uppercase leading-tight",
+  style_16: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-rose-700 via-amber-600 to-yellow-600 bg-clip-text text-transparent leading-tight",
+  style_17: "font-serif text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-800 tracking-tight leading-tight",
+  style_18: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 border-l-4 border-emerald-600 pl-4 leading-tight",
+  style_19: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 border-l-4 border-amber-500 pl-4 leading-tight",
+  style_20: "font-sans text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-normal leading-tight",
+  style_21: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight",
+  style_22: "font-sans text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-widest uppercase leading-tight",
+  style_23: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 border-b-4 border-amber-500/80 pb-2 inline-block leading-tight",
+  style_24: "font-serif text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-700 tracking-tight leading-tight",
+  style_25: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-stone-900 tracking-tight leading-tight",
+  style_26: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-teal-950 tracking-tight leading-tight",
+  style_27: "font-sans text-3xl sm:text-5xl lg:text-6xl font-black text-black tracking-normal leading-tight",
+  style_28: "font-serif italic text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight",
+  style_29: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 drop-shadow leading-tight",
+  style_30: "font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-amber-800 tracking-tight leading-tight"
+};
+
+const titleCssClass = titleStyleMap[selectedStyle] || titleStyleMap.style_1;
 
 // Gallery Images
 const galleryImages = (data.gallery && data.gallery.length > 0) 
@@ -33,7 +73,7 @@ const totalPhotos = galleryImages.length;
 const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
 ---
 
-<!-- 1ST COMPONENT: HOTEL HERO BANNER (100% WORKING CLICK & POPUP MODAL) -->
+<!-- 1ST COMPONENT: HOTEL HERO BANNER (NO REVIEWS, 30 TITLE STYLES, FULL BUTTON CONTROL) -->
 <section class="bg-[#F8FAF9] text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -50,59 +90,60 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
       </div>
 
       <!-- Category Pill Badge -->
-      <div>
-        <span class="bg-emerald-100/80 text-emerald-800 border border-emerald-300/80 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
-          {hotelCategory}
-        </span>
-      </div>
+      {hotelCategory && (
+        <div>
+          <span class="bg-emerald-100/80 text-emerald-800 border border-emerald-300/80 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
+            {hotelCategory}
+          </span>
+        </div>
+      )}
 
-      <!-- Hotel Title -->
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-serif text-slate-900 tracking-tight leading-tight">
+      <!-- Hotel Title with Selected 30 Typography Styles -->
+      <h1 class={titleCssClass}>
         {hotelTitle}
       </h1>
 
       <!-- Location Line with Interactive Map Link -->
-      <p class="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center justify-center gap-2">
-        <span class="flex items-center gap-1">
-          <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>{hotelLocation}</span>
-        </span>
-        <a href="#location-map" class="text-emerald-800 font-black hover:underline inline-flex items-center gap-0.5">
-          <span>View in a map</span>
-          <span>➔</span>
-        </a>
-      </p>
+      {hotelLocation && (
+        <p class="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center justify-center gap-2">
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span>{hotelLocation}</span>
+          </span>
+          <a href="#location-map" class="text-emerald-800 font-black hover:underline inline-flex items-center gap-0.5">
+            <span>View in a map</span>
+            <span>➔</span>
+          </a>
+        </p>
+      )}
 
-      <!-- Rating Line -->
-      <div class="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold pt-1">
-        <span class="bg-amber-100 text-amber-900 border border-amber-300 font-black px-2 py-0.5 rounded-lg text-xs">
-          {hotelRating}
-        </span>
-        <a href="#guest-reviews" class="text-slate-700 font-black hover:text-emerald-800 hover:underline inline-flex items-center gap-1">
-          <span>{reviewsCount} reviews</span>
-          <span>➔</span>
-        </a>
-      </div>
+      <!-- (REVIEW COUNT AND RATING REMOVED COMPLETELY) -->
 
-      <!-- Action Buttons -->
-      <div class="flex items-center justify-center gap-3 pt-3">
-        <a href="#about-and-rates" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs sm:text-sm uppercase tracking-wider px-7 py-3 rounded-2xl shadow-lg transition hover:scale-105">
-          View Prices ➔
-        </a>
+      <!-- Action Buttons (Full Admin Control) -->
+      {(showViewPrices || showOfficialSite) && (
+        <div class="flex items-center justify-center gap-3 pt-3">
+          {showViewPrices && (
+            <a href="#about-and-rates" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs sm:text-sm uppercase tracking-wider px-7 py-3 rounded-2xl shadow-lg transition hover:scale-105">
+              View Prices ➔
+            </a>
+          )}
 
-        <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-white hover:bg-slate-100 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-2xl transition border border-slate-300 hover:scale-105 flex items-center gap-1.5 shadow-sm">
-          <span>Official Website</span>
-          <span>↗</span>
-        </a>
-      </div>
+          {showOfficialSite && (
+            <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-white hover:bg-slate-100 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-2xl transition border border-slate-300 hover:scale-105 flex items-center gap-1.5 shadow-sm">
+              <span>Official Website</span>
+              <span>↗</span>
+            </a>
+          )}
+        </div>
+      )}
 
     </div>
 
-    <!-- RESPONSIVE HERO GALLERY (INTERACTIVE MAIN IMAGE & THUMBNAILS) -->
+    <!-- RESPONSIVE HERO GALLERY (CLEAN MOBILE & DESKTOP LAYOUT) -->
     <div class="max-w-5xl mx-auto space-y-3 pt-2">
       
-      <!-- 1. MAIN LARGE HERO COVER PHOTO (CLICKING OPENS LIGHTBOX) -->
-      <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900 cursor-pointer">
+      <!-- 1. MAIN LARGE HERO COVER PHOTO -->
+      <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
         <img 
           id="heroMainViewImg" 
           src={galleryImages[0]} 
@@ -110,7 +151,7 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
           loading="eager"
           decoding="async"
           data-images={JSON.stringify(galleryImages)}
-          class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105" 
+          class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer" 
         />
 
         <!-- Left/Right Arrow Navigation over Main Image -->
@@ -132,7 +173,7 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         </div>
       </div>
 
-      <!-- 2. EXACTLY 5 SMALL THUMBNAILS IN 1 ROW (CLICKABLE) -->
+      <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW (5TH THUMBNAIL HAS 'MORE PHOTOS' POPUP BADGE) -->
       <div class="grid grid-cols-5 gap-2 sm:gap-3">
         {galleryImages.slice(0, 4).map((img: string, idx: number) => (
           <button 
@@ -186,7 +227,7 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH COMPLETE CLICK LISTENERS & BACK-BUTTON SAFETY -->
+<!-- CLIENT SCRIPT WITH CLICK LISTENERS & BACK-BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
     const mainImg = document.getElementById('heroMainViewImg');
@@ -207,7 +248,6 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
       const images = JSON.parse(mainImg.dataset.images || '[]');
       let activeIdx = 0;
 
-      // 1. Update Main Featured Image
       function updateMainImage(idx) {
         if (!mainImg || !images.length) return;
         activeIdx = (idx + images.length) % images.length;
@@ -228,7 +268,6 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
       if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx - 1); });
       if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx + 1); });
 
-      // Click Thumbnails 1-4 -> Updates Main Image
       thumbBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
           const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
@@ -236,7 +275,6 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         });
       });
 
-      // 2. Lightbox Modal Control with Phone Back Button (popstate) Safety
       function openModalSafe(startIdx) {
         if (!modal) return;
         updateModalImage(startIdx !== undefined ? startIdx : activeIdx);
@@ -251,26 +289,22 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         modal.classList.add('hidden');
       }
 
-      // Handle Phone Physical / Gesture Back Button Press
       window.addEventListener('popstate', () => {
         if (modal && !modal.classList.contains('hidden')) {
           modal.classList.add('hidden');
         }
       });
 
-      // Click Main Image -> Opens Lightbox Modal
       mainImg.addEventListener('click', () => {
         openModalSafe(activeIdx);
       });
 
-      // Click 5th Thumbnail (+More Photos) -> Opens Lightbox Modal
       if (openModalBtn) {
         openModalBtn.addEventListener('click', () => {
           openModalSafe(4);
         });
       }
 
-      // Close Modal Events
       if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => closeModalSafe());
       }
@@ -281,7 +315,6 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         });
       }
 
-      // Modal Navigation Arrows
       function updateModalImage(idx) {
         if (!modalImg || !images.length) return;
         activeIdx = (idx + images.length) % images.length;
