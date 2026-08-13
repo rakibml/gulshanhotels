@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (High Contrast, Rich Link Styling & 100% CMS Policies)
+// src/components/hotel/HotelAboutAndRates.astro (Strict Hyperlink Visual Styling Fix)
 interface Props {
   hotel: any;
 }
@@ -31,8 +31,8 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Rich Link Styling (prose-a) -->
-        <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal prose-a:text-emerald-800 prose-a:font-extrabold prose-a:underline hover:prose-a:text-emerald-600">
+        <!-- Hotel Description Container with Forced Link Styling ([&_a]) -->
+        <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 cursor-pointer">
           {hotel?.body ? <Fragment set:html={hotel.body} /> : (
             <p>
               Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
@@ -50,7 +50,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
         </button>
       </div>
 
-      <!-- Hotel Policies & Quick Information Grid (High Contrast WCAG Text & CMS Controlled) -->
+      <!-- Hotel Policies & Quick Information Grid (High Contrast Text) -->
       <div class="pt-4 border-t border-slate-200/80 space-y-4">
         <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Hotel Policies & Essential Info</h3>
 
@@ -165,7 +165,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & STRICT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & STRICT 150-WORD TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -267,7 +267,16 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. STRICT 150-WORD TRUNCATOR LOGIC (UNHIDES BUTTON ONLY IF WORDS > 150)
+    // 2. ENHANCE ALL CMS LINKS IN DESCRIPTION (NEW TAB & STYLING)
+    document.querySelectorAll('#overview-text a').forEach(link => {
+      link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+      if (link.hostname !== window.location.hostname) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+
+    // 3. STRICT 150-WORD TRUNCATOR LOGIC
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
