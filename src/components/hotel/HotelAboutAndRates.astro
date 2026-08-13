@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Text Cutoff Fix & Dynamic Link Target)
+// src/components/hotel/HotelAboutAndRates.astro (Exact 150-Word Truncator & Link Preservation)
 interface Props {
   hotel: any;
 }
@@ -31,7 +31,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Line-Height Protection & Link Styling -->
+        <!-- Hotel Description Container -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
@@ -46,7 +46,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
         <button 
           id="toggleOverviewBtn" 
           style="display: none;"
-          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
           Read More ➔
         </button>
@@ -167,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK TARGET & TEXT CUTOFF PREVENTION -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & STRICT EXACT 150-WORD TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -269,44 +269,60 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. DYNAMIC LINK TARGET DETECTOR (EXTERNAL = NEW TAB, INTERNAL = SAME TAB)
-    document.querySelectorAll('#overview-text a').forEach(link => {
-      link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-      
-      const isExternal = link.hostname && link.hostname !== window.location.hostname;
-      if (isExternal || link.getAttribute('target') === '_blank') {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
-      } else {
-        link.setAttribute('target', '_self');
-      }
-    });
+    // 2. ENHANCE LINKS TO OPEN IN NEW TAB WITH EMERALD STYLING
+    function applyLinkStyling() {
+      document.querySelectorAll('#overview-text a').forEach(link => {
+        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+        if (link.hostname && link.hostname !== window.location.hostname) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    }
 
-    // 3. STRICT 150-WORD TRUNCATOR (PREVENTS TEXT CUTOFF / SLICING MID-LETTER)
+    // 3. STRICT EXACT 150-WORD TRUNCATOR LOGIC
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
     if (overviewTextEl && toggleBtn) {
-      // Fix missing spaces after periods in raw text
+      // Fix missing spaces after periods
       overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
 
-      const words = overviewTextEl.innerText.trim().split(/\s+/);
+      const rawText = overviewTextEl.innerText.trim();
+      const words = rawText.split(/\s+/);
 
       if (words.length > 150) {
-        overviewTextEl.classList.add('line-clamp-4');
+        const first150Words = words.slice(0, 150).join(' ');
+        const remainingWords = words.slice(150).join(' ');
+
+        overviewTextEl.innerHTML = `
+          <span>${first150Words}</span>
+          <span id="overview-dots">... </span>
+          <span id="overview-more" class="hidden">${remainingWords}</span>
+        `;
+
+        applyLinkStyling();
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
-          const isClamped = overviewTextEl.classList.contains('line-clamp-4');
-          if (isClamped) {
-            overviewTextEl.classList.remove('line-clamp-4');
-            toggleBtn.innerHTML = 'Read Less ▲';
-          } else {
-            overviewTextEl.classList.add('line-clamp-4');
-            toggleBtn.innerHTML = 'Read More ➔';
+          const moreSpan = document.getElementById('overview-more');
+          const dotsSpan = document.getElementById('overview-dots');
+
+          if (moreSpan && dotsSpan) {
+            const isHidden = moreSpan.classList.contains('hidden');
+            if (isHidden) {
+              moreSpan.classList.remove('hidden');
+              dotsSpan.classList.add('hidden');
+              toggleBtn.innerHTML = 'Read Less ▲';
+            } else {
+              moreSpan.classList.add('hidden');
+              dotsSpan.classList.remove('hidden');
+              toggleBtn.innerHTML = 'Read More ➔';
+            }
           }
         });
       } else {
+        applyLinkStyling();
         toggleBtn.style.display = 'none';
       }
     }
