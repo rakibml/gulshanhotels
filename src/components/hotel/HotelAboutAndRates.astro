@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (HTML Link Protection & Fixed Green Links)
+// src/components/hotel/HotelAboutAndRates.astro (Text Cutoff Fix & Dynamic Link Target)
 interface Props {
   hotel: any;
 }
@@ -31,7 +31,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Forced Green Link Styling ([&_a]) -->
+        <!-- Hotel Description Container with Line-Height Protection & Link Styling -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
@@ -167,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK STYLING & HTML-PRESERVING 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK TARGET & TEXT CUTOFF PREVENTION -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -269,34 +269,40 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE ALL LINKS TO OPEN IN NEW TAB
+    // 2. DYNAMIC LINK TARGET DETECTOR (EXTERNAL = NEW TAB, INTERNAL = SAME TAB)
     document.querySelectorAll('#overview-text a').forEach(link => {
       link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-      if (link.hostname !== window.location.hostname) {
+      
+      const isExternal = link.hostname && link.hostname !== window.location.hostname;
+      if (isExternal || link.getAttribute('target') === '_blank') {
         link.setAttribute('target', '_blank');
         link.setAttribute('rel', 'noopener noreferrer');
+      } else {
+        link.setAttribute('target', '_self');
       }
     });
 
-    // 3. HTML-PRESERVING TRUNCATOR LOGIC (PRESERVES ALL <a> HYPERLINKS IN TACT)
+    // 3. STRICT 150-WORD TRUNCATOR (PREVENTS TEXT CUTOFF / SLICING MID-LETTER)
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
     if (overviewTextEl && toggleBtn) {
+      // Fix missing spaces after periods in raw text
+      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
+
       const words = overviewTextEl.innerText.trim().split(/\s+/);
 
       if (words.length > 150) {
-        // Apply CSS max-height truncation without touching or destroying inner HTML links!
-        overviewTextEl.classList.add('max-h-[140px]', 'overflow-hidden');
+        overviewTextEl.classList.add('line-clamp-4');
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
-          const isTruncated = overviewTextEl.classList.contains('max-h-[140px]');
-          if (isTruncated) {
-            overviewTextEl.classList.remove('max-h-[140px]', 'overflow-hidden');
+          const isClamped = overviewTextEl.classList.contains('line-clamp-4');
+          if (isClamped) {
+            overviewTextEl.classList.remove('line-clamp-4');
             toggleBtn.innerHTML = 'Read Less ▲';
           } else {
-            overviewTextEl.classList.add('max-h-[140px]', 'overflow-hidden');
+            overviewTextEl.classList.add('line-clamp-4');
             toggleBtn.innerHTML = 'Read More ➔';
           }
         });
