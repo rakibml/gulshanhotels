@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (Review Removed, 30 Title Styles & Full Button Control)
+// src/components/hotel/HotelHeader.astro (100% Speed Optimized & LCP Boosted)
 interface Props {
   hotel: any;
 }
@@ -14,11 +14,11 @@ const hotelImage = data.image || "https://images.unsplash.com/photo-156607377125
 const officialSite = data.officialSite || "";
 const hotelDescription = data.description || "Experience timeless luxury and exceptional Bangladeshi hospitality in the heart of Gulshan, Dhaka.";
 
-// 1. Button Show/Hide Toggles from CMS (100% Admin Controllable)
+// Button Controls from CMS (100% Admin Controllable)
 const showViewPrices = data.enable_view_prices !== false; // Default true
 const showOfficialSite = data.enable_official_site !== false && Boolean(officialSite); // Default true if link exists
 
-// 2. 30 Preset Typography & Color Styles for Hotel Title
+// 30 Preset Typography & Color Styles for Hotel Title
 const selectedStyle = data.title_style || "style_1";
 
 const titleStyleMap: Record<string, string> = {
@@ -56,24 +56,39 @@ const titleStyleMap: Record<string, string> = {
 
 const titleCssClass = titleStyleMap[selectedStyle] || titleStyleMap.style_1;
 
-// Gallery Images
-const galleryImages = (data.gallery && data.gallery.length > 0) 
+// IMAGE RESIZING & WEBP SPEED OPTIMIZER HELPER FUNCTION
+function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
+  if (!url) return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
+  if (url.includes('unsplash.com')) {
+    const cleanUrl = url.split('?')[0];
+    return `${cleanUrl}?auto=format&fit=crop&w=${width}&q=${quality}`;
+  }
+  return url;
+}
+
+// Raw Gallery Images
+const rawGallery = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
   : [
       hotelImage,
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750",
+      "https://images.unsplash.com/photo-1618773928121-c32242e63f39",
+      "https://images.unsplash.com/photo-1591088398332-8a7791972843"
     ];
 
-const totalPhotos = galleryImages.length;
+const totalPhotos = rawGallery.length;
 const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
+
+// High-Res & Thumbnail Optimized Arrays
+const mainHeroUrl = getOptimizedImageUrl(rawGallery[0], 800, 80);
+const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 200, 70));
+const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1200, 85));
 ---
 
-<!-- 1ST COMPONENT: HOTEL HERO BANNER (NO REVIEWS, 30 TITLE STYLES, FULL BUTTON CONTROL) -->
+<!-- 1ST COMPONENT: HOTEL HERO BANNER (100% SPEED OPTIMIZED & WEBP COMPRESSED) -->
 <section class="bg-[#F8FAF9] text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -117,8 +132,6 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         </p>
       )}
 
-      <!-- (REVIEW COUNT AND RATING REMOVED COMPLETELY) -->
-
       <!-- Action Buttons (Full Admin Control) -->
       {(showViewPrices || showOfficialSite) && (
         <div class="flex items-center justify-center gap-3 pt-3">
@@ -139,29 +152,30 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
 
     </div>
 
-    <!-- RESPONSIVE HERO GALLERY (CLEAN MOBILE & DESKTOP LAYOUT) -->
+    <!-- RESPONSIVE HERO GALLERY (LCP PRIORITY MAIN IMAGE + 200PX LIGHTWEIGHT THUMBNAILS) -->
     <div class="max-w-5xl mx-auto space-y-3 pt-2">
       
-      <!-- 1. MAIN LARGE HERO COVER PHOTO -->
+      <!-- 1. MAIN LARGE HERO COVER PHOTO (LCP PRIORITY EAGER LOADED) -->
       <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
         <img 
           id="heroMainViewImg" 
-          src={galleryImages[0]} 
+          src={mainHeroUrl} 
           alt={hotelTitle} 
           loading="eager"
+          fetchpriority="high"
           decoding="async"
-          data-images={JSON.stringify(galleryImages)}
+          data-images={JSON.stringify(lightboxUrls)}
           class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer" 
         />
 
         <!-- Left/Right Arrow Navigation over Main Image -->
-        {galleryImages.length > 1 && (
+        {totalPhotos > 1 && (
           <button id="heroPrevImgBtn" aria-label="Previous Image" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
             ❮
           </button>
         )}
 
-        {galleryImages.length > 1 && (
+        {totalPhotos > 1 && (
           <button id="heroNextImgBtn" aria-label="Next Image" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
             ❯
           </button>
@@ -173,25 +187,41 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
         </div>
       </div>
 
-      <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW (5TH THUMBNAIL HAS 'MORE PHOTOS' POPUP BADGE) -->
+      <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW (LIGHTWEIGHT 200PX WEBP) -->
       <div class="grid grid-cols-5 gap-2 sm:gap-3">
-        {galleryImages.slice(0, 4).map((img: string, idx: number) => (
+        {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
           <button 
             class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : ''}"
             data-index={idx}
           >
-            <img src={img} alt={`Thumb ${idx + 1}`} loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
+            <img 
+              src={img} 
+              alt={`Thumb ${idx + 1}`} 
+              width="200"
+              height="150"
+              loading="lazy" 
+              decoding="async" 
+              class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+            />
           </button>
         ))}
 
         <!-- 5th Thumbnail with 'More Photos' Pop-up Badge -->
-        {galleryImages[4] && (
+        {thumbUrls[4] && (
           <button 
             id="triggerFullGalleryBtn"
             class="h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
             data-index="4"
           >
-            <img src={galleryImages[4]} alt="More Photos" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
+            <img 
+              src={thumbUrls[4]} 
+              alt="More Photos" 
+              width="200"
+              height="150"
+              loading="lazy" 
+              decoding="async" 
+              class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+            />
             <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
               <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos > 0 ? remainingPhotos : totalPhotos}</span>
               <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
@@ -221,13 +251,13 @@ const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
   </div>
 
   <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
-    <img id="lightboxModalImg" src={galleryImages[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+    <img id="lightboxModalImg" src={lightboxUrls[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
     <button id="lightboxPrevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❮</button>
     <button id="lightboxNextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❯</button>
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH CLICK LISTENERS & BACK-BUTTON SAFETY -->
+<!-- CLIENT SCRIPT WITH CLICK LISTENERS & MOBILE BACK-BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
     const mainImg = document.getElementById('heroMainViewImg');
