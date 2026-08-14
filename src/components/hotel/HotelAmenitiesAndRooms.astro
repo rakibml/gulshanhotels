@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (No Dummy Prices & SEO Alt Text Fix)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card Viewport Scroll Fix)
 interface Props {
   hotel: any;
 }
@@ -8,546 +8,349 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelPrice = data.price || "$120 / night";
+const hotelCategory = data.category || "Luxury Hotel";
 
-// Detailed Room Types Data
-const agodaRoomTypes = [
-  {
-    name: "Deluxe Guest Room, 1 King Bed",
-    size: "42 m² / 452 ft²",
-    guests: "Max 2 Adults",
-    bed: "1 King Bed",
-    badges: ["Recommended", "Preferred Choice"],
-    checklist: ["City view", "Air conditioning", "Private bathroom", "Electric kettle", "Hair dryer", "Free toiletries"],
-    fullAmenities: ["High-speed Wi-Fi", "City View", "Air conditioning", "Private bathroom", "Rain Shower", "Electric kettle", "Hair dryer", "Free toiletries", "Work desk", "In-room safe", "24/7 Room service", "Slippers & Bathrobes"],
-    photos: [
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    name: "Deluxe Guest Room, 2 Twin Beds",
-    size: "42 m² / 452 ft²",
-    guests: "Max 2 Adults",
-    bed: "2 Twin Beds",
-    badges: ["Popular with Families"],
-    checklist: ["City view", "Walk-in shower", "Private bathroom", "Work desk", "Coffee maker", "In-room safe"],
-    fullAmenities: ["High-speed Wi-Fi", "City View", "Walk-in shower", "Private bathroom", "Work desk", "Coffee maker", "In-room safe", "Free toiletries", "Hair dryer", "Mini fridge"],
-    photos: [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    name: "Club Lounge Access, Larger Suite, 1 King",
-    size: "58 m² / 624 ft²",
-    guests: "Max 2 Adults",
-    bed: "1 King Bed",
-    badges: ["Club Lounge Access", "High Floor View"],
-    checklist: ["Panoramic city view", "Club Lounge breakfast", "Bathtub & Jacuzzi", "Espresso machine", "Bathrobes & slippers", "Free minibar"],
-    fullAmenities: ["Panoramic city view", "Club Lounge breakfast & evening drinks", "Bathtub & Jacuzzi", "Espresso machine", "Plush Bathrobes & slippers", "Free minibar", "Priority check-in", "Work desk with executive chair"],
-    photos: [
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
-    name: "Presidential Westin Suite, City View",
-    size: "95 m² / 1022 ft²",
-    guests: "Max 3 Adults",
-    bed: "1 Super King Bed",
-    badges: ["VIP Diplomatic Suite", "Luxury Pick"],
-    checklist: ["Private living room", "Dining hall table", "Separate guest toilet", "Luxury Jacuzzi bath", "Personal butler service", "24/7 Room service"],
-    fullAmenities: ["Private living room & dining hall", "Separate guest powder room", "Luxury Jacuzzi bath & rain shower", "Personal butler service", "24/7 Executive room service", "Premium sound system & 65\" TV"],
-    photos: [
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80"
-    ]
-  }
-];
+// 100% Admin CMS Controllable Policies
+const checkIn = data.checkIn || "2:00 PM";
+const checkOut = data.checkOut || "12:00 PM";
+const powerBackup = data.powerBackup || "24/7 Generator";
+const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 ---
 
-<!-- 3RD COMPONENT: AMENITIES & INTERACTIVE ROOM TYPES CAROUSEL -->
-<section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
+<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
+<section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
-    <!-- LEFT COLUMN: AMENITIES & SERVICES -->
-    <div class="lg:col-span-5 space-y-6 text-left">
-      <div class="border-b border-slate-200/80 pb-3">
-        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-          Amenities & Services
+    <!-- LEFT COLUMN (ABOUT {HOTEL TITLE} & HOTEL POLICIES) -->
+    <div class="lg:col-span-7 space-y-8 text-left">
+      
+      <!-- About Hotel Section with Dynamic Title -->
+      <div class="space-y-4">
+        <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
+          About {hotelTitle}
         </h2>
-      </div>
 
-      <!-- 9 Circular Vector Amenity Badges Grid -->
-      <div class="grid grid-cols-3 gap-3 text-center">
-        
-        <!-- Swimming Pool -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>
+        <!-- Hotel Description Container -->
+        <div id="overview-wrapper" class="relative">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+            {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+              <p>
+                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+              </p>
+            )}
           </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Swimming Pool</span>
         </div>
 
-        <!-- Spa & Wellness -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Spa & Wellness</span>
-        </div>
-
-        <!-- Fitness Center -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Fitness Center</span>
-        </div>
-
-        <!-- 3 Restaurants -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">3 Restaurants</span>
-        </div>
-
-        <!-- Free Wi-Fi -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Free Wi-Fi</span>
-        </div>
-
-        <!-- Free Parking -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Free Parking</span>
-        </div>
-
-        <!-- Airport Transfer -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Airport Transfer</span>
-        </div>
-
-        <!-- Meeting & Events -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Meeting & Events</span>
-        </div>
-
-        <!-- 24/7 Room Service -->
-        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-          <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-          </div>
-          <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">24/7 Room Service</span>
-        </div>
-
-      </div>
-
-      <!-- See More Amenities Button -->
-      <div>
+        <!-- Read More Button -->
         <button 
-          id="openAmenitiesModalBtn" 
-          class="w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs uppercase tracking-wider px-6 py-3 rounded-xl border border-slate-300 transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+          id="toggleOverviewBtn" 
+          style="display: none;"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
-          <span>See More Amenities (28+)</span>
-          <span>➔</span>
+          Read More ➔
         </button>
       </div>
+
+      <!-- Hotel Policies & Quick Information Grid -->
+      <div class="pt-4 border-t border-slate-200/80 space-y-4">
+        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Hotel Policies & Essential Info</h3>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+          
+          <!-- Check-In SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-slate-800" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-In</span>
+              <span class="font-black text-slate-900">{checkIn}</span>
+            </div>
+          </div>
+
+          <!-- Check-Out SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-Out</span>
+              <span class="font-black text-slate-900">{checkOut}</span>
+            </div>
+          </div>
+
+          <!-- Price SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Starting Price</span>
+              <span class="font-black text-emerald-900">{hotelPrice}</span>
+            </div>
+          </div>
+
+          <!-- Property Type SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Property Type</span>
+              <span class="font-black text-slate-900">{hotelCategory}</span>
+            </div>
+          </div>
+
+          <!-- Power Backup SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Power Backup</span>
+              <span class="font-black text-emerald-900">{powerBackup}</span>
+            </div>
+          </div>
+
+          <!-- Smoking Policy SVG -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
+            </div>
+            <div>
+              <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Smoking</span>
+              <span class="font-black text-slate-900">{smokingPolicy}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
 
-    <!-- RIGHT COLUMN: SMART ALL ROOM TYPES CAROUSEL -->
-    <div class="lg:col-span-7 space-y-4 text-left">
-      
-      <!-- Section Header -->
-      <div class="border-b border-slate-200/80 pb-3">
-        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-          Room Types
-        </h2>
-        <p class="text-xs text-slate-500 font-medium mt-0.5">Explore all available rooms & suites</p>
-      </div>
-
-      <!-- CAROUSEL TRACK WITH SIDE FLOATING ARROW BUTTONS -->
-      <div class="relative group">
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - DIRECT TARGET WITH SCROLL-MT-24 FOR PERFECT CENTERED ALIGNMENT) -->
+    <div class="lg:col-span-5">
+      <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
-        <!-- Left Floating Arrow Button -->
-        <button 
-          id="roomPrevBtn" 
-          aria-label="Previous Room" 
-          class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95"
-        >
-          ❮
-        </button>
+        <!-- Card Header -->
+        <div class="space-y-1 text-left border-b border-slate-100 pb-4">
+          <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
+            Where can you book this hotel?
+          </h3>
+          <p class="text-xs text-slate-500 font-medium">
+            Compare prices from trusted travel partners.
+          </p>
+        </div>
 
-        <!-- Right Floating Arrow Button -->
-        <button 
-          id="roomNextBtn" 
-          aria-label="Next Room" 
-          class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95"
-        >
-          ❯
-        </button>
+        <!-- Live Stay22 API Rates List Container -->
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[220px]">
+          <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+            <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
+          </div>
+        </div>
 
-        <!-- ROOM CARDS SLIDER WITH SEO ALT TEXT -->
-        <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {agodaRoomTypes.map((room, index) => (
-            <div class="room-card-box w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
-              
-              <div>
-                <!-- PHOTO CAROUSEL HEADER ON CARD -->
-                <div class="h-44 w-full overflow-hidden relative group/roomimg">
-                  <img 
-                    src={room.photos[0]} 
-                    alt={`${room.name} - ${hotelTitle} Room Photo`} 
-                    loading="lazy"
-                    decoding="async"
-                    data-photos={JSON.stringify(room.photos)}
-                    class="room-card-main-img w-full h-full object-cover group-hover/roomimg:scale-105 transition duration-500 cursor-pointer" 
-                  />
-                  
-                  <!-- Card Image Arrow Left -->
-                  <button class="card-img-prev-btn absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-xs flex items-center justify-center backdrop-blur-md opacity-0 group-hover/roomimg:opacity-100 transition z-10 cursor-pointer">❮</button>
-                  
-                  <!-- Card Image Arrow Right -->
-                  <button class="card-img-next-btn absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-xs flex items-center justify-center backdrop-blur-md opacity-0 group-hover/roomimg:opacity-100 transition z-10 cursor-pointer">❯</button>
-
-                  <!-- Photo Counter Badge -->
-                  <span class="card-img-badge absolute bottom-2.5 left-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-white/20 pointer-events-none">
-                    1 / {room.photos.length}
-                  </span>
-                </div>
-
-                <!-- ROOM CONTENT -->
-                <div class="p-5 space-y-2 text-left">
-                  <!-- Room Photos and Details Link -->
-                  <button 
-                    class="open-room-detail-btn text-[11px] font-bold text-emerald-800 hover:underline inline-block cursor-pointer"
-                    data-room-index={index}
-                  >
-                    Room photos and details ➔
-                  </button>
-
-                  <h3 class="font-bold text-slate-900 text-base leading-tight group-hover:text-emerald-800 transition line-clamp-2">
-                    {room.name}
-                  </h3>
-
-                  <!-- Specs Sub-bar (Vector SVG Icons) -->
-                  <div class="text-[11px] text-slate-500 font-semibold flex flex-wrap items-center gap-2 pt-0.5">
-                    <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
-                      <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 7h2v3H8zm0 5h2v3H8zm5-5h2v3h-2zm0 5h2v3h-2z"/></svg>
-                      {room.size}
-                    </span>
-
-                    <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
-                      <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                      {room.guests}
-                    </span>
-
-                    <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
-                      <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M20 9.557V3h-2v2H6V3H4v6.557C2.81 10.25 2 11.525 2 13v8h2v-2h16v2h2v-8c0-1.475-.81-2.75-2-3.443zM18 7v2.05A3.486 3.486 0 0 0 16.5 9c-.83 0-1.58.29-2.18.78A3.47 3.48 0 0 0 12 9c-.83 0-1.58.29-2.18.78A3.486 3.486 0 0 0 8.5 9C7.67 9 6.92 9.29 6.32 9.78V7h11.68z"/></svg>
-                      {room.bed}
-                    </span>
-                  </div>
-
-                  <!-- Badges -->
-                  <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                    {room.badges.map((b) => (
-                      <span class="bg-indigo-50 text-indigo-900 border border-indigo-200 text-[10px] font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                        <svg class="w-3 h-3 fill-indigo-700 shrink-0" width="12" height="12" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-                        <span>{b}</span>
-                      </span>
-                    ))}
-                  </div>
-
-                  <!-- 2-Column Vector Checklist -->
-                  <div class="grid grid-cols-2 gap-x-2 gap-y-1 pt-2 border-t border-slate-100 text-[11px] text-slate-700">
-                    {room.checklist.map((item) => (
-                      <div class="flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        <span class="truncate">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <!-- FULL-WIDTH ACTION BUTTON -->
-              <div class="p-5 pt-0">
-                <a href="#about-and-rates" class="block w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition shadow-md">
-                  Check Live Rates ➔
-                </a>
-              </div>
-
-            </div>
-          ))}
+        <!-- Amber Deal Tip Box -->
+        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
+          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+          </svg>
+          <p class="leading-tight">
+            Compare prices before you book and get the best deal.
+          </p>
         </div>
 
       </div>
-
     </div>
 
   </div>
 </section>
 
-<!-- =================================================== -->
-<!-- POPUP MODAL: ALL 28+ AMENITIES -->
-<!-- =================================================== -->
-<div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
-    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-      <div>
-        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Complete List</span>
-        <h3 class="text-2xl font-black font-serif text-slate-900">All Hotel Amenities & Services</h3>
-      </div>
-      <button id="closeAmenitiesModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
-    </div>
-
-    <div class="space-y-6 text-xs sm:text-sm text-slate-800">
-      <div>
-        <h4 class="font-bold text-emerald-800 uppercase tracking-wider text-xs mb-2.5">Pool, Spa & Wellness</h4>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Swimming Pool</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Jacuzzi & Hot Tub</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Full Body Sauna</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Wellness Massage Spa</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Fitness Center Gym</div>
-        </div>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-emerald-800 uppercase tracking-wider text-xs mb-2.5">Food & Dining</h4>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> 3 Fine Dining Restaurants</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Rooftop Lounge Bar</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Buffet Breakfast</div>
-          <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border"><svg class="w-3.5 h-3.5 fill-emerald-600" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> 24/7 Room Service</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- =================================================== -->
-<!-- POPUP MODAL: SELECTED ROOM PHOTOS & FULL DETAILS -->
-<!-- =================================================== -->
-<div id="selectedRoomModal" data-all-rooms={JSON.stringify(agodaRoomTypes)} class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
-  
-  <!-- Modal Header -->
-  <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
-    <div>
-      <span class="text-[10px] font-black uppercase text-emerald-400 tracking-widest block">Room Inspector & Photos</span>
-      <h3 id="modalSelectedRoomName" class="text-xl sm:text-2xl font-black font-serif text-white">Room Details</h3>
-    </div>
-    <button id="closeSelectedRoomModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
-  </div>
-
-  <!-- Modal Main Image & Info Container -->
-  <div class="max-w-4xl mx-auto my-auto w-full space-y-6 py-4">
-    
-    <!-- Modal Photo Slider -->
-    <div class="relative w-full h-[300px] sm:h-[400px] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-      <img id="modalRoomMainImg" src="" alt={`${hotelTitle} Room Photo`} loading="lazy" decoding="async" class="w-full h-full object-cover" />
-      <button id="modalRoomPrevPhotoBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❮</button>
-      <button id="modalRoomNextPhotoBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❯</button>
-      <span id="modalRoomPhotoBadge" class="absolute bottom-3 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">1 / 1</span>
-    </div>
-
-    <!-- Modal Room Specs & Full Checklist -->
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl text-left space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <div id="modalRoomSpecs" class="text-xs text-slate-300 font-semibold flex items-center gap-3"></div>
-      </div>
-
-      <div class="space-y-2">
-        <h4 class="text-xs font-black uppercase text-emerald-400 tracking-wider">Room Features & Included Amenities</h4>
-        <div id="modalRoomChecklistGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-200"></div>
-      </div>
-
-      <div class="pt-2">
-        <a href="#about-and-rates" id="modalCheckRatesBtn" class="block w-full bg-[#00e676] hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl text-center transition shadow-lg">
-          Check Live Rates ➔
-        </a>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- CLIENT SCRIPTS -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & STRICT 150-WORD TRUNCATOR -->
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. Amenities Modal
-    const amenModal = document.getElementById('allAmenitiesModal');
-    const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
-    const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
+    const ratesContainer = document.getElementById('aboutRatesTableContainer');
 
-    function openAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.remove('hidden');
-      try { history.pushState({ amenModalOpen: true }, ''); } catch (e) {}
-    }
+    if (ratesContainer) {
+      const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
+      const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
-    function closeAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.add('hidden');
-    }
+      try {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const json = await res.json();
+          
+          let rawResults = [];
+          if (json && Array.isArray(json.results)) {
+            rawResults = json.results;
+          } else if (Array.isArray(json)) {
+            rawResults = json;
+          }
 
-    if (openAmenBtn) openAmenBtn.addEventListener('click', () => openAmenModalSafe());
-    if (closeAmenBtn) closeAmenBtn.addEventListener('click', () => closeAmenModalSafe());
+          const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
+          const targetKeywords = hotelName.toLowerCase()
+            .split(/\s+/)
+            .filter(word => word.length > 2 && !ignoreWords.includes(word));
 
-    if (amenModal) {
-      amenModal.addEventListener('click', (e) => {
-        if (e.target === amenModal) closeAmenModalSafe();
-      });
-    }
+          let deals = [];
+          rawResults.forEach(item => {
+            const itemName = (item.name || '').toLowerCase();
+            const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
 
-    // 2. Selected Room Modal
-    const roomModal = document.getElementById('selectedRoomModal');
-    const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
-    const modalRoomTitle = document.getElementById('modalSelectedRoomName');
-    const modalRoomImg = document.getElementById('modalRoomMainImg');
-    const modalRoomSpecs = document.getElementById('modalRoomSpecs');
-    const modalRoomGrid = document.getElementById('modalRoomChecklistGrid');
-    const modalBadge = document.getElementById('modalRoomPhotoBadge');
-    const modalPrevPhotoBtn = document.getElementById('modalRoomPrevPhotoBtn');
-    const modalNextPhotoBtn = document.getElementById('modalRoomNextPhotoBtn');
-    const modalCheckRatesBtn = document.getElementById('modalCheckRatesBtn');
+            if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
+              Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
+                const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
+                const linkUrl = supplierData.link || item.url || '#';
+                
+                let logoUrl = (supplierData.media && supplierData.media.logoSquare) 
+                  ? supplierData.media.logoSquare 
+                  : `https://r2.stay22.com/2025_${supplierKey}.png`;
 
-    const allRoomsData = JSON.parse(roomModal?.dataset.allRooms || '[]');
-    let modalPhotos = [];
-    let modalActivePhotoIdx = 0;
+                let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
+                if (supplierKey === 'booking') {
+                  providerName = 'Booking.com';
+                } else if (supplierKey === 'hotelscom') {
+                  providerName = 'Hotels.com';
+                } else if (supplierKey === 'expedia') {
+                  providerName = 'Expedia';
+                } else if (supplierKey === 'vrbo') {
+                  providerName = 'Vrbo';
+                }
 
-    function openRoomModalSafe(roomObj) {
-      if (!roomModal || !roomObj) return;
-      if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name;
-      
-      if (modalRoomSpecs) {
-        modalRoomSpecs.innerHTML = `<span>📐 ${roomObj.size}</span><span>•</span><span>👤 ${roomObj.guests}</span><span>•</span><span>🛏️ ${roomObj.bed}</span>`;
-      }
-
-      if (modalRoomGrid && Array.isArray(roomObj.fullAmenities || roomObj.checklist)) {
-        const list = roomObj.fullAmenities || roomObj.checklist;
-        modalRoomGrid.innerHTML = list.map(item => `<div class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span><span>${item}</span></div>`).join('');
-      }
-
-      modalPhotos = roomObj.photos || [];
-      modalActivePhotoIdx = 0;
-      updateModalPhoto(0);
-
-      roomModal.classList.remove('hidden');
-      try { history.pushState({ roomModalOpen: true }, ''); } catch (e) {}
-    }
-
-    function updateModalPhoto(idx) {
-      if (!modalRoomImg || !modalPhotos.length) return;
-      modalActivePhotoIdx = (idx + modalPhotos.length) % modalPhotos.length;
-      modalRoomImg.src = modalPhotos[modalActivePhotoIdx];
-      if (modalBadge) modalBadge.textContent = `${modalActivePhotoIdx + 1} / ${modalPhotos.length}`;
-    }
-
-    if (modalPrevPhotoBtn) modalPrevPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx - 1));
-    if (modalNextPhotoBtn) modalNextPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx + 1));
-
-    if (modalCheckRatesBtn) {
-      modalCheckRatesBtn.addEventListener('click', () => {
-        if (roomModal) roomModal.classList.add('hidden');
-      });
-    }
-
-    function closeRoomModalSafe() {
-      if (!roomModal) return;
-      roomModal.classList.add('hidden');
-    }
-
-    // Intercept Mobile Back Button
-    window.addEventListener('popstate', () => {
-      if (amenModal && !amenModal.classList.contains('hidden')) {
-        amenModal.classList.add('hidden');
-      }
-      if (roomModal && !roomModal.classList.contains('hidden')) {
-        roomModal.classList.add('hidden');
-      }
-    });
-
-    if (closeRoomModalBtn) closeRoomModalBtn.addEventListener('click', () => closeRoomModalSafe());
-    if (roomModal) {
-      roomModal.addEventListener('click', (e) => {
-        if (e.target === roomModal) closeRoomModalSafe();
-      });
-    }
-
-    // 3. Room Card Photo Slider & Details Click
-    document.querySelectorAll('.room-card-box').forEach((card, index) => {
-      const img = card.querySelector('.room-card-main-img');
-      const prevBtn = card.querySelector('.card-img-prev-btn');
-      const nextBtn = card.querySelector('.card-img-next-btn');
-      const badge = card.querySelector('.card-img-badge');
-      const detailsBtn = card.querySelector('.open-room-detail-btn');
-
-      const roomObj = allRoomsData[index] || {};
-
-      if (img) {
-        const photos = roomObj.photos || JSON.parse(img.dataset.photos || '[]');
-        let currentPhotoIdx = 0;
-
-        function updateCardPhoto(idx) {
-          if (!photos.length) return;
-          currentPhotoIdx = (idx + photos.length) % photos.length;
-          img.src = photos[currentPhotoIdx];
-          if (badge) badge.textContent = `${currentPhotoIdx + 1} / ${photos.length}`;
-        }
-
-        if (prevBtn) {
-          prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateCardPhoto(currentPhotoIdx - 1);
+                if (priceVal > 0) {
+                  deals.push({
+                    provider: providerName,
+                    price: priceVal,
+                    url: linkUrl,
+                    logo: logoUrl
+                  });
+                }
+              });
+            }
           });
-        }
 
-        if (nextBtn) {
-          nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateCardPhoto(currentPhotoIdx + 1);
-          });
-        }
+          // Sort deals ascending by price
+          deals.sort((a, b) => a.price - b.price);
 
-        img.addEventListener('click', () => {
-          openRoomModalSafe(roomObj);
+          if (deals.length > 0) {
+            ratesContainer.innerHTML = deals.map((item) => `
+              <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
+                    <img 
+                      src="${item.logo}" 
+                      alt="${item.provider} logo" 
+                      width="32"
+                      height="32"
+                      loading="lazy"
+                      class="w-full h-full object-contain"
+                      onerror="this.style.display='none';"
+                    />
+                  </div>
+                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4">
+                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
+                    View Deal
+                  </a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${hotelName}" right now.</div>`;
+          }
+        }
+      } catch (e) {
+        console.error('Rate fetch error:', e);
+      }
+    }
+
+    // 2. ENHANCE LINKS TO OPEN IN NEW TAB
+    function applyLinkAttributes() {
+      document.querySelectorAll('#overview-text a').forEach(link => {
+        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+        if (link.hostname && link.hostname !== window.location.hostname) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    }
+
+    // 3. PERFECT HTML-PRESERVING EXACT 150-WORD TRUNCATOR
+    const overviewTextEl = document.getElementById('overview-text');
+    const toggleBtn = document.getElementById('toggleOverviewBtn');
+
+    if (overviewTextEl && toggleBtn) {
+      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
+
+      const rawText = overviewTextEl.innerText.trim();
+      const words = rawText.split(/\s+/);
+
+      if (words.length > 150) {
+        let currentWordCount = 0;
+        let visibleHtml = '';
+        let hiddenHtml = '';
+        let isCut = false;
+
+        const nodes = Array.from(overviewTextEl.childNodes);
+
+        nodes.forEach(node => {
+          if (isCut) {
+            hiddenHtml += node.outerHTML || node.textContent || '';
+            return;
+          }
+
+          const nodeText = node.textContent || '';
+          const nodeWords = nodeText.trim().split(/\s+/).filter(w => w.length > 0);
+
+          if (currentWordCount + nodeWords.length <= 150) {
+            currentWordCount += nodeWords.length;
+            visibleHtml += node.outerHTML || node.textContent || '';
+          } else {
+            const needed = 150 - currentWordCount;
+            const part1 = nodeWords.slice(0, needed).join(' ');
+            const part2 = nodeWords.slice(needed).join(' ');
+
+            visibleHtml += part1;
+            hiddenHtml += ' ' + part2;
+            isCut = true;
+          }
         });
 
-        if (detailsBtn) {
-          detailsBtn.addEventListener('click', () => {
-            openRoomModalSafe(roomObj);
-          });
-        }
+        overviewTextEl.innerHTML = `
+          <span>${visibleHtml}</span>
+          <span id="overview-dots">... </span>
+          <span id="overview-more" class="hidden">${hiddenHtml}</span>
+        `;
+
+        applyLinkAttributes();
+        toggleBtn.style.display = 'inline-flex';
+
+        toggleBtn.addEventListener('click', () => {
+          const moreSpan = document.getElementById('overview-more');
+          const dotsSpan = document.getElementById('overview-dots');
+
+          if (moreSpan && dotsSpan) {
+            const isHidden = moreSpan.classList.contains('hidden');
+            if (isHidden) {
+              moreSpan.classList.remove('hidden');
+              dotsSpan.classList.add('hidden');
+              toggleBtn.innerHTML = 'Read Less ▲';
+            } else {
+              moreSpan.classList.add('hidden');
+              dotsSpan.classList.remove('hidden');
+              toggleBtn.innerHTML = 'Read More ➔';
+            }
+          }
+        });
+      } else {
+        applyLinkAttributes();
+        toggleBtn.style.display = 'none';
       }
-    });
-
-    // 4. Room Carousel Track Side Floating Arrows
-    const track = document.getElementById('roomsCarouselTrack');
-    const prevTrackBtn = document.getElementById('roomPrevBtn');
-    const nextTrackBtn = document.getElementById('roomNextBtn');
-
-    if (track && prevTrackBtn && nextTrackBtn) {
-      prevTrackBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -320, behavior: 'smooth' });
-      });
-
-      nextTrackBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 320, behavior: 'smooth' });
-      });
     }
   });
 </script>
