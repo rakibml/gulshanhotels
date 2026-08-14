@@ -29,18 +29,6 @@ amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
 amenities:
-  - Swimming Pool,24/7 Room Service,3 Fine Dining Restaurants
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
   - Service
   - Service
   - Service
@@ -51,6 +39,7 @@ rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
   - name: Deluxe Guest Room, 1 King Bed
+    price: ''
     size: 42 m² / 452 ft²
     guests: Max 2 Adults
     bed: 1 King Bed
@@ -63,7 +52,27 @@ rooms:
     badges:
       - Deluxe Guest Room, 1 King Bed
     checklist:
-      - City view, Walk-in shower, Private bathroom ,Work desk, Coffee maker ,In-room safe,City view, Walk-in shower ,Private bathroom ,Work desk ,Coffee maker, In-room safe
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
 location_notice: ''
 enable_nearby: true
 nearby_places: []
