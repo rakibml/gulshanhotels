@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card Viewport Scroll Fix)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Pure Dynamic CMS Policies & HTML Link Protection)
 interface Props {
   hotel: any;
 }
@@ -8,7 +8,7 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelPrice = data.price || "$120 / night";
+const hotelPrice = data.price || "Check Price";
 const hotelCategory = data.category || "Luxury Hotel";
 
 // 100% Admin CMS Controllable Policies
@@ -31,18 +31,18 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container -->
+        <!-- Hotel Description Container with Forced Link Styling ([&_a]) -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
-                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+                Located in the heart of Gulshan, {hotelTitle} offers executive lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
               </p>
             )}
           </div>
         </div>
 
-        <!-- Read More Button -->
+        <!-- Read More Button (Hidden by default, shown ONLY if text > 150 words) -->
         <button 
           id="toggleOverviewBtn" 
           style="display: none;"
