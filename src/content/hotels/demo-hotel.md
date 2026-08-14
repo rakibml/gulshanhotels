@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: demo hotel
-title_style: style_1
+title_style: style_5
 category: 5-Star Luxury Stay
 location: Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 description: ''
@@ -11,6 +11,7 @@ gallery:
   - https://picsum.photos/id/1060/1920/1280.webp
   - https://picsum.photos/id/590/1920/1280.webp
   - https://picsum.photos/id/181/1920/1280.webp
+  - https://picsum.photos/id/690/1920/1280.webp
 enable_view_prices: true
 enable_official_site: true
 popular: true
