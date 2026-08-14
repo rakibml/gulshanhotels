@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (Hotels.com Signature Room Information Popup Modal)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (Strict Max 6 Card Amenities & Vector Icons in Modal)
 interface Props {
   hotel: any;
 }
@@ -31,11 +31,18 @@ const iconMap: Record<string, string> = {
   shuttle: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
   meeting: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>`,
   room_service: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
-  checkmark: `<svg class="w-4 h-4 fill-emerald-600" width="16" height="16" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
+  checkmark: `<svg class="w-4 h-4 fill-emerald-600" width="16" height="16" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
+  
+  // Room Feature Specific Icons
+  view: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
+  ac: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
+  bath: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 13V4.83C20 3.27 18.73 2 17.17 2c-.75 0-1.47.3-2 .83l-1.25 1.25c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l.59-.59c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-1.5 1.5c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.5-1.5c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-.59.59c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.25-1.25c.53-.53.83-1.25.83-2V13h-2zm1 2H3c-.55 0-1 .45-1 1v2c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-2c0-.55-.45-1-1-1z"/></svg>`,
+  kettle: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H4V5h16v10z"/></svg>`,
+  dryer: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`
 };
 ---
 
-<!-- 3RD COMPONENT: AMENITIES & AGODA SIGNATURE ROOM CARDS -->
+<!-- 3RD COMPONENT: AMENITIES & SMART ROOM TYPES CAROUSEL -->
 {(showAmenities || showRooms) && (
   <section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -107,10 +114,16 @@ const iconMap: Record<string, string> = {
               <button id="roomNextBtn" aria-label="Next Room" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
             )}
 
+            <!-- ROOM CARDS SLIDER (STRICT MAX 6 CARD AMENITIES) -->
             <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {roomsList.map((room: any, index: number) => {
                 const roomPhotos = (room.photos && room.photos.length > 0) ? room.photos : (room.image ? [room.image] : []);
                 const roomAltText = room.image_alt || `${room.name || 'Room'} - ${hotelTitle} Room Photo`;
+
+                // STRICT MAX 6 AMENITIES ON CARD FRONT
+                const fullChecklist = room.checklist || [];
+                const cardChecklist = fullChecklist.slice(0, 6);
+                const extraCount = fullChecklist.length > 6 ? fullChecklist.length - 6 : 0;
 
                 return (
                   <div class="room-card-box w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
@@ -144,6 +157,7 @@ const iconMap: Record<string, string> = {
 
                       <!-- ROOM CONTENT -->
                       <div class="p-5 space-y-2 text-left">
+                        <!-- Room Photos and Details Link -->
                         <button 
                           class="open-room-detail-btn text-[11px] font-bold text-emerald-800 hover:underline inline-block cursor-pointer"
                           data-room-index={index}
@@ -191,27 +205,36 @@ const iconMap: Record<string, string> = {
                           </div>
                         )}
 
-                        <!-- Room Checklist Items with Forced SVG Scaling Container -->
-                        {room.checklist && room.checklist.length > 0 && (
-                          <div class="grid grid-cols-2 gap-x-2 gap-y-2 pt-2 border-t border-slate-100 text-[11px] text-slate-700">
-                            {room.checklist.map((item: any) => {
-                              const nameStr = typeof item === 'string' ? item : (item?.name || 'Feature');
-                              const customSvg = typeof item === 'object' ? item?.custom_svg : '';
-                              const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
+                        <!-- Room Checklist Items (STRICT MAX 6 ITEMS) -->
+                        {cardChecklist && cardChecklist.length > 0 && (
+                          <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                            <div class="grid grid-cols-2 gap-x-2 gap-y-2 text-[11px] text-slate-700">
+                              {cardChecklist.map((item: any) => {
+                                const nameStr = typeof item === 'string' ? item : (item?.name || 'Feature');
+                                const customSvg = typeof item === 'object' ? item?.custom_svg : '';
+                                const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
 
-                              return (
-                                <div class="flex items-center gap-2 min-h-[22px]">
-                                  <div class="w-4 h-4 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full [&_svg]:block">
-                                    {customSvg ? (
-                                      <Fragment set:html={customSvg} />
-                                    ) : (
-                                      <Fragment set:html={iconMap[iconKey] || iconMap.checkmark} />
-                                    )}
+                                return (
+                                  <div class="flex items-center gap-2 min-h-[22px]">
+                                    <div class="w-4 h-4 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full [&_svg]:block">
+                                      {customSvg ? (
+                                        <Fragment set:html={customSvg} />
+                                      ) : (
+                                        <Fragment set:html={iconMap[iconKey] || iconMap.checkmark} />
+                                      )}
+                                    </div>
+                                    <span class="truncate leading-tight font-medium">{nameStr}</span>
                                   </div>
-                                  <span class="truncate leading-tight font-medium">{nameStr}</span>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
+
+                            <!-- More Amenities Trigger Link if > 6 -->
+                            {extraCount > 0 && (
+                              <button class="open-room-detail-btn text-[10px] font-extrabold text-emerald-800 hover:underline pt-1 inline-block cursor-pointer">
+                                + {extraCount} more features in Popup ➔
+                              </button>
+                            )}
                           </div>
                         )}
 
@@ -239,9 +262,7 @@ const iconMap: Record<string, string> = {
   </section>
 )}
 
-<!-- =================================================== -->
 <!-- POPUP MODAL: ALL 28+ CATEGORIZED AMENITIES -->
-<!-- =================================================== -->
 <div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
@@ -266,9 +287,7 @@ const iconMap: Record<string, string> = {
   </div>
 </div>
 
-<!-- =================================================== -->
-<!-- POPUP MODAL: HOTELS.COM SIGNATURE ROOM INFORMATION -->
-<!-- =================================================== -->
+<!-- POPUP MODAL: HOTELS.COM SIGNATURE ROOM INFORMATION WITH VECTOR SVG ICONS -->
 <div id="selectedRoomModal" data-all-rooms={JSON.stringify(roomsList)} class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
   
   <!-- Modal Header Bar -->
@@ -295,7 +314,7 @@ const iconMap: Record<string, string> = {
       Deluxe Room, 1 King Bed, City View
     </h3>
 
-    <!-- HOTELS.COM FEATURED HIGHLIGHTS CARD (CREAM/BEIGE CARD - TOP RED BOX IN MOCKUP) -->
+    <!-- HOTELS.COM FEATURED HIGHLIGHTS CARD WITH VECTOR SVG ICONS -->
     <div class="bg-[#fcfaf5] text-slate-900 p-5 sm:p-6 rounded-3xl border border-amber-200/80 shadow-md space-y-3">
       <span class="text-[10px] font-black uppercase text-amber-900 tracking-wider block">Featured Amenities Highlights</span>
       <div id="modalFeaturedHighlightsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-bold text-slate-800">
@@ -303,10 +322,10 @@ const iconMap: Record<string, string> = {
       </div>
     </div>
 
-    <!-- HOTELS.COM KEY ROOM SPECS LIST (BOTTOM LEFT RED BOX IN MOCKUP) -->
+    <!-- HOTELS.COM KEY ROOM SPECS LIST -->
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
       <div id="modalRoomSpecs" class="space-y-2 text-xs sm:text-sm text-slate-200 font-bold border-b border-slate-800 pb-3">
-        <!-- Rendered vertical specs: City view, Free parking, 37 sq m, 1 bedroom, Sleeps 3 -->
+        <!-- Rendered vertical specs -->
       </div>
 
       <div class="space-y-2">
@@ -327,6 +346,16 @@ const iconMap: Record<string, string> = {
 <!-- CLIENT SCRIPTS -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
+    // Vector SVG Icon Map for Modal Rendering
+    const svgIconMap = {
+      view: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
+      ac: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
+      bath: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M20 13V4.83C20 3.27 18.73 2 17.17 2c-.75 0-1.47.3-2 .83l-1.25 1.25c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l.59-.59c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-1.5 1.5c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.5-1.5c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-.59.59c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.25-1.25c.53-.53.83-1.25.83-2V13h-2zm1 2H3c-.55 0-1 .45-1 1v2c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-2c0-.55-.45-1-1-1z"/></svg>`,
+      kettle: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H4V5h16v10z"/></svg>`,
+      dryer: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`,
+      checkmark: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
+    };
+
     // 1. Amenities Modal
     const amenModal = document.getElementById('allAmenitiesModal');
     const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
@@ -352,7 +381,7 @@ const iconMap: Record<string, string> = {
       });
     }
 
-    // 2. Hotels.com Signature Selected Room Modal
+    // 2. Hotels.com Selected Room Modal
     const roomModal = document.getElementById('selectedRoomModal');
     const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
     const modalRoomTitle = document.getElementById('modalSelectedRoomName');
@@ -373,16 +402,28 @@ const iconMap: Record<string, string> = {
       if (!roomModal || !roomObj) return;
       if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name || 'Room Details';
       
-      // Top Beige Featured Highlights Grid (Matching Image 66)
+      // Top Beige Featured Highlights Grid (WITH VECTOR SVG ICONS)
       if (modalHighlightsGrid) {
-        const topList = roomObj.checklist ? roomObj.checklist.slice(0, 6) : ['Air-conditioning', 'Connecting rooms', 'Pillowtop mattress', 'Bathrobes', 'City View', 'Free Wi-Fi'];
+        const topList = roomObj.checklist ? roomObj.checklist.slice(0, 6) : ['Air conditioning', 'Connecting rooms', 'Pillowtop mattress', 'Bathrobes', 'City View', 'Free Wi-Fi'];
         modalHighlightsGrid.innerHTML = topList.map(item => {
           const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
-          return `<div class="flex items-center gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200/60 shadow-sm"><span class="text-amber-800">✔</span><span>${nameStr}</span></div>`;
+          const customSvg = typeof item === 'object' ? item?.custom_svg : '';
+          const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
+
+          const svgContent = customSvg ? customSvg : (svgIconMap[iconKey] || svgIconMap.checkmark);
+
+          return `
+            <div class="flex items-center gap-2 bg-white/90 p-2.5 rounded-xl border border-amber-200/80 shadow-sm">
+              <div class="w-4 h-4 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-amber-800">
+                ${svgContent}
+              </div>
+              <span class="truncate">${nameStr}</span>
+            </div>
+          `;
         }).join('');
       }
 
-      // Key Specs List (Matching Bottom Left Box in Image 66)
+      // Key Specs List
       if (modalRoomSpecs) {
         modalRoomSpecs.innerHTML = `
           ${roomObj.size ? `<div class="flex items-center gap-2"><svg class="w-4 h-4 fill-emerald-400" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg><span>${roomObj.size}</span></div>` : ''}
@@ -391,13 +432,25 @@ const iconMap: Record<string, string> = {
         `;
       }
 
-      // Full Amenities Checklist
+      // Full Amenities Checklist with Vector SVGs
       if (modalRoomGrid) {
         const list = roomObj.checklist || roomObj.fullAmenities || [];
         if (list && list.length > 0) {
           modalRoomGrid.innerHTML = list.map(item => {
             const nameStr = typeof item === 'string' ? item : (item?.name || 'Feature');
-            return `<div class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span><span>${nameStr}</span></div>`;
+            const customSvg = typeof item === 'object' ? item?.custom_svg : '';
+            const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
+
+            const svgContent = customSvg ? customSvg : (svgIconMap[iconKey] || svgIconMap.checkmark);
+
+            return `
+              <div class="flex items-center gap-2 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+                <div class="w-4 h-4 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-emerald-400">
+                  ${svgContent}
+                </div>
+                <span class="text-xs font-semibold text-slate-200 truncate">${nameStr}</span>
+              </div>
+            `;
           }).join('');
         } else {
           modalRoomGrid.innerHTML = `<span class="text-slate-400">Standard Room Features Included.</span>`;
