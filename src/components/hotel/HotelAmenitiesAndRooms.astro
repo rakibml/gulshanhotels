@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Pure Dynamic Amenities Count & Modal)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (Hybrid Custom SVG + Dropdown Icon System)
 interface Props {
   hotel: any;
 }
@@ -8,20 +8,31 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-
-// Dynamic Amenities List from CMS
 const amenitiesList = data.amenities || [];
 const totalAmenitiesCount = amenitiesList.length;
 
-// First 9 Amenities for Main Grid Page
+// Top 9 Amenities for Main Grid
 const top9Amenities = amenitiesList.slice(0, 9);
 
-// Section Toggles
 const showAmenities = data.enable_amenities !== false && totalAmenitiesCount > 0;
 const showSeeMoreBtn = totalAmenitiesCount > 9;
 
 const roomsList = data.rooms || [];
 const showRooms = roomsList.length > 0;
+
+// Pre-Built Vector SVG Icon Dictionary
+const iconMap: Record<string, string> = {
+  pool: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
+  spa: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
+  gym: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
+  restaurant: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
+  wifi: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
+  parking: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>`,
+  shuttle: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
+  meeting: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>`,
+  room_service: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
+  checkmark: `<svg class="w-5 h-5 fill-emerald-600" width="20" height="20" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
+};
 ---
 
 <!-- 3RD COMPONENT: AMENITIES & SMART ROOM TYPES CAROUSEL -->
@@ -29,28 +40,38 @@ const showRooms = roomsList.length > 0;
   <section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
       
-      <!-- LEFT COLUMN: AMENITIES & SERVICES (RENDERED ONLY IF CMS HAS AMENITIES) -->
+      <!-- LEFT COLUMN: AMENITIES & SERVICES -->
       {showAmenities && (
         <div class={showRooms ? "lg:col-span-5 space-y-6 text-left" : "lg:col-span-12 space-y-6 text-left"}>
           <div class="border-b border-slate-200/80 pb-3">
             <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-              Amenities & Services
+              {data.amenities_title || "Amenities & Services"}
             </h2>
           </div>
 
-          <!-- Dynamic CMS Amenities Grid (Displays Top 9) -->
+          <!-- Hybrid Icon Amenities Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
-            {top9Amenities.map((item: string) => (
-              <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-                  <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            {top9Amenities.map((item: any) => {
+              const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
+              const customSvg = typeof item === 'object' ? item?.custom_svg : '';
+              const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
+
+              return (
+                <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
+                  <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0 overflow-hidden p-1">
+                    {customSvg ? (
+                      <Fragment set:html={customSvg} />
+                    ) : (
+                      <Fragment set:html={iconMap[iconKey] || iconMap.checkmark} />
+                    )}
+                  </div>
+                  <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">{nameStr}</span>
                 </div>
-                <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">{item}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <!-- See All Amenities Button (Shows Dynamic Count, Hidden if <= 9) -->
+          <!-- See All Amenities Button -->
           {showSeeMoreBtn && (
             <div>
               <button 
@@ -65,42 +86,25 @@ const showRooms = roomsList.length > 0;
         </div>
       )}
 
-      <!-- RIGHT COLUMN: SMART ROOM TYPES CAROUSEL (RENDERED ONLY IF CMS HAS ROOMS) -->
+      <!-- RIGHT COLUMN: SMART ROOM TYPES CAROUSEL -->
       {showRooms && (
         <div class={showAmenities ? "lg:col-span-7 space-y-4 text-left" : "lg:col-span-12 space-y-4 text-left"}>
           
-          <!-- Section Header -->
           <div class="border-b border-slate-200/80 pb-3">
             <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-              Room Types
+              {data.rooms_title || "Room Types"}
             </h2>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Explore available rooms & suites</p>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">{data.rooms_subtitle || "Explore all available rooms & suites"}</p>
           </div>
 
-          <!-- CAROUSEL TRACK WITH SIDE FLOATING ARROW BUTTONS -->
           <div class="relative group">
-            
             {roomsList.length > 2 && (
-              <button 
-                id="roomPrevBtn" 
-                aria-label="Previous Room" 
-                class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95"
-              >
-                ❮
-              </button>
+              <button id="roomPrevBtn" aria-label="Previous Room" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❮</button>
+            )}
+            {roomsList.length > 2 && (
+              <button id="roomNextBtn" aria-label="Next Room" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
             )}
 
-            {roomsList.length > 2 && (
-              <button 
-                id="roomNextBtn" 
-                aria-label="Next Room" 
-                class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95"
-              >
-                ❯
-              </button>
-            )}
-
-            <!-- PURE CMS ROOM CARDS SLIDER -->
             <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {roomsList.map((room: any, index: number) => {
                 const roomPhotos = (room.photos && room.photos.length > 0) ? room.photos : (room.image ? [room.image] : []);
@@ -109,7 +113,6 @@ const showRooms = roomsList.length > 0;
                   <div class="room-card-box w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
                     
                     <div>
-                      <!-- PHOTO CAROUSEL HEADER ON CARD -->
                       <div class="h-44 w-full overflow-hidden relative group/roomimg">
                         <img 
                           src={roomPhotos[0] || 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80'} 
@@ -135,7 +138,6 @@ const showRooms = roomsList.length > 0;
                         )}
                       </div>
 
-                      <!-- ROOM CONTENT -->
                       <div class="p-5 space-y-2 text-left">
                         <button 
                           class="open-room-detail-btn text-[11px] font-bold text-emerald-800 hover:underline inline-block cursor-pointer"
@@ -148,7 +150,6 @@ const showRooms = roomsList.length > 0;
                           {room.name || 'Standard Room'}
                         </h3>
 
-                        <!-- Specs Sub-bar -->
                         <div class="text-[11px] text-slate-500 font-semibold flex flex-wrap items-center gap-2 pt-0.5">
                           {room.size && (
                             <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
@@ -172,7 +173,6 @@ const showRooms = roomsList.length > 0;
                           )}
                         </div>
 
-                        <!-- Badges if provided in CMS -->
                         {room.badges && room.badges.length > 0 && (
                           <div class="flex flex-wrap items-center gap-1.5 pt-1">
                             {room.badges.map((b: string) => (
@@ -184,7 +184,6 @@ const showRooms = roomsList.length > 0;
                           </div>
                         )}
 
-                        <!-- Checklist if provided in CMS -->
                         {room.checklist && room.checklist.length > 0 && (
                           <div class="grid grid-cols-2 gap-x-2 gap-y-1 pt-2 border-t border-slate-100 text-[11px] text-slate-700">
                             {room.checklist.map((item: string) => (
@@ -198,7 +197,6 @@ const showRooms = roomsList.length > 0;
                       </div>
                     </div>
 
-                    <!-- FULL-WIDTH ACTION BUTTON -->
                     <div class="p-5 pt-0">
                       <a href="#rates-card" class="block w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition shadow-md">
                         Check Live Rates ➔
@@ -219,9 +217,7 @@ const showRooms = roomsList.length > 0;
   </section>
 )}
 
-<!-- =================================================== -->
-<!-- POPUP MODAL: ALL DYNAMIC CMS AMENITIES -->
-<!-- =================================================== -->
+<!-- POPUP MODAL: ALL DYNAMIC AMENITIES -->
 <div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
@@ -232,58 +228,18 @@ const showRooms = roomsList.length > 0;
       <button id="closeAmenitiesModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
     </div>
 
-    <!-- Pure Dynamic Amenities Grid in Modal -->
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-800">
-      {amenitiesList.map((item: string) => (
-        <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold">
-          <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-          <span>{item}</span>
-        </div>
-      ))}
-    </div>
-
-  </div>
-</div>
-
-<!-- =================================================== -->
-<!-- POPUP MODAL: SELECTED ROOM PHOTOS & FULL DETAILS -->
-<!-- =================================================== -->
-<div id="selectedRoomModal" data-all-rooms={JSON.stringify(roomsList)} class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
-  
-  <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
-    <div>
-      <span class="text-[10px] font-black uppercase text-emerald-400 tracking-widest block">Room Inspector & Photos</span>
-      <h3 id="modalSelectedRoomName" class="text-xl sm:text-2xl font-black font-serif text-white">Room Details</h3>
-    </div>
-    <button id="closeSelectedRoomModalBtn" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
-  </div>
-
-  <div class="max-w-4xl mx-auto my-auto w-full space-y-6 py-4">
-    <div class="relative w-full h-[300px] sm:h-[400px] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-      <img id="modalRoomMainImg" src="" alt={`${hotelTitle} Room Photo`} loading="lazy" decoding="async" class="w-full h-full object-cover" />
-      <button id="modalRoomPrevPhotoBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❮</button>
-      <button id="modalRoomNextPhotoBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❯</button>
-      <span id="modalRoomPhotoBadge" class="absolute bottom-3 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">1 / 1</span>
-    </div>
-
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl text-left space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <div id="modalRoomSpecs" class="text-xs text-slate-300 font-semibold flex items-center gap-3"></div>
-      </div>
-
-      <div class="space-y-2">
-        <h4 class="text-xs font-black uppercase text-emerald-400 tracking-wider">Room Features & Included Amenities</h4>
-        <div id="modalRoomChecklistGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-200"></div>
-      </div>
-
-      <div class="pt-2">
-        <a href="#rates-card" id="modalCheckRatesBtn" class="block w-full bg-[#00e676] hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl text-center transition shadow-lg">
-          Check Live Rates ➔
-        </a>
-      </div>
+      {amenitiesList.map((item: any) => {
+        const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
+        return (
+          <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold">
+            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>{nameStr}</span>
+          </div>
+        );
+      })}
     </div>
   </div>
-
 </div>
 
 <!-- CLIENT SCRIPTS -->
@@ -294,159 +250,14 @@ const showRooms = roomsList.length > 0;
     const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
     const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
 
-    function openAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.remove('hidden');
-      try { history.pushState({ amenModalOpen: true }, ''); } catch (e) {}
+    if (openAmenBtn && amenModal) {
+      openAmenBtn.addEventListener('click', () => amenModal.classList.remove('hidden'));
+    }
+    if (closeAmenBtn && amenModal) {
+      closeAmenBtn.addEventListener('click', () => amenModal.classList.add('hidden'));
     }
 
-    function closeAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.add('hidden');
-    }
-
-    if (openAmenBtn) openAmenBtn.addEventListener('click', () => openAmenModalSafe());
-    if (closeAmenBtn) closeAmenBtn.addEventListener('click', () => closeAmenModalSafe());
-
-    if (amenModal) {
-      amenModal.addEventListener('click', (e) => {
-        if (e.target === amenModal) closeAmenModalSafe();
-      });
-    }
-
-    // 2. Selected Room Modal
-    const roomModal = document.getElementById('selectedRoomModal');
-    const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
-    const modalRoomTitle = document.getElementById('modalSelectedRoomName');
-    const modalRoomImg = document.getElementById('modalRoomMainImg');
-    const modalRoomSpecs = document.getElementById('modalRoomSpecs');
-    const modalRoomGrid = document.getElementById('modalRoomChecklistGrid');
-    const modalBadge = document.getElementById('modalRoomPhotoBadge');
-    const modalPrevPhotoBtn = document.getElementById('modalRoomPrevPhotoBtn');
-    const modalNextPhotoBtn = document.getElementById('modalRoomNextPhotoBtn');
-    const modalCheckRatesBtn = document.getElementById('modalCheckRatesBtn');
-
-    const allRoomsData = JSON.parse(roomModal?.dataset.allRooms || '[]');
-    let modalPhotos = [];
-    let modalActivePhotoIdx = 0;
-
-    function openRoomModalSafe(roomObj) {
-      if (!roomModal || !roomObj) return;
-      if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name || 'Room Details';
-      
-      if (modalRoomSpecs) {
-        modalRoomSpecs.innerHTML = `
-          ${roomObj.size ? `<span>📐 ${roomObj.size}</span><span>•</span>` : ''}
-          ${roomObj.guests ? `<span>👤 ${roomObj.guests}</span><span>•</span>` : ''}
-          ${roomObj.bed ? `<span>🛏️ ${roomObj.bed}</span>` : ''}
-        `;
-      }
-
-      if (modalRoomGrid) {
-        const list = roomObj.checklist || roomObj.fullAmenities || [];
-        if (list && list.length > 0) {
-          modalRoomGrid.innerHTML = list.map(item => `<div class="flex items-center gap-1.5"><span class="text-emerald-400">✔</span><span>${item}</span></div>`).join('');
-        } else {
-          modalRoomGrid.innerHTML = `<span class="text-slate-400">Standard Room Features Included.</span>`;
-        }
-      }
-
-      modalPhotos = (roomObj.photos && roomObj.photos.length > 0) ? roomObj.photos : (roomObj.image ? [roomObj.image] : []);
-      modalActivePhotoIdx = 0;
-      if (modalPhotos.length > 0) {
-        updateModalPhoto(0);
-      }
-
-      roomModal.classList.remove('hidden');
-      try { history.pushState({ roomModalOpen: true }, ''); } catch (e) {}
-    }
-
-    function updateModalPhoto(idx) {
-      if (!modalRoomImg || !modalPhotos.length) return;
-      modalActivePhotoIdx = (idx + modalPhotos.length) % modalPhotos.length;
-      modalRoomImg.src = modalPhotos[modalActivePhotoIdx];
-      if (modalBadge) modalBadge.textContent = `${modalActivePhotoIdx + 1} / ${modalPhotos.length}`;
-    }
-
-    if (modalPrevPhotoBtn) modalPrevPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx - 1));
-    if (modalNextPhotoBtn) modalNextPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx + 1));
-
-    if (modalCheckRatesBtn) {
-      modalCheckRatesBtn.addEventListener('click', () => {
-        if (roomModal) roomModal.classList.add('hidden');
-      });
-    }
-
-    function closeRoomModalSafe() {
-      if (!roomModal) return;
-      roomModal.classList.add('hidden');
-    }
-
-    // Intercept Mobile Back Button
-    window.addEventListener('popstate', () => {
-      if (amenModal && !amenModal.classList.contains('hidden')) {
-        amenModal.classList.add('hidden');
-      }
-      if (roomModal && !roomModal.classList.contains('hidden')) {
-        roomModal.classList.add('hidden');
-      }
-    });
-
-    if (closeRoomModalBtn) closeRoomModalBtn.addEventListener('click', () => closeRoomModalSafe());
-    if (roomModal) {
-      roomModal.addEventListener('click', (e) => {
-        if (e.target === roomModal) closeRoomModalSafe();
-      });
-    }
-
-    // 3. Room Card Photo Slider & Details Click
-    document.querySelectorAll('.room-card-box').forEach((card, index) => {
-      const img = card.querySelector('.room-card-main-img');
-      const prevBtn = card.querySelector('.card-img-prev-btn');
-      const nextBtn = card.querySelector('.card-img-next-btn');
-      const badge = card.querySelector('.card-img-badge');
-      const detailsBtn = card.querySelector('.open-room-detail-btn');
-
-      const roomObj = allRoomsData[index] || {};
-
-      if (img) {
-        const photos = (roomObj.photos && roomObj.photos.length > 0) ? roomObj.photos : (roomObj.image ? [roomObj.image] : [img.src]);
-        let currentPhotoIdx = 0;
-
-        function updateCardPhoto(idx) {
-          if (!photos.length) return;
-          currentPhotoIdx = (idx + photos.length) % photos.length;
-          img.src = photos[currentPhotoIdx];
-          if (badge) badge.textContent = `${currentPhotoIdx + 1} / ${photos.length}`;
-        }
-
-        if (prevBtn) {
-          prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateCardPhoto(currentPhotoIdx - 1);
-          });
-        }
-
-        if (nextBtn) {
-          nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateCardPhoto(currentPhotoIdx + 1);
-          });
-        }
-
-        img.addEventListener('click', () => {
-          openRoomModalSafe(roomObj);
-        });
-
-        if (detailsBtn) {
-          detailsBtn.addEventListener('click', () => {
-            openRoomModalSafe(roomObj);
-          });
-        }
-      }
-    });
-
-    // 4. Room Carousel Track Side Floating Arrows
+    // 2. Room Carousel Track Side Floating Arrows
     const track = document.getElementById('roomsCarouselTrack');
     const prevTrackBtn = document.getElementById('roomPrevBtn');
     const nextTrackBtn = document.getElementById('roomNextBtn');
