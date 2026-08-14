@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Perfect 150-Word HTML Truncator & No Sliced Letters)
+// src/components/hotel/HotelAboutAndRates.astro (CSS Box Mask Truncator - 100% HTML Link Protection)
 interface Props {
   hotel: any;
 }
@@ -31,7 +31,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container (Natural Height, No Letter Slicing/Clipping) -->
+        <!-- Hotel Description Container (HTML Preserved, CSS Truncated) -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
@@ -167,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & EXACT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & CSS BOX TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -269,87 +269,42 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE LINKS TO OPEN IN NEW TAB
-    function applyLinkAttributes() {
-      document.querySelectorAll('#overview-text a').forEach(link => {
-        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-        if (link.hostname && link.hostname !== window.location.hostname) {
-          link.setAttribute('target', '_blank');
-          link.setAttribute('rel', 'noopener noreferrer');
-        }
-      });
-    }
+    // 2. ENHANCE ALL LINKS TO OPEN IN NEW TAB (PRESERVES NATIVE HTML)
+    document.querySelectorAll('#overview-text a').forEach(link => {
+      link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+      if (link.hostname && link.hostname !== window.location.hostname) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
 
-    // 3. PERFECT HTML-PRESERVING EXACT 150-WORD TRUNCATOR
+    // 3. CSS BOX MASK TRUNCATOR (100% PRESERVES HTML LINKS)
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
     if (overviewTextEl && toggleBtn) {
-      // Fix missing spaces after periods in raw text
+      // Fix missing spaces after periods
       overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
 
       const rawText = overviewTextEl.innerText.trim();
       const words = rawText.split(/\s+/);
 
       if (words.length > 150) {
-        let currentWordCount = 0;
-        let visibleHtml = '';
-        let hiddenHtml = '';
-        let isCut = false;
-
-        const nodes = Array.from(overviewTextEl.childNodes);
-
-        nodes.forEach(node => {
-          if (isCut) {
-            hiddenHtml += node.outerHTML || node.textContent || '';
-            return;
-          }
-
-          const nodeText = node.textContent || '';
-          const nodeWords = nodeText.trim().split(/\s+/).filter(w => w.length > 0);
-
-          if (currentWordCount + nodeWords.length <= 150) {
-            currentWordCount += nodeWords.length;
-            visibleHtml += node.outerHTML || node.textContent || '';
-          } else {
-            const needed = 150 - currentWordCount;
-            const part1 = nodeWords.slice(0, needed).join(' ');
-            const part2 = nodeWords.slice(needed).join(' ');
-
-            visibleHtml += part1;
-            hiddenHtml += ' ' + part2;
-            isCut = true;
-          }
-        });
-
-        overviewTextEl.innerHTML = `
-          <span>${visibleHtml}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${hiddenHtml}</span>
-        `;
-
-        applyLinkAttributes();
+        // Apply CSS height truncation without touching or destroying inner HTML links!
+        overviewTextEl.classList.add('max-h-[170px]', 'overflow-hidden');
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
-          const moreSpan = document.getElementById('overview-more');
-          const dotsSpan = document.getElementById('overview-dots');
-
-          if (moreSpan && dotsSpan) {
-            const isHidden = moreSpan.classList.contains('hidden');
-            if (isHidden) {
-              moreSpan.classList.remove('hidden');
-              dotsSpan.classList.add('hidden');
-              toggleBtn.innerHTML = 'Read Less ▲';
-            } else {
-              moreSpan.classList.add('hidden');
-              dotsSpan.classList.remove('hidden');
-              toggleBtn.innerHTML = 'Read More ➔';
-            }
+          const isTruncated = overviewTextEl.classList.contains('max-h-[170px]');
+          if (isTruncated) {
+            overviewTextEl.classList.remove('max-h-[170px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read Less ▲';
+          } else {
+            overviewTextEl.classList.add('max-h-[170px]', 'overflow-hidden');
+            toggleBtn.innerHTML = 'Read More ➔';
           }
         });
       } else {
-        applyLinkAttributes();
         toggleBtn.style.display = 'none';
       }
     }
