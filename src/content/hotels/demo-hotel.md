@@ -31,6 +31,17 @@ amenities:
   - Service
   - Service
   - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
+  - Service
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
