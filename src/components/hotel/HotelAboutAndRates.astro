@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Simple Normal Text + 150-Word See More Inline Toggle)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card Viewport Scroll Fix)
 interface Props {
   hotel: any;
 }
@@ -31,22 +31,24 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container (Simple Normal Text) -->
-        <div id="overview-text" class="text-xs sm:text-base leading-relaxed text-slate-700 font-normal">
-          {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-            <p>
-              Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
-            </p>
-          )}
+        <!-- Hotel Description Container -->
+        <div id="overview-wrapper" class="relative">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+            {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+              <p>
+                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+              </p>
+            )}
+          </div>
         </div>
 
-        <!-- See More Button (Hidden by default, shown ONLY if text > 150 words) -->
+        <!-- Read More Button -->
         <button 
           id="toggleOverviewBtn" 
           style="display: none;"
           class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
-          See More ➔
+          Read More ➔
         </button>
       </div>
 
@@ -127,9 +129,9 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - STAY22 WORKER API COMPARISON) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - DIRECT TARGET WITH SCROLL-MT-24 FOR PERFECT CENTERED ALIGNMENT) -->
     <div class="lg:col-span-5">
-      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px]">
+      <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
         <!-- Card Header -->
         <div class="space-y-1 text-left border-b border-slate-100 pb-4">
@@ -165,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH & PURE 150-WORD SEE MORE TOGGLE -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & STRICT 150-WORD TRUNCATOR -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -267,27 +269,65 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. PURE 150-WORD SEE MORE / SEE LESS TOGGLE LOGIC
+    // 2. ENHANCE LINKS TO OPEN IN NEW TAB
+    function applyLinkAttributes() {
+      document.querySelectorAll('#overview-text a').forEach(link => {
+        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+        if (link.hostname && link.hostname !== window.location.hostname) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    }
+
+    // 3. PERFECT HTML-PRESERVING EXACT 150-WORD TRUNCATOR
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
     if (overviewTextEl && toggleBtn) {
-      // Fix missing spaces after periods
-      overviewTextEl.innerText = overviewTextEl.innerText.replace(/\.([A-Z])/g, '. $1');
+      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
 
       const rawText = overviewTextEl.innerText.trim();
       const words = rawText.split(/\s+/);
 
       if (words.length > 150) {
-        const first150Words = words.slice(0, 150).join(' ');
-        const remainingWords = words.slice(150).join(' ');
+        let currentWordCount = 0;
+        let visibleHtml = '';
+        let hiddenHtml = '';
+        let isCut = false;
+
+        const nodes = Array.from(overviewTextEl.childNodes);
+
+        nodes.forEach(node => {
+          if (isCut) {
+            hiddenHtml += node.outerHTML || node.textContent || '';
+            return;
+          }
+
+          const nodeText = node.textContent || '';
+          const nodeWords = nodeText.trim().split(/\s+/).filter(w => w.length > 0);
+
+          if (currentWordCount + nodeWords.length <= 150) {
+            currentWordCount += nodeWords.length;
+            visibleHtml += node.outerHTML || node.textContent || '';
+          } else {
+            const needed = 150 - currentWordCount;
+            const part1 = nodeWords.slice(0, needed).join(' ');
+            const part2 = nodeWords.slice(needed).join(' ');
+
+            visibleHtml += part1;
+            hiddenHtml += ' ' + part2;
+            isCut = true;
+          }
+        });
 
         overviewTextEl.innerHTML = `
-          <span>${first150Words}</span>
+          <span>${visibleHtml}</span>
           <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${remainingWords}</span>
+          <span id="overview-more" class="hidden">${hiddenHtml}</span>
         `;
 
+        applyLinkAttributes();
         toggleBtn.style.display = 'inline-flex';
 
         toggleBtn.addEventListener('click', () => {
@@ -299,15 +339,16 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             if (isHidden) {
               moreSpan.classList.remove('hidden');
               dotsSpan.classList.add('hidden');
-              toggleBtn.innerHTML = 'See Less ▲';
+              toggleBtn.innerHTML = 'Read Less ▲';
             } else {
               moreSpan.classList.add('hidden');
               dotsSpan.classList.remove('hidden');
-              toggleBtn.innerHTML = 'See More ➔';
+              toggleBtn.innerHTML = 'Read More ➔';
             }
           }
         });
       } else {
+        applyLinkAttributes();
         toggleBtn.style.display = 'none';
       }
     }
