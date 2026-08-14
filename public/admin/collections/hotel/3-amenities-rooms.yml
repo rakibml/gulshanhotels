@@ -1,7 +1,7 @@
 - label: "3. AMENITIES & ROOM TYPES"
   name: "amenities_notice"
   widget: "instructions"
-  description: "Controls the amenities grid, 28+ amenities modal list, and Agoda-style room categories with room photo sliders, badges, checklists, and SEO alt text."
+  description: "Controls amenities with Hybrid Icon Picker (Dropdown or Custom SVG Code) and Agoda-style room categories."
   required: false
 
 # --- Section Show/Hide Toggle ---
@@ -16,14 +16,38 @@
   widget: "string"
   default: "Amenities & Services"
 
-- label: "Top Amenities List (All Amenities for Grid & Modal)"
+- label: "Top Amenities List (Displayed on Grid)"
   name: "amenities"
   widget: "list"
   required: false
-  field:
-    label: "Amenity Name (e.g. Swimming Pool, Free Wi-Fi, Spa & Wellness)"
-    name: "amenity"
-    widget: "string"
+  fields:
+    - label: "Amenity Name (e.g. Swimming Pool, Free Wi-Fi)"
+      name: "name"
+      widget: "string"
+
+    - label: "Select Preset Icon"
+      name: "icon"
+      widget: "select"
+      default: "checkmark"
+      required: false
+      options:
+        - { label: "✔ Default Checkmark", value: "checkmark" }
+        - { label: "🏊 Swimming Pool", value: "pool" }
+        - { label: "🧖 Spa & Wellness", value: "spa" }
+        - { label: "🏋️ Fitness Center / Gym", value: "gym" }
+        - { label: "🍽️ Restaurant / Dining", value: "restaurant" }
+        - { label: "📶 Free Wi-Fi", value: "wifi" }
+        - { label: "🚗 Free Parking", value: "parking" }
+        - { label: "✈️ Airport Transfer / Shuttle", value: "shuttle" }
+        - { label: "👔 Meeting & Events", value: "meeting" }
+        - { label: "🛎️ 24/7 Room Service", value: "room_service" }
+        - { label: "🧺 Laundry Service", value: "laundry" }
+
+    - label: "Or Paste Custom Raw SVG Icon Code (Optional)"
+      name: "custom_svg"
+      widget: "text"
+      required: false
+      hint: "Paste your custom <svg>...</svg> code here if you want a custom icon!"
 
 # --- Right Column: Room Types Control ---
 - label: "Room Types Section Title"
@@ -76,7 +100,6 @@
       name: "image_alt"
       widget: "string"
       required: false
-      hint: "e.g. 'Deluxe King Room Interior View at The Westin Dhaka'"
 
     - label: "Room Multiple Photos Gallery (For Card Slider & Modal)"
       name: "photos"
@@ -100,12 +123,4 @@
       required: false
       field:
         label: "Feature Name (e.g. City view, Air conditioning, Private bathroom)"
-        widget: "string"
-
-    - label: "Expanded Room Inspector Amenities (Full List for Modal)"
-      name: "fullAmenities"
-      widget: "list"
-      required: false
-      field:
-        label: "Amenity Name (e.g. Jacuzzi, Rain Shower, Free Minibar)"
         widget: "string"
