@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (CSS Box Mask Truncator - 100% HTML Link Protection)
+// src/components/hotel/HotelAboutAndRates.astro (Airbnb Style Full Description Popup Modal + Back Button Safety)
 interface Props {
   hotel: any;
 }
@@ -31,25 +31,25 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container (HTML Preserved, CSS Truncated) -->
-        <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
-            {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-              <p>
-                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
-              </p>
-            )}
-          </div>
+        <!-- Clean Hotel Description Excerpt (No Text Slicing / No Link Wiping) -->
+        <div id="overview-excerpt" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600">
+          {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+            <p>
+              Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+            </p>
+          )}
         </div>
 
-        <!-- Read More Button (Hidden by default, shown ONLY if text > 150 words) -->
-        <button 
-          id="toggleOverviewBtn" 
-          style="display: none;"
-          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
-        >
-          Read More ➔
-        </button>
+        <!-- Airbnb Style Show Full Description Button -->
+        <div>
+          <button 
+            id="openDescModalBtn" 
+            class="mt-1 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-2 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2.5 rounded-xl border border-emerald-300/80 shadow-sm"
+          >
+            <span>Show Full Description</span>
+            <span>➔</span>
+          </button>
+        </div>
       </div>
 
       <!-- Hotel Policies & Quick Information Grid -->
@@ -167,7 +167,34 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & CSS BOX TRUNCATOR -->
+<!-- =================================================== -->
+<!-- AIRBNB STYLE FULL DESCRIPTION POPUP MODAL -->
+<!-- =================================================== -->
+<div id="fullDescriptionModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-3xl text-slate-900 space-y-5 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div>
+        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Full Overview & History</span>
+        <h3 class="text-2xl font-black font-serif text-slate-900">About {hotelTitle}</h3>
+      </div>
+      <button id="closeDescModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
+    </div>
+
+    <!-- Modal Body (Full Unclipped Markdown Description) -->
+    <div id="modalFullDescContent" class="prose prose-slate max-w-none text-sm sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 text-left">
+      {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+        <p>
+          Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+        </p>
+      )}
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API, AIRBNB MODAL & MOBILE BACK BUTTON SAFETY -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
@@ -269,44 +296,55 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE ALL LINKS TO OPEN IN NEW TAB (PRESERVES NATIVE HTML)
-    document.querySelectorAll('#overview-text a').forEach(link => {
-      link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-      if (link.hostname && link.hostname !== window.location.hostname) {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
+    // 2. ENHANCE HYPERLINKS TO OPEN IN NEW TAB
+    function enhanceLinks(container) {
+      if (!container) return;
+      container.querySelectorAll('a').forEach(link => {
+        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+        if (link.hostname && link.hostname !== window.location.hostname) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    }
+
+    const excerptEl = document.getElementById('overview-excerpt');
+    const modalContentEl = document.getElementById('modalFullDescContent');
+    enhanceLinks(excerptEl);
+    enhanceLinks(modalContentEl);
+
+    // 3. AIRBNB STYLE DESCRIPTION MODAL WITH MOBILE BACK-BUTTON (POPSTATE) SAFETY
+    const descModal = document.getElementById('fullDescriptionModal');
+    const openDescBtn = document.getElementById('openDescModalBtn');
+    const closeDescBtn = document.getElementById('closeDescModalBtn');
+
+    function openDescModalSafe() {
+      if (!descModal) return;
+      descModal.classList.remove('hidden');
+      try {
+        history.pushState({ descModalOpen: true }, '');
+      } catch (e) {}
+    }
+
+    function closeDescModalSafe() {
+      if (!descModal) return;
+      descModal.classList.add('hidden');
+    }
+
+    // Intercept Mobile Physical / Gesture Back Button Press
+    window.addEventListener('popstate', () => {
+      if (descModal && !descModal.classList.contains('hidden')) {
+        descModal.classList.add('hidden'); // Closes modal without leaving the website!
       }
     });
 
-    // 3. CSS BOX MASK TRUNCATOR (100% PRESERVES HTML LINKS)
-    const overviewTextEl = document.getElementById('overview-text');
-    const toggleBtn = document.getElementById('toggleOverviewBtn');
+    if (openDescBtn) openDescBtn.addEventListener('click', () => openDescModalSafe());
+    if (closeDescBtn) closeDescBtn.addEventListener('click', () => closeDescModalSafe());
 
-    if (overviewTextEl && toggleBtn) {
-      // Fix missing spaces after periods
-      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
-
-      const rawText = overviewTextEl.innerText.trim();
-      const words = rawText.split(/\s+/);
-
-      if (words.length > 150) {
-        // Apply CSS height truncation without touching or destroying inner HTML links!
-        overviewTextEl.classList.add('max-h-[170px]', 'overflow-hidden');
-        toggleBtn.style.display = 'inline-flex';
-
-        toggleBtn.addEventListener('click', () => {
-          const isTruncated = overviewTextEl.classList.contains('max-h-[170px]');
-          if (isTruncated) {
-            overviewTextEl.classList.remove('max-h-[170px]', 'overflow-hidden');
-            toggleBtn.innerHTML = 'Read Less ▲';
-          } else {
-            overviewTextEl.classList.add('max-h-[170px]', 'overflow-hidden');
-            toggleBtn.innerHTML = 'Read More ➔';
-          }
-        });
-      } else {
-        toggleBtn.style.display = 'none';
-      }
+    if (descModal) {
+      descModal.addEventListener('click', (e) => {
+        if (e.target === descModal) closeDescModalSafe();
+      });
     }
   });
 </script>
