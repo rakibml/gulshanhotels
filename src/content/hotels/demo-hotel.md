@@ -35,6 +35,22 @@ amenities:
   - Service
   - Service
   - Service
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
+  - Guest Room
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
