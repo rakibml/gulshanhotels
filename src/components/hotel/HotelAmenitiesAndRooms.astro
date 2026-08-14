@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (Popup Button Click Fix, Highlighted Cross & Normal Icons)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (3x3 Mobile Amenity Grid Upgrade)
 interface Props {
   hotel: any;
 }
@@ -20,7 +20,7 @@ const showSeeMoreBtn = totalAmenitiesCount > 9;
 const roomsList = data.rooms || [];
 const showRooms = roomsList.length > 0;
 
-// Pre-Built Vector SVG Icon Dictionary
+// Pre-Built Vector SVG Icon Dictionary for Amenities & Room Features
 const iconMap: Record<string, string> = {
   pool: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
   spa: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
@@ -47,7 +47,7 @@ const iconMap: Record<string, string> = {
   <section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
       
-      <!-- LEFT COLUMN: AMENITIES & SERVICES -->
+      <!-- LEFT COLUMN: AMENITIES & SERVICES (3x3 GRID ON MOBILE) -->
       {showAmenities && (
         <div class={showRooms ? "lg:col-span-5 space-y-6 text-left" : "lg:col-span-12 space-y-6 text-left"}>
           <div class="border-b border-slate-200/80 pb-3">
@@ -56,23 +56,23 @@ const iconMap: Record<string, string> = {
             </h2>
           </div>
 
-          <!-- Hybrid Icon Amenities Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+          <!-- 3x3 COMPACT GRID ON MOBILE & DESKTOP (grid-cols-3) -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 text-center">
             {top9Amenities.map((item: any) => {
               const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
               const customSvg = typeof item === 'object' ? item?.custom_svg : '';
               const iconKey = typeof item === 'object' ? item?.icon : 'checkmark';
 
               return (
-                <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
-                  <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0 overflow-hidden p-2 [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
+                <div class="flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0 overflow-hidden p-1.5 sm:p-2 [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
                     {customSvg ? (
                       <Fragment set:html={customSvg} />
                     ) : (
                       <Fragment set:html={iconMap[iconKey] || iconMap.checkmark} />
                     )}
                   </div>
-                  <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">{nameStr}</span>
+                  <span class="text-[10px] sm:text-xs font-bold text-slate-800 mt-1.5 line-clamp-1">{nameStr}</span>
                 </div>
               );
             })}
@@ -114,7 +114,6 @@ const iconMap: Record<string, string> = {
               <button id="roomNextBtn" aria-label="Next Room" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
             )}
 
-            <!-- ROOM CARDS SLIDER (STRICT MAX 6 CARD AMENITIES) -->
             <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {roomsList.map((room: any, index: number) => {
                 const roomPhotos = (room.photos && room.photos.length > 0) ? room.photos : (room.image ? [room.image] : []);
@@ -157,7 +156,6 @@ const iconMap: Record<string, string> = {
 
                       <!-- ROOM CONTENT -->
                       <div class="p-5 space-y-2 text-left">
-                        <!-- Room Photos and Details Link -->
                         <button 
                           class="open-room-detail-btn text-[11px] font-bold text-emerald-800 hover:underline inline-block cursor-pointer"
                           data-room-index={index}
@@ -297,7 +295,7 @@ const iconMap: Record<string, string> = {
       <h3 id="modalSelectedRoomName" class="text-xl sm:text-2xl font-black font-serif text-white">Room Details</h3>
     </div>
     
-    <!-- HIGHLIGHTED ROSE RED CROSS BUTTON (TRIPLE-VISIBILITY FOR TRAFFIC) -->
+    <!-- HIGHLIGHTED ROSE RED CROSS BUTTON -->
     <button id="closeSelectedRoomModalBtn" aria-label="Close Room Inspector" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-2xl flex items-center justify-center shadow-2xl hover:scale-110 transition cursor-pointer border border-rose-400 shrink-0">&times;</button>
   </div>
 
@@ -315,16 +313,12 @@ const iconMap: Record<string, string> = {
     <!-- CLEAN MONOCHROME FEATURED HIGHLIGHTS CARD -->
     <div class="bg-slate-900 border border-slate-800 p-5 sm:p-6 rounded-3xl space-y-3 shadow-md">
       <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider block">Featured Amenities Highlights</span>
-      <div id="modalFeaturedHighlightsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-bold text-slate-200">
-        <!-- Dynamically rendered top 6 amenities with vector icons -->
-      </div>
+      <div id="modalFeaturedHighlightsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-bold text-slate-200"></div>
     </div>
 
     <!-- KEY ROOM SPECS & FULL AMENITIES LIST -->
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
-      <div id="modalRoomSpecs" class="space-y-2 text-xs sm:text-sm text-slate-200 font-bold border-b border-slate-800 pb-3">
-        <!-- Rendered vertical specs -->
-      </div>
+      <div id="modalRoomSpecs" class="space-y-2 text-xs sm:text-sm text-slate-200 font-bold border-b border-slate-800 pb-3"></div>
 
       <div class="space-y-2">
         <h4 class="text-xs font-black uppercase text-emerald-400 tracking-wider">Full Included Amenities</h4>
@@ -344,7 +338,6 @@ const iconMap: Record<string, string> = {
 <!-- CLIENT SCRIPTS -->
 <script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
-    // Vector SVG Icon Map for Modal Rendering
     const svgIconMap = {
       view: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
       ac: `<svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
@@ -379,7 +372,7 @@ const iconMap: Record<string, string> = {
       });
     }
 
-    // 2. Hotels.com Selected Room Modal
+    // 2. Selected Room Modal
     const roomModal = document.getElementById('selectedRoomModal');
     const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
     const modalRoomTitle = document.getElementById('modalSelectedRoomName');
