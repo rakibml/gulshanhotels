@@ -17,21 +17,23 @@ const checkOut = data.checkOut || "12:00 PM";
 const powerBackup = data.powerBackup || "24/7 Generator";
 const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 
-// --- SSR Safe 140 Words Excerpt Logic ---
+// --- SSR Safe 140 Words & Conditional Button Logic ---
 const rawBody = typeof hotel?.body === 'string' 
   ? hotel.body 
   : (typeof data?.description === 'string' ? data.description : "");
 
-// HTML ট্যাগ সরিয়ে নিছক টেক্সটের ওয়ার্ড কাউন্ট করা (Safe for SSR)
+// HTML ট্যাগ সরিয়ে নিছক টেক্সটের ওয়ার্ড কাউন্ট করা
 const plainText = rawBody.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
 const wordsArray = plainText ? plainText.split(' ') : [];
-const isLongText = wordsArray.length > 140;
+const isLongText = wordsArray.length > 140; // ১৪০ শব্দের বেশি কি না পরীক্ষা
 
+// ১৪০ শব্দের এক্সার্প্ট
 const excerptText = isLongText 
   ? wordsArray.slice(0, 140).join(' ') + '...'
-  : (plainText || `Located in the heart of Gulshan 2, ${hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.`);
+  : plainText;
 
-const fullBodyContent = rawBody || `<p>Located in the heart of Gulshan 2, ${hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.</p>`;
+const defaultText = `<p>Located in the heart of Gulshan 2, ${hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.</p>`;
+const fullBodyContent = rawBody || defaultText;
 ---
 
 <!-- ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
@@ -47,22 +49,28 @@ const fullBodyContent = rawBody || `<p>Located in the heart of Gulshan 2, ${hote
           About {hotelTitle}
         </h2>
 
-        <!-- 140 Words Excerpt Display -->
+        <!-- Description Excerpt -->
         <div id="overview-excerpt" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600">
-          <p>{excerptText}</p>
+          {isLongText ? (
+            <p>{excerptText}</p>
+          ) : (
+            <Fragment set:html={fullBodyContent} />
+          )}
         </div>
 
-        <!-- Show Full Description Button -->
-        <div>
-          <button 
-            id="openDescModalBtn" 
-            type="button"
-            class="mt-1 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-2 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2.5 rounded-xl border border-emerald-300/80 shadow-sm"
-          >
-            <span>Show Full Description</span>
-            <span aria-hidden="true">➔</span>
-          </button>
-        </div>
+        <!-- Show Full Description Button (কেবল ১৪০ শব্দের বেশি হলেই বাটনটি শো করবে) -->
+        {isLongText && (
+          <div>
+            <button 
+              id="openDescModalBtn" 
+              type="button"
+              class="mt-1 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-2 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2.5 rounded-xl border border-emerald-300/80 shadow-sm"
+            >
+              <span>Show Full Description</span>
+              <span aria-hidden="true">➔</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <!-- Hotel Policies & Quick Info Grid -->
@@ -205,7 +213,7 @@ const fullBodyContent = rawBody || `<p>Located in the heart of Gulshan 2, ${hote
       >&times;</button>
     </div>
 
-    <!-- Modal Body (100% SSR Safe Render) -->
+    <!-- Modal Body -->
     <div id="modalFullDescContent" class="prose prose-slate max-w-none text-sm sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 text-left">
       <Fragment set:html={fullBodyContent} />
     </div>
