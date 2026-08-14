@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (100% Speed Optimized & LCP Boosted)
+// src/components/hotel/HotelHeader.astro (100% Pure Dynamic & Zero Hardcoded Fallbacks)
 interface Props {
   hotel: any;
 }
@@ -7,18 +7,19 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
+// 1. Pure Dynamic CMS Data
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelCategory = data.category || "5-Star Luxury Stay";
-const hotelLocation = data.location || "Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh";
+const hotelCategory = data.category;
+const hotelLocation = data.location;
 const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 const officialSite = data.officialSite || "";
-const hotelDescription = data.description || "Experience timeless luxury and exceptional Bangladeshi hospitality in the heart of Gulshan, Dhaka.";
+const hotelDescription = data.description;
 
-// Button Controls from CMS (100% Admin Controllable)
+// 2. Button Controls from CMS (100% Admin Controllable)
 const showViewPrices = data.enable_view_prices !== false; // Default true
 const showOfficialSite = data.enable_official_site !== false && Boolean(officialSite); // Default true if link exists
 
-// 30 Preset Typography & Color Styles for Hotel Title
+// 3. 30 Preset Typography & Color Styles for Hotel Title
 const selectedStyle = data.title_style || "style_1";
 
 const titleStyleMap: Record<string, string> = {
@@ -58,7 +59,7 @@ const titleCssClass = titleStyleMap[selectedStyle] || titleStyleMap.style_1;
 
 // IMAGE RESIZING & WEBP SPEED OPTIMIZER HELPER FUNCTION
 function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
-  if (!url) return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
+  if (!url) return '';
   if (url.includes('unsplash.com')) {
     const cleanUrl = url.split('?')[0];
     return `${cleanUrl}?auto=format&fit=crop&w=${width}&q=${quality}`;
@@ -66,18 +67,10 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   return url;
 }
 
-// Raw Gallery Images
+// Pure Dynamic Gallery Images (Zero Hardcoded Unsplash Fallbacks)
 const rawGallery = (data.gallery && data.gallery.length > 0) 
   ? data.gallery 
-  : [
-      hotelImage,
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39",
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843"
-    ];
+  : (hotelImage ? [hotelImage] : []);
 
 const totalPhotos = rawGallery.length;
 const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
@@ -88,7 +81,7 @@ const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 200,
 const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1200, 85));
 ---
 
-<!-- 1ST COMPONENT: HOTEL HERO BANNER (100% SPEED OPTIMIZED & WEBP COMPRESSED) -->
+<!-- 1ST COMPONENT: HOTEL HERO BANNER (100% PURE DYNAMIC CMS DATA) -->
 <section class="bg-[#F8FAF9] text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -132,6 +125,13 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
         </p>
       )}
 
+      <!-- Short Tagline Description (Rendered ONLY if provided in CMS) -->
+      {hotelDescription && (
+        <p class="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
+          {hotelDescription}
+        </p>
+      )}
+
       <!-- Action Buttons (Full Admin Control) -->
       {(showViewPrices || showOfficialSite) && (
         <div class="flex items-center justify-center gap-3 pt-3">
@@ -152,85 +152,89 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
 
     </div>
 
-    <!-- RESPONSIVE HERO GALLERY (LCP PRIORITY MAIN IMAGE + 200PX LIGHTWEIGHT THUMBNAILS) -->
-    <div class="max-w-5xl mx-auto space-y-3 pt-2">
-      
-      <!-- 1. MAIN LARGE HERO COVER PHOTO (LCP PRIORITY EAGER LOADED) -->
-      <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
-        <img 
-          id="heroMainViewImg" 
-          src={mainHeroUrl} 
-          alt={hotelTitle} 
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          data-images={JSON.stringify(lightboxUrls)}
-          class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer" 
-        />
+    <!-- RESPONSIVE HERO GALLERY (PURE DYNAMIC PHOTOS ONLY) -->
+    {totalPhotos > 0 && (
+      <div class="max-w-5xl mx-auto space-y-3 pt-2">
+        
+        <!-- 1. MAIN LARGE HERO COVER PHOTO -->
+        <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
+          <img 
+            id="heroMainViewImg" 
+            src={mainHeroUrl} 
+            alt={hotelTitle} 
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            data-images={JSON.stringify(lightboxUrls)}
+            class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer" 
+          />
 
-        <!-- Left/Right Arrow Navigation over Main Image -->
-        {totalPhotos > 1 && (
-          <button id="heroPrevImgBtn" aria-label="Previous Image" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
-            ❮
-          </button>
-        )}
+          <!-- Left/Right Arrow Navigation over Main Image -->
+          {totalPhotos > 1 && (
+            <button id="heroPrevImgBtn" aria-label="Previous Image" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
+              ❮
+            </button>
+          )}
 
-        {totalPhotos > 1 && (
-          <button id="heroNextImgBtn" aria-label="Next Image" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
-            ❯
-          </button>
-        )}
+          {totalPhotos > 1 && (
+            <button id="heroNextImgBtn" aria-label="Next Image" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
+              ❯
+            </button>
+          )}
 
-        <!-- Photo Counter Badge -->
-        <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20">
-          <span id="heroCurrentIdx">1</span> / <span>{totalPhotos}</span>
+          <!-- Photo Counter Badge -->
+          <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20">
+            <span id="heroCurrentIdx">1</span> / <span>{totalPhotos}</span>
+          </div>
         </div>
-      </div>
 
-      <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW (LIGHTWEIGHT 200PX WEBP) -->
-      <div class="grid grid-cols-5 gap-2 sm:gap-3">
-        {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
-          <button 
-            class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : ''}"
-            data-index={idx}
-          >
-            <img 
-              src={img} 
-              alt={`Thumb ${idx + 1}`} 
-              width="200"
-              height="150"
-              loading="lazy" 
-              decoding="async" 
-              class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
-            />
-          </button>
-        ))}
+        <!-- 2. EXACTLY 5 SMALL THUMBNAIL PHOTOS IN 1 ROW -->
+        {thumbUrls.length > 1 && (
+          <div class="grid grid-cols-5 gap-2 sm:gap-3">
+            {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
+              <button 
+                class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : ''}"
+                data-index={idx}
+              >
+                <img 
+                  src={img} 
+                  alt={`Thumb ${idx + 1}`} 
+                  width="200"
+                  height="150"
+                  loading="lazy" 
+                  decoding="async" 
+                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+                />
+              </button>
+            ))}
 
-        <!-- 5th Thumbnail with 'More Photos' Pop-up Badge -->
-        {thumbUrls[4] && (
-          <button 
-            id="triggerFullGalleryBtn"
-            class="h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
-            data-index="4"
-          >
-            <img 
-              src={thumbUrls[4]} 
-              alt="More Photos" 
-              width="200"
-              height="150"
-              loading="lazy" 
-              decoding="async" 
-              class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
-            />
-            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
-              <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos > 0 ? remainingPhotos : totalPhotos}</span>
-              <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
-            </div>
-          </button>
+            <!-- 5th Thumbnail with 'More Photos' Pop-up Badge -->
+            {thumbUrls[4] && (
+              <button 
+                id="triggerFullGalleryBtn"
+                class="h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
+                data-index="4"
+              >
+                <img 
+                  src={thumbUrls[4]} 
+                  alt="More Photos" 
+                  width="200"
+                  height="150"
+                  loading="lazy" 
+                  decoding="async" 
+                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+                />
+                <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
+                  <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos > 0 ? remainingPhotos : totalPhotos}</span>
+                  <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
+                </div>
+              </button>
+            )}
+          </div>
         )}
-      </div>
 
-    </div>
+      </div>
+    )}
 
   </div>
 </section>
