@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (Interactive Room Inspector Popup Modal)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (No Dummy Prices & SEO Alt Text Fix)
 interface Props {
   hotel: any;
 }
@@ -9,11 +9,10 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 
-// Detailed Room Types Data for Modal & Cards
+// Detailed Room Types Data
 const agodaRoomTypes = [
   {
     name: "Deluxe Guest Room, 1 King Bed",
-    price: "$120",
     size: "42 m² / 452 ft²",
     guests: "Max 2 Adults",
     bed: "1 King Bed",
@@ -28,7 +27,6 @@ const agodaRoomTypes = [
   },
   {
     name: "Deluxe Guest Room, 2 Twin Beds",
-    price: "$130",
     size: "42 m² / 452 ft²",
     guests: "Max 2 Adults",
     bed: "2 Twin Beds",
@@ -42,7 +40,6 @@ const agodaRoomTypes = [
   },
   {
     name: "Club Lounge Access, Larger Suite, 1 King",
-    price: "$185",
     size: "58 m² / 624 ft²",
     guests: "Max 2 Adults",
     bed: "1 King Bed",
@@ -56,7 +53,6 @@ const agodaRoomTypes = [
   },
   {
     name: "Presidential Westin Suite, City View",
-    price: "$290",
     size: "95 m² / 1022 ft²",
     guests: "Max 3 Adults",
     bed: "1 Super King Bed",
@@ -89,7 +85,7 @@ const agodaRoomTypes = [
         <!-- Swimming Pool -->
         <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md transition group cursor-pointer">
           <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 group-hover:scale-110 transition shrink-0">
-            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>
+            <svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>
           </div>
           <span class="text-xs font-bold text-slate-800 mt-2 line-clamp-1">Swimming Pool</span>
         </div>
@@ -204,7 +200,7 @@ const agodaRoomTypes = [
           ❯
         </button>
 
-        <!-- ROOM CARDS SLIDER -->
+        <!-- ROOM CARDS SLIDER WITH SEO ALT TEXT -->
         <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {agodaRoomTypes.map((room, index) => (
             <div class="room-card-box w-[300px] sm:w-[330px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
@@ -214,7 +210,7 @@ const agodaRoomTypes = [
                 <div class="h-44 w-full overflow-hidden relative group/roomimg">
                   <img 
                     src={room.photos[0]} 
-                    alt={room.name} 
+                    alt={`${room.name} - ${hotelTitle} Room Photo`} 
                     loading="lazy"
                     decoding="async"
                     data-photos={JSON.stringify(room.photos)}
@@ -247,16 +243,18 @@ const agodaRoomTypes = [
                     {room.name}
                   </h3>
 
-                  <!-- Specs Sub-bar -->
+                  <!-- Specs Sub-bar (Vector SVG Icons) -->
                   <div class="text-[11px] text-slate-500 font-semibold flex flex-wrap items-center gap-2 pt-0.5">
                     <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
                       <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 7h2v3H8zm0 5h2v3H8zm5-5h2v3h-2zm0 5h2v3h-2z"/></svg>
                       {room.size}
                     </span>
+
                     <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
                       <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                       {room.guests}
                     </span>
+
                     <span class="bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1">
                       <svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" width="14" height="14" viewBox="0 0 24 24"><path d="M20 9.557V3h-2v2H6V3H4v6.557C2.81 10.25 2 11.525 2 13v8h2v-2h16v2h2v-8c0-1.475-.81-2.75-2-3.443zM18 7v2.05A3.486 3.486 0 0 0 16.5 9c-.83 0-1.58.29-2.18.78A3.47 3.48 0 0 0 12 9c-.83 0-1.58.29-2.18.78A3.486 3.486 0 0 0 8.5 9C7.67 9 6.92 9.29 6.32 9.78V7h11.68z"/></svg>
                       {room.bed}
@@ -347,7 +345,7 @@ const agodaRoomTypes = [
 <div id="selectedRoomModal" data-all-rooms={JSON.stringify(agodaRoomTypes)} class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
   
   <!-- Modal Header -->
-  <div class="flex items-center justify-between max-w-4xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
+  <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
     <div>
       <span class="text-[10px] font-black uppercase text-emerald-400 tracking-widest block">Room Inspector & Photos</span>
       <h3 id="modalSelectedRoomName" class="text-xl sm:text-2xl font-black font-serif text-white">Room Details</h3>
@@ -360,7 +358,7 @@ const agodaRoomTypes = [
     
     <!-- Modal Photo Slider -->
     <div class="relative w-full h-[300px] sm:h-[400px] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-      <img id="modalRoomMainImg" src="" alt="Room Photo" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+      <img id="modalRoomMainImg" src="" alt={`${hotelTitle} Room Photo`} loading="lazy" decoding="async" class="w-full h-full object-cover" />
       <button id="modalRoomPrevPhotoBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❮</button>
       <button id="modalRoomNextPhotoBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❯</button>
       <span id="modalRoomPhotoBadge" class="absolute bottom-3 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">1 / 1</span>
@@ -369,7 +367,6 @@ const agodaRoomTypes = [
     <!-- Modal Room Specs & Full Checklist -->
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl text-left space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-        <span id="modalRoomPrice" class="text-xl font-black text-emerald-400">$120 / night</span>
         <div id="modalRoomSpecs" class="text-xs text-slate-300 font-semibold flex items-center gap-3"></div>
       </div>
 
@@ -380,7 +377,7 @@ const agodaRoomTypes = [
 
       <div class="pt-2">
         <a href="#about-and-rates" id="modalCheckRatesBtn" class="block w-full bg-[#00e676] hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl text-center transition shadow-lg">
-          Check Live Rates for this Room ➔
+          Check Live Rates ➔
         </a>
       </div>
     </div>
@@ -416,12 +413,11 @@ const agodaRoomTypes = [
       });
     }
 
-    // 2. Selected Room Details Modal & Photo Slider
+    // 2. Selected Room Modal
     const roomModal = document.getElementById('selectedRoomModal');
     const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
     const modalRoomTitle = document.getElementById('modalSelectedRoomName');
     const modalRoomImg = document.getElementById('modalRoomMainImg');
-    const modalRoomPrice = document.getElementById('modalRoomPrice');
     const modalRoomSpecs = document.getElementById('modalRoomSpecs');
     const modalRoomGrid = document.getElementById('modalRoomChecklistGrid');
     const modalBadge = document.getElementById('modalRoomPhotoBadge');
@@ -436,7 +432,6 @@ const agodaRoomTypes = [
     function openRoomModalSafe(roomObj) {
       if (!roomModal || !roomObj) return;
       if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name;
-      if (modalRoomPrice) modalRoomPrice.textContent = `${roomObj.price} / night`;
       
       if (modalRoomSpecs) {
         modalRoomSpecs.innerHTML = `<span>📐 ${roomObj.size}</span><span>•</span><span>👤 ${roomObj.guests}</span><span>•</span><span>🛏️ ${roomObj.bed}</span>`;
@@ -493,7 +488,7 @@ const agodaRoomTypes = [
       });
     }
 
-    // 3. Room Card Photo Slider & Details Link Click Handler
+    // 3. Room Card Photo Slider & Details Click
     document.querySelectorAll('.room-card-box').forEach((card, index) => {
       const img = card.querySelector('.room-card-main-img');
       const prevBtn = card.querySelector('.card-img-prev-btn');
@@ -528,7 +523,6 @@ const agodaRoomTypes = [
           });
         }
 
-        // CLICKING PHOTO OR 'Room photos and details ➔' OPENS FULL INSPECTOR MODAL
         img.addEventListener('click', () => {
           openRoomModalSafe(roomObj);
         });
