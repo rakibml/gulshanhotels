@@ -101,9 +101,999 @@ amenities:
         <!-- Spa Water Ripples -->
         <path d="M2 22H22" />
       </svg>
+  - name: fdsdsa
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Lotus Flower (Petals) -->
+        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+        
+        <!-- Spa Water Ripples -->
+        <path d="M2 22H22" />
+      </svg>
+  - name: dsfsf
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Lotus Flower (Petals) -->
+        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+        
+        <!-- Spa Water Ripples -->
+        <path d="M2 22H22" />
+      </svg>
+  - name: dsdsfdsaf
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Lotus Flower (Petals) -->
+        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+        
+        <!-- Spa Water Ripples -->
+        <path d="M2 22H22" />
+      </svg>
+  - name: dfadsfds
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Lotus Flower (Petals) -->
+        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+        
+        <!-- Spa Water Ripples -->
+        <path d="M2 22H22" />
+      </svg>
+  - name: dsfads
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Lotus Flower (Petals) -->
+        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+        
+        <!-- Spa Water Ripples -->
+        <path d="M2 22H22" />
+      </svg>
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+  - name: Deluxe Guest Room, 1 King Bed
+    price: ''
+    size: 42 m² / 452 ft²
+    guests: Max 2 Adults
+    bed: 1 King Bed
+    image: https://picsum.photos/id/871/1920/1280.webp
+    image_alt: Deluxe Guest Room, 1 King Bed
+    photos:
+      - https://picsum.photos/id/1003/1280/1920.webp
+      - https://picsum.photos/id/64/1920/1280.webp
+      - https://picsum.photos/id/260/1280/1920.webp
+    badges:
+      - Deluxe Guest Room, 1 King Bed
+    checklist:
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: spa
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dfsfdsfsf
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: dsfdsfds
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+      - name: fdfdsfsffsd
+        icon: checkmark
+        custom_svg: |-
+          <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Lotus Flower (Petals) -->
+            <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
+            <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
+            <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
+            
+            <!-- Spa Water Ripples -->
+            <path d="M2 22H22" />
+          </svg>
+    fullAmenities:
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
+      - City view,
   - name: Deluxe Guest Room, 1 King Bed
     price: ''
     size: 42 m² / 452 ft²
