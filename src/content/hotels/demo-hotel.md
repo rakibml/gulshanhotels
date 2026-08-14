@@ -29,28 +29,20 @@ amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
 amenities:
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Service
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
-  - Guest Room
+  - name: Spa & Wellness
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="100" height="100" fill="none" stroke="#2E7D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Center Petal / Water Drop -->
+        <path d="M12 3C12 3 8.5 8.5 8.5 11.5C8.5 13.9853 10.068 16 12 16C13.932 16 15.5 13.9853 15.5 11.5C15.5 8.5 12 3 12 3Z" />
+          <!-- Left Petal -->
+        <path d="M12 16C9.5 16 6.5 14 5.5 11C4.5 8 7 6 7 6C7 6 7.5 8.5 9.5 10C11.5 11.5 12 13 12 16Z" />
+          <!-- Right Petal -->
+        <path d="M12 16C14.5 16 17.5 14 18.5 11C19.5 8 17 6 17 6C17 6 16.5 8.5 14.5 10C12.5 11.5 12 13 12 16Z" />
+          <!-- Base Lotus Curves / Spa Stones effect -->
+        <path d="M3 20C6 22 18 22 21 20" />
+        <path d="M6 18C9 19.5 15 19.5 18 18" />
+      </svg>
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
