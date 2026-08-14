@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro
+// src/components/hotel/HotelAboutAndRates.astro (Simple Normal Text + 150-Word See More Inline Toggle)
 interface Props {
   hotel: any;
 }
@@ -11,28 +11,28 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// Admin CMS Controllable Policies
+// 100% Admin CMS Controllable Policies
 const checkIn = data.checkIn || "2:00 PM";
 const checkOut = data.checkOut || "12:00 PM";
 const powerBackup = data.powerBackup || "24/7 Generator";
 const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 ---
 
-<!-- ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
+<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
-    <!-- LEFT COLUMN (ABOUT HOTEL & POLICIES) -->
+    <!-- LEFT COLUMN (ABOUT {HOTEL TITLE} & HOTEL POLICIES) -->
     <div class="lg:col-span-7 space-y-8 text-left">
       
-      <!-- About Hotel Section -->
+      <!-- About Hotel Section with Dynamic Title -->
       <div class="space-y-4">
         <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
           About {hotelTitle}
         </h2>
 
-        <!-- Clean Description Excerpt -->
-        <div id="overview-excerpt" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600">
+        <!-- Hotel Description Container (Simple Normal Text) -->
+        <div id="overview-text" class="text-xs sm:text-base leading-relaxed text-slate-700 font-normal">
           {hotel?.body ? <Fragment set:html={hotel.body} /> : (
             <p>
               Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
@@ -40,29 +40,26 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           )}
         </div>
 
-        <!-- Show Full Description Button -->
-        <div>
-          <button 
-            id="openDescModalBtn" 
-            type="button"
-            class="mt-1 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition inline-flex items-center gap-2 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2.5 rounded-xl border border-emerald-300/80 shadow-sm"
-          >
-            <span>Show Full Description</span>
-            <span aria-hidden="true">➔</span>
-          </button>
-        </div>
+        <!-- See More Button (Hidden by default, shown ONLY if text > 150 words) -->
+        <button 
+          id="toggleOverviewBtn" 
+          style="display: none;"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
+        >
+          See More ➔
+        </button>
       </div>
 
-      <!-- Hotel Policies & Information Grid -->
+      <!-- Hotel Policies & Quick Information Grid -->
       <div class="pt-4 border-t border-slate-200/80 space-y-4">
         <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">Hotel Policies & Essential Info</h3>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
           
-          <!-- Check-In -->
+          <!-- Check-In SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+              <svg class="w-4 h-4 fill-slate-800" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-In</span>
@@ -70,10 +67,10 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             </div>
           </div>
 
-          <!-- Check-Out -->
+          <!-- Check-Out SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-Out</span>
@@ -81,10 +78,10 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             </div>
           </div>
 
-          <!-- Price -->
+          <!-- Price SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Starting Price</span>
@@ -92,10 +89,10 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             </div>
           </div>
 
-          <!-- Property Type -->
+          <!-- Property Type SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Property Type</span>
@@ -103,10 +100,10 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             </div>
           </div>
 
-          <!-- Power Backup -->
+          <!-- Power Backup SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Power Backup</span>
@@ -114,10 +111,10 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             </div>
           </div>
 
-          <!-- Smoking Policy -->
+          <!-- Smoking Policy SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg aria-hidden="true" class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Smoking</span>
@@ -130,7 +127,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 
     </div>
 
-    <!-- RIGHT COLUMN (LIVE STAY22 API COMPARISON) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - STAY22 WORKER API COMPARISON) -->
     <div class="lg:col-span-5">
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px]">
         
@@ -144,7 +141,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           </p>
         </div>
 
-        <!-- Live Stay22 API Rates Container -->
+        <!-- Live Stay22 API Rates List Container -->
         <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[220px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
@@ -152,9 +149,9 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
           </div>
         </div>
 
-        <!-- Deal Tip Box -->
+        <!-- Amber Deal Tip Box -->
         <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
-          <svg aria-hidden="true" class="w-5 h-5 fill-amber-700 shrink-0" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
             <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
           </svg>
           <p class="leading-tight">
@@ -168,68 +165,21 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- AIRBNB STYLE FULL DESCRIPTION POPUP MODAL -->
-<div 
-  id="fullDescriptionModal" 
-  role="dialog" 
-  aria-modal="true" 
-  aria-labelledby="modalTitle" 
-  aria-hidden="true" 
-  class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4"
->
-  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-3xl text-slate-900 space-y-5 shadow-2xl relative max-h-[85vh] overflow-y-auto">
-    
-    <!-- Modal Header -->
-    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-      <div>
-        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Full Overview & History</span>
-        <h3 id="modalTitle" class="text-2xl font-black font-serif text-slate-900">About {hotelTitle}</h3>
-      </div>
-      <button 
-        id="closeDescModalBtn" 
-        type="button" 
-        aria-label="Close description modal" 
-        class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer transition"
-      >&times;</button>
-    </div>
-
-    <!-- Modal Body -->
-    <div id="modalFullDescContent" class="prose prose-slate max-w-none text-sm sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 text-left">
-      {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-        <p>
-          Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
-        </p>
-      )}
-    </div>
-
-  </div>
-</div>
-
-<!-- CLIENT-SIDE SCRIPT -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH & PURE 150-WORD SEE MORE TOGGLE -->
 <script is:inline>
-  function initHotelAboutAndRates() {
-    // Escaping helper for safe innerHTML injection
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
+  document.addEventListener('DOMContentLoaded', async () => {
     // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
 
-    if (ratesContainer && !ratesContainer.dataset.loaded) {
-      ratesContainer.dataset.loaded = 'true';
+    if (ratesContainer) {
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
-      fetch(apiUrl)
-        .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
-        .then(json => {
+      try {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const json = await res.json();
+          
           let rawResults = [];
           if (json && Array.isArray(json.results)) {
             rawResults = json.results;
@@ -257,10 +207,15 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
                   : `https://r2.stay22.com/2025_${supplierKey}.png`;
 
                 let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                if (supplierKey === 'booking') providerName = 'Booking.com';
-                else if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
-                else if (supplierKey === 'expedia') providerName = 'Expedia';
-                else if (supplierKey === 'vrbo') providerName = 'Vrbo';
+                if (supplierKey === 'booking') {
+                  providerName = 'Booking.com';
+                } else if (supplierKey === 'hotelscom') {
+                  providerName = 'Hotels.com';
+                } else if (supplierKey === 'expedia') {
+                  providerName = 'Expedia';
+                } else if (supplierKey === 'vrbo') {
+                  providerName = 'Vrbo';
+                }
 
                 if (priceVal > 0) {
                   deals.push({
@@ -283,8 +238,8 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
                     <img 
-                      src="${escapeHtml(item.logo)}" 
-                      alt="${escapeHtml(item.provider)} logo" 
+                      src="${item.logo}" 
+                      alt="${item.provider} logo" 
                       width="32"
                       height="32"
                       loading="lazy"
@@ -292,103 +247,69 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
                       onerror="this.style.display='none';"
                     />
                   </div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-900">${escapeHtml(item.provider)}</span>
+                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-4">
                   <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
-                  <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
                     View Deal
                   </a>
                 </div>
               </div>
             `).join('');
           } else {
-            ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${escapeHtml(hotelName)}" right now.</div>`;
+            ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${hotelName}" right now.</div>`;
           }
-        })
-        .catch(e => {
-          console.error('Rate fetch error:', e);
-          ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">Unable to load live rates at this time.</div>`;
+        }
+      } catch (e) {
+        console.error('Rate fetch error:', e);
+      }
+    }
+
+    // 2. PURE 150-WORD SEE MORE / SEE LESS TOGGLE LOGIC
+    const overviewTextEl = document.getElementById('overview-text');
+    const toggleBtn = document.getElementById('toggleOverviewBtn');
+
+    if (overviewTextEl && toggleBtn) {
+      // Fix missing spaces after periods
+      overviewTextEl.innerText = overviewTextEl.innerText.replace(/\.([A-Z])/g, '. $1');
+
+      const rawText = overviewTextEl.innerText.trim();
+      const words = rawText.split(/\s+/);
+
+      if (words.length > 150) {
+        const first150Words = words.slice(0, 150).join(' ');
+        const remainingWords = words.slice(150).join(' ');
+
+        overviewTextEl.innerHTML = `
+          <span>${first150Words}</span>
+          <span id="overview-dots">... </span>
+          <span id="overview-more" class="hidden">${remainingWords}</span>
+        `;
+
+        toggleBtn.style.display = 'inline-flex';
+
+        toggleBtn.addEventListener('click', () => {
+          const moreSpan = document.getElementById('overview-more');
+          const dotsSpan = document.getElementById('overview-dots');
+
+          if (moreSpan && dotsSpan) {
+            const isHidden = moreSpan.classList.contains('hidden');
+            if (isHidden) {
+              moreSpan.classList.remove('hidden');
+              dotsSpan.classList.add('hidden');
+              toggleBtn.innerHTML = 'See Less ▲';
+            } else {
+              moreSpan.classList.add('hidden');
+              dotsSpan.classList.remove('hidden');
+              toggleBtn.innerHTML = 'See More ➔';
+            }
+          }
         });
-    }
-
-    // 2. Enhance Hyperlinks
-    function enhanceLinks(container) {
-      if (!container) return;
-      container.querySelectorAll('a').forEach(link => {
-        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
-        if (link.hostname && link.hostname !== window.location.hostname) {
-          link.setAttribute('target', '_blank');
-          link.setAttribute('rel', 'noopener noreferrer');
-        }
-      });
-    }
-
-    enhanceLinks(document.getElementById('overview-excerpt'));
-    enhanceLinks(document.getElementById('modalFullDescContent'));
-
-    // 3. Airbnb-Style Modal Logic with History & Back Button Synchronization
-    const descModal = document.getElementById('fullDescriptionModal');
-    const openDescBtn = document.getElementById('openDescModalBtn');
-    const closeDescBtn = document.getElementById('closeDescModalBtn');
-    let isPushedToHistory = false;
-
-    function openDescModalSafe() {
-      if (!descModal) return;
-      descModal.classList.remove('hidden');
-      descModal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('overflow-hidden');
-
-      if (!isPushedToHistory) {
-        history.pushState({ descModalOpen: true }, '');
-        isPushedToHistory = true;
+      } else {
+        toggleBtn.style.display = 'none';
       }
     }
-
-    function closeDescModalSafe(fromPopstate = false) {
-      if (!descModal || descModal.classList.contains('hidden')) return;
-      descModal.classList.add('hidden');
-      descModal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('overflow-hidden');
-
-      if (isPushedToHistory) {
-        isPushedToHistory = false;
-        if (!fromPopstate) {
-          history.back(); // Rollback pushed history state when manually closed
-        }
-      }
-    }
-
-    // Intercept Physical / Gesture Back Button
-    window.addEventListener('popstate', (e) => {
-      if (descModal && !descModal.classList.contains('hidden')) {
-        closeDescModalSafe(true);
-      }
-    });
-
-    // Close on ESC key press
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && descModal && !descModal.classList.contains('hidden')) {
-        closeDescModalSafe();
-      }
-    });
-
-    if (openDescBtn) openDescBtn.addEventListener('click', openDescModalSafe);
-    if (closeDescBtn) closeDescBtn.addEventListener('click', () => closeDescModalSafe(false));
-
-    if (descModal) {
-      descModal.addEventListener('click', (e) => {
-        if (e.target === descModal) closeDescModalSafe(false);
-      });
-    }
-  }
-
-  // Initialize on load and on Astro page transitions
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHotelAboutAndRates);
-  } else {
-    initHotelAboutAndRates();
-  }
-  document.addEventListener('astro:page-load', initHotelAboutAndRates);
+  });
 </script>
