@@ -62,32 +62,34 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   if (!url) return '';
   if (url.includes('unsplash.com')) {
     const cleanUrl = url.split('?')[0];
-    return `${cleanUrl}?auto=format&fit=crop&w=${width}&q=${quality}`;
+    return `${cleanUrl}?auto=format&fit=crop&w=${width}&q=${quality}&fm=webp`;
   }
   return url;
 }
 
 // Pure Dynamic Gallery Images (Zero Hardcoded Unsplash Fallbacks)
-const rawGallery = (data.gallery && data.gallery.length > 0) 
-  ? data.gallery 
+const rawGallery = (data.gallery && data.gallery.length > 0)
+  ? data.gallery
   : (hotelImage ? [hotelImage] : []);
 
 const totalPhotos = rawGallery.length;
 const remainingPhotos = totalPhotos > 4 ? totalPhotos - 4 : 0;
 
 // High-Res & Thumbnail Optimized Arrays
-const mainHeroUrl = getOptimizedImageUrl(rawGallery[0], 800, 80);
-const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 200, 70));
-const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1200, 85));
+// Hero image: request at 2 sizes for responsive srcset (mobile vs desktop) instead of a single 800px file
+const mainHeroUrlMobile = getOptimizedImageUrl(rawGallery[0], 640, 75);
+const mainHeroUrlDesktop = getOptimizedImageUrl(rawGallery[0], 1200, 80);
+const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 160, 65));
+const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1400, 82));
 ---
 
 <!-- 1ST COMPONENT: HOTEL HERO BANNER (100% PURE DYNAMIC CMS DATA) -->
 <section class="bg-[#F8FAF9] text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200/80">
   <div class="space-y-6">
-    
+
     <!-- TOP HEADER & TITLE AREA -->
     <div class="text-center max-w-4xl mx-auto space-y-3">
-      
+
       <!-- Breadcrumbs -->
       <div class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
         <a href="/" class="hover:text-emerald-700 transition">Home</a>
@@ -155,18 +157,24 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
     <!-- RESPONSIVE HERO GALLERY (PURE DYNAMIC PHOTOS ONLY) -->
     {totalPhotos > 0 && (
       <div class="max-w-5xl mx-auto space-y-3 pt-2">
-        
+
         <!-- 1. MAIN LARGE HERO COVER PHOTO -->
+        <!-- Fixed aspect-ratio box (via explicit height classes below) reserves layout space so the image
+             never causes a Cumulative Layout Shift while it loads. -->
         <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
-          <img 
-            id="heroMainViewImg" 
-            src={mainHeroUrl} 
-            alt={hotelTitle} 
+          <img
+            id="heroMainViewImg"
+            src={mainHeroUrlDesktop}
+            srcset={`${mainHeroUrlMobile} 640w, ${mainHeroUrlDesktop} 1200w`}
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            width="1200"
+            height="480"
+            alt={hotelTitle}
             loading="eager"
             fetchpriority="high"
             decoding="async"
             data-images={JSON.stringify(lightboxUrls)}
-            class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer" 
+            class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer"
           />
 
           <!-- Left/Right Arrow Navigation over Main Image -->
@@ -192,40 +200,40 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
         {thumbUrls.length > 1 && (
           <div class="grid grid-cols-5 gap-2 sm:gap-3">
             {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
-              <button 
-                class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : ''}"
+              <button
+                class={`hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : 'border-transparent'}`}
                 data-index={idx}
               >
-                <img 
-                  src={img} 
-                  alt={`Thumb ${idx + 1}`} 
-                  width="200"
-                  height="150"
-                  loading="lazy" 
-                  decoding="async" 
-                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+                <img
+                  src={img}
+                  alt={`Thumb ${idx + 1}`}
+                  width="160"
+                  height="120"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                 />
               </button>
             ))}
 
             <!-- 5th Thumbnail with 'More Photos' Pop-up Badge -->
             {thumbUrls[4] && (
-              <button 
+              <button
                 id="triggerFullGalleryBtn"
                 class="h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
                 data-index="4"
               >
-                <img 
-                  src={thumbUrls[4]} 
-                  alt="More Photos" 
-                  width="200"
-                  height="150"
-                  loading="lazy" 
-                  decoding="async" 
-                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300" 
+                <img
+                  src={thumbUrls[4]}
+                  alt="More Photos"
+                  width="160"
+                  height="120"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                 />
                 <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
-                  <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos > 0 ? remainingPhotos : totalPhotos}</span>
+                  <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos}</span>
                   <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
                 </div>
               </button>
@@ -255,7 +263,9 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
   </div>
 
   <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
-    <img id="lightboxModalImg" src={lightboxUrls[0]} alt={hotelTitle} class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+    <!-- lightbox image is only ever visible after user interaction, so loading="lazy" costs nothing
+         and keeps it out of the initial page weight -->
+    <img id="lightboxModalImg" src={lightboxUrls[0]} alt={hotelTitle} loading="lazy" decoding="async" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
     <button id="lightboxPrevBtn" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❮</button>
     <button id="lightboxNextBtn" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❯</button>
   </div>
@@ -286,6 +296,7 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
         if (!mainImg || !images.length) return;
         activeIdx = (idx + images.length) % images.length;
         mainImg.src = images[activeIdx];
+        mainImg.removeAttribute('srcset'); // switching images manually: drop the responsive hero srcset so the exact clicked photo always shows
         if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
 
         thumbBtns.forEach((btn, i) => {
@@ -321,6 +332,9 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
       function closeModalSafe() {
         if (!modal) return;
         modal.classList.add('hidden');
+        if (history.state && history.state.modalOpen) {
+          history.back();
+        }
       }
 
       window.addEventListener('popstate', () => {
