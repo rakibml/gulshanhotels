@@ -284,59 +284,7 @@ const iconMap: Record<string, string> = {
   </div>
 </div>
 
-<!-- SAFE HIDDEN SCRIPT TAG FOR PASSING DYNAMIC ROOMS DATA (ADMIN-SAFE) -->
-<script type="application/json" id="hotel-rooms-data" set:html={JSON.stringify(roomsList)}></script>
-
-<!-- POPUP MODAL: ROOM DETAILS INSPECTOR -->
-<div id="selectedRoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
-  
-  <!-- Header Bar -->
-  <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
-    <div>
-      <span class="text-[10px] font-black uppercase text-emerald-400 tracking-widest block">Room Inspector & Photos</span>
-      <h3 id="modalSelectedRoomName" class="text-xl sm:text-2xl font-black font-serif text-white">Room Details</h3>
-    </div>
-    
-    <button id="closeSelectedRoomModalBtn" aria-label="Close Room Inspector" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-2xl flex items-center justify-center shadow-2xl hover:scale-110 transition cursor-pointer border border-rose-400 shrink-0">&times;</button>
-  </div>
-
-  <!-- Modal Content -->
-  <div class="max-w-4xl mx-auto my-auto w-full space-y-6 py-4 text-left">
-    
-    <!-- Top Room Photo Slider -->
-    <div class="relative w-full h-[280px] sm:h-[400px] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
-      <img id="modalRoomMainImg" src="" alt={`${hotelTitle} Room Photo`} loading="lazy" decoding="async" class="w-full h-full object-cover" />
-      <button id="modalRoomPrevPhotoBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❮</button>
-      <button id="modalRoomNextPhotoBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/80 hover:bg-slate-950 text-white flex items-center justify-center font-bold text-lg shadow-xl cursor-pointer">❯</button>
-      <span id="modalRoomPhotoBadge" class="absolute bottom-3 right-4 bg-slate-950/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">1 / 1</span>
-    </div>
-
-    <!-- FEATURED HIGHLIGHTS CARD (DYNAMICALLY POPULATED) -->
-    <div class="bg-slate-900 border border-slate-800 p-5 sm:p-6 rounded-3xl space-y-3 shadow-md">
-      <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider block">Featured Room Badges & Highlights</span>
-      <div id="modalFeaturedHighlightsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-bold text-slate-200"></div>
-    </div>
-
-    <!-- KEY ROOM SPECS & FULL AMENITIES LIST -->
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
-      <div id="modalRoomSpecs" class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-200 font-bold border-b border-slate-800 pb-3"></div>
-
-      <div class="space-y-2">
-        <h4 class="text-xs font-black uppercase text-emerald-400 tracking-wider">Full Included Amenities</h4>
-        <div id="modalRoomChecklistGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-200"></div>
-      </div>
-
-      <div class="pt-2">
-        <a href="#rates-card" id="modalCheckRatesBtn" class="block w-full bg-[#00e676] hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 rounded-2xl text-center transition shadow-lg">
-          Check Live Rates ➔
-        </a>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- CLIENT SIDE JAVASCRIPT (PERFECT 2-CLICK BACK BUTTON FIX) -->
+<!-- CLIENT SIDE JAVASCRIPT (DIRECT LINK SUPPORT + 2-CLICK BACK BUTTON FIX) -->
 <script is:inline>
   const initHotelAmenitiesAndRooms = () => {
     // 1. Modal Elements
@@ -374,26 +322,29 @@ const iconMap: Record<string, string> = {
       if (roomModal) roomModal.classList.add('hidden');
     }
 
-    // Helper: Open Modal with #popup Hash
-    function openModalWithHash(type, roomObj = null) {
+    // Helper: Open Modal DOM UI
+    function showModalDOM(type, roomObj = null) {
       hideModalsDOM();
-
       if (type === 'amenities' && amenModal) {
         amenModal.classList.remove('hidden');
       } else if (type === 'room' && roomModal && roomObj) {
         populateRoomModalUI(roomObj);
         roomModal.classList.remove('hidden');
       }
+    }
 
-      // Add #popup hash to URL if not present
-      if (window.location.hash !== '#popup') {
-        window.location.hash = 'popup';
+    // Open Modal with URL Hash
+    function openModalWithHash(type, roomObj = null, targetHash = 'popup') {
+      showModalDOM(type, roomObj);
+      if (window.location.hash !== `#${targetHash}`) {
+        window.location.hash = targetHash;
       }
     }
 
-    // Helper: Close Modal via UI (Cross button or Overlay click)
+    // Close Modal via UI (Cross button or Overlay click)
     function closeModalByUI() {
-      if (window.location.hash === '#popup') {
+      const currentHash = window.location.hash;
+      if (currentHash === '#popup' || currentHash === '#amenities' || currentHash.startsWith('#room-')) {
         history.back(); // Reverts hash, triggering 'hashchange'
       } else {
         hideModalsDOM();
@@ -464,20 +415,31 @@ const iconMap: Record<string, string> = {
       if (modalBadge) modalBadge.textContent = `${modalActivePhotoIdx + 1} / ${modalPhotos.length}`;
     }
 
-    // --- LISTEN TO HASH CHANGE (MOBILE BACK BUTTON EVENT) ---
-    window.addEventListener('hashchange', () => {
-      if (window.location.hash !== '#popup') {
-        hideModalsDOM(); // Closes popup instantly when hash is removed
+    // --- CHECK & HANDLE URL HASH ON LOAD AND HASHCHANGE ---
+    function syncModalWithURLHash() {
+      const hash = window.location.hash;
+      if (hash === '#popup' || hash === '#amenities') {
+        showModalDOM('amenities');
+      } else if (hash.startsWith('#room-')) {
+        const roomIdx = parseInt(hash.replace('#room-', ''), 10);
+        if (!isNaN(roomIdx) && allRoomsData[roomIdx]) {
+          showModalDOM('room', allRoomsData[roomIdx]);
+        } else {
+          hideModalsDOM();
+        }
+      } else {
+        hideModalsDOM();
       }
-    });
-
-    // Clear existing hash on fresh page load if present
-    if (window.location.hash === '#popup') {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
+    // Listen to Mobile Back Button or URL Hash Change
+    window.addEventListener('hashchange', syncModalWithURLHash);
+
+    // Sync on initial page load (Direct Link Visit Support)
+    syncModalWithURLHash();
+
     // --- EVENT LISTENERS ---
-    if (openAmenBtn) openAmenBtn.addEventListener('click', () => openModalWithHash('amenities'));
+    if (openAmenBtn) openAmenBtn.addEventListener('click', () => openModalWithHash('amenities', null, 'popup'));
     if (closeAmenBtn) closeAmenBtn.addEventListener('click', closeModalByUI);
 
     if (amenModal) {
@@ -534,13 +496,13 @@ const iconMap: Record<string, string> = {
           });
         }
 
-        img.addEventListener('click', () => openModalWithHash('room', roomObj));
+        img.addEventListener('click', () => openModalWithHash('room', roomObj, `room-${index}`));
       }
 
       card.querySelectorAll('.open-room-detail-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          openModalWithHash('room', roomObj);
+          openModalWithHash('room', roomObj, `room-${index}`);
         });
       });
     });
