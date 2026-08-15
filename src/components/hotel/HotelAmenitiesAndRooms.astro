@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (3x3 Mobile Amenity Grid Upgrade)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Dynamic, Agoda Room Cards, Hybrid SVGs & Back-Button Safety)
 interface Props {
   hotel: any;
 }
@@ -11,7 +11,7 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const amenitiesList = data.amenities || [];
 const totalAmenitiesCount = amenitiesList.length;
 
-// Top 9 Amenities for Main Grid
+// Top 9 Amenities for Main Grid (3x3 on Mobile)
 const top9Amenities = amenitiesList.slice(0, 9);
 
 const showAmenities = data.enable_amenities !== false && totalAmenitiesCount > 0;
@@ -47,7 +47,7 @@ const iconMap: Record<string, string> = {
   <section id="amenities-and-rooms" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
       
-      <!-- LEFT COLUMN: AMENITIES & SERVICES (3x3 GRID ON MOBILE) -->
+      <!-- LEFT COLUMN: AMENITIES & SERVICES (3x3 COMPACT GRID ON MOBILE) -->
       {showAmenities && (
         <div class={showRooms ? "lg:col-span-5 space-y-6 text-left" : "lg:col-span-12 space-y-6 text-left"}>
           <div class="border-b border-slate-200/80 pb-3">
@@ -114,6 +114,7 @@ const iconMap: Record<string, string> = {
               <button id="roomNextBtn" aria-label="Next Room" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border border-slate-200 shadow-xl text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
             )}
 
+            <!-- ROOM CARDS SLIDER (STRICT MAX 6 CARD AMENITIES) -->
             <div id="roomsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {roomsList.map((room: any, index: number) => {
                 const roomPhotos = (room.photos && room.photos.length > 0) ? room.photos : (room.image ? [room.image] : []);
