@@ -165,7 +165,7 @@ rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
   - name: 1 King Bed room 1
-    price: ''
+    price: '150'
     size: 42 m² / 452 ft²
     guests: Max 2 Adults
     bed: 1 King Bed
@@ -320,7 +320,7 @@ rooms:
       - City view,
       - City view,
   - name: Deluxe Guest Room3
-    price: ''
+    price: '500'
     size: 42 m² / 452 ft²
     guests: Max 2 Adults
     bed: 1 King Bed
