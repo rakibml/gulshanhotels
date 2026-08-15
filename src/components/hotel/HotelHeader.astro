@@ -15,9 +15,9 @@ const hotelImage = data.image || "https://images.unsplash.com/photo-156607377125
 const officialSite = data.officialSite || "";
 const hotelDescription = data.description;
 
-// 2. Button Controls from CMS
-const showViewPrices = data.enable_view_prices !== false;
-const showOfficialSite = data.enable_official_site !== false && Boolean(officialSite);
+// 2. Button Controls from CMS (100% Admin Controllable)
+const showViewPrices = data.enable_view_prices !== false; // Default true
+const showOfficialSite = data.enable_official_site !== false && Boolean(officialSite); // Default true if link exists
 
 // 3. 30 Preset Typography & Color Styles for Hotel Title
 const selectedStyle = data.title_style || "style_1";
@@ -92,16 +92,20 @@ const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 160,
 const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1400, 82));
 ---
 
-<!-- HIGH PRIORITY LCP IMAGE PRELOAD FOR GOOGLE LIGHTHOUSE 100% GREEN CHECKMARK PASS -->
+<!-- EARLY LCP PRECONNECT & PRELOAD DIRECTIVES FOR LIGHTHOUSE PASS -->
 {totalPhotos > 0 && (
-  <link
-    rel="preload"
-    as="image"
-    href={mainHeroUrlDesktop}
-    imagesrcset={`${mainHeroUrlMobile} 640w, ${mainHeroUrlDesktop} 1200w`}
-    imagesizes="(max-width: 1024px) 100vw, 1024px"
-    fetchpriority="high"
-  />
+  <>
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://picsum.photos" crossorigin />
+    <link
+      rel="preload"
+      as="image"
+      href={mainHeroUrlDesktop}
+      imagesrcset={`${mainHeroUrlMobile} 640w, ${mainHeroUrlDesktop} 1200w`}
+      imagesizes="(max-width: 1024px) 100vw, 1024px"
+      fetchpriority="high"
+    />
+  </>
 )}
 
 <!-- 1ST COMPONENT: HOTEL HERO BANNER -->
@@ -335,7 +339,7 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
       
       if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
 
-      // Update thumbnail active borders (works for all thumbnails)
+      // Update thumbnail active borders
       thumbBtns.forEach((btn, i) => {
         if (i === activeIdx) {
           btn.classList.add('border-emerald-600');
