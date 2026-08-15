@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Dynamic, Agoda Room Cards, Separate Popup Hashes)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Dynamic, Agoda Room Cards, Price Field Integrated, Back-Button Safe)
 interface Props {
   hotel: any;
 }
@@ -22,7 +22,7 @@ const showSeeMoreBtn = totalAmenitiesCount > 9;
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 const showRooms = roomsList.length > 0;
 
-// Pre-Built Vector SVG Icon Dictionary
+// Pre-Built Vector SVG Icon Dictionary (Including Laundry, Safe & Desk)
 const iconMap: Record<string, string> = {
   pool: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
   spa: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
@@ -33,12 +33,15 @@ const iconMap: Record<string, string> = {
   shuttle: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
   meeting: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>`,
   room_service: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
+  laundry: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zm-6.5 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`,
   checkmark: `<svg class="w-4 h-4 fill-emerald-600" width="16" height="16" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
   view: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
   ac: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
   bath: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 13V4.83C20 3.27 18.73 2 17.17 2c-.75 0-1.47.3-2 .83l-1.25 1.25c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l.59-.59c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-1.5 1.5c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.5-1.5c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-.59.59c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.25-1.25c.53-.53.83-1.25.83-2V13h-2zm1 2H3c-.55 0-1 .45-1 1v2c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-2c0-.55-.45-1-1-1z"/></svg>`,
   kettle: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H4V5h16v10z"/></svg>`,
-  dryer: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`
+  dryer: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`,
+  safe: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
+  desk: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 18v-2H4v2H2v-6c0-1.1.9-2 2-2h16c1.1 0 2-.9 2-2v6h-2zM4 6h16v2H4V6z"/></svg>`
 };
 ---
 
@@ -134,7 +137,7 @@ const iconMap: Record<string, string> = {
                         <img 
                           src={roomPhotos[0] || 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80'} 
                           alt={roomAltText} 
-                          loading="lazy"
+                          loading={index === 0 ? "eager" : "lazy"}
                           decoding="async"
                           class="room-card-main-img w-full h-full object-cover group-hover/roomimg:scale-105 transition duration-500 cursor-pointer" 
                         />
@@ -163,9 +166,20 @@ const iconMap: Record<string, string> = {
                           Room photos and details ➔
                         </button>
 
-                        <h3 class="font-bold text-slate-900 text-base leading-tight group-hover:text-emerald-800 transition line-clamp-2">
-                          {room.name || 'Standard Room'}
-                        </h3>
+                        <div class="flex items-start justify-between gap-2">
+                          <h3 class="font-bold text-slate-900 text-base leading-tight group-hover:text-emerald-800 transition line-clamp-2">
+                            {room.name || 'Standard Room'}
+                          </h3>
+                        </div>
+
+                        <!-- PRICE DISPLAY FIELD -->
+                        {room.price && (
+                          <div class="pt-0.5">
+                            <span class="text-xs font-black text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-md inline-block">
+                              {room.price}
+                            </span>
+                          </div>
+                        )}
 
                         <!-- Specs Sub-bar -->
                         <div class="text-[11px] text-slate-500 font-semibold flex flex-wrap items-center gap-2 pt-0.5">
@@ -260,7 +274,7 @@ const iconMap: Record<string, string> = {
 )}
 
 <!-- POPUP MODAL 1: ALL AMENITIES -->
-<div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+<div id="allAmenitiesModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
       <div>
@@ -288,7 +302,7 @@ const iconMap: Record<string, string> = {
 <script type="application/json" id="hotel-rooms-data" set:html={JSON.stringify(roomsList)}></script>
 
 <!-- POPUP MODAL 2: ROOM DETAILS INSPECTOR -->
-<div id="selectedRoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
+<div id="selectedRoomModal" role="dialog" aria-modal="true" aria-labelledby="modalSelectedRoomName" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
   
   <!-- Header Bar -->
   <div class="flex items-center justify-between max-w-5xl mx-auto w-full border-b border-slate-800 pb-4 shrink-0">
@@ -336,7 +350,28 @@ const iconMap: Record<string, string> = {
   </div>
 </div>
 
-<!-- CLIENT SIDE JAVASCRIPT (SEPARATE HASH POPUP CONTROLLER) -->
+<!-- GOOGLE SEO STRUCTURED DATA (JSON-LD SCHEMA FOR RICH SNIPPETS) -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Hotel",
+  "name": hotelTitle,
+  "amenityFeature": amenitiesList.map(item => ({
+    "@type": "LocationFeatureSpecification",
+    "name": typeof item === 'string' ? item : (item?.name || ''),
+    "value": true
+  })),
+  "containsPlace": roomsList.map(room => ({
+    "@type": "HotelRoom",
+    "name": room.name || 'Standard Room',
+    "description": room.price ? `Rate starting from ${room.price}` : 'Available Room Type',
+    "occupancy": {
+      "@type": "QuantitativeValue",
+      "value": room.guests || 'Max 2 Adults'
+    }
+  }))
+})}></script>
+
+<!-- CLIENT SIDE JAVASCRIPT -->
 <script is:inline>
   const initHotelAmenitiesAndRooms = () => {
     // 1. Modal Elements
@@ -382,9 +417,10 @@ const iconMap: Record<string, string> = {
       if (!roomObj) return;
       if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name || 'Room Details';
       
-      // Specs
+      // Specs & Price Bar in Modal
       if (modalRoomSpecs) {
         const specs = [];
+        if (roomObj.price) specs.push(`<span class="text-emerald-400 font-extrabold">💰 ${roomObj.price}</span>`);
         if (roomObj.size) specs.push(`<span>📐 ${roomObj.size}</span>`);
         if (roomObj.guests) specs.push(`<span>👤 ${roomObj.guests}</span>`);
         if (roomObj.bed) specs.push(`<span>🛏️ ${roomObj.bed}</span>`);
@@ -473,7 +509,7 @@ const iconMap: Record<string, string> = {
       }
     }
 
-    // --- LISTEN TO HASH CHANGES (BACK BUTTON & DIRECT LINKS) ---
+    // --- LISTEN TO HASH CHANGES ---
     function handleHashChange() {
       const hash = window.location.hash;
       
