@@ -164,7 +164,7 @@ amenities:
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
-  - name: Deluxe Guest Room, 1 King Bed
+  - name: 1 King Bed room 1
     price: ''
     size: 42 m² / 452 ft²
     guests: Max 2 Adults
@@ -176,7 +176,7 @@ rooms:
       - https://picsum.photos/id/64/1920/1280.webp
       - https://picsum.photos/id/260/1280/1920.webp
     badges:
-      - Deluxe Guest Room, 1 King Bed
+      - Deluxe Guest Room, 2222
     checklist:
       - name: spa
         icon: checkmark
@@ -319,7 +319,7 @@ rooms:
       - City view,
       - City view,
       - City view,
-  - name: Deluxe Guest Room, 1 King Bed
+  - name: Deluxe Guest Room3
     price: ''
     size: 42 m² / 452 ft²
     guests: Max 2 Adults
