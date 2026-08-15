@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Dynamic, Admin-Safe, Bulletproof Room & Amenities Popups)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Dynamic, Agoda Room Cards, Separate Popup Hashes)
 interface Props {
   hotel: any;
 }
@@ -9,7 +9,7 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 
-// Admin-Safe Defensive Data Fetching (Null/Undefined Protection)
+// Admin-Safe Defensive Data Fetching
 const amenitiesList = Array.isArray(data.amenities) ? data.amenities : [];
 const totalAmenitiesCount = amenitiesList.length;
 
@@ -22,7 +22,7 @@ const showSeeMoreBtn = totalAmenitiesCount > 9;
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 const showRooms = roomsList.length > 0;
 
-// Pre-Built Vector SVG Icon Dictionary for Amenities & Room Features
+// Pre-Built Vector SVG Icon Dictionary
 const iconMap: Record<string, string> = {
   pool: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
   spa: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
@@ -259,7 +259,7 @@ const iconMap: Record<string, string> = {
   </section>
 )}
 
-<!-- POPUP MODAL: ALL AMENITIES -->
+<!-- POPUP MODAL 1: ALL AMENITIES -->
 <div id="allAmenitiesModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
@@ -287,7 +287,7 @@ const iconMap: Record<string, string> = {
 <!-- SAFE HIDDEN SCRIPT TAG FOR PASSING DYNAMIC ROOMS DATA -->
 <script type="application/json" id="hotel-rooms-data" set:html={JSON.stringify(roomsList)}></script>
 
-<!-- POPUP MODAL: ROOM DETAILS INSPECTOR -->
+<!-- POPUP MODAL 2: ROOM DETAILS INSPECTOR -->
 <div id="selectedRoomModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white overflow-y-auto">
   
   <!-- Header Bar -->
@@ -336,10 +336,10 @@ const iconMap: Record<string, string> = {
   </div>
 </div>
 
-<!-- CLIENT SIDE JAVASCRIPT (BULLETPROOF UNIFIED POPUP SYSTEM) -->
+<!-- CLIENT SIDE JAVASCRIPT (SEPARATE HASH POPUP CONTROLLER) -->
 <script is:inline>
   const initHotelAmenitiesAndRooms = () => {
-    // Modal Elements
+    // 1. Modal Elements
     const amenModal = document.getElementById('allAmenitiesModal');
     const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
     const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
@@ -369,6 +369,7 @@ const iconMap: Record<string, string> = {
 
     let modalPhotos = [];
     let modalActivePhotoIdx = 0;
+    let currentSelectedRoom = null;
 
     // Helper: Hide DOM Modals
     function hideModalsDOM() {
@@ -445,61 +446,70 @@ const iconMap: Record<string, string> = {
     function openAmenitiesModal() {
       hideModalsDOM();
       if (amenModal) amenModal.classList.remove('hidden');
-      if (window.location.hash !== '#popup') {
-        window.location.hash = 'popup';
+      if (window.location.hash !== '#amenities' && window.location.hash !== '#popup') {
+        window.location.hash = 'amenities';
       }
     }
 
     // --- OPEN ROOM INSPECTOR MODAL ---
     function openRoomModal(roomObj) {
       if (!roomObj) return;
+      currentSelectedRoom = roomObj;
       hideModalsDOM();
       populateRoomModalUI(roomObj);
       if (roomModal) roomModal.classList.remove('hidden');
-      if (window.location.hash !== '#popup') {
-        window.location.hash = 'popup';
+      if (window.location.hash !== '#room-details') {
+        window.location.hash = 'room-details';
       }
     }
 
-    // --- CLOSE MODAL VIA CROSS (X) BUTTON OR BACKDROP ---
+    // --- CLOSE MODAL VIA UI (CROSS BUTTON OR OVERLAY) ---
     function closeModalByUI() {
-      if (window.location.hash === '#popup') {
-        history.back(); // Triggers hashchange to close DOM modal
+      const hash = window.location.hash;
+      if (hash === '#amenities' || hash === '#room-details' || hash === '#popup') {
+        history.back(); // Triggers hashchange to hide DOM modal
       } else {
         hideModalsDOM();
       }
     }
 
-    // --- HASHCHANGE & INITIAL LOAD SYNC ---
+    // --- LISTEN TO HASH CHANGES (BACK BUTTON & DIRECT LINKS) ---
     function handleHashChange() {
       const hash = window.location.hash;
-      if (hash === '#popup') {
-        // Keep active modal visible if open, else default to amenities
-        if (amenModal?.classList.contains('hidden') && roomModal?.classList.contains('hidden')) {
-          if (amenModal) amenModal.classList.remove('hidden');
-        }
-      } else {
+      
+      if (hash === '#amenities' || hash === '#popup') {
         hideModalsDOM();
+        if (amenModal) amenModal.classList.remove('hidden');
+      } else if (hash === '#room-details') {
+        hideModalsDOM();
+        if (currentSelectedRoom) {
+          populateRoomModalUI(currentSelectedRoom);
+        } else if (allRoomsData.length > 0) {
+          populateRoomModalUI(allRoomsData[0]);
+        }
+        if (roomModal) roomModal.classList.remove('hidden');
+      } else {
+        hideModalsDOM(); // No modal hash -> hide all popups!
       }
     }
 
     window.addEventListener('hashchange', handleHashChange);
     
     // Initial load check
-    if (window.location.hash === '#popup') {
+    if (window.location.hash === '#amenities' || window.location.hash === '#room-details' || window.location.hash === '#popup') {
       handleHashChange();
     }
 
-    // --- EVENT LISTENERS ---
+    // Event Listeners for Amenities
     if (openAmenBtn) openAmenBtn.addEventListener('click', openAmenitiesModal);
     if (closeAmenBtn) closeAmenBtn.addEventListener('click', closeModalByUI);
-
     if (amenModal) {
       amenModal.addEventListener('click', (e) => {
         if (e.target === amenModal) closeModalByUI();
       });
     }
 
+    // Event Listeners for Room Inspector
     if (closeRoomModalBtn) closeRoomModalBtn.addEventListener('click', closeModalByUI);
     if (roomModal) {
       roomModal.addEventListener('click', (e) => {
@@ -509,10 +519,7 @@ const iconMap: Record<string, string> = {
 
     if (modalPrevPhotoBtn) modalPrevPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx - 1));
     if (modalNextPhotoBtn) modalNextPhotoBtn.addEventListener('click', () => updateModalPhoto(modalActivePhotoIdx + 1));
-
-    if (modalCheckRatesBtn) {
-      modalCheckRatesBtn.addEventListener('click', closeModalByUI);
-    }
+    if (modalCheckRatesBtn) modalCheckRatesBtn.addEventListener('click', closeModalByUI);
 
     // Room Cards Click Handling
     document.querySelectorAll('.room-card-box').forEach((card, index) => {
@@ -559,7 +566,7 @@ const iconMap: Record<string, string> = {
       });
     });
 
-    // Carousel Track Side Floating Scroll Buttons
+    // Carousel Track Scroll
     const track = document.getElementById('roomsCarouselTrack');
     const prevTrackBtn = document.getElementById('roomPrevBtn');
     const nextTrackBtn = document.getElementById('roomNextBtn');
@@ -570,7 +577,7 @@ const iconMap: Record<string, string> = {
     }
   };
 
-  // Astro Page Navigation Compatible
+  // Astro Lifecycle Compatibility
   document.addEventListener('DOMContentLoaded', initHotelAmenitiesAndRooms);
   document.addEventListener('astro:page-load', initHotelAmenitiesAndRooms);
 </script>
