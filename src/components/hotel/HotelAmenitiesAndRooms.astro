@@ -336,28 +336,14 @@ const iconMap: Record<string, string> = {
   </div>
 </div>
 
-<!-- CLIENT SIDE JAVASCRIPT -->
+<!-- CLIENT SIDE JAVASCRIPT WITH PERFECT BACK-BUTTON SAFETY -->
 <script is:inline>
   const initHotelAmenitiesAndRooms = () => {
-    // 1. Amenities Modal Script
+    // 1. Modal Elements
     const amenModal = document.getElementById('allAmenitiesModal');
     const openAmenBtn = document.getElementById('openAmenitiesModalBtn');
     const closeAmenBtn = document.getElementById('closeAmenitiesModalBtn');
-    let isAmenModalOpen = false;
 
-    function openAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.remove('hidden');
-      isAmenModalOpen = true;
-    }
-
-    function closeAmenModalSafe() {
-      if (!amenModal) return;
-      amenModal.classList.add('hidden');
-      isAmenModalOpen = false;
-    }
-
-    // 2. Room Inspector Modal Script
     const roomModal = document.getElementById('selectedRoomModal');
     const closeRoomModalBtn = document.getElementById('closeSelectedRoomModalBtn');
     const modalRoomTitle = document.getElementById('modalSelectedRoomName');
@@ -370,7 +356,7 @@ const iconMap: Record<string, string> = {
     const modalNextPhotoBtn = document.getElementById('modalRoomNextPhotoBtn');
     const modalCheckRatesBtn = document.getElementById('modalCheckRatesBtn');
 
-    // Parse rooms JSON securely from script tag
+    // Rooms Data
     const roomsScript = document.getElementById('hotel-rooms-data');
     let allRoomsData = [];
     try {
@@ -381,11 +367,46 @@ const iconMap: Record<string, string> = {
 
     let modalPhotos = [];
     let modalActivePhotoIdx = 0;
-    let isRoomModalOpen = false;
+    
+    // Global Modal State Trackers
+    let activeModal = null; // 'amenities' | 'room' | null
+    let isHistoryPushed = false;
 
+    // Helper: Hide Modal in DOM
+    function hideModalsDOM() {
+      if (amenModal) amenModal.classList.add('hidden');
+      if (roomModal) roomModal.classList.add('hidden');
+      activeModal = null;
+    }
+
+    // --- AMENITIES MODAL FUNCTIONS ---
+    function openAmenModalSafe() {
+      if (!amenModal) return;
+      hideModalsDOM();
+      amenModal.classList.remove('hidden');
+      activeModal = 'amenities';
+
+      if (!isHistoryPushed) {
+        history.pushState({ popupOpen: true }, '');
+        isHistoryPushed = true;
+      }
+    }
+
+    function closeAmenModalSafe() {
+      if (activeModal === 'amenities') {
+        hideModalsDOM();
+        if (isHistoryPushed) {
+          isHistoryPushed = false;
+          history.back(); // Revert pushState
+        }
+      }
+    }
+
+    // --- ROOM INSPECTOR MODAL FUNCTIONS ---
     function openRoomModalSafe(roomObj) {
       if (!roomModal || !roomObj) return;
-      
+      hideModalsDOM();
+
       if (modalRoomTitle) modalRoomTitle.textContent = roomObj.name || 'Room Details';
       
       // Update Specs Bar
@@ -397,7 +418,7 @@ const iconMap: Record<string, string> = {
         modalRoomSpecs.innerHTML = specs.length > 0 ? specs.join('<span class="text-slate-600">•</span>') : '<span>Standard Room Specifications</span>';
       }
 
-      // Populate Featured Highlights Grid (FIXED BUG)
+      // Populate Featured Badges
       if (modalHighlightsGrid) {
         const badges = Array.isArray(roomObj.badges) ? roomObj.badges : [];
         if (badges.length > 0) {
@@ -412,7 +433,7 @@ const iconMap: Record<string, string> = {
         }
       }
 
-      // Populate Room Checklist Grid
+      // Populate Checklist
       if (modalRoomGrid) {
         const list = Array.isArray(roomObj.checklist) ? roomObj.checklist : [];
         if (list.length > 0) {
@@ -430,7 +451,7 @@ const iconMap: Record<string, string> = {
         }
       }
 
-      // Photo Carousel Setup
+      // Photos Setup
       modalPhotos = (Array.isArray(roomObj.photos) && roomObj.photos.length > 0) ? roomObj.photos : (roomObj.image ? [roomObj.image] : []);
       modalActivePhotoIdx = 0;
       if (modalPhotos.length > 0) {
@@ -441,7 +462,12 @@ const iconMap: Record<string, string> = {
       }
 
       roomModal.classList.remove('hidden');
-      isRoomModalOpen = true;
+      activeModal = 'room';
+
+      if (!isHistoryPushed) {
+        history.pushState({ popupOpen: true }, '');
+        isHistoryPushed = true;
+      }
     }
 
     function updateModalPhoto(idx) {
@@ -452,12 +478,25 @@ const iconMap: Record<string, string> = {
     }
 
     function closeRoomModalSafe() {
-      if (!roomModal) return;
-      roomModal.classList.add('hidden');
-      isRoomModalOpen = false;
+      if (activeModal === 'room') {
+        hideModalsDOM();
+        if (isHistoryPushed) {
+          isHistoryPushed = false;
+          history.back(); // Revert pushState
+        }
+      }
     }
 
-    // Modal Triggers
+    // --- POPSTATE EVENT: MOBILE BACK BUTTON HANDLER ---
+    window.addEventListener('popstate', () => {
+      // User pressed browser/mobile back button
+      if (activeModal) {
+        hideModalsDOM();
+        isHistoryPushed = false;
+      }
+    });
+
+    // Triggers
     if (openAmenBtn) openAmenBtn.addEventListener('click', openAmenModalSafe);
     if (closeAmenBtn) closeAmenBtn.addEventListener('click', closeAmenModalSafe);
 
@@ -481,7 +520,7 @@ const iconMap: Record<string, string> = {
       modalCheckRatesBtn.addEventListener('click', closeRoomModalSafe);
     }
 
-    // 3. Room Card Inner Photo Slider & Inspectors
+    // Room Cards Click Events
     document.querySelectorAll('.room-card-box').forEach((card, index) => {
       const img = card.querySelector('.room-card-main-img');
       const prevBtn = card.querySelector('.card-img-prev-btn');
@@ -526,23 +565,17 @@ const iconMap: Record<string, string> = {
       });
     });
 
-    // 4. Room Carousel Horizontal Scroll Controls
+    // Carousel Track Scroll
     const track = document.getElementById('roomsCarouselTrack');
     const prevTrackBtn = document.getElementById('roomPrevBtn');
     const nextTrackBtn = document.getElementById('roomNextBtn');
 
     if (track && prevTrackBtn && nextTrackBtn) {
-      prevTrackBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -320, behavior: 'smooth' });
-      });
-
-      nextTrackBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 320, behavior: 'smooth' });
-      });
+      prevTrackBtn.addEventListener('click', () => track.scrollBy({ left: -320, behavior: 'smooth' }));
+      nextTrackBtn.addEventListener('click', () => track.scrollBy({ left: 320, behavior: 'smooth' }));
     }
   };
 
-  // Astro Lifecycle Listeners
   document.addEventListener('DOMContentLoaded', initHotelAmenitiesAndRooms);
   document.addEventListener('astro:page-load', initHotelAmenitiesAndRooms);
 </script>
