@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card Viewport Scroll Fix)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & HTML-Safe 150-Word Truncator)
 interface Props {
   hotel: any;
 }
@@ -12,17 +12,17 @@ const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
 // 100% Admin CMS Controllable Policies
-const checkIn = data.checkIn || "2:00 PM";
-const checkOut = data.checkOut || "12:00 PM";
-const powerBackup = data.powerBackup || "24/7 Generator";
-const smokingPolicy = data.smokingPolicy || "Non-Smoking";
+const checkIn = data.checkIn || data.check_in || "2:00 PM";
+const checkOut = data.checkOut || data.check_out || "12:00 PM";
+const powerBackup = data.powerBackup || data.power_backup || "24/7 Generator";
+const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking";
 ---
 
 <!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
-    <!-- LEFT COLUMN (ABOUT {HOTEL TITLE} & HOTEL POLICIES) -->
+    <!-- LEFT COLUMN (ABOUT HOTEL TITLE & HOTEL POLICIES) -->
     <div class="lg:col-span-7 space-y-8 text-left">
       
       <!-- About Hotel Section with Dynamic Title -->
@@ -129,7 +129,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - DIRECT TARGET WITH SCROLL-MT-24 FOR PERFECT CENTERED ALIGNMENT) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL?) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
@@ -167,13 +167,14 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & STRICT 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & ACCURATE 150-WORD TRUNCATOR -->
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
+  const initHotelAboutSection = async () => {
+    // 1. FETCH STAY22 API LIVE RATES
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
 
-    if (ratesContainer) {
+    if (ratesContainer && !ratesContainer.dataset.fetched) {
+      ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
@@ -231,7 +232,6 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
             }
           });
 
-          // Sort deals ascending by price
           deals.sort((a, b) => a.price - b.price);
 
           if (deals.length > 0) {
@@ -269,7 +269,7 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       }
     }
 
-    // 2. ENHANCE LINKS TO OPEN IN NEW TAB
+    // 2. ENHANCE LINKS IN OVERVIEW
     function applyLinkAttributes() {
       document.querySelectorAll('#overview-text a').forEach(link => {
         link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
@@ -280,77 +280,94 @@ const smokingPolicy = data.smokingPolicy || "Non-Smoking";
       });
     }
 
-    // 3. PERFECT HTML-PRESERVING EXACT 150-WORD TRUNCATOR
+    // 3. HTML-SAFE EXACT 150-WORD TRUNCATOR
     const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
 
-    if (overviewTextEl && toggleBtn) {
-      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
-
-      const rawText = overviewTextEl.innerText.trim();
-      const words = rawText.split(/\s+/);
+    if (overviewTextEl && toggleBtn && !overviewTextEl.dataset.truncatorSet) {
+      const textContent = overviewTextEl.textContent || overviewTextEl.innerText || '';
+      const words = textContent.trim().split(/\s+/).filter(w => w.length > 0);
 
       if (words.length > 150) {
-        let currentWordCount = 0;
-        let visibleHtml = '';
-        let hiddenHtml = '';
-        let isCut = false;
+        let count = 0;
+        let targetTextNode = null;
+        let splitOffset = 0;
 
-        const nodes = Array.from(overviewTextEl.childNodes);
+        const walker = document.createTreeWalker(overviewTextEl, NodeFilter.SHOW_TEXT, null, false);
+        let node;
 
-        nodes.forEach(node => {
-          if (isCut) {
-            hiddenHtml += node.outerHTML || node.textContent || '';
-            return;
-          }
+        while ((node = walker.nextNode())) {
+          const text = node.nodeValue;
+          const nodeWords = text.match(/\S+/g) || [];
 
-          const nodeText = node.textContent || '';
-          const nodeWords = nodeText.trim().split(/\s+/).filter(w => w.length > 0);
+          if (count + nodeWords.length >= 150) {
+            const needed = 150 - count;
+            let wordCount = 0;
+            let regex = /\S+/g;
+            let match;
 
-          if (currentWordCount + nodeWords.length <= 150) {
-            currentWordCount += nodeWords.length;
-            visibleHtml += node.outerHTML || node.textContent || '';
-          } else {
-            const needed = 150 - currentWordCount;
-            const part1 = nodeWords.slice(0, needed).join(' ');
-            const part2 = nodeWords.slice(needed).join(' ');
-
-            visibleHtml += part1;
-            hiddenHtml += ' ' + part2;
-            isCut = true;
-          }
-        });
-
-        overviewTextEl.innerHTML = `
-          <span>${visibleHtml}</span>
-          <span id="overview-dots">... </span>
-          <span id="overview-more" class="hidden">${hiddenHtml}</span>
-        `;
-
-        applyLinkAttributes();
-        toggleBtn.style.display = 'inline-flex';
-
-        toggleBtn.addEventListener('click', () => {
-          const moreSpan = document.getElementById('overview-more');
-          const dotsSpan = document.getElementById('overview-dots');
-
-          if (moreSpan && dotsSpan) {
-            const isHidden = moreSpan.classList.contains('hidden');
-            if (isHidden) {
-              moreSpan.classList.remove('hidden');
-              dotsSpan.classList.add('hidden');
-              toggleBtn.innerHTML = 'Read Less ▲';
-            } else {
-              moreSpan.classList.add('hidden');
-              dotsSpan.classList.remove('hidden');
-              toggleBtn.innerHTML = 'Read More ➔';
+            while ((match = regex.exec(text)) !== null) {
+              wordCount++;
+              if (wordCount === needed) {
+                splitOffset = match.index + match[0].length;
+                targetTextNode = node;
+                break;
+              }
             }
+            break;
           }
-        });
+          count += nodeWords.length;
+        }
+
+        if (targetTextNode) {
+          const secondHalf = targetTextNode.splitText(splitOffset);
+
+          const range = document.createRange();
+          range.setStart(secondHalf, 0);
+          range.setEndAfter(overviewTextEl.lastChild);
+
+          const moreSpan = document.createElement('span');
+          moreSpan.id = 'overview-more';
+          moreSpan.style.display = 'none';
+
+          const dotsSpan = document.createElement('span');
+          dotsSpan.id = 'overview-dots';
+          dotsSpan.textContent = '... ';
+
+          try {
+            const fragment = range.extractContents();
+            moreSpan.appendChild(fragment);
+
+            targetTextNode.parentNode.insertBefore(dotsSpan, targetTextNode.nextSibling);
+            targetTextNode.parentNode.insertBefore(moreSpan, dotsSpan.nextSibling);
+
+            overviewTextEl.dataset.truncatorSet = 'true';
+            toggleBtn.style.display = 'inline-flex';
+
+            toggleBtn.addEventListener('click', () => {
+              const isHidden = moreSpan.style.display === 'none';
+              if (isHidden) {
+                moreSpan.style.display = 'inline';
+                dotsSpan.style.display = 'none';
+                toggleBtn.innerHTML = 'Read Less ▲';
+              } else {
+                moreSpan.style.display = 'none';
+                dotsSpan.style.display = 'inline';
+                toggleBtn.innerHTML = 'Read More ➔';
+              }
+            });
+          } catch (e) {
+            console.error('Truncator Error:', e);
+          }
+        }
       } else {
-        applyLinkAttributes();
         toggleBtn.style.display = 'none';
       }
+
+      applyLinkAttributes();
     }
-  });
+  };
+
+  document.addEventListener('DOMContentLoaded', initHotelAboutSection);
+  document.addEventListener('astro:page-load', initHotelAboutSection);
 </script>
