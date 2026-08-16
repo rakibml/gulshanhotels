@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & Bulletproof 150-Word Overview Toggle)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & HTML-Safe 150-Word Truncator)
 interface Props {
   hotel: any;
 }
@@ -31,9 +31,9 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Gradient Fade Masking -->
+        <!-- Hotel Description Container -->
         <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-500">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
                 Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
@@ -42,12 +42,13 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           </div>
         </div>
 
-        <!-- Read More / Show Less Toggle Button -->
+        <!-- Read More Button -->
         <button 
           id="toggleOverviewBtn" 
-          class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm inline-flex z-10 relative"
+          style="display: none;"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
-          <span id="readMoreText">Read More ➔</span>
+          Read More ➔
         </button>
       </div>
 
@@ -151,8 +152,8 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
         </div>
 
         <!-- Amber Deal Tip Box -->
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm text-left">
-          <svg class="w-5 h-5 fill-amber-700 shrink-0" viewBox="0 0 24 24">
+        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
+          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
             <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
           </svg>
           <p class="leading-tight">
@@ -166,7 +167,7 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & BULLETPROOF 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & ACCURATE 150-WORD TRUNCATOR -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     // 1. FETCH STAY22 API LIVE RATES
@@ -279,47 +280,91 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
       });
     }
 
-    // 3. BULLETPROOF CSS-HEIGHT 150-WORD TRUNCATOR
-    const textEl = document.getElementById('overview-text');
-    const wrapperEl = document.getElementById('overview-wrapper');
+    // 3. HTML-SAFE EXACT 150-WORD TRUNCATOR
+    const overviewTextEl = document.getElementById('overview-text');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
-    const toggleBtnText = document.getElementById('readMoreText');
 
-    if (textEl && toggleBtn && wrapperEl) {
-      applyLinkAttributes();
+    if (overviewTextEl && toggleBtn && !overviewTextEl.dataset.truncatorSet) {
+      const textContent = overviewTextEl.textContent || overviewTextEl.innerText || '';
+      const words = textContent.trim().split(/\s+/).filter(w => w.length > 0);
 
-      const fullText = textEl.textContent || textEl.innerText || '';
-      const words = fullText.trim().split(/\s+/).filter(w => w.length > 0);
-
-      // Truncate only if word count exceeds 150 words
       if (words.length > 150) {
-        textEl.classList.add('max-h-[220px]', 'overflow-hidden');
-        wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
-        
-        toggleBtn.classList.remove('hidden');
-        let isExpanded = false;
+        let count = 0;
+        let targetTextNode = null;
+        let splitOffset = 0;
 
-        // Prevent duplicate listener setup
-        if (!toggleBtn.dataset.listenerSet) {
-          toggleBtn.dataset.listenerSet = 'true';
-          
-          toggleBtn.addEventListener('click', () => {
-            isExpanded = !isExpanded;
-            if (isExpanded) {
-              textEl.classList.remove('max-h-[220px]', 'overflow-hidden');
-              wrapperEl.classList.remove('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
-              if (toggleBtnText) toggleBtnText.textContent = 'Show Less ↩';
-            } else {
-              textEl.classList.add('max-h-[220px]', 'overflow-hidden');
-              wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
-              if (toggleBtnText) toggleBtnText.textContent = 'Read More ➔';
-              wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const walker = document.createTreeWalker(overviewTextEl, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+
+        while ((node = walker.nextNode())) {
+          const text = node.nodeValue;
+          const nodeWords = text.match(/\S+/g) || [];
+
+          if (count + nodeWords.length >= 150) {
+            const needed = 150 - count;
+            let wordCount = 0;
+            let regex = /\S+/g;
+            let match;
+
+            while ((match = regex.exec(text)) !== null) {
+              wordCount++;
+              if (wordCount === needed) {
+                splitOffset = match.index + match[0].length;
+                targetTextNode = node;
+                break;
+              }
             }
-          });
+            break;
+          }
+          count += nodeWords.length;
+        }
+
+        if (targetTextNode) {
+          const secondHalf = targetTextNode.splitText(splitOffset);
+
+          const range = document.createRange();
+          range.setStart(secondHalf, 0);
+          range.setEndAfter(overviewTextEl.lastChild);
+
+          const moreSpan = document.createElement('span');
+          moreSpan.id = 'overview-more';
+          moreSpan.style.display = 'none';
+
+          const dotsSpan = document.createElement('span');
+          dotsSpan.id = 'overview-dots';
+          dotsSpan.textContent = '... ';
+
+          try {
+            const fragment = range.extractContents();
+            moreSpan.appendChild(fragment);
+
+            targetTextNode.parentNode.insertBefore(dotsSpan, targetTextNode.nextSibling);
+            targetTextNode.parentNode.insertBefore(moreSpan, dotsSpan.nextSibling);
+
+            overviewTextEl.dataset.truncatorSet = 'true';
+            toggleBtn.style.display = 'inline-flex';
+
+            toggleBtn.addEventListener('click', () => {
+              const isHidden = moreSpan.style.display === 'none';
+              if (isHidden) {
+                moreSpan.style.display = 'inline';
+                dotsSpan.style.display = 'none';
+                toggleBtn.innerHTML = 'Read Less ▲';
+              } else {
+                moreSpan.style.display = 'none';
+                dotsSpan.style.display = 'inline';
+                toggleBtn.innerHTML = 'Read More ➔';
+              }
+            });
+          } catch (e) {
+            console.error('Truncator Error:', e);
+          }
         }
       } else {
-        toggleBtn.classList.add('hidden');
+        toggleBtn.style.display = 'none';
       }
+
+      applyLinkAttributes();
     }
   };
 
