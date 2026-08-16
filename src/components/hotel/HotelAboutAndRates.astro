@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API Container & Pure Dynamic CMS Policies)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card Viewport Scroll Fix)
 interface Props {
   hotel: any;
 }
@@ -8,21 +8,21 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelPrice = data.price || "Check Price";
+const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// 100% Admin CMS Controllable Policies (CamelCase & Snake_case Safe)
-const checkIn = data.checkIn || data.check_in || "2:00 PM";
-const checkOut = data.checkOut || data.check_out || "12:00 PM";
-const powerBackup = data.powerBackup || data.power_backup || "24/7 Generator";
-const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking";
+// 100% Admin CMS Controllable Policies
+const checkIn = data.checkIn || "2:00 PM";
+const checkOut = data.checkOut || "12:00 PM";
+const powerBackup = data.powerBackup || "24/7 Generator";
+const smokingPolicy = data.smokingPolicy || "Non-Smoking";
 ---
 
 <!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
-    <!-- LEFT COLUMN (ABOUT HOTEL TITLE & HOTEL POLICIES) -->
+    <!-- LEFT COLUMN (ABOUT {HOTEL TITLE} & HOTEL POLICIES) -->
     <div class="lg:col-span-7 space-y-8 text-left">
       
       <!-- About Hotel Section with Dynamic Title -->
@@ -31,23 +31,24 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Expand/Collapse -->
+        <!-- Hotel Description Container -->
         <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300 line-clamp-4">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
-                Located in the heart of Gulshan, {hotelTitle} offers executive lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
               </p>
             )}
           </div>
         </div>
 
-        <!-- Read More Toggle Button -->
+        <!-- Read More Button -->
         <button 
           id="toggleOverviewBtn" 
-          class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm inline-flex"
+          style="display: none;"
+          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
         >
-          <span id="readMoreText">Read More ➔</span>
+          Read More ➔
         </button>
       </div>
 
@@ -57,10 +58,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
           
-          <!-- Check-In -->
+          <!-- Check-In SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+              <svg class="w-4 h-4 fill-slate-800" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-In</span>
@@ -68,10 +69,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
             </div>
           </div>
 
-          <!-- Check-Out -->
+          <!-- Check-Out SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-Out</span>
@@ -79,10 +80,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
             </div>
           </div>
 
-          <!-- Price -->
+          <!-- Price SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Starting Price</span>
@@ -90,10 +91,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
             </div>
           </div>
 
-          <!-- Property Type -->
+          <!-- Property Type SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Property Type</span>
@@ -101,10 +102,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
             </div>
           </div>
 
-          <!-- Power Backup -->
+          <!-- Power Backup SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Power Backup</span>
@@ -112,10 +113,10 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
             </div>
           </div>
 
-          <!-- Smoking Policy -->
+          <!-- Smoking Policy SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Smoking</span>
@@ -128,7 +129,7 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - ORIGINAL STAY22 CONTAINER) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - DIRECT TARGET WITH SCROLL-MT-24 FOR PERFECT CENTERED ALIGNMENT) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
@@ -142,7 +143,7 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           </p>
         </div>
 
-        <!-- Live Stay22 API Rates List Container (Your Original Code Restored) -->
+        <!-- Live Stay22 API Rates List Container -->
         <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[220px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
@@ -151,8 +152,8 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
         </div>
 
         <!-- Amber Deal Tip Box -->
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm text-left">
-          <svg class="w-5 h-5 fill-amber-700 shrink-0" viewBox="0 0 24 24">
+        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
+          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
             <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
           </svg>
           <p class="leading-tight">
@@ -166,35 +167,190 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
   </div>
 </section>
 
-<!-- CLIENT SCRIPT FOR OVERVIEW TEXT TOGGLE -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK PRESERVATION & STRICT 150-WORD TRUNCATOR -->
 <script is:inline>
-  const initHotelAboutOverview = () => {
-    const textEl = document.getElementById('overview-text');
-    const toggleBtn = document.getElementById('toggleOverviewBtn');
-    const toggleBtnText = document.getElementById('readMoreText');
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Fetch Realtime API Rates via Cloudflare Worker Proxy
+    const ratesContainer = document.getElementById('aboutRatesTableContainer');
 
-    if (textEl && toggleBtn) {
-      // Check if text exceeds line clamp height
-      const isClamped = textEl.scrollHeight > textEl.clientHeight + 10;
-      
-      if (isClamped) {
-        toggleBtn.classList.remove('hidden');
-        let isExpanded = false;
+    if (ratesContainer) {
+      const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
+      const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
-        toggleBtn.addEventListener('click', () => {
-          isExpanded = !isExpanded;
-          if (isExpanded) {
-            textEl.classList.remove('line-clamp-4');
-            if (toggleBtnText) toggleBtnText.textContent = 'Show Less ↩';
-          } else {
-            textEl.classList.add('line-clamp-4');
-            if (toggleBtnText) toggleBtnText.textContent = 'Read More ➔';
+      try {
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const json = await res.json();
+          
+          let rawResults = [];
+          if (json && Array.isArray(json.results)) {
+            rawResults = json.results;
+          } else if (Array.isArray(json)) {
+            rawResults = json;
           }
-        });
+
+          const ignoreWords = ['hotel', 'dhaka', 'gulshan', 'bangladesh', 'the', 'by', 'an', 'ihg', 'resort', 'suites', 'apartments'];
+          const targetKeywords = hotelName.toLowerCase()
+            .split(/\s+/)
+            .filter(word => word.length > 2 && !ignoreWords.includes(word));
+
+          let deals = [];
+          rawResults.forEach(item => {
+            const itemName = (item.name || '').toLowerCase();
+            const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
+
+            if (isMatch && item.suppliers && typeof item.suppliers === 'object') {
+              Object.entries(item.suppliers).forEach(([supplierKey, supplierData]) => {
+                const priceVal = supplierData.price && supplierData.price.total ? parseFloat(supplierData.price.total) : 0;
+                const linkUrl = supplierData.link || item.url || '#';
+                
+                let logoUrl = (supplierData.media && supplierData.media.logoSquare) 
+                  ? supplierData.media.logoSquare 
+                  : `https://r2.stay22.com/2025_${supplierKey}.png`;
+
+                let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
+                if (supplierKey === 'booking') {
+                  providerName = 'Booking.com';
+                } else if (supplierKey === 'hotelscom') {
+                  providerName = 'Hotels.com';
+                } else if (supplierKey === 'expedia') {
+                  providerName = 'Expedia';
+                } else if (supplierKey === 'vrbo') {
+                  providerName = 'Vrbo';
+                }
+
+                if (priceVal > 0) {
+                  deals.push({
+                    provider: providerName,
+                    price: priceVal,
+                    url: linkUrl,
+                    logo: logoUrl
+                  });
+                }
+              });
+            }
+          });
+
+          // Sort deals ascending by price
+          deals.sort((a, b) => a.price - b.price);
+
+          if (deals.length > 0) {
+            ratesContainer.innerHTML = deals.map((item) => `
+              <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
+                    <img 
+                      src="${item.logo}" 
+                      alt="${item.provider} logo" 
+                      width="32"
+                      height="32"
+                      loading="lazy"
+                      class="w-full h-full object-contain"
+                      onerror="this.style.display='none';"
+                    />
+                  </div>
+                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4">
+                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
+                    View Deal
+                  </a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            ratesContainer.innerHTML = `<div class="p-4 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">No live rates returned for "${hotelName}" right now.</div>`;
+          }
+        }
+      } catch (e) {
+        console.error('Rate fetch error:', e);
       }
     }
-  };
 
-  document.addEventListener('DOMContentLoaded', initHotelAboutOverview);
-  document.addEventListener('astro:page-load', initHotelAboutOverview);
+    // 2. ENHANCE LINKS TO OPEN IN NEW TAB
+    function applyLinkAttributes() {
+      document.querySelectorAll('#overview-text a').forEach(link => {
+        link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
+        if (link.hostname && link.hostname !== window.location.hostname) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    }
+
+    // 3. PERFECT HTML-PRESERVING EXACT 150-WORD TRUNCATOR
+    const overviewTextEl = document.getElementById('overview-text');
+    const toggleBtn = document.getElementById('toggleOverviewBtn');
+
+    if (overviewTextEl && toggleBtn) {
+      overviewTextEl.innerHTML = overviewTextEl.innerHTML.replace(/\.([A-Z])/g, '. $1');
+
+      const rawText = overviewTextEl.innerText.trim();
+      const words = rawText.split(/\s+/);
+
+      if (words.length > 150) {
+        let currentWordCount = 0;
+        let visibleHtml = '';
+        let hiddenHtml = '';
+        let isCut = false;
+
+        const nodes = Array.from(overviewTextEl.childNodes);
+
+        nodes.forEach(node => {
+          if (isCut) {
+            hiddenHtml += node.outerHTML || node.textContent || '';
+            return;
+          }
+
+          const nodeText = node.textContent || '';
+          const nodeWords = nodeText.trim().split(/\s+/).filter(w => w.length > 0);
+
+          if (currentWordCount + nodeWords.length <= 150) {
+            currentWordCount += nodeWords.length;
+            visibleHtml += node.outerHTML || node.textContent || '';
+          } else {
+            const needed = 150 - currentWordCount;
+            const part1 = nodeWords.slice(0, needed).join(' ');
+            const part2 = nodeWords.slice(needed).join(' ');
+
+            visibleHtml += part1;
+            hiddenHtml += ' ' + part2;
+            isCut = true;
+          }
+        });
+
+        overviewTextEl.innerHTML = `
+          <span>${visibleHtml}</span>
+          <span id="overview-dots">... </span>
+          <span id="overview-more" class="hidden">${hiddenHtml}</span>
+        `;
+
+        applyLinkAttributes();
+        toggleBtn.style.display = 'inline-flex';
+
+        toggleBtn.addEventListener('click', () => {
+          const moreSpan = document.getElementById('overview-more');
+          const dotsSpan = document.getElementById('overview-dots');
+
+          if (moreSpan && dotsSpan) {
+            const isHidden = moreSpan.classList.contains('hidden');
+            if (isHidden) {
+              moreSpan.classList.remove('hidden');
+              dotsSpan.classList.add('hidden');
+              toggleBtn.innerHTML = 'Read Less ▲';
+            } else {
+              moreSpan.classList.add('hidden');
+              dotsSpan.classList.remove('hidden');
+              toggleBtn.innerHTML = 'Read More ➔';
+            }
+          }
+        });
+      } else {
+        applyLinkAttributes();
+        toggleBtn.style.display = 'none';
+      }
+    }
+  });
 </script>
