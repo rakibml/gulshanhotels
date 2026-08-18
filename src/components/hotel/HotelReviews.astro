@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Zero Stickers, Carousel Arrows & Google Schema)
+// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Agoda-Style Stars, Hash Back-Button Safe)
 interface Props {
   hotel: any;
 }
@@ -9,10 +9,10 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelRating = data.rating || "4.8";
-const reviewsCount = data.reviewsCount || "125";
+const reviewsCount = data.reviewsCount || data.reviews_count || "125";
 
-// Approved Guest Reviews
-const initialApprovedReviews = [
+// Default Fallback Guest Reviews
+const defaultReviews = [
   {
     name: "Ismat F",
     date: "Aug 2026",
@@ -39,6 +39,10 @@ const initialApprovedReviews = [
   }
 ];
 
+// Priority to Admin Panel CMS Reviews if provided, else Default Fallbacks
+const cmsReviews = Array.isArray(data.reviews) ? data.reviews : (Array.isArray(data.user_reviews) ? data.user_reviews : []);
+const approvedReviews = cmsReviews.length > 0 ? cmsReviews : defaultReviews;
+
 // GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = {
   "@context": "https://schema.org",
@@ -46,19 +50,19 @@ const googleRatingSchema = {
   "name": hotelTitle,
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": hotelRating,
-    "reviewCount": reviewsCount,
+    "ratingValue": String(hotelRating),
+    "reviewCount": String(reviewsCount),
     "bestRating": "5",
     "worstRating": "1"
   },
-  "review": initialApprovedReviews.map((r) => ({
+  "review": approvedReviews.map((r: any) => ({
     "@type": "Review",
-    "author": { "@type": "Person", "name": r.name },
+    "author": { "@type": "Person", "name": r.name || "Verified Guest" },
     "datePublished": "2026-08-01",
-    "reviewBody": r.comment,
+    "reviewBody": r.comment || "",
     "reviewRating": {
       "@type": "Rating",
-      "ratingValue": r.rating,
+      "ratingValue": String(r.rating || 5),
       "bestRating": "5"
     }
   }))
@@ -68,7 +72,7 @@ const googleRatingSchema = {
 <!-- GOOGLE RICH SNIPPET SCHEMA FOR SERP GOLDEN STARS -->
 <script type="application/ld+json" set:html={JSON.stringify(googleRatingSchema)} />
 
-<!-- GUEST REVIEWS SECTION (ZERO EMOJIS, CLEAN CAROUSEL) -->
+<!-- GUEST REVIEWS SECTION -->
 <section id="guest-reviews" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -103,7 +107,7 @@ const googleRatingSchema = {
           </button>
         </div>
 
-        <!-- Clean Write Review Button (No Sticker) -->
+        <!-- Clean Write Review Button -->
         <button 
           id="openWriteReviewBtn" 
           class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
@@ -113,25 +117,31 @@ const googleRatingSchema = {
       </div>
     </div>
 
-    <!-- REVIEWS CAROUSEL TRACK (HORIZONTALLY SCROLLABLE FOR 10-50 REVIEWS) -->
+    <!-- REVIEWS CAROUSEL TRACK -->
     <div class="relative group">
       <div id="reviewsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         
-        {initialApprovedReviews.map((rev) => (
-          <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
-            <div class="space-y-2 text-left">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center text-amber-500 text-xs tracking-wider">
-                  ★ ★ ★ ★ ★
+        {approvedReviews.map((rev: any) => {
+          const ratingVal = Math.min(Math.max(Number(rev.rating) || 5, 1), 5);
+          return (
+            <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
+              <div class="space-y-2 text-left">
+                <div class="flex items-center justify-between">
+                  <!-- Dynamic Star Rating -->
+                  <div class="flex items-center text-amber-500 text-xs tracking-wider">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span>{i < ratingVal ? '★' : '☆'}</span>
+                    ))}
+                  </div>
+                  <span class="text-[11px] font-bold text-slate-500">{rev.name || 'Verified Guest'} • {rev.date || 'Recent'}</span>
                 </div>
-                <span class="text-[11px] font-bold text-slate-500">{rev.name} • {rev.date}</span>
+                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-4 font-normal">
+                  "{rev.comment || 'Great experience staying at this hotel.'}"
+                </p>
               </div>
-              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-4 font-normal">
-                "{rev.comment}"
-              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
       </div>
     </div>
@@ -140,7 +150,7 @@ const googleRatingSchema = {
 </section>
 
 <!-- SUBMIT REVIEW MODAL -->
-<div id="writeReviewModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+<div id="writeReviewModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
   <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-lg text-slate-900 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
     
     <div class="flex items-center justify-between border-b border-slate-200 pb-3">
@@ -164,6 +174,8 @@ const googleRatingSchema = {
           <option value="5">★ ★ ★ ★ ★ 5 / 5 Excellent</option>
           <option value="4">★ ★ ★ ★ ☆ 4 / 5 Very Good</option>
           <option value="3">★ ★ ★ ☆ ☆ 3 / 5 Average</option>
+          <option value="2">★ ★ ☆ ☆ ☆ 2 / 5 Poor</option>
+          <option value="1">★ ☆ ☆ ☆ ☆ 1 / 5 Terrible</option>
         </select>
       </div>
 
@@ -185,10 +197,10 @@ const googleRatingSchema = {
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH CAROUSEL ARROW CONTROLS & MOBILE BACK BUTTON SAFETY -->
+<!-- CLIENT SCRIPT WITH BACK-BUTTON SAFETY & CAROUSEL -->
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. Carousel Left/Right Arrow Navigation
+  const initHotelReviews = () => {
+    // 1. Carousel Arrow Controls
     const track = document.getElementById('reviewsCarouselTrack');
     const prevBtn = document.getElementById('reviewPrevBtn');
     const nextBtn = document.getElementById('reviewNextBtn');
@@ -203,7 +215,7 @@ const googleRatingSchema = {
       });
     }
 
-    // 2. Review Modal Script with Mobile Back Button Interceptor
+    // 2. Review Modal Script with Hash #write-review Safety
     const modal = document.getElementById('writeReviewModal');
     const openBtn = document.getElementById('openWriteReviewBtn');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
@@ -211,37 +223,55 @@ const googleRatingSchema = {
     const successMsg = document.getElementById('reviewSuccessMsg');
     const submitBtn = document.getElementById('submitReviewBtn');
 
-    function openReviewModalSafe() {
+    function hideModalDOM() {
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openReviewModal() {
       if (!modal) return;
-      modal.classList.remove('hidden');
       if (successMsg) successMsg.classList.add('hidden');
-      if (form) form.classList.remove('hidden');
-      try {
-        history.pushState({ reviewModalOpen: true }, '');
-      } catch (e) {}
+      if (form) {
+        form.classList.remove('hidden');
+        form.reset();
+      }
+      modal.classList.remove('hidden');
+
+      if (window.location.hash !== '#write-review') {
+        window.location.hash = 'write-review';
+      }
     }
 
-    function closeReviewModalSafe() {
-      if (!modal) return;
-      modal.classList.add('hidden');
+    function closeReviewModalByUI() {
+      if (window.location.hash === '#write-review') {
+        history.back(); // Reverts hash, triggering hashchange
+      } else {
+        hideModalDOM();
+      }
     }
 
-    // Intercept Mobile Physical / Gesture Back Button
-    window.addEventListener('popstate', () => {
-      if (modal && !modal.classList.contains('hidden')) {
-        modal.classList.add('hidden');
+    // Back Button Safety
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash !== '#write-review') {
+        hideModalDOM();
+      } else if (modal && modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
       }
     });
 
-    if (openBtn) openBtn.addEventListener('click', () => openReviewModalSafe());
-    if (closeBtn) closeBtn.addEventListener('click', () => closeReviewModalSafe());
+    if (window.location.hash === '#write-review') {
+      openReviewModal();
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openReviewModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeReviewModalByUI);
 
     if (modal) {
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeReviewModalSafe();
+        if (e.target === modal) closeReviewModalByUI();
       });
     }
 
+    // Form Submission
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -281,5 +311,8 @@ const googleRatingSchema = {
         }
       });
     }
-  });
+  };
+
+  document.addEventListener('DOMContentLoaded', initHotelReviews);
+  document.addEventListener('astro:page-load', initHotelReviews);
 </script>
