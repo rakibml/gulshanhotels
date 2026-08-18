@@ -290,46 +290,51 @@ const googleRatingSchema = {
       });
     }
 
-    // Form Submission to Worker
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const hotelTitle = form.getAttribute('data-hotel-title') || '';
-        const name = document.getElementById('reviewerName')?.value || '';
-        const rating = document.getElementById('reviewerRating')?.value || '5';
-        const comment = document.getElementById('reviewerComment')?.value || '';
+    // Form Submission to Worker with Real Error Alert
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hotelTitle = form.getAttribute('data-hotel-title') || '';
+    const name = document.getElementById('reviewerName')?.value || '';
+    const rating = document.getElementById('reviewerRating')?.value || '5';
+    const comment = document.getElementById('reviewerComment')?.value || '';
 
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.innerText = 'Submitting...';
-        }
-
-        try {
-          await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              hotel: hotelTitle,
-              name: name,
-              rating: rating,
-              comment: comment,
-              status: 'pending'
-            })
-          });
-
-          if (form) form.classList.add('hidden');
-          if (successMsg) successMsg.classList.remove('hidden');
-        } catch (err) {
-          if (form) form.classList.add('hidden');
-          if (successMsg) successMsg.classList.remove('hidden');
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Submit Review For Admin Approval ➔';
-          }
-        }
-      });
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Submitting...';
     }
+
+    try {
+      const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hotel: hotelTitle,
+          name: name,
+          rating: rating,
+          comment: comment,
+          status: 'pending'
+        })
+      });
+
+      const resData = await res.json();
+
+      if (res.ok && resData.success) {
+        if (form) form.classList.add('hidden');
+        if (successMsg) successMsg.classList.remove('hidden');
+      } else {
+        alert('Review Submission Error: ' + (resData.error || resData.details || 'Failed to write to GitHub. Check GITHUB_TOKEN.'));
+      }
+    } catch (err) {
+      alert('Network Error: ' + err.message);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit Review For Admin Approval ➔';
+      }
+    }
+  });
+}
   };
 
   document.addEventListener('DOMContentLoaded', initHotelReviews);
