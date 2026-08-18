@@ -1,5 +1,7 @@
 ---
 // src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Agoda-Style Stars, Hash Back-Button Safe)
+import { getCollection } from 'astro:content';
+
 interface Props {
   hotel: any;
 }
@@ -39,9 +41,29 @@ const defaultReviews = [
   }
 ];
 
-// Priority to Admin Panel CMS Reviews if provided, else Default Fallbacks
-const cmsReviews = Array.isArray(data.reviews) ? data.reviews : (Array.isArray(data.user_reviews) ? data.user_reviews : []);
-const approvedReviews = cmsReviews.length > 0 ? cmsReviews : defaultReviews;
+// 1. FETCH APPROVED REVIEWS FROM GITHUB CONTENT COLLECTION (src/content/reviews/)
+let approvedCmsReviews: any[] = [];
+try {
+  const allCmsReviews = await getCollection('reviews');
+  approvedCmsReviews = allCmsReviews
+    .filter(r => 
+      (r.data.hotel === hotelTitle || r.data.hotel?.toLowerCase() === hotelTitle.toLowerCase()) && 
+      r.data.approved === true
+    )
+    .map(r => ({
+      name: r.data.name,
+      date: r.data.date || 'Aug 2026',
+      rating: r.data.rating || 5,
+      comment: r.data.comment
+    }));
+} catch (e) {
+  approvedCmsReviews = [];
+}
+
+const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
+const approvedReviews = approvedCmsReviews.length > 0 
+  ? approvedCmsReviews 
+  : (hotelEmbeddedReviews.length > 0 ? hotelEmbeddedReviews : defaultReviews);
 
 // GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = {
@@ -200,7 +222,6 @@ const googleRatingSchema = {
 <!-- CLIENT SCRIPT WITH BACK-BUTTON SAFETY & CAROUSEL -->
 <script is:inline>
   const initHotelReviews = () => {
-    // 1. Carousel Arrow Controls
     const track = document.getElementById('reviewsCarouselTrack');
     const prevBtn = document.getElementById('reviewPrevBtn');
     const nextBtn = document.getElementById('reviewNextBtn');
@@ -215,7 +236,6 @@ const googleRatingSchema = {
       });
     }
 
-    // 2. Review Modal Script with Hash #write-review Safety
     const modal = document.getElementById('writeReviewModal');
     const openBtn = document.getElementById('openWriteReviewBtn');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
@@ -243,13 +263,12 @@ const googleRatingSchema = {
 
     function closeReviewModalByUI() {
       if (window.location.hash === '#write-review') {
-        history.back(); // Reverts hash, triggering hashchange
+        history.back();
       } else {
         hideModalDOM();
       }
     }
 
-    // Back Button Safety
     window.addEventListener('hashchange', () => {
       if (window.location.hash !== '#write-review') {
         hideModalDOM();
@@ -271,7 +290,7 @@ const googleRatingSchema = {
       });
     }
 
-    // Form Submission
+    // Form Submission to Worker
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
