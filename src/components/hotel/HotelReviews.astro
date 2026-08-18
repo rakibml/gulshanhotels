@@ -10,8 +10,6 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelRating = data.rating || "4.8";
-const reviewsCount = data.reviewsCount || data.reviews_count || "125";
 
 // Default Fallback Guest Reviews
 const defaultReviews = [
@@ -45,16 +43,24 @@ const defaultReviews = [
 let approvedCmsReviews: any[] = [];
 try {
   const allCmsReviews = await getCollection('reviews');
+  
   approvedCmsReviews = allCmsReviews
-    .filter(r => 
-      (r.data.hotel === hotelTitle || r.data.hotel?.toLowerCase() === hotelTitle.toLowerCase()) && 
-      r.data.approved === true
-    )
+    .filter(r => {
+      // Flexible Approved Status Checking (Handles boolean true, string "true", etc.)
+      const isApproved = r.data.approved === true || String(r.data.approved).toLowerCase() === 'true';
+      
+      // Case-Insensitive & Trimmed Hotel Name Matching
+      const currentHotelName = hotelTitle.trim().toLowerCase();
+      const reviewHotelName = (r.data.hotel || '').trim().toLowerCase();
+      const isMatch = !reviewHotelName || reviewHotelName === currentHotelName || currentHotelName.includes(reviewHotelName) || reviewHotelName.includes(currentHotelName);
+
+      return isApproved && isMatch;
+    })
     .map(r => ({
-      name: r.data.name,
+      name: r.data.name || 'Verified Guest',
       date: r.data.date || 'Aug 2026',
-      rating: r.data.rating || 5,
-      comment: r.data.comment
+      rating: Number(r.data.rating) || 5,
+      comment: r.data.comment || ''
     }));
 } catch (e) {
   approvedCmsReviews = [];
@@ -64,6 +70,10 @@ const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const approvedReviews = approvedCmsReviews.length > 0 
   ? approvedCmsReviews 
   : (hotelEmbeddedReviews.length > 0 ? hotelEmbeddedReviews : defaultReviews);
+
+// Dynamic Rating & Count Calculation
+const reviewsCount = data.reviewsCount || data.reviews_count || String(approvedReviews.length);
+const hotelRating = data.rating || "4.8";
 
 // GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = {
@@ -290,51 +300,51 @@ const googleRatingSchema = {
       });
     }
 
-    // Form Submission to Worker with Real Error Alert
-if (form) {
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const hotelTitle = form.getAttribute('data-hotel-title') || '';
-    const name = document.getElementById('reviewerName')?.value || '';
-    const rating = document.getElementById('reviewerRating')?.value || '5';
-    const comment = document.getElementById('reviewerComment')?.value || '';
+    // Form Submission
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hotelTitle = form.getAttribute('data-hotel-title') || '';
+        const name = document.getElementById('reviewerName')?.value || '';
+        const rating = document.getElementById('reviewerRating')?.value || '5';
+        const comment = document.getElementById('reviewerComment')?.value || '';
 
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Submitting...';
-    }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Submitting...';
+        }
 
-    try {
-      const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          hotel: hotelTitle,
-          name: name,
-          rating: rating,
-          comment: comment,
-          status: 'pending'
-        })
+        try {
+          const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              hotel: hotelTitle,
+              name: name,
+              rating: rating,
+              comment: comment,
+              status: 'pending'
+            })
+          });
+
+          const resData = await res.json();
+
+          if (res.ok && resData.success) {
+            if (form) form.classList.add('hidden');
+            if (successMsg) successMsg.classList.remove('hidden');
+          } else {
+            alert('Review Submission Error: ' + (resData.error || resData.details || 'Failed to write to GitHub. Check GITHUB_TOKEN.'));
+          }
+        } catch (err) {
+          alert('Network Error: ' + err.message);
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Submit Review For Admin Approval ➔';
+          }
+        }
       });
-
-      const resData = await res.json();
-
-      if (res.ok && resData.success) {
-        if (form) form.classList.add('hidden');
-        if (successMsg) successMsg.classList.remove('hidden');
-      } else {
-        alert('Review Submission Error: ' + (resData.error || resData.details || 'Failed to write to GitHub. Check GITHUB_TOKEN.'));
-      }
-    } catch (err) {
-      alert('Network Error: ' + err.message);
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Submit Review For Admin Approval ➔';
-      }
     }
-  });
-}
   };
 
   document.addEventListener('DOMContentLoaded', initHotelReviews);
