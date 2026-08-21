@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Smart Rates Card, Sub-second KV Sync & Smart WhatsApp/Phone Links)
+// src/components/hotel/HotelAboutAndRates.astro (100% CMS Protected Booking Channels, Serial Order & Custom SVGs)
 interface Props {
   hotel: any;
 }
@@ -11,18 +11,29 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// 100% Admin CMS Controllable Policies
+// Policies
 const checkIn = data.checkIn || data.check_in || "2:00 PM";
 const checkOut = data.checkOut || data.check_out || "12:00 PM";
 const powerBackup = data.powerBackup || data.power_backup || "24/7 Generator";
 const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking";
 
-// Reservation Channels from CMS
 const officialSite = data.officialSite || data.official_site_url || "";
 const whatsapp = data.whatsapp || "";
 const phone = data.phone || "";
 const cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
 const cleanPhone = phone.replace(/[^0-9+]/g, '');
+
+const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
+
+// Vector Brand SVG Badges
+const presetSvgs: Record<string, string> = {
+  agoda: `<div class="w-8 h-8 rounded-xl bg-[#1d3557] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-sm tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
+  booking: `<div class="w-8 h-8 rounded-xl bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">B.</div>`,
+  expedia: `<div class="w-8 h-8 rounded-xl bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
+  direct: `<div class="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-900 flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
+  whatsapp: `<div class="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
+  phone: `<div class="w-8 h-8 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`
+};
 ---
 
 <!-- 2ND COMPONENT: ABOUT HOTEL & LIVE RATE COMPARISON -->
@@ -64,7 +75,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
           
-          <!-- Check-In SVG -->
+          <!-- Check-In -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
@@ -75,7 +86,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             </div>
           </div>
 
-          <!-- Check-Out SVG -->
+          <!-- Check-Out -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
@@ -86,7 +97,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             </div>
           </div>
 
-          <!-- Price SVG -->
+          <!-- Price -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
@@ -97,7 +108,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             </div>
           </div>
 
-          <!-- Property Type SVG -->
+          <!-- Property Type -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
@@ -108,7 +119,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             </div>
           </div>
 
-          <!-- Power Backup SVG -->
+          <!-- Power Backup -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
@@ -119,7 +130,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             </div>
           </div>
 
-          <!-- Smoking Policy SVG -->
+          <!-- Smoking Policy -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
               <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
@@ -135,7 +146,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - SMART TRUST ENGINE) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - 100% SVELTIA CMS CONTROLLED CARD) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
@@ -192,12 +203,77 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         )}
 
-        <!-- Live Stay22 & Cloudflare KV Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[200px]">
-          <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-            <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-            <p class="text-xs font-bold text-slate-600">Connecting to Cloudflare Edge API for live rates...</p>
-          </div>
+        <!-- 100% SVELTIA CMS CONTROLLED BOOKING CHANNELS LIST -->
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-3 min-h-[200px]">
+          {customChannels.length > 0 ? (
+            customChannels.map((item: any) => {
+              const pName = item.provider_name || "Booking Partner";
+              const pPrice = item.price || "";
+              const showPriceTag = item.show_price !== false;
+              const btnText = item.button_text || "Book Now ➔";
+              let pUrl = item.button_url || "#";
+              const badgeText = item.badge || "";
+              const customSvg = item.custom_svg || "";
+              const iconPreset = item.icon_preset || "direct";
+
+              // Smart WhatsApp & Phone Deep-Link Formatting
+              if (iconPreset === 'whatsapp' || pName.toLowerCase().includes('whatsapp')) {
+                if (!pUrl.startsWith('http')) {
+                  const cleanWa = pUrl.replace(/[^0-9]/g, '');
+                  pUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}` : '#';
+                }
+              } else if (iconPreset === 'phone' || pName.toLowerCase().includes('call')) {
+                if (!pUrl.startsWith('tel:') && !pUrl.startsWith('http')) {
+                  const cleanPh = pUrl.replace(/[^0-9+]/g, '');
+                  pUrl = cleanPh ? `tel:${cleanPh}` : '#';
+                }
+              }
+
+              return (
+                <div class="relative pt-2">
+                  {badgeText && (
+                    <span class="absolute -top-1.5 left-4 z-10 bg-indigo-900 text-indigo-100 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-indigo-700 shadow-xs">
+                      {badgeText}
+                    </span>
+                  )}
+                  <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+                    <div class="flex items-center gap-3">
+                      {customSvg ? (
+                        <div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
+                          <Fragment set:html={customSvg} />
+                        </div>
+                      ) : (
+                        <Fragment set:html={presetSvgs[iconPreset] || presetSvgs.direct} />
+                      )}
+                      
+                      <span class="text-xs sm:text-sm font-bold text-slate-900">{pName}</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 sm:gap-4">
+                      {showPriceTag && pPrice && (
+                        <span class="text-sm sm:text-base font-black text-slate-900">
+                          {pPrice.startsWith('$') || pPrice.startsWith('৳') ? pPrice : '$' + pPrice}
+                        </span>
+                      )}
+                      <a 
+                        href={pUrl} 
+                        target={pUrl.startsWith('http') ? "_blank" : "_self"} 
+                        rel="noopener noreferrer" 
+                        class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0"
+                      >
+                        {btnText}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+              <p class="text-xs font-bold text-slate-600">Connecting to Cloudflare Edge API for live rates...</p>
+            </div>
+          )}
         </div>
 
         <!-- Transparent Price Disclaimer Box -->
@@ -214,124 +290,10 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
   </div>
 </section>
 
-<!-- CLIENT SCRIPT WITH PERMANENT VECTOR LOGO BADGES & SMART DEEP LINKS -->
+<!-- CLIENT SCRIPT -->
 <script is:inline>
-  const initHotelAboutSection = async () => {
-    const ratesContainer = document.getElementById('aboutRatesTableContainer');
-    const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
-
-    // HIGH-RESOLUTION VECTOR BRAND BADGES
-    const brandBadges = {
-      whatsapp: `
-        <div class="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-sm">
-          <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
-        </div>
-      `,
-      agoda: `
-        <div class="w-8 h-8 rounded-xl bg-[#1d3557] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-sm tracking-tighter">
-          <span class="text-rose-400 font-serif italic text-xs">a</span>goda
-        </div>
-      `,
-      booking: `
-        <div class="w-8 h-8 rounded-xl bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">
-          B.
-        </div>
-      `,
-      expedia: `
-        <div class="w-8 h-8 rounded-xl bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-sm">
-          <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-        </div>
-      `,
-      direct: `
-        <div class="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-900 flex items-center justify-center shrink-0 shadow-sm">
-          <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
-        </div>
-      `
-    };
-
-    if (ratesContainer && !ratesContainer.dataset.fetched) {
-      ratesContainer.dataset.fetched = 'true';
-      const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
-      
-      // 1. Try Instant Sub-second Cloudflare KV Live Rates
-      const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
-
-      try {
-        const res = await fetch(kvApiUrl);
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.success && json.rates) {
-            const rates = json.rates;
-            
-            if (rates.startingPrice && startingPriceEl) {
-              startingPriceEl.textContent = rates.startingPrice;
-            }
-
-            let dealsList = Array.isArray(rates.channelsList) ? rates.channelsList : [];
-
-            if (dealsList.length > 0) {
-              ratesContainer.innerHTML = dealsList.map((item) => {
-                const badgeHtml = item.badge ? `<span class="absolute -top-1.5 left-4 z-10 bg-indigo-900 text-indigo-100 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-indigo-700 shadow-xs">${item.badge}</span>` : '';
-                
-                let iconHtml = brandBadges[item.icon_preset] || brandBadges.direct;
-                if (item.custom_svg) {
-                  iconHtml = `<div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
-                }
-
-                const priceDisplay = (item.showPrice !== false && item.price) ? `<span class="text-sm sm:text-base font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` : '';
-
-                // SMART DEEP-LINK AUTO-FORMATTING FOR WHATSAPP & PHONE
-                let finalUrl = item.button_url || '#';
-                const providerLower = (item.provider_name || '').toLowerCase();
-
-                if (item.icon_preset === 'whatsapp' || providerLower.includes('whatsapp')) {
-                  if (!finalUrl.startsWith('http')) {
-                    const cleanWa = finalUrl.replace(/[^0-9]/g, '');
-                    finalUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${encodeURIComponent('Hi! I want to book a stay at ' + hotelName)}` : '#';
-                  }
-                } else if (item.icon_preset === 'phone' || providerLower.includes('call')) {
-                  if (!finalUrl.startsWith('tel:') && !finalUrl.startsWith('http')) {
-                    const cleanPhone = finalUrl.replace(/[^0-9+]/g, '');
-                    finalUrl = cleanPhone ? `tel:${cleanPhone}` : '#';
-                  }
-                }
-
-                return `
-                  <div class="relative pt-2">
-                    ${badgeHtml}
-                    <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
-                      <div class="flex items-center gap-3">
-                        ${iconHtml}
-                        <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider_name || 'Booking Partner'}</span>
-                      </div>
-                      <div class="flex items-center gap-3 sm:gap-4">
-                        ${priceDisplay}
-                        <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
-                          ${item.button_text || 'Book Now ➔'}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('');
-              
-              applyLinkAttributes();
-              setupOverviewTruncator();
-              return;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('KV fetch bypass...', e);
-      }
-    }
-
-    applyLinkAttributes();
-    setupOverviewTruncator();
-  };
-
-  // ENHANCE LINKS IN OVERVIEW
-  function applyLinkAttributes() {
+  const initHotelAboutSection = () => {
+    // ENHANCE LINKS IN OVERVIEW
     document.querySelectorAll('#overview-text a').forEach(link => {
       link.classList.add('text-emerald-800', 'font-extrabold', 'underline', 'hover:text-emerald-600');
       if (link.hostname && link.hostname !== window.location.hostname) {
@@ -339,10 +301,8 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
         link.setAttribute('rel', 'noopener noreferrer');
       }
     });
-  }
 
-  // BULLETPROOF CSS-HEIGHT 150-WORD OVERVIEW TRUNCATOR
-  function setupOverviewTruncator() {
+    // BULLETPROOF CSS-HEIGHT 150-WORD OVERVIEW TRUNCATOR
     const textEl = document.getElementById('overview-text');
     const wrapperEl = document.getElementById('overview-wrapper');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
@@ -380,7 +340,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
         toggleBtn.classList.add('hidden');
       }
     }
-  }
+  };
 
   document.addEventListener('DOMContentLoaded', initHotelAboutSection);
   document.addEventListener('astro:page-load', initHotelAboutSection);
