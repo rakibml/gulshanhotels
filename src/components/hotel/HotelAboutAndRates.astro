@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API with Multi-OTA Fallback & Truncator)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, 100% Pure Realtime Stay22 API Rates)
 interface Props {
   hotel: any;
 }
@@ -181,7 +181,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
         )}
 
         <!-- Live Stay22 API Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} data-official-site={officialSite} class="space-y-2.5 min-h-[200px]">
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[200px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
             <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
@@ -204,7 +204,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, MULTI-OTA AGGREGATION & BULLETPROOF TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH (100% PURE REALTIME DATA ONLY) -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     // 1. FETCH STAY22 API LIVE RATES
@@ -213,7 +213,6 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
     if (ratesContainer && !ratesContainer.dataset.fetched) {
       ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
-      const officialSite = ratesContainer.getAttribute('data-official-site') || '';
       const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
       try {
@@ -257,10 +256,9 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                 else if (supplierKey === 'tripcom' || supplierKey === 'trip') providerName = 'Trip.com';
 
                 if (priceVal > 0) {
-                  // Save lowest price per supplier
+                  // Keep lowest real price per supplier from API
                   if (!uniqueDealsMap.has(supplierKey) || priceVal < uniqueDealsMap.get(supplierKey).price) {
                     uniqueDealsMap.set(supplierKey, {
-                      key: supplierKey,
                       provider: providerName,
                       price: priceVal,
                       url: linkUrl,
@@ -272,26 +270,11 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             }
           });
 
+          // PURE REALTIME DEALS (NO MOCK/FAKE ITEMS ADDED)
           let deals = Array.from(uniqueDealsMap.values());
 
-          // Backup: If Agoda is missing from Stay22 API response, add Agoda Deal
-          const hasAgoda = deals.some(d => d.key === 'agoda' || d.provider.toLowerCase().includes('agoda'));
-          if (!hasAgoda) {
-            deals.push({
-              key: 'agoda',
-              provider: 'Agoda',
-              price: 'Check Deal',
-              url: `https://www.agoda.com/search?text=${encodeURIComponent(hotelName)}`,
-              logo: 'https://r2.stay22.com/2025_agoda.png'
-            });
-          }
-
-          // Sort deals ascending by numeric price
-          deals.sort((a, b) => {
-            const pA = typeof a.price === 'number' ? a.price : 999999;
-            const pB = typeof b.price === 'number' ? b.price : 999999;
-            return pA - pB;
-          });
+          // Sort deals ascending by real price
+          deals.sort((a, b) => a.price - b.price);
 
           if (deals.length > 0) {
             ratesContainer.innerHTML = deals.map((item) => `
@@ -312,7 +295,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-4">
-                  <span class="text-sm sm:text-base font-black text-slate-900">${typeof item.price === 'number' ? '$' + item.price : item.price}</span>
+                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
                   <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
                     View Deal
                   </a>
