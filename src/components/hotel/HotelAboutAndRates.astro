@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Sub-second Cloudflare KV Rates, Instant Admin Portal Sync, Safe Policies & Overview Truncator)
+// src/components/hotel/HotelAboutAndRates.astro (Smart Trust-Engine Rates Card, Sub-second KV Sync & Overview Truncator)
 interface Props {
   hotel: any;
 }
@@ -11,7 +11,7 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// 100% Admin CMS Controllable Policies (CamelCase & Snake_case Safe)
+// 100% Admin CMS Controllable Policies
 const checkIn = data.checkIn || data.check_in || "2:00 PM";
 const checkOut = data.checkOut || data.check_out || "12:00 PM";
 const powerBackup = data.powerBackup || data.power_backup || "24/7 Generator";
@@ -38,7 +38,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Gradient Fade Masking -->
+        <!-- Hotel Description Container -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-500">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
@@ -49,7 +49,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         </div>
 
-        <!-- Read More / Show Less Toggle Button -->
+        <!-- Read More Button -->
         <button 
           id="toggleOverviewBtn" 
           class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm inline-flex z-10 relative"
@@ -135,29 +135,40 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL?) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - SMART TRUST ENGINE) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
-        <!-- Card Header -->
-        <div class="space-y-1 text-left border-b border-slate-100 pb-4">
-          <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
-            Where can you book this hotel?
-          </h3>
-          <p class="text-xs text-slate-500 font-medium">
-            Compare prices from trusted travel partners.
-          </p>
+        <!-- Card Header & Live Status Badge -->
+        <div class="space-y-2 text-left border-b border-slate-100 pb-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
+              Where can you book this hotel?
+            </h3>
+          </div>
+          
+          <div class="flex items-center justify-between pt-1">
+            <p class="text-xs text-slate-500 font-medium">
+              Compare rates from trusted travel partners.
+            </p>
+            
+            <!-- Live Pulse Status Badge -->
+            <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-2xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Rates Updated Today</span>
+            </span>
+          </div>
         </div>
 
         <!-- Quick Direct Booking Buttons (WhatsApp & Phone if provided by CMS) -->
         {(whatsapp || phone) && (
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-1">
             {whatsapp && (
               <a 
                 href={`https://wa.me/${cleanWhatsapp}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 transition text-emerald-900 font-black text-xs"
+                class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 transition text-emerald-900 font-black text-xs shadow-2xs"
               >
                 <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
                   <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
@@ -169,7 +180,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             {phone && (
               <a 
                 href={`tel:${cleanPhone}`} 
-                class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-slate-900 font-black text-xs"
+                class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-slate-900 font-black text-xs shadow-2xs"
               >
                 <div class="w-7 h-7 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0">
                   <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
@@ -188,13 +199,11 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         </div>
 
-        <!-- Amber Deal Tip Box -->
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm text-left">
-          <svg class="w-5 h-5 fill-amber-700 shrink-0" viewBox="0 0 24 24">
-            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
-          </svg>
-          <p class="leading-tight">
-            Compare prices before you book and get the best deal.
+        <!-- Transparent Price Disclaimer Box -->
+        <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-2.5 text-[11px] text-amber-900 font-bold shadow-2xs text-left">
+          <svg class="w-4 h-4 fill-amber-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          <p class="leading-relaxed font-semibold text-slate-700">
+            Rates vary by travel dates, occupancy & room type. Click <strong class="text-amber-950 font-black">'View Live Deal'</strong> to see exact checkout prices for your dates.
           </p>
         </div>
 
@@ -204,7 +213,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR SUB-SECOND CLOUDFLARE KV & STAY22 LIVE RATES -->
+<!-- CLIENT-SIDE SCRIPT FOR SUB-SECOND CLOUDFLARE KV, STAY22 & TRUST MICROCOPY -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
@@ -237,11 +246,14 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                     <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
                       <img src="${item.logo}" alt="${item.provider}" width="32" height="32" class="w-full h-full object-contain" />
                     </div>
-                    <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                    <div class="text-left">
+                      <span class="text-xs sm:text-sm font-bold text-slate-900 block">${item.provider}</span>
+                      <span class="text-[10px] text-emerald-700 font-semibold">Rates from</span>
+                    </div>
                   </div>
                   <div class="flex items-center gap-3 sm:gap-4">
                     <span class="text-sm sm:text-base font-black text-slate-900">${item.price}</span>
-                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">View Deal</a>
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition shadow-sm shrink-0">View Live Deal ➔</a>
                   </div>
                 </div>
               `).join('');
@@ -329,13 +341,16 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                       onerror="this.src='https://r2.stay22.com/2025_booking.png';"
                     />
                   </div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                  <div class="text-left">
+                    <span class="text-xs sm:text-sm font-bold text-slate-900 block">${item.provider}</span>
+                    <span class="text-[10px] text-emerald-700 font-semibold">Rates from</span>
+                  </div>
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-4">
                   <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
-                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
-                    View Deal
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition shadow-sm shrink-0">
+                    View Live Deal ➔
                   </a>
                 </div>
               </div>
