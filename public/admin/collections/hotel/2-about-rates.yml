@@ -1,7 +1,7 @@
-- label: "2. ABOUT HOTEL & LIVE STAY22 RATES"
+- label: "2. ABOUT HOTEL & LIVE RATES"
   name: "about_notice"
   widget: "instructions"
-  description: "Controls overview description, starting price, hotel policies, and booking channels."
+  description: "Controls overview description, starting price, hotel policies, and custom booking channels."
   required: false
 
 - label: "Starting Price Text (e.g. $120 / night or ৳ 18,500)"
@@ -9,7 +9,7 @@
   widget: "string"
   default: "৳ 18,500 / night"
 
-# --- Hotel Policies & Info (100% Admin Controllable) ---
+# --- Hotel Policies ---
 - label: "Check-In Time (e.g. 2:00 PM)"
   name: "checkIn"
   widget: "string"
@@ -34,12 +34,64 @@
   default: "Non-Smoking"
   required: false
 
-# --- Reservation Channels ---
-- label: "Show Live Stay22 OTA Rate Comparison Table?"
-  name: "enable_rates"
-  widget: "boolean"
-  default: true
+# --- 100% CUSTOM BOOKING CHANNELS LIST (DRAG & DROP SERIAL IN SVELTIA CMS) ---
+- label: "Booking Channels List (Full Admin Control & Drag-and-Drop Order)"
+  name: "booking_channels"
+  widget: "list"
+  required: false
+  hint: "Add, reorder (drag & drop serial), set custom SVG logo, price, badges, and button text!"
+  fields:
+    - label: "Channel Name / Title (e.g. Agoda, Official Site, WhatsApp Booking)"
+      name: "provider_name"
+      widget: "string"
 
+    - label: "Price Text (Optional - Leave blank for no price tag)"
+      name: "price"
+      widget: "string"
+      required: false
+      hint: "e.g. '$114' or '৳ 12,500' (Leave empty if you don't want to show price)"
+
+    - label: "Show Price Tag on Website?"
+      name: "show_price"
+      widget: "boolean"
+      default: true
+
+    - label: "Button Action Text (e.g. Book Now ➔, View Deal, Chat on WhatsApp)"
+      name: "button_text"
+      widget: "string"
+      default: "Book Now ➔"
+
+    - label: "Destination URL Link or Phone Number"
+      name: "button_url"
+      widget: "string"
+      hint: "e.g. https://www.agoda.com/... or phone number 01700000000"
+
+    - label: "Top Badge Tag (Optional - e.g. Recommended, Official Site, Best Rate)"
+      name: "badge"
+      widget: "string"
+      required: false
+      hint: "e.g. 'Recommended', 'Official Site', 'Best Rate'"
+
+    - label: "Preset Logo Icon"
+      name: "icon_preset"
+      widget: "select"
+      default: "direct"
+      required: false
+      options:
+        - { label: "🔴 Agoda", value: "agoda" }
+        - { label: "🔵 Booking.com", value: "booking" }
+        - { label: "🟡 Expedia", value: "expedia" }
+        - { label: "🏨 Direct Hotel / Building", value: "direct" }
+        - { label: "💬 WhatsApp", value: "whatsapp" }
+        - { label: "📞 Phone Call", value: "phone" }
+
+    - label: "Or Paste Custom Raw SVG Icon Code (Optional)"
+      name: "custom_svg"
+      widget: "text"
+      required: false
+      hint: "Paste raw <svg>...</svg> code here to display any custom brand logo!"
+
+# --- Reservation Contacts ---
 - label: "Official Hotel Website Link (Optional)"
   name: "officialSite"
   widget: "string"
