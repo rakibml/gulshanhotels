@@ -1,5 +1,5 @@
 ---
-// src/pages/[slug].astro (Master Single Hotel Page Template)
+// src/pages/[slug].astro (Master Single Hotel Page Template - 100% SEO & Social Share Ready)
 import Layout from '../layouts/Layout.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelAboutAndRates from '../components/hotel/HotelAboutAndRates.astro';
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
     hotels = [];
   }
 
-  // Backup glob scanner
+  // Backup glob scanner fallback
   if (!hotels || hotels.length === 0) {
     try {
       const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -31,25 +31,60 @@ export async function getStaticPaths() {
     }
   }
 
-  return hotels.map((entry: any) => {
-    const rawId = entry.id || entry.slug || '';
-    const cleanSlug = rawId
-      .split('/')
-      .pop()
-      .replace(/\.md$/, '')
-      .toLowerCase();
+  // Process all entries for Custom Slug & Body Compilation
+  const paths = await Promise.all(
+    hotels.map(async (entry: any) => {
+      // 1. Priority to Admin Panel Custom Slug, then entry.id / entry.slug
+      const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
+      const cleanSlug = rawSlug
+        .split('/')
+        .pop()
+        .replace(/\.md$/, '')
+        .toLowerCase();
 
-    return {
-      params: { slug: cleanSlug || 'hotel' },
-      props: { hotel: entry },
-    };
-  });
+      // 2. Safe Body Compilation
+      let renderedBody = entry.body || '';
+      if (typeof entry.render === 'function') {
+        try {
+          const { Content } = await entry.render();
+          renderedBody = Content;
+        } catch (e) {}
+      }
+
+      return {
+        params: { slug: cleanSlug || 'hotel' },
+        props: { 
+          hotel: {
+            ...entry,
+            renderedBody
+          } 
+        },
+      };
+    })
+  );
+
+  return paths;
 }
 
 const { hotel } = Astro.props;
+const data = hotel?.data || {};
+
+const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelCategory = data.category || "Luxury Stay";
+const hotelLocation = data.location || "Dhaka, Bangladesh";
+const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+
+// Smart Dynamic SEO Meta Description
+const metaDescription = data.seo_description 
+  || data.description 
+  || `Book your stay at ${hotelTitle}, a verified ${hotelCategory} located in ${hotelLocation}. Check live room rates, amenities, photo gallery, and reviews.`;
 ---
 
-<Layout title={`${hotel?.data?.title || 'Hotel'} — Verified Hotel in Gulshan, Dhaka`}>
+<Layout 
+  title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
+  description={metaDescription}
+  image={hotelImage}
+>
   <!-- 1. HERO HEADER & TITLE -->
   <HotelHeader hotel={hotel} />
 
@@ -59,12 +94,12 @@ const { hotel } = Astro.props;
   <!-- 3. AMENITIES & FEATURED ROOMS -->
   <HotelAmenitiesAndRooms hotel={hotel} />
 
-   <!-- 5. LOCATION MAP -->
+  <!-- 4. LOCATION MAP -->
   <HotelLocationMap hotel={hotel} />
 
-  <!-- 6. GUEST REVIEWS -->
+  <!-- 5. GUEST REVIEWS -->
   <HotelReviews hotel={hotel} />
 
-  <!-- 7. FAQS ACCORDION -->
+  <!-- 6. FAQS ACCORDION -->
   <HotelFaqsSection hotel={hotel} />
 </Layout>
