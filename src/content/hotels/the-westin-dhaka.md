@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: the westin dhaka
-title_style: style_5
+title_style: style_6
 category: 5-Star Luxury Stay
 location: Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
@@ -1253,8 +1253,9 @@ location_notice: ''
 enable_nearby: true
 nearby_places: []
 reviews_notice: ''
-rating: null
-reviewsCount: null
+rating: '408'
+reviewsCount: '5'
+reviews: []
 faqs_notice: ''
 enable_faqs: true
 faqs: []
