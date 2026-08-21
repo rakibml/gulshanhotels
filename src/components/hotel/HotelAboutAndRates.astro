@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & Bulletproof Overview Toggle)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API with Multi-OTA Fallback & Truncator)
 interface Props {
   hotel: any;
 }
@@ -38,7 +38,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container with Fade Overlay -->
+        <!-- Hotel Description Container -->
         <div id="overview-wrapper" class="relative">
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-500">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
@@ -49,7 +49,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         </div>
 
-        <!-- Read More / Show Less Toggle Button -->
+        <!-- Read More Button -->
         <button 
           id="toggleOverviewBtn" 
           class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm inline-flex z-10 relative"
@@ -67,7 +67,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Check-In SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-800" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+              <svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-In</span>
@@ -78,7 +78,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Check-Out SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Check-Out</span>
@@ -89,7 +89,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Price SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Starting Price</span>
@@ -100,7 +100,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Property Type SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Property Type</span>
@@ -111,7 +111,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Power Backup SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-emerald-800" width="16" height="16" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+              <svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Power Backup</span>
@@ -122,7 +122,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <!-- Smoking Policy SVG -->
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-              <svg class="w-4 h-4 fill-slate-700" width="16" height="16" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
+              <svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
             </div>
             <div>
               <span class="text-slate-600 text-[11px] block font-extrabold uppercase">Smoking</span>
@@ -181,7 +181,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
         )}
 
         <!-- Live Stay22 API Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[200px]">
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} data-official-site={officialSite} class="space-y-2.5 min-h-[200px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
             <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
@@ -204,7 +204,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & BULLETPROOF 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, MULTI-OTA AGGREGATION & BULLETPROOF TRUNCATOR -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     // 1. FETCH STAY22 API LIVE RATES
@@ -213,6 +213,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
     if (ratesContainer && !ratesContainer.dataset.fetched) {
       ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
+      const officialSite = ratesContainer.getAttribute('data-official-site') || '';
       const apiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
 
       try {
@@ -232,7 +233,8 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             .split(/\s+/)
             .filter(word => word.length > 2 && !ignoreWords.includes(word));
 
-          let deals = [];
+          const uniqueDealsMap = new Map();
+
           rawResults.forEach(item => {
             const itemName = (item.name || '').toLowerCase();
             const isMatch = targetKeywords.length === 0 || targetKeywords.some(keyword => itemName.includes(keyword));
@@ -247,29 +249,49 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                   : `https://r2.stay22.com/2025_${supplierKey}.png`;
 
                 let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                if (supplierKey === 'booking') {
-                  providerName = 'Booking.com';
-                } else if (supplierKey === 'hotelscom') {
-                  providerName = 'Hotels.com';
-                } else if (supplierKey === 'expedia') {
-                  providerName = 'Expedia';
-                } else if (supplierKey === 'vrbo') {
-                  providerName = 'Vrbo';
-                }
+                if (supplierKey === 'booking') providerName = 'Booking.com';
+                else if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
+                else if (supplierKey === 'expedia') providerName = 'Expedia';
+                else if (supplierKey === 'vrbo') providerName = 'Vrbo';
+                else if (supplierKey === 'agoda') providerName = 'Agoda';
+                else if (supplierKey === 'tripcom' || supplierKey === 'trip') providerName = 'Trip.com';
 
                 if (priceVal > 0) {
-                  deals.push({
-                    provider: providerName,
-                    price: priceVal,
-                    url: linkUrl,
-                    logo: logoUrl
-                  });
+                  // Save lowest price per supplier
+                  if (!uniqueDealsMap.has(supplierKey) || priceVal < uniqueDealsMap.get(supplierKey).price) {
+                    uniqueDealsMap.set(supplierKey, {
+                      key: supplierKey,
+                      provider: providerName,
+                      price: priceVal,
+                      url: linkUrl,
+                      logo: logoUrl
+                    });
+                  }
                 }
               });
             }
           });
 
-          deals.sort((a, b) => a.price - b.price);
+          let deals = Array.from(uniqueDealsMap.values());
+
+          // Backup: If Agoda is missing from Stay22 API response, add Agoda Deal
+          const hasAgoda = deals.some(d => d.key === 'agoda' || d.provider.toLowerCase().includes('agoda'));
+          if (!hasAgoda) {
+            deals.push({
+              key: 'agoda',
+              provider: 'Agoda',
+              price: 'Check Deal',
+              url: `https://www.agoda.com/search?text=${encodeURIComponent(hotelName)}`,
+              logo: 'https://r2.stay22.com/2025_agoda.png'
+            });
+          }
+
+          // Sort deals ascending by numeric price
+          deals.sort((a, b) => {
+            const pA = typeof a.price === 'number' ? a.price : 999999;
+            const pB = typeof b.price === 'number' ? b.price : 999999;
+            return pA - pB;
+          });
 
           if (deals.length > 0) {
             ratesContainer.innerHTML = deals.map((item) => `
@@ -283,14 +305,14 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                       height="32"
                       loading="lazy"
                       class="w-full h-full object-contain"
-                      onerror="this.style.display='none';"
+                      onerror="this.src='https://r2.stay22.com/2025_booking.png';"
                     />
                   </div>
                   <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-4">
-                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
+                  <span class="text-sm sm:text-base font-black text-slate-900">${typeof item.price === 'number' ? '$' + item.price : item.price}</span>
                   <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
                     View Deal
                   </a>
