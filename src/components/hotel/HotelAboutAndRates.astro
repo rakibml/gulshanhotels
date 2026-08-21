@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Custom Prominent Starting Price & OTA List with Book Now)
+// src/components/hotel/HotelAboutAndRates.astro (Smart Trust-Engine Rates Card, Sub-second KV Sync & Overview Truncator)
 interface Props {
   hotel: any;
 }
@@ -135,7 +135,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - PROMINENT STARTING PRICE & BOOK NOW LIST) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - SMART TRUST ENGINE) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
@@ -224,7 +224,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
       ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       
-      // 1. First Priority: Try Instant Sub-second Cloudflare KV Live Rates
+      // 1. First Priority: Try Instant Sub-second Cloudflare KV Live Rates with Channel Controls
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
       try {
@@ -233,22 +233,45 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           const json = await res.json();
           if (json && json.success && json.rates) {
             const rates = json.rates;
-            const cur = rates.currency || '$';
+            
+            if (rates.startingPrice && startingPriceEl) {
+              startingPriceEl.textContent = rates.startingPrice;
+            }
+
+            const channels = rates.channels || {};
             let deals = [];
 
-            if (rates.direct) deals.push({ provider: 'Direct Hotel Partner', price: `${cur}${rates.direct}`, url: '#', logo: 'https://r2.stay22.com/2025_booking.png' });
-            if (rates.agoda) deals.push({ provider: 'Agoda', price: `${cur}${rates.agoda}`, url: `https://www.agoda.com/search?text=${encodeURIComponent(hotelName)}`, logo: 'https://r2.stay22.com/2025_agoda.png' });
-            if (rates.booking) deals.push({ provider: 'Booking.com', price: `${cur}${rates.booking}`, url: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}`, logo: 'https://r2.stay22.com/2025_booking.png' });
-            if (rates.expedia) deals.push({ provider: 'Expedia', price: `${cur}${rates.expedia}`, url: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(hotelName)}`, logo: 'https://r2.stay22.com/2025_expedia.png' });
+            // AGODA
+            if (channels.agoda) {
+              const url = channels.agoda.url || `https://www.agoda.com/search?text=${encodeURIComponent(hotelName)}`;
+              const priceText = (channels.agoda.showPrice && channels.agoda.price) ? `$${channels.agoda.price}` : '';
+              deals.push({ provider: 'Agoda', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_agoda.png' });
+            }
+
+            // BOOKING.COM
+            if (channels.booking) {
+              const url = channels.booking.url || `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}`;
+              const priceText = (channels.booking.showPrice && channels.booking.price) ? `$${channels.booking.price}` : '';
+              deals.push({ provider: 'Booking.com', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_booking.png' });
+            }
+
+            // EXPEDIA
+            if (channels.expedia) {
+              const url = channels.expedia.url || `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(hotelName)}`;
+              const priceText = (channels.expedia.showPrice && channels.expedia.price) ? `$${channels.expedia.price}` : '';
+              deals.push({ provider: 'Expedia', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_expedia.png' });
+            }
+
+            // DIRECT HOTEL
+            if (channels.direct) {
+              const url = channels.direct.url || '#';
+              const priceText = (channels.direct.showPrice && channels.direct.price) ? `$${channels.direct.price}` : '';
+              deals.push({ provider: 'Direct Hotel Partner', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_booking.png' });
+            }
 
             if (deals.length > 0) {
-              // Dynamically update top Starting Price with lowest rate
-              if (startingPriceEl && deals[0].price) {
-                startingPriceEl.textContent = `${deals[0].price} / night`;
-              }
-
               ratesContainer.innerHTML = deals.map((item) => `
-                <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+                <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
                       <img src="${item.logo}" alt="${item.provider}" width="32" height="32" class="w-full h-full object-contain" />
@@ -256,7 +279,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                     <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
                   </div>
                   <div class="flex items-center gap-3 sm:gap-4">
-                    <span class="text-sm sm:text-base font-black text-slate-900">${item.price}</span>
+                    ${item.price ? `<span class="text-sm sm:text-base font-black text-slate-900">${item.price}</span>` : ''}
                     <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">Book Now ➔</a>
                   </div>
                 </div>
@@ -331,13 +354,8 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           deals.sort((a, b) => a.price - b.price);
 
           if (deals.length > 0) {
-            // Update starting price if real rates found
-            if (startingPriceEl && typeof deals[0].price === 'number') {
-              startingPriceEl.textContent = `$${deals[0].price} / night`;
-            }
-
             ratesContainer.innerHTML = deals.map((item) => `
-              <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
+              <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
                     <img 
