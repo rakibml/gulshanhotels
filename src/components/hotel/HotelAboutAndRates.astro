@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & HTML-Safe 150-Word Truncator)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API & Bulletproof Overview Toggle)
 interface Props {
   hotel: any;
 }
@@ -16,6 +16,13 @@ const checkIn = data.checkIn || data.check_in || "2:00 PM";
 const checkOut = data.checkOut || data.check_out || "12:00 PM";
 const powerBackup = data.powerBackup || data.power_backup || "24/7 Generator";
 const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking";
+
+// Reservation Channels from CMS
+const officialSite = data.officialSite || data.official_site_url || "";
+const whatsapp = data.whatsapp || "";
+const phone = data.phone || "";
+const cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
+const cleanPhone = phone.replace(/[^0-9+]/g, '');
 ---
 
 <!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
@@ -31,9 +38,9 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           About {hotelTitle}
         </h2>
 
-        <!-- Hotel Description Container -->
+        <!-- Hotel Description Container with Fade Overlay -->
         <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-500">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
                 Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
@@ -42,13 +49,12 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           </div>
         </div>
 
-        <!-- Read More Button -->
+        <!-- Read More / Show Less Toggle Button -->
         <button 
           id="toggleOverviewBtn" 
-          style="display: none;"
-          class="mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm"
+          class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-100/70 hover:bg-emerald-200/80 px-4 py-2 rounded-xl border border-emerald-300/80 shadow-sm inline-flex z-10 relative"
         >
-          Read More ➔
+          <span id="readMoreText">Read More ➔</span>
         </button>
       </div>
 
@@ -143,8 +149,39 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
           </p>
         </div>
 
+        <!-- Quick Direct Booking Buttons (WhatsApp & Phone if provided by CMS) -->
+        {(whatsapp || phone) && (
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-2">
+            {whatsapp && (
+              <a 
+                href={`https://wa.me/${cleanWhatsapp}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 transition text-emerald-900 font-black text-xs"
+              >
+                <div class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
+                </div>
+                <span>WhatsApp Booking</span>
+              </a>
+            )}
+
+            {phone && (
+              <a 
+                href={`tel:${cleanPhone}`} 
+                class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-slate-900 font-black text-xs"
+              >
+                <div class="w-7 h-7 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </div>
+                <span>Call Hotel Direct</span>
+              </a>
+            )}
+          </div>
+        )}
+
         <!-- Live Stay22 API Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[220px]">
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[200px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
             <p class="text-xs font-bold text-slate-600">Connecting to Stay22 Direct API for live rates...</p>
@@ -152,8 +189,8 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
         </div>
 
         <!-- Amber Deal Tip Box -->
-        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm">
-          <svg class="w-5 h-5 fill-amber-700 shrink-0" width="20" height="20" viewBox="0 0 24 24">
+        <div class="bg-amber-50/80 border border-amber-200/70 rounded-2xl p-4 flex items-center gap-3 text-xs text-amber-900 font-bold shadow-sm text-left">
+          <svg class="w-5 h-5 fill-amber-700 shrink-0" viewBox="0 0 24 24">
             <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
           </svg>
           <p class="leading-tight">
@@ -167,7 +204,7 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & ACCURATE 150-WORD TRUNCATOR -->
+<!-- CLIENT-SIDE SCRIPT FOR STAY22 API FETCH, LINK ENHANCER & BULLETPROOF 150-WORD TRUNCATOR -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     // 1. FETCH STAY22 API LIVE RATES
@@ -280,91 +317,45 @@ const smokingPolicy = data.smokingPolicy || data.smoking_policy || "Non-Smoking"
       });
     }
 
-    // 3. HTML-SAFE EXACT 150-WORD TRUNCATOR
-    const overviewTextEl = document.getElementById('overview-text');
+    // 3. BULLETPROOF CSS-HEIGHT 150-WORD TRUNCATOR
+    const textEl = document.getElementById('overview-text');
+    const wrapperEl = document.getElementById('overview-wrapper');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
+    const toggleBtnText = document.getElementById('readMoreText');
 
-    if (overviewTextEl && toggleBtn && !overviewTextEl.dataset.truncatorSet) {
-      const textContent = overviewTextEl.textContent || overviewTextEl.innerText || '';
-      const words = textContent.trim().split(/\s+/).filter(w => w.length > 0);
+    if (textEl && toggleBtn && wrapperEl) {
+      applyLinkAttributes();
+
+      const fullText = textEl.textContent || textEl.innerText || '';
+      const words = fullText.trim().split(/\s+/).filter(w => w.length > 0);
 
       if (words.length > 150) {
-        let count = 0;
-        let targetTextNode = null;
-        let splitOffset = 0;
+        textEl.classList.add('max-h-[220px]', 'overflow-hidden');
+        wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
+        
+        toggleBtn.classList.remove('hidden');
+        let isExpanded = false;
 
-        const walker = document.createTreeWalker(overviewTextEl, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-
-        while ((node = walker.nextNode())) {
-          const text = node.nodeValue;
-          const nodeWords = text.match(/\S+/g) || [];
-
-          if (count + nodeWords.length >= 150) {
-            const needed = 150 - count;
-            let wordCount = 0;
-            let regex = /\S+/g;
-            let match;
-
-            while ((match = regex.exec(text)) !== null) {
-              wordCount++;
-              if (wordCount === needed) {
-                splitOffset = match.index + match[0].length;
-                targetTextNode = node;
-                break;
-              }
+        if (!toggleBtn.dataset.listenerSet) {
+          toggleBtn.dataset.listenerSet = 'true';
+          
+          toggleBtn.addEventListener('click', () => {
+            isExpanded = !isExpanded;
+            if (isExpanded) {
+              textEl.classList.remove('max-h-[220px]', 'overflow-hidden');
+              wrapperEl.classList.remove('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
+              if (toggleBtnText) toggleBtnText.textContent = 'Show Less ↩';
+            } else {
+              textEl.classList.add('max-h-[220px]', 'overflow-hidden');
+              wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-[#F8FAF9]', 'after:to-transparent', 'after:pointer-events-none');
+              if (toggleBtnText) toggleBtnText.textContent = 'Read More ➔';
+              wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-            break;
-          }
-          count += nodeWords.length;
-        }
-
-        if (targetTextNode) {
-          const secondHalf = targetTextNode.splitText(splitOffset);
-
-          const range = document.createRange();
-          range.setStart(secondHalf, 0);
-          range.setEndAfter(overviewTextEl.lastChild);
-
-          const moreSpan = document.createElement('span');
-          moreSpan.id = 'overview-more';
-          moreSpan.style.display = 'none';
-
-          const dotsSpan = document.createElement('span');
-          dotsSpan.id = 'overview-dots';
-          dotsSpan.textContent = '... ';
-
-          try {
-            const fragment = range.extractContents();
-            moreSpan.appendChild(fragment);
-
-            targetTextNode.parentNode.insertBefore(dotsSpan, targetTextNode.nextSibling);
-            targetTextNode.parentNode.insertBefore(moreSpan, dotsSpan.nextSibling);
-
-            overviewTextEl.dataset.truncatorSet = 'true';
-            toggleBtn.style.display = 'inline-flex';
-
-            toggleBtn.addEventListener('click', () => {
-              const isHidden = moreSpan.style.display === 'none';
-              if (isHidden) {
-                moreSpan.style.display = 'inline';
-                dotsSpan.style.display = 'none';
-                toggleBtn.innerHTML = 'Read Less ▲';
-              } else {
-                moreSpan.style.display = 'none';
-                dotsSpan.style.display = 'inline';
-                toggleBtn.innerHTML = 'Read More ➔';
-              }
-            });
-          } catch (e) {
-            console.error('Truncator Error:', e);
-          }
+          });
         }
       } else {
-        toggleBtn.style.display = 'none';
+        toggleBtn.classList.add('hidden');
       }
-
-      applyLinkAttributes();
     }
   };
 
