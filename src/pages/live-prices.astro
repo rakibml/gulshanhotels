@@ -1,17 +1,27 @@
 ---
-// src/pages/live-prices.astro (Full Control Live Price & Booking Channels Manager - Zero Emojis)
+// src/pages/live-prices.astro (Ultimate Dynamic Channel & Rate Manager - Cloudflare KV Edge Sync)
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Admin Live Price Manager — GulshanHotels">
   <div class="min-h-screen bg-slate-900 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
+    <div class="max-w-3xl mx-auto bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
       
       <!-- Header -->
-      <div class="border-b border-slate-700 pb-4">
-        <span class="text-xs font-black uppercase text-emerald-400 tracking-widest block">Instant Cloudflare KV Sync</span>
-        <h1 class="text-2xl sm:text-3xl font-black font-serif text-white mt-1">Live Rate & Channel Manager</h1>
-        <p class="text-xs text-slate-400 mt-1">Full control over prices, OTA visibility, official site & WhatsApp links.</p>
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700 pb-4">
+        <div>
+          <span class="text-xs font-black uppercase text-emerald-400 tracking-widest block">Instant Cloudflare KV Sync</span>
+          <h1 class="text-2xl sm:text-3xl font-black font-serif text-white mt-1">Live Channel & Rate Manager</h1>
+          <p class="text-xs text-slate-400 mt-1">Full serial order, custom SVGs, badges & button text control in 0.1s.</p>
+        </div>
+        
+        <button 
+          type="button" 
+          id="fetchExistingRatesBtn" 
+          class="bg-slate-700 hover:bg-slate-600 text-emerald-400 border border-emerald-500/30 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow cursor-pointer shrink-0"
+        >
+          🔄 Fetch Current KV Rates
+        </button>
       </div>
 
       <!-- Form -->
@@ -42,7 +52,7 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-        <!-- Top Starting Price -->
+        <!-- Top Starting Price Display -->
         <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700/80 space-y-2">
           <label class="block text-emerald-400 font-black uppercase text-[11px]">Top Card Starting Price Display</label>
           <input 
@@ -53,111 +63,38 @@ import Layout from '../layouts/Layout.astro';
           />
         </div>
 
-        <!-- OTA CONTROLS GRID -->
+        <!-- DYNAMIC CHANNELS LIST CONTAINER -->
         <div class="space-y-4">
-          <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider">OTA Channels & Custom Prices</h3>
-
-          <!-- AGODA -->
-          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-white text-sm flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Agoda Channel
-              </span>
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-                <input type="checkbox" id="showAgodaPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Show Price Tag</span>
-              </label>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="text" id="agodaPrice" placeholder="Price (e.g. $114 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-              <input type="url" id="agodaUrl" placeholder="Custom Agoda Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-            </div>
+          <div class="flex items-center justify-between border-b border-slate-700/80 pb-2">
+            <h3 class="text-xs font-black uppercase text-slate-300 tracking-wider">Booking Channels List (Serial & Order Control)</h3>
+            <button 
+              type="button" 
+              id="addNewChannelBtn" 
+              class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-lg transition shadow cursor-pointer"
+            >
+              + Add Channel
+            </button>
           </div>
 
-          <!-- BOOKING.COM -->
-          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-white text-sm flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Booking.com Channel
-              </span>
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-                <input type="checkbox" id="showBookingPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Show Price Tag</span>
-              </label>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="text" id="bookingPrice" placeholder="Price (e.g. $120 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-              <input type="url" id="bookingUrl" placeholder="Custom Booking.com Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-            </div>
-          </div>
-
-          <!-- EXPEDIA -->
-          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-white text-sm flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span> Expedia Channel
-              </span>
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-                <input type="checkbox" id="showExpediaPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Show Price Tag</span>
-              </label>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="text" id="expediaPrice" placeholder="Price (e.g. $125 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-              <input type="url" id="expediaUrl" placeholder="Custom Expedia Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-            </div>
-          </div>
-
-          <!-- OFFICIAL HOTEL WEBSITE -->
-          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-white text-sm flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Official Hotel Partner
-              </span>
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-                <input type="checkbox" id="showDirectPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Show Price Tag</span>
-              </label>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="text" id="directPrice" placeholder="Price (e.g. $110 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-              <input type="url" id="directUrl" placeholder="Official Website URL (e.g. https://...)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-            </div>
-          </div>
-
-          <!-- WHATSAPP DIRECT BOOKING -->
-          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-white text-sm flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> WhatsApp Direct Channel
-              </span>
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-                <input type="checkbox" id="enableWhatsapp" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
-                <span>Show WhatsApp Channel</span>
-              </label>
-            </div>
-            <div>
-              <input type="text" id="whatsappNumber" placeholder="WhatsApp Number (e.g. 8801700000000)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
-            </div>
-          </div>
-
+          <!-- Dynamic Items Render Here -->
+          <div id="channelsListContainer" class="space-y-4"></div>
         </div>
 
         <!-- Submit Button -->
-        <div class="pt-4">
+        <div class="pt-4 border-t border-slate-700">
           <button 
             type="submit" 
             id="savePriceBtn" 
-            class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-wider py-4 rounded-xl shadow-lg transition cursor-pointer text-xs"
+            class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-wider py-4 rounded-2xl shadow-xl transition cursor-pointer text-xs"
           >
-            Save Live Rates & Channels ➔ (0.1s Global Sync)
+            Save Live Channels & Serial Order ⚡ (0.1s Global Sync)
           </button>
         </div>
 
       </form>
 
       <!-- Status Alert -->
-      <div id="statusAlert" class="hidden p-4 rounded-xl text-xs font-bold text-center"></div>
+      <div id="statusAlert" class="hidden p-4 rounded-2xl text-xs font-bold text-center"></div>
 
     </div>
   </div>
@@ -168,13 +105,242 @@ import Layout from '../layouts/Layout.astro';
       const passcodeEl = document.getElementById('adminPasscode');
       const hotelEl = document.getElementById('targetHotel');
       const startingPriceEl = document.getElementById('startingPriceText');
+      const container = document.getElementById('channelsListContainer');
+      const addBtn = document.getElementById('addNewChannelBtn');
+      const fetchBtn = document.getElementById('fetchExistingRatesBtn');
       const saveBtn = document.getElementById('savePriceBtn');
       const alertEl = document.getElementById('statusAlert');
 
+      // Default Channels List
+      let channelsList = [
+        {
+          provider_name: 'Agoda',
+          price: '114',
+          showPrice: true,
+          button_text: 'Book Now ➔',
+          button_url: '',
+          badge: 'Recommended',
+          icon_preset: 'agoda',
+          custom_svg: ''
+        },
+        {
+          provider_name: 'Booking.com',
+          price: '120',
+          showPrice: true,
+          button_text: 'Book Now ➔',
+          button_url: '',
+          badge: '',
+          icon_preset: 'booking',
+          custom_svg: ''
+        },
+        {
+          provider_name: 'Direct Hotel Partner',
+          price: '110',
+          showPrice: true,
+          button_text: 'Book Direct ➔',
+          button_url: '',
+          badge: 'Official Site',
+          icon_preset: 'direct',
+          custom_svg: ''
+        }
+      ];
+
+      // Remember passcode
       if (passcodeEl) {
         passcodeEl.value = localStorage.getItem('gh_admin_passcode') || 'admin2026';
       }
 
+      // Render Dynamic Channels Cards UI
+      function renderChannelsUI() {
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (channelsList.length === 0) {
+          container.innerHTML = `<div class="p-6 text-center text-slate-500 border border-dashed border-slate-700 rounded-2xl">No booking channels added yet. Click "+ Add Channel" to create one.</div>`;
+          return;
+        }
+
+        channelsList.forEach((item, index) => {
+          const card = document.createElement('div');
+          card.className = 'bg-slate-900/90 p-4 sm:p-5 rounded-2xl border border-slate-700/90 space-y-4 text-left relative group';
+          card.dataset.index = index.toString();
+
+          card.innerHTML = `
+            <!-- Card Top Bar with Serial controls -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-slate-800 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center border border-slate-700">
+                  #${index + 1}
+                </span>
+                <span class="font-bold text-white text-xs sm:text-sm">${item.provider_name || 'Booking Channel'}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button type="button" class="move-up-btn bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded text-[10px] font-bold cursor-pointer" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}>⬆ Move Up</button>
+                <button type="button" class="move-down-btn bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded text-[10px] font-bold cursor-pointer" ${index === channelsList.length - 1 ? 'disabled style="opacity:0.3;"' : ''}>⬇ Move Down</button>
+                <button type="button" class="remove-channel-btn bg-rose-950 hover:bg-rose-900 text-rose-300 px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer border border-rose-800">✕ Delete</button>
+              </div>
+            </div>
+
+            <!-- Row 1: Provider Name & Badge Tag -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Channel / Provider Name</label>
+                <input type="text" class="field-provider-name w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-bold" value="${item.provider_name || ''}" placeholder="e.g. Agoda or WhatsApp Booking" />
+              </div>
+
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Top Badge Tag (Optional)</label>
+                <input type="text" class="field-badge w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-indigo-300 font-bold" value="${item.badge || ''}" placeholder="e.g. Recommended or Official Site" />
+              </div>
+            </div>
+
+            <!-- Row 2: Price & Show Price Toggle -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Price Tag (Optional - leave empty for no price)</label>
+                <input type="text" class="field-price w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-emerald-400 font-bold" value="${item.price || ''}" placeholder="e.g. $114 or ৳ 12,500" />
+              </div>
+
+              <div class="flex items-end pb-2">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                  <input type="checkbox" class="field-show-price w-4 h-4 accent-emerald-500 rounded cursor-pointer" ${item.showPrice !== false ? 'checked' : ''} />
+                  <span>Show Price Tag on Website</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Row 3: Button Text & Link URL -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Button Text</label>
+                <input type="text" class="field-button-text w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-bold" value="${item.button_text || 'Book Now ➔'}" placeholder="e.g. Book Now ➔ or View Deal" />
+              </div>
+
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Destination URL Link</label>
+                <input type="url" class="field-button-url w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-blue-300 font-bold" value="${item.button_url || ''}" placeholder="e.g. https://... or https://wa.me/..." />
+              </div>
+            </div>
+
+            <!-- Row 4: Logo Selection (Preset vs Custom SVG) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-800/80">
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Select Preset Logo</label>
+                <select class="field-icon-preset w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-bold">
+                  <option value="agoda" ${item.icon_preset === 'agoda' ? 'selected' : ''}>Agoda Logo</option>
+                  <option value="booking" ${item.icon_preset === 'booking' ? 'selected' : ''}>Booking.com Logo</option>
+                  <option value="expedia" ${item.icon_preset === 'expedia' ? 'selected' : ''}>Expedia Logo</option>
+                  <option value="direct" ${item.icon_preset === 'direct' ? 'selected' : ''}>Direct Hotel Building Icon</option>
+                  <option value="whatsapp" ${item.icon_preset === 'whatsapp' ? 'selected' : ''}>WhatsApp Icon</option>
+                  <option value="phone" ${item.icon_preset === 'phone' ? 'selected' : ''}>Phone Call Icon</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-400 text-[10px] font-bold uppercase mb-1">Or Paste Custom Raw SVG Code (Optional)</label>
+                <textarea class="field-custom-svg w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-300 font-mono text-[10px] h-10 focus:h-20 transition" placeholder="<svg>...</svg>">${item.custom_svg || ''}</textarea>
+              </div>
+            </div>
+          `;
+
+          // Event Listeners for Card Controls
+          card.querySelector('.move-up-btn')?.addEventListener('click', () => {
+            if (index > 0) {
+              const temp = channelsList[index];
+              channelsList[index] = channelsList[index - 1];
+              channelsList[index - 1] = temp;
+              renderChannelsUI();
+            }
+          });
+
+          card.querySelector('.move-down-btn')?.addEventListener('click', () => {
+            if (index < channelsList.length - 1) {
+              const temp = channelsList[index];
+              channelsList[index] = channelsList[index + 1];
+              channelsList[index + 1] = temp;
+              renderChannelsUI();
+            }
+          });
+
+          card.querySelector('.remove-channel-btn')?.addEventListener('click', () => {
+            channelsList.splice(index, 1);
+            renderChannelsUI();
+          });
+
+          // Sync Form Changes back to array
+          card.querySelector('.field-provider-name')?.addEventListener('input', (e) => { channelsList[index].provider_name = e.target.value; });
+          card.querySelector('.field-badge')?.addEventListener('input', (e) => { channelsList[index].badge = e.target.value; });
+          card.querySelector('.field-price')?.addEventListener('input', (e) => { channelsList[index].price = e.target.value; });
+          card.querySelector('.field-show-price')?.addEventListener('change', (e) => { channelsList[index].showPrice = e.target.checked; });
+          card.querySelector('.field-button-text')?.addEventListener('input', (e) => { channelsList[index].button_text = e.target.value; });
+          card.querySelector('.field-button-url')?.addEventListener('input', (e) => { channelsList[index].button_url = e.target.value; });
+          card.querySelector('.field-icon-preset')?.addEventListener('change', (e) => { channelsList[index].icon_preset = e.target.value; });
+          card.querySelector('.field-custom-svg')?.addEventListener('input', (e) => { channelsList[index].custom_svg = e.target.value; });
+
+          container.appendChild(card);
+        });
+      }
+
+      // Add New Channel Click
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          channelsList.push({
+            provider_name: 'New Channel',
+            price: '',
+            showPrice: true,
+            button_text: 'Book Now ➔',
+            button_url: '',
+            badge: '',
+            icon_preset: 'direct',
+            custom_svg: ''
+          });
+          renderChannelsUI();
+        });
+      }
+
+      // Fetch Existing Rates from KV
+      if (fetchBtn) {
+        fetchBtn.addEventListener('click', async () => {
+          const hotelName = hotelEl?.value.trim();
+          if (!hotelName) {
+            alert('Please enter a Hotel Name first!');
+            return;
+          }
+
+          fetchBtn.disabled = true;
+          fetchBtn.innerText = 'Fetching...';
+
+          try {
+            const res = await fetch(`https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`);
+            if (res.ok) {
+              const json = await res.json();
+              if (json && json.success && json.rates) {
+                if (json.rates.startingPrice && startingPriceEl) {
+                  startingPriceEl.value = json.rates.startingPrice;
+                }
+                if (Array.isArray(json.rates.channelsList)) {
+                  channelsList = json.rates.channelsList;
+                  renderChannelsUI();
+                  alert('✅ Current live settings fetched for "' + hotelName + '"!');
+                }
+              } else {
+                alert('No existing KV settings found for "' + hotelName + '". You can create new ones!');
+              }
+            }
+          } catch (err) {
+            alert('Fetch Error: ' + err.message);
+          } finally {
+            fetchBtn.disabled = false;
+            fetchBtn.innerText = '🔄 Fetch Current KV Rates';
+          }
+        });
+      }
+
+      // Initial Render
+      renderChannelsUI();
+
+      // Form Submit
       if (form) {
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
@@ -192,33 +358,8 @@ import Layout from '../layouts/Layout.astro';
           const payload = {
             passcode: passcode,
             hotel: hotelEl.value.trim(),
-            startingPrice: startingPriceEl.value.trim(),
-            channels: {
-              agoda: {
-                price: document.getElementById('agodaPrice')?.value.trim() || '',
-                showPrice: document.getElementById('showAgodaPrice')?.checked ?? true,
-                url: document.getElementById('agodaUrl')?.value.trim() || ''
-              },
-              booking: {
-                price: document.getElementById('bookingPrice')?.value.trim() || '',
-                showPrice: document.getElementById('showBookingPrice')?.checked ?? true,
-                url: document.getElementById('bookingUrl')?.value.trim() || ''
-              },
-              expedia: {
-                price: document.getElementById('expediaPrice')?.value.trim() || '',
-                showPrice: document.getElementById('showExpediaPrice')?.checked ?? true,
-                url: document.getElementById('expediaUrl')?.value.trim() || ''
-              },
-              direct: {
-                price: document.getElementById('directPrice')?.value.trim() || '',
-                showPrice: document.getElementById('showDirectPrice')?.checked ?? true,
-                url: document.getElementById('directUrl')?.value.trim() || ''
-              },
-              whatsapp: {
-                enable: document.getElementById('enableWhatsapp')?.checked ?? true,
-                number: document.getElementById('whatsappNumber')?.value.trim() || ''
-              }
-            }
+            startingPrice: startingPriceEl?.value.trim() || '',
+            channelsList: channelsList
           };
 
           try {
@@ -232,7 +373,7 @@ import Layout from '../layouts/Layout.astro';
 
             if (res.ok && json.success) {
               if (alertEl) {
-                alertEl.textContent = '✓ ' + json.message;
+                alertEl.textContent = '✅ ' + json.message;
                 alertEl.className = 'p-4 rounded-xl text-xs font-bold text-center bg-emerald-950 border border-emerald-500/50 text-emerald-300 block';
               }
             } else {
@@ -249,7 +390,7 @@ import Layout from '../layouts/Layout.astro';
           } finally {
             if (saveBtn) {
               saveBtn.disabled = false;
-              saveBtn.innerText = 'Save Live Rates & Channels ➔ (0.1s Global Sync)';
+              saveBtn.innerText = 'Save Live Channels & Serial Order ⚡ (0.1s Global Sync)';
             }
           }
         });
