@@ -1,7 +1,7 @@
 ---
 header_notice: ''
-title: the westin dhaka
-title_style: style_5
+title: The Midori by Lakeshore
+title_style: style_7
 category: 5-Star Luxury Stay
 location: Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
