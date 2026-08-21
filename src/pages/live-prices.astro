@@ -1,76 +1,146 @@
 ---
-// src/pages/live-prices.astro (Instant Sub-second Price Update Portal)
-import Layout from '../layouts/Layout.astro';
+// src/pages/live-prices.astro (Full Control Live Price & Booking Channels Manager)
+import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout title="Admin Live Price Manager — GulshanHotels">
-  <div class="min-h-screen bg-slate-900 text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-xl mx-auto bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
+  <div class="min-h-screen bg-slate-900 text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
       
       <!-- Header -->
       <div class="border-b border-slate-700 pb-4">
         <span class="text-xs font-black uppercase text-emerald-400 tracking-widest block">Instant Cloudflare KV Sync</span>
-        <h1 class="text-2xl sm:text-3xl font-black font-serif text-white mt-1">Live Price Manager</h1>
-        <p class="text-xs text-slate-400 mt-1">Update hotel rates in 0.1 seconds globally without rebuilding site.</p>
+        <h1 class="text-2xl sm:text-3xl font-black font-serif text-white mt-1">Live Rate & Channel Manager</h1>
+        <p class="text-xs text-slate-400 mt-1">Full control over prices, OTA visibility, official site & WhatsApp links.</p>
       </div>
 
       <!-- Form -->
-      <form id="priceManagerForm" class="space-y-4 text-xs sm:text-sm">
+      <form id="priceManagerForm" class="space-y-6 text-xs sm:text-sm">
         
-        <!-- Secret Admin Passcode -->
-        <div>
-          <label class="block text-slate-300 font-extrabold uppercase text-[11px] mb-1">Admin Passcode</label>
-          <input 
-            type="password" 
-            id="adminPasscode" 
-            required 
-            placeholder="Enter passcode (default: admin2026)" 
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition"
-          />
+        <!-- Passcode & Hotel Name -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-300 font-extrabold uppercase text-[11px] mb-1">Admin Passcode</label>
+            <input 
+              type="password" 
+              id="adminPasscode" 
+              required 
+              placeholder="Enter passcode (default: admin2026)" 
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition font-mono"
+            />
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-extrabold uppercase text-[11px] mb-1">Hotel Name / Title</label>
+            <input 
+              type="text" 
+              id="targetHotel" 
+              required 
+              placeholder="e.g. The Midori by Lakeshore" 
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition"
+            />
+          </div>
         </div>
 
-        <!-- Hotel Name -->
-        <div>
-          <label class="block text-slate-300 font-extrabold uppercase text-[11px] mb-1">Hotel Name / Title</label>
+        <!-- Top Starting Price -->
+        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-700/80 space-y-2">
+          <label class="block text-emerald-400 font-black uppercase text-[11px]">Top Card Starting Price Display</label>
           <input 
             type="text" 
-            id="targetHotel" 
-            required 
-            placeholder="e.g. The Westin Dhaka or The Midori by Lakeshore" 
-            class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition"
+            id="startingPriceText" 
+            placeholder="e.g. $120 / night or ৳ 18,500 / night" 
+            class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-emerald-500" 
           />
         </div>
 
-        <!-- Currency -->
-        <div>
-          <label class="block text-slate-300 font-extrabold uppercase text-[11px] mb-1">Currency Symbol</label>
-          <select id="priceCurrency" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 font-bold">
-            <option value="$">$ (USD Dollars)</option>
-            <option value="৳">৳ (BDT Taka)</option>
-          </select>
-        </div>
+        <!-- OTA CONTROLS GRID -->
+        <div class="space-y-4">
+          <h3 class="text-xs font-black uppercase text-slate-400 tracking-wider">OTA Channels & Custom Prices</h3>
 
-        <!-- Price Inputs Grid -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
-          <div>
-            <label class="block text-slate-300 font-bold text-[11px] mb-1 text-emerald-400">🔴 Agoda Price</label>
-            <input type="number" id="priceAgoda" placeholder="e.g. 114" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500" />
+          <!-- AGODA -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-white text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> 🔴 Agoda Channel
+              </span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                <input type="checkbox" id="showAgodaPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span>Show Price Tag</span>
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="text" id="agodaPrice" placeholder="Price (e.g. $114 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+              <input type="url" id="agodaUrl" placeholder="Custom Agoda Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+            </div>
           </div>
 
-          <div>
-            <label class="block text-slate-300 font-bold text-[11px] mb-1 text-blue-400">🔵 Booking.com Price</label>
-            <input type="number" id="priceBooking" placeholder="e.g. 120" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500" />
+          <!-- BOOKING.COM -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-white text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 🔵 Booking.com Channel
+              </span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                <input type="checkbox" id="showBookingPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span>Show Price Tag</span>
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="text" id="bookingPrice" placeholder="Price (e.g. $120 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+              <input type="url" id="bookingUrl" placeholder="Custom Booking.com Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+            </div>
           </div>
 
-          <div>
-            <label class="block text-slate-300 font-bold text-[11px] mb-1 text-yellow-400">🟡 Expedia Price</label>
-            <input type="number" id="priceExpedia" placeholder="e.g. 125" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500" />
+          <!-- EXPEDIA -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-white text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> 🟡 Expedia Channel
+              </span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                <input type="checkbox" id="showExpediaPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span>Show Price Tag</span>
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="text" id="expediaPrice" placeholder="Price (e.g. $125 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+              <input type="url" id="expediaUrl" placeholder="Custom Expedia Link (Optional)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+            </div>
           </div>
 
-          <div>
-            <label class="block text-slate-300 font-bold text-[11px] mb-1 text-emerald-300">🏨 Direct Hotel Price</label>
-            <input type="number" id="priceDirect" placeholder="e.g. 110" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500" />
+          <!-- OFFICIAL HOTEL WEBSITE -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-white text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 🏨 Official Hotel Partner
+              </span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                <input type="checkbox" id="showDirectPrice" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span>Show Price Tag</span>
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="text" id="directPrice" placeholder="Price (e.g. $110 - leave blank for no price)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+              <input type="url" id="directUrl" placeholder="Official Website URL (e.g. https://...)" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+            </div>
           </div>
+
+          <!-- WHATSAPP DIRECT BOOKING -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-white text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 💬 WhatsApp Direct Channel
+              </span>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                <input type="checkbox" id="enableWhatsapp" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+                <span>Show WhatsApp Channel</span>
+              </label>
+            </div>
+            <div>
+              <input type="text" id="whatsappNumber" placeholder="WhatsApp Number (e.g. 8801700000000)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white" />
+            </div>
+          </div>
+
         </div>
 
         <!-- Submit Button -->
@@ -78,9 +148,9 @@ import Layout from '../layouts/Layout.astro';
           <button 
             type="submit" 
             id="savePriceBtn" 
-            class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-wider py-3.5 rounded-xl shadow-lg transition cursor-pointer text-xs"
+            class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-wider py-4 rounded-xl shadow-lg transition cursor-pointer text-xs"
           >
-            Save Live Prices ⚡ (Instant Sync)
+            Save Live Rates & Channels ⚡ (0.1s Global Sync)
           </button>
         </div>
 
@@ -97,15 +167,11 @@ import Layout from '../layouts/Layout.astro';
       const form = document.getElementById('priceManagerForm');
       const passcodeEl = document.getElementById('adminPasscode');
       const hotelEl = document.getElementById('targetHotel');
-      const currencyEl = document.getElementById('priceCurrency');
-      const agodaEl = document.getElementById('priceAgoda');
-      const bookingEl = document.getElementById('priceBooking');
-      const expediaEl = document.getElementById('priceExpedia');
-      const directEl = document.getElementById('priceDirect');
+      const startingPriceEl = document.getElementById('startingPriceText');
       const saveBtn = document.getElementById('savePriceBtn');
       const alertEl = document.getElementById('statusAlert');
 
-      // Remember passcode locally in browser
+      // Remember passcode
       if (passcodeEl) {
         passcodeEl.value = localStorage.getItem('gh_admin_passcode') || 'admin2026';
       }
@@ -124,19 +190,43 @@ import Layout from '../layouts/Layout.astro';
 
           if (alertEl) alertEl.className = 'hidden';
 
+          const payload = {
+            passcode: passcode,
+            hotel: hotelEl.value.trim(),
+            startingPrice: startingPriceEl.value.trim(),
+            channels: {
+              agoda: {
+                price: document.getElementById('agodaPrice')?.value.trim() || '',
+                showPrice: document.getElementById('showAgodaPrice')?.checked ?? true,
+                url: document.getElementById('agodaUrl')?.value.trim() || ''
+              },
+              booking: {
+                price: document.getElementById('bookingPrice')?.value.trim() || '',
+                showPrice: document.getElementById('showBookingPrice')?.checked ?? true,
+                url: document.getElementById('bookingUrl')?.value.trim() || ''
+              },
+              expedia: {
+                price: document.getElementById('expediaPrice')?.value.trim() || '',
+                showPrice: document.getElementById('showExpediaPrice')?.checked ?? true,
+                url: document.getElementById('expediaUrl')?.value.trim() || ''
+              },
+              direct: {
+                price: document.getElementById('directPrice')?.value.trim() || '',
+                showPrice: document.getElementById('showDirectPrice')?.checked ?? true,
+                url: document.getElementById('directUrl')?.value.trim() || ''
+              },
+              whatsapp: {
+                enable: document.getElementById('enableWhatsapp')?.checked ?? true,
+                number: document.getElementById('whatsappNumber')?.value.trim() || ''
+              }
+            }
+          };
+
           try {
             const res = await fetch('https://gatlin.rmollah394.workers.dev/api/admin/update-prices', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                passcode: passcode,
-                hotel: hotelEl.value.trim(),
-                currency: currencyEl.value,
-                agoda: agodaEl.value,
-                booking: bookingEl.value,
-                expedia: expediaEl.value,
-                direct: directEl.value
-              })
+              body: JSON.stringify(payload)
             });
 
             const json = await res.json();
@@ -148,7 +238,7 @@ import Layout from '../layouts/Layout.astro';
               }
             } else {
               if (alertEl) {
-                alertEl.textContent = '❌ Error: ' + (json.error || 'Failed to update price');
+                alertEl.textContent = '❌ Error: ' + (json.error || 'Failed to update channel rates');
                 alertEl.className = 'p-4 rounded-xl text-xs font-bold text-center bg-rose-950 border border-rose-500/50 text-rose-300 block';
               }
             }
@@ -160,7 +250,7 @@ import Layout from '../layouts/Layout.astro';
           } finally {
             if (saveBtn) {
               saveBtn.disabled = false;
-              saveBtn.innerText = 'Save Live Prices ⚡ (Instant Sync)';
+              saveBtn.innerText = 'Save Live Rates & Channels ⚡ (0.1s Global Sync)';
             }
           }
         });
