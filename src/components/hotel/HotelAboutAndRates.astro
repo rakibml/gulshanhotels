@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Smart Trust-Engine Rates Card, Sub-second KV Sync & Overview Truncator)
+// src/components/hotel/HotelAboutAndRates.astro (Smart Rates Card, KV Sync, WhatsApp, Pure Vector SVGs - Zero Emojis)
 interface Props {
   hotel: any;
 }
@@ -25,7 +25,7 @@ const cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
 const cleanPhone = phone.replace(/[^0-9+]/g, '');
 ---
 
-<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE STAY22 RATE COMPARISON -->
+<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
@@ -135,11 +135,11 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
     </div>
 
-    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL? - SMART TRUST ENGINE) -->
+    <!-- RIGHT COLUMN (WHERE CAN YOU BOOK THIS HOTEL?) -->
     <div class="lg:col-span-5">
       <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl space-y-5 min-h-[380px] scroll-mt-24 sm:scroll-mt-28">
         
-        <!-- CARD HEADER WITH BIG PROMINENT STARTING PRICE -->
+        <!-- CARD HEADER WITH STARTING PRICE -->
         <div class="space-y-3 text-left border-b border-slate-100 pb-4">
           <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
             Where can you book this hotel?
@@ -161,9 +161,9 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         </div>
 
-        <!-- Quick Direct Booking Buttons (WhatsApp & Phone if provided by CMS) -->
+        <!-- Quick Static WhatsApp & Phone fallback from CMS -->
         {(whatsapp || phone) && (
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-1">
+          <div id="staticReservationChannels" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-1">
             {whatsapp && (
               <a 
                 href={`https://wa.me/${cleanWhatsapp}`} 
@@ -192,8 +192,8 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           </div>
         )}
 
-        <!-- Live Stay22 & Cloudflare KV OTA Rates List Container -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[180px]">
+        <!-- Live Stay22 & Cloudflare KV Rates List Container -->
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[200px]">
           <div class="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
             <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
             <p class="text-xs font-bold text-slate-600">Connecting to Cloudflare Edge API for live rates...</p>
@@ -214,17 +214,26 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
   </div>
 </section>
 
-<!-- CLIENT-SIDE SCRIPT FOR SUB-SECOND CLOUDFLARE KV, STAY22 & TRUST MICROCOPY -->
+<!-- CLIENT SCRIPT WITH HIGH-RELIABILITY LOGOS & DYNAMIC WHATSAPP -->
 <script is:inline>
   const initHotelAboutSection = async () => {
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
 
+    // Vector SVG Logos Fallback Dictionary
+    const svgLogos = {
+      agoda: `<svg class="w-5 h-5 fill-[#003580] shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>`,
+      booking: `<svg class="w-5 h-5 fill-[#003580] shrink-0" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6.5 12h-3v-2h3c.83 0 1.5-.67 1.5-1.5S13.33 10 12.5 10h-3V7h4c.83 0 1.5.67 1.5 1.5v.5c0 .83-.67 1.5-1.5 1.5.83 0 1.5.67 1.5 1.5v.5c0 .83-.67 1.5-1.5 1.5z"/></svg>`,
+      expedia: `<svg class="w-5 h-5 fill-[#00256c] shrink-0" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
+      direct: `<svg class="w-5 h-5 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>`,
+      whatsapp: `<svg class="w-5 h-5 fill-[#25D366] shrink-0" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>`
+    };
+
     if (ratesContainer && !ratesContainer.dataset.fetched) {
       ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       
-      // 1. First Priority: Try Instant Sub-second Cloudflare KV Live Rates with Channel Controls
+      // 1. Try Instant Sub-second Cloudflare KV Live Rates
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
       try {
@@ -241,40 +250,83 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
             const channels = rates.channels || {};
             let deals = [];
 
+            // DYNAMIC WHATSAPP CHANNEL
+            if (channels.whatsapp && channels.whatsapp.enable && channels.whatsapp.number) {
+              const cleanWa = channels.whatsapp.number.replace(/[^0-9]/g, '');
+              deals.push({
+                provider: 'WhatsApp Direct Booking',
+                price: '',
+                url: `https://wa.me/${cleanWa}`,
+                svg: svgLogos.whatsapp,
+                logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg'
+              });
+            }
+
             // AGODA
             if (channels.agoda) {
               const url = channels.agoda.url || `https://www.agoda.com/search?text=${encodeURIComponent(hotelName)}`;
               const priceText = (channels.agoda.showPrice && channels.agoda.price) ? `$${channels.agoda.price}` : '';
-              deals.push({ provider: 'Agoda', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_agoda.png' });
+              deals.push({
+                provider: 'Agoda',
+                price: priceText,
+                url: url,
+                svg: svgLogos.agoda,
+                logo: 'https://r2.stay22.com/2025_agoda.png'
+              });
             }
 
             // BOOKING.COM
             if (channels.booking) {
               const url = channels.booking.url || `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}`;
               const priceText = (channels.booking.showPrice && channels.booking.price) ? `$${channels.booking.price}` : '';
-              deals.push({ provider: 'Booking.com', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_booking.png' });
+              deals.push({
+                provider: 'Booking.com',
+                price: priceText,
+                url: url,
+                svg: svgLogos.booking,
+                logo: 'https://r2.stay22.com/2025_booking.png'
+              });
             }
 
             // EXPEDIA
             if (channels.expedia) {
               const url = channels.expedia.url || `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(hotelName)}`;
               const priceText = (channels.expedia.showPrice && channels.expedia.price) ? `$${channels.expedia.price}` : '';
-              deals.push({ provider: 'Expedia', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_expedia.png' });
+              deals.push({
+                provider: 'Expedia',
+                price: priceText,
+                url: url,
+                svg: svgLogos.expedia,
+                logo: 'https://r2.stay22.com/2025_expedia.png'
+              });
             }
 
             // DIRECT HOTEL
             if (channels.direct) {
               const url = channels.direct.url || '#';
               const priceText = (channels.direct.showPrice && channels.direct.price) ? `$${channels.direct.price}` : '';
-              deals.push({ provider: 'Direct Hotel Partner', price: priceText, url: url, logo: 'https://r2.stay22.com/2025_booking.png' });
+              deals.push({
+                provider: 'Direct Hotel Partner',
+                price: priceText,
+                url: url,
+                svg: svgLogos.direct,
+                logo: 'https://r2.stay22.com/2025_booking.png'
+              });
             }
 
             if (deals.length > 0) {
               ratesContainer.innerHTML = deals.map((item) => `
                 <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
-                      <img src="${item.logo}" alt="${item.provider}" width="32" height="32" class="w-full h-full object-contain" />
+                    <div class="w-8 h-8 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-sm border border-slate-200">
+                      <img 
+                        src="${item.logo}" 
+                        alt="${item.provider}" 
+                        width="24" 
+                        height="24" 
+                        class="w-full h-full object-contain" 
+                        onerror="this.outerHTML='${item.svg.replace(/'/g, "\\'")}';"
+                      />
                     </div>
                     <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
                   </div>
@@ -295,7 +347,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
         console.warn('KV fetch bypass, trying Stay22 fallback...', e);
       }
 
-      // 2. Second Priority: Stay22 Realtime API Rates Fallback
+      // 2. Stay22 Realtime API Rates Fallback
       const stay22ApiUrl = `https://gatlin.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
       try {
         const res = await fetch(stay22ApiUrl);
@@ -330,11 +382,12 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                   : `https://r2.stay22.com/2025_${supplierKey}.png`;
 
                 let providerName = supplierKey.charAt(0).toUpperCase() + supplierKey.slice(1);
-                if (supplierKey === 'booking') providerName = 'Booking.com';
-                else if (supplierKey === 'hotelscom') providerName = 'Hotels.com';
-                else if (supplierKey === 'expedia') providerName = 'Expedia';
-                else if (supplierKey === 'vrbo') providerName = 'Vrbo';
-                else if (supplierKey === 'agoda') providerName = 'Agoda';
+                let svgFallback = svgLogos.booking;
+                if (supplierKey === 'booking') { providerName = 'Booking.com'; svgFallback = svgLogos.booking; }
+                else if (supplierKey === 'hotelscom') { providerName = 'Hotels.com'; svgFallback = svgLogos.booking; }
+                else if (supplierKey === 'expedia') { providerName = 'Expedia'; svgFallback = svgLogos.expedia; }
+                else if (supplierKey === 'vrbo') { providerName = 'Vrbo'; svgFallback = svgLogos.booking; }
+                else if (supplierKey === 'agoda') { providerName = 'Agoda'; svgFallback = svgLogos.agoda; }
 
                 if (priceVal > 0) {
                   if (!uniqueDealsMap.has(supplierKey) || priceVal < uniqueDealsMap.get(supplierKey).price) {
@@ -342,7 +395,8 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                       provider: providerName,
                       price: priceVal,
                       url: linkUrl,
-                      logo: logoUrl
+                      logo: logoUrl,
+                      svg: svgFallback
                     });
                   }
                 }
@@ -354,6 +408,10 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           deals.sort((a, b) => a.price - b.price);
 
           if (deals.length > 0) {
+            if (startingPriceEl && typeof deals[0].price === 'number') {
+              startingPriceEl.textContent = `$${deals[0].price} / night`;
+            }
+
             ratesContainer.innerHTML = deals.map((item) => `
               <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 transition">
                 <div class="flex items-center gap-3">
@@ -365,7 +423,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                       height="32"
                       loading="lazy"
                       class="w-full h-full object-contain"
-                      onerror="this.src='https://r2.stay22.com/2025_booking.png';"
+                      onerror="this.outerHTML='${item.svg.replace(/'/g, "\\'")}';"
                     />
                   </div>
                   <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
