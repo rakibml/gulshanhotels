@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API, Active Date Badge & Bulletproof Overview Toggle)
+// src/components/hotel/HotelAboutAndRates.astro (Centered Rates Card, Stay22 API, Multi-OTA Comparison & Bulletproof Overview Toggle)
 interface Props {
   hotel: any;
 }
@@ -43,7 +43,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
           <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-500">
             {hotel?.body ? <Fragment set:html={hotel.body} /> : (
               <p>
-                Located in the heart of Dhaka, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and high security.
+                Located in the heart of Dhaka, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
               </p>
             )}
           </div>
@@ -262,18 +262,54 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                     provider: providerName,
                     price: priceVal,
                     url: linkUrl,
-                    logo: logoUrl
+                    logo: logoUrl,
+                    isLive: true
                   });
                 }
               });
             }
           });
 
-          // Sort deals cheapest first
-          deals.sort((a, b) => a.price - b.price);
+          // MULTI-PLATFORM AUTO-ENRICHER: If Stay22 API returns 1 supplier, append Agoda & Expedia so it displays all options
+          const existingProviders = deals.map(d => d.provider.toLowerCase());
+          const fallbacks = [
+            {
+              provider: 'Agoda',
+              logo: 'https://r2.stay22.com/2025_agoda.png',
+              url: `https://www.agoda.com/search?text=${encodeURIComponent(hotelName + ' Dhaka')}`
+            },
+            {
+              provider: 'Expedia',
+              logo: 'https://r2.stay22.com/2025_expedia.png',
+              url: `https://www.expedia.com/Hotel-Search?destination=${encodeURIComponent(hotelName + ' Dhaka')}`
+            },
+            {
+              provider: 'Hotels.com',
+              logo: 'https://r2.stay22.com/2025_hotelscom.png',
+              url: `https://www.hotels.com/Hotel-Search?destination=${encodeURIComponent(hotelName + ' Dhaka')}`
+            }
+          ];
+
+          fallbacks.forEach(fb => {
+            if (!existingProviders.includes(fb.provider.toLowerCase())) {
+              deals.push({
+                provider: fb.provider,
+                price: null,
+                url: fb.url,
+                logo: fb.logo,
+                isLive: false
+              });
+            }
+          });
+
+          // Sort: Live prices first (cheapest first), then additional platforms
+          deals.sort((a, b) => {
+            if (a.isLive && !b.isLive) return -1;
+            if (!a.isLive && b.isLive) return 1;
+            return (a.price || 0) - (b.price || 0);
+          });
 
           if (deals.length > 0) {
-            // Display active check-in date badge if available from Worker meta
             const dateBadge = (json.meta && json.meta.activeCheckin) 
               ? `<div class="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 mb-2 shadow-xs">
                   <span>📅 Live Rate for: <strong>${json.meta.activeCheckin}</strong></span>
@@ -291,16 +327,22 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
                       height="32"
                       loading="lazy"
                       class="w-full h-full object-contain"
-                      onerror="this.style.display='none';"
+                      onerror="this.src='https://r2.stay22.com/2025_booking.png';"
                     />
                   </div>
-                  <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider}</span>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded-md">Available</span>
+                  </div>
                 </div>
 
                 <div class="flex items-center gap-3 sm:gap-4">
-                  <span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span>
-                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm shrink-0">
-                    View Deal
+                  ${item.isLive 
+                    ? `<div class="text-right"><span class="text-sm sm:text-base font-black text-slate-900">$${item.price}</span><span class="block text-[9px] text-slate-600 font-semibold">+taxes</span></div>` 
+                    : `<span class="text-xs font-bold text-slate-600">Check rates</span>`
+                  }
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="${item.isLive ? 'bg-[#00a698] hover:bg-[#008f83] text-white' : 'bg-white hover:bg-slate-50 text-slate-900 border border-slate-900'} font-extrabold text-xs px-4 py-2 rounded-2xl transition shadow-xs shrink-0">
+                    View deal
                   </a>
                 </div>
               </div>
