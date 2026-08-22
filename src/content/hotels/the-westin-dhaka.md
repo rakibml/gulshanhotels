@@ -172,6 +172,23 @@ amenities:
         <!-- Spa Water Ripples -->
         <path d="M2 22H22" />
       </svg>
+categorized_amenities:
+  - category_name: Parking
+    category_icon: ''
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Rounded square background boundary -->
+        <rect x="3" y="3" width="18" height="18" rx="4" ry="4" />
+        <!-- The letter P -->
+        <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+      </svg>
+    items:
+      - name: Valet parking
+        badge: ''
+      - name: Parking garage
+        badge: ''
+      - name: Accessible parking
+        badge: Free
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
@@ -1270,8 +1287,8 @@ reviews: []
 faqs_notice: ''
 enable_faqs: true
 faqs: []
-image_alt: ''
 enable_rates: true
+image_alt: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
