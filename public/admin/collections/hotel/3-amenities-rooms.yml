@@ -1,22 +1,21 @@
 - label: "3. AMENITIES & ROOM TYPES"
   name: "amenities_notice"
   widget: "instructions"
-  description: "Controls top amenities grid, 28+ amenities modal list, and Agoda-style room categories with room photo sliders, custom icons, checklists, and SEO alt text."
+  description: "Controls top quick amenities grid, Booking.com-style categorized amenities modal, and room types."
   required: false
 
-# --- Section Show/Hide Toggle ---
 - label: "Show Amenities & Rooms Section?"
   name: "enable_amenities"
   widget: "boolean"
   default: true
 
-# --- Left Column: Amenities Control ---
 - label: "Amenities Section Title"
   name: "amenities_title"
   widget: "string"
   default: "Amenities & Services"
 
-- label: "Top Amenities List (Displayed on Grid)"
+# --- TOP 9 GRID AMENITIES (DISPLAYED ON MAIN PAGE GRID) ---
+- label: "Top 9 Quick Grid Amenities (Displayed on Main Page)"
   name: "amenities"
   widget: "list"
   required: false
@@ -38,7 +37,7 @@
         - { label: "🍽️ Restaurant / Dining", value: "restaurant" }
         - { label: "📶 Free Wi-Fi", value: "wifi" }
         - { label: "🚗 Free Parking", value: "parking" }
-        - { label: "✈️ Airport Transfer / Shuttle", value: "shuttle" }
+        - { label: "✈️ Airport Shuttle", value: "shuttle" }
         - { label: "👔 Meeting & Events", value: "meeting" }
         - { label: "🛎️ 24/7 Room Service", value: "room_service" }
         - { label: "🧺 Laundry Service", value: "laundry" }
@@ -48,7 +47,57 @@
       widget: "text"
       required: false
 
-# --- Right Column: Room Types Control ---
+# --- BOOKING.COM STYLE CATEGORIZED AMENITIES FOR POPUP MODAL ---
+- label: "Categorized Amenities (Booking.com Style Popup Modal List)"
+  name: "categorized_amenities"
+  widget: "list"
+  required: false
+  hint: "Add categories (e.g. Spa & Wellness, Business Facilities, Bathroom) with sub-items and optional tags (e.g. Free!, Additional charge)!"
+  fields:
+    - label: "Category Title (e.g. Spa & Wellness, Cleaning Services, Private bathroom)"
+      name: "category_name"
+      widget: "string"
+
+    - label: "Category Icon Preset"
+      name: "category_icon"
+      widget: "select"
+      default: "spa"
+      required: false
+      options:
+        - { label: "🧖 Spa & Wellness", value: "spa" }
+        - { label: "🏊 Outdoor Swimming Pool", value: "pool" }
+        - { label: "🚿 Bathroom & Toiletries", value: "bath" }
+        - { label: "🧺 Cleaning & Laundry Services", value: "laundry" }
+        - { label: "👔 Business Facilities & Meetings", value: "meeting" }
+        - { label: "🍳 Kitchen & Dining", value: "restaurant" }
+        - { label: "🏙️ View & Balcony", value: "view" }
+        - { label: "❄️ Air Conditioning & Climate", value: "ac" }
+        - { label: "📶 Internet & Wi-Fi", value: "wifi" }
+        - { label: "🚗 Parking & Transport", value: "parking" }
+        - { label: "🔒 Safety & Security", value: "safe" }
+        - { label: "🛎️ Front Desk Services", value: "room_service" }
+
+    - label: "Or Paste Custom Category SVG Icon Code (Optional)"
+      name: "custom_svg"
+      widget: "text"
+      required: false
+
+    - label: "Sub-items List Under This Category"
+      name: "items"
+      widget: "list"
+      required: false
+      fields:
+        - label: "Sub-item Name (e.g. Full-body massage, Daily housekeeping, City view)"
+          name: "name"
+          widget: "string"
+
+        - label: "Optional Badge Tag (e.g. Free!, Additional charge)"
+          name: "badge"
+          widget: "string"
+          required: false
+          hint: "e.g. 'Free!' or 'Additional charge'"
+
+# --- ROOM TYPES ---
 - label: "Room Types Section Title"
   name: "rooms_title"
   widget: "string"
@@ -95,13 +144,12 @@
       name: "image"
       widget: "image"
 
-    - label: "Room Image SEO Alt Text (Custom Keywords)"
+    - label: "Room Image SEO Alt Text"
       name: "image_alt"
       widget: "string"
       required: false
-      hint: "e.g. 'Deluxe King Room Interior View at The Westin Dhaka'"
 
-    - label: "Room Multiple Photos Gallery (For Card Slider & Modal)"
+    - label: "Room Multiple Photos Gallery"
       name: "photos"
       widget: "list"
       required: false
@@ -109,7 +157,7 @@
         label: "Photo"
         widget: "image"
 
-    - label: "Room Badges (e.g. Recommended, Preferred Choice)"
+    - label: "Room Badges"
       name: "badges"
       widget: "list"
       required: false
@@ -117,12 +165,12 @@
         label: "Badge Text"
         widget: "string"
 
-    - label: "Room Quick Checklist Amenities (With Custom Icons)"
+    - label: "Room Quick Checklist Amenities"
       name: "checklist"
       widget: "list"
       required: false
       fields:
-        - label: "Feature Name (e.g. City view, Air conditioning, Private bathroom)"
+        - label: "Feature Name"
           name: "name"
           widget: "string"
 
@@ -135,14 +183,14 @@
             - { label: "✔ Default Checkmark", value: "checkmark" }
             - { label: "🏙️ City View", value: "view" }
             - { label: "❄️ Air Conditioning", value: "ac" }
-            - { label: "🚿 Private Bathroom / Shower", value: "bath" }
-            - { label: "☕ Electric Kettle / Coffee Maker", value: "kettle" }
+            - { label: "🚿 Private Bathroom", value: "bath" }
+            - { label: "☕ Electric Kettle", value: "kettle" }
             - { label: "💇 Hair Dryer", value: "dryer" }
             - { label: "🔒 In-Room Safe", value: "safe" }
             - { label: "💻 Work Desk", value: "desk" }
             - { label: "📶 High-Speed Wi-Fi", value: "wifi" }
 
-        - label: "Or Paste Custom Raw SVG Icon Code (Optional)"
+        - label: "Custom SVG Icon"
           name: "custom_svg"
           widget: "text"
           required: false
