@@ -183,6 +183,7 @@ amenities:
         <!-- Spa Water Ripples -->
         <path d="M2 22H22" />
       </svg>
+categorized_amenities: []
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
@@ -1272,17 +1273,21 @@ rooms:
       - City view,
       - City view,
 location_notice: ''
-enable_nearby: true
-nearby_places: []
+map_query: ''
+nearby_places:
+  - name: Gulshan Youth Club
+    distance: 900 m
 reviews_notice: ''
-rating: '5'
-reviewsCount: '4'
 reviews: []
 faqs_notice: ''
-enable_faqs: true
+faqs_title: Travelers are asking
 faqs: []
-image_alt: ''
 enable_rates: true
+image_alt: ''
+enable_faqs: true
+enable_nearby: true
+rating: '5'
+reviewsCount: '4'
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
