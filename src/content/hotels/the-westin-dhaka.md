@@ -22,7 +22,7 @@ checkOut: 12:00 PM
 powerBackup: 24/7 Generator
 smokingPolicy: Non-Smoking
 booking_channels:
-  - provider_name: Official Site
+  - provider_name: Whatsapp
     price: $55
     show_price: true
     button_text: Book Now ➔
