@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Agoda-Style Stars, Hash Back-Button Safe)
+// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Fail-Safe Glob Fallback, Agoda-Style Stars)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -10,6 +10,8 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelRating = data.rating || "4.8";
+const defaultReviewsCount = data.reviewsCount || data.reviews_count || "125";
 
 // Default Fallback Guest Reviews
 const defaultReviews = [
@@ -39,41 +41,61 @@ const defaultReviews = [
   }
 ];
 
-// 1. FETCH APPROVED REVIEWS FROM GITHUB CONTENT COLLECTION (src/content/reviews/)
-let approvedCmsReviews: any[] = [];
-try {
-  const allCmsReviews = await getCollection('reviews');
-  
-  approvedCmsReviews = allCmsReviews
-    .filter(r => {
-      // Flexible Approved Status Checking (Handles boolean true, string "true", etc.)
-      const isApproved = r.data.approved === true || String(r.data.approved).toLowerCase() === 'true';
-      
-      // Case-Insensitive & Trimmed Hotel Name Matching
-      const currentHotelName = hotelTitle.trim().toLowerCase();
-      const reviewHotelName = (r.data.hotel || '').trim().toLowerCase();
-      const isMatch = !reviewHotelName || reviewHotelName === currentHotelName || currentHotelName.includes(reviewHotelName) || reviewHotelName.includes(currentHotelName);
+// DOUBLE-LAYER FETCHING: getCollection + import.meta.glob Fallback
+let rawReviewsList: any[] = [];
 
-      return isApproved && isMatch;
-    })
-    .map(r => ({
-      name: r.data.name || 'Verified Guest',
-      date: r.data.date || 'Aug 2026',
-      rating: Number(r.data.rating) || 5,
-      comment: r.data.comment || ''
-    }));
+// Layer 1: Astro getCollection
+try {
+  const cmsReviews = await getCollection('reviews');
+  if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
+    rawReviewsList = cmsReviews.map(r => r.data || {});
+  }
 } catch (e) {
-  approvedCmsReviews = [];
+  console.warn('getCollection(reviews) bypassed, trying glob scanner...', e);
 }
+
+// Layer 2: Direct Eager Glob Scanner Fallback (Guarantees zero Zod Schema blocking)
+if (rawReviewsList.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
+    rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
+  } catch (e) {
+    console.warn('Glob scanner error:', e);
+  }
+}
+
+// Filter Approved Reviews for this Hotel
+const currentHotelName = hotelTitle.trim().toLowerCase();
+
+const approvedCmsReviews = rawReviewsList
+  .filter(item => {
+    if (!item) return false;
+    
+    // Flexible Approved Status Check (boolean true or string "true")
+    const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+    
+    // Flexible Case-Insensitive Hotel Name Match
+    const reviewHotelName = (item.hotel || '').trim().toLowerCase();
+    const isMatch = !reviewHotelName || 
+      reviewHotelName === currentHotelName || 
+      currentHotelName.includes(reviewHotelName) || 
+      reviewHotelName.includes(currentHotelName);
+
+    return isApproved && isMatch;
+  })
+  .map(item => ({
+    name: item.name || 'Verified Guest',
+    date: item.date || 'Aug 2026',
+    rating: Number(item.rating) || 5,
+    comment: item.comment || ''
+  }));
 
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const approvedReviews = approvedCmsReviews.length > 0 
   ? approvedCmsReviews 
   : (hotelEmbeddedReviews.length > 0 ? hotelEmbeddedReviews : defaultReviews);
 
-// Dynamic Rating & Count Calculation
-const reviewsCount = data.reviewsCount || data.reviews_count || String(approvedReviews.length);
-const hotelRating = data.rating || "4.8";
+const reviewsCount = approvedCmsReviews.length > 0 ? String(approvedCmsReviews.length) : defaultReviewsCount;
 
 // GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = {
@@ -300,7 +322,7 @@ const googleRatingSchema = {
       });
     }
 
-    // Form Submission
+    // Form Submission to Worker
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
