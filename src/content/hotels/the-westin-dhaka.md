@@ -26,7 +26,7 @@ booking_channels:
     price: $55
     show_price: true
     button_text: Book Now ➔
-    button_url: '01945529869'
+    button_url: '+8801996322761'
     badge: Recommended
     icon_preset: direct
     custom_svg: |-
