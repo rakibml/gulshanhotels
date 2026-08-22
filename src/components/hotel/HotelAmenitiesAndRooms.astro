@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAmenitiesAndRooms.astro (100% Vector SVG Icons, Agoda Room Cards, Back-Button Safe)
+// src/components/hotel/HotelAmenitiesAndRooms.astro (Booking.com Style Categorized Amenities Modal & Agoda Room Cards)
 interface Props {
   hotel: any;
 }
@@ -11,37 +11,42 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 
 // Admin-Safe Defensive Data Fetching
 const amenitiesList = Array.isArray(data.amenities) ? data.amenities : [];
-const totalAmenitiesCount = amenitiesList.length;
+const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
-// Top 9 Amenities for Main Grid (3x3 on Mobile)
+// Calculate total count across categories or flat list
+const totalAmenitiesCount = categorizedList.length > 0
+  ? categorizedList.reduce((acc: number, cat: any) => acc + (Array.isArray(cat.items) ? cat.items.length : 0), 0)
+  : amenitiesList.length;
+
+// Top 9 Amenities for Main Page Grid (3x3)
 const top9Amenities = amenitiesList.slice(0, 9);
 
-const showAmenities = data.enable_amenities !== false && totalAmenitiesCount > 0;
-const showSeeMoreBtn = totalAmenitiesCount > 9;
+const showAmenities = data.enable_amenities !== false && (totalAmenitiesCount > 0 || top9Amenities.length > 0);
+const showSeeMoreBtn = totalAmenitiesCount > 0;
 
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 const showRooms = roomsList.length > 0;
 
-// Pre-Built Vector SVG Icon Dictionary (Including Price, Size, Guest, Bed, Laundry, Safe & Desk)
+// Pre-Built Vector SVG Icon Dictionary
 const iconMap: Record<string, string> = {
-  pool: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
-  spa: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
-  gym: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
-  restaurant: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
-  wifi: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
-  parking: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9-2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>`,
-  shuttle: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
-  meeting: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>`,
-  room_service: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
-  laundry: `<svg class="w-5 h-5 fill-slate-700" width="20" height="20" viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zm-6.5 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`,
-  checkmark: `<svg class="w-4 h-4 fill-emerald-600" width="16" height="16" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
-  view: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
-  ac: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
-  bath: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 13V4.83C20 3.27 18.73 2 17.17 2c-.75 0-1.47.3-2 .83l-1.25 1.25c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l.59-.59c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-1.5 1.5c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.5-1.5c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-.59.59c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.25-1.25c.53-.53.83-1.25.83-2V13h-2zm1 2H3c-.55 0-1 .45-1 1v2c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-2c0-.55-.45-1-1-1z"/></svg>`,
-  kettle: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H4V5h16v10z"/></svg>`,
-  dryer: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`,
-  safe: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
-  desk: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" width="16" height="16" viewBox="0 0 24 24"><path d="M20 18v-2H4v2H2v-6c0-1.1.9-2 2-2h16c1.1 0 2-.9 2-2v6h-2zM4 6h16v2H4V6z"/></svg>`
+  pool: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
+  spa: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
+  gym: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
+  restaurant: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
+  wifi: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
+  parking: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9-2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>`,
+  shuttle: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
+  meeting: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>`,
+  room_service: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`,
+  laundry: `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zm-6.5 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`,
+  checkmark: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
+  view: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
+  ac: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 10H5V5h14v8z"/></svg>`,
+  bath: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M20 13V4.83C20 3.27 18.73 2 17.17 2c-.75 0-1.47.3-2 .83l-1.25 1.25c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l.59-.59c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-1.5 1.5c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.5-1.5c.2-.2.51-.2.71 0 .2.2.2.51 0 .71l-.59.59c-.39.39-.39 1.02 0 1.41l.09.09c.39.39 1.02.39 1.41 0l1.25-1.25c.53-.53.83-1.25.83-2V13h-2zm1 2H3c-.55 0-1 .45-1 1v2c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-2c0-.55-.45-1-1-1z"/></svg>`,
+  kettle: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12H4V5h16v10z"/></svg>`,
+  dryer: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M12 3C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`,
+  safe: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`,
+  desk: `<svg class="w-5 h-5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M20 18v-2H4v2H2v-6c0-1.1.9-2 2-2h16c1.1 0 2-.9 2-2v6h-2zM4 6h16v2H4V6z"/></svg>`
 };
 ---
 
@@ -274,28 +279,84 @@ const iconMap: Record<string, string> = {
   </section>
 )}
 
-<!-- POPUP MODAL 1: ALL AMENITIES -->
-<div id="allAmenitiesModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 space-y-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+<!-- POPUP MODAL 1: ALL AMENITIES (BOOKING.COM CATEGORIZED STYLE) -->
+<div id="allAmenitiesModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6">
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-5xl text-slate-900 space-y-6 shadow-2xl relative max-h-[88vh] overflow-y-auto text-left">
+    
+    <!-- Modal Header -->
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
       <div>
-        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Complete List ({totalAmenitiesCount})</span>
-        <h3 class="text-2xl font-black font-serif text-slate-900">All Hotel Amenities & Services</h3>
+        <span class="text-[10px] font-black uppercase text-emerald-800 tracking-widest block">Facilities & Services ({totalAmenitiesCount})</span>
+        <h3 class="text-2xl font-black font-serif text-slate-900">Facilities of {hotelTitle}</h3>
       </div>
-      <button id="closeAmenitiesModalBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
+      <button id="closeAmenitiesModalBtn" aria-label="Close Modal" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-800">
-      {amenitiesList.map((item: any) => {
-        const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
-        return (
-          <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold">
-            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            <span>{nameStr}</span>
-          </div>
-        );
-      })}
-    </div>
+    <!-- BOOKING.COM STYLE CATEGORIZED GRID (3 COLUMNS ON DESKTOP) -->
+    {categorizedList.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
+        {categorizedList.map((cat: any) => {
+          const catName = cat.category_name || "Facility";
+          const catIcon = cat.category_icon || "checkmark";
+          const catSvg = cat.custom_svg || "";
+          const items = Array.isArray(cat.items) ? cat.items : [];
+
+          return (
+            <div class="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-200/80">
+              <!-- Category Header with Icon -->
+              <div class="flex items-center gap-2.5 border-b border-slate-200 pb-2">
+                <div class="w-6 h-6 shrink-0 flex items-center justify-center text-slate-800 [&_svg]:w-full [&_svg]:h-full">
+                  {catSvg ? (
+                    <Fragment set:html={catSvg} />
+                  ) : (
+                    <Fragment set:html={iconMap[catIcon] || iconMap.checkmark} />
+                  )}
+                </div>
+                <h4 class="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">
+                  {catName}
+                </h4>
+              </div>
+
+              <!-- Sub-items List with Checkmarks and Badges -->
+              <div class="space-y-2 pt-1">
+                {items.map((sub: any) => {
+                  const itemName = typeof sub === 'string' ? sub : (sub?.name || 'Facility');
+                  const itemBadge = typeof sub === 'object' ? sub?.badge : '';
+
+                  return (
+                    <div class="flex items-center justify-between text-xs sm:text-sm text-slate-700">
+                      <div class="flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <span class="font-medium leading-snug">{itemName}</span>
+                      </div>
+                      {itemBadge && (
+                        <span class={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ml-2 ${itemBadge.toLowerCase().includes('free') ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-slate-200 text-slate-700'}`}>
+                          {itemBadge}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <!-- Fallback Flat Grid if categorized_amenities is not added -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-800">
+        {amenitiesList.map((item: any) => {
+          const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
+          return (
+            <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 font-bold">
+              <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span>{nameStr}</span>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
   </div>
 </div>
 
