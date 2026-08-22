@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Dynamic Auto-Calculated Ratings & Back-Button Safe)
+// src/components/hotel/HotelReviews.astro (100% Dynamic CMS Reviews - ZERO DEMO REVIEWS)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -11,46 +11,20 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 
-// Default Fallback Guest Reviews
-const defaultReviews = [
-  {
-    name: "Ismat F",
-    date: "Aug 2026",
-    rating: 5,
-    comment: "Excellent location in Gulshan 2, very close to US Embassy & IVAC visa centers. Staff is polite and rooms are sparkling clean."
-  },
-  {
-    name: "Fahimur R",
-    date: "Aug 2026",
-    rating: 5,
-    comment: "Very nice hotel with 24/7 diplomatic security. The food quality at the buffet and rooftop lounge ambience are top notch."
-  },
-  {
-    name: "Kaium Ali A",
-    date: "Aug 2026",
-    rating: 5,
-    comment: "The atmosphere, high-speed Wi-Fi, and corporate meeting facilities are wonderful. Highly recommended for international delegates."
-  },
-  {
-    name: "Tanvir H",
-    date: "Aug 2026",
-    rating: 5,
-    comment: "Great experience staying here. The check-in was smooth, airport shuttle was on time, and breakfast spread was amazing."
-  }
-];
-
 // Double-Layer Fetching: getCollection + import.meta.glob Fallback
 let rawReviewsList: any[] = [];
 
+// Layer 1: Astro getCollection
 try {
   const cmsReviews = await getCollection('reviews');
   if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
     rawReviewsList = cmsReviews.map(r => r.data || {});
   }
 } catch (e) {
-  console.warn('getCollection(reviews) bypassed, using glob scanner...', e);
+  console.warn('getCollection(reviews) bypassed, trying glob scanner...', e);
 }
 
+// Layer 2: Direct Eager Glob Scanner Fallback
 if (rawReviewsList.length === 0) {
   try {
     const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
@@ -60,13 +34,17 @@ if (rawReviewsList.length === 0) {
   }
 }
 
-// Filter Approved Reviews for this Hotel
+// Filter Approved Reviews ONLY for this Hotel
 const currentHotelName = hotelTitle.trim().toLowerCase();
 
 const approvedCmsReviews = rawReviewsList
   .filter(item => {
     if (!item) return false;
+    
+    // Flexible Approved Status Check (boolean true or string "true")
     const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+    
+    // Flexible Case-Insensitive Hotel Name Match
     const reviewHotelName = (item.hotel || '').trim().toLowerCase();
     const isMatch = !reviewHotelName || 
       reviewHotelName === currentHotelName || 
@@ -77,23 +55,21 @@ const approvedCmsReviews = rawReviewsList
   })
   .map(item => ({
     name: item.name || 'Verified Guest',
-    date: item.date || 'Aug 2026',
+    date: item.date || 'Recent',
     rating: Number(item.rating) || 5,
     comment: item.comment || ''
   }));
 
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const approvedReviews = approvedCmsReviews.length > 0 
-  ? approvedCmsReviews 
-  : (hotelEmbeddedReviews.length > 0 ? hotelEmbeddedReviews : defaultReviews);
+const approvedReviews = approvedCmsReviews.length > 0 ? approvedCmsReviews : hotelEmbeddedReviews;
 
 // REALTIME AUTOMATIC AVERAGE RATING & COUNT CALCULATION
 const reviewsCount = approvedReviews.length;
 const totalStarsSum = approvedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
 const hotelRating = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
 
-// GOOGLE RICH SNIPPET STARS SCHEMA
-const googleRatingSchema = {
+// GOOGLE RICH SNIPPET STARS SCHEMA (Rendered ONLY if approved reviews exist)
+const googleRatingSchema = reviewsCount > 0 ? {
   "@context": "https://schema.org",
   "@type": "Hotel",
   "name": hotelTitle,
@@ -115,11 +91,13 @@ const googleRatingSchema = {
       "bestRating": "5"
     }
   }))
-};
+} : null;
 ---
 
 <!-- GOOGLE RICH SNIPPET SCHEMA FOR SERP GOLDEN STARS -->
-<script type="application/ld+json" set:html={JSON.stringify(googleRatingSchema)} />
+{googleRatingSchema && (
+  <script type="application/ld+json" set:html={JSON.stringify(googleRatingSchema)} />
+)}
 
 <!-- GUEST REVIEWS SECTION -->
 <section id="guest-reviews" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
@@ -137,63 +115,87 @@ const googleRatingSchema = {
       <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
       <div class="flex items-center gap-3">
         
-        <!-- REALTIME AUTO-CALCULATED SCORE SUMMARY -->
-        <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
-          <span class="font-black text-slate-900 text-base">{hotelRating}</span>
-          <div class="flex items-center text-amber-500 text-xs tracking-wider">
-            ★ ★ ★ ★ ★
+        <!-- Score Summary (Shown ONLY if reviews exist) -->
+        {reviewsCount > 0 && (
+          <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="font-black text-slate-900 text-base">{hotelRating}</span>
+            <div class="flex items-center text-amber-500 text-xs tracking-wider">
+              ★ ★ ★ ★ ★
+            </div>
+            <span class="text-slate-500 font-normal">({reviewsCount} reviews)</span>
           </div>
-          <span class="text-slate-500 font-normal">({reviewsCount} reviews)</span>
-        </div>
+        )}
 
         <!-- Carousel Navigation Arrows -->
-        <div class="flex items-center gap-1.5">
-          <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
-            ❮
-          </button>
-          <button id="reviewNextBtn" aria-label="Next Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
-            ❯
-          </button>
-        </div>
+        {reviewsCount > 1 && (
+          <div class="flex items-center gap-1.5">
+            <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
+              ❮
+            </button>
+            <button id="reviewNextBtn" aria-label="Next Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
+              ❯
+            </button>
+          </div>
+        )}
 
         <!-- Clean Write Review Button -->
         <button 
           id="openWriteReviewBtn" 
-          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
+          class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
         >
           Write a Review
         </button>
       </div>
     </div>
 
-    <!-- REVIEWS CAROUSEL TRACK -->
-    <div class="relative group">
-      <div id="reviewsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        
-        {approvedReviews.map((rev: any) => {
-          const ratingVal = Math.min(Math.max(Number(rev.rating) || 5, 1), 5);
-          return (
-            <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
-              <div class="space-y-2 text-left">
-                <div class="flex items-center justify-between">
-                  <!-- Dynamic Star Rating -->
-                  <div class="flex items-center text-amber-500 text-xs tracking-wider">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span>{i < ratingVal ? '★' : '☆'}</span>
-                    ))}
+    <!-- REVIEWS CAROUSEL TRACK OR EMPTY PLACEHOLDER -->
+    {reviewsCount > 0 ? (
+      <div class="relative group">
+        <div id="reviewsCarouselTrack" class="flex gap-4 overflow-x-auto scroll-smooth py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          
+          {approvedReviews.map((rev: any) => {
+            const ratingVal = Math.min(Math.max(Number(rev.rating) || 5, 1), 5);
+            return (
+              <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
+                <div class="space-y-2 text-left">
+                  <div class="flex items-center justify-between">
+                    <!-- Dynamic Star Rating -->
+                    <div class="flex items-center text-amber-500 text-xs tracking-wider">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span>{i < ratingVal ? '★' : '☆'}</span>
+                      ))}
+                    </div>
+                    <span class="text-[11px] font-bold text-slate-500">{rev.name || 'Verified Guest'} • {rev.date || 'Recent'}</span>
                   </div>
-                  <span class="text-[11px] font-bold text-slate-500">{rev.name || 'Verified Guest'} • {rev.date || 'Recent'}</span>
+                  <p class="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-4 font-normal">
+                    "{rev.comment || 'Great experience staying at this hotel.'}"
+                  </p>
                 </div>
-                <p class="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-4 font-normal">
-                  "{rev.comment || 'Great experience staying at this hotel.'}"
-                </p>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
+        </div>
       </div>
-    </div>
+    ) : (
+      <!-- EMPTY STATE WHEN NO APPROVED REVIEWS EXIST YET -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center text-2xl mx-auto shadow-2xs">
+          💬
+        </div>
+        <h3 class="text-lg font-black text-slate-900">No guest reviews published yet</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+          Have you stayed at {hotelTitle}? Be the first guest to share your experience and write a review!
+        </p>
+        <div class="pt-2">
+          <button 
+            class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl shadow-md transition cursor-pointer"
+          >
+            Be the First to Write a Review ➔
+          </button>
+        </div>
+      </div>
+    )}
 
   </div>
 </section>
@@ -240,7 +242,7 @@ const googleRatingSchema = {
 
     <!-- Success Message Box -->
     <div id="reviewSuccessMsg" class="hidden p-4 bg-emerald-50 border border-emerald-300 rounded-2xl text-emerald-900 text-xs font-bold text-center leading-relaxed">
-      Thank you! Your review has been submitted successfully and will be published live as soon as.
+      Thank you! Your review has been submitted successfully and will be published live as soon as admin approves it.
     </div>
 
   </div>
@@ -249,6 +251,7 @@ const googleRatingSchema = {
 <!-- CLIENT SCRIPT WITH BACK-BUTTON SAFETY & CAROUSEL -->
 <script is:inline>
   const initHotelReviews = () => {
+    // 1. Carousel Arrow Controls
     const track = document.getElementById('reviewsCarouselTrack');
     const prevBtn = document.getElementById('reviewPrevBtn');
     const nextBtn = document.getElementById('reviewNextBtn');
@@ -263,8 +266,8 @@ const googleRatingSchema = {
       });
     }
 
+    // 2. Review Modal Script
     const modal = document.getElementById('writeReviewModal');
-    const openBtn = document.getElementById('openWriteReviewBtn');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
     const form = document.getElementById('submitReviewForm');
     const successMsg = document.getElementById('reviewSuccessMsg');
@@ -296,6 +299,7 @@ const googleRatingSchema = {
       }
     }
 
+    // Back Button Safety
     window.addEventListener('hashchange', () => {
       if (window.location.hash !== '#write-review') {
         hideModalDOM();
@@ -308,7 +312,11 @@ const googleRatingSchema = {
       openReviewModal();
     }
 
-    if (openBtn) openBtn.addEventListener('click', openReviewModal);
+    // Bind triggers
+    document.querySelectorAll('.open-write-review-trigger').forEach(btn => {
+      btn.addEventListener('click', openReviewModal);
+    });
+
     if (closeBtn) closeBtn.addEventListener('click', closeReviewModalByUI);
 
     if (modal) {
