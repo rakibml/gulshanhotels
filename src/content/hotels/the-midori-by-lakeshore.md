@@ -1277,6 +1277,34 @@ map_query: ''
 nearby_places:
   - name: Gulshan Youth Club
     distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
+  - name: Gulshan Youth Club
+    distance: 900 m
 reviews_notice: ''
 reviews: []
 faqs_notice: ''
