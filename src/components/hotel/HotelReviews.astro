@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Fail-Safe Glob Fallback, Agoda-Style Stars)
+// src/components/hotel/HotelReviews.astro (100% Dynamic Auto-Calculated Ratings & Back-Button Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -10,8 +10,6 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelRating = data.rating || "4.8";
-const defaultReviewsCount = data.reviewsCount || data.reviews_count || "125";
 
 // Default Fallback Guest Reviews
 const defaultReviews = [
@@ -41,20 +39,18 @@ const defaultReviews = [
   }
 ];
 
-// DOUBLE-LAYER FETCHING: getCollection + import.meta.glob Fallback
+// Double-Layer Fetching: getCollection + import.meta.glob Fallback
 let rawReviewsList: any[] = [];
 
-// Layer 1: Astro getCollection
 try {
   const cmsReviews = await getCollection('reviews');
   if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
     rawReviewsList = cmsReviews.map(r => r.data || {});
   }
 } catch (e) {
-  console.warn('getCollection(reviews) bypassed, trying glob scanner...', e);
+  console.warn('getCollection(reviews) bypassed, using glob scanner...', e);
 }
 
-// Layer 2: Direct Eager Glob Scanner Fallback (Guarantees zero Zod Schema blocking)
 if (rawReviewsList.length === 0) {
   try {
     const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
@@ -70,11 +66,7 @@ const currentHotelName = hotelTitle.trim().toLowerCase();
 const approvedCmsReviews = rawReviewsList
   .filter(item => {
     if (!item) return false;
-    
-    // Flexible Approved Status Check (boolean true or string "true")
     const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
-    
-    // Flexible Case-Insensitive Hotel Name Match
     const reviewHotelName = (item.hotel || '').trim().toLowerCase();
     const isMatch = !reviewHotelName || 
       reviewHotelName === currentHotelName || 
@@ -95,7 +87,10 @@ const approvedReviews = approvedCmsReviews.length > 0
   ? approvedCmsReviews 
   : (hotelEmbeddedReviews.length > 0 ? hotelEmbeddedReviews : defaultReviews);
 
-const reviewsCount = approvedCmsReviews.length > 0 ? String(approvedCmsReviews.length) : defaultReviewsCount;
+// REALTIME AUTOMATIC AVERAGE RATING & COUNT CALCULATION
+const reviewsCount = approvedReviews.length;
+const totalStarsSum = approvedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+const hotelRating = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
 
 // GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = {
@@ -142,7 +137,7 @@ const googleRatingSchema = {
       <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
       <div class="flex items-center gap-3">
         
-        <!-- Score Summary -->
+        <!-- REALTIME AUTO-CALCULATED SCORE SUMMARY -->
         <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
           <span class="font-black text-slate-900 text-base">{hotelRating}</span>
           <div class="flex items-center text-amber-500 text-xs tracking-wider">
@@ -322,7 +317,7 @@ const googleRatingSchema = {
       });
     }
 
-    // Form Submission to Worker
+    // Form Submission
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
