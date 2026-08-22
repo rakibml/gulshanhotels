@@ -4,7 +4,7 @@ title: The Midori by Lakeshore
 title_style: style_5
 category: 5-Star Luxury Stay
 location: Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
-description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+description: ''
 image: https://picsum.photos/id/254/1920/1280.webp
 gallery:
   - /images/hotels/hero-gulshan.jpg.webp
@@ -21,7 +21,7 @@ checkIn: 2:00 PM
 checkOut: 12:00 PM
 powerBackup: 24/7 Generator
 smokingPolicy: Non-Smoking
-enable_rates: true
+booking_channels: []
 officialSite: https://www.youtube.com/watch?v=R1MyDv9d5IA
 whatsapp: ''
 phone: ''
@@ -161,6 +161,7 @@ amenities:
         <!-- Spa Water Ripples -->
         <path d="M2 22H22" />
       </svg>
+categorized_amenities: []
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms:
@@ -1253,12 +1254,14 @@ location_notice: ''
 enable_nearby: true
 nearby_places: []
 reviews_notice: ''
-rating: null
-reviewsCount: null
+reviews: []
 faqs_notice: ''
 enable_faqs: true
 faqs: []
 image_alt: ''
+enable_rates: true
+rating: null
+reviewsCount: null
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
