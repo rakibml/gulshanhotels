@@ -39,140 +39,56 @@ phone: ''
 amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
-amenities:
-  - name: Spa & Wellness
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: Wellnes
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: Wellnes
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: Wellnes
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: Wellnes
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: Wellnes
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: fdsdsa
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: dsfsf
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: dsdsfdsaf
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: dfadsfds
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
-  - name: dsfads
-    icon: checkmark
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <!-- Lotus Flower (Petals) -->
-        <path d="M12 22C12 22 7 16 7 12C7 9.2 9.2 7 12 7C14.8 7 17 9.2 17 12C17 16 12 22 12 22Z" />
-        <path d="M12 22C9 21 4 17 4 13C4 11 5.5 9 7.5 9C9.5 9 11 11 12 13" />
-        <path d="M12 22C15 21 20 17 20 13C20 11 18.5 9 16.5 9C14.5 9 13 11 12 13" />
-        
-        <!-- Spa Water Ripples -->
-        <path d="M2 22H22" />
-      </svg>
+amenities: []
 categorized_amenities:
+  - category_name: Parking
+    category_icon: ''
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Rounded square background boundary -->
+        <rect x="3" y="3" width="18" height="18" rx="4" ry="4" />
+        <!-- The letter P -->
+        <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+      </svg>
+    items:
+      - name: Valet parking
+        badge: ''
+      - name: Parking garage
+        badge: ''
+      - name: Accessible parking
+        badge: Free
+  - category_name: Parking
+    category_icon: ''
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Rounded square background boundary -->
+        <rect x="3" y="3" width="18" height="18" rx="4" ry="4" />
+        <!-- The letter P -->
+        <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+      </svg>
+    items:
+      - name: Valet parking
+        badge: ''
+      - name: Parking garage
+        badge: ''
+      - name: Accessible parking
+        badge: Free
+  - category_name: Parking
+    category_icon: ''
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Rounded square background boundary -->
+        <rect x="3" y="3" width="18" height="18" rx="4" ry="4" />
+        <!-- The letter P -->
+        <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+      </svg>
+    items:
+      - name: Valet parking
+        badge: ''
+      - name: Parking garage
+        badge: ''
+      - name: Accessible parking
+        badge: Free
   - category_name: Parking
     category_icon: ''
     custom_svg: |-
