@@ -1256,10 +1256,24 @@ nearby_places: []
 reviews_notice: ''
 reviews: []
 faqs_notice: ''
-enable_faqs: true
-faqs: []
-image_alt: ''
+faqs_title: Travelers are asking
+faqs:
+  - question: adfdfdf afadsfasfdsffd
+    answer: |-
+      fdasfdsfdfadfdasfdasf f adf asfasfaddada dadsafa
+        ad
+       fda
+      s fdaf
+      adf
+      das f
+      dsf 
+      da
+       fda
+      sf 
+      dfdfadasfda
 enable_rates: true
+image_alt: ''
+enable_faqs: true
 rating: null
 reviewsCount: null
 seo_description: |-
