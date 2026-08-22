@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelFaqsSection.astro (Compact 4 FAQs + Read More Toggle)
+// src/components/hotel/HotelFaqsSection.astro (100% Dynamic CMS FAQs - ZERO DEMO QUESTIONS)
 interface Props {
   hotel: any;
 }
@@ -8,146 +8,136 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
+const sectionTitle = data.faqs_title || `FAQs about ${hotelTitle}`;
 
-// Booking.com Style Real-World FAQs
-const faqList = (data.faqs && data.faqs.length > 0) ? data.faqs : [
-  {
-    question: `What kind of breakfast is served at ${hotelTitle}?`,
-    answer: `Guests staying at ${hotelTitle} can enjoy a highly-rated breakfast during their stay. Breakfast option(s) include: Continental, Halal, Asian, American, Full English, À la carte, and Buffet.`
-  },
-  {
-    question: `Does ${hotelTitle} have a restaurant on site?`,
-    answer: `Yes, ${hotelTitle} features multiple on-site dining venues including fine dining restaurants, all-day multi-cuisine buffets, artisan bakeries, and rooftop lounges.`
-  },
-  {
-    question: `What type of room can I book at ${hotelTitle}?`,
-    answer: `Room options include Deluxe King Rooms, Deluxe Twin Rooms, Executive Suites, and Presidential Diplomatic Suites.`
-  },
-  {
-    question: `How far is ${hotelTitle} from the center of Dhaka and the airport?`,
-    answer: `Located in the heart of Gulshan, the hotel is approximately 10 km from central Dhaka and only 15-20 minutes from Hazrat Shahjalal International Airport (DAC) via the Dhaka Elevated Expressway.`
-  },
-  {
-    question: `Does ${hotelTitle} have a pool or hot tub?`,
-    answer: `Yes, this hotel features a rooftop swimming pool, wellness jacuzzi, and lounge area for staying guests.`
-  },
-  {
-    question: `What is there to do at ${hotelTitle}?`,
-    answer: `Guests can enjoy fitness center workouts, luxury spa massages, rooftop swimming, fine dining experiences, and nearby walking tours around Gulshan Lake.`
-  },
-  {
-    question: `What are the check-in and check-out times at ${hotelTitle}?`,
-    answer: `Standard check-in time begins at 2:00 PM and check-out is until 12:00 PM.`
-  },
-  {
-    question: `Is ${hotelTitle} popular with families and corporate guests?`,
-    answer: `Yes, ${hotelTitle} is very popular with families, foreign diplomats, and corporate business delegates due to its high-security diplomatic location and world-class amenities.`
-  }
-];
+// Fetch Dynamic FAQs from CMS (Zero Demo Questions)
+const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
+const showSection = data.enable_faqs !== false && rawFaqs.length > 0;
 
 // Slice Initial Top 4 FAQs for Compact View + Remaining Hidden
-const initialTop4 = faqList.slice(0, 4);
-const remainingFaqs = faqList.slice(4);
+const initialTop4 = rawFaqs.slice(0, 4);
+const remainingFaqs = rawFaqs.slice(4);
 
-// Dynamic Google FAQPage Schema Script for ALL FAQs
-const faqSchema = {
+// Dynamic Google FAQPage Schema Script for REAL FAQs ONLY
+const faqSchema = showSection ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": faqList.map((item: any) => ({
+  "mainEntity": rawFaqs.map((item: any) => ({
     "@type": "Question",
-    "name": item.question,
+    "name": typeof item === 'string' ? item : (item?.question || ''),
     "acceptedAnswer": {
       "@type": "Answer",
-      "text": item.answer
+      "text": typeof item === 'object' ? (item?.answer || '') : ''
     }
   }))
-};
+} : null;
 ---
 
 <!-- GOOGLE FAQ SCHEMA FOR SEARCH ENGINE RICH SNIPPETS -->
-<script type="application/ld+json" set:html={JSON.stringify(faqSchema)}></script>
+{faqSchema && (
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+)}
 
-<!-- 7TH COMPONENT: FAQS SECTION (COMPACT 4 FAQS + READ MORE TOGGLE) -->
-<section id="faqs" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
-  <div class="space-y-6">
-    
-    <!-- Section Header -->
-    <div class="border-b border-slate-200/80 pb-3 text-left">
-      <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
-        FAQs about {hotelTitle}
-      </h2>
-      <p class="text-xs text-slate-500 mt-1">Frequently asked questions by guests and travelers</p>
-    </div>
-
-    <!-- INITIAL TOP 4 FAQS GRID (2 COLUMNS ON DESKTOP, 4 CARDS ON MOBILE) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-      {initialTop4.map((faq: any) => (
-        <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
-          <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
-            <span class="pr-2">{faq.question}</span>
-            <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
-            {faq.answer}
-          </div>
-        </details>
-      ))}
-    </div>
-
-    <!-- REMAINING HIDDEN FAQS (EXPANDED ON READ MORE BUTTON CLICK) -->
-    {remainingFaqs.length > 0 && (
-      <div id="extraFaqsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-1">
-        {remainingFaqs.map((faq: any) => (
-          <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
-            <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
-              <span class="pr-2">{faq.question}</span>
-              <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
-              {faq.answer}
-            </div>
-          </details>
-        ))}
+<!-- 7TH COMPONENT: FAQS SECTION (RENDERED ONLY IF CMS FAQS EXIST) -->
+{showSection && (
+  <section id="faqs" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
+    <div class="space-y-6">
+      
+      <!-- Section Header -->
+      <div class="border-b border-slate-200/80 pb-3 text-left">
+        <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
+          {sectionTitle}
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Frequently asked questions by guests and travelers</p>
       </div>
-    )}
 
-    <!-- READ MORE FAQS BUTTON -->
-    {remainingFaqs.length > 0 && (
-      <div class="flex justify-center pt-2">
-        <button 
-          id="toggleFaqsBtn" 
-          class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-100/70 hover:bg-emerald-200/80 px-6 py-3 rounded-2xl border border-emerald-300/80 transition cursor-pointer flex items-center gap-2 shadow-sm"
-        >
-          <span id="toggleFaqsText">Read More FAQs ({remainingFaqs.length}+)</span>
-          <span id="toggleFaqsArrow">➔</span>
-        </button>
+      <!-- INITIAL TOP 4 FAQS GRID (2 COLUMNS ON DESKTOP) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        {initialTop4.map((faq: any) => {
+          const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
+          const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
+
+          return (
+            <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+              <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
+                <span class="pr-2">{qText}</span>
+                <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
+                {aText}
+              </div>
+            </details>
+          );
+        })}
       </div>
-    )}
 
-  </div>
-</section>
+      <!-- REMAINING HIDDEN FAQS (EXPANDED ON READ MORE BUTTON CLICK) -->
+      {remainingFaqs.length > 0 && (
+        <div id="extraFaqsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-1">
+          {remainingFaqs.map((faq: any) => {
+            const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
+            const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
+
+            return (
+              <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+                <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
+                  <span class="pr-2">{qText}</span>
+                  <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
+                  {aText}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      )}
+
+      <!-- READ MORE FAQS BUTTON -->
+      {remainingFaqs.length > 0 && (
+        <div class="flex justify-center pt-2">
+          <button 
+            id="toggleFaqsBtn" 
+            class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-100/70 hover:bg-emerald-200/80 px-6 py-3 rounded-2xl border border-emerald-300/80 transition cursor-pointer flex items-center gap-2 shadow-sm"
+          >
+            <span id="toggleFaqsText">Read More FAQs ({remainingFaqs.length}+)</span>
+            <span id="toggleFaqsArrow">➔</span>
+          </button>
+        </div>
+      )}
+
+    </div>
+  </section>
+)}
 
 <!-- CLIENT SCRIPT FOR READ MORE FAQS TOGGLE -->
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
+  const initHotelFaqs = () => {
     const toggleBtn = document.getElementById('toggleFaqsBtn');
     const container = document.getElementById('extraFaqsContainer');
     const toggleText = document.getElementById('toggleFaqsText');
     const toggleArrow = document.getElementById('toggleFaqsArrow');
 
     if (toggleBtn && container && toggleText && toggleArrow) {
-      toggleBtn.addEventListener('click', () => {
-        const isHidden = container.classList.contains('hidden');
-        if (isHidden) {
-          container.classList.remove('hidden');
-          toggleText.textContent = 'Show Less FAQs';
-          toggleArrow.textContent = '▲';
-        } else {
-          container.classList.add('hidden');
-          toggleText.textContent = `Read More FAQs (${container.children.length}+)`;
-          toggleArrow.textContent = '➔';
-        }
-      });
+      if (!toggleBtn.dataset.listenerSet) {
+        toggleBtn.dataset.listenerSet = 'true';
+
+        toggleBtn.addEventListener('click', () => {
+          const isHidden = container.classList.contains('hidden');
+          if (isHidden) {
+            container.classList.remove('hidden');
+            toggleText.textContent = 'Show Less FAQs';
+            toggleArrow.textContent = '▲';
+          } else {
+            container.classList.add('hidden');
+            toggleText.textContent = `Read More FAQs (${container.children.length}+)`;
+            toggleArrow.textContent = '➔';
+          }
+        });
+      }
     }
-  });
+  };
+
+  document.addEventListener('DOMContentLoaded', initHotelFaqs);
+  document.addEventListener('astro:page-load', initHotelFaqs);
 </script>
