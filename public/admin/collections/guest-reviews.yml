@@ -4,11 +4,24 @@ label_singular: "Review"
 folder: "src/content/reviews"
 create: true
 slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+summary: "{{approved ? '✅ Approved' : '🔴 NEW / PENDING'}} | {{hotel}} — {{name}} ({{rating}}★)"
+sortable_fields: ["date", "hotel", "approved", "rating"]
+view_filters:
+  - label: "🔴 New / Unapproved Only"
+    field: "approved"
+    pattern: false
+  - label: "✅ Approved Only"
+    field: "approved"
+    pattern: true
+view_groups:
+  - label: "Approval Status"
+    field: "approved"
+
 fields:
   - { label: "Hotel Name / Title", name: "hotel", widget: "string" }
   - { label: "Reviewer Name", name: "name", widget: "string" }
   - { label: "Rating Stars (1 to 5)", name: "rating", widget: "number", value_type: "int", min: 1, max: 5, default: 5 }
-  - { label: "Review Date (e.g. Aug 2026)", name: "date", widget: "string", default: "Aug 2026" }
+  - { label: "Submitted Date & Time", name: "date", widget: "string" }
   - { label: "Review Comment", name: "comment", widget: "text" }
   - label: "Approve Review to Show Live on Website?"
     name: "approved"
