@@ -1,4 +1,4 @@
-// @ts-check
+// astro.config.mjs
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -6,5 +6,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
+  },
+  build: {
+    inlineStylesheets: 'always', // <--- ১০.৮ KB CSS ইনলাইন করে রেন্ডার-ব্লকিং ১৪০ms বন্ধ করবে!
   }
 });
