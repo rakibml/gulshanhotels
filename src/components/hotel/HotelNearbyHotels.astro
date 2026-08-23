@@ -1,0 +1,107 @@
+---
+// src/components/hotel/HotelNearbyHotels.astro (Internal Linking Matrix for Google PageRank & Low Bounce Rate)
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentHotel: any;
+}
+
+const { currentHotel } = Astro.props;
+const currentData = currentHotel?.data || {};
+const currentSlug = currentData.slug || currentHotel?.id || currentHotel?.slug || '';
+const currentCleanSlug = currentSlug.split('/').pop().replace(/\.md$/, '').toLowerCase();
+
+let allHotels: any[] = [];
+
+try {
+  allHotels = await getCollection('hotels');
+} catch (e) {
+  allHotels = [];
+}
+
+if (allHotels.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('../../content/hotels/*.md', { eager: true });
+    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      id: filePath.split('/').pop()?.replace('.md', ''),
+      data: item.frontmatter || {},
+    }));
+  } catch (e) {}
+}
+
+// Filter out current hotel and pick up to 3 nearby popular hotels
+const nearbyHotels = allHotels
+  .filter(h => {
+    const hSlug = (h.data?.slug || h.id || h.slug || '').split('/').pop().replace(/\.md$/, '').toLowerCase();
+    return hSlug !== currentCleanSlug;
+  })
+  .slice(0, 3);
+---
+
+{nearbyHotels.length > 0 && (
+  <section id="nearby-hotels" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
+    <div class="space-y-6">
+      
+      <!-- Section Header -->
+      <div class="border-b border-slate-200/80 pb-3 text-left">
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
+          Similar Hotels in Gulshan 2
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Explore other verified luxury stays and executive lodging nearby</p>
+      </div>
+
+      <!-- 3-Column Hotel Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+        {nearbyHotels.map(h => {
+          const hData = h.data || {};
+          const hTitle = hData.title || hData.name || "Hotel";
+          const hCategory = hData.category || "Luxury Hotel";
+          const hLocation = hData.location || "Gulshan 2, Dhaka";
+          const hPrice = hData.price || "Check Rate";
+          const hImage = hData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80";
+          const hSlug = (hData.slug || h.id || h.slug || '').split('/').pop().replace(/\.md$/, '').toLowerCase();
+
+          return (
+            <div class="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
+              <div>
+                <div class="h-48 w-full overflow-hidden relative">
+                  <img 
+                    src={hImage} 
+                    alt={`${hTitle} in ${hLocation}`} 
+                    loading="lazy" 
+                    decoding="async" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                  />
+                  <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-white/20">
+                    {hCategory}
+                  </span>
+                </div>
+
+                <div class="p-5 space-y-2">
+                  <h3 class="font-extrabold text-slate-900 text-base group-hover:text-emerald-800 transition line-clamp-1">
+                    {hTitle}
+                  </h3>
+                  <p class="text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
+                    <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    <span>{hLocation}</span>
+                  </p>
+                  <div class="pt-1 flex items-baseline gap-1">
+                    <span class="text-[11px] text-slate-500 font-semibold">Starting from</span>
+                    <span class="text-sm font-black text-emerald-800">{hPrice}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-5 pt-0">
+                <a href={`/${hSlug}`} class="block w-full bg-slate-100 hover:bg-[#0d3b23] text-slate-800 hover:text-white font-extrabold text-xs text-center py-2.5 rounded-xl transition">
+                  View Hotel Details ➔
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+  </section>
+)}
