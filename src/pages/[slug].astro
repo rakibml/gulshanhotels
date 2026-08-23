@@ -1,12 +1,14 @@
 ---
-// src/pages/[slug].astro (Master Single Hotel Page Template - 100% SEO & Social Share Ready)
+// src/pages/[slug].astro (Master Single Hotel Page Template - 100% SEO, Sitelinks & Internal Links)
 import Layout from '../layouts/Layout.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
+import HotelSubNav from '../components/hotel/HotelSubNav.astro';
 import HotelAboutAndRates from '../components/hotel/HotelAboutAndRates.astro';
 import HotelAmenitiesAndRooms from '../components/hotel/HotelAmenitiesAndRooms.astro';
 import HotelLocationMap from '../components/hotel/HotelLocationMap.astro';
 import HotelReviews from '../components/hotel/HotelReviews.astro';
 import HotelFaqsSection from '../components/hotel/HotelFaqsSection.astro';
+import HotelNearbyHotels from '../components/hotel/HotelNearbyHotels.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -17,7 +19,6 @@ export async function getStaticPaths() {
     hotels = [];
   }
 
-  // Backup glob scanner fallback
   if (!hotels || hotels.length === 0) {
     try {
       const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
@@ -31,10 +32,8 @@ export async function getStaticPaths() {
     }
   }
 
-  // Process all entries for Custom Slug & Body Compilation
   const paths = await Promise.all(
     hotels.map(async (entry: any) => {
-      // 1. Priority to Admin Panel Custom Slug, then entry.id / entry.slug
       const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
       const cleanSlug = rawSlug
         .split('/')
@@ -42,7 +41,6 @@ export async function getStaticPaths() {
         .replace(/\.md$/, '')
         .toLowerCase();
 
-      // 2. Safe Body Compilation
       let renderedBody = entry.body || '';
       if (typeof entry.render === 'function') {
         try {
@@ -74,7 +72,6 @@ const hotelCategory = data.category || "Luxury Stay";
 const hotelLocation = data.location || "Dhaka, Bangladesh";
 const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
-// Smart Dynamic SEO Meta Description
 const metaDescription = data.seo_description 
   || data.description 
   || `Book your stay at ${hotelTitle}, a verified ${hotelCategory} located in ${hotelLocation}. Check live room rates, amenities, photo gallery, and reviews.`;
@@ -87,6 +84,9 @@ const metaDescription = data.seo_description
 >
   <!-- 1. HERO HEADER & TITLE -->
   <HotelHeader hotel={hotel} />
+
+  <!-- STICKY JUMP-NAVIGATION BAR (FOR GOOGLE SEARCH SITELINKS) -->
+  <HotelSubNav hotel={hotel} />
 
   <!-- 2. ABOUT HOTEL & LIVE STAY22 API RATES -->
   <HotelAboutAndRates hotel={hotel} />
@@ -102,4 +102,7 @@ const metaDescription = data.seo_description
 
   <!-- 6. FAQS ACCORDION -->
   <HotelFaqsSection hotel={hotel} />
+
+  <!-- 7. NEARBY SIMILAR HOTELS (INTERNAL LINKING MATRIX FOR GOOGLE PAGERANK) -->
+  <HotelNearbyHotels currentHotel={hotel} />
 </Layout>
