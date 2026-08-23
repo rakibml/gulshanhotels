@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelFaqsSection.astro (100% Dynamic CMS FAQs - ZERO DEMO QUESTIONS)
+// src/components/hotel/HotelFaqsSection.astro (100% Dynamic CMS FAQs - 0ms Forced Reflow Pure CSS Grid Accordion)
 interface Props {
   hotel: any;
 }
@@ -51,22 +51,30 @@ const faqSchema = showSection ? {
         <p class="text-xs text-slate-500 mt-1">Frequently asked questions by guests and travelers</p>
       </div>
 
-      <!-- INITIAL TOP 4 FAQS GRID (2 COLUMNS ON DESKTOP) -->
+      <!-- INITIAL TOP 4 FAQS GRID (PURE CSS GRID ACCORDION - ZERO REFLOW) -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         {initialTop4.map((faq: any) => {
           const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
           const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
 
           return (
-            <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
-              <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
+            <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+              <button 
+                class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
+                aria-expanded="false"
+              >
                 <span class="pr-2">{qText}</span>
-                <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
-                {aText}
+                <span class="faq-arrow-icon text-slate-400 text-xs shrink-0 transition-transform duration-300">▼</span>
+              </button>
+              
+              <div class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300">
+                <div class="overflow-hidden">
+                  <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
+                    {aText}
+                  </div>
+                </div>
               </div>
-            </details>
+            </div>
           );
         })}
       </div>
@@ -79,15 +87,23 @@ const faqSchema = showSection ? {
             const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
 
             return (
-              <details class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
-                <summary class="flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left">
+              <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+                <button 
+                  class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
+                  aria-expanded="false"
+                >
                   <span class="pr-2">{qText}</span>
-                  <span class="text-slate-400 text-xs shrink-0 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
-                  {aText}
+                  <span class="faq-arrow-icon text-slate-400 text-xs shrink-0 transition-transform duration-300">▼</span>
+                </button>
+
+                <div class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300">
+                  <div class="overflow-hidden">
+                    <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
+                      {aText}
+                    </div>
+                  </div>
                 </div>
-              </details>
+              </div>
             );
           })}
         </div>
@@ -110,9 +126,38 @@ const faqSchema = showSection ? {
   </section>
 )}
 
-<!-- CLIENT SCRIPT FOR READ MORE FAQS TOGGLE -->
+<!-- CLIENT SCRIPT WITH PURE CSS GRID TOGGLE (ZERO REFLOW) -->
 <script is:inline>
   const initHotelFaqs = () => {
+    // Pure CSS Grid Accordion - 0ms Forced Reflow
+    document.querySelectorAll('.faq-accordion-trigger').forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        const wrapper = trigger.closest('.faq-item-wrapper');
+        const answer = wrapper ? wrapper.querySelector('.faq-accordion-answer') : null;
+        const arrow = trigger.querySelector('.faq-arrow-icon');
+
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+        if (isOpen) {
+          trigger.setAttribute('aria-expanded', 'false');
+          if (answer) {
+            answer.classList.remove('grid-rows-[1fr]');
+            answer.classList.add('grid-rows-[0fr]');
+          }
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        } else {
+          trigger.setAttribute('aria-expanded', 'true');
+          if (answer) {
+            answer.classList.remove('grid-rows-[0fr]');
+            answer.classList.add('grid-rows-[1fr]');
+          }
+          if (arrow) arrow.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+
+    // Read More Toggle
     const toggleBtn = document.getElementById('toggleFaqsBtn');
     const container = document.getElementById('extraFaqsContainer');
     const toggleText = document.getElementById('toggleFaqsText');
