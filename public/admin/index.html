@@ -51,19 +51,34 @@
             }
           }
 
-          // 3. Fetch Guest Reviews Approval Collection YML File
+          // 3. Fetch Guest Reviews Collection YML File
           let reviewsCollection = null;
           try {
-            const res = await fetch('/admin/collections/guest-reviews.yml');
-            if (res.ok) {
-              const text = await res.text();
-              reviewsCollection = jsyaml.load(text);
+            const resRev = await fetch('/admin/collections/guest-reviews.yml');
+            if (resRev.ok) {
+              const textRev = await resRev.text();
+              reviewsCollection = jsyaml.load(textRev);
             }
-          } catch (err) {
-            console.warn('Could not load guest-reviews.yml file:', err);
-          }
+          } catch (err) {}
 
-          // 4. Build Hotel Collection with merged fields
+          // 4. GUARANTEED INLINE SUBSCRIBERS COLLECTION
+          const subscribersCollection = {
+            name: "subscribers",
+            label: "📧 Subscribers List",
+            label_singular: "Subscriber",
+            folder: "src/content/subscribers",
+            create: false,
+            slug: "{{year}}-{{month}}-{{day}}-{{slug}}",
+            summary: "{{email}} — (Subscribed: {{subscribed_at}})",
+            sortable_fields: ["subscribed_at", "email"],
+            fields: [
+              { label: "Subscriber Email Address", name: "email", widget: "string" },
+              { label: "Subscribed Date & Time", name: "subscribed_at", widget: "string" },
+              { label: "Subscription Status", name: "status", widget: "string", default: "active" }
+            ]
+          };
+
+          // 5. Build Hotel Collection
           const hotelCollection = {
             name: "hotels",
             label: "🏨 Hotels Directory",
@@ -75,14 +90,13 @@
             fields: hotelFields
           };
 
-          // 5. Merge Collections into Sveltia CMS
+          // 6. Merge All Collections into Sveltia CMS
           config.collections = [];
           config.collections.push(hotelCollection);
-          if (reviewsCollection) {
-            config.collections.push(reviewsCollection);
-          }
+          if (reviewsCollection) config.collections.push(reviewsCollection);
+          config.collections.push(subscribersCollection); // Guaranteed Push
 
-          // 6. Initialize Sveltia CMS
+          // 7. Initialize Sveltia CMS
           if (window.CMS && typeof window.CMS.init === 'function') {
             window.CMS.init({ config });
           } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
