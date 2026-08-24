@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Brand Color Matching, Real Reviews & Zero Top Gap)
+// src/components/PopularHotels.astro (STRICT 100% Real Approved Reviews Only - ZERO DEMO DATA)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 const { 
   title = "Travelers' Choice: Top hotels", 
-  subtitle = "Among our top 1% of hotels in Gulshan - decided by verified travelers." 
+  subtitle = "Handpicked top stays in Gulshan - decided by verified guest reviews." 
 } = Astro.props;
 
 // 1. Fetch Hotels from Astro Content Collection
@@ -34,7 +34,7 @@ if (!hotels || hotels.length === 0) {
   }
 }
 
-// 2. Fetch All Approved Guest Reviews from src/content/reviews/
+// 2. Fetch Approved Guest Reviews from src/content/reviews/
 let allCmsReviews: any[] = [];
 try {
   const reviewsCol = await getCollection('reviews');
@@ -51,7 +51,7 @@ try {
 }
 ---
 
-<!-- POPULAR HOTELS SECTION (TRIPADVISOR STYLE - MATCHING BRAND BACKGROUND & ZERO TOP GAP) -->
+<!-- POPULAR HOTELS SECTION (STRICT REAL REVIEWS ONLY) -->
 <section id="hotels" class="bg-[#F8FAF9] pt-0 pb-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -92,7 +92,7 @@ try {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // Calculate Real Approved Reviews for this specific hotel
+          // Calculate STRICT REAL Approved Reviews ONLY for this hotel
           const currentNameLower = hTitle.trim().toLowerCase();
           const matchedReviews = allCmsReviews.filter(r => {
             if (!r) return false;
@@ -105,10 +105,9 @@ try {
           const realCount = matchedReviews.length;
           const totalStars = matchedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
           
-          // Clean Real Rating Calculation (Fixes 408 rating bug)
-          const realRating = realCount > 0 ? (totalStars / realCount).toFixed(1) : (hData.rating && Number(hData.rating) <= 5 ? String(hData.rating) : "5.0");
-          const displayCount = realCount > 0 ? String(realCount) : (hData.reviewsCount && Number(hData.reviewsCount) < 10000 ? String(hData.reviewsCount) : "0");
-          const ratingVal = Math.min(Math.max(Number(realRating) || 5, 1), 5);
+          // Strict Real Rating Calculation (Returns null if 0 reviews)
+          const realRating = realCount > 0 ? (totalStars / realCount).toFixed(1) : null;
+          const ratingVal = realCount > 0 ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -164,16 +163,22 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- TripAdvisor Style Green Bubble Circles Rating -->
-                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                      <span class="font-black text-slate-900 text-sm">{realRating}</span>
-                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
-                        ))}
+                    <!-- STRICT REAL-ONLY RATING DISPLAY -->
+                    {realCount > 0 ? (
+                      <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
+                        <div class="flex items-center space-x-0.5 text-[#00aa6c]">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
+                          ))}
+                        </div>
+                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
-                      <span class="text-slate-500 font-normal">({displayCount})</span>
-                    </div>
+                    ) : (
+                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
+                        <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
+                      </div>
+                    )}
 
                   </div>
                 </div>
@@ -216,7 +221,6 @@ try {
     document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
       
-      // Check initial saved state
       let list = [];
       try {
         list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
@@ -249,7 +253,6 @@ try {
         const existingIndex = list.findIndex(item => item.title === title);
 
         if (existingIndex > -1) {
-          // Remove from wishlist
           list.splice(existingIndex, 1);
           if (iconSvg) {
             iconSvg.setAttribute('fill', 'none');
@@ -257,7 +260,6 @@ try {
             iconSvg.classList.add('text-slate-700');
           }
         } else {
-          // Add to wishlist
           list.push({ title, image, url, price });
           if (iconSvg) {
             iconSvg.setAttribute('fill', 'currentColor');
@@ -268,7 +270,6 @@ try {
 
         localStorage.setItem('gh_wishlist', JSON.stringify(list));
 
-        // Update header wishlist badge counter in real-time
         const countEl = document.getElementById('wishlist-count');
         if (countEl) {
           if (list.length > 0) {
