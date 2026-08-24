@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Multi-Source Reviews & Rating Sync)
+// src/components/PopularHotels.astro (100% Smart Synced Reviews, Real Ratings & Zero Typos)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -96,7 +96,7 @@ try {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // 1. Source A: Check Approved Reviews in src/content/reviews/
+          // 1. Source A: Check Approved Guest Reviews in src/content/reviews/
           const currentNameLower = hTitle.trim().toLowerCase();
           const matchedCmsReviews = allCmsReviews.filter(r => {
             if (!r) return false;
@@ -105,27 +105,25 @@ try {
             return isApproved && (!rHotelName || rHotelName === currentNameLower || currentNameLower.includes(rHotelName) || rHotelName.includes(currentNameLower));
           });
 
-          // 2. Source B: Check Embedded Reviews inside the hotel's markdown file
+          // 2. Source B: Check Embedded Reviews in Hotel Markdown
           const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
-
-          // Combine reviews
           const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
 
-          // 3. Source C: Calculate Rating & Count or fallback to Frontmatter Rating
-          let displayRating = "5.0";
-          let displayCount = 0;
+          // 3. Source C: Calculate Rating or Fallback to Hotel Frontmatter Rating (e.g. 4.8, 125)
+          let finalRating = null;
+          let finalCount = 0;
 
           if (activeReviewsList.length > 0) {
-            displayCount = activeReviewsList.length;
+            finalCount = activeReviewsList.length;
             const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
-            displayRating = (totalStars / displayCount).toFixed(1);
+            finalRating = (totalStars / finalCount).toFixed(1);
           } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
             const rawR = Number(hData.rating);
-            displayRating = (!isNaN(rawR) && rawR <= 5 && rawR > 0) ? rawR.toFixed(1) : "5.0";
-            displayCount = Number(hData.reviewsCount || hData.reviews_count) || 0;
+            finalRating = (!isNaN(rawR) && rawR <= 5 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : null);
+            finalCount = Number(hData.reviewsCount || hData.reviews_count) || 0;
           }
 
-          const ratingVal = Math.min(Math.max(Number(displayRating) || 5, 1), 5);
+          const ratingVal = finalRating ? Math.min(Math.max(Number(finalRating) || 5, 1), 5) : 0;
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -181,16 +179,16 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- MULTI-SOURCE SYNCED RATING DISPLAY -->
-                    {displayCount > 0 ? (
+                    <!-- SMART MULTI-SOURCE SYNCED RATING DISPLAY -->
+                    {finalRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                        <span class="font-black text-slate-900 text-sm">{displayRating}</span>
+                        <span class="font-black text-slate-900 text-sm">{finalRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                           ))}
                         </div>
-                        <span class="text-slate-500 font-normal">({displayCount} {Number(displayCount) === 1 ? 'review' : 'reviews'})</span>
+                        <span class="text-slate-500 font-normal">({finalCount} {finalCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
                     ) : (
                       <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
@@ -286,7 +284,7 @@ try {
           }
         }
 
-        localStorage.setItem('gh_wishlist', JSON.stringify(stringifyList));
+        localStorage.setItem('gh_wishlist', JSON.stringify(list));
 
         const countEl = document.getElementById('wishlist-count');
         if (countEl) {
