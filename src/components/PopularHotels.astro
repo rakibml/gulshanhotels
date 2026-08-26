@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Bug-Free, Deduplicated & Sanitized Ratings)
+// src/components/PopularHotels.astro (Strict Hotel-Specific Review Matching & Zero Cross-Over Bug)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,40 +12,31 @@ const {
   subtitle = "Handpicked top stays in Gulshan - decided by verified guest reviews." 
 } = Astro.props;
 
-// 1. Fetch Hotels from Content Collection
-let rawHotels: any[] = [];
+// 1. Fetch Hotels from Astro Content Collection
+let hotels: any[] = [];
 try {
   const allHotels = await getCollection('hotels');
-  rawHotels = allHotels.filter(h => h.data.popular !== false);
+  hotels = allHotels.filter(h => h.data.popular !== false);
 } catch (e) {
-  rawHotels = [];
+  hotels = [];
 }
 
 // Fallback if collection is empty
-if (!rawHotels || rawHotels.length === 0) {
+if (!hotels || hotels.length === 0) {
   try {
     const glob1 = import.meta.glob('../content/hotels/*.md', { eager: true });
     const glob2 = import.meta.glob('../../content/hotels/*.md', { eager: true });
     const combined = { ...glob1, ...glob2 };
-    rawHotels = Object.entries(combined).map(([filePath, item]: [string, any]) => ({
+    hotels = Object.entries(combined).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {}
     }));
   } catch (e) {
-    rawHotels = [];
+    hotels = [];
   }
 }
 
-// DEDUPLICATE HOTELS BY TITLE (Prevents duplicate cards like Midori appearing twice)
-const seenTitles = new Set();
-const hotels = rawHotels.filter(h => {
-  const t = (h.data?.title || h.data?.name || h.slug || '').trim().toLowerCase();
-  if (!t || seenTitles.has(t)) return false;
-  seenTitles.add(t);
-  return true;
-});
-
-// 2. Fetch All Approved Guest Reviews from src/content/reviews/
+// 2. Fetch Approved Guest Reviews from src/content/reviews/
 let allCmsReviews: any[] = [];
 try {
   const reviewsCol = await getCollection('reviews');
@@ -61,17 +52,6 @@ try {
   } catch (err) {
     allCmsReviews = [];
   }
-}
-
-// Rating Sanitizer Helper (Fixes '408' -> 4.8 or 5.0)
-function sanitizeRating(rawRating: any) {
-  if (!rawRating) return null;
-  let num = Number(rawRating);
-  if (isNaN(num) || num <= 0) return null;
-  if (num > 50) num = num / 100; // Fixes 408 -> 4.08 -> 4.1 or 480 -> 4.8
-  if (num > 5) num = num / 10;   // Fixes 48 -> 4.8
-  if (num > 5) num = 5;
-  return num.toFixed(1);
 }
 ---
 
@@ -116,29 +96,35 @@ function sanitizeRating(rawRating: any) {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // 1. Check Approved Guest Reviews in src/content/reviews/
+          // 1. STRICT MATCHING: Check Approved Guest Reviews ONLY for THIS Hotel
           const hTitleLower = hTitle.trim().toLowerCase();
           const hSlugLower = hSlug.trim().toLowerCase();
 
           const matchedCmsReviews = allCmsReviews.filter(r => {
             if (!r) return false;
+            
+            // Must be approved
             const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
             if (!isApproved) return false;
 
+            // Must specify hotel name (DO NOT match empty hotel names!)
             const rHotel = (r.hotel || '').trim().toLowerCase();
             if (!rHotel) return false;
 
+            // Strict match against title or slug
             const matchesTitle = rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower);
             const matchesSlug = hSlugLower && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower));
 
             return matchesTitle || matchesSlug;
           });
 
-          // 2. Check Embedded Reviews inside hotel markdown
+          // 2. Source B: Check Embedded Reviews inside hotel's own markdown file
           const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
+
+          // Combine reviews specifically for this hotel
           const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
 
-          // 3. Calculate Final Rating & Count cleanly
+          // 3. Calculate Real Rating & Count or fallback to Hotel Frontmatter Rating
           let displayRating = null;
           let displayCount = 0;
 
@@ -147,7 +133,8 @@ function sanitizeRating(rawRating: any) {
             const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
             displayRating = (totalStars / displayCount).toFixed(1);
           } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
-            displayRating = sanitizeRating(hData.rating);
+            const rawR = Number(hData.rating);
+            displayRating = (!isNaN(rawR) && rawR <= 5 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : null);
             displayCount = Number(hData.reviewsCount || hData.reviews_count) || 0;
           }
 
@@ -207,8 +194,8 @@ function sanitizeRating(rawRating: any) {
                       {hTitle}
                     </h3>
 
-                    <!-- SANITIZED RATING DISPLAY -->
-                    {displayRating && displayCount > 0 ? (
+                    <!-- STRICT HOTEL-MATCHED RATING DISPLAY -->
+                    {displayCount > 0 && displayRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                         <span class="font-black text-slate-900 text-sm">{displayRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
