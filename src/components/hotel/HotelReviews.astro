@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Dynamic CMS Reviews - ZERO DEMO REVIEWS)
+// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Agoda-Style Stars, Hash Back-Button Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -10,11 +10,13 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelSlug = data.slug || hotel?.slug || hotel?.id || "hotel";
+const hotelRating = data.rating || "4.8";
+const defaultReviewsCount = data.reviewsCount || data.reviews_count || "125";
 
 // Double-Layer Fetching: getCollection + import.meta.glob Fallback
 let rawReviewsList: any[] = [];
 
-// Layer 1: Astro getCollection
 try {
   const cmsReviews = await getCollection('reviews');
   if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
@@ -24,7 +26,6 @@ try {
   console.warn('getCollection(reviews) bypassed, trying glob scanner...', e);
 }
 
-// Layer 2: Direct Eager Glob Scanner Fallback
 if (rawReviewsList.length === 0) {
   try {
     const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
@@ -34,24 +35,24 @@ if (rawReviewsList.length === 0) {
   }
 }
 
-// Filter Approved Reviews ONLY for this Hotel
-const currentHotelName = hotelTitle.trim().toLowerCase();
+// Filter Approved Reviews for this Hotel
+const currentHotelTitle = hotelTitle.trim().toLowerCase();
+const currentHotelSlug = hotelSlug.trim().toLowerCase();
 
 const approvedCmsReviews = rawReviewsList
   .filter(item => {
     if (!item) return false;
-    
-    // Flexible Approved Status Check (boolean true or string "true")
     const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
-    
-    // Flexible Case-Insensitive Hotel Name Match
-    const reviewHotelName = (item.hotel || '').trim().toLowerCase();
-    const isMatch = !reviewHotelName || 
-      reviewHotelName === currentHotelName || 
-      currentHotelName.includes(reviewHotelName) || 
-      reviewHotelName.includes(currentHotelName);
+    if (!isApproved) return false;
 
-    return isApproved && isMatch;
+    const rHotel = (item.hotel || '').trim().toLowerCase();
+    const rSlug = (item.slug || item.hotelSlug || '').trim().toLowerCase();
+
+    const matchesTitle = rHotel && (rHotel === currentHotelTitle || currentHotelTitle.includes(rHotel) || rHotel.includes(currentHotelTitle));
+    const matchesSlug = (rSlug && (rSlug === currentHotelSlug || currentHotelSlug.includes(rSlug) || rSlug.includes(currentHotelSlug))) ||
+                        (rHotel && (rHotel === currentHotelSlug || currentHotelSlug.includes(rHotel) || rHotel.includes(currentHotelSlug)));
+
+    return matchesTitle || matchesSlug;
   })
   .map(item => ({
     name: item.name || 'Verified Guest',
@@ -63,19 +64,18 @@ const approvedCmsReviews = rawReviewsList
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const approvedReviews = approvedCmsReviews.length > 0 ? approvedCmsReviews : hotelEmbeddedReviews;
 
-// REALTIME AUTOMATIC AVERAGE RATING & COUNT CALCULATION
 const reviewsCount = approvedReviews.length;
 const totalStarsSum = approvedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
-const hotelRating = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
+const hotelRatingCalculated = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
 
-// GOOGLE RICH SNIPPET STARS SCHEMA (Rendered ONLY if approved reviews exist)
+// GOOGLE RICH SNIPPET STARS SCHEMA
 const googleRatingSchema = reviewsCount > 0 ? {
   "@context": "https://schema.org",
   "@type": "Hotel",
   "name": hotelTitle,
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": String(hotelRating),
+    "ratingValue": String(hotelRatingCalculated),
     "reviewCount": String(reviewsCount),
     "bestRating": "5",
     "worstRating": "1"
@@ -115,10 +115,9 @@ const googleRatingSchema = reviewsCount > 0 ? {
       <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
       <div class="flex items-center gap-3">
         
-        <!-- Score Summary (Shown ONLY if reviews exist) -->
         {reviewsCount > 0 && (
           <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-black text-slate-900 text-base">{hotelRating}</span>
+            <span class="font-black text-slate-900 text-base">{hotelRatingCalculated}</span>
             <div class="flex items-center text-amber-500 text-xs tracking-wider">
               ★ ★ ★ ★ ★
             </div>
@@ -126,7 +125,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
-        <!-- Carousel Navigation Arrows -->
         {reviewsCount > 1 && (
           <div class="flex items-center gap-1.5">
             <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
@@ -138,7 +136,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
-        <!-- Clean Write Review Button -->
         <button 
           id="openWriteReviewBtn" 
           class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
@@ -159,7 +156,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
               <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
                 <div class="space-y-2 text-left">
                   <div class="flex items-center justify-between">
-                    <!-- Dynamic Star Rating -->
                     <div class="flex items-center text-amber-500 text-xs tracking-wider">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <span>{i < ratingVal ? '★' : '☆'}</span>
@@ -211,8 +207,8 @@ const googleRatingSchema = reviewsCount > 0 ? {
       <button id="closeWriteReviewBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
     </div>
 
-    <!-- Review Form -->
-    <form id="submitReviewForm" data-hotel-title={hotelTitle} class="space-y-4 text-xs sm:text-sm text-left">
+    <!-- Review Form with Slug -->
+    <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4 text-xs sm:text-sm text-left">
       <div>
         <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1">Your Name</label>
         <input type="text" id="reviewerName" required placeholder="e.g. Sarah Ahmed" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 outline-none focus:border-emerald-600" />
@@ -247,7 +243,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH BACK-BUTTON SAFETY & CAROUSEL -->
+<!-- CLIENT SCRIPT WITH SLUG PAYLOAD -->
 <script is:inline>
   const initHotelReviews = () => {
     const track = document.getElementById('reviewsCarouselTrack');
@@ -320,10 +316,12 @@ const googleRatingSchema = reviewsCount > 0 ? {
       });
     }
 
+    // Form Submission
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const hotelTitle = form.getAttribute('data-hotel-title') || '';
+        const hotelSlug = form.getAttribute('data-hotel-slug') || '';
         const name = document.getElementById('reviewerName')?.value || '';
         const rating = document.getElementById('reviewerRating')?.value || '5';
         const comment = document.getElementById('reviewerComment')?.value || '';
@@ -339,6 +337,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               hotel: hotelTitle,
+              slug: hotelSlug,
               name: name,
               rating: rating,
               comment: comment,
