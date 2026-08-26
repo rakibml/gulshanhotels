@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Single-Hotel Page Review Sync & Zero Fallback Numbers)
+// src/components/PopularHotels.astro (100% Dynamic, TripAdvisor Choice Style, Strict Review Matcher & Wishlist Sync)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -53,6 +53,66 @@ try {
     allCmsReviews = [];
   }
 }
+
+// Helper: Strict Review Matching Logic per Hotel
+function getHotelReviewStats(hData: any, hSlug: string) {
+  const hTitleLower = (hData.title || hData.name || "").trim().toLowerCase();
+  const hSlugLower = (hData.slug || hSlug || "").trim().toLowerCase();
+
+  // Filter approved reviews for this hotel
+  const matchedCmsReviews = allCmsReviews.filter(r => {
+    if (!r) return false;
+    const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
+    if (!isApproved) return false;
+
+    const rHotel = (r.hotel || '').trim().toLowerCase();
+    const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
+
+    const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
+    const matchTitle = rHotel && hTitleLower && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
+
+    return matchSlug || matchTitle;
+  });
+
+  const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
+  const activeReviews = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
+
+  if (activeReviews.length > 0) {
+    const count = activeReviews.length;
+    const totalStars = activeReviews.reduce((sum: number, r: any) => {
+      const num = parseFloat(r.rating);
+      return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
+    }, 0);
+
+    const avg = (totalStars / count).toFixed(1);
+    const clampedAvg = Math.min(Math.max(parseFloat(avg) || 5.0, 1.0), 5.0).toFixed(1);
+
+    return {
+      rating: clampedAvg,
+      reviewsCount: count,
+      hasReviews: true
+    };
+  }
+
+  // Check if hotel frontmatter has a valid rating (<= 5.0)
+  if (hData.rating) {
+    const rawR = parseFloat(hData.rating);
+    if (!isNaN(rawR) && rawR > 0 && rawR <= 5.0) {
+      const count = parseInt(hData.reviewsCount || hData.reviews_count || "0", 10) || 0;
+      return {
+        rating: rawR.toFixed(1),
+        reviewsCount: count,
+        hasReviews: count > 0
+      };
+    }
+  }
+
+  return {
+    rating: "5.0",
+    reviewsCount: 0,
+    hasReviews: false
+  };
+}
 ---
 
 <!-- POPULAR HOTELS SECTION -->
@@ -96,35 +156,9 @@ try {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // EXACT MATCHING: Same logic as Single Hotel Page (HotelReviews.astro)
-          const hTitleLower = hTitle.trim().toLowerCase();
-          const hSlugLower = hSlug.trim().toLowerCase();
-
-          const matchedCmsReviews = allCmsReviews.filter(r => {
-            if (!r) return false;
-            const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
-            if (!isApproved) return false;
-
-            const rHotel = (r.hotel || '').trim().toLowerCase();
-            const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
-
-            const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
-            const matchTitle = rHotel && hTitleLower && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
-
-            return matchSlug || matchTitle;
-          });
-
-          // Embedded reviews in hotel markdown
-          const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
-
-          // Combine (STRICTLY REAL REVIEWS ONLY)
-          const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
-
-          // Calculate Real Rating & Count
-          const realCount = activeReviewsList.length;
-          const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
-          const realRating = realCount > 0 ? (totalStars / realCount).toFixed(1) : null;
-          const ratingVal = realCount > 0 ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
+          // Calculate Exact Synced Rating Stats
+          const stats = getHotelReviewStats(hData, hSlug);
+          const ratingVal = Math.min(Math.max(Number(stats.rating) || 5, 1), 5);
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -180,16 +214,16 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- STRICT REAL-ONLY RATING DISPLAY (EXACT SINGLE-PAGE MATCH) -->
-                    {realCount > 0 && realRating ? (
+                    <!-- STRICT MATCHED RATING DISPLAY -->
+                    {stats.hasReviews ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
+                        <span class="font-black text-slate-900 text-sm">{stats.rating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                           ))}
                         </div>
-                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
+                        <span class="text-slate-500 font-normal">({stats.reviewsCount} {stats.reviewsCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
                     ) : (
                       <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
