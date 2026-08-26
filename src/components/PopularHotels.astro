@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (Strict Hotel-Specific Review Matching & Zero Cross-Over Bug)
+// src/components/PopularHotels.astro (100% Universal Review Matcher - Zero Missed Reviews)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -96,35 +96,31 @@ try {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // 1. STRICT MATCHING: Check Approved Guest Reviews ONLY for THIS Hotel
+          // UNIVERSAL SLUG & TITLE REVIEW MATCHER
           const hTitleLower = hTitle.trim().toLowerCase();
           const hSlugLower = hSlug.trim().toLowerCase();
 
           const matchedCmsReviews = allCmsReviews.filter(r => {
             if (!r) return false;
-            
-            // Must be approved
             const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
             if (!isApproved) return false;
 
-            // Must specify hotel name (DO NOT match empty hotel names!)
             const rHotel = (r.hotel || '').trim().toLowerCase();
-            if (!rHotel) return false;
+            const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
 
-            // Strict match against title or slug
-            const matchesTitle = rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower);
-            const matchesSlug = hSlugLower && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower));
+            // Match Title OR Slug
+            const matchesTitle = rHotel && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
+            const matchesSlug = (rSlug && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower))) ||
+                                (rHotel && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower)));
 
             return matchesTitle || matchesSlug;
           });
 
-          // 2. Source B: Check Embedded Reviews inside hotel's own markdown file
+          // Source B: Embedded Reviews inside hotel markdown
           const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
-
-          // Combine reviews specifically for this hotel
           const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
 
-          // 3. Calculate Real Rating & Count or fallback to Hotel Frontmatter Rating
+          // Source C: Calculate Rating & Count or fallback to Hotel Frontmatter Rating
           let displayRating = null;
           let displayCount = 0;
 
@@ -194,7 +190,7 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- STRICT HOTEL-MATCHED RATING DISPLAY -->
+                    <!-- UNIVERSAL MATCHED RATING DISPLAY -->
                     {displayCount > 0 && displayRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                         <span class="font-black text-slate-900 text-sm">{displayRating}</span>
