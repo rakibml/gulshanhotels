@@ -1314,8 +1314,8 @@ enable_rates: true
 image_alt: ''
 enable_faqs: true
 enable_nearby: true
-rating: '5'
-reviewsCount: '4'
+rating: ''
+reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
