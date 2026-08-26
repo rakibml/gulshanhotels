@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Dynamic, TripAdvisor Choice Style, Strict Review Matcher & Wishlist Sync)
+// src/components/PopularHotels.astro (100% PURE REAL REVIEWS ONLY - ZERO FAKE DATA)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -24,10 +24,8 @@ try {
 // Fallback if collection is empty
 if (!hotels || hotels.length === 0) {
   try {
-    const glob1 = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const glob2 = import.meta.glob('../../content/hotels/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2 };
-    hotels = Object.entries(combined).map(([filePath, item]: [string, any]) => ({
+    const rawGlob = import.meta.glob('/src/content/hotels/*.md', { eager: true });
+    hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {}
     }));
@@ -36,83 +34,24 @@ if (!hotels || hotels.length === 0) {
   }
 }
 
-// 2. Fetch Approved Guest Reviews from src/content/reviews/
-let allCmsReviews: any[] = [];
+// 2. Fetch ALL Review Objects (getCollection + Absolute Root Vite Glob Scanner)
+let allReviewsList: any[] = [];
+
 try {
-  const reviewsCol = await getCollection('reviews');
-  if (Array.isArray(reviewsCol) && reviewsCol.length > 0) {
-    allCmsReviews = reviewsCol.map(r => r.data || {});
+  const col = await getCollection('reviews');
+  if (Array.isArray(col) && col.length > 0) {
+    col.forEach(r => { if (r && r.data) allReviewsList.push(r.data); });
   }
-} catch (e) {
-  try {
-    const glob1 = import.meta.glob('../content/reviews/*.md', { eager: true });
-    const glob2 = import.meta.glob('../../content/reviews/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2 };
-    allCmsReviews = Object.values(combined).map((item: any) => item.frontmatter || {});
-  } catch (err) {
-    allCmsReviews = [];
-  }
-}
+} catch (e) {}
 
-// Helper: Strict Review Matching Logic per Hotel
-function getHotelReviewStats(hData: any, hSlug: string) {
-  const hTitleLower = (hData.title || hData.name || "").trim().toLowerCase();
-  const hSlugLower = (hData.slug || hSlug || "").trim().toLowerCase();
-
-  // Filter approved reviews for this hotel
-  const matchedCmsReviews = allCmsReviews.filter(r => {
-    if (!r) return false;
-    const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
-    if (!isApproved) return false;
-
-    const rHotel = (r.hotel || '').trim().toLowerCase();
-    const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
-
-    const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
-    const matchTitle = rHotel && hTitleLower && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
-
-    return matchSlug || matchTitle;
-  });
-
-  const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
-  const activeReviews = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
-
-  if (activeReviews.length > 0) {
-    const count = activeReviews.length;
-    const totalStars = activeReviews.reduce((sum: number, r: any) => {
-      const num = parseFloat(r.rating);
-      return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
-    }, 0);
-
-    const avg = (totalStars / count).toFixed(1);
-    const clampedAvg = Math.min(Math.max(parseFloat(avg) || 5.0, 1.0), 5.0).toFixed(1);
-
-    return {
-      rating: clampedAvg,
-      reviewsCount: count,
-      hasReviews: true
-    };
-  }
-
-  // Check if hotel frontmatter has a valid rating (<= 5.0)
-  if (hData.rating) {
-    const rawR = parseFloat(hData.rating);
-    if (!isNaN(rawR) && rawR > 0 && rawR <= 5.0) {
-      const count = parseInt(hData.reviewsCount || hData.reviews_count || "0", 10) || 0;
-      return {
-        rating: rawR.toFixed(1),
-        reviewsCount: count,
-        hasReviews: count > 0
-      };
+try {
+  const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+  Object.values(globModules).forEach((mod: any) => {
+    if (mod && mod.frontmatter) {
+      allReviewsList.push(mod.frontmatter);
     }
-  }
-
-  return {
-    rating: "5.0",
-    reviewsCount: 0,
-    hasReviews: false
-  };
-}
+  });
+} catch (e) {}
 ---
 
 <!-- POPULAR HOTELS SECTION -->
@@ -150,15 +89,59 @@ function getHotelReviewStats(hData: any, hSlug: string) {
       <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {hotels.map((hotelItem: any, index: number) => {
           const hData = hotelItem.data || {};
-          const hTitle = hData.title || hData.name || "Hotel Details";
-          const hSlug = hData.slug || hotelItem.slug || hotelItem.id || "hotel";
+          const hTitle = (hData.title || hData.name || "Hotel Details").trim();
+          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // Calculate Exact Synced Rating Stats
-          const stats = getHotelReviewStats(hData, hSlug);
-          const ratingVal = Math.min(Math.max(Number(stats.rating) || 5, 1), 5);
+          const hTitleLower = hTitle.toLowerCase();
+          const hSlugLower = hSlug.toLowerCase();
+
+          // Strict Approved Review Filtering for THIS Hotel ONLY
+          const hotelApprovedReviews = allReviewsList.filter(item => {
+            if (!item) return false;
+
+            const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+            if (!isApproved) return false;
+
+            const rHotel = (item.hotel || '').trim().toLowerCase();
+            const rSlug = (item.slug || item.hotelSlug || '').trim().toLowerCase();
+
+            const matchTitle = rHotel && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
+            const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
+            const matchSlugInTitle = rHotel && hSlugLower && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower));
+
+            return matchTitle || matchSlug || matchSlugInTitle;
+          });
+
+          // Deduplicate by reviewer name & comment
+          const uniqueApprovedReviews: any[] = [];
+          const seenKeys = new Set();
+          hotelApprovedReviews.forEach(r => {
+            const key = `${r.name}-${r.comment}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              uniqueApprovedReviews.push(r);
+            }
+          });
+
+          const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
+          const finalReviewsList = uniqueApprovedReviews.length > 0 ? uniqueApprovedReviews : embedded;
+
+          // STRICT CALCULATION (ZERO FAKE DATA / ZERO FALLBACK NUMBERS)
+          const realCount = finalReviewsList.length;
+          let realRating: string | null = null;
+
+          if (realCount > 0) {
+            const totalStars = finalReviewsList.reduce((sum: number, r: any) => {
+              const num = parseFloat(r.rating);
+              return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
+            }, 0);
+            realRating = (totalStars / realCount).toFixed(1);
+          }
+
+          const ratingVal = realRating ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -214,16 +197,16 @@ function getHotelReviewStats(hData: any, hSlug: string) {
                       {hTitle}
                     </h3>
 
-                    <!-- STRICT MATCHED RATING DISPLAY -->
-                    {stats.hasReviews ? (
+                    <!-- STRICT REAL APPROVED REVIEWS DISPLAY ONLY -->
+                    {realCount > 0 && realRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                        <span class="font-black text-slate-900 text-sm">{stats.rating}</span>
+                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                           ))}
                         </div>
-                        <span class="text-slate-500 font-normal">({stats.reviewsCount} {stats.reviewsCount === 1 ? 'review' : 'reviews'})</span>
+                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
                     ) : (
                       <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
