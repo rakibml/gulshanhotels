@@ -1197,8 +1197,8 @@ location_notice: ''
 enable_nearby: true
 nearby_places: []
 reviews_notice: ''
-rating: '408'
-reviewsCount: '5'
+rating: ''
+reviewsCount: ''
 reviews: []
 faqs_notice: ''
 enable_faqs: true
