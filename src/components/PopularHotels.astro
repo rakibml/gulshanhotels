@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Universal Review Matcher - Zero Missed Reviews)
+// src/components/PopularHotels.astro (100% Single-Hotel Page Review Sync & Zero Fallback Numbers)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -96,7 +96,7 @@ try {
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // UNIVERSAL SLUG & TITLE REVIEW MATCHER
+          // EXACT MATCHING: Same logic as Single Hotel Page (HotelReviews.astro)
           const hTitleLower = hTitle.trim().toLowerCase();
           const hSlugLower = hSlug.trim().toLowerCase();
 
@@ -108,33 +108,23 @@ try {
             const rHotel = (r.hotel || '').trim().toLowerCase();
             const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
 
-            // Match Title OR Slug
-            const matchesTitle = rHotel && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
-            const matchesSlug = (rSlug && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower))) ||
-                                (rHotel && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower)));
+            const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
+            const matchTitle = rHotel && hTitleLower && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
 
-            return matchesTitle || matchesSlug;
+            return matchSlug || matchTitle;
           });
 
-          // Source B: Embedded Reviews inside hotel markdown
+          // Embedded reviews in hotel markdown
           const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
+
+          // Combine (STRICTLY REAL REVIEWS ONLY)
           const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
 
-          // Source C: Calculate Rating & Count or fallback to Hotel Frontmatter Rating
-          let displayRating = null;
-          let displayCount = 0;
-
-          if (activeReviewsList.length > 0) {
-            displayCount = activeReviewsList.length;
-            const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
-            displayRating = (totalStars / displayCount).toFixed(1);
-          } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
-            const rawR = Number(hData.rating);
-            displayRating = (!isNaN(rawR) && rawR <= 5 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : null);
-            displayCount = Number(hData.reviewsCount || hData.reviews_count) || 0;
-          }
-
-          const ratingVal = displayRating ? Math.min(Math.max(Number(displayRating) || 5, 1), 5) : 0;
+          // Calculate Real Rating & Count
+          const realCount = activeReviewsList.length;
+          const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
+          const realRating = realCount > 0 ? (totalStars / realCount).toFixed(1) : null;
+          const ratingVal = realCount > 0 ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -190,16 +180,16 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- UNIVERSAL MATCHED RATING DISPLAY -->
-                    {displayCount > 0 && displayRating ? (
+                    <!-- STRICT REAL-ONLY RATING DISPLAY (EXACT SINGLE-PAGE MATCH) -->
+                    {realCount > 0 && realRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                        <span class="font-black text-slate-900 text-sm">{displayRating}</span>
+                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                           ))}
                         </div>
-                        <span class="text-slate-500 font-normal">({displayCount} {Number(displayCount) === 1 ? 'review' : 'reviews'})</span>
+                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
                     ) : (
                       <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
