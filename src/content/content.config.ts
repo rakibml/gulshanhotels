@@ -7,27 +7,31 @@ const hotels = defineCollection({
   schema: z.object({
     title: z.string().optional(),
     name: z.string().optional(),
-    category: z.string().optional(),
-    location: z.string().optional(),
-    price: z.string().optional(),
-    rating: z.union([z.number(), z.string()]).optional().nullable(),
-    reviewsCount: z.union([z.number(), z.string()]).optional().nullable(),
-    image: z.string().optional().nullable(),
-    popular: z.boolean().optional(),
   }).passthrough(),
 });
 
-// Flexible Reviews Schema with Passthrough
+const homepage = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/homepage' }),
+  schema: z.object({
+    enable_popular_hotels: z.boolean().optional(),
+    popular_hotels_title: z.string().optional(),
+    popular_hotels_subtitle: z.string().optional(),
+    max_hotels: z.number().optional(),
+  }).passthrough(),
+});
+
 const reviews = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/reviews' }),
   schema: z.object({
     hotel: z.any().optional(),
-    name: z.any().optional(),
-    rating: z.any().optional(),
-    date: z.any().optional(),
-    comment: z.any().optional(),
-    approved: z.any().optional(),
   }).passthrough(),
 });
 
-export const collections = { hotels, reviews };
+const subscribers = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/subscribers' }),
+  schema: z.object({
+    email: z.string().optional(),
+  }).passthrough(),
+});
+
+export const collections = { hotels, homepage, reviews, subscribers };
