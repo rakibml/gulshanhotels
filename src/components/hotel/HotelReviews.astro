@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Agoda-Style Stars, Hash Back-Button Safe)
+// src/components/hotel/HotelReviews.astro (100% Dynamic CMS Reviews - ZERO DEMO REVIEWS)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -11,12 +11,11 @@ const data = hotel?.data || {};
 
 const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelSlug = data.slug || hotel?.slug || hotel?.id || "hotel";
-const hotelRating = data.rating || "4.8";
-const defaultReviewsCount = data.reviewsCount || data.reviews_count || "125";
 
 // Double-Layer Fetching: getCollection + import.meta.glob Fallback
 let rawReviewsList: any[] = [];
 
+// Layer 1: Astro getCollection
 try {
   const cmsReviews = await getCollection('reviews');
   if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
@@ -26,6 +25,7 @@ try {
   console.warn('getCollection(reviews) bypassed, trying glob scanner...', e);
 }
 
+// Layer 2: Direct Eager Glob Scanner Fallback
 if (rawReviewsList.length === 0) {
   try {
     const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
@@ -35,13 +35,15 @@ if (rawReviewsList.length === 0) {
   }
 }
 
-// Filter Approved Reviews for this Hotel
+// Filter Approved Reviews ONLY for this Hotel
 const currentHotelTitle = hotelTitle.trim().toLowerCase();
 const currentHotelSlug = hotelSlug.trim().toLowerCase();
 
 const approvedCmsReviews = rawReviewsList
   .filter(item => {
     if (!item) return false;
+    
+    // Flexible Approved Status Check
     const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
     if (!isApproved) return false;
 
@@ -64,18 +66,19 @@ const approvedCmsReviews = rawReviewsList
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const approvedReviews = approvedCmsReviews.length > 0 ? approvedCmsReviews : hotelEmbeddedReviews;
 
+// REALTIME AUTOMATIC AVERAGE RATING & COUNT CALCULATION
 const reviewsCount = approvedReviews.length;
 const totalStarsSum = approvedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
-const hotelRatingCalculated = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
+const hotelRating = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
 
-// GOOGLE RICH SNIPPET STARS SCHEMA
+// GOOGLE RICH SNIPPET STARS SCHEMA (Rendered ONLY if approved reviews exist)
 const googleRatingSchema = reviewsCount > 0 ? {
   "@context": "https://schema.org",
   "@type": "Hotel",
   "name": hotelTitle,
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": String(hotelRatingCalculated),
+    "ratingValue": String(hotelRating),
     "reviewCount": String(reviewsCount),
     "bestRating": "5",
     "worstRating": "1"
@@ -115,9 +118,10 @@ const googleRatingSchema = reviewsCount > 0 ? {
       <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
       <div class="flex items-center gap-3">
         
+        <!-- Score Summary (Shown ONLY if approved reviews exist) -->
         {reviewsCount > 0 && (
           <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-black text-slate-900 text-base">{hotelRatingCalculated}</span>
+            <span class="font-black text-slate-900 text-base">{hotelRating}</span>
             <div class="flex items-center text-amber-500 text-xs tracking-wider">
               ★ ★ ★ ★ ★
             </div>
@@ -125,6 +129,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
+        <!-- Carousel Navigation Arrows -->
         {reviewsCount > 1 && (
           <div class="flex items-center gap-1.5">
             <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
@@ -136,6 +141,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
+        <!-- Clean Write Review Button -->
         <button 
           id="openWriteReviewBtn" 
           class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
@@ -156,6 +162,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
               <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
                 <div class="space-y-2 text-left">
                   <div class="flex items-center justify-between">
+                    <!-- Dynamic Star Rating -->
                     <div class="flex items-center text-amber-500 text-xs tracking-wider">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <span>{i < ratingVal ? '★' : '☆'}</span>
@@ -174,6 +181,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
         </div>
       </div>
     ) : (
+      <!-- EMPTY STATE WHEN NO APPROVED REVIEWS EXIST YET -->
       <div class="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-sm">
         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center text-2xl mx-auto shadow-2xs">
           💬
@@ -207,7 +215,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
       <button id="closeWriteReviewBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
     </div>
 
-    <!-- Review Form with Slug -->
+    <!-- Review Form -->
     <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4 text-xs sm:text-sm text-left">
       <div>
         <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1">Your Name</label>
@@ -243,7 +251,7 @@ const googleRatingSchema = reviewsCount > 0 ? {
   </div>
 </div>
 
-<!-- CLIENT SCRIPT WITH SLUG PAYLOAD -->
+<!-- CLIENT SCRIPT WITH BACK-BUTTON SAFETY & CAROUSEL -->
 <script is:inline>
   const initHotelReviews = () => {
     const track = document.getElementById('reviewsCarouselTrack');
@@ -316,7 +324,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
       });
     }
 
-    // Form Submission
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
