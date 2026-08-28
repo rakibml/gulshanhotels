@@ -5,13 +5,6 @@ popular_hotels_subtitle: Popular Hotels in Gulshan
 featured_hotels:
   - the-westin-dhaka
   - the-midori-by-lakeshore
-  - the-westin-dhaka
-  - the-midori-by-lakeshore
-  - the-westin-dhaka
-  - the-midori-by-lakeshore
-  - the-westin-dhaka
-  - the-midori-by-lakeshore
-  - the-westin-dhaka
-  - the-midori-by-lakeshore
+  - amari-dhaka
 max_hotels: 10
 ---
