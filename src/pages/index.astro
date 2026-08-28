@@ -6,13 +6,20 @@ import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection, getEntry } from 'astro:content';
 
-// 1. Fetch Homepage Settings from CMS
+// 1. Fetch Homepage Settings from CMS (Handles both hyphen and underscore filenames)
 let homepageConfig: any = {};
 try {
-  const homepageEntry = await getEntry('homepage', 'popular_hotels');
-  homepageConfig = homepageEntry?.data || {};
+  const entry = (await getEntry('homepage', 'popular-hotels')) || (await getEntry('homepage', 'popular_hotels'));
+  homepageConfig = entry?.data || {};
 } catch (e) {
-  homepageConfig = {};
+  // Glob Fallback
+  try {
+    const glob = import.meta.glob('../content/homepage/*.md', { eager: true });
+    const firstFile: any = Object.values(glob)[0];
+    homepageConfig = firstFile?.frontmatter || {};
+  } catch (err) {
+    homepageConfig = {};
+  }
 }
 
 // 2. Fetch Hotels Collection
