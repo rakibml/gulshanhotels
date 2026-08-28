@@ -5,7 +5,7 @@ title_style: style_7
 category: 5-Star Luxury Stay
 location: Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-image: https://picsum.photos/id/254/1920/1280.webp
+image: /images/hotels/hero-gulshan.jpg.webp
 gallery:
   - /images/hotels/hero-gulshan.jpg.webp
   - https://picsum.photos/id/1060/1920/1280.webp
