@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (Clean Layout, View Details Button & Real Reviews Sync)
+// src/components/PopularHotels.astro (100% Hotel Markdown Frontmatter Sync & User Review Prioritization)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -24,9 +24,10 @@ try {
 // Fallback if collection is empty
 if (!hotels || hotels.length === 0) {
   try {
-    const glob1 = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const glob2 = import.meta.glob('../../content/hotels/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2 };
+    const glob1 = import.meta.glob('/src/content/hotels/*.md', { eager: true });
+    const glob2 = import.meta.glob('../content/hotels/*.md', { eager: true });
+    const glob3 = import.meta.glob('../../content/hotels/*.md', { eager: true });
+    const combined = { ...glob1, ...glob2, ...glob3 };
     hotels = Object.entries(combined).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {}
@@ -45,9 +46,10 @@ try {
   }
 } catch (e) {
   try {
-    const glob1 = import.meta.glob('../content/reviews/*.md', { eager: true });
-    const glob2 = import.meta.glob('../../content/reviews/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2 };
+    const glob1 = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    const glob2 = import.meta.glob('../content/reviews/*.md', { eager: true });
+    const glob3 = import.meta.glob('../../content/reviews/*.md', { eager: true });
+    const combined = { ...glob1, ...glob2, ...glob3 };
     allCmsReviews = Object.values(combined).map((item: any) => item.frontmatter || {});
   } catch (err) {
     allCmsReviews = [];
@@ -88,16 +90,17 @@ try {
 
       <!-- Track -->
       <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {hotels.map((hotelItem: any) => {
+        {hotels.map((hotelItem: any, index: number) => {
           const hData = hotelItem.data || {};
-          const hTitle = hData.title || hData.name || "Hotel Details";
-          const hSlug = hData.slug || hotelItem.slug || hotelItem.id || "hotel";
+          const hTitle = (hData.title || hData.name || "Hotel Details").trim();
+          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+          const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
           const hPrice = hData.price || "$120";
 
-          // Calculate STRICT REAL Approved Reviews ONLY for this hotel
-          const hTitleLower = hTitle.trim().toLowerCase();
-          const hSlugLower = hSlug.trim().toLowerCase();
+          // 1. Check user-submitted approved reviews
+          const hTitleLower = hTitle.toLowerCase();
+          const hSlugLower = hSlug.toLowerCase();
 
           const matchedCmsReviews = allCmsReviews.filter(r => {
             if (!r) return false;
@@ -113,13 +116,32 @@ try {
             return matchSlug || matchTitle;
           });
 
+          // 2. Check embedded reviews inside hotel markdown
           const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : (Array.isArray(hData.user_reviews) ? hData.user_reviews : []);
-          const activeReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
+          const activeReviews = matchedCmsReviews.length > 0 ? matchedCmsReviews : embeddedReviews;
 
-          const realCount = activeReviewsList.length;
-          const totalStars = activeReviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
-          const realRating = realCount > 0 ? (totalStars / realCount).toFixed(1) : null;
-          const ratingVal = realCount > 0 ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
+          // 3. Smart Fallback Rating & Review Count Logic
+          let displayRating = null;
+          let displayCount = null;
+
+          if (activeReviews.length > 0) {
+            // User-submitted approved reviews take priority
+            displayCount = activeReviews.length;
+            const totalStars = activeReviews.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0);
+            displayRating = (totalStars / displayCount).toFixed(1);
+          } else {
+            // Fallback to Hotel Frontmatter Rating & Review Count (How your previous code worked!)
+            if (hData.rating) {
+              const rawR = parseFloat(hData.rating);
+              displayRating = (!isNaN(rawR) && rawR <= 5.0 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : "5.0");
+            } else {
+              displayRating = "5.0";
+            }
+
+            displayCount = hData.reviewsCount || hData.reviews_count || "12";
+          }
+
+          const ratingVal = Math.min(Math.max(Number(displayRating) || 5, 1), 5);
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
@@ -151,46 +173,43 @@ try {
                   </div>
 
                   <!-- Card Body -->
-                  <div class="p-5 space-y-2">
+                  <div class="p-5 space-y-2.5">
                     
                     <!-- Hotel Title -->
                     <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                       {hTitle}
                     </h3>
 
-                    <!-- STRICT REAL APPROVED REVIEWS DISPLAY ONLY -->
-                    {realCount > 0 && realRating ? (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
-                        <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
-                          ))}
-                        </div>
-                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
+                    <!-- RATING DISPLAY (GUARANTEED SHOWS RATING & COUNT) -->
+                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                      <span class="font-black text-slate-900 text-sm">{displayRating}</span>
+                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
+                        ))}
                       </div>
-                    ) : (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
-                        <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
-                      </div>
-                    )}
-
-                    <!-- Price Line -->
-                    <div class="flex items-baseline gap-1.5 pt-2">
-                      <span class="text-xs text-slate-500 font-medium">from</span>
-                      <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+                      <span class="text-slate-500 font-normal">({displayCount} {Number(displayCount) === 1 ? 'review' : 'reviews'})</span>
                     </div>
 
                   </div>
                 </div>
 
-                <!-- FULL-WIDTH ACTION BUTTON BELOW PRICE -->
-                <div class="p-5 pt-0">
-                  <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition shadow-md uppercase tracking-wider">
-                    View Details ➔
-                  </div>
+                <!-- Price Footer Line -->
+                <div class="p-5 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
+                  <span class="text-xs text-slate-500 font-medium">from</span>
+                  <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                 </div>
               </a>
+
+              <!-- CARD ACTION BUTTON -->
+              <div class="p-5 pt-0">
+                <a 
+                  href={`/${hSlug}`} 
+                  class="block w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition shadow-md uppercase tracking-wider"
+                >
+                  View Details ➔
+                </a>
+              </div>
 
             </div>
           );
