@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% PURE REAL REVIEWS ONLY - ZERO FAKE DATA)
+// src/components/PopularHotels.astro (100% PURE REAL REVIEWS ONLY)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -16,27 +16,28 @@ const {
 let hotels: any[] = [];
 try {
   const allHotels = await getCollection('hotels');
-  hotels = allHotels.filter(h => h.data.popular !== false);
+  if (Array.isArray(allHotels) && allHotels.length > 0) {
+    hotels = allHotels.filter(h => h.data.popular !== false);
+  }
 } catch (e) {
   hotels = [];
 }
 
 // Fallback if collection is empty
-if (!hotels || hotels.length === 0) {
+if (hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('/src/content/hotels/*.md', { eager: true });
     hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {}
-    }));
+    })).filter((h: any) => h.data.popular !== false);
   } catch (e) {
     hotels = [];
   }
 }
 
-// 2. Fetch ALL Review Objects (getCollection + Absolute Root Vite Glob Scanner)
+// 2. Fetch ALL Reviews (Fallback to Glob only if collection is empty)
 let allReviewsList: any[] = [];
-
 try {
   const col = await getCollection('reviews');
   if (Array.isArray(col) && col.length > 0) {
@@ -44,14 +45,16 @@ try {
   }
 } catch (e) {}
 
-try {
-  const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
-  Object.values(globModules).forEach((mod: any) => {
-    if (mod && mod.frontmatter) {
-      allReviewsList.push(mod.frontmatter);
-    }
-  });
-} catch (e) {}
+if (allReviewsList.length === 0) {
+  try {
+    const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    Object.values(globModules).forEach((mod: any) => {
+      if (mod && mod.frontmatter) {
+        allReviewsList.push(mod.frontmatter);
+      }
+    });
+  } catch (e) {}
+}
 ---
 
 <!-- POPULAR HOTELS SECTION -->
@@ -93,26 +96,21 @@ try {
           const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
           const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
-          const hPrice = hData.price || "$120";
+          const hPrice = hData.price ? String(hData.price) : "$120";
 
           const hTitleLower = hTitle.toLowerCase();
           const hSlugLower = hSlug.toLowerCase();
 
-          // Strict Approved Review Filtering for THIS Hotel ONLY
+          // Strict Approved Review Filtering
           const hotelApprovedReviews = allReviewsList.filter(item => {
             if (!item) return false;
-
             const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
             if (!isApproved) return false;
 
             const rHotel = (item.hotel || '').trim().toLowerCase();
             const rSlug = (item.slug || item.hotelSlug || '').trim().toLowerCase();
 
-            const matchTitle = rHotel && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
-            const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
-            const matchSlugInTitle = rHotel && hSlugLower && (rHotel === hSlugLower || hSlugLower.includes(rHotel) || rHotel.includes(hSlugLower));
-
-            return matchTitle || matchSlug || matchSlugInTitle;
+            return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
           });
 
           // Deduplicate by reviewer name & comment
@@ -129,7 +127,6 @@ try {
           const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
           const finalReviewsList = uniqueApprovedReviews.length > 0 ? uniqueApprovedReviews : embedded;
 
-          // STRICT CALCULATION (ZERO FAKE DATA / ZERO FALLBACK NUMBERS)
           const realCount = finalReviewsList.length;
           let realRating: string | null = null;
 
@@ -141,11 +138,24 @@ try {
             realRating = (totalStars / realCount).toFixed(1);
           }
 
-          const ratingVal = realRating ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
+          const ratingVal = realRating ? Math.round(Number(realRating)) : 0;
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
               
+              <!-- Wishlist Heart Button (Placed OUTSIDE <a> tag) -->
+              <button 
+                type="button"
+                class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
+                data-title={hTitle}
+                data-image={hImage}
+                data-url={`/${hSlug}`}
+                data-price={hPrice}
+                aria-label="Add to Wishlist"
+              >
+                <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+              </button>
+
               <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
                 <div>
                   <!-- Card Image Header -->
@@ -158,46 +168,29 @@ try {
                       class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                     />
 
-                    <!-- Gold TripAdvisor Award Badge (Top Left) -->
+                    <!-- Award Badge (Top Left) -->
                     <div class="absolute top-3 left-3 bg-[#f2b203] text-slate-950 font-black text-[10px] px-2 py-1 rounded-md shadow-md flex items-center gap-1 border border-amber-300 tracking-wider">
                       <svg class="w-3.5 h-3.5 fill-slate-950 shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                       <span>2026 CHOICE</span>
                     </div>
-
-                    <!-- Wishlist Heart Button (Top Right) -->
-                    <button 
-                      type="button"
-                      class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
-                      data-title={hTitle}
-                      data-image={hImage}
-                      data-url={`/${hSlug}`}
-                      data-price={hPrice}
-                      aria-label="Add to Wishlist"
-                    >
-                      <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                    </button>
                   </div>
 
                   <!-- Card Body -->
                   <div class="p-5 space-y-2.5">
-                    
-                    <!-- Big Bold Rank Number + Location Badge -->
                     <div class="flex items-center justify-between">
                       <span class="text-3xl font-black font-sans text-slate-900 leading-none">
                         {index + 1}
                       </span>
-
                       <span class="bg-emerald-100 text-emerald-900 border border-emerald-300/80 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                         {hLocation}
                       </span>
                     </div>
 
-                    <!-- Hotel Title -->
                     <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                       {hTitle}
                     </h3>
 
-                    <!-- STRICT REAL APPROVED REVIEWS DISPLAY ONLY -->
+                    <!-- REAL APPROVED REVIEWS DISPLAY -->
                     {realCount > 0 && realRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                         <span class="font-black text-slate-900 text-sm">{realRating}</span>
@@ -213,11 +206,10 @@ try {
                         <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
                       </div>
                     )}
-
                   </div>
                 </div>
 
-                <!-- Price Footer Line -->
+                <!-- Price Footer -->
                 <div class="p-5 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
                   <span class="text-xs text-slate-500 font-medium">from</span>
                   <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
@@ -234,33 +226,24 @@ try {
   </div>
 </section>
 
-<!-- CLIENT SCRIPT FOR CAROUSEL SCROLL & INTERACTIVE WISHLIST TOGGLE -->
+<!-- CLIENT SCRIPT -->
 <script is:inline>
-  const initPopularHotelsSection = () => {
+  function initPopularHotels() {
     const track = document.getElementById('popularHotelsTrack');
     const prevBtn = document.getElementById('popPrevBtn');
     const nextBtn = document.getElementById('popNextBtn');
 
     if (track && prevBtn && nextBtn) {
-      prevBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -320, behavior: 'smooth' });
-      });
-
-      nextBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 320, behavior: 'smooth' });
-      });
+      prevBtn.onclick = () => track.scrollBy({ left: -320, behavior: 'smooth' });
+      nextBtn.onclick = () => track.scrollBy({ left: 320, behavior: 'smooth' });
     }
 
-    // Wishlist Heart Toggle Handler
-    document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
+    // Wishlist Logic
+    const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
+    wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
-      
       let list = [];
-      try {
-        list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
-      } catch (err) {
-        list = [];
-      }
+      try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (e) { list = []; }
 
       const isSaved = list.some(item => item.title === title);
       const iconSvg = btn.querySelector('svg');
@@ -270,24 +253,17 @@ try {
         iconSvg.classList.remove('text-slate-700');
       }
 
-      btn.addEventListener('click', (e) => {
+      btn.onclick = (e) => {
         e.preventDefault();
-        e.stopPropagation();
-
         const image = btn.getAttribute('data-image') || '';
         const url = btn.getAttribute('data-url') || '';
         const price = btn.getAttribute('data-price') || '';
 
-        try {
-          list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
-        } catch (err) {
-          list = [];
-        }
+        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
 
-        const existingIndex = list.findIndex(item => item.title === title);
-
-        if (existingIndex > -1) {
-          list.splice(existingIndex, 1);
+        const idx = list.findIndex(item => item.title === title);
+        if (idx > -1) {
+          list.splice(idx, 1);
           if (iconSvg) {
             iconSvg.setAttribute('fill', 'none');
             iconSvg.classList.remove('text-rose-600');
@@ -303,20 +279,20 @@ try {
         }
 
         localStorage.setItem('gh_wishlist', JSON.stringify(list));
-
         const countEl = document.getElementById('wishlist-count');
         if (countEl) {
-          if (list.length > 0) {
-            countEl.textContent = list.length.toString();
-            countEl.classList.remove('hidden');
-          } else {
-            countEl.classList.add('hidden');
-          }
+          countEl.textContent = list.length.toString();
+          countEl.classList.toggle('hidden', list.length === 0);
         }
-      });
+      };
     });
-  };
+  }
 
-  document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
-  document.addEventListener('astro:page-load', initPopularHotelsSection);
+  // Support both normal load and Astro View Transitions
+  document.addEventListener('astro:page-load', initPopularHotels);
+  if (document.readyState !== 'loading') {
+    initPopularHotels();
+  } else {
+    document.addEventListener('DOMContentLoaded', initPopularHotels);
+  }
 </script>
