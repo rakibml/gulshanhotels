@@ -90,13 +90,12 @@ if (allReviewsList.length === 0) {
 
       <!-- Track -->
       <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {hotels.map((hotelItem: any, index: number) => {
+        {hotels.map((hotelItem: any) => {
           const hData = hotelItem.data || {};
           const hTitle = (hData.title || hData.name || "Hotel Details").trim();
           const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
-          const hLocation = hData.category || hData.location || "Gulshan 2, Dhaka";
-          const hPrice = hData.price ? String(hData.price) : "$120";
+          const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
 
           const hTitleLower = hTitle.toLowerCase();
           const hSlugLower = hSlug.toLowerCase();
@@ -143,7 +142,7 @@ if (allReviewsList.length === 0) {
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
               
-              <!-- Wishlist Heart Button (Placed OUTSIDE <a> tag) -->
+              <!-- Wishlist Heart Button -->
               <button 
                 type="button"
                 class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
@@ -167,25 +166,11 @@ if (allReviewsList.length === 0) {
                       decoding="async" 
                       class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                     />
-
-                    <!-- Award Badge (Top Left) -->
-                    <div class="absolute top-3 left-3 bg-[#f2b203] text-slate-950 font-black text-[10px] px-2 py-1 rounded-md shadow-md flex items-center gap-1 border border-amber-300 tracking-wider">
-                      <svg class="w-3.5 h-3.5 fill-slate-950 shrink-0" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                      <span>2026 CHOICE</span>
-                    </div>
                   </div>
 
                   <!-- Card Body -->
                   <div class="p-5 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                      <span class="text-3xl font-black font-sans text-slate-900 leading-none">
-                        {index + 1}
-                      </span>
-                      <span class="bg-emerald-100 text-emerald-900 border border-emerald-300/80 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                        {hLocation}
-                      </span>
-                    </div>
-
+                    <!-- Hotel Title -->
                     <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                       {hTitle}
                     </h3>
