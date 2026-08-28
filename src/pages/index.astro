@@ -1,11 +1,21 @@
 ---
-// src/pages/index.astro
+// src/pages/index.astro (CMS Homepage Settings & Dynamic Popular Hotels Sync)
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 
+// 1. Fetch Homepage Settings from CMS
+let homepageConfig: any = {};
+try {
+  const homepageEntry = await getEntry('homepage', 'popular_hotels');
+  homepageConfig = homepageEntry?.data || {};
+} catch (e) {
+  homepageConfig = {};
+}
+
+// 2. Fetch Hotels Collection
 let hotels: any[] = [];
 try {
   const collectionData = await getCollection('hotels');
@@ -36,6 +46,8 @@ const popularHotels = hotels.map((h: any) => ({
   ...h,
   title: toTitleCase(h.title)
 })).filter((h: any) => h.popular !== false);
+
+const showPopularSection = homepageConfig.enable_popular_hotels !== false;
 ---
 
 <Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
@@ -45,6 +57,13 @@ const popularHotels = hotels.map((h: any) => ({
   <!-- 2. WELCOME SECTION -->
   <WelcomeSection />
 
-  <!-- 3. POPULAR HOTELS SECTION -->
-  <PopularHotels popularHotels={popularHotels} />
+  <!-- 3. POPULAR HOTELS SECTION (100% CMS CONTROLLED) -->
+  {showPopularSection && (
+    <PopularHotels 
+      title={homepageConfig.popular_hotels_title} 
+      subtitle={homepageConfig.popular_hotels_subtitle}
+      featuredHotels={homepageConfig.featured_hotels}
+      popularHotels={popularHotels} 
+    />
+  )}
 </Layout>
