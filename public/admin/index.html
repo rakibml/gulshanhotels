@@ -51,7 +51,47 @@
             }
           }
 
-          // 3. Fetch Guest Reviews Collection YML File
+          // 3. Homepage Settings Collection (Popular Hotels & Hero Controls)
+          const homepageCollection = {
+            name: "homepage",
+            label: "🏠 Homepage Settings",
+            files: [
+              {
+                name: "popular_hotels",
+                label: "Popular Hotels Carousel Section",
+                file: "src/content/homepage/popular-hotels.md",
+                fields: [
+                  {
+                    label: "Show Popular Hotels Section on Homepage?",
+                    name: "enable_popular_hotels",
+                    widget: "boolean",
+                    default: true
+                  },
+                  {
+                    label: "Section Title",
+                    name: "popular_hotels_title",
+                    widget: "string",
+                    default: "Popular Hotels in Gulshan, Dhaka"
+                  },
+                  {
+                    label: "Section Subtitle",
+                    name: "popular_hotels_subtitle",
+                    widget: "text",
+                    default: "Handpicked top luxury & executive stays recommended by verified guest reviews."
+                  },
+                  {
+                    label: "Maximum Hotels to Show on Carousel",
+                    name: "max_hotels",
+                    widget: "number",
+                    value_type: "int",
+                    default: 10
+                  }
+                ]
+              }
+            ]
+          };
+
+          // 4. Guest Reviews & Subscribers Collections
           let reviewsCollection = null;
           try {
             const resRev = await fetch('/admin/collections/guest-reviews.yml');
@@ -61,7 +101,6 @@
             }
           } catch (err) {}
 
-          // 4. GUARANTEED INLINE SUBSCRIBERS COLLECTION
           const subscribersCollection = {
             name: "subscribers",
             label: "📧 Subscribers List",
@@ -70,7 +109,6 @@
             create: false,
             slug: "{{year}}-{{month}}-{{day}}-{{slug}}",
             summary: "{{email}} — (Subscribed: {{subscribed_at}})",
-            sortable_fields: ["subscribed_at", "email"],
             fields: [
               { label: "Subscriber Email Address", name: "email", widget: "string" },
               { label: "Subscribed Date & Time", name: "subscribed_at", widget: "string" },
@@ -90,11 +128,12 @@
             fields: hotelFields
           };
 
-          // 6. Merge All Collections into Sveltia CMS
+          // 6. Push All Collections into Sveltia CMS
           config.collections = [];
           config.collections.push(hotelCollection);
+          config.collections.push(homepageCollection); // Added Homepage Settings
           if (reviewsCollection) config.collections.push(reviewsCollection);
-          config.collections.push(subscribersCollection); // Guaranteed Push
+          config.collections.push(subscribersCollection);
 
           // 7. Initialize Sveltia CMS
           if (window.CMS && typeof window.CMS.init === 'function') {
