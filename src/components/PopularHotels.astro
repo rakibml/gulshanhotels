@@ -1,11 +1,11 @@
 ---
-// src/components/PopularHotels.astro (Serial Order & Selected Hotels Sync)
+// src/components/PopularHotels.astro (Flexible Object/String Relation Array & Serial Order Sync)
 import { getCollection } from 'astro:content';
 
 interface Props {
   title?: string;
   subtitle?: string;
-  featuredHotels?: string[];
+  featuredHotels?: any[];
 }
 
 const { 
@@ -40,25 +40,35 @@ if (allHotels.length === 0) {
   }
 }
 
-// 2. SORT HOTELS BY ADMIN SELECTED SERIAL ORDER (1st, 2nd, 3rd...)
+// 2. EXTRACT SERIAL SLUGS FROM CMS RELATION ARRAY (Handles strings or objects)
+const selectedSlugs = Array.isArray(featuredHotels) 
+  ? featuredHotels.map((item: any) => {
+      if (typeof item === 'object' && item !== null) {
+        return item.hotel_slug || item.slug || item.title || item.name || '';
+      }
+      return String(item || '');
+    }).filter(Boolean)
+  : [];
+
+// 3. SORT HOTELS BY ADMIN SELECTED SERIAL ORDER (1st, 2nd, 3rd...)
 let hotels: any[] = [];
-const selectedSlugs = Array.isArray(featuredHotels) ? featuredHotels.filter(Boolean) : [];
 
 if (selectedSlugs.length > 0) {
-  // Render in exact admin serial order!
   selectedSlugs.forEach(slugStr => {
     const cleanTarget = String(slugStr).trim().toLowerCase();
     const found = allHotels.find(h => {
       const hSlug = String(h.data?.slug || h.slug || h.id || '').trim().toLowerCase();
       const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
-      return hSlug === cleanTarget || hTitle === cleanTarget;
+      return hSlug === cleanTarget || hTitle === cleanTarget || cleanTarget.includes(hSlug) || cleanTarget.includes(hTitle);
     });
-    if (found && !hotels.some(x => x.slug === found.slug)) {
+    if (found && !hotels.some(x => (x.data?.title || x.slug) === (found.data?.title || found.slug))) {
       hotels.push(found);
     }
   });
-} else {
-  // Default: Show all popular hotels
+}
+
+// Fallback if no specific hotels selected or matches empty
+if (hotels.length === 0) {
   const uniqueHotelsMap = new Map();
   allHotels.forEach(h => {
     if (h.data?.popular !== false) {
@@ -71,7 +81,7 @@ if (selectedSlugs.length > 0) {
   hotels = Array.from(uniqueHotelsMap.values());
 }
 
-// 3. Fetch Approved Guest Reviews
+// 4. Fetch Approved Guest Reviews
 let allCmsReviews: any[] = [];
 try {
   const reviewsCol = await getCollection('reviews');
@@ -85,9 +95,9 @@ try {
   const glob2 = import.meta.glob('../content/reviews/*.md', { eager: true });
   const glob3 = import.meta.glob('../../content/reviews/*.md', { eager: true });
   const combined = { ...glob1, ...glob2, ...glob3 };
-  Object.values(combined).forEach((item: any) => {
-    if (item && item.frontmatter) {
-      allCmsReviews.push(item.frontmatter);
+  Object.values(combined).forEach((mod: any) => {
+    if (mod && mod.frontmatter) {
+      allCmsReviews.push(mod.frontmatter);
     }
   });
 } catch (e) {}
@@ -97,7 +107,7 @@ try {
 <section id="hotels" class="bg-white pt-0 pb-6 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
   <div class="space-y-6">
     
-    <!-- Section Header -->
+    <!-- Section Header (Admin Controllable Title & Subtitle) -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-left border-b border-slate-200/80 pb-4">
       <div class="space-y-1">
         <h2 class="text-2xl sm:text-3xl font-black font-sans text-slate-900 tracking-tight">
@@ -153,8 +163,18 @@ try {
             return matchTitle || matchSlug;
           });
 
+          const uniqueApprovedReviews: any[] = [];
+          const seenKeys = new Set();
+          matchedCmsReviews.forEach(r => {
+            const key = `${r.name}-${r.comment}`;
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key);
+              uniqueApprovedReviews.push(r);
+            }
+          });
+
           const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
-          const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
+          const finalReviewsList = uniqueApprovedReviews.length > 0 ? uniqueApprovedReviews : embedded;
 
           const realCount = finalReviewsList.length;
           let realRating: string | null = null;
@@ -187,7 +207,7 @@ try {
                       class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                     />
 
-                    <!-- Wishlist Heart Button -->
+                    <!-- Wishlist Heart Button (Top Right) -->
                     <button 
                       type="button"
                       class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
@@ -207,7 +227,6 @@ try {
                       {hTitle}
                     </h3>
 
-                    <!-- REAL APPROVED REVIEWS DISPLAY -->
                     {realCount > 0 && realRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                         <span class="font-black text-slate-900 text-sm">{realRating}</span>
@@ -224,7 +243,6 @@ try {
                       </div>
                     )}
 
-                    <!-- Price Line -->
                     <div class="flex items-baseline gap-1.5 pt-2">
                       <span class="text-xs text-slate-500 font-medium">from</span>
                       <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
@@ -233,7 +251,6 @@ try {
                   </div>
                 </div>
 
-                <!-- FULL-WIDTH ACTION BUTTON BELOW PRICE -->
                 <div class="p-5 pt-0">
                   <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition shadow-md uppercase tracking-wider">
                     View Details ➔
