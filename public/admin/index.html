@@ -51,7 +51,7 @@
             }
           }
 
-          // 3. Homepage Settings Collection (Popular Hotels & Hero Controls)
+          // 3. Homepage Settings Collection with Serial Hotel Selection
           const homepageCollection = {
             name: "homepage",
             label: "🏠 Homepage Settings",
@@ -80,11 +80,20 @@
                     default: "Handpicked top luxury & executive stays recommended by verified guest reviews."
                   },
                   {
-                    label: "Maximum Hotels to Show on Carousel",
-                    name: "max_hotels",
-                    widget: "number",
-                    value_type: "int",
-                    default: 10
+                    label: "Select Hotels & Drag to Set Serial Order (1st, 2nd, 3rd...)",
+                    name: "featured_hotels",
+                    widget: "list",
+                    required: false,
+                    hint: "Add hotels from dropdown and drag & drop to change serial order on homepage!",
+                    field: {
+                      label: "Select Hotel",
+                      name: "hotel_slug",
+                      widget: "relation",
+                      collection: "hotels",
+                      search_fields: ["title", "name"],
+                      value_field: "{{slug}}",
+                      display_fields: ["title"]
+                    }
                   }
                 ]
               }
@@ -93,6 +102,8 @@
 
           // 4. Guest Reviews & Subscribers Collections
           let reviewsCollection = null;
+          let subscribersCollection = null;
+
           try {
             const resRev = await fetch('/admin/collections/guest-reviews.yml');
             if (resRev.ok) {
@@ -101,20 +112,13 @@
             }
           } catch (err) {}
 
-          const subscribersCollection = {
-            name: "subscribers",
-            label: "📧 Subscribers List",
-            label_singular: "Subscriber",
-            folder: "src/content/subscribers",
-            create: false,
-            slug: "{{year}}-{{month}}-{{day}}-{{slug}}",
-            summary: "{{email}} — (Subscribed: {{subscribed_at}})",
-            fields: [
-              { label: "Subscriber Email Address", name: "email", widget: "string" },
-              { label: "Subscribed Date & Time", name: "subscribed_at", widget: "string" },
-              { label: "Subscription Status", name: "status", widget: "string", default: "active" }
-            ]
-          };
+          try {
+            const resSub = await fetch('/admin/collections/subscribers.yml');
+            if (resSub.ok) {
+              const textSub = await resSub.text();
+              subscribersCollection = jsyaml.load(textSub);
+            }
+          } catch (err) {}
 
           // 5. Build Hotel Collection
           const hotelCollection = {
@@ -128,12 +132,12 @@
             fields: hotelFields
           };
 
-          // 6. Push All Collections into Sveltia CMS
+          // 6. Merge Collections
           config.collections = [];
           config.collections.push(hotelCollection);
-          config.collections.push(homepageCollection); // Added Homepage Settings
+          config.collections.push(homepageCollection);
           if (reviewsCollection) config.collections.push(reviewsCollection);
-          config.collections.push(subscribersCollection);
+          if (subscribersCollection) config.collections.push(subscribersCollection);
 
           // 7. Initialize Sveltia CMS
           if (window.CMS && typeof window.CMS.init === 'function') {
