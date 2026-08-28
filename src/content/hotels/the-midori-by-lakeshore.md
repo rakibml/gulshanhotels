@@ -16,7 +16,7 @@ enable_view_prices: true
 enable_official_site: true
 popular: true
 about_notice: ''
-price: ৳ 18,500 / night
+price: 120$ / night
 checkIn: 2:00 PM
 checkOut: 12:00 PM
 powerBackup: 24/7 Generator
