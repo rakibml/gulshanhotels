@@ -8,8 +8,8 @@ interface Props {
 }
 
 const { 
-  title = "Travelers' Choice: Top hotels", 
-  subtitle = "Handpicked top stays in Gulshan - decided by verified guest reviews." 
+  title = "Popular Hotels in Gulshan, Dhaka", 
+  subtitle = "" 
 } = Astro.props;
 
 // 1. Fetch Hotels from Astro Content Collection
@@ -57,19 +57,21 @@ if (allReviewsList.length === 0) {
 }
 ---
 
-<!-- POPULAR HOTELS SECTION -->
-<section id="hotels" class="bg-[#F8FAF9] pt-0 pb-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-6">
+<!-- POPULAR HOTELS SECTION (Padding reduced to prevent excess whitespace) -->
+<section id="hotels" class="bg-[#F8FAF9] py-4 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+  <div class="space-y-3">
     
-    <!-- Section Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-left border-b border-slate-200/80 pb-4">
-      <div class="space-y-1">
-        <h2 class="text-2xl sm:text-3xl font-black font-sans text-slate-900 tracking-tight">
+    <!-- Section Header (Compact spacing) -->
+    <div class="flex justify-between items-center text-left border-b border-slate-200/80 pb-2.5">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
           {title}
         </h2>
-        <p class="text-xs sm:text-sm text-slate-600 font-medium">
-          {subtitle}
-        </p>
+        {subtitle && (
+          <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       <a href="/#hotels" class="text-xs sm:text-sm font-extrabold text-slate-900 hover:text-emerald-800 underline transition shrink-0">
@@ -88,8 +90,8 @@ if (allReviewsList.length === 0) {
         <button id="popNextBtn" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
       )}
 
-      <!-- Track -->
-      <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <!-- Track (Reduced top/bottom padding) -->
+      <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-1 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {hotels.map((hotelItem: any) => {
           const hData = hotelItem.data || {};
           const hTitle = (hData.title || hData.name || "Hotel Details").trim();
@@ -112,7 +114,7 @@ if (allReviewsList.length === 0) {
             return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
           });
 
-          // Deduplicate by reviewer name & comment
+          // Deduplicate
           const uniqueApprovedReviews: any[] = [];
           const seenKeys = new Set();
           hotelApprovedReviews.forEach(r => {
@@ -169,15 +171,15 @@ if (allReviewsList.length === 0) {
                   </div>
 
                   <!-- Card Body -->
-                  <div class="p-5 space-y-2.5">
+                  <div class="p-4 space-y-2">
                     <!-- Hotel Title -->
                     <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                       {hTitle}
                     </h3>
 
-                    <!-- REAL APPROVED REVIEWS DISPLAY -->
+                    <!-- Reviews Display -->
                     {realCount > 0 && realRating ? (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                      <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
                         <span class="font-black text-slate-900 text-sm">{realRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                           {Array.from({ length: 5 }).map((_, i) => (
@@ -187,7 +189,7 @@ if (allReviewsList.length === 0) {
                         <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
                       </div>
                     ) : (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
+                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                         <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
                       </div>
                     )}
@@ -195,9 +197,9 @@ if (allReviewsList.length === 0) {
                 </div>
 
                 <!-- Price Footer -->
-                <div class="p-5 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
+                <div class="p-4 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
                   <span class="text-xs text-slate-500 font-medium">from</span>
-                  <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+                  <span class="text-base sm:text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                 </div>
               </a>
 
@@ -273,7 +275,6 @@ if (allReviewsList.length === 0) {
     });
   }
 
-  // Support both normal load and Astro View Transitions
   document.addEventListener('astro:page-load', initPopularHotels);
   if (document.readyState !== 'loading') {
     initPopularHotels();
