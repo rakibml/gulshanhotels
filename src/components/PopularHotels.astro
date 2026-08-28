@@ -36,7 +36,7 @@ if (hotels.length === 0) {
   }
 }
 
-// 2. Fetch ALL Reviews (Fallback to Glob only if collection is empty)
+// 2. Fetch ALL Reviews
 let allReviewsList: any[] = [];
 try {
   const col = await getCollection('reviews');
@@ -57,12 +57,12 @@ if (allReviewsList.length === 0) {
 }
 ---
 
-<!-- POPULAR HOTELS SECTION (Padding reduced to prevent excess whitespace) -->
-<section id="hotels" class="bg-[#F8FAF9] py-4 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-3">
+<!-- POPULAR HOTELS SECTION (Zero extra bottom space) -->
+<section id="hotels" class="bg-[#F8FAF9] pt-3 pb-3 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+  <div>
     
-    <!-- Section Header (Compact spacing) -->
-    <div class="flex justify-between items-center text-left border-b border-slate-200/80 pb-2.5">
+    <!-- Section Header -->
+    <div class="flex justify-between items-center text-left border-b border-slate-200/80 pb-2.5 mb-3">
       <div>
         <h2 class="text-xl sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
           {title}
@@ -90,8 +90,8 @@ if (allReviewsList.length === 0) {
         <button id="popNextBtn" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
       )}
 
-      <!-- Track (Reduced top/bottom padding) -->
-      <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-1 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <!-- Track (Strictly compact) -->
+      <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto overflow-y-hidden scroll-smooth py-1 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {hotels.map((hotelItem: any) => {
           const hData = hotelItem.data || {};
           const hTitle = (hData.title || hData.name || "Hotel Details").trim();
@@ -142,7 +142,7 @@ if (allReviewsList.length === 0) {
           const ratingVal = realRating ? Math.round(Number(realRating)) : 0;
 
           return (
-            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
+            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative mb-1">
               
               <!-- Wishlist Heart Button -->
               <button 
@@ -159,7 +159,7 @@ if (allReviewsList.length === 0) {
 
               <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
                 <div>
-                  <!-- Card Image Header -->
+                  <!-- Card Image -->
                   <div class="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-900">
                     <img 
                       src={hImage} 
@@ -172,12 +172,11 @@ if (allReviewsList.length === 0) {
 
                   <!-- Card Body -->
                   <div class="p-4 space-y-2">
-                    <!-- Hotel Title -->
                     <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
                       {hTitle}
                     </h3>
 
-                    <!-- Reviews Display -->
+                    <!-- Reviews -->
                     {realCount > 0 && realRating ? (
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
                         <span class="font-black text-slate-900 text-sm">{realRating}</span>
@@ -225,7 +224,6 @@ if (allReviewsList.length === 0) {
       nextBtn.onclick = () => track.scrollBy({ left: 320, behavior: 'smooth' });
     }
 
-    // Wishlist Logic
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
