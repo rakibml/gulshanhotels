@@ -1,24 +1,36 @@
 ---
-// src/pages/index.astro (CMS Homepage Settings & Dynamic Popular Hotels Sync)
+// src/pages/index.astro (100% Bulletproof Eager Glob Sync for Homepage CMS Settings)
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
 import { getCollection, getEntry } from 'astro:content';
 
-// 1. Fetch Homepage Settings from CMS (Handles both hyphen and underscore filenames)
+// 1. Fetch Homepage Settings from CMS (Eager Glob Direct File Scanner - 100% Bulletproof)
 let homepageConfig: any = {};
+
 try {
-  const entry = (await getEntry('homepage', 'popular-hotels')) || (await getEntry('homepage', 'popular_hotels'));
-  homepageConfig = entry?.data || {};
+  const globFiles = import.meta.glob('../content/homepage/*.md', { eager: true });
+  const fileList: any[] = Object.values(globFiles);
+  if (fileList.length > 0) {
+    homepageConfig = fileList[0]?.frontmatter || fileList[0]?.data || {};
+  }
 } catch (e) {
-  // Glob Fallback
+  console.warn('Homepage eager glob import fallback...', e);
+}
+
+// Fallback to Content Collections getEntry
+if (!homepageConfig || Object.keys(homepageConfig).length === 0) {
   try {
-    const glob = import.meta.glob('../content/homepage/*.md', { eager: true });
-    const firstFile: any = Object.values(glob)[0];
-    homepageConfig = firstFile?.frontmatter || {};
-  } catch (err) {
-    homepageConfig = {};
+    const homepageEntry = (await getEntry('homepage', 'popular-hotels')) || (await getEntry('homepage', 'popular_hotels'));
+    homepageConfig = homepageEntry?.data || {};
+  } catch (e) {
+    try {
+      const col = await getCollection('homepage');
+      if (col && col.length > 0) {
+        homepageConfig = col[0]?.data || {};
+      }
+    } catch (err) {}
   }
 }
 
@@ -64,7 +76,7 @@ const showPopularSection = homepageConfig.enable_popular_hotels !== false;
   <!-- 2. WELCOME SECTION -->
   <WelcomeSection />
 
-  <!-- 3. POPULAR HOTELS SECTION (100% CMS CONTROLLED) -->
+  <!-- 3. POPULAR HOTELS SECTION (100% CMS CONTROLLED VIA EAGER GLOB) -->
   {showPopularSection && (
     <PopularHotels 
       title={homepageConfig.popular_hotels_title} 
