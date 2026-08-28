@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Dynamic CMS Reviews - ZERO DEMO REVIEWS)
+// src/components/hotel/HotelReviews.astro (Dynamic CMS Reviews, Fail-Safe & 100% Build Proof)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -95,6 +95,9 @@ const googleRatingSchema = reviewsCount > 0 ? {
     }
   }))
 } : null;
+
+// Helper array for star loops
+const starsArray = [0, 1, 2, 3, 4];
 ---
 
 <!-- GOOGLE RICH SNIPPET SCHEMA FOR SERP GOLDEN STARS -->
@@ -118,7 +121,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
       <!-- Right Rating Summary, Carousel Arrows & Write Review Button -->
       <div class="flex items-center gap-3">
         
-        <!-- Score Summary (Shown ONLY if approved reviews exist) -->
         {reviewsCount > 0 && (
           <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 bg-white px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-sm">
             <span class="font-black text-slate-900 text-base">{hotelRating}</span>
@@ -129,7 +131,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
-        <!-- Carousel Navigation Arrows -->
         {reviewsCount > 1 && (
           <div class="flex items-center gap-1.5">
             <button id="reviewPrevBtn" aria-label="Previous Reviews" class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-[#0d3b23] hover:text-white transition cursor-pointer text-xs font-bold active:scale-95">
@@ -141,7 +142,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
           </div>
         )}
 
-        <!-- Clean Write Review Button -->
         <button 
           id="openWriteReviewBtn" 
           class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition cursor-pointer"
@@ -162,9 +162,8 @@ const googleRatingSchema = reviewsCount > 0 ? {
               <div class="w-[290px] sm:w-[340px] shrink-0 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition">
                 <div class="space-y-2 text-left">
                   <div class="flex items-center justify-between">
-                    <!-- Dynamic Star Rating -->
                     <div class="flex items-center text-amber-500 text-xs tracking-wider">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {starsArray.map((i) => (
                         <span>{i < ratingVal ? '★' : '☆'}</span>
                       ))}
                     </div>
@@ -181,7 +180,6 @@ const googleRatingSchema = reviewsCount > 0 ? {
         </div>
       </div>
     ) : (
-      <!-- EMPTY STATE WHEN NO APPROVED REVIEWS EXIST YET -->
       <div class="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-sm">
         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center text-2xl mx-auto shadow-2xs">
           💬
