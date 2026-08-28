@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (Deduplicated Hotels, Pure White Background & Reduced Bottom Padding)
+// src/components/PopularHotels.astro (100% Fail-Safe, Pure White Background, Deduplicated Hotels)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -16,7 +16,9 @@ const {
 let rawHotels: any[] = [];
 try {
   const allHotels = await getCollection('hotels');
-  rawHotels = allHotels.filter(h => h.data.popular !== false);
+  if (Array.isArray(allHotels)) {
+    rawHotels = allHotels.filter(h => h.data && h.data.popular !== false);
+  }
 } catch (e) {
   rawHotels = [];
 }
@@ -65,9 +67,12 @@ try {
     allCmsReviews = [];
   }
 }
+
+// Fixed array for 5 green rating dots
+const dotsArray = [0, 1, 2, 3, 4];
 ---
 
-<!-- POPULAR HOTELS SECTION (PURE WHITE BACKGROUND & REDUCED BOTTOM PADDING) -->
+<!-- POPULAR HOTELS SECTION -->
 <section id="hotels" class="bg-white pt-0 pb-6 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
   <div class="space-y-6">
     
@@ -100,7 +105,7 @@ try {
 
       <!-- Track -->
       <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-3 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {hotels.map((hotelItem: any, index: number) => {
+        {hotels.map((hotelItem: any) => {
           const hData = hotelItem.data || {};
           const hTitle = (hData.title || hData.name || "Hotel Details").trim();
           const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
@@ -198,7 +203,7 @@ try {
                       <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                         <span class="font-black text-slate-900 text-sm">{realRating}</span>
                         <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                          {Array.from({ length: 5 }).map((_, i) => (
+                          {dotsArray.map((i) => (
                             <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                           ))}
                         </div>
@@ -311,4 +316,15 @@ try {
         if (countEl) {
           if (list.length > 0) {
             countEl.textContent = list.length.toString();
-            countEl.classList.rem
+            countEl.classList.remove('hidden');
+          } else {
+            countEl.classList.add('hidden');
+          }
+        }
+      });
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
+  document.addEventListener('astro:page-load', initPopularHotelsSection);
+</script>
