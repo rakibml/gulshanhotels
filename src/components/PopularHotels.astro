@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% PURE REAL REVIEWS ONLY)
+// src/components/PopularHotels.astro
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,7 +12,7 @@ const {
   subtitle = "" 
 } = Astro.props;
 
-// 1. Fetch Hotels from Astro Content Collection
+// 1. Fetch Hotels
 let hotels: any[] = [];
 try {
   const allHotels = await getCollection('hotels');
@@ -23,7 +23,6 @@ try {
   hotels = [];
 }
 
-// Fallback if collection is empty
 if (hotels.length === 0) {
   try {
     const rawGlob = import.meta.glob('/src/content/hotels/*.md', { eager: true });
@@ -36,7 +35,7 @@ if (hotels.length === 0) {
   }
 }
 
-// 2. Fetch ALL Reviews
+// 2. Fetch Reviews
 let allReviewsList: any[] = [];
 try {
   const col = await getCollection('reviews');
@@ -57,156 +56,153 @@ if (allReviewsList.length === 0) {
 }
 ---
 
-<!-- POPULAR HOTELS SECTION (Zero extra bottom space) -->
-<section id="hotels" class="bg-[#F8FAF9] pt-3 pb-3 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div>
-    
-    <!-- Section Header -->
-    <div class="flex justify-between items-center text-left border-b border-slate-200/80 pb-2.5 mb-3">
-      <div>
-        <h2 class="text-xl sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
-          {title}
-        </h2>
-        {subtitle && (
-          <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
-            {subtitle}
-          </p>
-        )}
-      </div>
-
-      <a href="/#hotels" class="text-xs sm:text-sm font-extrabold text-slate-900 hover:text-emerald-800 underline transition shrink-0">
-        See all
-      </a>
+<!-- POPULAR HOTELS SECTION -->
+<section id="hotels" class="bg-[#F8FAF9] pt-4 pb-2 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80 h-auto">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-center text-left border-b border-slate-200/80 pb-2 mb-3">
+    <div>
+      <h2 class="text-xl sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
+        {title}
+      </h2>
+      {subtitle && (
+        <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+          {subtitle}
+        </p>
+      )}
     </div>
 
-    <!-- Carousel Track Container -->
-    <div class="relative group">
-      
-      <!-- Carousel Navigation Arrows -->
-      {hotels.length > 3 && (
-        <button id="popPrevBtn" aria-label="Previous Hotels" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❮</button>
-      )}
-      {hotels.length > 3 && (
-        <button id="popNextBtn" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
-      )}
+    <a href="/#hotels" class="text-xs sm:text-sm font-extrabold text-slate-900 hover:text-emerald-800 underline transition shrink-0">
+      See all
+    </a>
+  </div>
 
-      <!-- Track (Strictly compact) -->
-      <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto overflow-y-hidden scroll-smooth py-1 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {hotels.map((hotelItem: any) => {
-          const hData = hotelItem.data || {};
-          const hTitle = (hData.title || hData.name || "Hotel Details").trim();
-          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
-          const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
-          const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
+  <!-- Carousel Track Container -->
+  <div class="relative group h-auto">
+    
+    <!-- Carousel Navigation Arrows -->
+    {hotels.length > 3 && (
+      <button id="popPrevBtn" aria-label="Previous Hotels" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❮</button>
+    )}
+    {hotels.length > 3 && (
+      <button id="popNextBtn" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 shadow-xl text-slate-800 hover:bg-slate-900 hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
+    )}
 
-          const hTitleLower = hTitle.toLowerCase();
-          const hSlugLower = hSlug.toLowerCase();
+    <!-- Track -->
+    <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto overflow-y-hidden scroll-smooth pt-1 pb-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden items-start">
+      {hotels.map((hotelItem: any) => {
+        const hData = hotelItem.data || {};
+        const hTitle = (hData.title || hData.name || "Hotel Details").trim();
+        const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
+        const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+        const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
 
-          // Strict Approved Review Filtering
-          const hotelApprovedReviews = allReviewsList.filter(item => {
-            if (!item) return false;
-            const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
-            if (!isApproved) return false;
+        const hTitleLower = hTitle.toLowerCase();
+        const hSlugLower = hSlug.toLowerCase();
 
-            const rHotel = (item.hotel || '').trim().toLowerCase();
-            const rSlug = (item.slug || item.hotelSlug || '').trim().toLowerCase();
+        // Strict Review Filtering
+        const hotelApprovedReviews = allReviewsList.filter(item => {
+          if (!item) return false;
+          const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+          if (!isApproved) return false;
 
-            return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
-          });
+          const rHotel = (item.hotel || '').trim().toLowerCase();
+          const rSlug = (item.slug || item.hotelSlug || '').trim().toLowerCase();
 
-          // Deduplicate
-          const uniqueApprovedReviews: any[] = [];
-          const seenKeys = new Set();
-          hotelApprovedReviews.forEach(r => {
-            const key = `${r.name}-${r.comment}`;
-            if (!seenKeys.has(key)) {
-              seenKeys.add(key);
-              uniqueApprovedReviews.push(r);
-            }
-          });
+          return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
+        });
 
-          const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
-          const finalReviewsList = uniqueApprovedReviews.length > 0 ? uniqueApprovedReviews : embedded;
-
-          const realCount = finalReviewsList.length;
-          let realRating: string | null = null;
-
-          if (realCount > 0) {
-            const totalStars = finalReviewsList.reduce((sum: number, r: any) => {
-              const num = parseFloat(r.rating);
-              return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
-            }, 0);
-            realRating = (totalStars / realCount).toFixed(1);
+        // Deduplicate
+        const uniqueApprovedReviews: any[] = [];
+        const seenKeys = new Set();
+        hotelApprovedReviews.forEach(r => {
+          const key = `${r.name}-${r.comment}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            uniqueApprovedReviews.push(r);
           }
+        });
 
-          const ratingVal = realRating ? Math.round(Number(realRating)) : 0;
+        const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
+        const finalReviewsList = uniqueApprovedReviews.length > 0 ? uniqueApprovedReviews : embedded;
 
-          return (
-            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative mb-1">
-              
-              <!-- Wishlist Heart Button -->
-              <button 
-                type="button"
-                class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
-                data-title={hTitle}
-                data-image={hImage}
-                data-url={`/${hSlug}`}
-                data-price={hPrice}
-                aria-label="Add to Wishlist"
-              >
-                <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-              </button>
+        const realCount = finalReviewsList.length;
+        let realRating: string | null = null;
 
-              <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
-                <div>
-                  <!-- Card Image -->
-                  <div class="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-900">
-                    <img 
-                      src={hImage} 
-                      alt={`${hTitle} Photo`} 
-                      loading="lazy" 
-                      decoding="async" 
-                      class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-                    />
-                  </div>
+        if (realCount > 0) {
+          const totalStars = finalReviewsList.reduce((sum: number, r: any) => {
+            const num = parseFloat(r.rating);
+            return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
+          }, 0);
+          realRating = (totalStars / realCount).toFixed(1);
+        }
 
-                  <!-- Card Body -->
-                  <div class="p-4 space-y-2">
-                    <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
-                      {hTitle}
-                    </h3>
+        const ratingVal = realRating ? Math.round(Number(realRating)) : 0;
 
-                    <!-- Reviews -->
-                    {realCount > 0 && realRating ? (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
-                        <span class="font-black text-slate-900 text-sm">{realRating}</span>
-                        <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
-                          ))}
-                        </div>
-                        <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
-                      </div>
-                    ) : (
-                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                        <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
-                      </div>
-                    )}
-                  </div>
+        return (
+          <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative">
+            
+            <!-- Wishlist Heart Button -->
+            <button 
+              type="button"
+              class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
+              data-title={hTitle}
+              data-image={hImage}
+              data-url={`/${hSlug}`}
+              data-price={hPrice}
+              aria-label="Add to Wishlist"
+            >
+              <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </button>
+
+            <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
+              <div>
+                <!-- Card Image -->
+                <div class="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-900">
+                  <img 
+                    src={hImage} 
+                    alt={`${hTitle} Photo`} 
+                    loading="lazy" 
+                    decoding="async" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                  />
                 </div>
 
-                <!-- Price Footer -->
-                <div class="p-4 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
-                  <span class="text-xs text-slate-500 font-medium">from</span>
-                  <span class="text-base sm:text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+                <!-- Card Body -->
+                <div class="p-4 space-y-2">
+                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
+                    {hTitle}
+                  </h3>
+
+                  <!-- Reviews -->
+                  {realCount > 0 && realRating ? (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
+                      <span class="font-black text-slate-900 text-sm">{realRating}</span>
+                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
+                        ))}
+                      </div>
+                      <span class="text-slate-500 font-normal">({realCount} {realCount === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  ) : (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                      <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
+                    </div>
+                  )}
                 </div>
-              </a>
+              </div>
 
-            </div>
-          );
-        })}
-      </div>
+              <!-- Price Footer -->
+              <div class="p-4 pt-0 border-t border-slate-100/80 flex items-baseline gap-1.5 mt-2">
+                <span class="text-xs text-slate-500 font-medium">from</span>
+                <span class="text-base sm:text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+              </div>
+            </a>
 
+          </div>
+        );
+      })}
     </div>
 
   </div>
