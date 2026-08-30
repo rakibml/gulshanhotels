@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Cloudflare Build Safe, Matching Screenshot UI)
+// src/components/AllHotelsDirectory.astro (100% Cloudflare Build Safe - Fixed const reassignment)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -33,7 +33,7 @@ if (!rawHotels || rawHotels.length === 0) {
   }
 }
 
-// Deduplicate
+// Deduplicate Hotels
 const uniqueHotelsMap = new Map();
 rawHotels.forEach(h => {
   const key = (h.data?.title || h.data?.name || h.slug || h.id || '').trim().toLowerCase();
@@ -227,7 +227,8 @@ const svgMap = {
             const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
             const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
 
-            const realCount = finalReviewsList.length;
+            // Re-assignable Let Variables (Fixes const re-assignment build error!)
+            let realCount = finalReviewsList.length;
             let realRating: string | null = null;
 
             if (realCount > 0) {
