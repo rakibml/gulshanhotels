@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
 import PopularHotels from '../components/PopularHotels.astro';
+import AllHotelsDirectory from '../components/AllHotelsDirectory.astro';
 import { getCollection, getEntry } from 'astro:content';
 
 // 1. Fetch Homepage Settings from CMS (Eager Glob Direct File Scanner - 100% Bulletproof)
@@ -67,9 +68,10 @@ const popularHotels = hotels.map((h: any) => ({
 })).filter((h: any) => h.popular !== false);
 
 const showPopularSection = homepageConfig.enable_popular_hotels !== false;
+const showAllHotelsSection = homepageConfig.enable_all_hotels !== false;
 ---
 
-<Layout title="GulshanHotels.com - Verified Gulshan Hotel Audits & Local Guides">
+<Layout title="Gulshan Hotels — Best 5-Star & Luxury Hotels in Gulshan, Dhaka">
   <!-- 1. HERO BANNER -->
   <Hero />
 
@@ -83,6 +85,14 @@ const showPopularSection = homepageConfig.enable_popular_hotels !== false;
       subtitle={homepageConfig.popular_hotels_subtitle}
       featuredHotels={homepageConfig.featured_hotels}
       popularHotels={popularHotels} 
+    />
+  )}
+
+  <!-- 4. ALL HOTELS DIRECTORY SECTION (WITH AREA FILTERS) -->
+  {showAllHotelsSection && (
+    <AllHotelsDirectory 
+      title={homepageConfig.all_hotels_title}
+      subtitle={homepageConfig.all_hotels_subtitle}
     />
   )}
 </Layout>
