@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Matching Screenshot UI - Zero Emojis, Sidebar Filters & Grid)
+// src/components/AllHotelsDirectory.astro (100% Cloudflare Build Safe, Matching Screenshot UI)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -23,11 +23,8 @@ try {
 
 if (!rawHotels || rawHotels.length === 0) {
   try {
-    const glob1 = import.meta.glob('/src/content/hotels/*.md', { eager: true });
-    const glob2 = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const glob3 = import.meta.glob('../../content/hotels/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2, ...glob3 };
-    rawHotels = Object.entries(combined).map(([filePath, item]: [string, any]) => ({
+    const rawGlob = import.meta.glob('/src/content/hotels/*.md', { eager: true });
+    rawHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {}
     }));
@@ -36,7 +33,7 @@ if (!rawHotels || rawHotels.length === 0) {
   }
 }
 
-// Deduplicate Hotels
+// Deduplicate
 const uniqueHotelsMap = new Map();
 rawHotels.forEach(h => {
   const key = (h.data?.title || h.data?.name || h.slug || h.id || '').trim().toLowerCase();
@@ -47,7 +44,7 @@ rawHotels.forEach(h => {
 const hotels = Array.from(uniqueHotelsMap.values());
 const totalHotelsCount = hotels.length;
 
-// 2. Fetch Approved Guest Reviews from src/content/reviews/
+// 2. Fetch Approved Guest Reviews
 let allCmsReviews: any[] = [];
 try {
   const reviewsCol = await getCollection('reviews');
@@ -56,24 +53,22 @@ try {
   }
 } catch (e) {
   try {
-    const glob1 = import.meta.glob('/src/content/reviews/*.md', { eager: true });
-    const glob2 = import.meta.glob('../content/reviews/*.md', { eager: true });
-    const glob3 = import.meta.glob('../../content/reviews/*.md', { eager: true });
-    const combined = { ...glob1, ...glob2, ...glob3 };
-    allCmsReviews = Object.values(combined).map((item: any) => item.frontmatter || {});
+    const rawGlob = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    Object.values(rawGlob).forEach((mod: any) => {
+      if (mod && mod.frontmatter) {
+        allCmsReviews.push(mod.frontmatter);
+      }
+    });
   } catch (err) {
     allCmsReviews = [];
   }
 }
 
-// SVG Vector Icons Dictionary (ZERO STICKERS)
+// SVG Vector Icons Dictionary
 const svgMap = {
   wifi: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
   pool: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
   spa: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
-  gym: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
-  dining: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
-  kids: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9-2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>`,
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
   search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
   gridIcon: `<svg class="w-4 h-4 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
@@ -85,7 +80,7 @@ const svgMap = {
 <section id="all-hotels-directory" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
   <div class="space-y-6">
     
-    <!-- TOP HEADER WITH LIVE SEARCH, SORT & VIEW TOGGLES -->
+    <!-- TOP HEADER -->
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200/80 pb-5 text-left">
       <div>
         <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
@@ -98,8 +93,6 @@ const svgMap = {
 
       <!-- SEARCH, SORT & VIEW TOGGLES -->
       <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-        
-        <!-- Search Input -->
         <div class="relative flex-1 sm:w-64">
           <input 
             type="text" 
@@ -108,11 +101,10 @@ const svgMap = {
             class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-600 transition shadow-2xs font-medium"
           />
           <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Fragment set:html={svgMap.search} />
+            <span set:html={svgMap.search} class="inline-flex"></span>
           </div>
         </div>
 
-        <!-- Sort Dropdown -->
         <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-2xs">
           <span class="text-slate-400 font-normal">Sort by:</span>
           <select id="dirSortSelect" class="bg-transparent text-slate-900 font-extrabold focus:outline-none cursor-pointer">
@@ -123,16 +115,14 @@ const svgMap = {
           </select>
         </div>
 
-        <!-- Layout View Toggle -->
         <div class="hidden sm:flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
           <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg bg-slate-100 text-slate-900 transition cursor-pointer">
-            <Fragment set:html={svgMap.gridIcon} />
+            <span set:html={svgMap.gridIcon} class="inline-flex"></span>
           </button>
           <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition cursor-pointer">
-            <Fragment set:html={svgMap.listIcon} />
+            <span set:html={svgMap.listIcon} class="inline-flex"></span>
           </button>
         </div>
-
       </div>
     </div>
 
@@ -142,7 +132,6 @@ const svgMap = {
       <!-- LEFT SIDEBAR FILTER PANEL -->
       <aside class="lg:col-span-3 bg-white rounded-3xl border border-slate-200/90 p-5 space-y-6 shadow-2xs text-left sticky top-24">
         
-        <!-- Sidebar Header -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider">Filters</h3>
           <button id="resetAllFiltersBtn" class="text-xs font-bold text-emerald-800 hover:underline cursor-pointer">Reset All</button>
@@ -198,82 +187,14 @@ const svgMap = {
           </div>
         </div>
 
-        <!-- Filter 3: Hotel Type -->
-        <div class="space-y-2.5 border-t border-slate-100 pt-4">
-          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
-            <span>Hotel Type</span>
-            <span class="text-slate-400 text-[10px]">▲</span>
-          </h4>
-
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="luxury" />
-                <span>Luxury</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(24)</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="business" />
-                <span>Business</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(36)</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="boutique" />
-                <span>Boutique</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(12)</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Filter 4: Amenities -->
-        <div class="space-y-2.5 border-t border-slate-100 pt-4">
-          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
-            <span>Amenities</span>
-            <span class="text-slate-400 text-[10px]">▲</span>
-          </h4>
-
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="wifi" />
-                <span>Free Wi-Fi</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(82)</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="pool" />
-                <span>Swimming Pool</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(28)</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="spa" />
-                <span>Spa & Wellness</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">(15)</span>
-            </label>
-          </div>
-        </div>
-
       </aside>
 
       <!-- RIGHT SIDE: HOTELS GRID CONTAINER -->
       <div class="lg:col-span-9 space-y-6">
         
-        <!-- Cards Grid (4 columns on Desktop) -->
+        <!-- Cards Grid -->
         <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
-          {hotels.map((hotelItem: any, index: number) => {
+          {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
             const hTitle = (hData.title || hData.name || "Hotel Details").trim();
             const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
@@ -281,17 +202,14 @@ const svgMap = {
             const hLocation = (hData.location || hData.category || "Gulshan 2, Dhaka").trim();
             const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
 
-            // Format Title & Price
-            const formattedTitle = hTitle.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+            const formattedTitle = hTitle.replace(/\w\S*/g, (txt: string) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
             let formattedPrice = hPrice.replace(/\$/g, '').trim();
             if (!formattedPrice.startsWith('৳')) {
               formattedPrice = '$' + formattedPrice;
             }
 
-            // Star Rating Text Badge
             const starCategory = hData.starCategory || (hData.category?.includes('5-Star') ? '5-Star Hotel' : (hData.category?.includes('4-Star') ? '4-Star Hotel' : '3-Star Hotel'));
 
-            // Strict Review Filtering
             const hTitleLower = hTitle.toLowerCase();
             const hSlugLower = hSlug.toLowerCase();
 
@@ -357,7 +275,7 @@ const svgMap = {
                       <!-- Top Right Wishlist Heart -->
                       <button 
                         type="button"
-                        class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-sm transition cursor-pointer hover:scale-110 z-10"
+                        class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
                         data-title={formattedTitle}
                         data-image={hImage}
                         data-url={`/${hSlug}`}
@@ -388,15 +306,15 @@ const svgMap = {
 
                       <!-- Location Line -->
                       <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
-                        <Fragment set:html={svgMap.locationPin} />
+                        <span set:html={svgMap.locationPin} class="inline-flex"></span>
                         <span class="truncate">{hLocation}</span>
                       </div>
 
                       <!-- Feature Badges with Pure Vector SVGs -->
                       <div class="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-bold text-slate-600">
-                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.wifi} /> Wi-Fi</span>
-                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.pool} /> Pool</span>
-                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.spa} /> Spa</span>
+                        <span class="flex items-center gap-1"><span set:html={svgMap.wifi} class="inline-flex"></span> Wi-Fi</span>
+                        <span class="flex items-center gap-1"><span set:html={svgMap.pool} class="inline-flex"></span> Pool</span>
+                        <span class="flex items-center gap-1"><span set:html={svgMap.spa} class="inline-flex"></span> Spa</span>
                       </div>
                     </div>
                   </div>
@@ -418,17 +336,6 @@ const svgMap = {
           })}
         </div>
 
-        <!-- LOAD MORE HOTELS BUTTON -->
-        <div class="pt-4 text-center">
-          <button 
-            id="loadMoreHotelsBtn" 
-            class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-extrabold text-xs px-6 py-3 rounded-2xl shadow-2xs transition cursor-pointer inline-flex items-center gap-2"
-          >
-            <span>Load More Hotels</span>
-            <span>˅</span>
-          </button>
-        </div>
-
       </div>
 
     </div>
@@ -446,7 +353,6 @@ const svgMap = {
     const resetBtn = document.getElementById('resetAllFiltersBtn');
     const cards = document.querySelectorAll('.directory-card-item');
 
-    // Filter Trigger Checkboxes
     const starCbs = document.querySelectorAll('.filter-star-cb');
 
     function filterDirectory() {
@@ -496,7 +402,6 @@ const svgMap = {
       });
     }
 
-    // Sort Handler
     if (sortSelect) {
       sortSelect.addEventListener('change', (e) => {
         const val = e.target.value;
