@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Agoda/Booking.com Style Wide Banner Cards Layout)
+// src/components/AllHotelsDirectory.astro (Compact Agoda/Booking.com Style Wide Cards - Fixed Image Size & Clean SVGs)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -72,46 +72,46 @@ try {
 const dotsArray = [0, 1, 2, 3, 4];
 ---
 
-<!-- ALL HOTELS DIRECTORY SECTION (AGODA / BOOKING WIDE BANNER STYLE) -->
-<section id="all-hotels-directory" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-6">
+<!-- ALL HOTELS DIRECTORY SECTION (COMPACT WIDE BANNER CARDS) -->
+<section id="all-hotels-directory" class="bg-[#F8FAF9] py-8 px-4 sm:px-8 lg:px-12 max-w-[1280px] mx-auto text-slate-900 border-b border-slate-200/80">
+  <div class="space-y-5">
     
     <!-- Section Header -->
     <div class="space-y-1 text-left border-b border-slate-200/80 pb-3">
-      <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900 tracking-tight">
+      <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
         {title}
       </h2>
-      <p class="text-xs sm:text-sm text-slate-600 font-medium">
+      <p class="text-xs text-slate-500 font-medium">
         {subtitle}
       </p>
     </div>
 
     <!-- 5 SMART AREA FILTER PILLS BAR -->
-    <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-left pt-1 pb-2">
+    <div class="flex flex-wrap items-center gap-2 text-left pt-1 pb-1">
       
       <button 
-        class="dir-filter-pill bg-[#0d3b23] text-white px-4 py-2.5 rounded-xl text-xs font-black transition cursor-pointer border border-[#0d3b23] shadow-xs active" 
+        class="dir-filter-pill bg-[#0d3b23] text-white px-3.5 py-2 rounded-xl text-xs font-black transition cursor-pointer border border-[#0d3b23] shadow-xs active" 
         data-filter="all"
       >
         🏢 All Hotels ({totalHotelsCount})
       </button>
 
       <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
+        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
         data-filter="gulshan-1"
       >
         📍 Gulshan 1
       </button>
 
       <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
+        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
         data-filter="gulshan-2"
       >
         📍 Gulshan 2
       </button>
 
       <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
+        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
         data-filter="near-gulshan"
       >
         🚗 Hotels near Gulshan
@@ -119,7 +119,7 @@ const dotsArray = [0, 1, 2, 3, 4];
 
       <button 
         id="openAdvancedFilterBtn" 
-        class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-800 flex items-center gap-1.5 ml-auto shadow-xs"
+        class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-800 flex items-center gap-1.5 ml-auto shadow-xs"
       >
         <span>Filters</span>
         <svg class="w-3.5 h-3.5 fill-white shrink-0" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
@@ -127,15 +127,24 @@ const dotsArray = [0, 1, 2, 3, 4];
 
     </div>
 
-    <!-- HOTEL WIDE BANNER CARDS CONTAINER (STACTED VERTICALLY LIKE BOOKING.COM) -->
-    <div id="directoryCardsGrid" class="space-y-5 pt-2">
+    <!-- COMPACT HOTEL WIDE BANNER CARDS CONTAINER -->
+    <div id="directoryCardsGrid" class="space-y-4 pt-1">
       {hotels.map((hotelItem: any) => {
         const hData = hotelItem.data || {};
         const hTitle = (hData.title || hData.name || "Hotel Details").trim();
         const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
         const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
         const hLocation = (hData.location || hData.category || "Gulshan 2, Dhaka").trim();
-        const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
+        const hPrice = hData.price ? String(hData.price) : "$120 / night";
+
+        // Auto Title Case
+        const formattedTitle = hTitle.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+
+        // Fix Double Dollar Price Bug
+        let formattedPrice = hPrice.replace(/\$/g, '').trim();
+        if (!formattedPrice.startsWith('৳')) {
+          formattedPrice = '$' + formattedPrice;
+        }
 
         // Determine Area Filter Category
         const locLower = hLocation.toLowerCase();
@@ -167,7 +176,7 @@ const dotsArray = [0, 1, 2, 3, 4];
         const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
         const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
 
-        // Calculate Real Rating & Count or fallback to Hotel Frontmatter Rating
+        // Calculate Real Rating & Count
         let displayRating: string | null = null;
         let displayCount = 0;
 
@@ -188,59 +197,59 @@ const dotsArray = [0, 1, 2, 3, 4];
 
         return (
           <div 
-            class="directory-card-item bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col md:flex-row group text-left relative"
+            class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-lg transition duration-300 flex flex-col md:flex-row group text-left relative"
             data-category={areaCategory}
             data-rating={ratingVal}
           >
-            <!-- LEFT 40% WIDE IMAGE CONTAINER -->
-            <div class="md:w-5/12 relative h-56 md:h-auto min-h-[220px] bg-slate-900 overflow-hidden shrink-0">
+            <!-- COMPACT LEFT IMAGE CONTAINER (FIXED SLEEK WIDTH) -->
+            <div class="md:w-72 lg:w-80 relative h-48 sm:h-52 md:h-auto bg-slate-900 overflow-hidden shrink-0">
               <img 
                 src={hImage} 
-                alt={`${hTitle} Photo`} 
+                alt={`${formattedTitle} Photo`} 
                 loading="lazy" 
                 decoding="async" 
                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
               />
 
-              <!-- Wishlist Heart Button (Top Right of Image) -->
+              <!-- Wishlist Heart Button -->
               <button 
                 type="button"
-                class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
-                data-title={hTitle}
+                class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
+                data-title={formattedTitle}
                 data-image={hImage}
                 data-url={`/${hSlug}`}
-                data-price={hPrice}
+                data-price={formattedPrice}
                 aria-label="Add to Wishlist"
               >
-                <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
               </button>
             </div>
 
-            <!-- RIGHT 60% CONTENT CONTAINER -->
-            <div class="md:w-7/12 p-5 sm:p-6 flex flex-col justify-between space-y-4">
-              <a href={`/${hSlug}`} class="block space-y-3">
+            <!-- COMPACT RIGHT CONTENT CONTAINER -->
+            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-3">
+              <a href={`/${hSlug}`} class="block space-y-2">
                 
                 <!-- Title & Location -->
                 <div class="space-y-1">
-                  <h3 class="font-black text-slate-900 text-lg sm:text-xl leading-tight group-hover:text-emerald-800 transition">
-                    {hTitle}
+                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-1">
+                    {formattedTitle}
                   </h3>
                   
-                  <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
+                  <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
                     <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
-                    <span>{hLocation}</span>
+                    <span class="truncate">{hLocation}</span>
                   </div>
                 </div>
 
                 <!-- Star Rating Display -->
                 {displayCount > 0 && displayRating ? (
-                  <div class="flex items-center gap-2 text-xs text-slate-600 font-bold">
-                    <span class="font-black text-slate-900 text-sm bg-slate-100 px-2 py-0.5 rounded-md">{displayRating}</span>
+                  <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
+                    <span class="font-black text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded">{displayRating}</span>
                     <div class="flex items-center space-x-0.5 text-[#00aa6c]">
                       {dotsArray.map((i) => (
-                        <span key={i} class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
+                        <span key={i} class={`w-2 h-2 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
                       ))}
                     </div>
                     <span class="text-slate-500 font-normal">({displayCount} {Number(displayCount) === 1 ? 'review' : 'reviews'})</span>
@@ -251,34 +260,41 @@ const dotsArray = [0, 1, 2, 3, 4];
                   </div>
                 )}
 
-                <!-- Top 4 Feature Badges -->
-                <div class="flex flex-wrap items-center gap-2 pt-1">
-                  <span class="bg-slate-100 border border-slate-200/80 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    📶 Free Wi-Fi
+                <!-- Clean Vector SVG Feature Badges (Zero Emojis) -->
+                <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>
+                    <span>Wi-Fi</span>
                   </span>
-                  <span class="bg-slate-100 border border-slate-200/80 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    🏊 Swimming Pool
+
+                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>
+                    <span>Pool</span>
                   </span>
-                  <span class="bg-slate-100 border border-slate-200/80 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    🍳 Free Breakfast
+
+                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>
+                    <span>Breakfast</span>
                   </span>
-                  <span class="bg-slate-100 border border-slate-200/80 text-slate-700 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                    🚗 Free Parking
+
+                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9-2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>
+                    <span>Parking</span>
                   </span>
                 </div>
 
               </a>
 
               <!-- Bottom Price Line & View Details Button -->
-              <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
+              <div class="flex items-center justify-between border-t border-slate-100 pt-3">
                 <div>
-                  <span class="text-[11px] text-slate-500 font-medium block">Starting from</span>
-                  <span class="text-xl sm:text-2xl font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+                  <span class="text-[10px] text-slate-500 font-semibold block">Starting from</span>
+                  <span class="text-base sm:text-lg font-black text-slate-900">{formattedPrice}</span>
                 </div>
 
                 <a 
                   href={`/${hSlug}`}
-                  class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl transition shadow-md uppercase tracking-wider inline-flex items-center gap-1 shrink-0"
+                  class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-5 py-2.5 rounded-xl transition shadow-xs uppercase tracking-wider inline-flex items-center gap-1 shrink-0"
                 >
                   View Details ➔
                 </a>
