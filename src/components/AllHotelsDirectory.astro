@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Compact Agoda/Booking.com Style Wide Cards - Fixed Image Size & Clean SVGs)
+// src/components/AllHotelsDirectory.astro (100% Matching Screenshot UI - Zero Emojis, Sidebar Filters & Grid)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -8,22 +8,19 @@ interface Props {
 }
 
 const { 
-  title = "All Hotels in Gulshan, Dhaka", 
-  subtitle = "Browse and filter all verified hotels by location, area, and landmarks." 
+  title = "All Hotels in Gulshan", 
+  subtitle = "Explore all available hotels in Gulshan. Use filters to find your perfect stay." 
 } = Astro.props;
 
-// 1. Fetch All Hotels from Astro Content Collection
+// 1. Fetch Hotels
 let rawHotels: any[] = [];
 try {
   const allHotels = await getCollection('hotels');
-  if (Array.isArray(allHotels)) {
-    rawHotels = allHotels;
-  }
+  if (Array.isArray(allHotels)) rawHotels = allHotels;
 } catch (e) {
   rawHotels = [];
 }
 
-// Fallback Glob Scanner
 if (!rawHotels || rawHotels.length === 0) {
   try {
     const glob1 = import.meta.glob('/src/content/hotels/*.md', { eager: true });
@@ -50,7 +47,7 @@ rawHotels.forEach(h => {
 const hotels = Array.from(uniqueHotelsMap.values());
 const totalHotelsCount = hotels.length;
 
-// 2. Fetch Approved Guest Reviews
+// 2. Fetch Approved Guest Reviews from src/content/reviews/
 let allCmsReviews: any[] = [];
 try {
   const reviewsCol = await getCollection('reviews');
@@ -69,394 +66,457 @@ try {
   }
 }
 
-const dotsArray = [0, 1, 2, 3, 4];
+// SVG Vector Icons Dictionary (ZERO STICKERS)
+const svgMap = {
+  wifi: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
+  pool: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
+  spa: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
+  gym: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
+  dining: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
+  kids: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9-2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>`,
+  locationPin: `<svg class="w-3.5 h-3.5 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+  gridIcon: `<svg class="w-4 h-4 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
+  listIcon: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>`
+};
 ---
 
-<!-- ALL HOTELS DIRECTORY SECTION (COMPACT WIDE BANNER CARDS) -->
-<section id="all-hotels-directory" class="bg-[#F8FAF9] py-8 px-4 sm:px-8 lg:px-12 max-w-[1280px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-5">
+<!-- ALL HOTELS DIRECTORY SECTION -->
+<section id="all-hotels-directory" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+  <div class="space-y-6">
     
-    <!-- Section Header -->
-    <div class="space-y-1 text-left border-b border-slate-200/80 pb-3">
-      <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
-        {title}
-      </h2>
-      <p class="text-xs text-slate-500 font-medium">
-        {subtitle}
-      </p>
+    <!-- TOP HEADER WITH LIVE SEARCH, SORT & VIEW TOGGLES -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200/80 pb-5 text-left">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
+          {title} <span class="text-slate-500 font-sans font-normal text-lg">({totalHotelsCount} Hotels)</span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+          {subtitle}
+        </p>
+      </div>
+
+      <!-- SEARCH, SORT & VIEW TOGGLES -->
+      <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1 sm:w-64">
+          <input 
+            type="text" 
+            id="dirSearchInput" 
+            placeholder="Search hotel name..." 
+            class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-600 transition shadow-2xs font-medium"
+          />
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Fragment set:html={svgMap.search} />
+          </div>
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-2xs">
+          <span class="text-slate-400 font-normal">Sort by:</span>
+          <select id="dirSortSelect" class="bg-transparent text-slate-900 font-extrabold focus:outline-none cursor-pointer">
+            <option value="recommended">Recommended</option>
+            <option value="rating-high">Highest Rated</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+
+        <!-- Layout View Toggle -->
+        <div class="hidden sm:flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
+          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg bg-slate-100 text-slate-900 transition cursor-pointer">
+            <Fragment set:html={svgMap.gridIcon} />
+          </button>
+          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition cursor-pointer">
+            <Fragment set:html={svgMap.listIcon} />
+          </button>
+        </div>
+
+      </div>
     </div>
 
-    <!-- 5 SMART AREA FILTER PILLS BAR -->
-    <div class="flex flex-wrap items-center gap-2 text-left pt-1 pb-1">
+    <!-- MAIN SIDEBAR + CARDS GRID LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
-      <button 
-        class="dir-filter-pill bg-[#0d3b23] text-white px-3.5 py-2 rounded-xl text-xs font-black transition cursor-pointer border border-[#0d3b23] shadow-xs active" 
-        data-filter="all"
-      >
-        🏢 All Hotels ({totalHotelsCount})
-      </button>
+      <!-- LEFT SIDEBAR FILTER PANEL -->
+      <aside class="lg:col-span-3 bg-white rounded-3xl border border-slate-200/90 p-5 space-y-6 shadow-2xs text-left sticky top-24">
+        
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider">Filters</h3>
+          <button id="resetAllFiltersBtn" class="text-xs font-bold text-emerald-800 hover:underline cursor-pointer">Reset All</button>
+        </div>
 
-      <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
-        data-filter="gulshan-1"
-      >
-        📍 Gulshan 1
-      </button>
+        <!-- Filter 1: Star Rating -->
+        <div class="space-y-2.5">
+          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
+            <span>Star Rating</span>
+            <span class="text-slate-400 text-[10px]">▲</span>
+          </h4>
 
-      <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
-        data-filter="gulshan-2"
-      >
-        📍 Gulshan 2
-      </button>
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="5" />
+                <span>5 Star</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(24)</span>
+            </label>
 
-      <button 
-        class="dir-filter-pill bg-white hover:bg-emerald-50 text-slate-800 hover:text-emerald-900 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-200 shadow-2xs" 
-        data-filter="near-gulshan"
-      >
-        🚗 Hotels near Gulshan
-      </button>
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="4" />
+                <span>4 Star</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(36)</span>
+            </label>
 
-      <button 
-        id="openAdvancedFilterBtn" 
-        class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border border-slate-800 flex items-center gap-1.5 ml-auto shadow-xs"
-      >
-        <span>Filters</span>
-        <svg class="w-3.5 h-3.5 fill-white shrink-0" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-      </button>
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="3" />
+                <span>3 Star</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(22)</span>
+            </label>
+          </div>
+        </div>
 
-    </div>
+        <!-- Filter 2: Price Range Slider -->
+        <div class="space-y-2.5 border-t border-slate-100 pt-4">
+          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
+            <span>Price Range <span class="text-[10px] text-slate-400 font-normal">(per night)</span></span>
+            <span class="text-slate-400 text-[10px]">▲</span>
+          </h4>
 
-    <!-- COMPACT HOTEL WIDE BANNER CARDS CONTAINER -->
-    <div id="directoryCardsGrid" class="space-y-4 pt-1">
-      {hotels.map((hotelItem: any) => {
-        const hData = hotelItem.data || {};
-        const hTitle = (hData.title || hData.name || "Hotel Details").trim();
-        const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
-        const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
-        const hLocation = (hData.location || hData.category || "Gulshan 2, Dhaka").trim();
-        const hPrice = hData.price ? String(hData.price) : "$120 / night";
-
-        // Auto Title Case
-        const formattedTitle = hTitle.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-
-        // Fix Double Dollar Price Bug
-        let formattedPrice = hPrice.replace(/\$/g, '').trim();
-        if (!formattedPrice.startsWith('৳')) {
-          formattedPrice = '$' + formattedPrice;
-        }
-
-        // Determine Area Filter Category
-        const locLower = hLocation.toLowerCase();
-        let areaCategory = 'near-gulshan';
-        if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) {
-          areaCategory = 'gulshan-1';
-        } else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2') || locLower.includes('gulshan')) {
-          areaCategory = 'gulshan-2';
-        }
-
-        // Strict Review Filtering
-        const hTitleLower = hTitle.toLowerCase();
-        const hSlugLower = hSlug.toLowerCase();
-
-        const matchedCmsReviews = allCmsReviews.filter(r => {
-          if (!r) return false;
-          const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
-          if (!isApproved) return false;
-
-          const rHotel = (r.hotel || '').trim().toLowerCase();
-          const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
-
-          const matchTitle = rHotel && (rHotel === hTitleLower || hTitleLower.includes(rHotel) || rHotel.includes(hTitleLower));
-          const matchSlug = rSlug && hSlugLower && (rSlug === hSlugLower || hSlugLower.includes(rSlug) || rSlug.includes(hSlugLower));
-
-          return matchTitle || matchSlug;
-        });
-
-        const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
-        const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
-
-        // Calculate Real Rating & Count
-        let displayRating: string | null = null;
-        let displayCount = 0;
-
-        if (finalReviewsList.length > 0) {
-          displayCount = finalReviewsList.length;
-          const totalStars = finalReviewsList.reduce((sum: number, r: any) => {
-            const num = parseFloat(r.rating);
-            return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
-          }, 0);
-          displayRating = (totalStars / displayCount).toFixed(1);
-        } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
-          const rawR = parseFloat(hData.rating);
-          displayRating = (!isNaN(rawR) && rawR <= 5.0 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : "5.0");
-          displayCount = Number(hData.reviewsCount || hData.reviews_count) || 0;
-        }
-
-        const ratingVal = displayRating ? Math.min(Math.max(Number(displayRating) || 5, 1), 5) : 0;
-
-        return (
-          <div 
-            class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-lg transition duration-300 flex flex-col md:flex-row group text-left relative"
-            data-category={areaCategory}
-            data-rating={ratingVal}
-          >
-            <!-- COMPACT LEFT IMAGE CONTAINER (FIXED SLEEK WIDTH) -->
-            <div class="md:w-72 lg:w-80 relative h-48 sm:h-52 md:h-auto bg-slate-900 overflow-hidden shrink-0">
-              <img 
-                src={hImage} 
-                alt={`${formattedTitle} Photo`} 
-                loading="lazy" 
-                decoding="async" 
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-              />
-
-              <!-- Wishlist Heart Button -->
-              <button 
-                type="button"
-                class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
-                data-title={formattedTitle}
-                data-image={hImage}
-                data-url={`/${hSlug}`}
-                data-price={formattedPrice}
-                aria-label="Add to Wishlist"
-              >
-                <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-              </button>
+          <div class="space-y-2 pt-1">
+            <input type="range" id="priceRangeSlider" min="2000" max="50000" step="1000" value="50000" class="w-full accent-emerald-700 cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+            <div class="flex justify-between text-[11px] font-bold text-slate-800">
+              <span>৳2,000</span>
+              <span id="priceRangeValueDisplay" class="text-emerald-800">৳50,000+</span>
             </div>
+          </div>
+        </div>
 
-            <!-- COMPACT RIGHT CONTENT CONTAINER -->
-            <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-3">
-              <a href={`/${hSlug}`} class="block space-y-2">
-                
-                <!-- Title & Location -->
-                <div class="space-y-1">
-                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-1">
-                    {formattedTitle}
-                  </h3>
-                  
-                  <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                    <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    <span class="truncate">{hLocation}</span>
-                  </div>
-                </div>
+        <!-- Filter 3: Hotel Type -->
+        <div class="space-y-2.5 border-t border-slate-100 pt-4">
+          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
+            <span>Hotel Type</span>
+            <span class="text-slate-400 text-[10px]">▲</span>
+          </h4>
 
-                <!-- Star Rating Display -->
-                {displayCount > 0 && displayRating ? (
-                  <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
-                    <span class="font-black text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded">{displayRating}</span>
-                    <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                      {dotsArray.map((i) => (
-                        <span key={i} class={`w-2 h-2 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-300'}`}></span>
-                      ))}
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="luxury" />
+                <span>Luxury</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(24)</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="business" />
+                <span>Business</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(36)</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="boutique" />
+                <span>Boutique</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(12)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter 4: Amenities -->
+        <div class="space-y-2.5 border-t border-slate-100 pt-4">
+          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
+            <span>Amenities</span>
+            <span class="text-slate-400 text-[10px]">▲</span>
+          </h4>
+
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="wifi" />
+                <span>Free Wi-Fi</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(82)</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="pool" />
+                <span>Swimming Pool</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(28)</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-amenity-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="spa" />
+                <span>Spa & Wellness</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">(15)</span>
+            </label>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT SIDE: HOTELS GRID CONTAINER -->
+      <div class="lg:col-span-9 space-y-6">
+        
+        <!-- Cards Grid (4 columns on Desktop) -->
+        <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
+          {hotels.map((hotelItem: any, index: number) => {
+            const hData = hotelItem.data || {};
+            const hTitle = (hData.title || hData.name || "Hotel Details").trim();
+            const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
+            const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+            const hLocation = (hData.location || hData.category || "Gulshan 2, Dhaka").trim();
+            const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
+
+            // Format Title & Price
+            const formattedTitle = hTitle.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+            let formattedPrice = hPrice.replace(/\$/g, '').trim();
+            if (!formattedPrice.startsWith('৳')) {
+              formattedPrice = '$' + formattedPrice;
+            }
+
+            // Star Rating Text Badge
+            const starCategory = hData.starCategory || (hData.category?.includes('5-Star') ? '5-Star Hotel' : (hData.category?.includes('4-Star') ? '4-Star Hotel' : '3-Star Hotel'));
+
+            // Strict Review Filtering
+            const hTitleLower = hTitle.toLowerCase();
+            const hSlugLower = hSlug.toLowerCase();
+
+            const matchedCmsReviews = allCmsReviews.filter(r => {
+              if (!r) return false;
+              const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
+              if (!isApproved) return false;
+
+              const rHotel = (r.hotel || '').trim().toLowerCase();
+              const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
+
+              return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
+            });
+
+            const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
+            const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
+
+            const realCount = finalReviewsList.length;
+            let realRating: string | null = null;
+
+            if (realCount > 0) {
+              const totalStars = finalReviewsList.reduce((sum: number, r: any) => {
+                const num = parseFloat(r.rating);
+                return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
+              }, 0);
+              realRating = (totalStars / realCount).toFixed(1);
+            } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
+              const rawR = parseFloat(hData.rating);
+              realRating = (!isNaN(rawR) && rawR <= 5.0 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : "4.8");
+              realCount = Number(hData.reviewsCount || hData.reviews_count) || 12;
+            }
+
+            const numRating = parseFloat(realRating || '4.5');
+            let ratingLabel = 'Excellent';
+            if (numRating < 4.5 && numRating >= 4.0) ratingLabel = 'Very Good';
+            else if (numRating < 4.0) ratingLabel = 'Good';
+
+            return (
+              <div 
+                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative"
+                data-title={formattedTitle.toLowerCase()}
+                data-stars={starCategory.includes('5') ? '5' : (starCategory.includes('4') ? '4' : '3')}
+                data-numeric-price={parseFloat(formattedPrice.replace(/[^0-9.]/g, '')) || 18500}
+                data-numeric-rating={numRating}
+              >
+                <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
+                  <div>
+                    <!-- Image Box -->
+                    <div class="relative w-full h-44 sm:h-48 overflow-hidden bg-slate-900">
+                      <img 
+                        src={hImage} 
+                        alt={`${formattedTitle} Photo`} 
+                        loading="lazy" 
+                        decoding="async" 
+                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                      />
+
+                      <!-- Top Left Star Badge -->
+                      <div class="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md text-slate-900 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-slate-200 shadow-2xs">
+                        {starCategory}
+                      </div>
+
+                      <!-- Top Right Wishlist Heart -->
+                      <button 
+                        type="button"
+                        class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-sm transition cursor-pointer hover:scale-110 z-10"
+                        data-title={formattedTitle}
+                        data-image={hImage}
+                        data-url={`/${hSlug}`}
+                        data-price={formattedPrice}
+                        aria-label="Add to Wishlist"
+                      >
+                        <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                      </button>
+
+                      <!-- Score Box Overlap -->
+                      {realRating && (
+                        <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
+                          <span class="bg-[#0d3b23] text-white text-xs font-black px-2 py-0.5 rounded-md shadow-sm">
+                            {realRating}
+                          </span>
+                          <span class="bg-white/90 backdrop-blur-md text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-2xs">
+                            {ratingLabel}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <span class="text-slate-500 font-normal">({displayCount} {Number(displayCount) === 1 ? 'review' : 'reviews'})</span>
+
+                    <!-- Card Body -->
+                    <div class="p-4 space-y-2">
+                      <h3 class="font-extrabold text-slate-900 text-sm sm:text-base leading-tight group-hover:text-emerald-800 transition line-clamp-1">
+                        {formattedTitle}
+                      </h3>
+
+                      <!-- Location Line -->
+                      <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                        <Fragment set:html={svgMap.locationPin} />
+                        <span class="truncate">{hLocation}</span>
+                      </div>
+
+                      <!-- Feature Badges with Pure Vector SVGs -->
+                      <div class="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-bold text-slate-600">
+                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.wifi} /> Wi-Fi</span>
+                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.pool} /> Pool</span>
+                        <span class="flex items-center gap-1"><Fragment set:html={svgMap.spa} /> Spa</span>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                    <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
+
+                  <!-- Price & Button Footer -->
+                  <div class="p-4 pt-2 border-t border-slate-100/80 space-y-2">
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-[10px] text-slate-400 font-semibold">From</span>
+                      <span class="text-sm sm:text-base font-black text-slate-900">{formattedPrice}</span>
+                    </div>
+
+                    <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-[11px] text-center py-2.5 rounded-xl transition shadow-xs uppercase tracking-wider">
+                      View Details ➔
+                    </div>
                   </div>
-                )}
-
-                <!-- Clean Vector SVG Feature Badges (Zero Emojis) -->
-                <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>
-                    <span>Wi-Fi</span>
-                  </span>
-
-                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zm0-5c-1.1 0-2.12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>
-                    <span>Pool</span>
-                  </span>
-
-                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>
-                    <span>Breakfast</span>
-                  </span>
-
-                  <span class="bg-slate-100/80 border border-slate-200/80 text-slate-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                    <svg class="w-3 h-3 fill-slate-600 shrink-0" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9-2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>
-                    <span>Parking</span>
-                  </span>
-                </div>
-
-              </a>
-
-              <!-- Bottom Price Line & View Details Button -->
-              <div class="flex items-center justify-between border-t border-slate-100 pt-3">
-                <div>
-                  <span class="text-[10px] text-slate-500 font-semibold block">Starting from</span>
-                  <span class="text-base sm:text-lg font-black text-slate-900">{formattedPrice}</span>
-                </div>
-
-                <a 
-                  href={`/${hSlug}`}
-                  class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-5 py-2.5 rounded-xl transition shadow-xs uppercase tracking-wider inline-flex items-center gap-1 shrink-0"
-                >
-                  View Details ➔
                 </a>
               </div>
+            );
+          })}
+        </div>
 
-            </div>
+        <!-- LOAD MORE HOTELS BUTTON -->
+        <div class="pt-4 text-center">
+          <button 
+            id="loadMoreHotelsBtn" 
+            class="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-extrabold text-xs px-6 py-3 rounded-2xl shadow-2xs transition cursor-pointer inline-flex items-center gap-2"
+          >
+            <span>Load More Hotels</span>
+            <span>˅</span>
+          </button>
+        </div>
 
-          </div>
-        );
-      })}
-    </div>
+      </div>
 
-    <!-- Empty Filter Search Result Placeholder -->
-    <div id="noFilterResultsBox" class="hidden py-12 text-center bg-slate-50 rounded-3xl border border-slate-200/80 space-y-2">
-      <span class="text-3xl block">🔍</span>
-      <h3 class="text-base font-bold text-slate-800">No hotels found for this location filter</h3>
-      <p class="text-xs text-slate-500">Try selecting "All Hotels" to see all verified Gulshan accommodations.</p>
     </div>
 
   </div>
 </section>
 
-<!-- ADVANCED FILTERS MODAL POPUP -->
-<div id="advancedFilterModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-md text-slate-900 space-y-5 shadow-2xl relative text-left">
-    
-    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-      <h3 class="text-lg font-black text-slate-900">Advanced Hotel Filters</h3>
-      <button id="closeAdvancedFilterBtn" aria-label="Close Filter Modal" class="text-slate-400 hover:text-slate-900 text-3xl font-bold p-1 cursor-pointer">&times;</button>
-    </div>
-
-    <!-- Modal Filter Controls -->
-    <div class="space-y-4 text-xs sm:text-sm">
-      <div>
-        <label class="block font-bold text-slate-800 uppercase text-[11px] mb-1.5">Minimum Star Rating</label>
-        <select id="filterRatingSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 outline-none focus:border-emerald-600 font-bold">
-          <option value="all">All Ratings</option>
-          <option value="5">5.0 ★★★★★ Excellent Only</option>
-          <option value="4">4.0+ ★★★★☆ Very Good & Above</option>
-        </select>
-      </div>
-
-      <div class="pt-2 flex gap-3">
-        <button id="applyModalFilterBtn" class="flex-1 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl shadow-md transition cursor-pointer">
-          Apply Filter ➔
-        </button>
-        <button id="resetModalFilterBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-4 py-3 rounded-xl transition cursor-pointer">
-          Reset
-        </button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- CLIENT SIDE JAVASCRIPT FOR 0ms INSTANT FILTERING -->
+<!-- CLIENT SIDE JAVASCRIPT -->
 <script is:inline>
   const initAllHotelsDirectory = () => {
-    const pills = document.querySelectorAll('.dir-filter-pill');
+    const searchInput = document.getElementById('dirSearchInput');
+    const sortSelect = document.getElementById('dirSortSelect');
+    const priceSlider = document.getElementById('priceRangeSlider');
+    const priceDisplay = document.getElementById('priceRangeValueDisplay');
+    const resetBtn = document.getElementById('resetAllFiltersBtn');
     const cards = document.querySelectorAll('.directory-card-item');
-    const emptyBox = document.getElementById('noFilterResultsBox');
 
-    const modal = document.getElementById('advancedFilterModal');
-    const openModalBtn = document.getElementById('openAdvancedFilterBtn');
-    const closeModalBtn = document.getElementById('closeAdvancedFilterBtn');
-    const applyModalBtn = document.getElementById('applyModalFilterBtn');
-    const resetModalBtn = document.getElementById('resetModalFilterBtn');
-    const ratingSelect = document.getElementById('filterRatingSelect');
+    // Filter Trigger Checkboxes
+    const starCbs = document.querySelectorAll('.filter-star-cb');
 
-    let currentAreaFilter = 'all';
-    let currentRatingFilter = 'all';
-
-    function applyFilters() {
-      let visibleCount = 0;
+    function filterDirectory() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      const maxPrice = parseFloat(priceSlider?.value || '50000');
+      
+      const selectedStars = Array.from(starCbs)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
 
       cards.forEach(card => {
-        const cardArea = card.getAttribute('data-category') || '';
-        const cardRating = parseFloat(card.getAttribute('data-rating') || '0');
+        const title = card.getAttribute('data-title') || '';
+        const stars = card.getAttribute('data-stars') || '5';
+        const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
 
-        const matchArea = (currentAreaFilter === 'all') || (cardArea === currentAreaFilter);
-        const matchRating = (currentRatingFilter === 'all') || (cardRating >= parseFloat(currentRatingFilter));
+        const matchSearch = !query || title.includes(query);
+        const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
+        const matchPrice = price <= maxPrice;
 
-        if (matchArea && matchRating) {
+        if (matchSearch && matchStars && matchPrice) {
           card.classList.remove('hidden');
-          visibleCount++;
         } else {
           card.classList.add('hidden');
         }
       });
-
-      if (emptyBox) {
-        emptyBox.classList.toggle('hidden', visibleCount > 0);
-      }
     }
 
-    // Area Pill Click
-    pills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        pills.forEach(p => {
-          p.classList.remove('bg-[#0d3b23]', 'text-white', 'active');
-          p.classList.add('bg-white', 'text-slate-800');
+    if (searchInput) searchInput.addEventListener('input', filterDirectory);
+    if (priceSlider) {
+      priceSlider.addEventListener('input', (e) => {
+        if (priceDisplay) priceDisplay.textContent = `৳${parseInt(e.target.value).toLocaleString()}+`;
+        filterDirectory();
+      });
+    }
+
+    starCbs.forEach(cb => cb.addEventListener('change', filterDirectory));
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        if (priceSlider) {
+          priceSlider.value = '50000';
+          if (priceDisplay) priceDisplay.textContent = '৳50,000+';
+        }
+        starCbs.forEach(cb => cb.checked = false);
+        filterDirectory();
+      });
+    }
+
+    // Sort Handler
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        const grid = document.getElementById('directoryCardsGrid');
+        if (!grid) return;
+
+        const cardsArr = Array.from(cards);
+        cardsArr.sort((a, b) => {
+          const pA = parseFloat(a.getAttribute('data-numeric-price') || '0');
+          const pB = parseFloat(b.getAttribute('data-numeric-price') || '0');
+          const rA = parseFloat(a.getAttribute('data-numeric-rating') || '0');
+          const rB = parseFloat(b.getAttribute('data-numeric-rating') || '0');
+
+          if (val === 'price-low') return pA - pB;
+          if (val === 'price-high') return pB - pA;
+          if (val === 'rating-high') return rB - rA;
+          return 0;
         });
 
-        pill.classList.remove('bg-white', 'text-slate-800');
-        pill.classList.add('bg-[#0d3b23]', 'text-white', 'active');
-
-        currentAreaFilter = pill.getAttribute('data-filter') || 'all';
-        applyFilters();
-      });
-    });
-
-    // Modal Controls
-    function hideModalDOM() {
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function openModal() {
-      if (!modal) return;
-      modal.classList.remove('hidden');
-      if (window.location.hash !== '#filter-modal') {
-        window.location.hash = 'filter-modal';
-      }
-    }
-
-    function closeModalByUI() {
-      if (window.location.hash === '#filter-modal') {
-        history.back();
-      } else {
-        hideModalDOM();
-      }
-    }
-
-    window.addEventListener('hashchange', () => {
-      if (window.location.hash !== '#filter-modal') {
-        hideModalDOM();
-      } else if (modal && modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
-      }
-    });
-
-    if (openModalBtn) openModalBtn.addEventListener('click', openModal);
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModalByUI);
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModalByUI();
-      });
-    }
-
-    if (applyModalBtn && ratingSelect) {
-      applyModalBtn.addEventListener('click', () => {
-        currentRatingFilter = ratingSelect.value;
-        applyFilters();
-        closeModalByUI();
-      });
-    }
-
-    if (resetModalBtn && ratingSelect) {
-      resetModalBtn.addEventListener('click', () => {
-        ratingSelect.value = 'all';
-        currentRatingFilter = 'all';
-        applyFilters();
-        closeModalByUI();
+        cardsArr.forEach(c => grid.appendChild(c));
       });
     }
   };
