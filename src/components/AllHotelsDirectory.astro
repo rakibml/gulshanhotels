@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Advanced Booking.com Filter Edition)
+// src/components/AllHotelsDirectory.astro (High-Conversion Price Anchoring Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -55,8 +55,8 @@ try {
 
 if (allCmsReviews.length === 0) {
   try {
-    const rawGlob = import.meta.glob('/src/content/reviews/*.md', { eager: true });
-    Object.values(rawGlob).forEach((mod: any) => {
+    const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    Object.values(globModules).forEach((mod: any) => {
       if (mod && mod.frontmatter) {
         allCmsReviews.push(mod.frontmatter);
       }
@@ -66,7 +66,7 @@ if (allCmsReviews.length === 0) {
   }
 }
 
-// 3. Calculate Dynamic Counters (Stars & Areas)
+// 3. Dynamic Counters
 let count5Star = 0;
 let count4Star = 0;
 let count3Star = 0;
@@ -94,15 +94,6 @@ hotels.forEach(h => {
 // Helpers
 const toTitleCase = (str: string) => {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-};
-
-const extractAmenityName = (item: any): string => {
-  if (!item) return '';
-  if (typeof item === 'string') return item;
-  if (typeof item === 'object') {
-    return item.name || item.title || item.label || item.amenity || Object.values(item)[0] || '';
-  }
-  return String(item);
 };
 
 const cleanPriceString = (priceRaw: string) => {
@@ -147,7 +138,6 @@ const svgMap: Record<string, string> = {
 
       <!-- SEARCH, SORT & VIEW TOGGLES -->
       <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-        <!-- Search Input -->
         <div class="relative flex-1 sm:w-64">
           <input 
             type="text" 
@@ -160,7 +150,6 @@ const svgMap: Record<string, string> = {
           </div>
         </div>
 
-        <!-- Sort Select -->
         <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
           <span class="text-slate-400 font-normal">Sort by:</span>
           <select id="dirSortSelect" class="bg-transparent text-slate-900 font-extrabold focus:outline-none cursor-pointer">
@@ -171,7 +160,6 @@ const svgMap: Record<string, string> = {
           </select>
         </div>
 
-        <!-- View Toggles -->
         <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200 rounded-lg p-1">
           <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs">
             <span set:html={svgMap.gridIcon} class="inline-flex"></span>
@@ -190,20 +178,13 @@ const svgMap: Record<string, string> = {
       <aside class="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-24">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-900 text-sm">
-            Filter by:
-          </h3>
-          <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">
-            Reset all
-          </button>
+          <h3 class="font-bold text-slate-900 text-sm">Filter by:</h3>
+          <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">Reset all</button>
         </div>
 
-        <!-- Filter 1: Area / Neighbourhood -->
+        <!-- Filter: Area -->
         <div class="space-y-3">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
-            Popular Areas
-          </h4>
-
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Popular Areas</h4>
           <div class="space-y-2 text-xs font-medium text-slate-700">
             <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
               <div class="flex items-center gap-2">
@@ -241,44 +222,33 @@ const svgMap: Record<string, string> = {
           </div>
         </div>
 
-        <!-- Filter 2: Star Rating -->
+        <!-- Filter: Star Rating -->
         <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
-            Property rating
-          </h4>
-
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property rating</h4>
           <div class="space-y-2 text-xs font-medium text-slate-700">
             {count5Star > 0 && (
               <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="5" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">
-                    5 stars <span class="text-[#febb02] text-sm">★★★★★</span>
-                  </span>
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">5 stars <span class="text-[#febb02] text-sm">★★★★★</span></span>
                 </div>
                 <span class="text-slate-400 text-[11px]">{count5Star}</span>
               </label>
             )}
-
             {count4Star > 0 && (
               <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="4" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">
-                    4 stars <span class="text-[#febb02] text-sm">★★★★</span>
-                  </span>
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">4 stars <span class="text-[#febb02] text-sm">★★★★</span></span>
                 </div>
                 <span class="text-slate-400 text-[11px]">{count4Star}</span>
               </label>
             )}
-
             {count3Star > 0 && (
               <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
                   <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="3" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">
-                    3 stars <span class="text-[#febb02] text-sm">★★★</span>
-                  </span>
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">3 stars <span class="text-[#febb02] text-sm">★★★</span></span>
                 </div>
                 <span class="text-slate-400 text-[11px]">{count3Star}</span>
               </label>
@@ -286,57 +256,14 @@ const svgMap: Record<string, string> = {
           </div>
         </div>
 
-        <!-- Filter 3: Review Score -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
-            Review Score
-          </h4>
-
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="9" />
-                <span class="text-slate-800 font-semibold">Wonderful: 9+</span>
-              </div>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="8" />
-                <span class="text-slate-800 font-semibold">Very Good: 8+</span>
-              </div>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="7" />
-                <span class="text-slate-800 font-semibold">Good: 7+</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- Filter 4: Budget Slider -->
+        <!-- Filter: Budget Slider -->
         <div class="space-y-3 border-t border-slate-100 pt-4">
           <div class="flex justify-between items-center">
-            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
-              Your budget (per night)
-            </h4>
-            <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">
-              ৳60,000+
-            </span>
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Your budget (per night)</h4>
+            <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">৳60,000+</span>
           </div>
-
           <div class="space-y-2 pt-1">
-            <input 
-              type="range" 
-              id="priceRangeSlider" 
-              min="2000" 
-              max="60000" 
-              step="1000" 
-              value="60000" 
-              class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" 
-            />
+            <input type="range" id="priceRangeSlider" min="2000" max="60000" step="1000" value="60000" class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
             <div class="flex justify-between text-[11px] text-slate-400">
               <span>৳2,000</span>
               <span>৳60,000</span>
@@ -357,15 +284,15 @@ const svgMap: Record<string, string> = {
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // Location & Area Category Tagging
+            // Location & Area
             let hLocation = String(hData.location || hData.category || "Gulshan, Dhaka").trim();
             const locLower = hLocation.toLowerCase();
             let areaType = 'near';
 
-            if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1') || locLower.includes('gulshan1')) {
+            if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) {
               areaType = 'gulshan-1';
               hLocation = 'Gulshan 1, Dhaka';
-            } else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2') || locLower.includes('gulshan2')) {
+            } else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) {
               areaType = 'gulshan-2';
               hLocation = 'Gulshan 2, Dhaka';
             } else {
@@ -373,14 +300,25 @@ const svgMap: Record<string, string> = {
               if (hLocation.length > 30) hLocation = 'Gulshan, Dhaka';
             }
 
+            // Price Calculation & Price Anchoring
             const rawPrice = hData.price ? String(hData.price).trim() : "";
             const displayPrice = cleanPriceString(rawPrice);
+            const numericPrice = parseFloat(rawPrice.replace(/[^0-9]/g, '')) || 0;
+            const isDollar = rawPrice.includes('$');
+
+            // Smart Original (Anchor) Price (+22% regular rate)
+            let originalPriceNum = hData.originalPrice ? parseFloat(String(hData.originalPrice).replace(/[^0-9]/g, '')) : 0;
+            if (!originalPriceNum || originalPriceNum <= numericPrice) {
+              originalPriceNum = isDollar ? Math.round(numericPrice * 1.22) : Math.round(numericPrice * 1.20 / 100) * 100;
+            }
+            const discountPercent = Math.round(((originalPriceNum - numericPrice) / originalPriceNum) * 100) || 18;
+            const displayOriginalPrice = isDollar ? `$${originalPriceNum}` : `৳ ${originalPriceNum.toLocaleString()}`;
 
             // Star Count
             const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
             const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
 
-            // Description / Snippet
+            // Description Snippet
             const hSnippet = hData.description || hData.excerpt || hData.about || `Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.`;
 
             const hTitleLower = rawTitle.toLowerCase();
@@ -414,7 +352,6 @@ const svgMap: Record<string, string> = {
             }
 
             const numRating = parseFloat(realRating || '0');
-            const numericPrice = parseFloat(rawPrice.replace(/[^0-9]/g, '')) || 0;
 
             let ratingLabel = 'Wonderful';
             if (numRating < 9.0 && numRating >= 8.0) ratingLabel = 'Very Good';
@@ -455,7 +392,7 @@ const svgMap: Record<string, string> = {
                     data-price={displayPrice}
                     aria-label="Save to Wishlist"
                   >
-                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke_linejoin="round" stroke_width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                   </button>
                 </div>
 
@@ -466,7 +403,7 @@ const svgMap: Record<string, string> = {
                   <div>
                     <div class="flex items-start justify-between gap-3">
                       <div>
-                        <!-- Title & Yellow Stars -->
+                        <!-- Title & Stars -->
                         <div class="flex items-center gap-1.5 flex-wrap">
                           <a href={`/${hSlug}`} class="text-base sm:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition">
                             {hTitle}
@@ -478,14 +415,14 @@ const svgMap: Record<string, string> = {
                           )}
                         </div>
 
-                        <!-- Location with Map Pin -->
+                        <!-- Location -->
                         <div class="flex items-center gap-1 text-xs text-slate-600 font-medium mt-1">
                           <span set:html={svgMap.locationPin} class="inline-flex"></span>
                           <span class="hover:underline cursor-pointer">{hLocation}</span>
                         </div>
                       </div>
 
-                      <!-- Booking.com Navy Blue Score Box -->
+                      <!-- Booking.com Blue Score Badge -->
                       {realRating ? (
                         <div class="flex items-center gap-2 shrink-0">
                           <div class="text-right">
@@ -512,10 +449,27 @@ const svgMap: Record<string, string> = {
                     </a>
                   </div>
 
-                  <!-- Bottom Row: Price & Check Availability Button -->
-                  <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-end gap-3">
+                  <!-- Bottom Row: Price Anchoring & High-Converting Deal Badges -->
+                  <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-between gap-2">
+                    
+                    <!-- Left: Deal Tag & Scarcity/Member perk -->
+                    <div class="space-y-1">
+                      <span class="inline-flex items-center gap-1 bg-[#d4111e] text-white text-[10px] font-black px-2 py-0.5 rounded shadow-2xs uppercase tracking-wide">
+                        <span>🏷️</span>
+                        <span>Save {discountPercent}% Today</span>
+                      </span>
+                      
+                      <span class="text-[11px] text-[#008234] font-bold block">
+                        🔒 Secret Member Rate
+                      </span>
+                    </div>
+
+                    <!-- Right: Strikethrough Original Price + Offer Price + CTA -->
                     <div class="text-right shrink-0">
-                      <span class="text-[11px] text-slate-500 block leading-tight">Price from</span>
+                      <span class="text-[11px] text-slate-400 block line-through font-semibold leading-none">
+                        {displayOriginalPrice}
+                      </span>
+                      
                       <span class="text-lg sm:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
                         {displayPrice}
                       </span>
@@ -529,6 +483,7 @@ const svgMap: Record<string, string> = {
                         <span class="text-xs">›</span>
                       </a>
                     </div>
+
                   </div>
 
                 </div>
@@ -561,7 +516,6 @@ const svgMap: Record<string, string> = {
     const cards = document.querySelectorAll('.directory-card-item');
     const starCbs = document.querySelectorAll('.filter-star-cb');
     const areaRadios = document.querySelectorAll('.filter-area-radio');
-    const scoreCbs = document.querySelectorAll('.filter-score-cb');
 
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
@@ -573,29 +527,18 @@ const svgMap: Record<string, string> = {
 
       const selectedArea = Array.from(areaRadios).find(r => r.checked)?.value || 'all';
 
-      const selectedMinScores = Array.from(scoreCbs)
-        .filter(cb => cb.checked)
-        .map(cb => parseFloat(cb.value));
-
       cards.forEach(card => {
         const title = card.getAttribute('data-title') || '';
         const stars = card.getAttribute('data-stars') || '0';
         const area = card.getAttribute('data-area') || 'near';
         const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
-        const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
 
         const matchSearch = !query || title.includes(query);
         const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
         const matchArea = selectedArea === 'all' || area === selectedArea;
         const matchPrice = price === 0 || price <= maxPrice;
-        
-        let matchScore = true;
-        if (selectedMinScores.length > 0) {
-          const lowestRequired = Math.min(...selectedMinScores);
-          matchScore = rating >= lowestRequired;
-        }
 
-        if (matchSearch && matchStars && matchArea && matchScore && matchPrice) {
+        if (matchSearch && matchStars && matchArea && matchPrice) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
@@ -613,7 +556,6 @@ const svgMap: Record<string, string> = {
 
     starCbs.forEach(cb => cb.onchange = filterDirectory);
     areaRadios.forEach(r => r.onchange = filterDirectory);
-    scoreCbs.forEach(cb => cb.onchange = filterDirectory);
 
     if (resetBtn) {
       resetBtn.onclick = () => {
@@ -623,7 +565,6 @@ const svgMap: Record<string, string> = {
           if (priceDisplay) priceDisplay.textContent = '৳60,000+';
         }
         starCbs.forEach(cb => cb.checked = false);
-        scoreCbs.forEach(cb => cb.checked = false);
         if (areaRadios.length > 0) areaRadios[0].checked = true;
         filterDirectory();
       };
@@ -676,7 +617,7 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Wishlist Logic
+    // Wishlist
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
