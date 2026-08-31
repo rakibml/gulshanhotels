@@ -55,8 +55,8 @@ try {
 
 if (allCmsReviews.length === 0) {
   try {
-    const rawGlob = import.meta.glob('/src/content/reviews/*.md', { eager: true });
-    Object.values(rawGlob).forEach((mod: any) => {
+    const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    Object.values(globModules).forEach((mod: any) => {
       if (mod && mod.frontmatter) {
         allCmsReviews.push(mod.frontmatter);
       }
@@ -83,7 +83,7 @@ const toTitleCase = (str: string) => {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-// 100% Clean Price Formatter (Zero Double Symbol Glitch)
+// Clean Price Formatter
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
   const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
@@ -355,7 +355,7 @@ const svgMap: Record<string, string> = {
                     data-price={displayPrice}
                     aria-label="Save to Wishlist"
                   >
-                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                   </button>
                 </div>
 
@@ -411,6 +411,9 @@ const svgMap: Record<string, string> = {
                       Show more
                     </a>
                   </div>
+
+                  <!-- Bottom Row: Price & Check Availability Button -->
+                  <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-end gap-3">
                     <div class="text-right shrink-0">
                       <span class="text-[11px] text-slate-500 block leading-tight">Price from</span>
                       <span class="text-lg sm:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
@@ -426,7 +429,6 @@ const svgMap: Record<string, string> = {
                         <span class="text-xs">›</span>
                       </a>
                     </div>
-
                   </div>
 
                 </div>
