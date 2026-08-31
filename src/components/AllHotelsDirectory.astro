@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Cloudflare Build Safe - Fixed const reassignment)
+// src/components/AllHotelsDirectory.astro (100% Bug-Free, Real Reviews & Dynamic Counters)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -51,7 +51,9 @@ try {
   if (Array.isArray(reviewsCol) && reviewsCol.length > 0) {
     allCmsReviews = reviewsCol.map(r => r.data || {});
   }
-} catch (e) {
+} catch (e) {}
+
+if (allCmsReviews.length === 0) {
   try {
     const rawGlob = import.meta.glob('/src/content/reviews/*.md', { eager: true });
     Object.values(rawGlob).forEach((mod: any) => {
@@ -64,6 +66,18 @@ try {
   }
 }
 
+// 3. Calculate Dynamic Star Counts for Sidebar
+let count5Star = 0;
+let count4Star = 0;
+let count3Star = 0;
+
+hotels.forEach(h => {
+  const cat = (h.data?.starCategory || h.data?.category || '').toLowerCase();
+  if (cat.includes('5')) count5Star++;
+  else if (cat.includes('4')) count4Star++;
+  else count3Star++;
+});
+
 // SVG Vector Icons Dictionary
 const svgMap = {
   wifi: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
@@ -71,24 +85,26 @@ const svgMap = {
   spa: `<svg class="w-3.5 h-3.5 fill-slate-500 shrink-0" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
   search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-  gridIcon: `<svg class="w-4 h-4 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
-  listIcon: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>`
+  gridIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
+  listIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>`
 };
 ---
 
 <!-- ALL HOTELS DIRECTORY SECTION -->
-<section id="all-hotels-directory" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+<section id="all-hotels-directory" class="bg-[#F8FAF9] py-8 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
   <div class="space-y-6">
     
     <!-- TOP HEADER -->
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200/80 pb-5 text-left">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-slate-200/80 pb-4 text-left">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
-          {title} <span class="text-slate-500 font-sans font-normal text-lg">({totalHotelsCount} Hotels)</span>
+        <h2 class="text-2xl sm:text-3xl font-black font-sans text-slate-900 tracking-tight">
+          {title} <span class="text-slate-500 font-sans font-normal text-lg" id="dirTotalHotelsDisplay">({totalHotelsCount} Hotels)</span>
         </h2>
-        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-          {subtitle}
-        </p>
+        {subtitle && (
+          <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       <!-- SEARCH, SORT & VIEW TOGGLES -->
@@ -115,11 +131,12 @@ const svgMap = {
           </select>
         </div>
 
+        <!-- Working View Toggles -->
         <div class="hidden sm:flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
-          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg bg-slate-100 text-slate-900 transition cursor-pointer">
+          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer">
             <span set:html={svgMap.gridIcon} class="inline-flex"></span>
           </button>
-          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition cursor-pointer">
+          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 transition cursor-pointer">
             <span set:html={svgMap.listIcon} class="inline-flex"></span>
           </button>
         </div>
@@ -137,11 +154,10 @@ const svgMap = {
           <button id="resetAllFiltersBtn" class="text-xs font-bold text-emerald-800 hover:underline cursor-pointer">Reset All</button>
         </div>
 
-        <!-- Filter 1: Star Rating -->
+        <!-- Filter 1: Star Rating (Dynamic Counts) -->
         <div class="space-y-2.5">
           <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
             <span>Star Rating</span>
-            <span class="text-slate-400 text-[10px]">▲</span>
           </h4>
 
           <div class="space-y-2 text-xs font-medium text-slate-700">
@@ -150,7 +166,7 @@ const svgMap = {
                 <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="5" />
                 <span>5 Star</span>
               </div>
-              <span class="text-slate-400 text-[11px]">(24)</span>
+              <span class="text-slate-400 text-[11px]">({count5Star})</span>
             </label>
 
             <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
@@ -158,7 +174,7 @@ const svgMap = {
                 <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="4" />
                 <span>4 Star</span>
               </div>
-              <span class="text-slate-400 text-[11px]">(36)</span>
+              <span class="text-slate-400 text-[11px]">({count4Star})</span>
             </label>
 
             <label class="flex items-center justify-between cursor-pointer hover:text-slate-900">
@@ -166,7 +182,7 @@ const svgMap = {
                 <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="3" />
                 <span>3 Star</span>
               </div>
-              <span class="text-slate-400 text-[11px]">(22)</span>
+              <span class="text-slate-400 text-[11px]">({count3Star})</span>
             </label>
           </div>
         </div>
@@ -174,15 +190,14 @@ const svgMap = {
         <!-- Filter 2: Price Range Slider -->
         <div class="space-y-2.5 border-t border-slate-100 pt-4">
           <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
-            <span>Price Range <span class="text-[10px] text-slate-400 font-normal">(per night)</span></span>
-            <span class="text-slate-400 text-[10px]">▲</span>
+            <span>Max Price <span class="text-[10px] text-slate-400 font-normal">(per night)</span></span>
           </h4>
 
           <div class="space-y-2 pt-1">
-            <input type="range" id="priceRangeSlider" min="2000" max="50000" step="1000" value="50000" class="w-full accent-emerald-700 cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+            <input type="range" id="priceRangeSlider" min="2000" max="60000" step="1000" value="60000" class="w-full accent-emerald-700 cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
             <div class="flex justify-between text-[11px] font-bold text-slate-800">
               <span>৳2,000</span>
-              <span id="priceRangeValueDisplay" class="text-emerald-800">৳50,000+</span>
+              <span id="priceRangeValueDisplay" class="text-emerald-800">৳60,000+</span>
             </div>
           </div>
         </div>
@@ -193,7 +208,7 @@ const svgMap = {
       <div class="lg:col-span-9 space-y-6">
         
         <!-- Cards Grid -->
-        <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 items-stretch">
+        <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
             const hTitle = (hData.title || hData.name || "Hotel Details").trim();
@@ -202,13 +217,7 @@ const svgMap = {
             const hLocation = (hData.location || hData.category || "Gulshan 2, Dhaka").trim();
             const hPrice = hData.price ? String(hData.price) : "৳ 18,500 / night";
 
-            const formattedTitle = hTitle.replace(/\w\S*/g, (txt: string) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-            let formattedPrice = hPrice.replace(/\$/g, '').trim();
-            if (!formattedPrice.startsWith('৳')) {
-              formattedPrice = '$' + formattedPrice;
-            }
-
-            const starCategory = hData.starCategory || (hData.category?.includes('5-Star') ? '5-Star Hotel' : (hData.category?.includes('4-Star') ? '4-Star Hotel' : '3-Star Hotel'));
+            const starCategory = hData.starCategory || (hData.category?.includes('5') ? '5-Star Hotel' : (hData.category?.includes('4') ? '4-Star Hotel' : '3-Star Hotel'));
 
             const hTitleLower = hTitle.toLowerCase();
             const hSlugLower = hSlug.toLowerCase();
@@ -227,8 +236,7 @@ const svgMap = {
             const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
             const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews : embedded;
 
-            // Re-assignable Let Variables (Fixes const re-assignment build error!)
-            let realCount = finalReviewsList.length;
+            const realCount = finalReviewsList.length;
             let realRating: string | null = null;
 
             if (realCount > 0) {
@@ -237,56 +245,54 @@ const svgMap = {
                 return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
               }, 0);
               realRating = (totalStars / realCount).toFixed(1);
-            } else if (hData.rating || hData.reviewsCount || hData.reviews_count) {
-              const rawR = parseFloat(hData.rating);
-              realRating = (!isNaN(rawR) && rawR <= 5.0 && rawR > 0) ? rawR.toFixed(1) : (hData.rating ? String(hData.rating) : "4.8");
-              realCount = Number(hData.reviewsCount || hData.reviews_count) || 12;
             }
 
-            const numRating = parseFloat(realRating || '4.5');
+            const numRating = parseFloat(realRating || '0');
+            const numericPrice = parseFloat(hPrice.replace(/[^0-9]/g, '')) || 0;
+
             let ratingLabel = 'Excellent';
             if (numRating < 4.5 && numRating >= 4.0) ratingLabel = 'Very Good';
-            else if (numRating < 4.0) ratingLabel = 'Good';
+            else if (numRating < 4.0 && numRating > 0) ratingLabel = 'Good';
 
             return (
               <div 
                 class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl transition duration-300 flex flex-col justify-between group text-left relative"
-                data-title={formattedTitle.toLowerCase()}
+                data-title={hTitleLower}
                 data-stars={starCategory.includes('5') ? '5' : (starCategory.includes('4') ? '4' : '3')}
-                data-numeric-price={parseFloat(formattedPrice.replace(/[^0-9.]/g, '')) || 18500}
+                data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
+                <!-- Wishlist Heart Button (Placed OUTSIDE <a> tag) -->
+                <button 
+                  type="button"
+                  class="card-wishlist-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
+                  data-title={hTitle}
+                  data-image={hImage}
+                  data-url={`/${hSlug}`}
+                  data-price={hPrice}
+                  aria-label="Add to Wishlist"
+                >
+                  <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </button>
+
                 <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
                   <div>
                     <!-- Image Box -->
-                    <div class="relative w-full h-44 sm:h-48 overflow-hidden bg-slate-900">
+                    <div class="relative w-full h-48 overflow-hidden bg-slate-900">
                       <img 
                         src={hImage} 
-                        alt={`${formattedTitle} Photo`} 
+                        alt={`${hTitle} Photo`} 
                         loading="lazy" 
                         decoding="async" 
                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                       />
 
-                      <!-- Top Left Star Badge -->
+                      <!-- Star Badge -->
                       <div class="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md text-slate-900 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-slate-200 shadow-2xs">
                         {starCategory}
                       </div>
 
-                      <!-- Top Right Wishlist Heart -->
-                      <button 
-                        type="button"
-                        class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-10"
-                        data-title={formattedTitle}
-                        data-image={hImage}
-                        data-url={`/${hSlug}`}
-                        data-price={formattedPrice}
-                        aria-label="Add to Wishlist"
-                      >
-                        <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                      </button>
-
-                      <!-- Score Box Overlap -->
+                      <!-- Score Box -->
                       {realRating && (
                         <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
                           <span class="bg-[#0d3b23] text-white text-xs font-black px-2 py-0.5 rounded-md shadow-sm">
@@ -301,18 +307,18 @@ const svgMap = {
 
                     <!-- Card Body -->
                     <div class="p-4 space-y-2">
-                      <h3 class="font-extrabold text-slate-900 text-sm sm:text-base leading-tight group-hover:text-emerald-800 transition line-clamp-1">
-                        {formattedTitle}
+                      <h3 class="font-extrabold text-slate-900 text-base leading-tight group-hover:text-emerald-800 transition line-clamp-1">
+                        {hTitle}
                       </h3>
 
                       <!-- Location Line -->
-                      <div class="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                      <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
                         <span set:html={svgMap.locationPin} class="inline-flex"></span>
                         <span class="truncate">{hLocation}</span>
                       </div>
 
-                      <!-- Feature Badges with Pure Vector SVGs -->
-                      <div class="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-bold text-slate-600">
+                      <!-- Pure Vector SVGs -->
+                      <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-bold text-slate-600">
                         <span class="flex items-center gap-1"><span set:html={svgMap.wifi} class="inline-flex"></span> Wi-Fi</span>
                         <span class="flex items-center gap-1"><span set:html={svgMap.pool} class="inline-flex"></span> Pool</span>
                         <span class="flex items-center gap-1"><span set:html={svgMap.spa} class="inline-flex"></span> Spa</span>
@@ -321,13 +327,13 @@ const svgMap = {
                   </div>
 
                   <!-- Price & Button Footer -->
-                  <div class="p-4 pt-2 border-t border-slate-100/80 space-y-2">
+                  <div class="p-4 pt-2 border-t border-slate-100/80 space-y-2.5">
                     <div class="flex items-baseline gap-1">
-                      <span class="text-[10px] text-slate-400 font-semibold">From</span>
-                      <span class="text-sm sm:text-base font-black text-slate-900">{formattedPrice}</span>
+                      <span class="text-xs text-slate-400 font-semibold">From</span>
+                      <span class="text-base font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                     </div>
 
-                    <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-[11px] text-center py-2.5 rounded-xl transition shadow-xs uppercase tracking-wider">
+                    <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-2.5 rounded-xl transition shadow-xs uppercase tracking-wider">
                       View Details ➔
                     </div>
                   </div>
@@ -346,19 +352,24 @@ const svgMap = {
 
 <!-- CLIENT SIDE JAVASCRIPT -->
 <script is:inline>
-  const initAllHotelsDirectory = () => {
+  function initAllHotelsDirectory() {
     const searchInput = document.getElementById('dirSearchInput');
     const sortSelect = document.getElementById('dirSortSelect');
     const priceSlider = document.getElementById('priceRangeSlider');
     const priceDisplay = document.getElementById('priceRangeValueDisplay');
     const resetBtn = document.getElementById('resetAllFiltersBtn');
-    const cards = document.querySelectorAll('.directory-card-item');
+    const cardsGrid = document.getElementById('directoryCardsGrid');
+    const viewGridBtn = document.getElementById('viewGridBtn');
+    const viewListBtn = document.getElementById('viewListBtn');
 
+    if (!cardsGrid) return;
+    const cards = document.querySelectorAll('.directory-card-item');
     const starCbs = document.querySelectorAll('.filter-star-cb');
 
+    // 1. Filter Logic
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
-      const maxPrice = parseFloat(priceSlider?.value || '50000');
+      const maxPrice = parseFloat(priceSlider?.value || '60000');
       
       const selectedStars = Array.from(starCbs)
         .filter(cb => cb.checked)
@@ -371,7 +382,7 @@ const svgMap = {
 
         const matchSearch = !query || title.includes(query);
         const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
-        const matchPrice = price <= maxPrice;
+        const matchPrice = price === 0 || price <= maxPrice;
 
         if (matchSearch && matchStars && matchPrice) {
           card.classList.remove('hidden');
@@ -381,34 +392,32 @@ const svgMap = {
       });
     }
 
-    if (searchInput) searchInput.addEventListener('input', filterDirectory);
+    if (searchInput) searchInput.oninput = filterDirectory;
     if (priceSlider) {
-      priceSlider.addEventListener('input', (e) => {
+      priceSlider.oninput = (e) => {
         if (priceDisplay) priceDisplay.textContent = `৳${parseInt(e.target.value).toLocaleString()}+`;
         filterDirectory();
-      });
+      };
     }
 
-    starCbs.forEach(cb => cb.addEventListener('change', filterDirectory));
+    starCbs.forEach(cb => cb.onchange = filterDirectory);
 
     if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
+      resetBtn.onclick = () => {
         if (searchInput) searchInput.value = '';
         if (priceSlider) {
-          priceSlider.value = '50000';
-          if (priceDisplay) priceDisplay.textContent = '৳50,000+';
+          priceSlider.value = '60000';
+          if (priceDisplay) priceDisplay.textContent = '৳60,000+';
         }
         starCbs.forEach(cb => cb.checked = false);
         filterDirectory();
-      });
+      };
     }
 
+    // 2. Sorting Logic
     if (sortSelect) {
-      sortSelect.addEventListener('change', (e) => {
+      sortSelect.onchange = (e) => {
         const val = e.target.value;
-        const grid = document.getElementById('directoryCardsGrid');
-        if (!grid) return;
-
         const cardsArr = Array.from(cards);
         cardsArr.sort((a, b) => {
           const pA = parseFloat(a.getAttribute('data-numeric-price') || '0');
@@ -422,11 +431,79 @@ const svgMap = {
           return 0;
         });
 
-        cardsArr.forEach(c => grid.appendChild(c));
-      });
+        cardsArr.forEach(c => cardsGrid.appendChild(c));
+      };
     }
-  };
 
-  document.addEventListener('DOMContentLoaded', initAllHotelsDirectory);
+    // 3. Grid vs List View Toggle Logic
+    if (viewGridBtn && viewListBtn) {
+      viewGridBtn.onclick = () => {
+        cardsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch';
+        viewGridBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer';
+        viewListBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-900 transition cursor-pointer';
+      };
+
+      viewListBtn.onclick = () => {
+        cardsGrid.className = 'grid grid-cols-1 gap-4 items-stretch';
+        viewListBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer';
+        viewGridBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-900 transition cursor-pointer';
+      };
+    }
+
+    // 4. Interactive Wishlist Handler
+    const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
+    wishlistBtns.forEach(btn => {
+      const title = btn.getAttribute('data-title') || '';
+      let list = [];
+      try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (e) { list = []; }
+
+      const isSaved = list.some(item => item.title === title);
+      const iconSvg = btn.querySelector('svg');
+      if (isSaved && iconSvg) {
+        iconSvg.setAttribute('fill', 'currentColor');
+        iconSvg.classList.add('text-rose-600');
+        iconSvg.classList.remove('text-slate-700');
+      }
+
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const image = btn.getAttribute('data-image') || '';
+        const url = btn.getAttribute('data-url') || '';
+        const price = btn.getAttribute('data-price') || '';
+
+        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
+
+        const idx = list.findIndex(item => item.title === title);
+        if (idx > -1) {
+          list.splice(idx, 1);
+          if (iconSvg) {
+            iconSvg.setAttribute('fill', 'none');
+            iconSvg.classList.remove('text-rose-600');
+            iconSvg.classList.add('text-slate-700');
+          }
+        } else {
+          list.push({ title, image, url, price });
+          if (iconSvg) {
+            iconSvg.setAttribute('fill', 'currentColor');
+            iconSvg.classList.remove('text-slate-700');
+            iconSvg.classList.add('text-rose-600');
+          }
+        }
+
+        localStorage.setItem('gh_wishlist', JSON.stringify(list));
+        const countEl = document.getElementById('wishlist-count');
+        if (countEl) {
+          countEl.textContent = list.length.toString();
+          countEl.classList.toggle('hidden', list.length === 0);
+        }
+      };
+    });
+  }
+
   document.addEventListener('astro:page-load', initAllHotelsDirectory);
+  if (document.readyState !== 'loading') {
+    initAllHotelsDirectory();
+  } else {
+    document.addEventListener('DOMContentLoaded', initAllHotelsDirectory);
+  }
 </script>
