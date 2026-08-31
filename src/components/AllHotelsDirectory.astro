@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Booking.com Perfect Edition)
+// src/components/AllHotelsDirectory.astro (Advanced Booking.com Filter Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -55,8 +55,8 @@ try {
 
 if (allCmsReviews.length === 0) {
   try {
-    const globModules = import.meta.glob('/src/content/reviews/*.md', { eager: true });
-    Object.values(globModules).forEach((mod: any) => {
+    const rawGlob = import.meta.glob('/src/content/reviews/*.md', { eager: true });
+    Object.values(rawGlob).forEach((mod: any) => {
       if (mod && mod.frontmatter) {
         allCmsReviews.push(mod.frontmatter);
       }
@@ -66,16 +66,29 @@ if (allCmsReviews.length === 0) {
   }
 }
 
-// Star Counts
+// 3. Calculate Dynamic Counters (Stars & Areas)
 let count5Star = 0;
 let count4Star = 0;
 let count3Star = 0;
+
+let countGulshan1 = 0;
+let countGulshan2 = 0;
+let countNearGulshan = 0;
 
 hotels.forEach(h => {
   const cat = String(h.data?.starCategory || h.data?.category || '').toLowerCase();
   if (cat.includes('5')) count5Star++;
   else if (cat.includes('4')) count4Star++;
   else count3Star++;
+
+  const loc = String(h.data?.location || h.data?.category || h.data?.address || '').toLowerCase();
+  if (loc.includes('gulshan 1') || loc.includes('gulshan-1') || loc.includes('gulshan1')) {
+    countGulshan1++;
+  } else if (loc.includes('gulshan 2') || loc.includes('gulshan-2') || loc.includes('gulshan2')) {
+    countGulshan2++;
+  } else {
+    countNearGulshan++;
+  }
 });
 
 // Helpers
@@ -83,18 +96,21 @@ const toTitleCase = (str: string) => {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-// Clean Price Formatter
+const extractAmenityName = (item: any): string => {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object') {
+    return item.name || item.title || item.label || item.amenity || Object.values(item)[0] || '';
+  }
+  return String(item);
+};
+
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
   const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
   const digits = clean.replace(/[^0-9.,]/g, '').trim();
   
-  if (clean.includes('$')) {
-    return `$${digits}`;
-  }
-  if (clean.includes('৳') || clean.includes('BDT') || clean.includes('Tk')) {
-    return `৳ ${digits}`;
-  }
+  if (clean.includes('$')) return `$${digits}`;
   return `৳ ${digits}`;
 };
 
@@ -182,8 +198,51 @@ const svgMap: Record<string, string> = {
           </button>
         </div>
 
-        <!-- Star Rating Filter -->
+        <!-- Filter 1: Area / Neighbourhood -->
         <div class="space-y-3">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+            Popular Areas
+          </h4>
+
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="all" checked />
+                <span class="font-semibold text-slate-800">All Gulshan Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{totalHotelsCount}</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-1" />
+                <span class="text-slate-800">Gulshan 1 Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{countGulshan1}</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-2" />
+                <span class="text-slate-800">Gulshan 2 Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{countGulshan2}</span>
+            </label>
+
+            {countNearGulshan > 0 && (
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="near" />
+                  <span class="text-slate-800">Hotels near Gulshan</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{countNearGulshan}</span>
+              </label>
+            )}
+          </div>
+        </div>
+
+        <!-- Filter 2: Star Rating -->
+        <div class="space-y-3 border-t border-slate-100 pt-4">
           <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
             Property rating
           </h4>
@@ -227,7 +286,37 @@ const svgMap: Record<string, string> = {
           </div>
         </div>
 
-        <!-- Budget Slider -->
+        <!-- Filter 3: Review Score -->
+        <div class="space-y-3 border-t border-slate-100 pt-4">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+            Review Score
+          </h4>
+
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="9" />
+                <span class="text-slate-800 font-semibold">Wonderful: 9+</span>
+              </div>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="8" />
+                <span class="text-slate-800 font-semibold">Very Good: 8+</span>
+              </div>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="7" />
+                <span class="text-slate-800 font-semibold">Good: 7+</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter 4: Budget Slider -->
         <div class="space-y-3 border-t border-slate-100 pt-4">
           <div class="flex justify-between items-center">
             <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
@@ -268,11 +357,21 @@ const svgMap: Record<string, string> = {
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // Location
+            // Location & Area Category Tagging
             let hLocation = String(hData.location || hData.category || "Gulshan, Dhaka").trim();
-            if (hLocation.includes('Gulshan 2')) hLocation = 'Gulshan 2, Dhaka';
-            else if (hLocation.includes('Gulshan 1')) hLocation = 'Gulshan 1, Dhaka';
-            else if (hLocation.length > 30) hLocation = 'Gulshan, Dhaka';
+            const locLower = hLocation.toLowerCase();
+            let areaType = 'near';
+
+            if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1') || locLower.includes('gulshan1')) {
+              areaType = 'gulshan-1';
+              hLocation = 'Gulshan 1, Dhaka';
+            } else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2') || locLower.includes('gulshan2')) {
+              areaType = 'gulshan-2';
+              hLocation = 'Gulshan 2, Dhaka';
+            } else {
+              areaType = 'near';
+              if (hLocation.length > 30) hLocation = 'Gulshan, Dhaka';
+            }
 
             const rawPrice = hData.price ? String(hData.price).trim() : "";
             const displayPrice = cleanPriceString(rawPrice);
@@ -326,6 +425,7 @@ const svgMap: Record<string, string> = {
                 class="directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col p-4 gap-4"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
+                data-area={areaType}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
@@ -355,7 +455,7 @@ const svgMap: Record<string, string> = {
                     data-price={displayPrice}
                     aria-label="Save to Wishlist"
                   >
-                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                   </button>
                 </div>
 
@@ -460,6 +560,8 @@ const svgMap: Record<string, string> = {
     if (!cardsGrid) return;
     const cards = document.querySelectorAll('.directory-card-item');
     const starCbs = document.querySelectorAll('.filter-star-cb');
+    const areaRadios = document.querySelectorAll('.filter-area-radio');
+    const scoreCbs = document.querySelectorAll('.filter-score-cb');
 
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
@@ -469,16 +571,31 @@ const svgMap: Record<string, string> = {
         .filter(cb => cb.checked)
         .map(cb => cb.value);
 
+      const selectedArea = Array.from(areaRadios).find(r => r.checked)?.value || 'all';
+
+      const selectedMinScores = Array.from(scoreCbs)
+        .filter(cb => cb.checked)
+        .map(cb => parseFloat(cb.value));
+
       cards.forEach(card => {
         const title = card.getAttribute('data-title') || '';
         const stars = card.getAttribute('data-stars') || '0';
+        const area = card.getAttribute('data-area') || 'near';
         const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
+        const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
 
         const matchSearch = !query || title.includes(query);
         const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
+        const matchArea = selectedArea === 'all' || area === selectedArea;
         const matchPrice = price === 0 || price <= maxPrice;
+        
+        let matchScore = true;
+        if (selectedMinScores.length > 0) {
+          const lowestRequired = Math.min(...selectedMinScores);
+          matchScore = rating >= lowestRequired;
+        }
 
-        if (matchSearch && matchStars && matchPrice) {
+        if (matchSearch && matchStars && matchArea && matchScore && matchPrice) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
@@ -495,6 +612,8 @@ const svgMap: Record<string, string> = {
     }
 
     starCbs.forEach(cb => cb.onchange = filterDirectory);
+    areaRadios.forEach(r => r.onchange = filterDirectory);
+    scoreCbs.forEach(cb => cb.onchange = filterDirectory);
 
     if (resetBtn) {
       resetBtn.onclick = () => {
@@ -504,6 +623,8 @@ const svgMap: Record<string, string> = {
           if (priceDisplay) priceDisplay.textContent = '৳60,000+';
         }
         starCbs.forEach(cb => cb.checked = false);
+        scoreCbs.forEach(cb => cb.checked = false);
+        if (areaRadios.length > 0) areaRadios[0].checked = true;
         filterDirectory();
       };
     }
@@ -555,7 +676,7 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Wishlist
+    // Wishlist Logic
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
