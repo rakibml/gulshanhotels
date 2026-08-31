@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% PURE REAL DATA - ZERO DEMO DATA)
+// src/components/AllHotelsDirectory.astro (100% Cloudflare Build Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -36,7 +36,7 @@ if (!rawHotels || rawHotels.length === 0) {
 // Deduplicate Hotels
 const uniqueHotelsMap = new Map();
 rawHotels.forEach(h => {
-  const key = (h.data?.title || h.data?.name || h.slug || h.id || '').trim().toLowerCase();
+  const key = String(h.data?.title || h.data?.name || h.slug || h.id || '').trim().toLowerCase();
   if (key && !uniqueHotelsMap.has(key)) {
     uniqueHotelsMap.set(key, h);
   }
@@ -66,17 +66,27 @@ if (allCmsReviews.length === 0) {
   }
 }
 
-// 3. Calculate Dynamic Star Counts
+// 3. Dynamic Star Counter
 let count5Star = 0;
 let count4Star = 0;
 let count3Star = 0;
 
 hotels.forEach(h => {
-  const cat = (h.data?.starCategory || h.data?.category || '').toLowerCase();
+  const cat = String(h.data?.starCategory || h.data?.category || '').toLowerCase();
   if (cat.includes('5')) count5Star++;
   else if (cat.includes('4')) count4Star++;
   else if (cat.includes('3')) count3Star++;
 });
+
+// Safe Amenity Helper function
+const extractAmenityName = (item: any): string => {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object') {
+    return item.name || item.title || item.label || item.amenity || Object.values(item)[0] || '';
+  }
+  return String(item);
+};
 
 // SVG Vector Icons Dictionary
 const svgMap: Record<string, string> = {
@@ -154,7 +164,7 @@ const svgMap: Record<string, string> = {
           <button id="resetAllFiltersBtn" class="text-xs font-bold text-emerald-800 hover:underline cursor-pointer">Reset All</button>
         </div>
 
-        <!-- Filter 1: Star Rating (Dynamic Counts) -->
+        <!-- Star Rating (Dynamic Counts) -->
         <div class="space-y-2.5">
           <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
             <span>Star Rating</span>
@@ -193,7 +203,7 @@ const svgMap: Record<string, string> = {
           </div>
         </div>
 
-        <!-- Filter 2: Price Range Slider -->
+        <!-- Price Range Slider -->
         <div class="space-y-2.5 border-t border-slate-100 pt-4">
           <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
             <span>Max Price <span class="text-[10px] text-slate-400 font-normal">(per night)</span></span>
@@ -217,13 +227,13 @@ const svgMap: Record<string, string> = {
         <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
-            const hTitle = (hData.title || hData.name || "").trim();
-            const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "").trim();
+            const hTitle = String(hData.title || hData.name || "").trim();
+            const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
-            const hLocation = (hData.location || hData.category || "").trim();
+            const hLocation = String(hData.location || hData.category || "").trim();
             const hPrice = hData.price ? String(hData.price).trim() : "";
 
-            const rawCat = (hData.starCategory || hData.category || '').toLowerCase();
+            const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
             const starCategory = rawCat.includes('5') ? '5-Star Hotel' : (rawCat.includes('4') ? '4-Star Hotel' : (rawCat.includes('3') ? '3-Star Hotel' : ''));
 
             const hTitleLower = hTitle.toLowerCase();
@@ -235,8 +245,8 @@ const svgMap: Record<string, string> = {
               const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
               if (!isApproved) return false;
 
-              const rHotel = (r.hotel || '').trim().toLowerCase();
-              const rSlug = (r.slug || r.hotelSlug || '').trim().toLowerCase();
+              const rHotel = String(r.hotel || '').trim().toLowerCase();
+              const rSlug = String(r.slug || r.hotelSlug || '').trim().toLowerCase();
 
               return (rSlug && rSlug === hSlugLower) || (rHotel && rHotel === hTitleLower);
             });
@@ -262,7 +272,7 @@ const svgMap: Record<string, string> = {
             if (numRating < 4.5 && numRating >= 4.0) ratingLabel = 'Very Good';
             else if (numRating < 4.0 && numRating > 0) ratingLabel = 'Good';
 
-            // Real Amenities (Only display if provided in hotel frontmatter)
+            // Safe Amenities Extraction
             const hotelAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
 
             return (
@@ -309,7 +319,7 @@ const svgMap: Record<string, string> = {
                         </div>
                       )}
 
-                      <!-- Score Box (Only if reviews exist) -->
+                      <!-- Score Box -->
                       {realRating && (
                         <div class="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
                           <span class="bg-[#0d3b23] text-white text-xs font-black px-2 py-0.5 rounded-md shadow-sm">
@@ -328,7 +338,7 @@ const svgMap: Record<string, string> = {
                         {hTitle}
                       </h3>
 
-                      <!-- Location Line (Only if location exists) -->
+                      <!-- Location Line -->
                       {hLocation && (
                         <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
                           <span set:html={svgMap.locationPin} class="inline-flex"></span>
@@ -336,16 +346,18 @@ const svgMap: Record<string, string> = {
                         </div>
                       )}
 
-                      <!-- Amenities (Only REAL amenities from markdown) -->
+                      <!-- Safe Amenities Rendering -->
                       {hotelAmenities.length > 0 && (
                         <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-bold text-slate-600">
-                          {hotelAmenities.slice(0, 3).map((amenity: string) => {
-                            const aLow = amenity.toLowerCase();
+                          {hotelAmenities.slice(0, 3).map((item: any) => {
+                            const label = extractAmenityName(item);
+                            if (!label) return null;
+                            const aLow = label.toLowerCase();
                             const iconSvg = aLow.includes('wifi') ? svgMap.wifi : (aLow.includes('pool') ? svgMap.pool : (aLow.includes('spa') ? svgMap.spa : null));
                             return (
                               <span class="flex items-center gap-1">
                                 {iconSvg && <span set:html={iconSvg} class="inline-flex"></span>}
-                                {amenity}
+                                <span>{label}</span>
                               </span>
                             );
                           })}
@@ -477,7 +489,6 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Wishlist Logic
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
