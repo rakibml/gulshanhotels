@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (High-Conversion Price Anchoring Edition)
+// src/components/AllHotelsDirectory.astro (Official Gulshan Guide & Partner Deals Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 const { 
   title = "All Hotels in Gulshan", 
-  subtitle = "Handpicked & verified stays in Gulshan. Explore, filter, and book your ideal stay." 
+  subtitle = "The official directory of verified stays in Gulshan. Compare rates and find the best booking options." 
 } = Astro.props;
 
 // 1. Fetch Hotels
@@ -82,9 +82,9 @@ hotels.forEach(h => {
   else count3Star++;
 
   const loc = String(h.data?.location || h.data?.category || h.data?.address || '').toLowerCase();
-  if (loc.includes('gulshan 1') || loc.includes('gulshan-1') || loc.includes('gulshan1')) {
+  if (loc.includes('gulshan 1') || loc.includes('gulshan-1')) {
     countGulshan1++;
-  } else if (loc.includes('gulshan 2') || loc.includes('gulshan-2') || loc.includes('gulshan2')) {
+  } else if (loc.includes('gulshan 2') || loc.includes('gulshan-2')) {
     countGulshan2++;
   } else {
     countNearGulshan++;
@@ -126,7 +126,7 @@ const svgMap: Record<string, string> = {
             {title}
           </h2>
           <span class="bg-[#003b95]/10 text-[#003b95] text-xs font-black px-2.5 py-0.5 rounded-full" id="dirTotalHotelsDisplay">
-            {totalHotelsCount} properties found
+            {totalHotelsCount} verified properties
           </span>
         </div>
         {subtitle && (
@@ -306,12 +306,11 @@ const svgMap: Record<string, string> = {
             const numericPrice = parseFloat(rawPrice.replace(/[^0-9]/g, '')) || 0;
             const isDollar = rawPrice.includes('$');
 
-            // Smart Original (Anchor) Price (+22% regular rate)
+            // Original Regular Rate
             let originalPriceNum = hData.originalPrice ? parseFloat(String(hData.originalPrice).replace(/[^0-9]/g, '')) : 0;
             if (!originalPriceNum || originalPriceNum <= numericPrice) {
-              originalPriceNum = isDollar ? Math.round(numericPrice * 1.22) : Math.round(numericPrice * 1.20 / 100) * 100;
+              originalPriceNum = isDollar ? Math.round(numericPrice * 1.20) : Math.round(numericPrice * 1.20 / 100) * 100;
             }
-            const discountPercent = Math.round(((originalPriceNum - numericPrice) / originalPriceNum) * 100) || 18;
             const displayOriginalPrice = isDollar ? `$${originalPriceNum}` : `৳ ${originalPriceNum.toLocaleString()}`;
 
             // Star Count
@@ -449,22 +448,23 @@ const svgMap: Record<string, string> = {
                     </a>
                   </div>
 
-                  <!-- Bottom Row: Price Anchoring & High-Converting Deal Badges -->
+                  <!-- Bottom Row: Official Guide Rates & Booking Options CTA -->
                   <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-between gap-2">
                     
-                    <!-- Left: Deal Tag & Scarcity/Member perk -->
+                    <!-- Left: Official Authority Deal Tag -->
                     <div class="space-y-1">
-                      <span class="inline-flex items-center gap-1 bg-[#d4111e] text-white text-[10px] font-black px-2 py-0.5 rounded shadow-2xs uppercase tracking-wide">
+                      <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-900 border border-emerald-300/80 text-[10px] font-black px-2 py-0.5 rounded shadow-2xs tracking-wide">
                         <span>🏷️</span>
-                        <span>Save {discountPercent}% Today</span>
+                        <span>10% OFF selected options</span>
                       </span>
                       
-                      <span class="text-[11px] text-[#008234] font-bold block">
-                        🔒 Secret Member Rate
+                      <span class="text-[11px] text-slate-600 font-bold block flex items-center gap-1">
+                        <span>🏛️</span>
+                        <span>Official Partner Deals</span>
                       </span>
                     </div>
 
-                    <!-- Right: Strikethrough Original Price + Offer Price + CTA -->
+                    <!-- Right: Strikethrough Regular Rate + Current Rate + CTA -->
                     <div class="text-right shrink-0">
                       <span class="text-[11px] text-slate-400 block line-through font-semibold leading-none">
                         {displayOriginalPrice}
@@ -473,13 +473,13 @@ const svgMap: Record<string, string> = {
                       <span class="text-lg sm:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
                         {displayPrice}
                       </span>
-                      <span class="text-[10px] text-slate-400 block mb-2 leading-tight">1 night, 2 adults</span>
+                      <span class="text-[10px] text-slate-400 block mb-2 leading-tight">Best rate found</span>
 
                       <a 
                         href={`/${hSlug}`} 
-                        class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-4 py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow"
+                        class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-4 py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap"
                       >
-                        <span>Check availability</span>
+                        <span>See Booking Options</span>
                         <span class="text-xs">›</span>
                       </a>
                     </div>
@@ -617,7 +617,7 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Wishlist
+    // Wishlist Logic
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
