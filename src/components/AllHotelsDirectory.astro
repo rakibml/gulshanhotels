@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Professional Responsive Grid & List View)
+// src/components/AllHotelsDirectory.astro (100% Pixel Perfect Luxury Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -94,10 +94,10 @@ const extractAmenityName = (item: any): string => {
 
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
-  let p = priceRaw.replace(/\$/g, '').replace(/night/gi, '').replace(/\//g, '').trim();
-  if (p.startsWith('৳')) return `${p} / night`;
+  let p = priceRaw.replace(/night/gi, '').replace(/\//g, '').trim();
+  if (p.startsWith('$') || p.startsWith('৳')) return `${p} / night`;
   if (/^\d/.test(p)) return `৳ ${p} / night`;
-  return `${priceRaw}`;
+  return `${priceRaw} / night`;
 };
 
 // SVG Vector Icons
@@ -107,7 +107,7 @@ const svgMap: Record<string, string> = {
   spa: `<svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
   search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-  gridIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
+  gridIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
   listIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>`
 };
 ---
@@ -162,10 +162,10 @@ const svgMap: Record<string, string> = {
 
         <!-- Working View Toggles -->
         <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
-          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs">
+          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer">
             <span set:html={svgMap.gridIcon} class="inline-flex"></span>
           </button>
-          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer">
+          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs">
             <span set:html={svgMap.listIcon} class="inline-flex"></span>
           </button>
         </div>
@@ -262,10 +262,10 @@ const svgMap: Record<string, string> = {
 
       </aside>
 
-      <!-- RIGHT SIDE: HOTELS GRID CONTAINER -->
+      <!-- RIGHT SIDE: HOTELS LIST / GRID CONTAINER -->
       <div class="lg:col-span-9">
         
-        <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
+        <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
             const rawTitle = String(hData.title || hData.name || "").trim();
@@ -321,7 +321,15 @@ const svgMap: Record<string, string> = {
             if (numRating < 4.5 && numRating >= 4.0) ratingLabel = 'Very Good';
             else if (numRating < 4.0 && numRating > 0) ratingLabel = 'Good';
 
-            const hotelAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
+            // Safe & Unique Amenities Extraction
+            const rawAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
+            const uniqueAmenities: string[] = [];
+            rawAmenities.forEach(a => {
+              const name = extractAmenityName(a);
+              if (name && !uniqueAmenities.includes(name)) {
+                uniqueAmenities.push(name);
+              }
+            });
 
             return (
               <div 
@@ -334,7 +342,7 @@ const svgMap: Record<string, string> = {
                 <!-- Wishlist Heart Button -->
                 <button 
                   type="button"
-                  class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
+                  class="card-wishlist-btn absolute top-3 right-3 md:top-3 md:left-3 md:right-auto w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
                   data-title={hTitle}
                   data-image={hImage}
                   data-url={`/${hSlug}`}
@@ -344,11 +352,11 @@ const svgMap: Record<string, string> = {
                   <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                 </button>
 
-                <a href={`/${hSlug}`} class="card-link-wrapper block flex-1 flex flex-col justify-between">
+                <a href={`/${hSlug}`} class="card-link-wrapper block flex-1 flex flex-col md:flex-row md:items-center justify-between">
                   
-                  <div class="card-content-wrapper flex flex-col">
+                  <div class="card-content-wrapper flex flex-col md:flex-row md:items-center flex-1">
                     <!-- Image Box -->
-                    <div class="card-image-box relative w-full h-48 overflow-hidden bg-slate-900 shrink-0">
+                    <div class="card-image-box relative w-full md:w-64 h-48 md:h-44 overflow-hidden bg-slate-900 shrink-0">
                       {hImage ? (
                         <img 
                           src={hImage} 
@@ -363,9 +371,9 @@ const svgMap: Record<string, string> = {
                         </div>
                       )}
 
-                      <!-- Top Left Star Badge -->
+                      <!-- Star Badge -->
                       {starCategory && (
-                        <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md border border-white/20 shadow-xs tracking-wider uppercase">
+                        <div class="absolute top-3 left-12 md:left-3 bg-slate-900/80 backdrop-blur-md text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md border border-white/20 shadow-xs tracking-wider uppercase">
                           {starCategory}
                         </div>
                       )}
@@ -387,8 +395,8 @@ const svgMap: Record<string, string> = {
                     </div>
 
                     <!-- Card Body -->
-                    <div class="card-body-box p-4 space-y-2 flex-1">
-                      <h3 class="font-extrabold text-slate-900 text-base leading-snug group-hover:text-emerald-800 transition line-clamp-1">
+                    <div class="card-body-box p-4 md:p-5 space-y-2 flex-1">
+                      <h3 class="font-extrabold text-slate-900 text-base md:text-lg leading-snug group-hover:text-emerald-800 transition line-clamp-1">
                         {hTitle}
                       </h3>
 
@@ -399,17 +407,15 @@ const svgMap: Record<string, string> = {
                       </div>
 
                       <!-- Amenities -->
-                      {hotelAmenities.length > 0 && (
-                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                          {hotelAmenities.slice(0, 3).map((item: any) => {
-                            const label = extractAmenityName(item);
-                            if (!label) return null;
-                            const aLow = label.toLowerCase();
+                      {uniqueAmenities.length > 0 && (
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
+                          {uniqueAmenities.slice(0, 3).map((name: string) => {
+                            const aLow = name.toLowerCase();
                             const iconSvg = aLow.includes('wifi') ? svgMap.wifi : (aLow.includes('pool') ? svgMap.pool : (aLow.includes('spa') ? svgMap.spa : null));
                             return (
                               <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
                                 {iconSvg && <span set:html={iconSvg} class="inline-flex"></span>}
-                                <span>{label}</span>
+                                <span>{name}</span>
                               </span>
                             );
                           })}
@@ -419,14 +425,14 @@ const svgMap: Record<string, string> = {
                   </div>
 
                   <!-- Footer -->
-                  <div class="card-footer-box p-4 pt-3 border-t border-slate-100/90 flex items-center justify-between gap-2 mt-2 bg-slate-50/50">
-                    <div>
+                  <div class="card-footer-box p-4 md:p-5 border-t md:border-t-0 md:border-l border-slate-100/90 flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 bg-slate-50/50 md:min-w-[180px] shrink-0">
+                    <div class="md:text-right">
                       <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Starts from</span>
-                      <span class="text-sm sm:text-base font-black text-slate-900">{displayPrice}</span>
+                      <span class="text-base md:text-lg font-black text-slate-900">{displayPrice}</span>
                     </div>
 
-                    <div class="bg-emerald-800 group-hover:bg-emerald-900 text-white font-black text-[11px] px-3.5 py-2 rounded-xl transition shadow-xs flex items-center gap-1">
-                      <span>View</span>
+                    <div class="bg-emerald-800 group-hover:bg-emerald-900 text-white font-black text-xs px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1">
+                      <span>View Details</span>
                       <span class="group-hover:translate-x-0.5 transition">➔</span>
                     </div>
                   </div>
@@ -527,24 +533,25 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // 100% Booking.com Style Grid vs List View Toggle
+    // Grid vs List View Toggle
     if (viewGridBtn && viewListBtn) {
       viewGridBtn.onclick = () => {
         cardsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch';
         viewGridBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs';
         viewListBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer';
 
-        // Reset cards to vertical layout
         cards.forEach(card => {
           const linkWrap = card.querySelector('.card-link-wrapper');
           const contentWrap = card.querySelector('.card-content-wrapper');
           const imgBox = card.querySelector('.card-image-box');
           const footerBox = card.querySelector('.card-footer-box');
+          const wishBtn = card.querySelector('.card-wishlist-btn');
 
           if (linkWrap) linkWrap.className = 'card-link-wrapper block flex-1 flex flex-col justify-between';
           if (contentWrap) contentWrap.className = 'card-content-wrapper flex flex-col';
           if (imgBox) imgBox.className = 'card-image-box relative w-full h-48 overflow-hidden bg-slate-900 shrink-0';
           if (footerBox) footerBox.className = 'card-footer-box p-4 pt-3 border-t border-slate-100/90 flex items-center justify-between gap-2 mt-2 bg-slate-50/50';
+          if (wishBtn) wishBtn.className = 'card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30';
         });
       };
 
@@ -553,22 +560,23 @@ const svgMap: Record<string, string> = {
         viewListBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs';
         viewGridBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer';
 
-        // Transform cards to true horizontal booking row layout
         cards.forEach(card => {
           const linkWrap = card.querySelector('.card-link-wrapper');
           const contentWrap = card.querySelector('.card-content-wrapper');
           const imgBox = card.querySelector('.card-image-box');
           const footerBox = card.querySelector('.card-footer-box');
+          const wishBtn = card.querySelector('.card-wishlist-btn');
 
           if (linkWrap) linkWrap.className = 'card-link-wrapper block flex-1 flex flex-col md:flex-row md:items-center justify-between';
           if (contentWrap) contentWrap.className = 'card-content-wrapper flex flex-col md:flex-row md:items-center flex-1';
           if (imgBox) imgBox.className = 'card-image-box relative w-full md:w-64 h-48 md:h-44 overflow-hidden bg-slate-900 shrink-0';
           if (footerBox) footerBox.className = 'card-footer-box p-4 md:p-5 border-t md:border-t-0 md:border-l border-slate-100/90 flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 bg-slate-50/50 md:min-w-[180px] shrink-0';
+          if (wishBtn) wishBtn.className = 'card-wishlist-btn absolute top-3 right-3 md:top-3 md:left-3 md:right-auto w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30';
         });
       };
     }
 
-    // Wishlist Logic
+    // Wishlist
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
