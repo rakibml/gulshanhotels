@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Pixel Perfect Luxury Edition)
+// src/components/AllHotelsDirectory.astro (100% Booking.com Exact Pattern)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -95,40 +95,37 @@ const extractAmenityName = (item: any): string => {
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
   let p = priceRaw.replace(/night/gi, '').replace(/\//g, '').trim();
-  if (p.startsWith('$') || p.startsWith('৳')) return `${p} / night`;
-  if (/^\d/.test(p)) return `৳ ${p} / night`;
-  return `${priceRaw} / night`;
+  if (p.startsWith('$') || p.startsWith('৳')) return p;
+  if (/^\d/.test(p)) return `৳ ${p}`;
+  return priceRaw;
 };
 
 // SVG Vector Icons
 const svgMap: Record<string, string> = {
-  wifi: `<svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
-  pool: `<svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
-  spa: `<svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M12 3c-1.5 2.5-3 5.5-3 8 0 1.66 1.34 3 3 3s3-1.34 3-3c0-2.5-1.5-5.5-3-8zm-5.5 5.5c-2.5 1.5-5.5 3-8 3 0 1.66 1.34 3 3 3 2.5 0 5.5-1.5 8-3-1.34 0-3-1.34-3-3zm11 0c0 1.66-1.66 3-3 3 2.5 1.5 5.5 3 8 3 0-1.66-1.34-3-3-3-2.5 0-5.5-1.5-8-3z"/></svg>`,
-  locationPin: `<svg class="w-3.5 h-3.5 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+  locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
   search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-  gridIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
+  gridIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>`,
   listIcon: `<svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>`
 };
 ---
 
 <!-- ALL HOTELS DIRECTORY SECTION -->
 <section id="all-hotels-directory" class="bg-[#F8FAF9] py-8 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-6">
+  <div class="space-y-5">
     
     <!-- TOP HEADER -->
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
       <div>
         <div class="flex items-center gap-2">
           <h2 class="text-xl sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
             {title}
           </h2>
-          <span class="bg-emerald-100 text-emerald-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-emerald-300/80" id="dirTotalHotelsDisplay">
-            {totalHotelsCount} Stays
+          <span class="bg-[#003b95]/10 text-[#003b95] text-xs font-black px-2.5 py-0.5 rounded-full" id="dirTotalHotelsDisplay">
+            {totalHotelsCount} properties found
           </span>
         </div>
         {subtitle && (
-          <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+          <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
             {subtitle}
           </p>
         )}
@@ -141,8 +138,8 @@ const svgMap: Record<string, string> = {
           <input 
             type="text" 
             id="dirSearchInput" 
-            placeholder="Search hotel name..." 
-            class="w-full bg-slate-50 border border-slate-200/90 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 transition shadow-2xs font-medium"
+            placeholder="Search property name..." 
+            class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
           />
           <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
             <span set:html={svgMap.search} class="inline-flex"></span>
@@ -150,23 +147,23 @@ const svgMap: Record<string, string> = {
         </div>
 
         <!-- Sort Select -->
-        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 shadow-2xs">
-          <span class="text-slate-400 font-normal">Sort:</span>
+        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+          <span class="text-slate-400 font-normal">Sort by:</span>
           <select id="dirSortSelect" class="bg-transparent text-slate-900 font-extrabold focus:outline-none cursor-pointer">
-            <option value="recommended">Recommended</option>
-            <option value="rating-high">Highest Rated</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
+            <option value="recommended">Top picks</option>
+            <option value="rating-high">Review score (highest first)</option>
+            <option value="price-low">Price (lowest first)</option>
+            <option value="price-high">Price (highest first)</option>
           </select>
         </div>
 
-        <!-- Working View Toggles -->
-        <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-1 shadow-2xs">
-          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer">
-            <span set:html={svgMap.gridIcon} class="inline-flex"></span>
-          </button>
-          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs">
+        <!-- View Toggles -->
+        <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200 rounded-lg p-1">
+          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs">
             <span set:html={svgMap.listIcon} class="inline-flex"></span>
+          </button>
+          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer">
+            <span set:html={svgMap.gridIcon} class="inline-flex"></span>
           </button>
         </div>
       </div>
@@ -176,69 +173,69 @@ const svgMap: Record<string, string> = {
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       
       <!-- LEFT SIDEBAR FILTER PANEL -->
-      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200/90 p-5 space-y-6 shadow-xs text-left sticky top-24">
+      <aside class="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-24">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 class="font-black text-slate-900 text-xs uppercase tracking-wider">
-            Filter Stays
+          <h3 class="font-bold text-slate-900 text-sm">
+            Filter by:
           </h3>
-          <button id="resetAllFiltersBtn" class="text-xs font-bold text-emerald-800 hover:text-emerald-950 hover:underline cursor-pointer transition">
-            Reset All
+          <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">
+            Reset all
           </button>
         </div>
 
-        <!-- Star Rating Filter -->
+        <!-- Star Rating -->
         <div class="space-y-3">
-          <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-            Star Rating
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+            Property rating
           </h4>
 
           <div class="space-y-2 text-xs font-medium text-slate-700">
             {count5Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 transition">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="5" />
-                  <span class="flex items-center gap-0.5 font-bold text-slate-800">
-                    5 Star <span class="text-amber-400 text-sm">★★★★★</span>
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="5" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">
+                    5 stars <span class="text-[#febb02] text-sm">★★★★★</span>
                   </span>
                 </div>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">({count5Star})</span>
+                <span class="text-slate-400 text-[11px]">{count5Star}</span>
               </label>
             )}
 
             {count4Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 transition">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="4" />
-                  <span class="flex items-center gap-0.5 font-bold text-slate-800">
-                    4 Star <span class="text-amber-400 text-sm">★★★★</span>
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="4" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">
+                    4 stars <span class="text-[#febb02] text-sm">★★★★</span>
                   </span>
                 </div>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">({count4Star})</span>
+                <span class="text-slate-400 text-[11px]">{count4Star}</span>
               </label>
             )}
 
             {count3Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 transition">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
                 <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-emerald-700 rounded cursor-pointer" value="3" />
-                  <span class="flex items-center gap-0.5 font-bold text-slate-800">
-                    3 Star <span class="text-amber-400 text-sm">★★★</span>
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="3" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">
+                    3 stars <span class="text-[#febb02] text-sm">★★★</span>
                   </span>
                 </div>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-md">({count3Star})</span>
+                <span class="text-slate-400 text-[11px]">{count3Star}</span>
               </label>
             )}
           </div>
         </div>
 
-        <!-- Price Range Slider -->
+        <!-- Budget Slider -->
         <div class="space-y-3 border-t border-slate-100 pt-4">
           <div class="flex justify-between items-center">
-            <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-              Budget Per Night
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+              Your budget (per night)
             </h4>
-            <span id="priceRangeValueDisplay" class="text-xs font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+            <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">
               ৳60,000+
             </span>
           </div>
@@ -251,9 +248,9 @@ const svgMap: Record<string, string> = {
               max="60000" 
               step="1000" 
               value="60000" 
-              class="w-full accent-emerald-700 cursor-pointer h-1.5 bg-slate-200 rounded-lg" 
+              class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" 
             />
-            <div class="flex justify-between text-[11px] font-bold text-slate-400">
+            <div class="flex justify-between text-[11px] text-slate-400">
               <span>৳2,000</span>
               <span>৳60,000</span>
             </div>
@@ -262,7 +259,7 @@ const svgMap: Record<string, string> = {
 
       </aside>
 
-      <!-- RIGHT SIDE: HOTELS LIST / GRID CONTAINER -->
+      <!-- RIGHT SIDE: BOOKING.COM CARDS -->
       <div class="lg:col-span-9">
         
         <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
@@ -273,22 +270,27 @@ const svgMap: Record<string, string> = {
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // Clean Location Format
+            // Location
             let hLocation = String(hData.location || hData.category || "Gulshan, Dhaka").trim();
             if (hLocation.includes('Gulshan 2')) hLocation = 'Gulshan 2, Dhaka';
             else if (hLocation.includes('Gulshan 1')) hLocation = 'Gulshan 1, Dhaka';
-            else if (hLocation.length > 28) hLocation = 'Gulshan, Dhaka';
+            else if (hLocation.length > 30) hLocation = 'Gulshan, Dhaka';
 
             const rawPrice = hData.price ? String(hData.price).trim() : "";
             const displayPrice = cleanPriceString(rawPrice);
 
+            // Star Count
             const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
-            const starCategory = rawCat.includes('5') ? '5-Star Luxury' : (rawCat.includes('4') ? '4-Star Premium' : (rawCat.includes('3') ? '3-Star Comfort' : ''));
+            const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
+            const starCategory = starCount > 0 ? `${starCount}-Star Hotel` : '';
+
+            // Description / Snippet
+            const hSnippet = hData.description || hData.excerpt || hData.about || `${hTitle} offers air-conditioned rooms, free WiFi, and top-tier hospitality in the heart of Gulshan, Dhaka.`;
 
             const hTitleLower = rawTitle.toLowerCase();
             const hSlugLower = hSlug.toLowerCase();
 
-            // Real Reviews Match
+            // Real Reviews
             const matchedCmsReviews = allCmsReviews.filter(r => {
               if (!r) return false;
               const isApproved = r.approved === true || String(r.approved).toLowerCase() === 'true';
@@ -311,133 +313,137 @@ const svgMap: Record<string, string> = {
                 const num = parseFloat(r.rating);
                 return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
               }, 0);
-              realRating = (totalStars / realCount).toFixed(1);
+              // Scale to 10 if 5-point, or keep exact score
+              const avg = totalStars / realCount;
+              realRating = (avg >= 4.5) ? (avg * 2).toFixed(1) : (avg * 2).toFixed(1);
             }
 
             const numRating = parseFloat(realRating || '0');
             const numericPrice = parseFloat(rawPrice.replace(/[^0-9]/g, '')) || 0;
 
-            let ratingLabel = 'Excellent';
-            if (numRating < 4.5 && numRating >= 4.0) ratingLabel = 'Very Good';
-            else if (numRating < 4.0 && numRating > 0) ratingLabel = 'Good';
-
-            // Safe & Unique Amenities Extraction
-            const rawAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
-            const uniqueAmenities: string[] = [];
-            rawAmenities.forEach(a => {
-              const name = extractAmenityName(a);
-              if (name && !uniqueAmenities.includes(name)) {
-                uniqueAmenities.push(name);
-              }
-            });
+            let ratingLabel = 'Wonderful';
+            if (numRating < 9.0 && numRating >= 8.0) ratingLabel = 'Very Good';
+            else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition duration-300 flex flex-col justify-between group text-left relative"
+                class="directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col md:flex-row p-4 gap-4"
                 data-title={hTitleLower}
-                data-stars={starCategory.includes('5') ? '5' : (starCategory.includes('4') ? '4' : (starCategory.includes('3') ? '3' : 'all'))}
+                data-stars={starCount.toString()}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
-                <!-- Wishlist Heart Button -->
-                <button 
-                  type="button"
-                  class="card-wishlist-btn absolute top-3 right-3 md:top-3 md:left-3 md:right-auto w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30"
-                  data-title={hTitle}
-                  data-image={hImage}
-                  data-url={`/${hSlug}`}
-                  data-price={displayPrice}
-                  aria-label="Add to Wishlist"
-                >
-                  <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                </button>
-
-                <a href={`/${hSlug}`} class="card-link-wrapper block flex-1 flex flex-col md:flex-row md:items-center justify-between">
-                  
-                  <div class="card-content-wrapper flex flex-col md:flex-row md:items-center flex-1">
-                    <!-- Image Box -->
-                    <div class="card-image-box relative w-full md:w-64 h-48 md:h-44 overflow-hidden bg-slate-900 shrink-0">
-                      {hImage ? (
-                        <img 
-                          src={hImage} 
-                          alt={`${hTitle} Photo`} 
-                          loading="lazy" 
-                          decoding="async" 
-                          class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-                        />
-                      ) : (
-                        <div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-400 text-xs font-bold">
-                          Luxury Suite
-                        </div>
-                      )}
-
-                      <!-- Star Badge -->
-                      {starCategory && (
-                        <div class="absolute top-3 left-12 md:left-3 bg-slate-900/80 backdrop-blur-md text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md border border-white/20 shadow-xs tracking-wider uppercase">
-                          {starCategory}
-                        </div>
-                      )}
-
-                      <!-- TripAdvisor Style Score Pill -->
-                      {realRating && (
-                        <div class="absolute bottom-3 left-3 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-2 py-1 rounded-md shadow-md border border-slate-100">
-                          <span class="bg-[#00aa6c] text-white text-[11px] font-black px-1.5 py-0.5 rounded leading-none">
-                            {realRating}
-                          </span>
-                          <span class="text-slate-800 text-[10px] font-bold">
-                            {ratingLabel}
-                          </span>
-                          <span class="text-slate-400 text-[10px]">
-                            ({realCount})
-                          </span>
-                        </div>
-                      )}
+                <!-- LEFT: Image Box -->
+                <div class="relative w-full md:w-56 h-48 md:h-auto shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                  {hImage ? (
+                    <img 
+                      src={hImage} 
+                      alt={`${hTitle} Photo`} 
+                      loading="lazy" 
+                      decoding="async" 
+                      class="w-full h-full object-cover hover:scale-105 transition duration-500" 
+                    />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold">
+                      Hotel Photo
                     </div>
+                  )}
 
-                    <!-- Card Body -->
-                    <div class="card-body-box p-4 md:p-5 space-y-2 flex-1">
-                      <h3 class="font-extrabold text-slate-900 text-base md:text-lg leading-snug group-hover:text-emerald-800 transition line-clamp-1">
-                        {hTitle}
-                      </h3>
+                  <!-- Wishlist Heart Button -->
+                  <button 
+                    type="button"
+                    class="card-wishlist-btn absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow transition cursor-pointer hover:scale-110 z-20"
+                    data-title={hTitle}
+                    data-image={hImage}
+                    data-url={`/${hSlug}`}
+                    data-price={displayPrice}
+                    aria-label="Save to Wishlist"
+                  >
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  </button>
+                </div>
 
-                      <!-- Location Line -->
-                      <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                        <span set:html={svgMap.locationPin} class="inline-flex"></span>
-                        <span class="truncate">{hLocation}</span>
+                <!-- RIGHT: Middle Info & Booking Column -->
+                <div class="flex-1 flex flex-col justify-between">
+                  
+                  <!-- Top Row: Title, Stars & Review Score -->
+                  <div>
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <!-- Title & Yellow Stars -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                          <a href={`/${hSlug}`} class="text-base sm:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition">
+                            {hTitle}
+                          </a>
+                          {starCount > 0 && (
+                            <span class="text-[#febb02] text-sm tracking-tight inline-block">
+                              {'★'.repeat(starCount)}
+                            </span>
+                          )}
+                        </div>
+
+                        <!-- Location with Map Pin -->
+                        <div class="flex items-center gap-1 text-xs text-slate-600 font-medium mt-1">
+                          <span set:html={svgMap.locationPin} class="inline-flex"></span>
+                          <span class="hover:underline cursor-pointer">{hLocation}</span>
+                        </div>
                       </div>
 
-                      <!-- Amenities -->
-                      {uniqueAmenities.length > 0 && (
-                        <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
-                          {uniqueAmenities.slice(0, 3).map((name: string) => {
-                            const aLow = name.toLowerCase();
-                            const iconSvg = aLow.includes('wifi') ? svgMap.wifi : (aLow.includes('pool') ? svgMap.pool : (aLow.includes('spa') ? svgMap.spa : null));
-                            return (
-                              <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                                {iconSvg && <span set:html={iconSvg} class="inline-flex"></span>}
-                                <span>{name}</span>
-                              </span>
-                            );
-                          })}
+                      <!-- Booking.com Navy Blue Score Box -->
+                      {realRating ? (
+                        <div class="flex items-center gap-2 shrink-0">
+                          <div class="text-right">
+                            <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
+                            <div class="text-[11px] text-slate-500 leading-tight">{realCount} reviews</div>
+                          </div>
+                          <div class="bg-[#003b95] text-white font-bold text-sm px-2 py-1 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
+                            {realRating}
+                          </div>
+                        </div>
+                      ) : (
+                        <div class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded-md">
+                          New to site
                         </div>
                       )}
                     </div>
+
+                    <!-- Description Snippet -->
+                    <p class="text-xs text-slate-600 mt-2.5 line-clamp-2 leading-relaxed">
+                      {hSnippet}
+                    </p>
+                    <a href={`/${hSlug}`} class="text-xs font-bold text-[#006ce4] hover:underline inline-block mt-0.5">
+                      Show more
+                    </a>
                   </div>
 
-                  <!-- Footer -->
-                  <div class="card-footer-box p-4 md:p-5 border-t md:border-t-0 md:border-l border-slate-100/90 flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 bg-slate-50/50 md:min-w-[180px] shrink-0">
-                    <div class="md:text-right">
-                      <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Starts from</span>
-                      <span class="text-base md:text-lg font-black text-slate-900">{displayPrice}</span>
+                  <!-- Bottom Row: Price & Check Availability Button -->
+                  <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-between gap-3">
+                    <div>
+                      <span class="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200 inline-block mb-1">
+                        Free cancellation available
+                      </span>
                     </div>
 
-                    <div class="bg-emerald-800 group-hover:bg-emerald-900 text-white font-black text-xs px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1">
-                      <span>View Details</span>
-                      <span class="group-hover:translate-x-0.5 transition">➔</span>
+                    <div class="text-right shrink-0">
+                      <span class="text-[11px] text-slate-500 block leading-tight">Price from</span>
+                      <span class="text-lg sm:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
+                        {displayPrice}
+                      </span>
+                      <span class="text-[10px] text-slate-400 block mb-2 leading-tight">1 night, 2 adults</span>
+
+                      <a 
+                        href={`/${hSlug}`} 
+                        class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-4 py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow"
+                      >
+                        <span>Check availability</span>
+                        <span class="text-xs">›</span>
+                      </a>
                     </div>
+
                   </div>
 
-                </a>
+                </div>
+
               </div>
             );
           })}
@@ -476,7 +482,7 @@ const svgMap: Record<string, string> = {
 
       cards.forEach(card => {
         const title = card.getAttribute('data-title') || '';
-        const stars = card.getAttribute('data-stars') || 'all';
+        const stars = card.getAttribute('data-stars') || '0';
         const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
 
         const matchSearch = !query || title.includes(query);
@@ -533,50 +539,32 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Grid vs List View Toggle
+    // Grid vs List Toggle
     if (viewGridBtn && viewListBtn) {
       viewGridBtn.onclick = () => {
         cardsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch';
-        viewGridBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs';
-        viewListBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer';
-
+        viewGridBtn.className = 'p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs';
+        viewListBtn.className = 'p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        
         cards.forEach(card => {
-          const linkWrap = card.querySelector('.card-link-wrapper');
-          const contentWrap = card.querySelector('.card-content-wrapper');
-          const imgBox = card.querySelector('.card-image-box');
-          const footerBox = card.querySelector('.card-footer-box');
-          const wishBtn = card.querySelector('.card-wishlist-btn');
-
-          if (linkWrap) linkWrap.className = 'card-link-wrapper block flex-1 flex flex-col justify-between';
-          if (contentWrap) contentWrap.className = 'card-content-wrapper flex flex-col';
-          if (imgBox) imgBox.className = 'card-image-box relative w-full h-48 overflow-hidden bg-slate-900 shrink-0';
-          if (footerBox) footerBox.className = 'card-footer-box p-4 pt-3 border-t border-slate-100/90 flex items-center justify-between gap-2 mt-2 bg-slate-50/50';
-          if (wishBtn) wishBtn.className = 'card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30';
+          card.classList.remove('md:flex-row');
+          card.classList.add('flex-col');
         });
       };
 
       viewListBtn.onclick = () => {
         cardsGrid.className = 'grid grid-cols-1 gap-4 items-stretch';
-        viewListBtn.className = 'p-1.5 rounded-lg bg-emerald-800 text-white transition cursor-pointer shadow-xs';
-        viewGridBtn.className = 'p-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        viewListBtn.className = 'p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs';
+        viewGridBtn.className = 'p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer';
 
         cards.forEach(card => {
-          const linkWrap = card.querySelector('.card-link-wrapper');
-          const contentWrap = card.querySelector('.card-content-wrapper');
-          const imgBox = card.querySelector('.card-image-box');
-          const footerBox = card.querySelector('.card-footer-box');
-          const wishBtn = card.querySelector('.card-wishlist-btn');
-
-          if (linkWrap) linkWrap.className = 'card-link-wrapper block flex-1 flex flex-col md:flex-row md:items-center justify-between';
-          if (contentWrap) contentWrap.className = 'card-content-wrapper flex flex-col md:flex-row md:items-center flex-1';
-          if (imgBox) imgBox.className = 'card-image-box relative w-full md:w-64 h-48 md:h-44 overflow-hidden bg-slate-900 shrink-0';
-          if (footerBox) footerBox.className = 'card-footer-box p-4 md:p-5 border-t md:border-t-0 md:border-l border-slate-100/90 flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 bg-slate-50/50 md:min-w-[180px] shrink-0';
-          if (wishBtn) wishBtn.className = 'card-wishlist-btn absolute top-3 right-3 md:top-3 md:left-3 md:right-auto w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow-md transition cursor-pointer hover:scale-110 z-30';
+          card.classList.remove('flex-col');
+          card.classList.add('md:flex-row');
         });
       };
     }
 
-    // Wishlist
+    // Wishlist Logic
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
