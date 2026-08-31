@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Booking.com Exact Pattern)
+// src/components/AllHotelsDirectory.astro (100% Booking.com Perfect Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -83,21 +83,19 @@ const toTitleCase = (str: string) => {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-const extractAmenityName = (item: any): string => {
-  if (!item) return '';
-  if (typeof item === 'string') return item;
-  if (typeof item === 'object') {
-    return item.name || item.title || item.label || item.amenity || Object.values(item)[0] || '';
-  }
-  return String(item);
-};
-
+// 100% Clean Price Formatter (Zero Double Symbol Glitch)
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
-  let p = priceRaw.replace(/night/gi, '').replace(/\//g, '').trim();
-  if (p.startsWith('$') || p.startsWith('৳')) return p;
-  if (/^\d/.test(p)) return `৳ ${p}`;
-  return priceRaw;
+  const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
+  const digits = clean.replace(/[^0-9.,]/g, '').trim();
+  
+  if (clean.includes('$')) {
+    return `$${digits}`;
+  }
+  if (clean.includes('৳') || clean.includes('BDT') || clean.includes('Tk')) {
+    return `৳ ${digits}`;
+  }
+  return `৳ ${digits}`;
 };
 
 // SVG Vector Icons
@@ -159,11 +157,11 @@ const svgMap: Record<string, string> = {
 
         <!-- View Toggles -->
         <div class="hidden sm:flex items-center bg-slate-100 border border-slate-200 rounded-lg p-1">
-          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs">
-            <span set:html={svgMap.listIcon} class="inline-flex"></span>
-          </button>
-          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer">
+          <button id="viewGridBtn" aria-label="Grid View" class="p-1.5 rounded-md bg-[#006ce4] text-white transition cursor-pointer shadow-xs">
             <span set:html={svgMap.gridIcon} class="inline-flex"></span>
+          </button>
+          <button id="viewListBtn" aria-label="List View" class="p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer">
+            <span set:html={svgMap.listIcon} class="inline-flex"></span>
           </button>
         </div>
       </div>
@@ -184,7 +182,7 @@ const svgMap: Record<string, string> = {
           </button>
         </div>
 
-        <!-- Star Rating -->
+        <!-- Star Rating Filter -->
         <div class="space-y-3">
           <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
             Property rating
@@ -262,7 +260,7 @@ const svgMap: Record<string, string> = {
       <!-- RIGHT SIDE: BOOKING.COM CARDS -->
       <div class="lg:col-span-9">
         
-        <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
+        <div id="directoryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
             const rawTitle = String(hData.title || hData.name || "").trim();
@@ -282,10 +280,9 @@ const svgMap: Record<string, string> = {
             // Star Count
             const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
             const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
-            const starCategory = starCount > 0 ? `${starCount}-Star Hotel` : '';
 
             // Description / Snippet
-            const hSnippet = hData.description || hData.excerpt || hData.about || `${hTitle} offers air-conditioned rooms, free WiFi, and top-tier hospitality in the heart of Gulshan, Dhaka.`;
+            const hSnippet = hData.description || hData.excerpt || hData.about || `Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.`;
 
             const hTitleLower = rawTitle.toLowerCase();
             const hSlugLower = hSlug.toLowerCase();
@@ -313,9 +310,8 @@ const svgMap: Record<string, string> = {
                 const num = parseFloat(r.rating);
                 return sum + (!isNaN(num) && num > 0 && num <= 5 ? num : 5);
               }, 0);
-              // Scale to 10 if 5-point, or keep exact score
               const avg = totalStars / realCount;
-              realRating = (avg >= 4.5) ? (avg * 2).toFixed(1) : (avg * 2).toFixed(1);
+              realRating = (avg * 2).toFixed(1);
             }
 
             const numRating = parseFloat(realRating || '0');
@@ -327,14 +323,14 @@ const svgMap: Record<string, string> = {
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col md:flex-row p-4 gap-4"
+                class="directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col p-4 gap-4"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
-                <!-- LEFT: Image Box -->
-                <div class="relative w-full md:w-56 h-48 md:h-auto shrink-0 rounded-lg overflow-hidden bg-slate-100">
+                <!-- Image Box -->
+                <div class="card-img-box relative w-full h-48 shrink-0 rounded-lg overflow-hidden bg-slate-100">
                   {hImage ? (
                     <img 
                       src={hImage} 
@@ -359,11 +355,11 @@ const svgMap: Record<string, string> = {
                     data-price={displayPrice}
                     aria-label="Save to Wishlist"
                   >
-                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                   </button>
                 </div>
 
-                <!-- RIGHT: Middle Info & Booking Column -->
+                <!-- Info & Booking Column -->
                 <div class="flex-1 flex flex-col justify-between">
                   
                   <!-- Top Row: Title, Stars & Review Score -->
@@ -539,7 +535,7 @@ const svgMap: Record<string, string> = {
       };
     }
 
-    // Grid vs List Toggle
+    // Grid vs List View Toggle
     if (viewGridBtn && viewListBtn) {
       viewGridBtn.onclick = () => {
         cardsGrid.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch';
@@ -547,8 +543,9 @@ const svgMap: Record<string, string> = {
         viewListBtn.className = 'p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer';
         
         cards.forEach(card => {
-          card.classList.remove('md:flex-row');
-          card.classList.add('flex-col');
+          card.className = 'directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col p-4 gap-4';
+          const imgBox = card.querySelector('.card-img-box');
+          if (imgBox) imgBox.className = 'card-img-box relative w-full h-48 shrink-0 rounded-lg overflow-hidden bg-slate-100';
         });
       };
 
@@ -558,13 +555,14 @@ const svgMap: Record<string, string> = {
         viewGridBtn.className = 'p-1.5 rounded-md text-slate-500 hover:text-slate-900 transition cursor-pointer';
 
         cards.forEach(card => {
-          card.classList.remove('flex-col');
-          card.classList.add('md:flex-row');
+          card.className = 'directory-card-item bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col md:flex-row p-4 gap-4';
+          const imgBox = card.querySelector('.card-img-box');
+          if (imgBox) imgBox.className = 'card-img-box relative w-full md:w-56 h-48 md:h-auto shrink-0 rounded-lg overflow-hidden bg-slate-100';
         });
       };
     }
 
-    // Wishlist Logic
+    // Wishlist
     const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
     wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
