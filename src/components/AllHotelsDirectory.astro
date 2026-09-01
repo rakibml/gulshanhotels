@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Guaranteed Left-Image Mobile Layout)
+// src/components/AllHotelsDirectory.astro (100% Production Ready & Body Sync Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -27,7 +27,7 @@ if (!rawHotels || rawHotels.length === 0) {
     rawHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace('.md', ''),
       data: item.frontmatter || {},
-      body: item.rawContent ? item.rawContent() : ''
+      body: typeof item.rawContent === 'function' ? item.rawContent() : (item.compiledContent ? item.compiledContent() : '')
     }));
   } catch (e) {
     rawHotels = [];
@@ -97,10 +97,11 @@ const toTitleCase = (str: string) => {
   return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
-// 25 Words Extractor
+// 25 Words Extractor from Markdown Body
 const getFirst25Words = (text: string): string => {
   if (!text) return "Experience world-class luxury suites, exceptional hospitality, fine dining, and prime comfort in the heart of Gulshan, Dhaka.";
-  const clean = text.replace(/<[^>]*>?/gm, '').replace(/[#*`_~]/g, '').trim();
+  // Strip HTML tags, markdown symbols, and extra whitespaces
+  const clean = text.replace(/<[^>]*>?/gm, '').replace(/[#*`_~]/g, '').replace(/---[\s\S]*?---/g, '').trim();
   const words = clean.split(/\s+/).filter(Boolean);
   if (words.length <= 25) return words.join(' ');
   return words.slice(0, 25).join(' ') + '...';
@@ -177,7 +178,7 @@ const svgMap: Record<string, string> = {
     <!-- MAIN CONTENT LAYOUT -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
-      <!-- LEFT SIDEBAR FILTER PANEL (Desktop Only) -->
+      <!-- LEFT SIDEBAR FILTER PANEL -->
       <aside class="hidden lg:block lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-24">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -276,7 +277,7 @@ const svgMap: Record<string, string> = {
 
       </aside>
 
-      <!-- RIGHT SIDE: DIRECTORY CARDS (STRICTLY LEFT-IMAGE ROW ON MOBILE) -->
+      <!-- RIGHT SIDE: DIRECTORY CARDS (ALWAYS LEFT-IMAGE ROW ON MOBILE & DESKTOP) -->
       <div class="lg:col-span-9">
         
         <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
@@ -287,7 +288,7 @@ const svgMap: Record<string, string> = {
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // FULL ADDRESS
+            // 1. FULL ADDRESS (Directly from Markdown/CMS)
             const hFullAddress = String(hData.address || hData.location || hData.category || "Gulshan, Dhaka").trim();
             const locLower = hFullAddress.toLowerCase();
             let areaType = 'near';
@@ -300,8 +301,8 @@ const svgMap: Record<string, string> = {
               areaType = 'near';
             }
 
-            // 25 WORDS FROM ABOUT
-            const rawAbout = hData.about || hData.description || hData.overview || hData.excerpt || (typeof hotelItem.body === 'string' ? hotelItem.body : '') || '';
+            // 2. 25 WORDS EXTRACTED FROM SINGLE HOTEL'S ACTUAL MARKDOWN BODY
+            const rawAbout = hotelItem.body || (typeof hotelItem.rawContent === 'function' ? hotelItem.rawContent() : '') || hData.about || hData.description || '';
             const hSnippet25Words = getFirst25Words(rawAbout);
 
             // Price Calculation & Price Anchoring
@@ -358,14 +359,14 @@ const svgMap: Record<string, string> = {
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[190px]"
+                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[195px]"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
                 data-area={areaType}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
-                <!-- LEFT COLUMN: BIG IMAGE (ALWAYS ON LEFT ON MOBILE & DESKTOP) -->
+                <!-- LEFT COLUMN: BIG IMAGE (ALWAYS ON LEFT) -->
                 <div class="card-img-box relative w-36 sm:w-48 md:w-56 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch">
                   {hImage ? (
                     <img 
@@ -439,7 +440,7 @@ const svgMap: Record<string, string> = {
                       )}
                     </div>
 
-                    <!-- 25 WORDS ABOUT / DESCRIPTION -->
+                    <!-- 25 WORDS FROM SINGLE HOTEL'S ACTUAL BODY -->
                     <p class="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2 sm:line-clamp-3">
                       {hSnippet25Words}
                     </p>
@@ -475,7 +476,7 @@ const svgMap: Record<string, string> = {
 
                     <a 
                       href={`/${hSlug}`} 
-                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
+                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
                     >
                       <span>See Options</span>
                       <span class="text-xs">›</span>
