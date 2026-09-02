@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (Clean, Minimal & High-Speed Edition)
+// src/components/AllHotelsDirectory.astro (Booking.com 3-Column Desktop & Mobile Optimized)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -118,7 +118,7 @@ const cleanPriceString = (priceRaw: string) => {
 // Common Icons
 const svgMap: Record<string, string> = {
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
-  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`
+  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>`
 };
 ---
 
@@ -272,7 +272,7 @@ const svgMap: Record<string, string> = {
 
       </aside>
 
-      <!-- RIGHT SIDE: DIRECTORY CARDS -->
+      <!-- RIGHT SIDE: BOOKING.COM 3-COLUMN DESKTOP & MOBILE ROW CARDS -->
       <div class="lg:col-span-9">
         
         <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
@@ -283,7 +283,7 @@ const svgMap: Record<string, string> = {
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // 1. FULL ADDRESS
+            // FULL ADDRESS
             const hFullAddress = String(hData.address || hData.location || hData.category || "Gulshan, Dhaka").trim();
             const locLower = hFullAddress.toLowerCase();
             let areaType = 'near';
@@ -296,7 +296,7 @@ const svgMap: Record<string, string> = {
               areaType = 'near';
             }
 
-            // 2. 25 WORDS FROM ACTUAL BODY
+            // 25 WORDS FROM ACTUAL BODY
             const rawAbout = hotelItem.body || (typeof hotelItem.rawContent === 'function' ? hotelItem.rawContent() : '') || hData.about || hData.description || '';
             const hSnippet25Words = getFirst25Words(rawAbout);
 
@@ -354,15 +354,15 @@ const svgMap: Record<string, string> = {
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[160px]"
+                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[190px]"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
                 data-area={areaType}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
-                <!-- LEFT COLUMN: BIG IMAGE -->
-                <div class="card-img-box relative w-36 sm:w-48 md:w-56 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch">
+                <!-- 1ST COLUMN: HOTEL PHOTO -->
+                <div class="card-img-box relative w-32 sm:w-44 md:w-56 lg:w-60 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch">
                   {hImage ? (
                     <img 
                       src={hImage} 
@@ -391,75 +391,98 @@ const svgMap: Record<string, string> = {
                   </button>
                 </div>
 
-                <!-- RIGHT COLUMN: ALL INFORMATION (CLEAN & SPACIOUS) -->
-                <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5">
-                  
-                  <!-- Top Details -->
+                <!-- 2ND COLUMN: MIDDLE HOTEL INFORMATION -->
+                <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5 md:pr-4">
                   <div>
-                    <div class="flex items-start justify-between gap-1.5 sm:gap-2">
-                      <div class="min-w-0">
-                        <!-- Title & Stars -->
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                          <a href={`/${hSlug}`} class="text-sm sm:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1">
-                            {hTitle}
-                          </a>
-                          {starCount > 0 && (
-                            <span class="text-[#febb02] text-xs sm:text-sm tracking-tight shrink-0">
-                              {'★'.repeat(starCount)}
-                            </span>
-                          )}
-                        </div>
-
-                        <!-- FULL HOTEL ADDRESS -->
-                        <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-600 font-medium mt-1 leading-snug">
-                          <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
-                          <span class="hover:underline cursor-pointer">{hFullAddress}</span>
-                        </div>
-                      </div>
-
-                      <!-- Blue Score Badge -->
-                      {realRating ? (
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <div class="text-right hidden sm:block">
-                            <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
-                            <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
-                          </div>
-                          <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-1.5 py-0.5 sm:py-1 rounded-t-md rounded-br-md leading-none shadow-2xs">
-                            {realRating}
-                          </div>
-                        </div>
-                      ) : (
-                        <div class="bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0">
-                          New
-                        </div>
+                    <!-- Title & Stars -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <a href={`/${hSlug}`} class="text-sm sm:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1">
+                        {hTitle}
+                      </a>
+                      {starCount > 0 && (
+                        <span class="text-[#febb02] text-xs sm:text-sm tracking-tight shrink-0">
+                          {'★'.repeat(starCount)}
+                        </span>
                       )}
                     </div>
 
-                    <!-- 25 WORDS FROM SINGLE HOTEL'S ACTUAL BODY -->
-                    <p class="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2 sm:line-clamp-3">
+                    <!-- Full Hotel Address -->
+                    <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-600 font-medium mt-1 leading-snug">
+                      <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
+                      <span class="hover:underline cursor-pointer">{hFullAddress}</span>
+                    </div>
+
+                    <!-- 25 Words Description -->
+                    <p class="text-xs text-slate-600 mt-2.5 leading-relaxed line-clamp-2 sm:line-clamp-3">
                       {hSnippet25Words}
                     </p>
                   </div>
 
-                  <!-- Bottom Row: Price & Spacious CTA Button -->
-                  <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <!-- Mobile-Only Bottom Price Bar -->
+                  <div class="md:hidden mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                     <div>
-                      <div class="flex items-baseline gap-1.5">
-                        <span class="text-[10px] sm:text-xs text-slate-400 line-through font-semibold leading-none">
+                      <div class="flex items-baseline gap-1">
+                        <span class="text-[10px] text-slate-400 line-through font-semibold leading-none">
                           {displayOriginalPrice}
                         </span>
-                        <span class="text-base sm:text-xl font-extrabold text-[#008234] leading-none">
+                        <span class="text-base font-extrabold text-[#008234] leading-none">
                           {displayPrice}
                         </span>
                       </div>
-                      <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium block mt-0.5">
+                      <span class="text-[9px] text-slate-500 font-medium block mt-0.5">
                         Best rate found
                       </span>
                     </div>
 
                     <a 
                       href={`/${hSlug}`} 
-                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
+                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
+                    >
+                      <span>See Options</span>
+                      <span class="text-xs">›</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- 3RD COLUMN: DEDICATED DESKTOP BOOKING BOX (Booking.com Exact Style) -->
+                <div class="hidden md:flex md:flex-col md:justify-between md:items-end md:w-56 lg:w-60 md:shrink-0 md:pl-5 md:border-l md:border-slate-100">
+                  
+                  <!-- Desktop Review Score Badge -->
+                  <div>
+                    {realRating ? (
+                      <div class="flex items-center gap-2">
+                        <div class="text-right">
+                          <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
+                          <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
+                        </div>
+                        <div class="bg-[#003b95] text-white font-bold text-sm px-2 py-1 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
+                          {realRating}
+                        </div>
+                      </div>
+                    ) : (
+                      <div class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded">
+                        New to site
+                      </div>
+                    )}
+                  </div>
+
+                  <!-- Desktop Pricing & Full-Width CTA -->
+                  <div class="w-full text-right space-y-2 mt-4">
+                    <div>
+                      <span class="text-xs text-slate-400 line-through font-semibold block leading-none">
+                        {displayOriginalPrice}
+                      </span>
+                      <span class="text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
+                        {displayPrice}
+                      </span>
+                      <span class="text-[10px] text-slate-500 font-medium block leading-tight">
+                        Best rate found
+                      </span>
+                    </div>
+
+                    <a 
+                      href={`/${hSlug}`} 
+                      class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold py-2.5 px-4 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap text-center"
                     >
                       <span>See Options</span>
                       <span class="text-xs">›</span>
