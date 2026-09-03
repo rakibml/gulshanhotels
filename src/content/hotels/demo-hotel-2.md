@@ -3,7 +3,7 @@ header_notice: ''
 title: demo hotel 2
 title_style: style_7
 category: 5-Star Luxury Stay
-location: Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
+location: banani dhaka
 description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 image: /images/hotels/hero-gulshan.jpg.webp
 gallery:
@@ -1310,16 +1310,16 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
-enable_rates: true
-image_alt: ''
 enable_faqs: true
 enable_nearby: true
+enable_rates: true
+image_alt: ''
+official_site_url: ''
 rating: ''
 reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-official_site_url: ''
 ---
 
 সামর্থ থাকলে দেশের প্রতিটা মানুষকে কথাগুলো জোর করে শোনাতাম || প্রফেসর মোখতার আহমেদ || Mukhtar ahmed 
