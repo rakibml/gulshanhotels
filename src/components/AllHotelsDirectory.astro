@@ -1,5 +1,5 @@
 ---
-// src/components/AllHotelsDirectory.astro (100% Production Ready Airbnb Split-Screen & Clean OSM Map)
+// src/components/AllHotelsDirectory.astro (100% Clean, Map-Free Multi-Column Edition)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 const { 
   title = "All Hotels in Gulshan", 
-  subtitle = "The official directory of verified stays in Gulshan. Compare rates, explore locations on the map, and book with ease." 
+  subtitle = "The official directory of verified stays in Gulshan. Compare rates and find the best booking options." 
 } = Astro.props;
 
 // 1. Fetch Hotels
@@ -114,73 +114,19 @@ const cleanPriceString = (priceRaw: string) => {
   return `৳ ${digits}`;
 };
 
-// Known Gulshan Coordinates
-const defaultCoordinates: Record<string, [number, number]> = {
-  'the westin dhaka': [23.7937, 90.4140],
-  'amari dhaka': [23.7915, 90.4133],
-  'the midori by lakeshore': [23.7950, 90.4160],
-  'demo hotel 1': [23.7960, 90.4145],
-  'demo hotel 2': [23.7910, 90.4175],
-  'demo hotel 3': [23.7885, 90.4160],
-  'demo hotel 4': [23.7820, 90.4165]
-};
-
-// Vector SVG Icons
+// Common Icons
 const svgMap: Record<string, string> = {
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
-  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-  mapIcon: `<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>`
+  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`
 };
 ---
 
-<!-- LEAFLET CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
-<style is:global>
-  /* Custom Airbnb Style Price Marker */
-  .airbnb-price-pin {
-    background: #ffffff;
-    color: #0f172a;
-    font-weight: 800;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 9999px;
-    border: 1.5px solid #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .airbnb-price-pin:hover, .airbnb-price-pin.active-highlight {
-    background: #003b95 !important;
-    color: #ffffff !important;
-    border-color: #003b95 !important;
-    transform: scale(1.18);
-    z-index: 1000 !important;
-  }
-
-  /* Custom Leaflet Popup */
-  .leaflet-popup-content-wrapper {
-    padding: 0;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }
-  .leaflet-popup-content {
-    margin: 0;
-    line-height: 1.4;
-  }
-</style>
-
-<!-- ALL HOTELS AIRBNB SPLIT-SCREEN SECTION -->
-<section id="all-hotels-directory" class="bg-[#F8FAF9] py-6 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-[1680px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="space-y-4">
+<!-- ALL HOTELS DIRECTORY SECTION -->
+<section id="all-hotels-directory" class="bg-[#F8FAF9] py-6 sm:py-8 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+  <div class="space-y-4 sm:space-y-5">
     
-    <!-- TOP HEADER BAR -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+    <!-- TOP HEADER -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
       <div>
         <div class="flex items-center gap-2">
           <h2 class="text-lg sm:text-2xl font-black font-sans text-slate-900 tracking-tight">
@@ -191,59 +137,152 @@ const svgMap: Record<string, string> = {
           </span>
         </div>
         {subtitle && (
-          <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 line-clamp-1">
+          <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 line-clamp-1 sm:line-clamp-none">
             {subtitle}
           </p>
         )}
       </div>
 
-      <!-- SEARCH, SORT & AREA FILTERS -->
-      <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-        <div class="relative flex-1 sm:w-56">
+      <!-- SEARCH & SORT -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+        <div class="relative flex-1 sm:w-64">
           <input 
             type="text" 
             id="dirSearchInput" 
-            placeholder="Search property..." 
-            class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 sm:py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
+            placeholder="Search hotel name..." 
+            class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
           />
           <div class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <span set:html={svgMap.search} class="inline-flex"></span>
           </div>
         </div>
 
-        <!-- Area Select -->
-        <select id="dirAreaSelect" class="bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-2.5 py-1.5 sm:py-2 focus:outline-none cursor-pointer">
-          <option value="all">All Areas ({totalHotelsCount})</option>
-          <option value="gulshan-1">Gulshan 1 ({countGulshan1})</option>
-          <option value="gulshan-2">Gulshan 2 ({countGulshan2})</option>
-          {countNearGulshan > 0 && <option value="near">Near Gulshan ({countNearGulshan})</option>}
-        </select>
-
-        <!-- Sort Select -->
-        <select id="dirSortSelect" class="bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-2.5 py-1.5 sm:py-2 focus:outline-none cursor-pointer">
-          <option value="recommended">Top picks</option>
-          <option value="rating-high">Rating (highest)</option>
-          <option value="price-low">Price (lowest)</option>
-          <option value="price-high">Price (highest)</option>
-        </select>
+        <div class="flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2">
+          <span class="text-slate-400 font-normal hidden sm:inline">Sort:</span>
+          <select id="dirSortSelect" class="bg-transparent text-slate-900 font-extrabold focus:outline-none cursor-pointer text-xs">
+            <option value="recommended">Top picks</option>
+            <option value="rating-high">Rating (highest)</option>
+            <option value="price-low">Price (lowest)</option>
+            <option value="price-high">Price (highest)</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <!-- MAIN AIRBNB SPLIT SCREEN CONTAINER -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start relative">
+    <!-- MAIN CONTENT LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       
-      <!-- LEFT COLUMN: HOTEL CARDS LIST (lg:col-span-7) -->
-      <div id="hotelCardsColumn" class="lg:col-span-7 space-y-4">
+      <!-- LEFT SIDEBAR FILTER PANEL -->
+      <aside class="hidden lg:block lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-24">
         
-        <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
-          {hotels.map((hotelItem: any, index: number) => {
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-slate-900 text-sm">Filter by:</h3>
+          <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">Reset all</button>
+        </div>
+
+        <!-- Filter: Area -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Popular Areas</h4>
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="all" checked />
+                <span class="font-semibold text-slate-800">All Gulshan Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{totalHotelsCount}</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-1" />
+                <span class="text-slate-800">Gulshan 1 Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{countGulshan1}</span>
+            </label>
+
+            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-2" />
+                <span class="text-slate-800">Gulshan 2 Hotels</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">{countGulshan2}</span>
+            </label>
+
+            {countNearGulshan > 0 && (
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="near" />
+                  <span class="text-slate-800">Hotels near Gulshan</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{countNearGulshan}</span>
+              </label>
+            )}
+          </div>
+        </div>
+
+        <!-- Filter: Star Rating -->
+        <div class="space-y-3 border-t border-slate-100 pt-4">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property rating</h4>
+          <div class="space-y-2 text-xs font-medium text-slate-700">
+            {count5Star > 0 && (
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="5" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">5 stars <span class="text-[#febb02] text-sm">★★★★★</span></span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{count5Star}</span>
+              </label>
+            )}
+            {count4Star > 0 && (
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="4" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">4 stars <span class="text-[#febb02] text-sm">★★★★</span></span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{count4Star}</span>
+              </label>
+            )}
+            {count3Star > 0 && (
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="3" />
+                  <span class="flex items-center gap-1 font-semibold text-slate-800">3 stars <span class="text-[#febb02] text-sm">★★★</span></span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{count3Star}</span>
+              </label>
+            )}
+          </div>
+        </div>
+
+        <!-- Filter: Budget Slider -->
+        <div class="space-y-3 border-t border-slate-100 pt-4">
+          <div class="flex justify-between items-center">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Your budget (per night)</h4>
+            <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">৳60,000+</span>
+          </div>
+          <div class="space-y-2 pt-1">
+            <input type="range" id="priceRangeSlider" min="2000" max="60000" step="1000" value="60000" class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>৳2,000</span>
+              <span>৳60,000</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT SIDE: MULTI-COLUMN CARDS GRID (9 COLS) -->
+      <div class="lg:col-span-9">
+        
+        <div id="directoryCardsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+          {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
             const rawTitle = String(hData.title || hData.name || "").trim();
             const hTitle = toTitleCase(rawTitle);
             const hSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "").trim();
             const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
             
-            // Full Address
+            // FULL ADDRESS
             const hFullAddress = String(hData.address || hData.location || hData.category || "Gulshan, Dhaka").trim();
             const locLower = hFullAddress.toLowerCase();
             let areaType = 'near';
@@ -256,7 +295,7 @@ const svgMap: Record<string, string> = {
               areaType = 'near';
             }
 
-            // 25 Words from Actual Body
+            // 25 WORDS FROM ACTUAL BODY
             const rawAbout = hotelItem.body || (typeof hotelItem.rawContent === 'function' ? hotelItem.rawContent() : '') || hData.about || hData.description || '';
             const hSnippet25Words = getFirst25Words(rawAbout);
 
@@ -271,20 +310,6 @@ const svgMap: Record<string, string> = {
               originalPriceNum = isDollar ? Math.round(numericPrice * 1.20) : Math.round(numericPrice * 1.20 / 100) * 100;
             }
             const displayOriginalPrice = isDollar ? `$${originalPriceNum}` : `৳ ${originalPriceNum.toLocaleString()}`;
-
-            // Coordinates calculation for Airbnb Map Marker
-            const titleLow = rawTitle.toLowerCase();
-            let lat = parseFloat(hData.coordinates?.lat || hData.lat || hData.latitude || '0');
-            let lng = parseFloat(hData.coordinates?.lng || hData.lng || hData.longitude || '0');
-
-            if (!lat || !lng) {
-              if (defaultCoordinates[titleLow]) {
-                [lat, lng] = defaultCoordinates[titleLow];
-              } else {
-                lat = 23.7900 + (index * 0.0022);
-                lng = 90.4130 + ((index % 3) * 0.0025);
-              }
-            }
 
             // Star Count
             const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
@@ -328,21 +353,15 @@ const svgMap: Record<string, string> = {
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md hover:border-slate-400 transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[175px]"
-                data-id={index.toString()}
+                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row md:flex-col p-3.5 sm:p-4 md:p-4 gap-3.5 sm:gap-4 md:gap-0 justify-between"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
                 data-area={areaType}
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
-                data-price-display={displayPrice}
-                data-lat={lat.toString()}
-                data-lng={lng.toString()}
-                data-slug={hSlug}
-                data-image={hImage}
               >
-                <!-- LEFT: IMAGE -->
-                <div class="card-img-box relative w-36 sm:w-48 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch">
+                <!-- TOP ON PC / LEFT ON MOBILE: IMAGE BOX -->
+                <div class="card-img-box relative w-32 sm:w-40 md:w-full h-auto md:h-48 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch md:self-auto">
                   {hImage ? (
                     <img 
                       src={hImage} 
@@ -371,13 +390,15 @@ const svgMap: Record<string, string> = {
                   </button>
                 </div>
 
-                <!-- RIGHT: DETAILS -->
-                <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5">
+                <!-- BOTTOM ON PC / RIGHT ON MOBILE: INFORMATION COLUMN -->
+                <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5 md:py-0 md:pt-3.5">
+                  
                   <div>
-                    <div class="flex items-start justify-between gap-1.5 sm:gap-2">
+                    <!-- Title & Score Header -->
+                    <div class="flex items-start justify-between gap-1.5">
                       <div class="min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                          <a href={`/${hSlug}`} class="text-sm sm:text-base font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1">
+                          <a href={`/${hSlug}`} class="text-sm sm:text-base md:text-base font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1">
                             {hTitle}
                           </a>
                           {starCount > 0 && (
@@ -387,14 +408,16 @@ const svgMap: Record<string, string> = {
                           )}
                         </div>
 
-                        <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-600 font-medium mt-1 leading-snug">
+                        <!-- Full Hotel Address -->
+                        <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-500 font-medium mt-1 leading-snug">
                           <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
-                          <span class="hover:underline cursor-pointer truncate">{hFullAddress}</span>
+                          <span class="hover:underline cursor-pointer line-clamp-1">{hFullAddress}</span>
                         </div>
                       </div>
 
+                      <!-- Blue Score Badge -->
                       {realRating ? (
-                        <div class="flex items-center gap-1.5 shrink-0">
+                        <div class="flex items-center gap-1 shrink-0">
                           <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-t-md rounded-br-md leading-none shadow-2xs">
                             {realRating}
                           </div>
@@ -406,19 +429,20 @@ const svgMap: Record<string, string> = {
                       )}
                     </div>
 
-                    <p class="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2 sm:line-clamp-3">
+                    <!-- 25 Words Description -->
+                    <p class="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2 md:line-clamp-3">
                       {hSnippet25Words}
                     </p>
                   </div>
 
-                  <!-- Price Bar & CTA -->
+                  <!-- Price & CTA Action Bar -->
                   <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
                     <div>
                       <div class="flex items-baseline gap-1">
                         <span class="text-[10px] sm:text-xs text-slate-400 line-through font-semibold leading-none">
                           {displayOriginalPrice}
                         </span>
-                        <span class="text-base sm:text-lg font-extrabold text-[#008234] leading-none">
+                        <span class="text-base sm:text-lg md:text-xl font-extrabold text-[#008234] leading-none">
                           {displayPrice}
                         </span>
                       </div>
@@ -429,12 +453,13 @@ const svgMap: Record<string, string> = {
 
                     <a 
                       href={`/${hSlug}`} 
-                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
+                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
                     >
                       <span>See Options</span>
                       <span class="text-xs">›</span>
                     </a>
                   </div>
+
                 </div>
 
               </div>
@@ -444,154 +469,82 @@ const svgMap: Record<string, string> = {
 
       </div>
 
-      <!-- RIGHT COLUMN: AIRBNB STICKY MAP (lg:col-span-5) -->
-      <div id="airbnbMapColumn" class="hidden lg:block lg:col-span-5 sticky top-24 h-[calc(100vh-7rem)] rounded-2xl overflow-hidden border border-slate-200 shadow-sm z-10">
-        <div id="airbnbHotelMap" class="w-full h-full bg-slate-100"></div>
-      </div>
-
     </div>
 
   </div>
-
-  <!-- AIRBNB MOBILE FLOATING MAP/LIST TOGGLE BUTTON -->
-  <div class="lg:hidden fixed bottom-6 inset-x-0 flex justify-center z-40 pointer-events-none">
-    <button 
-      id="mobileMapToggleBtn" 
-      class="pointer-events-auto bg-slate-900/90 hover:bg-slate-950 text-white font-extrabold text-xs px-5 py-3 rounded-full shadow-2xl backdrop-blur-md flex items-center gap-2 border border-white/20 active:scale-95 transition"
-    >
-      <span id="mobileMapToggleIcon" set:html={svgMap.mapIcon} class="inline-flex"></span>
-      <span id="mobileMapToggleText">Show Map</span>
-    </button>
-  </div>
 </section>
-
-<!-- LEAFLET JS SCRIPT -->
-<script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <!-- CLIENT SIDE JAVASCRIPT -->
 <script is:inline>
-  let hotelMapInstance = null;
-  let mapMarkers = [];
-
-  function initAirbnbSplitMapDirectory() {
+  function initAllHotelsDirectory() {
     const searchInput = document.getElementById('dirSearchInput');
     const sortSelect = document.getElementById('dirSortSelect');
-    const areaSelect = document.getElementById('dirAreaSelect');
+    const priceSlider = document.getElementById('priceRangeSlider');
+    const priceDisplay = document.getElementById('priceRangeValueDisplay');
+    const resetBtn = document.getElementById('resetAllFiltersBtn');
+    const cardsGrid = document.getElementById('directoryCardsGrid');
+
+    if (!cardsGrid) return;
     const cards = document.querySelectorAll('.directory-card-item');
-    const mapContainer = document.getElementById('airbnbHotelMap');
-    const mapColumn = document.getElementById('airbnbMapColumn');
-    const cardsColumn = document.getElementById('hotelCardsColumn');
-    const mobileToggleBtn = document.getElementById('mobileMapToggleBtn');
-    const mobileToggleText = document.getElementById('mobileMapToggleText');
+    const starCbs = document.querySelectorAll('.filter-star-cb');
+    const areaRadios = document.querySelectorAll('.filter-area-radio');
 
-    if (!mapContainer || typeof L === 'undefined') return;
-
-    // 1. Reset / Initialize Leaflet Map
-    if (hotelMapInstance) {
-      hotelMapInstance.remove();
-      hotelMapInstance = null;
-      mapMarkers = [];
-    }
-
-    hotelMapInstance = L.map('airbnbHotelMap', {
-      center: [23.7925, 90.4167],
-      zoom: 14,
-      zoomControl: true,
-      scrollWheelZoom: true
-    });
-
-    // 100% Free & Watermark-Free OpenStreetMap
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(hotelMapInstance);
-
-    // 2. Add Interactive Price Markers for all Hotels
-    cards.forEach((card, index) => {
-      const lat = parseFloat(card.getAttribute('data-lat') || '23.7925');
-      const lng = parseFloat(card.getAttribute('data-lng') || '90.4167');
-      const title = card.getAttribute('data-title') || 'Hotel';
-      const price = card.getAttribute('data-price-display') || '$120';
-      const slug = card.getAttribute('data-slug') || '';
-      const image = card.getAttribute('data-image') || '';
-
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const priceIcon = L.divIcon({
-          className: 'custom-leaflet-pin',
-          html: `<div class="airbnb-price-pin" id="map-pin-${index}">${price}</div>`,
-          iconSize: [60, 26],
-          iconAnchor: [30, 13]
-        });
-
-        const marker = L.marker([lat, lng], { icon: priceIcon }).addTo(hotelMapInstance);
-
-        const popupContent = `
-          <div style="width: 220px; font-family: sans-serif; text-align: left;">
-            <div style="width: 100%; height: 110px; background: #0f172a; overflow: hidden;">
-              <img src="${image}" style="width: 100%; height: 100%; object-fit: cover;" />
-            </div>
-            <div style="padding: 10px;">
-              <h4 style="margin: 0; font-size: 13px; font-weight: 800; color: #0f172a; text-transform: capitalize;">${title}</h4>
-              <p style="margin: 4px 0 8px; font-size: 12px; font-weight: 900; color: #008234;">${price}</p>
-              <a href="/${slug}" style="display: block; background: #006ce4; color: white; text-align: center; padding: 6px 0; border-radius: 6px; font-size: 11px; font-weight: bold; text-decoration: none;">View Details</a>
-            </div>
-          </div>
-        `;
-        marker.bindPopup(popupContent);
-
-        mapMarkers.push({ marker, card, index });
-
-        // Hover effect: Card -> Map Pin
-        card.addEventListener('mouseenter', () => {
-          const pinEl = document.getElementById(`map-pin-${index}`);
-          if (pinEl) pinEl.classList.add('active-highlight');
-        });
-
-        card.addEventListener('mouseleave', () => {
-          const pinEl = document.getElementById(`map-pin-${index}`);
-          if (pinEl) pinEl.classList.remove('active-highlight');
-        });
-      }
-    });
-
-    // 3. Filter Logic
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
-      const selectedArea = areaSelect?.value || 'all';
+      const maxPrice = parseFloat(priceSlider?.value || '60000');
+      
+      const selectedStars = Array.from(starCbs)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
 
-      cards.forEach((card, idx) => {
+      const selectedArea = Array.from(areaRadios).find(r => r.checked)?.value || 'all';
+
+      cards.forEach(card => {
         const title = card.getAttribute('data-title') || '';
+        const stars = card.getAttribute('data-stars') || '0';
         const area = card.getAttribute('data-area') || 'near';
+        const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
 
         const matchSearch = !query || title.includes(query);
+        const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
         const matchArea = selectedArea === 'all' || area === selectedArea;
+        const matchPrice = price === 0 || price <= maxPrice;
 
-        const isVisible = matchSearch && matchArea;
-        card.classList.toggle('hidden', !isVisible);
-
-        if (mapMarkers[idx]) {
-          if (isVisible) {
-            if (!hotelMapInstance.hasLayer(mapMarkers[idx].marker)) {
-              mapMarkers[idx].marker.addTo(hotelMapInstance);
-            }
-          } else {
-            if (hotelMapInstance.hasLayer(mapMarkers[idx].marker)) {
-              mapMarkers[idx].marker.remove();
-            }
-          }
+        if (matchSearch && matchStars && matchArea && matchPrice) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
         }
       });
     }
 
     if (searchInput) searchInput.oninput = filterDirectory;
-    if (areaSelect) areaSelect.onchange = filterDirectory;
+    if (priceSlider) {
+      priceSlider.oninput = (e) => {
+        if (priceDisplay) priceDisplay.textContent = `৳${parseInt(e.target.value).toLocaleString()}+`;
+        filterDirectory();
+      };
+    }
+
+    starCbs.forEach(cb => cb.onchange = filterDirectory);
+    areaRadios.forEach(r => r.onchange = filterDirectory);
+
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (searchInput) searchInput.value = '';
+        if (priceSlider) {
+          priceSlider.value = '60000';
+          if (priceDisplay) priceDisplay.textContent = '৳60,000+';
+        }
+        starCbs.forEach(cb => cb.checked = false);
+        if (areaRadios.length > 0) areaRadios[0].checked = true;
+        filterDirectory();
+      };
+    }
 
     if (sortSelect) {
       sortSelect.onchange = (e) => {
         const val = e.target.value;
-        const grid = document.getElementById('directoryCardsGrid');
-        if (!grid) return;
-
         const cardsArr = Array.from(cards);
         cardsArr.sort((a, b) => {
           const pA = parseFloat(a.getAttribute('data-numeric-price') || '0');
@@ -605,36 +558,13 @@ const svgMap: Record<string, string> = {
           return 0;
         });
 
-        cardsArr.forEach(c => grid.appendChild(c));
+        cardsArr.forEach(c => cardsGrid.appendChild(c));
       };
     }
 
-    // 4. Mobile Map Toggle
-    let isMobileMapVisible = false;
-    if (mobileToggleBtn && mapColumn && cardsColumn) {
-      mobileToggleBtn.onclick = () => {
-        isMobileMapVisible = !isMobileMapVisible;
-        if (isMobileMapVisible) {
-          mapColumn.classList.remove('hidden');
-          mapColumn.classList.add('block', 'fixed', 'inset-0', 'z-30', 'h-screen', 'rounded-none', 'top-0');
-          cardsColumn.classList.add('hidden');
-          if (mobileToggleText) mobileToggleText.textContent = 'Show List';
-          setTimeout(() => { if (hotelMapInstance) hotelMapInstance.invalidateSize(); }, 200);
-        } else {
-          mapColumn.classList.add('hidden');
-          mapColumn.classList.remove('block', 'fixed', 'inset-0', 'z-30', 'h-screen', 'rounded-none', 'top-0');
-          cardsColumn.classList.remove('hidden');
-          if (mobileToggleText) mobileToggleText.textContent = 'Show Map';
-        }
-      };
-    }
-
-    setTimeout(() => {
-      if (hotelMapInstance) hotelMapInstance.invalidateSize();
-    }, 400);
-
-    // 5. Wishlist Logic
-    document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
+    // Wishlist Logic
+    const wishlistBtns = document.querySelectorAll('.card-wishlist-btn');
+    wishlistBtns.forEach(btn => {
       const title = btn.getAttribute('data-title') || '';
       let list = [];
       try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (e) { list = []; }
@@ -673,14 +603,19 @@ const svgMap: Record<string, string> = {
         }
 
         localStorage.setItem('gh_wishlist', JSON.stringify(list));
+        const countEl = document.getElementById('wishlist-count');
+        if (countEl) {
+          countEl.textContent = list.length.toString();
+          countEl.classList.toggle('hidden', list.length === 0);
+        }
       };
     });
   }
 
-  document.addEventListener('astro:page-load', initAirbnbSplitMapDirectory);
+  document.addEventListener('astro:page-load', initAllHotelsDirectory);
   if (document.readyState !== 'loading') {
-    initAirbnbSplitMapDirectory();
+    initAllHotelsDirectory();
   } else {
-    document.addEventListener('DOMContentLoaded', initAirbnbSplitMapDirectory);
+    document.addEventListener('DOMContentLoaded', initAllHotelsDirectory);
   }
 </script>
