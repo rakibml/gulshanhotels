@@ -15,8 +15,29 @@
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- AUTOMATICALLY FETCHES AND MERGES YOUR MODULAR YML FILES -->
+    <!-- AUTOMATICALLY FETCHES, FIXES AND MERGES YOUR MODULAR YML FILES -->
     <script>
+      // Recursive Schema Normalizer for Sveltia CMS
+      function sanitizeSveltiaFields(fields) {
+        if (!Array.isArray(fields)) return;
+        fields.forEach(f => {
+          if (f && typeof f === 'object') {
+            // Auto-inject missing name inside single field list items
+            if (f.field && typeof f.field === 'object' && !f.field.name) {
+              f.field.name = f.field.label 
+                ? f.field.label.toLowerCase().replace(/[^a-z0-9]/g, '_') 
+                : (f.name ? f.name + '_item' : 'item');
+            }
+            if (Array.isArray(f.fields)) {
+              sanitizeSveltiaFields(f.fields);
+            }
+            if (f.field && Array.isArray(f.field.fields)) {
+              sanitizeSveltiaFields(f.field.fields);
+            }
+          }
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', async () => {
         try {
           // 1. Fetch main base config
@@ -51,7 +72,10 @@
             }
           }
 
-          // 3. Homepage Settings Collection with Serial Hotel Selection
+          // AUTO-FIX MISSING NAMES FOR SVELTIA CMS (Fixes gallery, photos, badges error!)
+          sanitizeSveltiaFields(hotelFields);
+
+          // 3. Homepage Settings Collection
           const homepageCollection = {
             name: "homepage",
             label: "🏠 Homepage Settings",
@@ -80,11 +104,11 @@
                     default: "Handpicked top luxury & executive stays recommended by verified guest reviews."
                   },
                   {
-                    label: "Select Hotels & Drag to Set Serial Order (1st, 2nd, 3rd...)",
+                    label: "Select Hotels & Drag to Set Serial Order",
                     name: "featured_hotels",
                     widget: "list",
                     required: false,
-                    hint: "Add hotels from dropdown and drag & drop to change serial order on homepage!",
+                    hint: "Add hotels from dropdown and drag & drop to change serial order!",
                     field: {
                       label: "Select Hotel",
                       name: "hotel_slug",
@@ -109,6 +133,9 @@
             if (resRev.ok) {
               const textRev = await resRev.text();
               reviewsCollection = jsyaml.load(textRev);
+              if (reviewsCollection && Array.isArray(reviewsCollection.fields)) {
+                sanitizeSveltiaFields(reviewsCollection.fields);
+              }
             }
           } catch (err) {}
 
@@ -117,6 +144,9 @@
             if (resSub.ok) {
               const textSub = await resSub.text();
               subscribersCollection = jsyaml.load(textSub);
+              if (subscribersCollection && Array.isArray(subscribersCollection.fields)) {
+                sanitizeSveltiaFields(subscribersCollection.fields);
+              }
             }
           } catch (err) {}
 
