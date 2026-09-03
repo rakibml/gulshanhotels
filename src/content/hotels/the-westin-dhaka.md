@@ -16,7 +16,7 @@ enable_view_prices: true
 enable_official_site: true
 popular: true
 about_notice: ''
-price: ৳ 18,500 / night
+price: 45 / night
 checkIn: 2:00 PM
 checkOut: 12:00 PM
 powerBackup: 24/7 Generator
@@ -1194,21 +1194,23 @@ rooms:
       - City view,
       - City view,
 location_notice: ''
-enable_nearby: true
+map_query: ''
 nearby_places: []
 reviews_notice: ''
-rating: ''
-reviewsCount: ''
 reviews: []
 faqs_notice: ''
-enable_faqs: true
+faqs_title: Travelers are asking
 faqs: []
+enable_faqs: true
+enable_nearby: true
 enable_rates: true
 image_alt: ''
+official_site_url: ''
+rating: ''
+reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-official_site_url: ''
 ---
 
 আসসালামু আলাইকুম।
