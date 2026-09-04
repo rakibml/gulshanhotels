@@ -13,7 +13,7 @@ interface Props {
 
 const { title, url, stars, address, latestReview, fallbackAbout, rating, ratingLabel, reviewsCount } = Astro.props;
 
-// 35-Word Review Truncation Logic
+// 35-Word Truncate Logic
 let reviewWordsShort = '';
 let reviewWordsFull = '';
 let isReviewLongerThan35 = false;
@@ -55,7 +55,7 @@ const svgPin = `<svg class="w-4 h-4 fill-slate-600 shrink-0 mt-0.5" viewBox="0 0
       <span class="card-hotel-address hover:underline cursor-pointer line-clamp-1">{address}</span>
     </div>
 
-    <!-- Latest Review or About Fallback -->
+    <!-- Latest Review or Fallback -->
     {latestReview && latestReview.comment ? (
       <div class="review-snippet-box mt-2 sm:mt-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal bg-transparent">
         <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-700 mb-1">
@@ -71,21 +71,7 @@ const svgPin = `<svg class="w-4 h-4 fill-slate-600 shrink-0 mt-0.5" viewBox="0 0
           {isReviewLongerThan35 && (
             <button 
               type="button" 
-              class="font-bold text-[#006ce4] hover:text-[#003b95] hover:underline ml-1 cursor-pointer inline-block"
-              onclick="
-                const box = this.closest('.review-snippet-box');
-                const s = box.querySelector('.review-short');
-                const f = box.querySelector('.review-full');
-                if (f.classList.contains('hidden')) {
-                  f.classList.remove('hidden');
-                  s.classList.add('hidden');
-                  this.textContent = 'Show less';
-                } else {
-                  f.classList.add('hidden');
-                  s.classList.remove('hidden');
-                  this.textContent = 'See more';
-                }
-              "
+              class="toggle-review-btn font-bold text-[#006ce4] hover:text-[#003b95] hover:underline ml-1 cursor-pointer inline-block"
             >
               See more
             </button>
@@ -120,3 +106,34 @@ const svgPin = `<svg class="w-4 h-4 fill-slate-600 shrink-0 mt-0.5" viewBox="0 0
     )}
   </div>
 </div>
+
+<!-- BUILD-SAFE & BUNDLED TOGGLE SCRIPT -->
+<script>
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    const btn = target?.closest('.toggle-review-btn');
+    if (!btn) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+
+    const box = btn.closest('.review-snippet-box');
+    if (!box) return;
+
+    const shortEl = box.querySelector('.review-short');
+    const fullEl = box.querySelector('.review-full');
+
+    if (shortEl && fullEl) {
+      const isHidden = fullEl.classList.contains('hidden');
+      if (isHidden) {
+        fullEl.classList.remove('hidden');
+        shortEl.classList.add('hidden');
+        btn.textContent = 'Show less';
+      } else {
+        fullEl.classList.add('hidden');
+        shortEl.classList.remove('hidden');
+        btn.textContent = 'See more';
+      }
+    }
+  });
+</script>
