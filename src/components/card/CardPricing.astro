@@ -1,0 +1,72 @@
+---
+interface Props {
+  displayPrice: string;
+  displayOriginalPrice: string;
+  discountPercent: number;
+  rating: string | null;
+  ratingLabel: string;
+  reviewsCount: number;
+  title: string;
+}
+
+const { displayPrice, displayOriginalPrice, discountPercent, rating, ratingLabel, reviewsCount, title } = Astro.props;
+---
+
+<div class="w-full md:w-48 lg:w-56 shrink-0 md:border-l md:border-slate-100 md:pl-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 flex flex-row md:flex-col justify-between items-center md:items-end text-left md:text-right gap-2">
+  
+  <!-- Desktop Review Score -->
+  <div class="w-full hidden md:flex justify-end">
+    {rating ? (
+      <div class="flex items-center gap-2">
+        <div class="text-right hidden sm:block">
+          <div class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{ratingLabel}</div>
+          <div class="text-[11px] sm:text-xs text-slate-500 leading-tight">{reviewsCount} reviews</div>
+        </div>
+        <div class="bg-[#003b95] text-white font-black text-sm sm:text-base px-2.5 py-1.5 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
+          {rating}
+        </div>
+      </div>
+    ) : (
+      <div class="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded">
+        New to site
+      </div>
+    )}
+  </div>
+
+  <!-- Price Info -->
+  <div class="text-left md:text-right">
+    {displayOriginalPrice && (
+      <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-1">
+        <span class="text-xs sm:text-sm text-slate-400 line-through font-semibold">
+          {displayOriginalPrice}
+        </span>
+        {discountPercent > 0 && (
+          <span class="text-[10px] sm:text-xs font-black text-[#e52429] bg-rose-50 border border-rose-200/80 px-1.5 py-0.5 rounded leading-none">
+            -{discountPercent}%
+          </span>
+        )}
+      </div>
+    )}
+
+    <span class="card-final-price text-lg sm:text-2xl md:text-3xl font-black text-[#008234] block leading-tight my-0.5">
+      {displayPrice}
+    </span>
+    
+    <span class="text-[10px] sm:text-xs text-slate-500 font-medium block leading-tight">
+      Best rate found
+    </span>
+  </div>
+
+  <!-- Quick View Action Button -->
+  <button 
+    type="button" 
+    class="open-quick-view-btn w-auto md:w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs sm:text-sm font-bold py-2 sm:py-2.5 px-3.5 rounded-lg sm:rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow cursor-pointer whitespace-nowrap text-center active:scale-95"
+    aria-label={`Quick view of ${title}`}
+  >
+    <svg class="w-4 h-4 shrink-0 fill-current opacity-90" viewBox="0 0 24 24">
+      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+    </svg>
+    <span>Quick View</span>
+  </button>
+
+</div>
