@@ -1,5 +1,5 @@
 ---
-// src/components/QuickViewModal.astro (100% Standalone, Highlighted Close, Mobile Back Button Safe)
+// src/components/QuickViewModal.astro (Bulletproof Click Listener, Instant Modal)
 ---
 
 <!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
@@ -38,7 +38,7 @@
           class="w-full h-full object-cover transition duration-300"
         />
 
-        <!-- Controls -->
+        <!-- Prev / Next Controls -->
         <button 
           type="button" 
           id="qvPrevImgBtn" 
@@ -56,7 +56,7 @@
           ❯
         </button>
 
-        <!-- Counter Badge -->
+        <!-- 1/5 Photo Badge -->
         <span 
           id="qvImgBadge" 
           class="absolute bottom-2.5 right-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-white/20 tracking-wider pointer-events-none"
@@ -125,12 +125,14 @@
   </div>
 </div>
 
-<!-- CLIENT JAVASCRIPT: WITH MOBILE BACK-BUTTON POPSTATE SUPPORT -->
+<!-- CLIENT JAVASCRIPT WITH GLOBAL CLICK EVENT DELEGATION -->
 <script is:inline>
-  const initQuickViewModal = () => {
+  const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
     const dialog = document.getElementById('quickViewDialog');
     const closeBtn = document.getElementById('closeQvModalBtn');
+
+    if (!modal || !dialog) return;
 
     // UI Elements
     const imgEl = document.getElementById('qvModalImg');
@@ -164,10 +166,10 @@
 
     const presetSvgs = {
       agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-black text-[9px] flex items-center justify-center shrink-0 tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
-      booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-black text-[10px] flex items-center justify-center shrink-0">B.</div>`,
+      booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-xs">B.</div>`,
       expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
       direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
-      whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
+      whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
       phone: `<div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`
     };
 
@@ -178,15 +180,14 @@
       badgeEl.textContent = `${currentImgIdx + 1} / ${currentImages.length}`;
     }
 
-    if (prevBtn) prevBtn.addEventListener('click', () => showPhoto(currentImgIdx - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => showPhoto(currentImgIdx + 1));
+    if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
+    if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
-    // OPEN MODAL
+    // OPEN MODAL FUNCTION
     function openModal(data, cardEl) {
       if (!data) return;
       isModalOpen = true;
 
-      // Mobile back button support via hash
       if (window.location.hash !== '#quick-view') {
         window.history.pushState({ modalOpen: true }, '', '#quick-view');
       }
@@ -194,24 +195,26 @@
       titleEl.textContent = data.title || 'Hotel Details';
       starsEl.textContent = data.stars > 0 ? '★'.repeat(data.stars) : '';
       addressEl.textContent = data.address || 'Gulshan, Dhaka';
-      priceEl.textContent = data.price || 'Contact for Rates';
       fullDetailsBtn.href = data.url || '#';
+      priceEl.textContent = data.price || 'Contact for Rates';
 
+      // RATING BADGE
       if (data.rating) {
         ratingBox.innerHTML = `
           <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-1 rounded-md inline-block shadow-2xs leading-none">
             ${data.rating}
           </div>
-          <div class="text-[10px] font-bold text-slate-800 mt-0.5">${data.ratingLabel}</div>
+          <div class="text-[10px] font-bold text-slate-800 mt-0.5">${data.ratingLabel || 'Very Good'}</div>
         `;
       } else {
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
+      // CAROUSEL IMAGES
       currentImages = Array.isArray(data.images) && data.images.length > 0 ? data.images : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
       showPhoto(0);
 
-      // READ AMENITIES DIRECTLY FROM CARD (CARD TOUCH KORA CHARAI AUTO READ HOBE)
+      // AMENITIES READ (From Card Dataset)
       let parsedAmenities = [];
       try {
         const rawAttr = cardEl ? cardEl.getAttribute('data-amenities') : '[]';
@@ -220,7 +223,6 @@
         parsedAmenities = [];
       }
 
-      // Default common amenities if empty
       if (!parsedAmenities || parsedAmenities.length === 0) {
         parsedAmenities = ['Free Wi-Fi', 'Air Conditioning', '24/7 Power', 'Room Service', 'Security'];
       }
@@ -247,6 +249,7 @@
 
       // BOOKING CHANNELS
       let channelsHtml = '';
+
       if (data.whatsapp) {
         const cleanWa = data.whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
@@ -256,7 +259,7 @@
               ${presetSvgs.whatsapp}
               <div>
                 <span class="text-xs font-bold text-emerald-950 block">WhatsApp Booking</span>
-                <span class="text-[10px] text-emerald-700 font-semibold">Fast confirmation</span>
+                <span class="text-[10px] text-emerald-700 font-semibold">Instant confirmation</span>
               </div>
             </div>
             <a href="https://wa.me/${waNum}?text=${encodeURIComponent('Hi! I want to book a stay at ' + data.title)}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:bg-[#1ebd59] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
@@ -288,7 +291,18 @@
         data.channels.forEach(ch => {
           const pName = ch.provider_name || 'Booking Partner';
           const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
-          const preset = ch.icon_preset || 'direct';
+          
+          const pLower = pName.toLowerCase();
+          let preset = ch.icon_preset || '';
+          if (!preset || preset === 'whatsapp') {
+            if (pLower.includes('booking')) preset = 'booking';
+            else if (pLower.includes('agoda')) preset = 'agoda';
+            else if (pLower.includes('expedia')) preset = 'expedia';
+            else if (pLower.includes('whatsapp')) preset = 'whatsapp';
+            else if (pLower.includes('call') || pLower.includes('phone')) preset = 'phone';
+            else preset = 'direct';
+          }
+
           const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
           const btnUrl = ch.button_url || data.url || '#';
 
@@ -319,7 +333,7 @@
       });
     }
 
-    // HIDE MODAL
+    // CLOSE MODAL
     function hideModalDOM() {
       if (!isModalOpen) return;
       isModalOpen = false;
@@ -340,42 +354,64 @@
     }
 
     window.addEventListener('popstate', () => {
-      if (isModalOpen) {
-        hideModalDOM();
-      }
+      if (isModalOpen) hideModalDOM();
     });
 
-    // LISTENERS
-    document.querySelectorAll('.directory-card-item').forEach(card => {
-      const qvBtn = card.querySelector('.open-quick-view-btn');
-      const jsonScript = card.querySelector('.hotel-quickview-json');
-
-      if (qvBtn && jsonScript) {
-        qvBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          try {
-            const data = JSON.parse(jsonScript.textContent || '{}');
-            openModal(data, card); // Card Element Passed Directly
-          } catch (err) {
-            console.error('Quick View parse error:', err);
-          }
-        });
-      }
-    });
-
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
+    if (closeBtn) closeBtn.onclick = closeModal;
+    modal.onclick = (e) => {
       if (e.target === modal) closeModal();
-    });
+    };
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isModalOpen) {
-        closeModal();
+      if (e.key === 'Escape' && isModalOpen) closeModal();
+    });
+
+    // ================= GLOBAL EVENT DELEGATION (GUARANTEED CLICK WORK) =================
+    // বাটন বা বাটনের ভেতরে থাকা আইকন/লেখা যেখানেই ক্লিক পড়ুক, এটা সাথে সাথে কাজ করবে!
+    document.addEventListener('click', (e) => {
+      const qvBtn = e.target.closest('.open-quick-view-btn');
+      if (!qvBtn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const card = qvBtn.closest('.directory-card-item');
+      if (!card) return;
+
+      // নতুন ও পুরোনো উভয় ধরনের ডেটা সিলেক্টর সাপোর্ট
+      const payloadEl = card.querySelector('.hotel-quickview-data, .hotel-quickview-json');
+      let data = null;
+
+      if (payloadEl) {
+        const raw = payloadEl.getAttribute('data-payload') || payloadEl.textContent || '{}';
+        try {
+          data = JSON.parse(raw);
+        } catch (err) {
+          data = null;
+        }
       }
+
+      // যদি কোনো কারণে পে-লোড নাও পায়, কার্ডের DOM থেকেই সরাসরি ব্যাকআপ ডাটা তৈরি করে নিবে!
+      if (!data) {
+        const titleLink = card.querySelector('a');
+        const imgTag = card.querySelector('img');
+        data = {
+          title: titleLink ? titleLink.textContent.trim() : 'Hotel Details',
+          address: card.getAttribute('data-area') || 'Gulshan, Dhaka',
+          price: card.querySelector('.text-emerald-700, .text-\\[\\#008234\\]')?.textContent?.trim() || 'Contact for Rates',
+          images: imgTag && imgTag.src ? [imgTag.src] : [],
+          url: titleLink ? titleLink.getAttribute('href') : '#'
+        };
+      }
+
+      openModal(data, card);
     });
   };
 
-  document.addEventListener('DOMContentLoaded', initQuickViewModal);
-  document.addEventListener('astro:page-load', initQuickViewModal);
+  document.addEventListener('DOMContentLoaded', setupQuickViewSystem);
+  document.addEventListener('astro:page-load', setupQuickViewSystem);
+  // Fail-safe immediate run
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setupQuickViewSystem();
+  }
 </script>
