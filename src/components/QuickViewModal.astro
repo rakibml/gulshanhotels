@@ -1,0 +1,344 @@
+---
+// src/components/QuickViewModal.astro (Global Fast Quick View Modal)
+---
+
+<!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
+<div 
+  id="globalQuickViewModal" 
+  role="dialog" 
+  aria-modal="true" 
+  class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
+>
+  <!-- MODAL DIALOG CONTAINER -->
+  <div 
+    id="quickViewDialog"
+    class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl overflow-hidden my-auto relative text-left flex flex-col max-h-[90vh] transition-all duration-300 scale-95 opacity-0"
+  >
+    <!-- TOP CLOSE BUTTON -->
+    <button 
+      type="button" 
+      id="closeQvModalBtn" 
+      class="absolute top-3 right-3 z-30 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white flex items-center justify-center transition cursor-pointer backdrop-blur-md shadow-md text-xl font-bold"
+      aria-label="Close Quick View"
+    >
+      &times;
+    </button>
+
+    <!-- SCROLLABLE BODY -->
+    <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5">
+      
+      <!-- ================= 1. 5-IMAGE CAROUSEL SLIDER ================= -->
+      <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
+        <img 
+          id="qvModalImg" 
+          src="" 
+          alt="Hotel Preview" 
+          class="w-full h-full object-cover transition duration-300"
+        />
+
+        <!-- Prev / Next Controls -->
+        <button 
+          type="button" 
+          id="qvPrevImgBtn" 
+          class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-sm font-black flex items-center justify-center backdrop-blur-md transition cursor-pointer shadow opacity-90 hover:scale-105"
+          aria-label="Previous Photo"
+        >
+          ❮
+        </button>
+        <button 
+          type="button" 
+          id="qvNextImgBtn" 
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white text-sm font-black flex items-center justify-center backdrop-blur-md transition cursor-pointer shadow opacity-90 hover:scale-105"
+          aria-label="Next Photo"
+        >
+          ❯
+        </button>
+
+        <!-- 1/5 Photo Badge -->
+        <span 
+          id="qvImgBadge" 
+          class="absolute bottom-2.5 right-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-white/20 tracking-wider pointer-events-none"
+        >
+          1 / 1
+        </span>
+      </div>
+
+      <!-- ================= 2. HOTEL NAME & RATING ================= -->
+      <div class="space-y-1">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 id="qvHotelTitle" class="text-lg sm:text-2xl font-black text-slate-900 leading-tight">
+              Hotel Title
+            </h3>
+            <div id="qvStarsContainer" class="text-[#febb02] text-xs sm:text-sm tracking-tight mt-0.5"></div>
+          </div>
+
+          <!-- Rating Score Badge -->
+          <div id="qvRatingBox" class="shrink-0 text-right"></div>
+        </div>
+
+        <!-- ================= 3. LOCATION ================= -->
+        <div class="flex items-start gap-1.5 text-xs text-slate-600 font-medium pt-1">
+          <svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span id="qvAddress" class="leading-snug">Address</span>
+        </div>
+      </div>
+
+      <!-- ================= 4. ROOM TYPES ================= -->
+      <div id="qvRoomsSection" class="pt-2 border-t border-slate-100 space-y-2">
+        <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
+          Available Room Types
+        </span>
+        <div id="qvRoomsList" class="flex flex-wrap gap-1.5 sm:gap-2"></div>
+      </div>
+
+      <!-- ================= 5. PRICING & BOOKING CHANNELS ================= -->
+      <div class="pt-2 border-t border-slate-100 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
+          <div class="text-right">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none">Starting from</span>
+            <span id="qvPrice" class="text-base sm:text-lg font-black text-[#008234]">৳ 0</span>
+          </div>
+        </div>
+
+        <!-- Channels & Direct Contacts (WhatsApp/Call/Agoda/Booking) -->
+        <div id="qvChannelsContainer" class="space-y-2"></div>
+      </div>
+
+    </div>
+
+    <!-- ================= 6. VIEW FULL DETAILS FOOTER BUTTON ================= -->
+    <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0">
+      <a 
+        id="qvFullDetailsBtn" 
+        href="#" 
+        class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold text-xs sm:text-sm py-2.5 sm:py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-xs hover:shadow text-center"
+      >
+        <span>View Full Hotel Details & Photos</span>
+        <span class="text-base font-bold">➔</span>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT JAVASCRIPT FOR DYNAMIC QUICK VIEW POPUP -->
+<script is:inline>
+  const initQuickViewModal = () => {
+    const modal = document.getElementById('globalQuickViewModal');
+    const dialog = document.getElementById('quickViewDialog');
+    const closeBtn = document.getElementById('closeQvModalBtn');
+
+    // UI Elements
+    const imgEl = document.getElementById('qvModalImg');
+    const prevBtn = document.getElementById('qvPrevImgBtn');
+    const nextBtn = document.getElementById('qvNextImgBtn');
+    const badgeEl = document.getElementById('qvImgBadge');
+    
+    const titleEl = document.getElementById('qvHotelTitle');
+    const starsEl = document.getElementById('qvStarsContainer');
+    const ratingBox = document.getElementById('qvRatingBox');
+    const addressEl = document.getElementById('qvAddress');
+    const roomsSection = document.getElementById('qvRoomsSection');
+    const roomsList = document.getElementById('qvRoomsList');
+    const priceEl = document.getElementById('qvPrice');
+    const channelsContainer = document.getElementById('qvChannelsContainer');
+    const fullDetailsBtn = document.getElementById('qvFullDetailsBtn');
+
+    let currentImages = [];
+    let currentImgIdx = 0;
+
+    // Vector SVG Presets
+    const presetSvgs = {
+      agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-black text-[9px] flex items-center justify-center shrink-0 tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
+      booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-black text-[10px] flex items-center justify-center shrink-0">B.</div>`,
+      expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
+      direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
+      whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
+      phone: `<div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`
+    };
+
+    // Update Slider Photo
+    function showPhoto(idx) {
+      if (!currentImages.length) return;
+      currentImgIdx = (idx + currentImages.length) % currentImages.length;
+      imgEl.src = currentImages[currentImgIdx];
+      badgeEl.textContent = `${currentImgIdx + 1} / ${currentImages.length}`;
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => showPhoto(currentImgIdx - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => showPhoto(currentImgIdx + 1));
+
+    // Open Modal Function
+    function openModal(data) {
+      if (!data) return;
+
+      // 1. Title & Details
+      titleEl.textContent = data.title || 'Hotel Details';
+      starsEl.textContent = data.stars > 0 ? '★'.repeat(data.stars) : '';
+      addressEl.textContent = data.address || 'Gulshan, Dhaka';
+      priceEl.textContent = data.price || 'Contact for Rates';
+      fullDetailsBtn.href = data.url || '#';
+
+      // 2. Rating Badge
+      if (data.rating) {
+        ratingBox.innerHTML = `
+          <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-1 rounded-md inline-block shadow-2xs leading-none">
+            ${data.rating}
+          </div>
+          <div class="text-[10px] font-bold text-slate-800 mt-0.5">${data.ratingLabel}</div>
+        `;
+      } else {
+        ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
+      }
+
+      // 3. Carousel Images
+      currentImages = Array.isArray(data.images) && data.images.length > 0 ? data.images : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
+      showPhoto(0);
+
+      // 4. Room Types
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        roomsSection.classList.remove('hidden');
+        roomsList.innerHTML = data.rooms.map(r => `
+          <span class="bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-800 text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
+            <span>🛏️</span>
+            <span>${r.name}</span>
+            ${r.price ? `<span class="text-emerald-700 font-black">(${r.price})</span>` : ''}
+          </span>
+        `).join('');
+      } else {
+        roomsSection.classList.add('hidden');
+      }
+
+      // 5. Booking Channels & Direct Contacts
+      let channelsHtml = '';
+
+      // Direct WhatsApp / Phone
+      if (data.whatsapp) {
+        const cleanWa = data.whatsapp.replace(/[^0-9]/g, '');
+        const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
+        channelsHtml += `
+          <div class="flex items-center justify-between p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50">
+            <div class="flex items-center gap-2.5">
+              ${presetSvgs.whatsapp}
+              <div>
+                <span class="text-xs font-bold text-emerald-950 block">WhatsApp Booking</span>
+                <span class="text-[10px] text-emerald-700 font-semibold">Fast confirmation</span>
+              </div>
+            </div>
+            <a href="https://wa.me/${waNum}?text=${encodeURIComponent('Hi! I want to book a stay at ' + data.title)}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:bg-[#1ebd59] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
+              Chat Now
+            </a>
+          </div>
+        `;
+      }
+
+      if (data.phone) {
+        const cleanPh = data.phone.replace(/[^0-9+]/g, '');
+        channelsHtml += `
+          <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50/70">
+            <div class="flex items-center gap-2.5">
+              ${presetSvgs.phone}
+              <div>
+                <span class="text-xs font-bold text-slate-900 block">Call Hotel Direct</span>
+                <span class="text-[10px] text-slate-500 font-semibold">${data.phone}</span>
+              </div>
+            </div>
+            <a href="tel:${cleanPh}" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
+              Call Direct
+            </a>
+          </div>
+        `;
+      }
+
+      // OTA Channels (Agoda, Booking, Expedia etc.)
+      if (Array.isArray(data.channels) && data.channels.length > 0) {
+        data.channels.forEach(ch => {
+          const pName = ch.provider_name || 'Booking Partner';
+          const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
+          const preset = ch.icon_preset || 'direct';
+          const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
+          const btnUrl = ch.button_url || data.url || '#';
+
+          channelsHtml += `
+            <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 transition">
+              <div class="flex items-center gap-2.5">
+                ${icon}
+                <span class="text-xs font-bold text-slate-900">${pName}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                ${pPrice ? `<span class="text-xs sm:text-sm font-black text-slate-900">${pPrice}</span>` : ''}
+                <a href="${btnUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
+                  ${ch.button_text || 'Book Now'}
+                </a>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      if (!channelsHtml) {
+        channelsHtml = `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-600 font-medium">
+            Please click below to view complete rates and booking contact.
+          </div>
+        `;
+      }
+
+      channelsContainer.innerHTML = channelsHtml;
+
+      // Show Dialog
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+      requestAnimationFrame(() => {
+        dialog.classList.remove('scale-95', 'opacity-0');
+        dialog.classList.add('scale-100', 'opacity-100');
+      });
+    }
+
+    // Close Modal Function
+    function closeModal() {
+      dialog.classList.remove('scale-100', 'opacity-100');
+      dialog.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }, 200);
+    }
+
+    // Attach Listeners to Directory Cards
+    document.querySelectorAll('.directory-card-item').forEach(card => {
+      const qvBtn = card.querySelector('.open-quick-view-btn');
+      const jsonScript = card.querySelector('.hotel-quickview-json');
+
+      if (qvBtn && jsonScript) {
+        qvBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            const data = JSON.parse(jsonScript.textContent || '{}');
+            openModal(data);
+          } catch (err) {
+            console.error('Quick View parse error:', err);
+          }
+        });
+      }
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', initQuickViewModal);
+  document.addEventListener('astro:page-load', initQuickViewModal);
+</script>
