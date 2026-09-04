@@ -23,7 +23,7 @@ powerBackup: 24/7 Generator
 smokingPolicy: Non-Smoking
 booking_channels:
   - provider_name: Whatsapp
-    price: 10$
+    price: 99$
     show_price: true
     button_text: Book Now ➔
     button_url: '01945529869'
@@ -1310,16 +1310,16 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
-enable_nearby: true
 enable_faqs: true
-image_alt: ''
+enable_nearby: true
 enable_rates: true
+image_alt: ''
+official_site_url: ''
 rating: ''
 reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-official_site_url: ''
 ---
 
 সামর্থ থাকলে দেশের প্রতিটা মানুষকে কথাগুলো জোর করে শোনাতাম || প্রফেসর মোখতার আহমেদ || Mukhtar ahmed 
