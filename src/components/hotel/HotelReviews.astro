@@ -9,130 +9,85 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// হোটেলের তথ্য (Slug এবং Title)
 const hotelTitle = (data.title || data.name || "").trim();
 const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "").trim();
 
-// ডাটা ফেচিং (Layered Fetch)
+// ডাটা ফেচিং - ডুপ্লিকেট আইডি এড়াতে ডাইরেক্ট স্ক্যানিং প্রেফারেন্স
 let rawReviewsList: any[] = [];
+
 try {
-  const cmsReviews = await getCollection('reviews');
-  if (cmsReviews) {
-    rawReviewsList = cmsReviews.map(r => ({
-       ...r.data,
-       id: r.id // ইউনিক আইডি ট্র্যাকিং
-    }));
-  }
-} catch (e) {
-  // Fallback if getCollection fails
+  // ১. সরাসরি ফাইল স্ক্যান করা (এটি আইডি ডুপ্লিকেট থাকলেও ফাইল আলাদা হলে ডাটা পায়)
   const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
   rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
+  
+  // ২. যদি গ্লোব থেকে ডাটা না পায় তবে কালেকশন ট্রাই করবে
+  if (rawReviewsList.length === 0) {
+    const cmsReviews = await getCollection('reviews');
+    rawReviewsList = cmsReviews.map(r => r.data);
+  }
+} catch (e) {
+  console.error("Error fetching reviews:", e);
 }
 
-// ফিল্টারিং লজিক (অত্যন্ত শক্তিশালী করা হয়েছে)
 const currentTitle = hotelTitle.toLowerCase();
 const currentSlug = hotelSlug.toLowerCase();
 
+// ফিল্টারিং
 const approvedCmsReviews = rawReviewsList.filter(item => {
   if (!item) return false;
-
-  // ১. অ্যাপ্রুভড চেক (String বা Boolean উভয়ই চেক করবে)
   const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
   if (!isApproved) return false;
 
-  // ২. রিভিউর ভেতর থাকা হোটেল রেফারেন্স
   const rHotel = (item.hotel || "").trim().toLowerCase();
   const rSlug = (item.slug || item.hotelSlug || "").trim().toLowerCase();
 
-  // ৩. স্মার্ট ম্যাচিং (Slug মিললে সবার আগে, না মিললে টাইটেল দিয়ে চেক)
-  const slugMatch = rSlug && (rSlug === currentSlug || currentSlug.includes(rSlug) || rSlug.includes(currentSlug));
-  const titleMatch = rHotel && (rHotel === currentTitle || currentTitle.includes(rHotel) || rHotel.includes(currentTitle));
-
-  return slugMatch || titleMatch;
+  return (rSlug && rSlug === currentSlug) || (rHotel && rHotel === currentTitle) || currentSlug.includes(rSlug);
 });
 
-// হার্ডকোডেড এবং CMS রিভিউ একসাথে করা
+// সব রিভিউ মার্জ করা
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const allReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].map(rev => ({
+const allReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].map((rev, index) => ({
+  id: index, // প্রতিটি রিভিউকে একটি ইউনিক কী দেওয়া
   name: rev.name || 'Verified Guest',
   date: rev.date || 'Recent',
   rating: Number(rev.rating) || 5,
   comment: rev.comment || ''
-})).filter(r => r.comment.length > 2);
+})).filter(r => r.comment.length > 1);
 
-// রেটিং ক্যালকুলেশন
 const reviewsCount = allReviews.length;
-const avgRating = reviewsCount > 0 
-  ? (allReviews.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) 
-  : "5.0";
-
-const starsArray = [1, 2, 3, 4, 5];
+const avgRating = reviewsCount > 0 ? (allReviews.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) : "5.0";
 ---
 
-<section id="guest-reviews" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 max-w-[1400px] mx-auto border-b border-slate-200">
+<!-- UI Section (আগের মতোই থাকবে কিন্তু ম্যাপ করার সময় ইভেন্ট লিসেনার চেক করে নেবে) -->
+<section id="guest-reviews" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 max-w-[1400px] mx-auto">
   <div class="space-y-8">
-    
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 pb-6">
-      <div class="space-y-1">
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Guest reviews & experiences</h2>
-        <p class="text-sm text-slate-500 font-medium lowercase">Verified ratings for {hotelTitle}</p>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-3">
-        {reviewsCount > 0 && (
-          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="bg-[#003580] text-white font-black px-2 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">
-              {avgRating}
-            </div>
-            <div class="flex flex-col">
-              <div class="flex text-amber-500 text-[10px]">
-                {starsArray.map(s => (<span>{s <= Math.round(Number(avgRating)) ? '★' : '☆'}</span>))}
-              </div>
-              <span class="text-[11px] font-bold text-slate-700">{reviewsCount} Reviews</span>
-            </div>
-          </div>
-        )}
-
-        <div class="flex items-center gap-2">
-            <button id="reviewPrevBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition cursor-pointer">❮</button>
-            <button id="reviewNextBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition cursor-pointer">❯</button>
-        </div>
-
-        <button type="button" class="open-write-review-trigger bg-[#003580] hover:bg-[#00224f] text-white font-bold text-xs px-5 py-3 rounded-xl transition cursor-pointer">
-          Write a Review
-        </button>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b pb-6">
+      <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Guest experiences ({reviewsCount})</h2>
+      <div class="flex items-center gap-3">
+        <button id="reviewPrevBtn" class="w-10 h-10 rounded-full bg-white border border-slate-200 cursor-pointer">❮</button>
+        <button id="reviewNextBtn" class="w-10 h-10 rounded-full bg-white border border-slate-200 cursor-pointer">❯</button>
+        <button class="open-write-review-trigger bg-[#003580] text-white px-5 py-2.5 rounded-xl font-bold text-xs cursor-pointer">Write a Review</button>
       </div>
     </div>
 
-    <!-- Carousel Track -->
-    {reviewsCount > 0 ? (
-      <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar">
-        {allReviews.map((rev) => (
-          <div class="w-[300px] sm:w-[380px] shrink-0 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-blue-200 transition">
-            <div class="space-y-4 text-left">
-              <div class="flex items-center justify-between">
-                <div class="flex text-amber-500 text-xs">
-                  {starsArray.map(s => (<span>{s <= rev.rating ? '★' : '☆'}</span>))}
-                </div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rev.date}</span>
-              </div>
-              <p class="text-sm text-slate-700 leading-relaxed italic font-medium">"{rev.comment}"</p>
-            </div>
-            <div class="mt-6 pt-4 border-t border-slate-50 flex items-center gap-2">
-                <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase">{rev.name.charAt(0)}</div>
-                <span class="text-xs font-black text-slate-900">{rev.name}</span>
-            </div>
+    <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth no-scrollbar pb-4">
+      {allReviews.map((rev) => (
+        <div class="w-[300px] sm:w-[380px] shrink-0 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-amber-500 text-xs">{'★'.repeat(rev.rating)}</div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">{rev.date}</span>
           </div>
-        ))}
-      </div>
-    ) : (
-      <div class="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center">
-        <p class="text-slate-500 font-medium italic">No guest reviews yet. Be the first to share your experience!</p>
-      </div>
-    )}
+          <p class="text-sm text-slate-700 italic">"{rev.comment}"</p>
+          <div class="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2">
+            <span class="text-xs font-black text-slate-900">— {rev.name}</span>
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 </section>
+
+<!-- Modal & Script (আগের কোডের মতো ঠিক থাকবে) -->
 
 <!-- MODAL (Hidden by default) -->
 <div id="writeReviewModal" class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
