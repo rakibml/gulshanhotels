@@ -72,12 +72,11 @@ if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1') || locLower
 
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house') || titleLowerStr.includes('guesthouse') || catLower.includes('guest house');
 
-// Default Fallback About Text
 const rawAbout = hotelItem?.body || hData.about || hData.description || '';
 const hSnippet25Words = getFirst25Words(rawAbout);
 const amenitiesStr = JSON.stringify(hData.amenities || []).toLowerCase();
 
-// Pricing
+// Safe Fast Pricing
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
 const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
 
@@ -113,7 +112,7 @@ const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat
 const hTitleLower = rawTitle.toLowerCase();
 const hSlugLower = hSlug.toLowerCase();
 
-// Reviews
+// Reviews Calculation
 const matchedCmsReviews = allCmsReviews
   .filter(r => {
     if (!r) return false;
@@ -194,10 +193,10 @@ const hasValidTitle = hTitle.length > 0;
       price={displayPrice} 
     />
 
-    <!-- ২য় ও ৩য় সেকশনের প্যারেন্ট কন্টেইনার -->
+    <!-- ২য় ও ৩য় কলামের র‍্যাপার -->
     <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-3 sm:p-3.5 md:p-4 gap-2 md:gap-0">
       
-      <!-- ২. হোটেলের তথ্য ও রিসেন্ট রিভিউ সেকশন -->
+      <!-- ২. হোটেলের বিস্তারিত ও রিসেন্ট রিভিউ -->
       <CardInfo 
         title={hTitle} 
         url={hotelUrl} 
@@ -210,7 +209,7 @@ const hasValidTitle = hTitle.length > 0;
         reviewsCount={realCount} 
       />
 
-      <!-- ৩. প্রাইসিং ও বুকিং সেকশন -->
+      <!-- ৩. প্রাইসিং ও বুকিং বাটন -->
       <CardPricing 
         displayPrice={displayPrice} 
         displayOriginalPrice={displayOriginalPrice} 
@@ -226,7 +225,7 @@ const hasValidTitle = hTitle.length > 0;
 )}
 
 <style is:global>
-  html, body, main {
+  body, main {
     background-color: #ffffff !important;
   }
   .directory-card-item {
