@@ -1,5 +1,5 @@
 ---
-// src/pages/hotels.astro (Booking.com Sidebar + Full-Width Horizontal Row Cards Edition)
+// src/pages/hotels.astro (Booking.com Sidebar + Sticky Quick Tabs + Strict Right Pricing Column)
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -115,7 +115,7 @@ const cleanPriceString = (priceRaw: string) => {
 // Common Icons
 const svgMap: Record<string, string> = {
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
-  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`
+  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>`
 };
 
 const siteUrl = "https://gulshanhotels.com/";
@@ -135,12 +135,12 @@ const siteUrl = "https://gulshanhotels.com/";
     </nav>
   </div>
 
-  <!-- MAIN CONTAINER: SIDEBAR + HORIZONTAL ROW CARDS -->
+  <!-- MAIN CONTAINER: SIDEBAR + CARDS LIST -->
   <section id="all-hotels-directory" class="bg-[#F8FAF9] py-6 sm:py-8 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
       
-      <!-- ================= LEFT SIDEBAR (BOOKING.COM STYLE FILTERS) ================= -->
-      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-24">
+      <!-- ================= 1. LEFT SIDEBAR (BOOKING.COM STYLE FILTERS) ================= -->
+      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 space-y-6 shadow-2xs text-left sticky top-4">
         
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 class="font-bold text-slate-900 text-sm tracking-tight">Filter by:</h3>
@@ -321,40 +321,88 @@ const siteUrl = "https://gulshanhotels.com/";
 
       </aside>
 
-      <!-- ================= RIGHT COLUMN: HEADER + HORIZONTAL ROW CARDS ================= -->
+      <!-- ================= 2. RIGHT COLUMN: STICKY HEADER + 3-COLUMN CARDS ================= -->
       <div class="lg:col-span-9 space-y-4">
         
-        <!-- TOP CONTROL BAR -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div>
-            <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-              Gulshan: <span class="text-[#006ce4] font-bold" id="dirTotalHotelsDisplay">{totalHotelsCount} properties found</span>
-            </h2>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <div class="relative flex-1 sm:w-56">
-              <input 
-                type="text" 
-                id="dirSearchInput" 
-                placeholder="Search property..." 
-                class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 sm:py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
-              />
-              <div class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                <span set:html={svgMap.search} class="inline-flex"></span>
-              </div>
+        <!-- LOCKED STICKY TOP BAR ON SCROLL -->
+        <div class="sticky top-4 z-30 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-md space-y-3">
+          
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                Gulshan: <span class="text-[#006ce4] font-bold" id="dirTotalHotelsDisplay">{totalHotelsCount} properties found</span>
+              </h2>
             </div>
 
-            <select id="dirSortSelect" class="bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-2.5 py-1.5 sm:py-2 focus:outline-none cursor-pointer">
-              <option value="recommended">Top picks</option>
-              <option value="rating-high">Rating (highest)</option>
-              <option value="price-low">Price (lowest)</option>
-              <option value="price-high">Price (highest)</option>
-            </select>
+            <!-- Search & Sort -->
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div class="relative flex-1 sm:w-56">
+                <input 
+                  type="text" 
+                  id="dirSearchInput" 
+                  placeholder="Search property..." 
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
+                />
+                <div class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <span set:html={svgMap.search} class="inline-flex"></span>
+                </div>
+              </div>
+
+              <select id="dirSortSelect" class="bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer">
+                <option value="recommended">Top picks</option>
+                <option value="rating-high">Rating (highest)</option>
+                <option value="price-low">Price (lowest)</option>
+                <option value="price-high">Price (highest)</option>
+              </select>
+            </div>
           </div>
+
+          <!-- Quick Filter Tabs Inside Sticky Bar -->
+          <div class="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1 border-t border-slate-100">
+            <button 
+              type="button" 
+              class="quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-[#003b95] text-white shadow-2xs cursor-pointer"
+              data-quick="all"
+            >
+              <span>All Stays</span>
+              <span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full">{totalHotelsCount}</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+              data-quick="hotel"
+            >
+              <span>Hotels</span>
+              <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full">{totalHotelsCount - countGuestHouse}</span>
+            </button>
+
+            {countGuestHouse > 0 && (
+              <button 
+                type="button" 
+                class="quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+                data-quick="guesthouse"
+              >
+                <span>Guest Houses</span>
+                <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full">{countGuestHouse}</span>
+              </button>
+            )}
+
+            {countNearGulshan > 0 && (
+              <button 
+                type="button" 
+                class="quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+                data-quick="near"
+              >
+                <span>Hotels near Gulshan</span>
+                <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full">{countNearGulshan}</span>
+              </button>
+            )}
+          </div>
+
         </div>
 
-        <!-- HORIZONTAL ROW CARDS (IMAGE ON LEFT, INFO ON RIGHT ON ALL DEVICES) -->
+        <!-- HOTEL CARDS LIST (3-COLUMN SPLIT INSIDE EACH CARD) -->
         <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
@@ -384,7 +432,7 @@ const siteUrl = "https://gulshanhotels.com/";
             const rawAbout = hotelItem.body || (typeof hotelItem.rawContent === 'function' ? hotelItem.rawContent() : '') || hData.about || hData.description || '';
             const hSnippet25Words = getFirst25Words(rawAbout);
 
-            // Amenities string for filter matching
+            // Amenities string for filter
             const amenitiesStr = JSON.stringify(hData.amenities || []).toLowerCase();
 
             // Price Calculation & Price Anchoring
@@ -441,7 +489,7 @@ const siteUrl = "https://gulshanhotels.com/";
 
             return (
               <div 
-                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-row p-3.5 sm:p-5 gap-3.5 sm:gap-5 min-h-[175px] sm:min-h-[195px]"
+                class="directory-card-item bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition duration-200 text-left relative flex flex-col md:flex-row p-3.5 sm:p-4 md:p-4 gap-3.5 sm:gap-4 md:gap-0 min-h-[195px]"
                 data-title={hTitleLower}
                 data-stars={starCount.toString()}
                 data-area={areaType}
@@ -450,8 +498,8 @@ const siteUrl = "https://gulshanhotels.com/";
                 data-numeric-price={numericPrice}
                 data-numeric-rating={numRating}
               >
-                <!-- LEFT COLUMN: BIG IMAGE (ALWAYS ON LEFT) -->
-                <div class="card-img-box relative w-36 sm:w-48 md:w-56 lg:w-60 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch">
+                <!-- 1ST COLUMN: HOTEL PHOTO -->
+                <div class="card-img-box relative w-full md:w-56 lg:w-60 shrink-0 rounded-xl overflow-hidden bg-slate-100 self-stretch md:self-auto h-48 md:h-auto">
                   {hImage ? (
                     <img 
                       src={hImage} 
@@ -479,69 +527,73 @@ const siteUrl = "https://gulshanhotels.com/";
                   </button>
                 </div>
 
-                <!-- RIGHT COLUMN: ALL INFORMATION -->
-                <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5">
+                <!-- 2ND COLUMN: MIDDLE HOTEL DETAILS (Strictly Confined in Middle) -->
+                <div class="flex-1 flex flex-col justify-between min-w-0 py-1 md:px-4">
                   <div>
-                    <div class="flex items-start justify-between gap-1.5 sm:gap-2">
-                      <div class="min-w-0">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                          <a href={`/${hSlug}`} class="text-sm sm:text-base md:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1">
-                            {hTitle}
-                          </a>
-                          {starCount > 0 && (
-                            <span class="text-[#febb02] text-xs sm:text-sm tracking-tight shrink-0">
-                              {'★'.repeat(starCount)}
-                            </span>
-                          )}
-                        </div>
-
-                        <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-500 font-medium mt-1 leading-snug">
-                          <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
-                          <span class="hover:underline cursor-pointer truncate">{hFullAddress}</span>
-                        </div>
-                      </div>
-
-                      {realRating ? (
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <div class="text-right hidden sm:block">
-                            <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
-                            <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
-                          </div>
-                          <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-t-md rounded-br-md leading-none shadow-2xs">
-                            {realRating}
-                          </div>
-                        </div>
-                      ) : (
-                        <div class="bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0">
-                          New
-                        </div>
+                    <!-- Title & Stars -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <a href={`/${hSlug}`} class="text-base sm:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition">
+                        {hTitle}
+                      </a>
+                      {starCount > 0 && (
+                        <span class="text-[#febb02] text-xs sm:text-sm tracking-tight shrink-0">
+                          {'★'.repeat(starCount)}
+                        </span>
                       )}
                     </div>
 
-                    <p class="text-xs text-slate-600 mt-2.5 leading-relaxed line-clamp-2 sm:line-clamp-3">
+                    <!-- Full Hotel Address -->
+                    <div class="flex items-start gap-1 text-[11px] sm:text-xs text-slate-600 font-medium mt-1 leading-snug">
+                      <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
+                      <span class="hover:underline cursor-pointer line-clamp-1">{hFullAddress}</span>
+                    </div>
+
+                    <!-- 25 Words Description -->
+                    <p class="text-xs text-slate-600 mt-2.5 leading-relaxed line-clamp-3">
                       {hSnippet25Words}
                     </p>
                   </div>
+                </div>
 
-                  <!-- Bottom Price & CTA Bar -->
-                  <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <div>
-                      <div class="flex items-baseline gap-1.5">
-                        <span class="text-[10px] sm:text-xs text-slate-400 line-through font-semibold leading-none">
-                          {displayOriginalPrice}
-                        </span>
-                        <span class="text-base sm:text-lg md:text-xl font-extrabold text-[#008234] leading-none">
-                          {displayPrice}
-                        </span>
+                <!-- 3RD COLUMN: DEDICATED RIGHT PRICING & BOOKING COLUMN (Review, Price, Button) -->
+                <div class="w-full md:w-52 lg:w-56 shrink-0 md:border-l md:border-slate-100 md:pl-4 pt-3 md:pt-1 border-t md:border-t-0 border-slate-100 flex md:flex-col justify-between items-end text-right">
+                  
+                  <!-- Top: Review Score -->
+                  <div class="w-full flex justify-end">
+                    {realRating ? (
+                      <div class="flex items-center gap-2">
+                        <div class="text-right hidden sm:block">
+                          <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
+                          <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
+                        </div>
+                        <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-2 py-1 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
+                          {realRating}
+                        </div>
                       </div>
-                      <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium block mt-0.5">
+                    ) : (
+                      <div class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
+                        New to site
+                      </div>
+                    )}
+                  </div>
+
+                  <!-- Bottom: Pricing & CTA Button -->
+                  <div class="w-full text-right space-y-1.5 mt-auto">
+                    <div>
+                      <span class="text-[11px] text-slate-400 line-through font-semibold block leading-none">
+                        {displayOriginalPrice}
+                      </span>
+                      <span class="text-lg sm:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
+                        {displayPrice}
+                      </span>
+                      <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium block leading-tight">
                         Best rate found
                       </span>
                     </div>
 
                     <a 
                       href={`/${hSlug}`} 
-                      class="bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap shrink-0"
+                      class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold py-2 px-3 rounded-lg transition inline-flex items-center justify-center gap-1 shadow-2xs hover:shadow whitespace-nowrap text-center"
                     >
                       <span>See Options</span>
                       <span class="text-xs">›</span>
@@ -561,9 +613,9 @@ const siteUrl = "https://gulshanhotels.com/";
   </section>
 </Layout>
 
-<!-- CLIENT SIDE JAVASCRIPT (ALL BOOKING.COM SIDEBAR FILTERS) -->
+<!-- CLIENT SIDE JAVASCRIPT (FILTERS & STICKY QUICK TABS SYNC) -->
 <script is:inline>
-  function initBookingStyleDirectory() {
+  function initHotelsDirectoryPage() {
     const searchInput = document.getElementById('dirSearchInput');
     const sortSelect = document.getElementById('dirSortSelect');
     const priceSlider = document.getElementById('priceRangeSlider');
@@ -576,6 +628,9 @@ const siteUrl = "https://gulshanhotels.com/";
     const scoreCbs = document.querySelectorAll('.filter-score-cb');
     const typeCbs = document.querySelectorAll('.filter-type-cb');
     const facilityCbs = document.querySelectorAll('.filter-facility-cb');
+    const quickPillBtns = document.querySelectorAll('.quick-pill-btn');
+
+    let currentQuickFilter = 'all';
 
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
@@ -596,17 +651,33 @@ const siteUrl = "https://gulshanhotels.com/";
         const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
         const amenities = (card.getAttribute('data-amenities') || '').toLowerCase();
 
+        // Search Match
         const matchSearch = !query || title.includes(query);
+
+        // Quick Pill Tab Match
+        let matchQuick = true;
+        if (currentQuickFilter === 'all') matchQuick = true;
+        else if (currentQuickFilter === 'hotel') matchQuick = !isGuestHouse;
+        else if (currentQuickFilter === 'guesthouse') matchQuick = isGuestHouse;
+        else if (currentQuickFilter === 'near') matchQuick = (area === 'near');
+
+        // Sidebar Area Match
         const matchArea = selectedArea === 'all' || area === selectedArea;
+
+        // Star Rating Match
         const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
+
+        // Price Match
         const matchPrice = price === 0 || price <= maxPrice;
 
+        // Review Score Match
         let matchScore = true;
         if (selectedScores.length > 0) {
           const minScore = Math.min(...selectedScores);
           matchScore = rating >= minScore;
         }
 
+        // Property Type Match
         let matchType = true;
         if (selectedTypes.length > 0) {
           if (selectedTypes.includes('guesthouse') && !selectedTypes.includes('hotel')) {
@@ -616,18 +687,37 @@ const siteUrl = "https://gulshanhotels.com/";
           }
         }
 
+        // Facilities Match
         let matchFacilities = true;
         if (selectedFacilities.length > 0) {
           matchFacilities = selectedFacilities.every(fac => amenities.includes(fac));
         }
 
-        if (matchSearch && matchArea && matchStars && matchPrice && matchScore && matchType && matchFacilities) {
+        if (matchSearch && matchQuick && matchArea && matchStars && matchPrice && matchScore && matchType && matchFacilities) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
         }
       });
     }
+
+    // Quick Pill Buttons Click
+    quickPillBtns.forEach(btn => {
+      btn.onclick = () => {
+        quickPillBtns.forEach(b => {
+          b.className = 'quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer';
+          const badge = b.querySelector('span:last-child');
+          if (badge) badge.className = 'bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full';
+        });
+
+        btn.className = 'quick-pill-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shrink-0 bg-[#003b95] text-white shadow-2xs cursor-pointer';
+        const activeSpan = btn.querySelector('span:last-child');
+        if (activeSpan) activeSpan.className = 'bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full';
+
+        currentQuickFilter = btn.getAttribute('data-quick') || 'all';
+        filterDirectory();
+      };
+    });
 
     if (searchInput) searchInput.oninput = filterDirectory;
     
@@ -656,7 +746,10 @@ const siteUrl = "https://gulshanhotels.com/";
         scoreCbs.forEach(cb => cb.checked = false);
         typeCbs.forEach(cb => cb.checked = false);
         facilityCbs.forEach(cb => cb.checked = false);
-        filterDirectory();
+
+        // Reset quick pills
+        if (quickPillBtns.length > 0) quickPillBtns[0].click();
+        else filterDirectory();
       };
     }
 
@@ -727,10 +820,10 @@ const siteUrl = "https://gulshanhotels.com/";
     });
   }
 
-  document.addEventListener('astro:page-load', initBookingStyleDirectory);
+  document.addEventListener('astro:page-load', initHotelsDirectoryPage);
   if (document.readyState !== 'loading') {
-    initBookingStyleDirectory();
+    initHotelsDirectoryPage();
   } else {
-    document.addEventListener('DOMContentLoaded', initBookingStyleDirectory);
+    document.addEventListener('DOMContentLoaded', initHotelsDirectoryPage);
   }
 </script>
