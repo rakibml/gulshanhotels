@@ -18,10 +18,14 @@ let reviewWordsShort = '';
 let reviewWordsFull = '';
 let isReviewLongerThan35 = false;
 
+// রিভিউ প্রসেসিং
 if (latestReview && latestReview.comment) {
-  const cleanComment = latestReview.comment.replace(/<[^>]+>/g, ' ').replace(/[#*`_~]/g, '').trim();
+  // HTML ট্যাগ এবং অতিরিক্ত স্পেস রিমুভ করা
+  const cleanComment = latestReview.comment.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const words = cleanComment.split(/\s+/).filter(Boolean);
+  
   reviewWordsFull = cleanComment;
+  
   if (words.length > 35) {
     reviewWordsShort = words.slice(0, 35).join(' ') + '...';
     isReviewLongerThan35 = true;
@@ -31,109 +35,122 @@ if (latestReview && latestReview.comment) {
   }
 }
 
-const svgPin = `<svg class="w-4 h-4 fill-slate-600 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+const svgPin = `<svg class="w-4 h-4 fill-slate-500 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 ---
 
 <div class="flex-1 flex flex-col justify-between min-w-0 pr-1 md:pr-3 text-left">
   <div>
     <!-- Title & Stars -->
     <div class="flex items-center gap-1.5 flex-wrap">
-      <a href={url} class="card-hotel-link text-sm sm:text-lg md:text-xl font-extrabold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1 sm:line-clamp-none leading-snug">
+      <a href={url} class="card-hotel-link text-base sm:text-lg md:text-xl font-black text-[#006ce4] hover:text-[#003b95] transition line-clamp-1 leading-snug">
         {title}
       </a>
       
       {stars > 0 && (
-        <span class="text-[#febb02] text-xs sm:text-sm md:text-base tracking-tight shrink-0">
+        <div class="flex text-[#febb02] text-[10px] sm:text-xs shrink-0 mb-0.5">
           {'★'.repeat(stars)}
-        </span>
+        </div>
       )}
     </div>
 
     <!-- Address -->
-    <div class="flex items-start gap-1.5 text-xs sm:text-sm text-slate-600 font-medium mt-1 sm:mt-1.5 leading-snug">
+    <div class="flex items-start gap-1 text-xs text-slate-500 font-medium mt-1 leading-snug">
       <span set:html={svgPin} class="inline-flex shrink-0"></span>
       <span class="card-hotel-address hover:underline cursor-pointer line-clamp-1">{address}</span>
     </div>
 
-    <!-- Latest Review or Fallback -->
-    {latestReview && latestReview.comment ? (
-      <div class="review-snippet-box mt-2 sm:mt-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal bg-transparent">
-        <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-700 mb-1">
-          <span class="text-amber-500">★</span>
-          <span>Latest Guest Experience:</span>
-        </div>
-        
-        <p class="text-slate-600 leading-relaxed">
-          <span class="review-short italic">“{reviewWordsShort}”</span>
-          {isReviewLongerThan35 && (
-            <span class="review-full italic hidden">“{reviewWordsFull}”</span>
-          )}
-          {isReviewLongerThan35 && (
-            <button 
-              type="button" 
-              class="toggle-review-btn font-bold text-[#006ce4] hover:text-[#003b95] hover:underline ml-1 cursor-pointer inline-block"
-            >
-              See more
-            </button>
-          )}
-        </p>
+    <!-- Review Section -->
+    <div class="mt-3 min-h-[40px]"> <!-- min-h added to prevent layout jump -->
+      {latestReview && latestReview.comment ? (
+        <div class="review-snippet-box text-xs sm:text-[13px] leading-relaxed">
+          <div class="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            <span class="text-amber-500 text-xs">“</span>
+            <span>Latest Guest Review</span>
+          </div>
+          
+          <div class="text-slate-700 italic">
+            <span class="review-short">“{reviewWordsShort}”</span>
+            {isReviewLongerThan35 && (
+              <>
+                <span class="review-full hidden">“{reviewWordsFull}”</span>
+                <button 
+                  type="button" 
+                  class="toggle-review-btn font-bold text-[#006ce4] hover:underline ml-1 cursor-pointer inline-block not-italic"
+                >
+                  See more
+                </button>
+              </>
+            )}
+          </div>
 
-        <span class="block text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1">
-          — {latestReview.name} {latestReview.date ? `(${latestReview.date})` : ''}
-        </span>
-      </div>
-    ) : (
-      <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-2.5 leading-relaxed line-clamp-2 md:line-clamp-3 hidden sm:block">
-        {fallbackAbout}
-      </p>
-    )}
+          <div class="flex items-center gap-2 mt-1.5">
+             <div class="w-4 h-px bg-slate-200"></div>
+             <span class="text-[10px] sm:text-[11px] font-bold text-slate-500">
+               {latestReview.name} {latestReview.date && <span class="font-medium text-slate-400 opacity-80">• {latestReview.date}</span>}
+             </span>
+          </div>
+        </div>
+      ) : (
+        /* Fallback visible on both Mobile & Desktop but limited to 2 lines */
+        <p class="text-xs sm:text-[13px] text-slate-500 leading-relaxed line-clamp-2 italic opacity-90">
+          {fallbackAbout || "Explore this property for your next stay. High-quality service and great amenities await."}
+        </p>
+      )}
+    </div>
   </div>
 
-  <!-- Mobile Inline Review Score Badge -->
-  <div class="md:hidden flex items-center gap-1.5 mt-1.5">
+  <!-- Mobile Rating Badge -->
+  <div class="md:hidden flex items-center gap-2 mt-3 pt-2 border-t border-slate-50">
     {rating ? (
-      <>
-        <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-0.5 rounded leading-none shadow-2xs">
+      <div class="flex items-center gap-1.5">
+        <div class="bg-[#003b95] text-white font-black text-[11px] px-1.5 py-0.5 rounded-t-md rounded-br-md">
           {rating}
         </div>
-        <span class="text-xs font-bold text-slate-800">{ratingLabel}</span>
-        <span class="text-[11px] text-slate-500">({reviewsCount})</span>
-      </>
+        <div class="flex flex-col leading-none">
+            <span class="text-[11px] font-bold text-slate-900">{ratingLabel}</span>
+            <span class="text-[9px] text-slate-500 font-medium">{reviewsCount} reviews</span>
+        </div>
+      </div>
     ) : (
-      <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
+      <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded">
         New to site
       </span>
     )}
   </div>
 </div>
 
-<!-- BUILD-SAFE & BUNDLED TOGGLE SCRIPT -->
 <script>
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement | null;
-    const btn = target?.closest('.toggle-review-btn');
-    if (!btn) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
+  // স্ক্রিপ্টকে আরও শক্তিশালী করা হয়েছে
+  const initToggle = () => {
+    document.querySelectorAll('.toggle-review-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const box = (e.currentTarget as HTMLElement).closest('.review-snippet-box');
+        if (!box) return;
 
-    const box = btn.closest('.review-snippet-box');
-    if (!box) return;
+        const shortEl = box.querySelector('.review-short');
+        const fullEl = box.querySelector('.review-full');
+        const btnEl = e.currentTarget as HTMLElement;
 
-    const shortEl = box.querySelector('.review-short');
-    const fullEl = box.querySelector('.review-full');
+        if (shortEl && fullEl) {
+          const isHidden = fullEl.classList.contains('hidden');
+          if (isHidden) {
+            fullEl.classList.remove('hidden');
+            shortEl.classList.add('hidden');
+            btnEl.textContent = 'Show less';
+          } else {
+            fullEl.classList.add('hidden');
+            shortEl.classList.remove('hidden');
+            btnEl.textContent = 'See more';
+          }
+        }
+      });
+    });
+  };
 
-    if (shortEl && fullEl) {
-      const isHidden = fullEl.classList.contains('hidden');
-      if (isHidden) {
-        fullEl.classList.remove('hidden');
-        shortEl.classList.add('hidden');
-        btn.textContent = 'Show less';
-      } else {
-        fullEl.classList.add('hidden');
-        shortEl.classList.remove('hidden');
-        btn.textContent = 'See more';
-      }
-    }
-  });
+  // Astro page load হ্যান্ডেল করা
+  initToggle();
+  document.addEventListener('astro:page-load', initToggle);
 </script>
