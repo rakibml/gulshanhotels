@@ -2,38 +2,111 @@
 // src/components/directory/StickyBar.astro
 ---
 
-<header class="sticky top-0 z-30 bg-white border-b border-slate-200/90 shadow-xs">
-  <div class="max-w-[1200px] mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300">
+  <div class="max-w-[1280px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3 sm:gap-6">
     
-    <!-- Search Input -->
-    <div class="relative flex-1 max-w-md">
+    <!-- Search Input Group -->
+    <div class="relative flex-1 max-w-lg group">
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#006ce4] transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
       <input 
         type="text" 
         id="hotelSearchInput" 
-        placeholder="Search hotel name, location..." 
-        class="w-full bg-slate-100 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-semibold rounded-xl pl-8 sm:pl-9 pr-3 py-2 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition"
+        placeholder="Where are you going?" 
+        class="w-full bg-slate-100 hover:bg-slate-200/50 focus:bg-white text-xs sm:text-sm font-bold rounded-xl pl-10 pr-4 py-2.5 border-transparent focus:border-[#006ce4] focus:ring-4 focus:ring-blue-50 focus:outline-none transition-all placeholder:text-slate-500"
       />
-      <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
     </div>
 
     <!-- Quick Filters (Desktop) -->
-    <div class="hidden md:flex items-center gap-2 text-xs font-bold text-slate-700">
-      <button type="button" class="area-quick-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-[#006ce4] text-white transition cursor-pointer" data-area="all">All Areas</button>
-      <button type="button" class="area-quick-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer" data-area="gulshan-1">Gulshan 1</button>
-      <button type="button" class="area-quick-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer" data-area="gulshan-2">Gulshan 2</button>
-    </div>
+    <nav class="hidden md:flex items-center gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
+      <button 
+        type="button" 
+        class="area-quick-btn px-4 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer bg-[#006ce4] text-white shadow-sm" 
+        data-area="all"
+      >
+        All Areas
+      </button>
+      <button 
+        type="button" 
+        class="area-quick-btn px-4 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer" 
+        data-area="gulshan-1"
+      >
+        Gulshan 1
+      </button>
+      <button 
+        type="button" 
+        class="area-quick-btn px-4 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:text-slate-900 hover:bg-white transition-all cursor-pointer" 
+        data-area="gulshan-2"
+      >
+        Gulshan 2
+      </button>
+    </nav>
 
-    <!-- Mobile Filter Drawer Trigger Button -->
+    <!-- Mobile Filter Trigger -->
     <button 
       type="button" 
       id="openMobileDrawerBtn" 
-      class="md:hidden flex items-center gap-1.5 bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs shrink-0 cursor-pointer transition active:scale-95"
+      class="md:hidden flex items-center gap-2 bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] font-black uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-lg shadow-blue-100 shrink-0 transition-all active:scale-95"
     >
-      <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+      </svg>
       <span>Filters</span>
     </button>
 
   </div>
 </header>
+
+<script>
+  // মোবাইল ড্রয়ার ওপেন লজিক
+  const openDrawerBtn = document.getElementById('openMobileDrawerBtn');
+  openDrawerBtn?.addEventListener('click', () => {
+    // আগের কম্পোনেন্টে যে গ্লোবাল ফাংশন বানিয়েছিলাম তা কল করছি
+    if (typeof (window as any).openFilterDrawer === 'function') {
+      (window as any).openFilterDrawer();
+    }
+  });
+
+  // ডেক্সটপ কুইক ফিল্টার বাটন টগল লজিক
+  const areaButtons = document.querySelectorAll('.area-quick-btn');
+  
+  areaButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // সবার আগে সব বাটনকে ডিফল্ট স্টাইলে আনুন
+      areaButtons.forEach(b => {
+        b.classList.remove('bg-[#006ce4]', 'text-white', 'shadow-sm');
+        b.classList.add('text-slate-600', 'hover:bg-white');
+      });
+
+      // ক্লিক করা বাটনকে একটিভ করুন
+      btn.classList.add('bg-[#006ce4]', 'text-white', 'shadow-sm');
+      btn.classList.remove('text-slate-600', 'hover:bg-white');
+
+      const selectedArea = btn.getAttribute('data-area');
+      console.log('Filtering for:', selectedArea);
+      // এখানে আপনার ফিল্টার করার লজিক বা API কল দিতে পারেন
+    });
+  });
+
+  // স্ক্রল করলে শ্যাডো পরিবর্তন (Optional UX)
+  window.addEventListener('scroll', () => {
+    const header = document.querySelector('header');
+    if (window.scrollY > 10) {
+      header?.classList.add('shadow-md', 'py-1.5');
+      header?.classList.remove('py-2.5');
+    } else {
+      header?.classList.remove('shadow-md', 'py-1.5');
+      header?.classList.add('py-2.5');
+    }
+  });
+</script>
+
+<style>
+    /* অতিরিক্ত মসৃণ ট্রানজিশনের জন্য */
+    header {
+        will-change: transform, padding;
+    }
+</style>
