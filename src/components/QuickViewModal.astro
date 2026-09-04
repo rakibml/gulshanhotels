@@ -1,5 +1,5 @@
 ---
-// src/components/QuickViewModal.astro (Bulletproof Click Listener, Instant Modal)
+// src/components/QuickViewModal.astro (100% Self-Contained, Auto-Reads Card Data & Top-Center Close)
 ---
 
 <!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
@@ -7,27 +7,27 @@
   id="globalQuickViewModal" 
   role="dialog" 
   aria-modal="true" 
-  class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
+  class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 pt-8 sm:pt-10 overflow-y-auto"
 >
   <!-- MODAL DIALOG CONTAINER -->
   <div 
     id="quickViewDialog"
-    class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl overflow-hidden my-auto relative text-left flex flex-col max-h-[92vh] transition-all duration-300 scale-95 opacity-0"
+    class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
   >
-    <!-- HIGHLIGHTED EYE-CATCHING CLOSE BUTTON -->
+    <!-- ================= HIGHLIGHTED TOP-CENTER CLOSE BUTTON ================= -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
-      class="absolute top-3 right-3 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-slate-800 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 shadow-xl flex items-center justify-center transition cursor-pointer hover:scale-110 active:scale-95"
+      class="absolute -top-5 sm:-top-6 left-1/2 -translate-x-1/2 z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-slate-900 hover:bg-rose-600 hover:text-white border-2 border-slate-300 hover:border-rose-600 shadow-2xl flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
       aria-label="Close Quick View"
     >
-      <svg class="w-4 h-4 sm:w-5 sm:h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
 
     <!-- SCROLLABLE BODY -->
-    <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5">
+    <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl">
       
       <!-- ================= 1. 5-IMAGE CAROUSEL SLIDER ================= -->
       <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
@@ -99,6 +99,7 @@
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
           <div class="text-right">
+            <!-- আসল সঠিক স্টার্টিং প্রাইস -->
             <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none">Starting from</span>
             <span id="qvPrice" class="text-base sm:text-lg font-black text-[#008234]">৳ 0</span>
           </div>
@@ -111,7 +112,7 @@
     </div>
 
     <!-- ================= 5. VIEW FULL DETAILS FOOTER BUTTON ================= -->
-    <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0">
+    <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0 rounded-b-2xl sm:rounded-b-3xl">
       <a 
         id="qvFullDetailsBtn" 
         href="#" 
@@ -125,7 +126,7 @@
   </div>
 </div>
 
-<!-- CLIENT JAVASCRIPT WITH GLOBAL CLICK EVENT DELEGATION -->
+<!-- CLIENT JAVASCRIPT: 100% SELF RELIANT -->
 <script is:inline>
   const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
@@ -134,7 +135,6 @@
 
     if (!modal || !dialog) return;
 
-    // UI Elements
     const imgEl = document.getElementById('qvModalImg');
     const prevBtn = document.getElementById('qvPrevImgBtn');
     const nextBtn = document.getElementById('qvNextImgBtn');
@@ -154,7 +154,6 @@
     let currentImgIdx = 0;
     let isModalOpen = false;
 
-    // Vector SVGs
     const iconSvgs = {
       pool: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
       gym: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
@@ -183,7 +182,6 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
-    // OPEN MODAL FUNCTION
     function openModal(data, cardEl) {
       if (!data) return;
       isModalOpen = true;
@@ -196,9 +194,13 @@
       starsEl.textContent = data.stars > 0 ? '★'.repeat(data.stars) : '';
       addressEl.textContent = data.address || 'Gulshan, Dhaka';
       fullDetailsBtn.href = data.url || '#';
-      priceEl.textContent = data.price || 'Contact for Rates';
 
-      // RATING BADGE
+      // ================= 100% ACCURATE BASE STARTING PRICE DETECTOR =================
+      // কার্ডের কাটা দাগে যে আসল রেট ($120) ছিল, তা স্বয়ংক্রিয়ভাবে পড়ে আসল স্টার্টিং রেট হিসেবে দেখাবে!
+      const cardStrikethrough = cardEl ? cardEl.querySelector('.line-through')?.textContent?.trim() : '';
+      const actualOfficialPrice = data.officialPrice || cardStrikethrough || data.price || 'Contact for Rates';
+      priceEl.textContent = actualOfficialPrice;
+
       if (data.rating) {
         ratingBox.innerHTML = `
           <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-1 rounded-md inline-block shadow-2xs leading-none">
@@ -210,11 +212,10 @@
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      // CAROUSEL IMAGES
       currentImages = Array.isArray(data.images) && data.images.length > 0 ? data.images : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
       showPhoto(0);
 
-      // AMENITIES READ (From Card Dataset)
+      // AMENITIES
       let parsedAmenities = [];
       try {
         const rawAttr = cardEl ? cardEl.getAttribute('data-amenities') : '[]';
@@ -333,7 +334,6 @@
       });
     }
 
-    // CLOSE MODAL
     function hideModalDOM() {
       if (!isModalOpen) return;
       isModalOpen = false;
@@ -366,8 +366,7 @@
       if (e.key === 'Escape' && isModalOpen) closeModal();
     });
 
-    // ================= GLOBAL EVENT DELEGATION (GUARANTEED CLICK WORK) =================
-    // বাটন বা বাটনের ভেতরে থাকা আইকন/লেখা যেখানেই ক্লিক পড়ুক, এটা সাথে সাথে কাজ করবে!
+    // ================= GLOBAL DELEGATION =================
     document.addEventListener('click', (e) => {
       const qvBtn = e.target.closest('.open-quick-view-btn');
       if (!qvBtn) return;
@@ -378,7 +377,6 @@
       const card = qvBtn.closest('.directory-card-item');
       if (!card) return;
 
-      // নতুন ও পুরোনো উভয় ধরনের ডেটা সিলেক্টর সাপোর্ট
       const payloadEl = card.querySelector('.hotel-quickview-data, .hotel-quickview-json');
       let data = null;
 
@@ -391,26 +389,12 @@
         }
       }
 
-      // যদি কোনো কারণে পে-লোড নাও পায়, কার্ডের DOM থেকেই সরাসরি ব্যাকআপ ডাটা তৈরি করে নিবে!
-      if (!data) {
-        const titleLink = card.querySelector('a');
-        const imgTag = card.querySelector('img');
-        data = {
-          title: titleLink ? titleLink.textContent.trim() : 'Hotel Details',
-          address: card.getAttribute('data-area') || 'Gulshan, Dhaka',
-          price: card.querySelector('.text-emerald-700, .text-\\[\\#008234\\]')?.textContent?.trim() || 'Contact for Rates',
-          images: imgTag && imgTag.src ? [imgTag.src] : [],
-          url: titleLink ? titleLink.getAttribute('href') : '#'
-        };
-      }
-
       openModal(data, card);
     });
   };
 
   document.addEventListener('DOMContentLoaded', setupQuickViewSystem);
   document.addEventListener('astro:page-load', setupQuickViewSystem);
-  // Fail-safe immediate run
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setupQuickViewSystem();
   }
