@@ -20,15 +20,6 @@ const getFirst25Words = (text: string): string => {
   return words.slice(0, 25).join(' ') + '...';
 };
 
-const cleanPriceString = (priceRaw: string) => {
-  if (!priceRaw) return 'Contact for Rates';
-  const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
-  const digits = clean.replace(/[^0-9.,]/g, '').trim();
-  if (!digits) return 'Contact for Rates';
-  if (clean.includes('$')) return `$${digits}`;
-  return `৳ ${digits}`;
-};
-
 const svgMap = {
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`
 };
@@ -76,19 +67,73 @@ const rawAbout = hotelItem.body || (typeof hotelItem.rawContent === 'function' ?
 const hSnippet25Words = getFirst25Words(rawAbout);
 const amenitiesStr = JSON.stringify(hData.amenities || []).toLowerCase();
 
-// ================= 100% REAL PRICING (NO FAKE MULTIPLIER) =================
-const rawPrice = hData.price ? String(hData.price).trim() : "";
-const displayPrice = cleanPriceString(rawPrice);
-const rawDigits = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
-const isDollar = rawPrice.includes('$');
-const numericPrice = isDollar ? Math.round(rawDigits * 120) : rawDigits;
+// ================= AGODA STYLE REAL PRICING & % DISCOUNT =================
+const parsePriceItem = (str: any) => {
+  if (!str) return null;
+  const s = String(str).trim();
+  const digits = parseFloat(s.replace(/[^0-9.]/g, ''));
+  if (isNaN(digits) || digits <= 0) return null;
+  const isUsd = s.includes('$');
+  return { num: digits, isUsd };
+};
 
-// শুধুমাত্র যদি ফাইলে আসলেই বেশি originalPrice দেওয়া থাকে, তবেই দেখাবে। কোনো অটো গুণ হবে না!
+const priceCandidates: { num: number; isUsd: boolean; normalized: number }[] = [];
+
+// Base hotel price
+const basePriceParsed = parsePriceItem(hData.price);
+if (basePriceParsed) {
+  priceCandidates.push({
+    ...basePriceParsed,
+    normalized: basePriceParsed.isUsd ? basePriceParsed.num * 120 : basePriceParsed.num
+  });
+}
+
+// Booking Channels prices (WhatsApp, Booking.com, Agoda etc.)
+if (Array.isArray(hData.booking_channels)) {
+  hData.booking_channels.forEach((ch: any) => {
+    const chParsed = parsePriceItem(ch.price);
+    if (chParsed) {
+      priceCandidates.push({
+        ...chParsed,
+        normalized: chParsed.isUsd ? chParsed.num * 120 : chParsed.num
+      });
+    }
+  });
+}
+
+// Explicit original price from CMS (if any)
+const explicitOrig = parsePriceItem(hData.originalPrice);
+if (explicitOrig) {
+  priceCandidates.push({
+    ...explicitOrig,
+    normalized: explicitOrig.isUsd ? explicitOrig.num * 120 : explicitOrig.num
+  });
+}
+
+let displayPrice = "Contact for Rates";
 let displayOriginalPrice = "";
-const explicitOriginalNum = hData.originalPrice ? parseFloat(String(hData.originalPrice).replace(/[^0-9.]/g, '')) : 0;
+let discountPercent = 0;
+let numericPrice = 0;
 
-if (explicitOriginalNum > rawDigits) {
-  displayOriginalPrice = isDollar ? `$${explicitOriginalNum}` : `৳ ${explicitOriginalNum.toLocaleString()}`;
+if (priceCandidates.length > 0) {
+  const isDollar = priceCandidates.some(p => p.isUsd);
+
+  let lowest = priceCandidates[0];
+  let highest = priceCandidates[0];
+
+  for (const item of priceCandidates) {
+    if (item.normalized < lowest.normalized) lowest = item;
+    if (item.normalized > highest.normalized) highest = item;
+  }
+
+  displayPrice = isDollar ? `$${lowest.num}` : `৳ ${lowest.num.toLocaleString()}`;
+  numericPrice = lowest.normalized;
+
+  // শুধুমাত্র যদি আসলেই দামের পার্থক্য থাকে, তবেই কাটা দাম এবং % ডিসকাউন্ট হিসাব হবে
+  if (highest.normalized > lowest.normalized && highest.num > lowest.num) {
+    displayOriginalPrice = isDollar ? `$${highest.num}` : `৳ ${highest.num.toLocaleString()}`;
+    discountPercent = Math.round(((highest.num - lowest.num) / highest.num) * 100);
+  }
 }
 
 // Star Category
@@ -282,12 +327,19 @@ const quickViewData = {
         )}
       </div>
 
-      <!-- Price Info -->
+      <!-- Price Info (With Agoda-Style -% Badge) -->
       <div class="text-left md:text-right">
         {displayOriginalPrice && (
-          <span class="text-[9px] sm:text-[11px] text-slate-400 line-through font-semibold block leading-none">
-            {displayOriginalPrice}
-          </span>
+          <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-0.5">
+            <span class="text-[9px] sm:text-[11px] text-slate-400 line-through font-semibold">
+              {displayOriginalPrice}
+            </span>
+            {discountPercent > 0 && (
+              <span class="text-[9px] sm:text-[10px] font-black text-[#e52429] bg-rose-50 border border-rose-200/80 px-1 py-0.5 rounded leading-none">
+                -{discountPercent}%
+              </span>
+            )}
+          </div>
         )}
         <span class="text-sm sm:text-base md:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
           {displayPrice}
