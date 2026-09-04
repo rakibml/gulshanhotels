@@ -22,79 +22,59 @@ const {
 
 <div
   class="
-    w-full md:w-56 lg:w-60 shrink-0
+    w-full md:w-52 lg:w-60
+    shrink-0
     md:border-l md:border-slate-100
     md:pl-4
-    pt-2 md:pt-0
-    mt-2 md:mt-0
+    pt-1.5 md:pt-0
+    mt-1.5 md:mt-0
     border-t md:border-t-0
     flex flex-row md:flex-col
     justify-between
     items-center md:items-end
-    gap-2.5
+    gap-2
   "
 >
 
   <!-- DESKTOP RATING -->
-  <div class="hidden md:flex items-center justify-between w-full mb-1">
+  <div class="hidden md:flex w-full justify-end">
 
-    {rating ? (
-      <div class="flex items-center gap-2 ml-auto">
+    {rating && (
+      <div class="flex items-center gap-2">
 
         <div class="text-right leading-tight">
-          <div class="text-sm font-extrabold text-[#0b1f3a]">
+          <div class="text-sm font-bold text-[#0b1f3a]">
             {ratingLabel}
           </div>
 
-          <div class="text-[11px] text-slate-500 font-medium mt-0.5">
-            {reviewsCount}
-            {reviewsCount === 1 ? ' review' : ' reviews'}
+          <div class="text-[10px] text-slate-500">
+            {reviewsCount} reviews
           </div>
         </div>
 
         <div
           class="
             flex items-center justify-center
-            min-w-[42px] h-[34px]
+            min-w-[40px]
+            h-[32px]
             bg-[#0b3b78]
             text-white
-            text-sm font-black
-            rounded-lg rounded-br-sm
-            shadow-sm
+            text-sm
+            font-black
+            rounded-md
           "
         >
           {rating}
         </div>
 
       </div>
-    ) : (
-      <span
-        class="
-          ml-auto
-          text-[10px] font-bold
-          text-slate-400
-          bg-slate-50
-          border border-slate-100
-          rounded-md
-          px-2 py-1
-        "
-      >
-        New to GulshanHotels
-      </span>
     )}
 
   </div>
 
 
-  <!-- PRICE AREA -->
-  <div
-    class="
-      flex-1 md:flex-none
-      min-w-0
-      md:w-full
-      text-left md:text-right
-    "
-  >
+  <!-- PRICE -->
+  <div class="flex-1 md:w-full">
 
     <div
       class="
@@ -105,16 +85,15 @@ const {
       "
     >
 
-      <!-- CURRENT PRICE -->
       <div class="flex items-baseline gap-1">
 
         <span
           class="
-            text-[26px] sm:text-3xl
+            text-[25px] sm:text-3xl
             font-black
-            tracking-tight
             text-[#087f3f]
             leading-none
+            tracking-tight
           "
         >
           {displayPrice}
@@ -122,9 +101,9 @@ const {
 
         <span
           class="
-            text-[9px] sm:text-[10px]
-            font-semibold
+            text-[9px]
             text-slate-400
+            font-semibold
           "
         >
           /night
@@ -133,11 +112,10 @@ const {
       </div>
 
 
-      <!-- ORIGINAL PRICE -->
       {displayOriginalPrice && (
         <span
           class="
-            text-[11px] sm:text-xs
+            text-[11px]
             text-slate-400
             line-through
             font-bold
@@ -148,16 +126,14 @@ const {
       )}
 
 
-      <!-- DISCOUNT -->
       {displayOriginalPrice && discountPercent > 0 && (
         <span
           class="
-            inline-flex items-center
             rounded-md
             bg-red-50
             border border-red-100
             px-1.5 py-1
-            text-[10px] sm:text-[11px]
+            text-[10px]
             font-black
             text-red-600
           "
@@ -169,27 +145,22 @@ const {
     </div>
 
 
-    <!-- TRUST MESSAGE -->
+    <!-- BEST RATE -->
     <div
       class="
         flex items-center
-        gap-1.5
-        mt-1
+        gap-1
+        mt-0.5
         md:justify-end
       "
     >
 
       <svg
-        class="w-3.5 h-3.5 text-[#087f3f] shrink-0"
+        class="w-3.5 h-3.5 text-[#087f3f]"
         viewBox="0 0 24 24"
         fill="currentColor"
-        aria-hidden="true"
       >
-        <path
-          d="M12 2 4 5v6c0 5.25 3.41 10.17 8 11
-             4.59-.83 8-5.75 8-11V5l-8-3zm-1 14-3-3
-             1.41-1.41L11 13.17l3.59-3.58L16 11l-5 5z"
-        />
+        <path d="M12 2 4 5v6c0 5.25 3.41 10.17 8 11 4.59-.83 8-5.75 8-11V5l-8-3zm-1 14-3-3 1.41-1.41L11 13.17l3.59-3.58L16 11l-5 5z"/>
       </svg>
 
       <span
@@ -208,89 +179,52 @@ const {
 
 
   <!-- CTA -->
-  <div class="shrink-0">
+  <button
+    type="button"
+    aria-label={`View ${title}`}
+    class="
+      open-quick-view-btn
+      shrink-0
+      bg-[#006ce4]
+      hover:bg-[#0057b8]
+      active:scale-[0.97]
+      text-white
+      text-[11px] sm:text-sm
+      font-black
+      py-2.5
+      px-4
+      sm:py-3
+      sm:px-5
+      rounded-xl
+      transition-all
+      whitespace-nowrap
+      flex items-center
+      justify-center
+      gap-1.5
+      shadow-[0_3px_10px_rgba(0,108,228,0.18)]
+    "
+  >
 
-    <button
-      type="button"
-      aria-label={`View ${title}`}
-      class="
-        open-quick-view-btn
-
-        bg-[#006ce4]
-        hover:bg-[#0057b8]
-
-        active:scale-[0.97]
-
-        text-white
-
-        text-[11px]
-        sm:text-sm
-
-        font-black
-
-        py-2.5
-        sm:py-3
-
-        px-4
-        sm:px-5
-
-        rounded-xl
-
-        transition-all
-        duration-200
-
-        whitespace-nowrap
-
-        flex items-center
-        justify-center
-        gap-2
-
-        shadow-[0_4px_12px_rgba(0,108,228,0.20)]
-        hover:shadow-[0_6px_16px_rgba(0,108,228,0.28)]
-      "
+    <svg
+      class="w-4 h-4 fill-current"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
     >
+      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+    </svg>
 
-      <svg
-        class="w-4 h-4 fill-current"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          d="M12 4.5C7 4.5 2.73 7.61 1 12
-             c1.73 4.39 6 7.5 11 7.5
-             s9.27-3.11 11-7.5
-             c-1.73-4.39-6-7.5-11-7.5z
-             M12 17c-2.76 0-5-2.24-5-5
-             s2.24-5 5-5 5 2.24 5 5
-             -2.24 5-5 5zm0-8
-             c-1.66 0-3 1.34-3 3
-             s1.34 3 3 3
-             3-1.34 3-3-1.34-3-3-3z"
-        />
-      </svg>
+    <span class="hidden sm:inline">
+      VIEW HOTEL
+    </span>
 
-      <span class="hidden sm:inline">
-        VIEW HOTEL
-      </span>
+    <span class="sm:hidden">
+      VIEW
+    </span>
 
-      <span class="sm:hidden uppercase tracking-wide">
-        VIEW
-      </span>
+    <span class="text-sm">
+      →
+    </span>
 
-      <svg
-        class="w-3.5 h-3.5 sm:w-4 sm:h-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        aria-hidden="true"
-      >
-        <path d="M5 12h14" />
-        <path d="m13 6 6 6-6 6" />
-      </svg>
-
-    </button>
-
-  </div>
+  </button>
 
 </div>
