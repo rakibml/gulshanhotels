@@ -9,85 +9,108 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-const hotelTitle = (data.title || data.name || "Hotel Details").trim();
-const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "hotel").trim();
+// হোটেলের তথ্য (Slug এবং Title)
+const hotelTitle = (data.title || data.name || "").trim();
+const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "").trim();
 
-// Layer 1 & 2: Fetching Reviews from CMS or Local Glob
+// ডাটা ফেচিং (Layered Fetch)
 let rawReviewsList: any[] = [];
 try {
   const cmsReviews = await getCollection('reviews');
-  if (cmsReviews) rawReviewsList = cmsReviews.map(r => r.data || {});
+  if (cmsReviews) {
+    rawReviewsList = cmsReviews.map(r => ({
+       ...r.data,
+       id: r.id // ইউনিক আইডি ট্র্যাকিং
+    }));
+  }
 } catch (e) {
+  // Fallback if getCollection fails
   const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
   rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
 }
 
-// Filtering Approved Reviews
-const currentHotelTitle = hotelTitle.toLowerCase();
-const currentHotelSlug = hotelSlug.toLowerCase();
+// ফিল্টারিং লজিক (অত্যন্ত শক্তিশালী করা হয়েছে)
+const currentTitle = hotelTitle.toLowerCase();
+const currentSlug = hotelSlug.toLowerCase();
 
 const approvedCmsReviews = rawReviewsList.filter(item => {
-  if (!item || !item.approved) return false;
-  const rHotel = (item.hotel || '').toLowerCase();
-  const rSlug = (item.slug || item.hotelSlug || '').toLowerCase();
-  return rHotel === currentHotelTitle || rSlug === currentHotelSlug || currentHotelTitle.includes(rHotel);
+  if (!item) return false;
+
+  // ১. অ্যাপ্রুভড চেক (String বা Boolean উভয়ই চেক করবে)
+  const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+  if (!isApproved) return false;
+
+  // ২. রিভিউর ভেতর থাকা হোটেল রেফারেন্স
+  const rHotel = (item.hotel || "").trim().toLowerCase();
+  const rSlug = (item.slug || item.hotelSlug || "").trim().toLowerCase();
+
+  // ৩. স্মার্ট ম্যাচিং (Slug মিললে সবার আগে, না মিললে টাইটেল দিয়ে চেক)
+  const slugMatch = rSlug && (rSlug === currentSlug || currentSlug.includes(rSlug) || rSlug.includes(currentSlug));
+  const titleMatch = rHotel && (rHotel === currentTitle || currentTitle.includes(rHotel) || rHotel.includes(currentTitle));
+
+  return slugMatch || titleMatch;
 });
 
-// Merging Hardcoded and CMS Reviews
+// হার্ডকোডেড এবং CMS রিভিউ একসাথে করা
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const allApprovedReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].map(item => ({
-  name: item.name || 'Verified Guest',
-  date: item.date || 'Recent',
-  rating: Number(item.rating) || 5,
-  comment: item.comment || ''
-})).filter(r => r.comment.trim().length > 0);
+const allReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].map(rev => ({
+  name: rev.name || 'Verified Guest',
+  date: rev.date || 'Recent',
+  rating: Number(rev.rating) || 5,
+  comment: rev.comment || ''
+})).filter(r => r.comment.length > 2);
 
-const reviewsCount = allApprovedReviews.length;
-const totalStarsSum = allApprovedReviews.reduce((sum, r) => sum + r.rating, 0);
-const hotelRating = reviewsCount > 0 ? (totalStarsSum / reviewsCount).toFixed(1) : "5.0";
+// রেটিং ক্যালকুলেশন
+const reviewsCount = allReviews.length;
+const avgRating = reviewsCount > 0 
+  ? (allReviews.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) 
+  : "5.0";
 
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
 <section id="guest-reviews" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 max-w-[1400px] mx-auto border-b border-slate-200">
   <div class="space-y-8">
-    <!-- Header -->
+    
+    <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 pb-6">
       <div class="space-y-1">
         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Guest reviews & experiences</h2>
-        <p class="text-sm text-slate-500 font-medium lowercase">Verified stays and ratings for {hotelTitle}</p>
+        <p class="text-sm text-slate-500 font-medium lowercase">Verified ratings for {hotelTitle}</p>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
         {reviewsCount > 0 && (
           <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="bg-[#003580] text-white font-black px-2 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">{hotelRating}</div>
-            <div class="flex flex-col justify-center">
+            <div class="bg-[#003580] text-white font-black px-2 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">
+              {avgRating}
+            </div>
+            <div class="flex flex-col">
               <div class="flex text-amber-500 text-[10px]">
-                {starsArray.map(s => (<span>{s <= Math.round(Number(hotelRating)) ? '★' : '☆'}</span>))}
+                {starsArray.map(s => (<span>{s <= Math.round(Number(avgRating)) ? '★' : '☆'}</span>))}
               </div>
-              <span class="text-[11px] font-bold text-slate-700 uppercase">{reviewsCount} Reviews</span>
+              <span class="text-[11px] font-bold text-slate-700">{reviewsCount} Reviews</span>
             </div>
           </div>
         )}
 
         <div class="flex items-center gap-2">
-            <button id="reviewPrevBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 transition active:scale-90 cursor-pointer">❮</button>
-            <button id="reviewNextBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 transition active:scale-90 cursor-pointer">❯</button>
+            <button id="reviewPrevBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition cursor-pointer">❮</button>
+            <button id="reviewNextBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition cursor-pointer">❯</button>
         </div>
 
-        <button type="button" class="open-write-review-trigger bg-[#003580] hover:bg-[#00224f] text-white font-bold text-xs px-5 py-3 rounded-xl transition shadow-md cursor-pointer">
+        <button type="button" class="open-write-review-trigger bg-[#003580] hover:bg-[#00224f] text-white font-bold text-xs px-5 py-3 rounded-xl transition cursor-pointer">
           Write a Review
         </button>
       </div>
     </div>
 
-    <!-- Carousel -->
+    <!-- Carousel Track -->
     {reviewsCount > 0 ? (
       <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar">
-        {allApprovedReviews.map((rev) => (
-          <div class="w-[300px] sm:w-[380px] shrink-0 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
-            <div class="space-y-4">
+        {allReviews.map((rev) => (
+          <div class="w-[300px] sm:w-[380px] shrink-0 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-blue-200 transition">
+            <div class="space-y-4 text-left">
               <div class="flex items-center justify-between">
                 <div class="flex text-amber-500 text-xs">
                   {starsArray.map(s => (<span>{s <= rev.rating ? '★' : '☆'}</span>))}
@@ -105,35 +128,35 @@ const starsArray = [1, 2, 3, 4, 5];
       </div>
     ) : (
       <div class="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center">
-        <p class="text-slate-500 font-medium">No reviews yet. Be the first to share your experience!</p>
-        <button type="button" class="open-write-review-trigger mt-4 text-[#003580] font-bold underline">Write Review</button>
+        <p class="text-slate-500 font-medium italic">No guest reviews yet. Be the first to share your experience!</p>
       </div>
     )}
   </div>
 </section>
 
-<!-- SUBMIT REVIEW MODAL -->
-<div id="writeReviewModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+<!-- MODAL (Hidden by default) -->
+<div id="writeReviewModal" class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative">
     <div class="flex items-center justify-between border-b pb-4 mb-4">
-      <h3 class="text-xl font-black text-slate-900">Review for {hotelTitle}</h3>
-      <button id="closeWriteReviewBtn" class="text-slate-400 hover:text-slate-900 text-3xl">&times;</button>
+      <h3 class="text-lg font-black text-slate-900 leading-tight">Review for {hotelTitle}</h3>
+      <button id="closeWriteReviewBtn" class="text-slate-400 hover:text-slate-900 text-3xl font-light cursor-pointer">&times;</button>
     </div>
 
     <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4">
-      <input type="text" id="reviewerName" required placeholder="Your Name" class="w-full bg-slate-50 border rounded-xl p-3 outline-none focus:border-blue-600" />
-      <select id="reviewerRating" class="w-full bg-slate-50 border rounded-xl p-3 outline-none focus:border-blue-600 font-bold text-amber-600">
+      <input type="text" id="reviewerName" required placeholder="Your Full Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-blue-600 text-sm" />
+      <select id="reviewerRating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-blue-600 font-bold text-amber-600 text-sm">
         <option value="5">★ ★ ★ ★ ★ 5 / 5 Excellent</option>
         <option value="4">★ ★ ★ ★ ☆ 4 / 5 Very Good</option>
         <option value="3">★ ★ ★ ☆ ☆ 3 / 5 Average</option>
         <option value="2">★ ★ ☆ ☆ ☆ 2 / 5 Poor</option>
         <option value="1">★ ☆ ☆ ☆ ☆ 1 / 5 Terrible</option>
       </select>
-      <textarea id="reviewerComment" rows="4" required placeholder="Your review..." class="w-full bg-slate-50 border rounded-xl p-3 outline-none focus:border-blue-600"></textarea>
-      <button type="submit" id="submitReviewBtn" class="w-full bg-[#003580] hover:bg-[#00224f] text-white font-black py-4 rounded-xl shadow-lg transition">Submit Review</button>
+      <textarea id="reviewerComment" rows="4" required placeholder="Describe your stay experience..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-blue-600 text-sm leading-relaxed"></textarea>
+      <button type="submit" id="submitReviewBtn" class="w-full bg-[#003580] hover:bg-[#00224f] text-white font-black py-4 rounded-xl shadow-lg transition uppercase tracking-widest text-xs">Submit for Approval</button>
     </form>
-    <div id="reviewSuccessMsg" class="hidden p-4 bg-emerald-50 text-emerald-900 font-bold rounded-2xl text-center">
-      Review submitted! Waiting for admin approval.
+    
+    <div id="reviewSuccessMsg" class="hidden p-6 bg-emerald-50 text-emerald-900 font-bold rounded-2xl text-center text-sm">
+      <p>Thank you! Your review has been submitted and is currently pending admin approval.</p>
     </div>
   </div>
 </div>
@@ -144,72 +167,74 @@ const starsArray = [1, 2, 3, 4, 5];
 </style>
 
 <script is:inline>
-  function initReviews() {
+  function setupReviews() {
     const track = document.getElementById('reviewsCarouselTrack');
-    const prevBtn = document.getElementById('reviewPrevBtn');
-    const nextBtn = document.getElementById('reviewNextBtn');
     const modal = document.getElementById('writeReviewModal');
-    const closeBtn = document.getElementById('closeWriteReviewBtn');
-    const openBtns = document.querySelectorAll('.open-write-review-trigger');
     const form = document.getElementById('submitReviewForm');
-
-    // Carousel Logic
-    if (prevBtn) prevBtn.onclick = () => track?.scrollBy({ left: -350, behavior: 'smooth' });
-    if (nextBtn) nextBtn.onclick = () => track?.scrollBy({ left: 350, behavior: 'smooth' });
-
-    // Modal Toggle Logic
-    openBtns.forEach(btn => {
-      btn.onclick = () => {
-        modal.classList.remove('hidden');
-        document.getElementById('reviewSuccessMsg').classList.add('hidden');
-        form.classList.remove('hidden');
-      }
+    const successMsg = document.getElementById('reviewSuccessMsg');
+    
+    // Slider
+    document.getElementById('reviewPrevBtn')?.addEventListener('click', () => {
+      track?.scrollBy({ left: -350, behavior: 'smooth' });
+    });
+    document.getElementById('reviewNextBtn')?.addEventListener('click', () => {
+      track?.scrollBy({ left: 350, behavior: 'smooth' });
     });
 
-    if (closeBtn) closeBtn.onclick = () => modal.classList.add('hidden');
-    if (modal) {
-      modal.onclick = (e) => { if (e.target === modal) modal.classList.add('hidden'); };
-    }
-
-    // Form Submission Logic
-    if (form) {
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-        const submitBtn = document.getElementById('submitReviewBtn');
-        const hotelTitle = form.getAttribute('data-hotel-title');
-        const hotelSlug = form.getAttribute('data-hotel-slug');
-        const name = document.getElementById('reviewerName').value;
-        const rating = document.getElementById('reviewerRating').value;
-        const comment = document.getElementById('reviewerComment').value;
-
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...';
-
-        try {
-          const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ hotel: hotelTitle, slug: hotelSlug, name, rating, comment })
-          });
-
-          if (res.ok) {
-            form.classList.add('hidden');
-            document.getElementById('reviewSuccessMsg').classList.remove('hidden');
-            setTimeout(() => modal.classList.add('hidden'), 3000);
-          } else {
-            alert('Submission failed. Please try again.');
-          }
-        } catch (err) {
-          alert('Network error: ' + err.message);
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerText = 'Submit Review';
-        }
+    // Modal logic
+    document.querySelectorAll('.open-write-review-trigger').forEach(btn => {
+      btn.onclick = () => {
+        modal?.classList.remove('hidden');
+        successMsg?.classList.add('hidden');
+        form?.classList.remove('hidden');
       };
-    }
+    });
+
+    document.getElementById('closeWriteReviewBtn')?.addEventListener('click', () => {
+      modal?.classList.add('hidden');
+    });
+
+    // Form Submit
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitReviewBtn');
+      const payload = {
+        hotel: form.getAttribute('data-hotel-title'),
+        slug: form.getAttribute('data-hotel-slug'),
+        name: document.getElementById('reviewerName').value,
+        rating: document.getElementById('reviewerRating').value,
+        comment: document.getElementById('reviewerComment').value,
+        approved: false, // ডিফল্টভাবে আন-অ্যাপ্রুভড
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Sending...';
+
+      try {
+        const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          form.classList.add('hidden');
+          successMsg.classList.remove('hidden');
+          setTimeout(() => modal.classList.add('hidden'), 4000);
+        } else {
+          alert('Failed to submit review.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit for Approval';
+      }
+    });
   }
 
-  // Astro life cycle hooks
-  document.addEventListener('DOMContentLoaded', initReviews);
-  document.addEventListener('astro:page-load', initReviews);
+  // Run on first load and on Astro view transitions
+  setupReviews();
+  document.addEventListener('astro:page-load', setupReviews);
 </script>
