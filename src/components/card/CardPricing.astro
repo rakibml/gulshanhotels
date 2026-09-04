@@ -9,71 +9,288 @@ interface Props {
   title: string;
 }
 
-const { 
-  displayPrice, 
-  displayOriginalPrice, 
-  discountPercent, 
-  rating, 
-  ratingLabel, 
-  reviewsCount, 
-  title 
+const {
+  displayPrice,
+  displayOriginalPrice,
+  discountPercent,
+  rating,
+  ratingLabel,
+  reviewsCount,
+  title
 } = Astro.props;
 ---
 
-<!-- কন্টেইনার: প্যাডিং এবং মার্জিন আরও কমিয়ে কমপ্যাক্ট করা হয়েছে -->
-<div class="w-full md:w-52 lg:w-60 shrink-0 md:border-l border-slate-100 md:pl-4 pt-1.5 md:pt-0 mt-0.5 md:mt-0 border-t md:border-t-0 flex flex-row md:flex-col justify-between items-center md:items-end gap-2">
-  
-  <!-- ডেস্কটপ রেটিং (মোবাইলে হিডেন) -->
-  <div class="hidden md:flex flex-col items-end w-full mb-3">
-    {rating && (
-      <div class="flex items-center gap-2">
-        <div class="text-right">
-          <div class="text-sm font-bold text-slate-900 leading-tight">{ratingLabel}</div>
-          <div class="text-xs text-slate-500 leading-tight">{reviewsCount} reviews</div>
+<div
+  class="
+    w-full md:w-56 lg:w-60 shrink-0
+    md:border-l md:border-slate-100
+    md:pl-4
+    pt-2 md:pt-0
+    mt-2 md:mt-0
+    border-t md:border-t-0
+    flex flex-row md:flex-col
+    justify-between
+    items-center md:items-end
+    gap-2.5
+  "
+>
+
+  <!-- DESKTOP RATING -->
+  <div class="hidden md:flex items-center justify-between w-full mb-1">
+
+    {rating ? (
+      <div class="flex items-center gap-2 ml-auto">
+
+        <div class="text-right leading-tight">
+          <div class="text-sm font-extrabold text-[#0b1f3a]">
+            {ratingLabel}
+          </div>
+
+          <div class="text-[11px] text-slate-500 font-medium mt-0.5">
+            {reviewsCount}
+            {reviewsCount === 1 ? ' review' : ' reviews'}
+          </div>
         </div>
-        <div class="bg-[#003b95] text-white font-bold text-base px-2 py-1 rounded-t-lg rounded-br-lg shadow-sm">
+
+        <div
+          class="
+            flex items-center justify-center
+            min-w-[42px] h-[34px]
+            bg-[#0b3b78]
+            text-white
+            text-sm font-black
+            rounded-lg rounded-br-sm
+            shadow-sm
+          "
+        >
           {rating}
         </div>
+
       </div>
+    ) : (
+      <span
+        class="
+          ml-auto
+          text-[10px] font-bold
+          text-slate-400
+          bg-slate-50
+          border border-slate-100
+          rounded-md
+          px-2 py-1
+        "
+      >
+        New to GulshanHotels
+      </span>
     )}
+
   </div>
 
-  <!-- মেইন প্রাইসিং সেকশন -->
-  <div class="flex-1 flex flex-col md:w-full">
-    <div class="flex items-center gap-2 flex-wrap md:justify-end">
-      <!-- ফাইনাল প্রাইস (বড় করা হয়েছে) -->
-      <span class="text-xl sm:text-3xl font-black text-[#008234] leading-none">
-        {displayPrice}
+
+  <!-- PRICE AREA -->
+  <div
+    class="
+      flex-1 md:flex-none
+      min-w-0
+      md:w-full
+      text-left md:text-right
+    "
+  >
+
+    <div
+      class="
+        flex items-center
+        gap-2
+        flex-wrap
+        md:justify-end
+      "
+    >
+
+      <!-- CURRENT PRICE -->
+      <div class="flex items-baseline gap-1">
+
+        <span
+          class="
+            text-[26px] sm:text-3xl
+            font-black
+            tracking-tight
+            text-[#087f3f]
+            leading-none
+          "
+        >
+          {displayPrice}
+        </span>
+
+        <span
+          class="
+            text-[9px] sm:text-[10px]
+            font-semibold
+            text-slate-400
+          "
+        >
+          /night
+        </span>
+
+      </div>
+
+
+      <!-- ORIGINAL PRICE -->
+      {displayOriginalPrice && (
+        <span
+          class="
+            text-[11px] sm:text-xs
+            text-slate-400
+            line-through
+            font-bold
+          "
+        >
+          {displayOriginalPrice}
+        </span>
+      )}
+
+
+      <!-- DISCOUNT -->
+      {displayOriginalPrice && discountPercent > 0 && (
+        <span
+          class="
+            inline-flex items-center
+            rounded-md
+            bg-red-50
+            border border-red-100
+            px-1.5 py-1
+            text-[10px] sm:text-[11px]
+            font-black
+            text-red-600
+          "
+        >
+          {discountPercent}% OFF
+        </span>
+      )}
+
+    </div>
+
+
+    <!-- TRUST MESSAGE -->
+    <div
+      class="
+        flex items-center
+        gap-1.5
+        mt-1
+        md:justify-end
+      "
+    >
+
+      <svg
+        class="w-3.5 h-3.5 text-[#087f3f] shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 2 4 5v6c0 5.25 3.41 10.17 8 11
+             4.59-.83 8-5.75 8-11V5l-8-3zm-1 14-3-3
+             1.41-1.41L11 13.17l3.59-3.58L16 11l-5 5z"
+        />
+      </svg>
+
+      <span
+        class="
+          text-[9px] sm:text-[10px]
+          font-bold
+          text-[#087f3f]
+        "
+      >
+        Best rate found
       </span>
 
-      <!-- ডিসকাউন্ট ইনফো (দাম এবং বাটনের মাঝে আনা হয়েছে এবং বড় করা হয়েছে) -->
-      {displayOriginalPrice && (
-        <div class="flex items-center gap-1.5 bg-red-50 border border-red-100 px-2 py-0.5 rounded shadow-xs shrink-0">
-          <span class="text-[11px] sm:text-xs text-slate-500 line-through font-bold">
-            {displayOriginalPrice}
-          </span>
-          <span class="text-[11px] sm:text-xs font-black text-red-600">
-            -{discountPercent}%
-          </span>
-        </div>
-      )}
     </div>
-    
-    <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold block mt-1 md:text-right">
-      Best rate found
-    </span>
+
   </div>
 
-  <!-- ভিউ বাটন -->
+
+  <!-- CTA -->
   <div class="shrink-0">
-    <button 
-      type="button" 
-      class="open-quick-view-btn bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] sm:text-sm font-black py-2 px-4 sm:py-2.5 sm:px-5 rounded-xl transition-all active:scale-95 whitespace-nowrap flex items-center gap-1.5 shadow-sm"
+
+    <button
+      type="button"
+      aria-label={`View ${title}`}
+      class="
+        open-quick-view-btn
+
+        bg-[#006ce4]
+        hover:bg-[#0057b8]
+
+        active:scale-[0.97]
+
+        text-white
+
+        text-[11px]
+        sm:text-sm
+
+        font-black
+
+        py-2.5
+        sm:py-3
+
+        px-4
+        sm:px-5
+
+        rounded-xl
+
+        transition-all
+        duration-200
+
+        whitespace-nowrap
+
+        flex items-center
+        justify-center
+        gap-2
+
+        shadow-[0_4px_12px_rgba(0,108,228,0.20)]
+        hover:shadow-[0_6px_16px_rgba(0,108,228,0.28)]
+      "
     >
-      <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-      <span class="hidden sm:inline">Quick View</span>
-      <span class="sm:hidden uppercase tracking-wider">View</span>
+
+      <svg
+        class="w-4 h-4 fill-current"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 4.5C7 4.5 2.73 7.61 1 12
+             c1.73 4.39 6 7.5 11 7.5
+             s9.27-3.11 11-7.5
+             c-1.73-4.39-6-7.5-11-7.5z
+             M12 17c-2.76 0-5-2.24-5-5
+             s2.24-5 5-5 5 2.24 5 5
+             -2.24 5-5 5zm0-8
+             c-1.66 0-3 1.34-3 3
+             s1.34 3 3 3
+             3-1.34 3-3-1.34-3-3-3z"
+        />
+      </svg>
+
+      <span class="hidden sm:inline">
+        VIEW HOTEL
+      </span>
+
+      <span class="sm:hidden uppercase tracking-wide">
+        VIEW
+      </span>
+
+      <svg
+        class="w-3.5 h-3.5 sm:w-4 sm:h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14" />
+        <path d="m13 6 6 6-6 6" />
+      </svg>
+
     </button>
+
   </div>
 
 </div>
