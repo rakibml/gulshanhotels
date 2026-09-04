@@ -150,13 +150,27 @@ const starsArray = [1, 2, 3, 4, 5];
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
+<!-- স্ক্রিপ্ট অংশটি এভাবে ঠিক করুন -->
 <script is:inline>
   function initReviews() {
     const track = document.getElementById('reviewsCarouselTrack');
-    document.getElementById('reviewPrevBtn')?.onclick = () => track?.scrollBy({ left: -400, behavior: 'smooth' });
-    document.getElementById('reviewNextBtn')?.onclick = () => track?.scrollBy({ left: 400, behavior: 'smooth' });
+    const prevBtn = document.getElementById('reviewPrevBtn');
+    const nextBtn = document.getElementById('reviewNextBtn');
 
-    // Modal logic (Same as yours, but clean and idempotent)
+    // অপশনাল চেইনিং দিয়ে অ্যাসাইনমেন্ট করা যায় না, তাই addEventListener ব্যবহার করা হলো
+    if (prevBtn) {
+      prevBtn.onclick = () => {
+        track?.scrollBy({ left: -350, behavior: 'smooth' });
+      };
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        track?.scrollBy({ left: 350, behavior: 'smooth' });
+      };
+    }
+
+    // Modal logic
     const modal = document.getElementById('writeReviewModal');
     const openBtns = document.querySelectorAll('.open-write-review-trigger');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
@@ -165,11 +179,19 @@ const starsArray = [1, 2, 3, 4, 5];
       btn.onclick = () => modal?.classList.remove('hidden');
     });
 
-    closeBtn.onclick = () => modal?.classList.add('hidden');
-    
-    // Form Submission (Fetch logic remains same as yours)
+    if (closeBtn) {
+      closeBtn.onclick = () => modal?.classList.add('hidden');
+    }
+
+    // Modal বন্ধ করার জন্য বাইরে ক্লিক লজিক
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      };
+    }
   }
 
+  // Astro page load এবং DOMContentLoaded উভয় ক্ষেত্রেই রান হবে
   document.addEventListener('DOMContentLoaded', initReviews);
   document.addEventListener('astro:page-load', initReviews);
 </script>
