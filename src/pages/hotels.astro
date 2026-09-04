@@ -1,5 +1,5 @@
 ---
-// src/pages/hotels.astro (Search & Sort Moved to Sidebar + Clean Sticky Quick Tabs)
+// src/pages/hotels.astro (Sticky Top-0 Fixed + Mobile Responsive Filter Drawer)
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -58,7 +58,7 @@ if (allCmsReviews.length === 0) {
   }
 }
 
-// 3. Dynamic Counters (Fixed Star Counting)
+// 3. Dynamic Counters
 let count5Star = 0;
 let count4Star = 0;
 let count3Star = 0;
@@ -115,7 +115,9 @@ const cleanPriceString = (priceRaw: string) => {
 // Common Icons
 const svgMap: Record<string, string> = {
   locationPin: `<svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
-  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`
+  search: `<svg class="w-4 h-4 fill-slate-400 shrink-0" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+  filterIcon: `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>`,
+  closeIcon: `<svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`
 };
 
 const siteUrl = "https://gulshanhotels.com/";
@@ -135,230 +137,263 @@ const siteUrl = "https://gulshanhotels.com/";
     </nav>
   </div>
 
-  <!-- MAIN CONTAINER: SIDEBAR + CARDS LIST -->
-  <section id="all-hotels-directory" class="bg-[#F8FAF9] py-6 sm:py-8 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+  <!-- MAIN CONTAINER -->
+  <section id="all-hotels-directory" class="bg-[#F8FAF9] py-4 sm:py-8 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start relative">
       
-      <!-- ================= 1. LEFT SIDEBAR (SEARCH, SORT & FILTERS) ================= -->
-      <aside class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 space-y-5 shadow-xs text-left sticky top-4">
+      <!-- ================= MOBILE BACKDROP OVERLAY ================= -->
+      <div id="filterDrawerBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden lg:hidden transition-opacity duration-300 opacity-0"></div>
+
+      <!-- ================= 1. SIDEBAR / MOBILE SLIDE-OVER DRAWER ================= -->
+      <aside 
+        id="filterSidebarDrawer" 
+        class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-sm bg-white p-5 overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:w-auto lg:z-auto lg:col-span-3 lg:block lg:rounded-2xl lg:border lg:border-slate-200 lg:p-5 lg:overflow-visible lg:sticky lg:top-4 lg:shadow-xs text-left"
+      >
         
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-slate-900 text-sm tracking-tight">Search & Filter:</h3>
-          <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">Reset all</button>
+        <!-- Mobile Drawer Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-slate-900 text-sm tracking-tight">Search & Filters</h3>
+            <button id="resetAllFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">Reset all</button>
+          </div>
+          <!-- Close Button (Mobile Only) -->
+          <button id="closeMobileFilterBtn" class="p-1 rounded-lg hover:bg-slate-100 text-slate-500 lg:hidden cursor-pointer" aria-label="Close filters">
+            <span set:html={svgMap.closeIcon}></span>
+          </button>
         </div>
 
-        <!-- A. SEARCH PROPERTY -->
-        <div class="space-y-1.5">
-          <label for="dirSearchInput" class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Search</label>
-          <div class="relative">
-            <input 
-              type="text" 
-              id="dirSearchInput" 
-              placeholder="Search hotel name..." 
-              class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
-            />
-            <div class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-              <span set:html={svgMap.search} class="inline-flex"></span>
+        <div class="space-y-5">
+          <!-- A. SEARCH PROPERTY -->
+          <div class="space-y-1.5">
+            <label for="dirSearchInput" class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Search</label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="dirSearchInput" 
+                placeholder="Search hotel name..." 
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#006ce4]/20 focus:border-[#006ce4] transition font-medium"
+              />
+              <div class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                <span set:html={svgMap.search} class="inline-flex"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- B. SORT BY -->
+          <div class="space-y-1.5">
+            <label for="dirSortSelect" class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Sort by</label>
+            <select id="dirSortSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-3 py-2 focus:outline-none cursor-pointer">
+              <option value="recommended">Top picks</option>
+              <option value="rating-high">Rating (highest)</option>
+              <option value="price-low">Price (lowest)</option>
+              <option value="price-high">Price (highest)</option>
+            </select>
+          </div>
+
+          <!-- 1. NEIGHBORHOOD -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Neighborhood</h4>
+            <div class="space-y-2 text-xs font-medium text-slate-700">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="all" checked />
+                  <span class="font-semibold text-slate-800">All Gulshan</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{totalHotelsCount}</span>
+              </label>
+
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-1" />
+                  <span class="text-slate-800">Gulshan 1</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{countGulshan1}</span>
+              </label>
+
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-2" />
+                  <span class="text-slate-800">Gulshan 2</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{countGulshan2}</span>
+              </label>
+
+              {countNearGulshan > 0 && (
+                <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="near" />
+                    <span class="text-slate-800">Near Gulshan</span>
+                  </div>
+                  <span class="text-slate-400 text-[11px]">{countNearGulshan}</span>
+                </label>
+              )}
+            </div>
+          </div>
+
+          <!-- 2. PROPERTY STAR RATING -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property Rating</h4>
+            <div class="space-y-2 text-xs font-medium text-slate-700">
+              {count5Star > 0 && (
+                <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="5" />
+                    <span class="flex items-center gap-1 font-semibold text-slate-800">5 stars <span class="text-[#febb02] text-sm">★★★★★</span></span>
+                  </div>
+                  <span class="text-slate-400 text-[11px]">{count5Star}</span>
+                </label>
+              )}
+              {count4Star > 0 && (
+                <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="4" />
+                    <span class="flex items-center gap-1 font-semibold text-slate-800">4 stars <span class="text-[#febb02] text-sm">★★★★</span></span>
+                  </div>
+                  <span class="text-slate-400 text-[11px]">{count4Star}</span>
+                </label>
+              )}
+              {count3Star > 0 && (
+                <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="3" />
+                    <span class="flex items-center gap-1 font-semibold text-slate-800">3 stars <span class="text-[#febb02] text-sm">★★★</span></span>
+                  </div>
+                  <span class="text-slate-400 text-[11px]">{count3Star}</span>
+                </label>
+              )}
+            </div>
+          </div>
+
+          <!-- 3. REVIEW SCORE -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Review Score</h4>
+            <div class="space-y-2 text-xs font-medium text-slate-700">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="9" />
+                  <span class="text-slate-800 font-semibold">Wonderful: 9+</span>
+                </div>
+              </label>
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="8" />
+                  <span class="text-slate-800 font-semibold">Very Good: 8+</span>
+                </div>
+              </label>
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="7" />
+                  <span class="text-slate-800 font-semibold">Good: 7+</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 4. PROPERTY TYPE -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property Type</h4>
+            <div class="space-y-2 text-xs font-medium text-slate-700">
+              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" class="filter-type-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="hotel" />
+                  <span class="text-slate-800 font-semibold">Hotels</span>
+                </div>
+                <span class="text-slate-400 text-[11px]">{totalHotelsCount - countGuestHouse}</span>
+              </label>
+              {countGuestHouse > 0 && (
+                <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" class="filter-type-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="guesthouse" />
+                    <span class="text-slate-800 font-semibold">Guest Houses</span>
+                  </div>
+                  <span class="text-slate-400 text-[11px]">{countGuestHouse}</span>
+                </label>
+              )}
+            </div>
+          </div>
+
+          <!-- 5. POPULAR FACILITIES -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Popular Facilities</h4>
+            <div class="space-y-2 text-xs font-medium text-slate-700">
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="wifi" />
+                <span class="text-slate-800">Free Wi-Fi</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="pool" />
+                <span class="text-slate-800">Swimming Pool</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="gym" />
+                <span class="text-slate-800">Fitness Center / Gym</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="spa" />
+                <span class="text-slate-800">Spa & Wellness</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="restaurant" />
+                <span class="text-slate-800">Restaurant</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="parking" />
+                <span class="text-slate-800">Free Parking</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
+                <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="shuttle" />
+                <span class="text-slate-800">Airport Shuttle</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 6. BUDGET SLIDER -->
+          <div class="space-y-3 border-t border-slate-100 pt-4">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Your budget (per night)</h4>
+              <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">৳60,000+</span>
+            </div>
+            <div class="space-y-2 pt-1">
+              <input type="range" id="priceRangeSlider" min="2000" max="60000" step="1000" value="60000" class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>৳2,000</span>
+                <span>৳60,000+</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- B. SORT BY -->
-        <div class="space-y-1.5">
-          <label for="dirSortSelect" class="font-bold text-slate-900 text-xs uppercase tracking-wider block">Sort by</label>
-          <select id="dirSortSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-900 font-bold text-xs rounded-lg px-3 py-2 focus:outline-none cursor-pointer">
-            <option value="recommended">Top picks</option>
-            <option value="rating-high">Rating (highest)</option>
-            <option value="price-low">Price (lowest)</option>
-            <option value="price-high">Price (highest)</option>
-          </select>
-        </div>
-
-        <!-- 1. NEIGHBORHOOD -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Neighborhood</h4>
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="all" checked />
-                <span class="font-semibold text-slate-800">All Gulshan</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">{totalHotelsCount}</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-1" />
-                <span class="text-slate-800">Gulshan 1</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">{countGulshan1}</span>
-            </label>
-
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="gulshan-2" />
-                <span class="text-slate-800">Gulshan 2</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">{countGulshan2}</span>
-            </label>
-
-            {countNearGulshan > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-                <div class="flex items-center gap-2">
-                  <input type="radio" name="areaFilter" class="filter-area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" value="near" />
-                  <span class="text-slate-800">Near Gulshan</span>
-                </div>
-                <span class="text-slate-400 text-[11px]">{countNearGulshan}</span>
-              </label>
-            )}
-          </div>
-        </div>
-
-        <!-- 2. PROPERTY STAR RATING -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property Rating</h4>
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            {count5Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="5" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">5 stars <span class="text-[#febb02] text-sm">★★★★★</span></span>
-                </div>
-                <span class="text-slate-400 text-[11px]">{count5Star}</span>
-              </label>
-            )}
-            {count4Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="4" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">4 stars <span class="text-[#febb02] text-sm">★★★★</span></span>
-                </div>
-                <span class="text-slate-400 text-[11px]">{count4Star}</span>
-              </label>
-            )}
-            {count3Star > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-star-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="3" />
-                  <span class="flex items-center gap-1 font-semibold text-slate-800">3 stars <span class="text-[#febb02] text-sm">★★★</span></span>
-                </div>
-                <span class="text-slate-400 text-[11px]">{count3Star}</span>
-              </label>
-            )}
-          </div>
-        </div>
-
-        <!-- 3. REVIEW SCORE -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Review Score</h4>
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="9" />
-                <span class="text-slate-800 font-semibold">Wonderful: 9+</span>
-              </div>
-            </label>
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="8" />
-                <span class="text-slate-800 font-semibold">Very Good: 8+</span>
-              </div>
-            </label>
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-score-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="7" />
-                <span class="text-slate-800 font-semibold">Good: 7+</span>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <!-- 4. PROPERTY TYPE -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Property Type</h4>
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" class="filter-type-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="hotel" />
-                <span class="text-slate-800 font-semibold">Hotels</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">{totalHotelsCount - countGuestHouse}</span>
-            </label>
-            {countGuestHouse > 0 && (
-              <label class="flex items-center justify-between cursor-pointer p-1 rounded hover:bg-slate-50">
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" class="filter-type-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="guesthouse" />
-                  <span class="text-slate-800 font-semibold">Guest Houses</span>
-                </div>
-                <span class="text-slate-400 text-[11px]">{countGuestHouse}</span>
-              </label>
-            )}
-          </div>
-        </div>
-
-        <!-- 5. POPULAR FACILITIES -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Popular Facilities</h4>
-          <div class="space-y-2 text-xs font-medium text-slate-700">
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="wifi" />
-              <span class="text-slate-800">Free Wi-Fi</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="pool" />
-              <span class="text-slate-800">Swimming Pool</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="gym" />
-              <span class="text-slate-800">Fitness Center / Gym</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="spa" />
-              <span class="text-slate-800">Spa & Wellness</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="restaurant" />
-              <span class="text-slate-800">Restaurant</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="parking" />
-              <span class="text-slate-800">Free Parking</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-50">
-              <input type="checkbox" class="filter-facility-cb w-4 h-4 accent-[#006ce4] rounded cursor-pointer" value="shuttle" />
-              <span class="text-slate-800">Airport Shuttle</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- 6. BUDGET SLIDER -->
-        <div class="space-y-3 border-t border-slate-100 pt-4">
-          <div class="flex justify-between items-center">
-            <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Your budget (per night)</h4>
-            <span id="priceRangeValueDisplay" class="text-xs font-bold text-[#006ce4]">৳60,000+</span>
-          </div>
-          <div class="space-y-2 pt-1">
-            <input type="range" id="priceRangeSlider" min="2000" max="60000" step="1000" value="60000" class="w-full accent-[#006ce4] cursor-pointer h-1.5 bg-slate-200 rounded-lg" />
-            <div class="flex justify-between text-[11px] text-slate-400">
-              <span>৳2,000</span>
-              <span>৳60,000+</span>
-            </div>
-          </div>
+        <!-- Mobile Drawer Apply Button -->
+        <div class="sticky bottom-0 bg-white pt-4 pb-2 mt-6 border-t border-slate-100 lg:hidden">
+          <button id="applyMobileFilterBtn" class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white py-3 rounded-xl font-bold text-xs shadow-md transition">
+            Show Results
+          </button>
         </div>
 
       </aside>
 
-      <!-- ================= 2. RIGHT COLUMN: STICKY QUICK TABS + 3-COLUMN CARDS ================= -->
+      <!-- ================= 2. RIGHT COLUMN ================= -->
       <div class="lg:col-span-9 space-y-4">
         
-        <!-- CLEAN STICKY QUICK FILTER TABS (LOCKED ON SCROLL) -->
-        <div class="sticky top-4 z-30 bg-white/95 backdrop-blur-md p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-md flex items-center justify-between gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <!-- FLUSH STICKY HEADER (LOCKS DIRECTLY AT TOP-0) -->
+        <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           
-          <!-- Quick Filter Tabs -->
           <div class="flex items-center gap-2 shrink-0">
+            
+            <!-- MOBILE FILTER OPEN BUTTON (Visible on Phone/Tablet) -->
             <button 
               type="button" 
-              class="quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-[#003b95] text-white shadow-xs cursor-pointer"
+              id="openMobileFilterBtn" 
+              class="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-[#006ce4]/10 text-[#006ce4] border border-[#006ce4]/20 hover:bg-[#006ce4]/20 transition cursor-pointer shrink-0"
+            >
+              <span set:html={svgMap.filterIcon} class="inline-flex"></span>
+              <span>Filters</span>
+            </button>
+
+            <!-- Quick Filter Tabs -->
+            <button 
+              type="button" 
+              class="quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-[#003b95] text-white shadow-xs cursor-pointer"
               data-quick="all"
             >
               <span>All Stays</span>
@@ -367,7 +402,7 @@ const siteUrl = "https://gulshanhotels.com/";
 
             <button 
               type="button" 
-              class="quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+              class="quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
               data-quick="hotel"
             >
               <span>Hotels</span>
@@ -377,7 +412,7 @@ const siteUrl = "https://gulshanhotels.com/";
             {countGuestHouse > 0 && (
               <button 
                 type="button" 
-                class="quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+                class="quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
                 data-quick="guesthouse"
               >
                 <span>Guest Houses</span>
@@ -388,25 +423,25 @@ const siteUrl = "https://gulshanhotels.com/";
             {countNearGulshan > 0 && (
               <button 
                 type="button" 
-                class="quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
+                class="quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer"
                 data-quick="near"
               >
-                <span>Hotels near Gulshan</span>
+                <span>Near Gulshan</span>
                 <span class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded-full">{countNearGulshan}</span>
               </button>
             )}
           </div>
 
-          <!-- Total Properties Found Indicator -->
+          <!-- Total Properties Indicator -->
           <div class="shrink-0 text-right">
-            <span class="text-xs font-bold text-slate-600 hidden sm:inline">
+            <span class="text-xs font-bold text-slate-600 hidden md:inline">
               Gulshan: <strong class="text-[#006ce4]" id="dirTotalHotelsDisplay">{totalHotelsCount} properties found</strong>
             </span>
           </div>
 
         </div>
 
-        <!-- HOTEL CARDS LIST (3-COLUMN SPLIT INSIDE EACH CARD) -->
+        <!-- HOTEL CARDS LIST -->
         <div id="directoryCardsGrid" class="grid grid-cols-1 gap-4 items-stretch">
           {hotels.map((hotelItem: any) => {
             const hData = hotelItem.data || {};
@@ -445,7 +480,6 @@ const siteUrl = "https://gulshanhotels.com/";
             const rawDigits = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
             const isDollar = rawPrice.includes('$');
             
-            // USD to approximate BDT rate (120) for consistent slider & sorting
             const numericPrice = isDollar ? Math.round(rawDigits * 120) : rawDigits;
 
             let originalPriceNum = hData.originalPrice ? parseFloat(String(hData.originalPrice).replace(/[^0-9.]/g, '')) : 0;
@@ -530,7 +564,7 @@ const siteUrl = "https://gulshanhotels.com/";
                     data-price={displayPrice}
                     aria-label="Save to Wishlist"
                   >
-                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke_linecap="round" stroke_linejoin="round" stroke_width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    <svg class="w-3.5 h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                   </button>
                 </div>
 
@@ -638,9 +672,16 @@ const siteUrl = "https://gulshanhotels.com/";
     const facilityCbs = document.querySelectorAll('.filter-facility-cb');
     const quickPillBtns = document.querySelectorAll('.quick-pill-btn');
 
+    // Mobile Drawer Elements
+    const openMobileFilterBtn = document.getElementById('openMobileFilterBtn');
+    const closeMobileFilterBtn = document.getElementById('closeMobileFilterBtn');
+    const applyMobileFilterBtn = document.getElementById('applyMobileFilterBtn');
+    const filterSidebarDrawer = document.getElementById('filterSidebarDrawer');
+    const filterDrawerBackdrop = document.getElementById('filterDrawerBackdrop');
+
     let currentQuickFilter = 'all';
 
-    // Facilities Keyword Map for Robust Matching
+    // Facilities Alias Map
     const facilityAliases = {
       wifi: ['wifi', 'wi-fi', 'internet'],
       pool: ['pool', 'swimming'],
@@ -651,6 +692,35 @@ const siteUrl = "https://gulshanhotels.com/";
       shuttle: ['shuttle', 'airport transfer', 'pickup']
     };
 
+    // Mobile Drawer Toggle Logic
+    function openMobileDrawer() {
+      if (filterSidebarDrawer && filterDrawerBackdrop) {
+        filterSidebarDrawer.classList.remove('-translate-x-full');
+        filterDrawerBackdrop.classList.remove('hidden');
+        setTimeout(() => {
+          filterDrawerBackdrop.classList.remove('opacity-0');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeMobileDrawer() {
+      if (filterSidebarDrawer && filterDrawerBackdrop) {
+        filterSidebarDrawer.classList.add('-translate-x-full');
+        filterDrawerBackdrop.classList.add('opacity-0');
+        setTimeout(() => {
+          filterDrawerBackdrop.classList.add('hidden');
+        }, 300);
+        document.body.style.overflow = '';
+      }
+    }
+
+    if (openMobileFilterBtn) openMobileFilterBtn.onclick = openMobileDrawer;
+    if (closeMobileFilterBtn) closeMobileFilterBtn.onclick = closeMobileDrawer;
+    if (applyMobileFilterBtn) applyMobileFilterBtn.onclick = closeMobileDrawer;
+    if (filterDrawerBackdrop) filterDrawerBackdrop.onclick = closeMobileDrawer;
+
+    // Filter Logic
     function filterDirectory() {
       const query = (searchInput?.value || '').trim().toLowerCase();
       const maxPrice = parseFloat(priceSlider?.value || '60000');
@@ -688,7 +758,7 @@ const siteUrl = "https://gulshanhotels.com/";
         // 4. Star Rating Match
         const matchStars = selectedStars.length === 0 || selectedStars.includes(stars);
 
-        // 5. Price Match (Max value 60000 acts as unlimited 60k+)
+        // 5. Price Match
         const matchPrice = price === 0 || maxPrice >= 60000 || price <= maxPrice;
 
         // 6. Review Score Match
@@ -708,7 +778,7 @@ const siteUrl = "https://gulshanhotels.com/";
           }
         }
 
-        // 8. Facilities Match (Alias-based)
+        // 8. Facilities Match
         let matchFacilities = true;
         if (selectedFacilities.length > 0) {
           matchFacilities = selectedFacilities.every(facKey => {
@@ -725,7 +795,6 @@ const siteUrl = "https://gulshanhotels.com/";
         }
       });
 
-      // Update Dynamic Counter
       if (totalDisplayEl) {
         totalDisplayEl.textContent = `${visibleCount} properties found`;
       }
@@ -735,12 +804,12 @@ const siteUrl = "https://gulshanhotels.com/";
     quickPillBtns.forEach(btn => {
       btn.onclick = () => {
         quickPillBtns.forEach(b => {
-          b.className = 'quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer';
+          b.className = 'quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer';
           const badge = b.querySelector('span:last-child');
           if (badge) badge.className = 'bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.5 rounded-full';
         });
 
-        btn.className = 'quick-pill-btn px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-[#003b95] text-white shadow-xs cursor-pointer';
+        btn.className = 'quick-pill-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-[#003b95] text-white shadow-xs cursor-pointer';
         const activeSpan = btn.querySelector('span:last-child');
         if (activeSpan) activeSpan.className = 'bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full';
 
