@@ -176,7 +176,7 @@ let ratingLabel = 'Wonderful';
 if (numRating < 9.0 && numRating >= 8.0) ratingLabel = 'Very Good';
 else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 
-// Quick View Images (Memory Safe)
+// Quick View Images
 let quickViewImages: string[] = [];
 if (Array.isArray(hData.gallery)) {
   quickViewImages = hData.gallery.slice(0, 5).map((img: any) => typeof img === 'object' && img?.src ? img.src : String(img || '')).filter(Boolean);
@@ -203,160 +203,179 @@ const quickViewData = {
 const hasValidTitle = hTitle.length > 0;
 ---
 
-<div 
-  class:list={[
-    "directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row p-2 sm:p-2.5 md:p-3 gap-2 sm:gap-3 md:gap-0 min-h-[135px] sm:min-h-[160px] md:min-h-[175px]",
-    { hidden: !hasValidTitle }
-  ]}
-  data-title={hTitleLower}
-  data-stars={starCount.toString()}
-  data-area={areaType}
-  data-guesthouse={isGuestHouse ? 'true' : 'false'}
-  data-amenities={amenitiesStr}
-  data-numeric-price={numericPrice}
-  data-numeric-rating={numRating}
->
-  <!-- ZERO-MEMORY OVERHEAD PAYLOAD (Astro Compiler Safe) -->
-  <div class="hotel-quickview-data hidden" data-payload={JSON.stringify(quickViewData)}></div>
+{hasValidTitle && (
+  <div 
+    class="directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row overflow-hidden min-h-[140px] sm:min-h-[165px] md:min-h-[185px]"
+    data-title={hTitleLower}
+    data-stars={starCount.toString()}
+    data-area={areaType}
+    data-guesthouse={isGuestHouse ? 'true' : 'false'}
+    data-amenities={amenitiesStr}
+    data-numeric-price={numericPrice}
+    data-numeric-rating={numRating}
+  >
+    <!-- Hidden Payload -->
+    <div class="hotel-quickview-data hidden" data-payload={JSON.stringify(quickViewData)}></div>
 
-  <!-- ================= 1ST COLUMN: HOTEL PHOTO ================= -->
-  <div class="card-img-box relative w-28 sm:w-44 md:w-52 lg:w-56 shrink-0 rounded-lg sm:rounded-xl overflow-hidden bg-slate-100 self-stretch min-h-[130px]">
-    {hImage ? (
-      <img 
-        src={hImage} 
-        alt={`${hTitle} Photo`} 
-        loading="lazy" 
-        decoding="async" 
-        class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition duration-500" 
-      />
-    ) : (
-      <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold">
-        Hotel Photo
-      </div>
-    )}
-
-    <!-- Wishlist Button -->
-    <button 
-      type="button"
-      class="card-wishlist-btn absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow transition cursor-pointer hover:scale-110 z-20"
-      data-title={hTitle}
-      data-image={hImage}
-      data-url={hotelUrl}
-      data-price={displayPrice}
-      aria-label="Save to Wishlist"
-      onclick="event.stopPropagation();"
-    >
-      <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- 2ND & 3RD COLUMN WRAPPER -->
-  <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 md:px-3.5 py-0 sm:py-0.5 gap-1.5 sm:gap-2 md:gap-0">
-    
-    <!-- ================= 2ND COLUMN: HOTEL DETAILS ================= -->
-    <div class="flex-1 flex flex-col justify-between min-w-0 pr-1 md:pr-0">
-      <div>
-        <!-- Title & Stars -->
-        <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-          <a href={hotelUrl} class="text-xs sm:text-base md:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1 sm:line-clamp-none">
-            {hTitle}
-          </a>
-          {starCount > 0 && (
-            <span class="text-[#febb02] text-[10px] sm:text-xs md:text-sm tracking-tight shrink-0">
-              {'★'.repeat(starCount)}
-            </span>
-          )}
+    <!-- ================= 1ST COLUMN: HOTEL PHOTO (FLUSH TO EDGE LIKE AGODA) ================= -->
+    <div class="card-img-box relative w-32 sm:w-48 md:w-56 lg:w-60 shrink-0 bg-slate-100 self-stretch overflow-hidden">
+      {hImage ? (
+        <img 
+          src={hImage} 
+          alt={`${hTitle} Photo`} 
+          loading="lazy" 
+          decoding="async" 
+          class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition duration-500" 
+        />
+      ) : (
+        <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold">
+          Hotel Photo
         </div>
+      )}
 
-        <!-- Address -->
-        <div class="flex items-start gap-1 text-[10px] sm:text-xs text-slate-600 font-medium mt-0.5 sm:mt-1 leading-snug">
-          <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
-          <span class="hover:underline cursor-pointer line-clamp-1">{hFullAddress}</span>
-        </div>
-
-        <!-- Description -->
-        <p class="text-[11px] sm:text-xs text-slate-600 mt-1.5 sm:mt-2 leading-relaxed line-clamp-2 md:line-clamp-3 hidden sm:block">
-          {hSnippet25Words}
-        </p>
-      </div>
-
-      <!-- Mobile Inline Review Score Badge -->
-      <div class="md:hidden flex items-center gap-1.5 mt-1">
-        {realRating ? (
-          <>
-            <div class="bg-[#003b95] text-white font-bold text-[10px] px-1.5 py-0.5 rounded leading-none shadow-2xs">
-              {realRating}
-            </div>
-            <span class="text-[10px] font-bold text-slate-800">{ratingLabel}</span>
-            <span class="text-[9px] text-slate-500">({realCount})</span>
-          </>
-        ) : (
-          <span class="bg-slate-100 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
-            New to site
-          </span>
-        )}
-      </div>
+      <!-- Wishlist Button -->
+      <button 
+        type="button"
+        class="card-wishlist-btn absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow transition cursor-pointer hover:scale-110 z-20"
+        data-title={hTitle}
+        data-image={hImage}
+        data-url={hotelUrl}
+        data-price={displayPrice}
+        aria-label="Save to Wishlist"
+        onclick="event.stopPropagation();"
+      >
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+      </button>
     </div>
 
-    <!-- ================= 3RD COLUMN: PRICING & BOOKING ================= -->
-    <div class="w-full md:w-48 lg:w-52 shrink-0 md:border-l md:border-slate-100 md:pl-3.5 pt-1.5 sm:pt-2 md:pt-1 border-t md:border-t-0 border-slate-100 flex flex-row md:flex-col justify-between items-center md:items-end text-left md:text-right gap-2">
+    <!-- ================= 2ND & 3RD COLUMN CONTENT WRAPPER ================= -->
+    <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-2.5 sm:p-3.5 md:p-4 gap-2 md:gap-0">
       
-      <!-- Desktop Review Score -->
-      <div class="w-full hidden md:flex justify-end">
-        {realRating ? (
-          <div class="flex items-center gap-2">
-            <div class="text-right hidden sm:block">
-              <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
-              <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
-            </div>
-            <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-2 py-1 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
-              {realRating}
-            </div>
-          </div>
-        ) : (
-          <div class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
-            New to site
-          </div>
-        )}
-      </div>
-
-      <!-- Price Info (Agoda Style) -->
-      <div class="text-left md:text-right">
-        {displayOriginalPrice && (
-          <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-0.5">
-            <span class="text-[9px] sm:text-[11px] text-slate-400 line-through font-semibold">
-              {displayOriginalPrice}
-            </span>
-            {discountPercent > 0 && (
-              <span class="text-[9px] sm:text-[10px] font-black text-[#e52429] bg-rose-50 border border-rose-200/80 px-1 py-0.5 rounded leading-none">
-                -{discountPercent}%
+      <!-- 2ND COLUMN: HOTEL DETAILS -->
+      <div class="flex-1 flex flex-col justify-between min-w-0 pr-1 md:pr-2">
+        <div>
+          <!-- Title & Stars -->
+          <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            <a href={hotelUrl} class="text-xs sm:text-base md:text-lg font-bold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1 sm:line-clamp-none">
+              {hTitle}
+            </a>
+            {starCount > 0 && (
+              <span class="text-[#febb02] text-[10px] sm:text-xs md:text-sm tracking-tight shrink-0">
+                {'★'.repeat(starCount)}
               </span>
             )}
           </div>
-        )}
-        <span class="text-sm sm:text-base md:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
-          {displayPrice}
-        </span>
-        <span class="text-[8px] sm:text-[10px] text-slate-500 font-medium block leading-tight">
-          Best rate found
-        </span>
+
+          <!-- Address -->
+          <div class="flex items-start gap-1 text-[10px] sm:text-xs text-slate-600 font-medium mt-0.5 sm:mt-1 leading-snug">
+            <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
+            <span class="hover:underline cursor-pointer line-clamp-1">{hFullAddress}</span>
+          </div>
+
+          <!-- Description -->
+          <p class="text-[11px] sm:text-xs text-slate-600 mt-1.5 sm:mt-2 leading-relaxed line-clamp-2 md:line-clamp-3 hidden sm:block">
+            {hSnippet25Words}
+          </p>
+        </div>
+
+        <!-- Mobile Inline Review Score Badge -->
+        <div class="md:hidden flex items-center gap-1.5 mt-1">
+          {realRating ? (
+            <>
+              <div class="bg-[#003b95] text-white font-bold text-[10px] px-1.5 py-0.5 rounded leading-none shadow-2xs">
+                {realRating}
+              </div>
+              <span class="text-[10px] font-bold text-slate-800">{ratingLabel}</span>
+              <span class="text-[9px] text-slate-500">({realCount})</span>
+            </>
+          ) : (
+            <span class="bg-slate-100 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
+              New to site
+            </span>
+          )}
+        </div>
       </div>
 
-      <!-- Quick View Action Button -->
-      <button 
-        type="button"
-        class="open-quick-view-btn w-auto md:w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] sm:text-xs font-bold py-1.5 sm:py-2 px-3 rounded-lg sm:rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow cursor-pointer whitespace-nowrap text-center active:scale-95"
-        aria-label={`Quick view of ${hTitle}`}
-      >
-        <svg class="w-3.5 h-3.5 shrink-0 fill-current opacity-90" viewBox="0 0 24 24">
-          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-        </svg>
-        <span>Quick View</span>
-      </button>
+      <!-- 3RD COLUMN: PRICING & BOOKING -->
+      <div class="w-full md:w-48 lg:w-52 shrink-0 md:border-l md:border-slate-100 md:pl-3.5 pt-1.5 sm:pt-2 md:pt-1 border-t md:border-t-0 border-slate-100 flex flex-row md:flex-col justify-between items-center md:items-end text-left md:text-right gap-2">
+        
+        <!-- Desktop Review Score -->
+        <div class="w-full hidden md:flex justify-end">
+          {realRating ? (
+            <div class="flex items-center gap-2">
+              <div class="text-right hidden sm:block">
+                <div class="text-xs font-bold text-slate-900 leading-tight">{ratingLabel}</div>
+                <div class="text-[10px] text-slate-500 leading-tight">{realCount} reviews</div>
+              </div>
+              <div class="bg-[#003b95] text-white font-bold text-xs sm:text-sm px-2 py-1 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
+                {realRating}
+              </div>
+            </div>
+          ) : (
+            <div class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
+              New to site
+            </div>
+          )}
+        </div>
+
+        <!-- Price Info (Agoda Style) -->
+        <div class="text-left md:text-right">
+          {displayOriginalPrice && (
+            <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-0.5">
+              <span class="text-[9px] sm:text-[11px] text-slate-400 line-through font-semibold">
+                {displayOriginalPrice}
+              </span>
+              {discountPercent > 0 && (
+                <span class="text-[9px] sm:text-[10px] font-black text-[#e52429] bg-rose-50 border border-rose-200/80 px-1 py-0.5 rounded leading-none">
+                  -{discountPercent}%
+                </span>
+              )}
+            </div>
+          )}
+          <span class="text-sm sm:text-base md:text-xl font-extrabold text-[#008234] block leading-tight my-0.5">
+            {displayPrice}
+          </span>
+          <span class="text-[8px] sm:text-[10px] text-slate-500 font-medium block leading-tight">
+            Best rate found
+          </span>
+        </div>
+
+        <!-- Quick View Action Button -->
+        <button 
+          type="button"
+          class="open-quick-view-btn w-auto md:w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] sm:text-xs font-bold py-1.5 sm:py-2 px-3 rounded-lg sm:rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow cursor-pointer whitespace-nowrap text-center active:scale-95"
+          aria-label={`Quick view of ${hTitle}`}
+        >
+          <svg class="w-3.5 h-3.5 shrink-0 fill-current opacity-90" viewBox="0 0 24 24">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+          <span>Quick View</span>
+        </button>
+
+      </div>
 
     </div>
-
   </div>
-</div>
+)}
+
+<!-- ================= AGODA GLOBAL DESIGN ENFORCER ================= -->
+<style is:global>
+  /* ১. পুরো পেজের ব্যাকগ্রাউন্ড অটোমেটিক অ্যাগোডার মতো সফট গ্রে (#f7f7f9) হবে */
+  body, main {
+    background-color: #f7f7f9 !important;
+  }
+
+  /* ২. কার্ডের মাঝের গ্যাপ অটোমেটিক ১২ পিক্সেল (Agoda gap) লক থাকবে */
+  .directory-card-item {
+    margin-bottom: 12px !important;
+    margin-top: 0 !important;
+  }
+
+  /* ৩. খালি ফ্রেম বা ফাঁকা দাগ (Ghost Card) চিরতরে অদৃশ্য থাকবে */
+  .directory-card-item:empty,
+  .directory-card-item[data-title=""] {
+    display: none !important;
+  }
+</style>
