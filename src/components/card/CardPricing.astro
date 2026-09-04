@@ -20,12 +20,12 @@ const {
 } = Astro.props;
 ---
 
-<!-- কন্টেইনার: মোবাইলে খুব কম প্যাডিং এবং মার্জিন ব্যবহার করা হয়েছে -->
-<div class="w-full md:w-52 lg:w-60 shrink-0 md:border-l border-slate-100 md:pl-4 pt-2 md:pt-0 mt-1 md:mt-0 border-t md:border-t-0 flex flex-row md:flex-col justify-between items-center md:items-end gap-2">
+<!-- কন্টেইনার: প্যাডিং এবং মার্জিন আরও কমিয়ে কমপ্যাক্ট করা হয়েছে -->
+<div class="w-full md:w-52 lg:w-60 shrink-0 md:border-l border-slate-100 md:pl-4 pt-1.5 md:pt-0 mt-0.5 md:mt-0 border-t md:border-t-0 flex flex-row md:flex-col justify-between items-center md:items-end gap-2">
   
-  <!-- ১. রেটিং সেকশন: মোবাইলে এটি হাইড (Hidden) করে দিন, কারণ এটি টাইটেলের নিচে থাকলে কার্ড ছোট দেখায় -->
-  <div class="hidden md:flex flex-col items-end w-full">
-    {rating ? (
+  <!-- ডেস্কটপ রেটিং (মোবাইলে হিডেন) -->
+  <div class="hidden md:flex flex-col items-end w-full mb-3">
+    {rating && (
       <div class="flex items-center gap-2">
         <div class="text-right">
           <div class="text-sm font-bold text-slate-900 leading-tight">{ratingLabel}</div>
@@ -35,48 +35,44 @@ const {
           {rating}
         </div>
       </div>
-    ) : (
-      <div class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded">
-        New to site
-      </div>
     )}
   </div>
 
-  <!-- ২. প্রাইস সেকশন: মোবাইলে এটি বামে এবং ডেক্সটপে ডানে থাকবে -->
-  <div class="text-left md:text-right flex-1 md:w-full md:mt-4">
-    {displayOriginalPrice && (
-      <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-0.5">
-        <span class="text-[10px] sm:text-xs text-slate-400 line-through font-medium">
-          {displayOriginalPrice}
-        </span>
-        {discountPercent > 0 && (
-          <span class="text-[9px] sm:text-[10px] font-bold text-white bg-red-600 px-1 rounded-sm">
+  <!-- মেইন প্রাইসিং সেকশন -->
+  <div class="flex-1 flex flex-col md:w-full">
+    <div class="flex items-center gap-2 flex-wrap md:justify-end">
+      <!-- ফাইনাল প্রাইস (বড় করা হয়েছে) -->
+      <span class="text-xl sm:text-3xl font-black text-[#008234] leading-none">
+        {displayPrice}
+      </span>
+
+      <!-- ডিসকাউন্ট ইনফো (দাম এবং বাটনের মাঝে আনা হয়েছে এবং বড় করা হয়েছে) -->
+      {displayOriginalPrice && (
+        <div class="flex items-center gap-1.5 bg-red-50 border border-red-100 px-2 py-0.5 rounded shadow-xs shrink-0">
+          <span class="text-[11px] sm:text-xs text-slate-500 line-through font-bold">
+            {displayOriginalPrice}
+          </span>
+          <span class="text-[11px] sm:text-xs font-black text-red-600">
             -{discountPercent}%
           </span>
-        )}
-      </div>
-    )}
-
-    <span class="text-lg sm:text-2xl font-black text-[#008234] block leading-none">
-      {displayPrice}
-    </span>
+        </div>
+      )}
+    </div>
     
-    <span class="text-[9px] sm:text-[10px] text-slate-400 font-medium block mt-1">
+    <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold block mt-1 md:text-right">
       Best rate found
     </span>
   </div>
 
-  <!-- ৩. বাটন সেকশন: মোবাইলে ছোট এবং ডেক্সটপে ফুল উইডথ -->
-  <div class="flex flex-col justify-center">
+  <!-- ভিউ বাটন -->
+  <div class="shrink-0">
     <button 
       type="button" 
-      class="open-quick-view-btn w-auto md:w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] sm:text-sm font-bold py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg transition-all active:scale-95 whitespace-nowrap flex items-center gap-1.5"
+      class="open-quick-view-btn bg-[#006ce4] hover:bg-[#0057b8] text-white text-[11px] sm:text-sm font-black py-2 px-4 sm:py-2.5 sm:px-5 rounded-xl transition-all active:scale-95 whitespace-nowrap flex items-center gap-1.5 shadow-sm"
     >
-      <svg class="w-3.5 h-3.5 shrink-0 fill-current" viewBox="0 0 24 24">
-        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-      </svg>
+      <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
       <span class="hidden sm:inline">Quick View</span>
-      <span class="sm:hidden">View</span>
+      <span class="sm:hidden uppercase tracking-wider">View</span>
     </button>
   </div>
 
