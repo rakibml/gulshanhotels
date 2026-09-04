@@ -1,4 +1,8 @@
 ---
+import CardImage from './card/CardImage.astro';
+import CardInfo from './card/CardInfo.astro';
+import CardPricing from './card/CardPricing.astro';
+
 interface Props {
   hotelItem: any;
   allCmsReviews?: any[];
@@ -6,7 +10,7 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// ================= HELPERS =================
+// Helpers
 const toTitleCase = (str: string) => {
   if (!str) return '';
   return str.toLowerCase().split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -31,11 +35,7 @@ const cleanPriceString = (priceRaw: string) => {
   return `৳ ${digits}`;
 };
 
-const svgMap = {
-  locationPin: `<svg class="w-4 h-4 fill-slate-600 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`
-};
-
-// ================= DATA EXTRACTION =================
+// Data Extraction
 const hData = hotelItem?.data || {};
 const rawTitle = String(hData.title || hData.name || "").trim();
 const hTitle = toTitleCase(rawTitle);
@@ -72,12 +72,12 @@ if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1') || locLower
 
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house') || titleLowerStr.includes('guesthouse') || catLower.includes('guest house');
 
-// Default Fallback Text
+// Default Fallback About Text
 const rawAbout = hotelItem?.body || hData.about || hData.description || '';
 const hSnippet25Words = getFirst25Words(rawAbout);
 const amenitiesStr = JSON.stringify(hData.amenities || []).toLowerCase();
 
-// Safe Fast Pricing
+// Pricing
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
 const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
 
@@ -113,7 +113,7 @@ const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat
 const hTitleLower = rawTitle.toLowerCase();
 const hSlugLower = hSlug.toLowerCase();
 
-// ================= REVIEWS CALCULATION =================
+// Reviews
 const matchedCmsReviews = allCmsReviews
   .filter(r => {
     if (!r) return false;
@@ -152,24 +152,6 @@ const sortedReviews = [...finalReviewsList].sort((a, b) => {
 
 const latestReview = sortedReviews.length > 0 ? sortedReviews[0] : null;
 
-// Helper: 35 Words Truncation
-let reviewWordsShort = '';
-let reviewWordsFull = '';
-let isReviewLongerThan35 = false;
-
-if (latestReview && latestReview.comment) {
-  const cleanComment = latestReview.comment.replace(/<[^>]+>/g, ' ').replace(/[#*`_~]/g, '').trim();
-  const words = cleanComment.split(/\s+/).filter(Boolean);
-  reviewWordsFull = cleanComment;
-  if (words.length > 35) {
-    reviewWordsShort = words.slice(0, 35).join(' ') + '...';
-    isReviewLongerThan35 = true;
-  } else {
-    reviewWordsShort = cleanComment;
-    isReviewLongerThan35 = false;
-  }
-}
-
 const realCount = finalReviewsList.length;
 let realRating: string | null = null;
 
@@ -190,209 +172,58 @@ else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 const hasValidTitle = hTitle.length > 0;
 ---
 
-<div 
-  class:list={[
-    "directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row overflow-hidden min-h-[145px] sm:min-h-[175px] md:min-h-[195px] mb-3",
-    { hidden: !hasValidTitle }
-  ]}
-  data-title={hTitleLower}
-  data-stars={starCount.toString()}
-  data-area={areaType}
-  data-guesthouse={isGuestHouse ? 'true' : 'false'}
-  data-amenities={amenitiesStr}
-  data-numeric-price={numericPrice}
-  data-numeric-rating={numRating}
-  data-official-price={officialBaseStartingPrice}
-  data-whatsapp={hData.whatsapp || ''}
-  data-phone={hData.phone || ''}
->
-  <!-- ================= 1ST COLUMN: HOTEL PHOTO ================= -->
-  <div class="card-img-box relative w-32 sm:w-48 md:w-56 lg:w-64 shrink-0 bg-slate-100 self-stretch overflow-hidden">
-    {hImage ? (
-      <img 
-        src={hImage} 
-        alt={`${hTitle} Photo`} 
-        loading="lazy" 
-        decoding="async" 
-        class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition duration-500" 
-      />
-    ) : (
-      <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold">
-        Hotel Photo
-      </div>
-    )}
+{hasValidTitle && (
+  <div 
+    class="directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row overflow-hidden min-h-[145px] sm:min-h-[175px] md:min-h-[195px] mb-3"
+    data-title={hTitleLower}
+    data-stars={starCount.toString()}
+    data-area={areaType}
+    data-guesthouse={isGuestHouse ? 'true' : 'false'}
+    data-amenities={amenitiesStr}
+    data-numeric-price={numericPrice}
+    data-numeric-rating={numRating}
+    data-official-price={officialBaseStartingPrice}
+    data-whatsapp={hData.whatsapp || ''}
+    data-phone={hData.phone || ''}
+  >
+    <!-- ১. ছবির সেকশন -->
+    <CardImage 
+      image={hImage} 
+      title={hTitle} 
+      url={hotelUrl} 
+      price={displayPrice} 
+    />
 
-    <!-- Wishlist Button -->
-    <button 
-      type="button"
-      class="card-wishlist-btn absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow transition cursor-pointer hover:scale-110 z-20"
-      data-title={hTitle}
-      data-image={hImage}
-      data-url={hotelUrl}
-      data-price={displayPrice}
-      aria-label="Save to Wishlist"
-      onclick="event.stopPropagation();"
-    >
-      <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- ================= 2ND & 3RD COLUMN WRAPPER ================= -->
-  <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-3 sm:p-3.5 md:p-4 gap-2 md:gap-0">
-    
-    <!-- ================= 2ND COLUMN: DETAILS ================= -->
-    <div class="flex-1 flex flex-col justify-between min-w-0 pr-1 md:pr-3">
-      <div>
-        <!-- Title & Stars -->
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <a href={hotelUrl} class="card-hotel-link text-sm sm:text-lg md:text-xl font-extrabold text-[#006ce4] hover:text-[#003b95] hover:underline transition line-clamp-1 sm:line-clamp-none leading-snug">
-            {hTitle}
-          </a>
-          
-          {starCount > 0 && (
-            <span class="text-[#febb02] text-xs sm:text-sm md:text-base tracking-tight shrink-0">
-              {'★'.repeat(starCount)}
-            </span>
-          )}
-        </div>
-
-        <!-- Address -->
-        <div class="flex items-start gap-1.5 text-xs sm:text-sm text-slate-600 font-medium mt-1 sm:mt-1.5 leading-snug">
-          <span set:html={svgMap.locationPin} class="inline-flex shrink-0"></span>
-          <span class="card-hotel-address hover:underline cursor-pointer line-clamp-1">{hFullAddress}</span>
-        </div>
-
-        <!-- ================= RECENT REVIEW (100% PURE WHITE & INLINE TOGGLE) ================= -->
-        {latestReview && latestReview.comment ? (
-          <div class="review-snippet-box mt-2 sm:mt-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal bg-transparent">
-            <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-700 mb-1">
-              <span class="text-amber-500">★</span>
-              <span>Latest Guest Experience:</span>
-            </div>
-            
-            <p class="text-slate-600 leading-relaxed">
-              <span class="review-short italic">“{reviewWordsShort}”</span>
-              {isReviewLongerThan28 && (
-                <span class="review-full italic hidden">“{reviewWordsFull}”</span>
-              )}
-              {isReviewLongerThan28 && (
-                <button 
-                  type="button" 
-                  class="font-bold text-[#006ce4] hover:text-[#003b95] hover:underline ml-1 cursor-pointer inline-block"
-                  onclick="
-                    const box = this.closest('.review-snippet-box');
-                    const s = box.querySelector('.review-short');
-                    const f = box.querySelector('.review-full');
-                    if (f.classList.contains('hidden')) {
-                      f.classList.remove('hidden');
-                      s.classList.add('hidden');
-                      this.textContent = 'Show less';
-                    } else {
-                      f.classList.add('hidden');
-                      s.classList.remove('hidden');
-                      this.textContent = 'See more';
-                    }
-                  "
-                >
-                  See more
-                </button>
-              )}
-            </p>
-
-            <span class="block text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1">
-              — {latestReview.name} : ''}
-            </span>
-          </div>
-        ) : (
-          <p class="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-2 leading-relaxed line-clamp-2 md:line-clamp-3 hidden sm:block">
-            {hSnippet28Words}
-          </p>
-        )}
-
-      </div>
-
-      <!-- Mobile Inline Review Score Badge -->
-      <div class="md:hidden flex items-center gap-1.5 mt-1.5">
-        {realRating ? (
-          <>
-            <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-0.5 rounded leading-none shadow-2xs">
-              {realRating}
-            </div>
-            <span class="text-xs font-bold text-slate-800">{ratingLabel}</span>
-            <span class="text-[11px] text-slate-500">({realCount})</span>
-          </>
-        ) : (
-          <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
-            New to site
-          </span>
-        )}
-      </div>
-    </div>
-
-    <!-- ================= 3RD COLUMN: PRICING & BOOKING ================= -->
-    <div class="w-full md:w-48 lg:w-56 shrink-0 md:border-l md:border-slate-100 md:pl-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 flex flex-row md:flex-col justify-between items-center md:items-end text-left md:text-right gap-2">
+    <!-- ২য় ও ৩য় সেকশনের প্যারেন্ট কন্টেইনার -->
+    <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-3 sm:p-3.5 md:p-4 gap-2 md:gap-0">
       
-      <!-- Desktop Review Score -->
-      <div class="w-full hidden md:flex justify-end">
-        {realRating ? (
-          <div class="flex items-center gap-2">
-            <div class="text-right hidden sm:block">
-              <div class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{ratingLabel}</div>
-              <div class="text-[11px] sm:text-xs text-slate-500 leading-tight">{realCount} reviews</div>
-            </div>
-            <div class="bg-[#003b95] text-white font-black text-sm sm:text-base px-2.5 py-1.5 rounded-t-lg rounded-br-lg leading-none shadow-2xs">
-              {realRating}
-            </div>
-          </div>
-        ) : (
-          <div class="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded">
-            New to site
-          </div>
-        )}
-      </div>
+      <!-- ২. হোটেলের তথ্য ও রিসেন্ট রিভিউ সেকশন -->
+      <CardInfo 
+        title={hTitle} 
+        url={hotelUrl} 
+        stars={starCount} 
+        address={hFullAddress} 
+        latestReview={latestReview} 
+        fallbackAbout={hSnippet25Words} 
+        rating={realRating} 
+        ratingLabel={ratingLabel} 
+        reviewsCount={realCount} 
+      />
 
-      <!-- Price Info -->
-      <div class="text-left md:text-right">
-        {displayOriginalPrice && (
-          <div class="flex items-center gap-1.5 justify-start md:justify-end leading-none mb-1">
-            <span class="text-xs sm:text-sm text-slate-400 line-through font-semibold">
-              {displayOriginalPrice}
-            </span>
-            {discountPercent > 0 && (
-              <span class="text-[10px] sm:text-xs font-black text-[#e52429] bg-rose-50 border border-rose-200/80 px-1.5 py-0.5 rounded leading-none">
-                -{discountPercent}%
-              </span>
-            )}
-          </div>
-        )}
-
-        <span class="card-final-price text-lg sm:text-2xl md:text-3xl font-black text-[#008234] block leading-tight my-0.5">
-          {displayPrice}
-        </span>
-        
-        <span class="text-[10px] sm:text-xs text-slate-500 font-medium block leading-tight">
-          Best rate found
-        </span>
-      </div>
-
-      <!-- Quick View Action Button -->
-      <button 
-        type="button" 
-        class="open-quick-view-btn w-auto md:w-full bg-[#006ce4] hover:bg-[#0057b8] text-white text-xs sm:text-sm font-bold py-2 sm:py-2.5 px-3.5 rounded-lg sm:rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs hover:shadow cursor-pointer whitespace-nowrap text-center active:scale-95"
-        aria-label={`Quick view of ${hTitle}`}
-      >
-        <svg class="w-4 h-4 shrink-0 fill-current opacity-90" viewBox="0 0 24 24">
-          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-        </svg>
-        <span>Quick View</span>
-      </button>
+      <!-- ৩. প্রাইসিং ও বুকিং সেকশন -->
+      <CardPricing 
+        displayPrice={displayPrice} 
+        displayOriginalPrice={displayOriginalPrice} 
+        discountPercent={discountPercent} 
+        rating={realRating} 
+        ratingLabel={ratingLabel} 
+        reviewsCount={realCount} 
+        title={hTitle} 
+      />
 
     </div>
-
   </div>
-</div>
+)}
 
 <style is:global>
   html, body, main {
