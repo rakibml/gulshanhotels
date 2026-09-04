@@ -1,0 +1,42 @@
+---
+interface Props {
+  image: string;
+  title: string;
+  url: string;
+  price: string;
+}
+
+const { image, title, url, price } = Astro.props;
+---
+
+<div class="card-img-box relative w-32 sm:w-48 md:w-56 lg:w-64 shrink-0 bg-slate-100 self-stretch overflow-hidden">
+  {image ? (
+    <img 
+      src={image} 
+      alt={`${title} Photo`} 
+      loading="lazy" 
+      decoding="async" 
+      class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition duration-500" 
+    />
+  ) : (
+    <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold">
+      Hotel Photo
+    </div>
+  )}
+
+  <!-- Wishlist Button -->
+  <button 
+    type="button"
+    class="card-wishlist-btn absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-white text-slate-800 flex items-center justify-center shadow transition cursor-pointer hover:scale-110 z-20"
+    data-title={title}
+    data-image={image}
+    data-url={url}
+    data-price={price}
+    aria-label="Save to Wishlist"
+    onclick="event.stopPropagation();"
+  >
+    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+    </svg>
+  </button>
+</div>
