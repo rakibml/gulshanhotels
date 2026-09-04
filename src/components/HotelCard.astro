@@ -72,6 +72,7 @@ if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1') || locLower
 
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house') || titleLowerStr.includes('guesthouse') || catLower.includes('guest house');
 
+// Default Fallback About Text
 const rawAbout = hotelItem?.body || hData.about || hData.description || '';
 const hSnippet25Words = getFirst25Words(rawAbout);
 const amenitiesStr = JSON.stringify(hData.amenities || []).toLowerCase();
@@ -171,61 +172,62 @@ else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 const hasValidTitle = hTitle.length > 0;
 ---
 
-{hasValidTitle && (
-  <div 
-    class="directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row overflow-hidden min-h-[145px] sm:min-h-[175px] md:min-h-[195px] mb-3"
-    data-title={hTitleLower}
-    data-stars={starCount.toString()}
-    data-area={areaType}
-    data-guesthouse={isGuestHouse ? 'true' : 'false'}
-    data-amenities={amenitiesStr}
-    data-numeric-price={numericPrice}
-    data-numeric-rating={numRating}
-    data-official-price={officialBaseStartingPrice}
-    data-whatsapp={hData.whatsapp || ''}
-    data-phone={hData.phone || ''}
-  >
-    <!-- ১. ছবির সেকশন -->
-    <CardImage 
-      image={hImage} 
+<div 
+  class:list={[
+    "directory-card-item bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition duration-150 text-left relative flex flex-row overflow-hidden min-h-[145px] sm:min-h-[175px] md:min-h-[195px] mb-3",
+    { hidden: !hasValidTitle }
+  ]}
+  data-title={hTitleLower}
+  data-stars={starCount.toString()}
+  data-area={areaType}
+  data-guesthouse={isGuestHouse ? 'true' : 'false'}
+  data-amenities={amenitiesStr}
+  data-numeric-price={numericPrice}
+  data-numeric-rating={numRating}
+  data-official-price={officialBaseStartingPrice}
+  data-whatsapp={hData.whatsapp || ''}
+  data-phone={hData.phone || ''}
+>
+  <!-- ১. ছবির মডিউল -->
+  <CardImage 
+    image={hImage} 
+    title={hTitle} 
+    url={hotelUrl} 
+    price={displayPrice} 
+  />
+
+  <!-- ২য় ও ৩য় মডিউল র‍্যাপার -->
+  <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-3 sm:p-3.5 md:p-4 gap-2 md:gap-0">
+    
+    <!-- ২. টাইটেল, অ্যাড্রেস ও রিসেন্ট রিভিউ মডিউল -->
+    <CardInfo 
       title={hTitle} 
       url={hotelUrl} 
-      price={displayPrice} 
+      stars={starCount} 
+      address={hFullAddress} 
+      latestReview={latestReview} 
+      fallbackAbout={hSnippet25Words} 
+      rating={realRating} 
+      ratingLabel={ratingLabel} 
+      reviewsCount={realCount} 
     />
 
-    <!-- ২য় ও ৩য় কলামের র‍্যাপার -->
-    <div class="flex-1 flex flex-col md:flex-row justify-between min-w-0 p-3 sm:p-3.5 md:p-4 gap-2 md:gap-0">
-      
-      <!-- ২. হোটেলের বিস্তারিত ও রিসেন্ট রিভিউ -->
-      <CardInfo 
-        title={hTitle} 
-        url={hotelUrl} 
-        stars={starCount} 
-        address={hFullAddress} 
-        latestReview={latestReview} 
-        fallbackAbout={hSnippet25Words} 
-        rating={realRating} 
-        ratingLabel={ratingLabel} 
-        reviewsCount={realCount} 
-      />
+    <!-- ৩. রেটিং স্কোর ও প্রাইসিং মডিউল -->
+    <CardPricing 
+      displayPrice={displayPrice} 
+      displayOriginalPrice={displayOriginalPrice} 
+      discountPercent={discountPercent} 
+      rating={realRating} 
+      ratingLabel={ratingLabel} 
+      reviewsCount={realCount} 
+      title={hTitle} 
+    />
 
-      <!-- ৩. প্রাইসিং ও বুকিং বাটন -->
-      <CardPricing 
-        displayPrice={displayPrice} 
-        displayOriginalPrice={displayOriginalPrice} 
-        discountPercent={discountPercent} 
-        rating={realRating} 
-        ratingLabel={ratingLabel} 
-        reviewsCount={realCount} 
-        title={hTitle} 
-      />
-
-    </div>
   </div>
-)}
+</div>
 
 <style is:global>
-  body, main {
+  html, body, main {
     background-color: #ffffff !important;
   }
   .directory-card-item {
