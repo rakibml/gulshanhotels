@@ -2,27 +2,112 @@
 // src/components/directory/MobileFilterDrawer.astro
 ---
 
-<div id="mobileDrawerOverlay" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs hidden transition-opacity">
-  <div class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-2xl p-5 flex flex-col justify-between overflow-y-auto">
-    <div class="space-y-6 text-left">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900">Filter Hotels</h3>
-        <button type="button" id="closeMobileDrawerBtn" class="text-2xl font-bold text-slate-400 hover:text-slate-900 cursor-pointer p-1">&times;</button>
-      </div>
-
-      <!-- Area Selection -->
-      <div>
-        <h4 class="text-xs font-black uppercase text-slate-400 mb-2">Area</h4>
-        <div class="flex flex-wrap gap-1.5 text-xs font-bold">
-          <button type="button" class="m-area-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-[#006ce4] text-white" data-area="all">All</button>
-          <button type="button" class="m-area-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-100" data-area="gulshan-1">Gulshan 1</button>
-          <button type="button" class="m-area-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-100" data-area="gulshan-2">Gulshan 2</button>
-        </div>
-      </div>
+<!-- Overlay -->
+<div 
+  id="mobileDrawerOverlay" 
+  class="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"
+>
+  <!-- Drawer Content -->
+  <div 
+    id="mobileDrawerContent"
+    class="fixed inset-y-0 right-0 max-w-[280px] sm:max-w-xs w-full bg-white shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-in-out"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+      <h3 class="text-base font-black text-slate-900 tracking-tight">Filter Hotels</h3>
+      <button 
+        type="button" 
+        id="closeMobileDrawerBtn" 
+        class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+        aria-label="Close filters"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
     </div>
 
-    <button type="button" id="applyMobileFiltersBtn" class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold text-xs py-3 rounded-xl shadow cursor-pointer transition">
-      Apply Filters
-    </button>
+    <!-- Body (Scrollable) -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-8">
+      
+      <!-- Area Selection -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xs font-black uppercase tracking-widest text-slate-400">Select Area</h4>
+            <span class="text-[10px] font-bold text-[#006ce4]">Clear</span>
+        </div>
+        
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="m-area-btn px-4 py-2 rounded-lg border border-[#006ce4] bg-[#006ce4] text-white text-xs font-bold transition-all active:scale-95" data-area="all">
+            All Areas
+          </button>
+          <button type="button" class="m-area-btn px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-bold hover:border-slate-300 transition-all active:scale-95" data-area="gulshan-1">
+            Gulshan 1
+          </button>
+          <button type="button" class="m-area-btn px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-bold hover:border-slate-300 transition-all active:scale-95" data-area="gulshan-2">
+            Gulshan 2
+          </button>
+          <button type="button" class="m-area-btn px-4 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-bold hover:border-slate-300 transition-all active:scale-95" data-area="banani">
+            Banani
+          </button>
+        </div>
+      </div>
+
+      <!-- Add more filter sections here (Price, Rating, etc.) -->
+
+    </div>
+
+    <!-- Footer Action -->
+    <div class="p-5 border-t border-slate-100 bg-white">
+      <button 
+        type="button" 
+        id="applyMobileFiltersBtn" 
+        class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
+      >
+        Show Results
+      </button>
+    </div>
   </div>
 </div>
+
+<script>
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  const drawer = document.getElementById('mobileDrawerContent');
+  const closeBtn = document.getElementById('closeMobileDrawerBtn');
+  const applyBtn = document.getElementById('applyMobileFiltersBtn');
+  const body = document.body;
+
+  // ড্রয়ার বন্ধ করার ফাংশন
+  function closeDrawer() {
+    overlay?.classList.add('opacity-0', 'pointer-events-none');
+    drawer?.classList.add('translate-x-full');
+    body.style.overflow = ''; // স্ক্রল ইনাবল করা
+  }
+
+  // ড্রয়ার খোলার ফাংশন (এটি অন্য কম্পোনেন্ট থেকে কল করতে পারবেন)
+  // উদাহরন: window.openFilterDrawer();
+  (window as any).openFilterDrawer = () => {
+    overlay?.classList.remove('opacity-0', 'pointer-events-none');
+    drawer?.classList.remove('translate-x-full');
+    body.style.overflow = 'hidden'; // ড্রয়ার খোলা অবস্থায় পেজ স্ক্রল হবে না
+  };
+
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) closeDrawer();
+  });
+
+  applyBtn?.addEventListener('click', () => {
+    // ফিল্টার অ্যাপ্লাই লজিক এখানে হবে
+    closeDrawer();
+  });
+
+  // Area Button Toggle (Simple logic)
+  const areaButtons = document.querySelectorAll('.m-area-btn');
+  areaButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        areaButtons.forEach(b => b.classList.remove('bg-[#006ce4]', 'text-white', 'border-[#006ce4]'));
+        btn.classList.add('bg-[#006ce4]', 'text-white', 'border-[#006ce4]');
+    });
+  });
+</script>
