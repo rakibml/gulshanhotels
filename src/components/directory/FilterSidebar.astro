@@ -23,137 +23,155 @@ const {
 } = Astro.props;
 ---
 
-<aside class="hidden lg:block lg:col-span-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-5 sticky top-20 text-left">
+<aside class="hidden lg:block lg:col-span-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-6 sticky top-24 h-fit max-h-[90vh] overflow-y-auto custom-scrollbar text-left">
   
   <!-- Header & Reset -->
-  <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-    <h3 class="text-sm font-black text-slate-900">Search & Filters</h3>
-    <button type="button" id="resetFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:underline cursor-pointer">
-      Reset all
+  <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+    <div>
+      <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">Filters</h3>
+      <p class="text-[10px] text-slate-500 font-medium">Showing {totalCount} options</p>
+    </div>
+    <button 
+      type="button" 
+      id="resetFiltersBtn" 
+      class="text-xs font-bold text-[#006ce4] hover:text-[#0057b8] transition-colors cursor-pointer flex items-center gap-1 group"
+    >
+      <svg class="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Reset
     </button>
   </div>
 
   <!-- SEARCH -->
-  <div class="space-y-1.5">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">SEARCH</span>
-    <div class="relative">
+  <div class="space-y-2">
+    <label for="sidebarSearchInput" class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Search Property</label>
+    <div class="relative group">
       <input 
         type="text" 
         id="sidebarSearchInput" 
-        placeholder="Search hotel name..." 
-        class="w-full bg-slate-50 focus:bg-white text-xs font-semibold rounded-xl pl-8 pr-3 py-2 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition"
+        placeholder="e.g. Radisson Blu" 
+        class="w-full bg-slate-50 group-hover:bg-slate-100 focus:bg-white text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-[#006ce4] focus:ring-4 focus:ring-blue-50 focus:outline-none transition-all"
       />
-      <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
     </div>
   </div>
 
   <!-- SORT BY -->
-  <div class="space-y-1.5 border-t border-slate-100 pt-4">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">SORT BY</span>
-    <select id="sidebarSortSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] cursor-pointer">
-      <option value="featured">Top picks</option>
-      <option value="price-asc">Price: Low to High</option>
-      <option value="price-desc">Price: High to Low</option>
-      <option value="rating-desc">Guest Rating: High to Low</option>
-    </select>
+  <div class="space-y-2 pt-2">
+    <label for="sidebarSortSelect" class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Sort By</label>
+    <div class="relative">
+      <select id="sidebarSortSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] focus:ring-4 focus:ring-blue-50 cursor-pointer transition-all">
+        <option value="featured">Recommended</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating-desc">Top Rated First</option>
+      </select>
+      <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
   </div>
 
-  <!-- NEIGHBORHOOD (RADIO) -->
-  <div class="space-y-2 border-t border-slate-100 pt-4">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">NEIGHBORHOOD</span>
-    <div class="space-y-2 text-xs font-semibold text-slate-700">
-      <label class="flex items-center justify-between cursor-pointer group">
-        <span class="flex items-center gap-2">
-          <input type="radio" name="areaFilter" value="all" checked class="area-radio text-[#006ce4]" />
-          <span>All Gulshan</span>
-        </span>
-        <span class="text-[11px] text-slate-400 font-bold">{totalCount}</span>
-      </label>
-      <label class="flex items-center justify-between cursor-pointer group">
-        <span class="flex items-center gap-2">
-          <input type="radio" name="areaFilter" value="gulshan-1" class="area-radio text-[#006ce4]" />
-          <span>Gulshan 1</span>
-        </span>
-        <span class="text-[11px] text-slate-400 font-bold">{g1Count}</span>
-      </label>
-      <label class="flex items-center justify-between cursor-pointer group">
-        <span class="flex items-center gap-2">
-          <input type="radio" name="areaFilter" value="gulshan-2" class="area-radio text-[#006ce4]" />
-          <span>Gulshan 2</span>
-        </span>
-        <span class="text-[11px] text-slate-400 font-bold">{g2Count}</span>
-      </label>
-      <label class="flex items-center justify-between cursor-pointer group">
-        <span class="flex items-center gap-2">
-          <input type="radio" name="areaFilter" value="near" class="area-radio text-[#006ce4]" />
-          <span>Near Gulshan</span>
-        </span>
-        <span class="text-[11px] text-slate-400 font-bold">{nearCount}</span>
-      </label>
+  <!-- NEIGHBORHOOD -->
+  <div class="space-y-3 pt-4 border-t border-slate-100">
+    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Neighborhood</span>
+    <div class="space-y-1">
+      { [
+        { id: 'area-all', val: 'all', label: 'All Gulshan', count: totalCount },
+        { id: 'area-g1', val: 'gulshan-1', label: 'Gulshan 1', count: g1Count },
+        { id: 'area-g2', val: 'gulshan-2', label: 'Gulshan 2', count: g2Count },
+        { id: 'area-near', val: 'near', label: 'Near Gulshan', count: nearCount }
+      ].map((area) => (
+        <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group transition-colors">
+          <span class="flex items-center gap-2.5">
+            <input type="radio" name="areaFilter" value={area.val} checked={area.val === 'all'} class="w-4 h-4 accent-[#006ce4] cursor-pointer" id={area.id} />
+            <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{area.label}</span>
+          </span>
+          <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md group-hover:bg-blue-100 group-hover:text-[#006ce4] transition-colors">{area.count}</span>
+        </label>
+      ))}
     </div>
   </div>
 
   <!-- PROPERTY RATING -->
-  <div class="space-y-2 border-t border-slate-100 pt-4">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">PROPERTY RATING</span>
-    <div class="space-y-2 text-xs font-semibold text-slate-700">
-      <label class="flex items-center justify-between cursor-pointer">
-        <span class="flex items-center gap-2">
-          <input type="checkbox" value="5" class="star-check text-[#006ce4] rounded" />
-          <span>5 stars <span class="text-[#febb02]">★★★★★</span></span>
+  <div class="space-y-3 pt-2">
+    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Rating</span>
+    <div class="space-y-1">
+      <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
+        <span class="flex items-center gap-2.5">
+          <input type="checkbox" value="5" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <span class="text-xs font-bold text-slate-700">5 Stars</span>
+          <span class="flex text-[#febb02] text-[10px]">★★★★★</span>
         </span>
-        <span class="text-[11px] text-slate-400 font-bold">{star5Count}</span>
+        <span class="text-[10px] font-bold text-slate-400">{star5Count}</span>
       </label>
-      <label class="flex items-center justify-between cursor-pointer">
-        <span class="flex items-center gap-2">
-          <input type="checkbox" value="4" class="star-check text-[#006ce4] rounded" />
-          <span>4 stars <span class="text-[#febb02]">★★★★</span></span>
+      <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
+        <span class="flex items-center gap-2.5">
+          <input type="checkbox" value="4" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <span class="text-xs font-bold text-slate-700">4 Stars</span>
+          <span class="flex text-[#febb02] text-[10px]">★★★★</span>
         </span>
-        <span class="text-[11px] text-slate-400 font-bold">{star4Count}</span>
+        <span class="text-[10px] font-bold text-slate-400">{star4Count}</span>
       </label>
     </div>
   </div>
 
   <!-- REVIEW SCORE -->
-  <div class="space-y-2 border-t border-slate-100 pt-4">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">REVIEW SCORE</span>
-    <div class="space-y-2 text-xs font-semibold text-slate-700">
-      <label class="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" value="9" class="rating-check text-[#006ce4] rounded" />
-        <span>Wonderful: 9+</span>
-      </label>
-      <label class="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" value="8" class="rating-check text-[#006ce4] rounded" />
-        <span>Very Good: 8+</span>
-      </label>
-      <label class="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" value="7" class="rating-check text-[#006ce4] rounded" />
-        <span>Good: 7+</span>
-      </label>
+  <div class="space-y-3 pt-2">
+    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Guest Review</span>
+    <div class="space-y-1">
+      {[
+        { val: '9', label: 'Exceptional: 9+' },
+        { val: '8', label: 'Excellent: 8+' },
+        { val: '7', label: 'Very Good: 7+' }
+      ].map(score => (
+        <label class="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
+          <input type="checkbox" value={score.val} class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{score.label}</span>
+        </label>
+      ))}
     </div>
   </div>
 
   <!-- PROPERTY TYPE -->
-  <div class="space-y-2 border-t border-slate-100 pt-4">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">PROPERTY TYPE</span>
-    <div class="space-y-2 text-xs font-semibold text-slate-700">
-      <label class="flex items-center justify-between cursor-pointer">
-        <span class="flex items-center gap-2">
-          <input type="checkbox" value="hotel" class="type-check text-[#006ce4] rounded" />
-          <span>Hotels</span>
+  <div class="space-y-3 pt-4 border-t border-slate-100">
+    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Property Type</span>
+    <div class="space-y-1">
+      <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
+        <span class="flex items-center gap-2.5">
+          <input type="checkbox" value="hotel" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Hotels</span>
         </span>
-        <span class="text-[11px] text-slate-400 font-bold">{hotelCount}</span>
+        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#006ce4]">{hotelCount}</span>
       </label>
-      <label class="flex items-center justify-between cursor-pointer">
-        <span class="flex items-center gap-2">
-          <input type="checkbox" value="guesthouse" class="type-check text-[#006ce4] rounded" />
-          <span>Guest Houses</span>
+      <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
+        <span class="flex items-center gap-2.5">
+          <input type="checkbox" value="guesthouse" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Guest Houses</span>
         </span>
-        <span class="text-[11px] text-slate-400 font-bold">{guestHouseCount}</span>
+        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#006ce4]">{guestHouseCount}</span>
       </label>
     </div>
   </div>
 
 </aside>
+
+<style>
+  /* Sidebar-এর জন্য কাস্টম স্ক্রলবার যদি কন্টেন্ট বেশি বড় হয় */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+</style>
