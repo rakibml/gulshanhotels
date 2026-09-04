@@ -11,146 +11,373 @@ interface Props {
   reviewsCount: number;
 }
 
-const { title, url, stars, address, latestReview, fallbackAbout, rating, ratingLabel, reviewsCount } = Astro.props;
+const {
+  title,
+  url,
+  stars,
+  address,
+  latestReview,
+  fallbackAbout,
+  rating,
+  ratingLabel,
+  reviewsCount
+} = Astro.props;
 
-// 35-Word Truncate Logic
-let reviewWordsShort = '';
-let reviewWordsFull = '';
-let isReviewLongerThan35 = false;
+// Review processing
+let reviewShort = '';
+let reviewFull = '';
+let hasMoreReview = false;
 
-// রিভিউ প্রসেসিং
-if (latestReview && latestReview.comment) {
-  // HTML ট্যাগ এবং অতিরিক্ত স্পেস রিমুভ করা
-  const cleanComment = latestReview.comment.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+if (latestReview?.comment) {
+  const cleanComment = latestReview.comment
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
   const words = cleanComment.split(/\s+/).filter(Boolean);
-  
-  reviewWordsFull = cleanComment;
-  
-  if (words.length > 35) {
-    reviewWordsShort = words.slice(0, 35).join(' ') + '...';
-    isReviewLongerThan35 = true;
+
+  reviewFull = cleanComment;
+
+  // Compact review = better card height
+  if (words.length > 22) {
+    reviewShort = words.slice(0, 22).join(' ') + '...';
+    hasMoreReview = true;
   } else {
-    reviewWordsShort = cleanComment;
-    isReviewLongerThan35 = false;
+    reviewShort = cleanComment;
   }
 }
-
-const svgPin = `<svg class="w-4 h-4 fill-slate-500 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 ---
 
-<div class="flex-1 flex flex-col justify-between min-w-0 pr-1 md:pr-3 text-left">
+<div class="hotel-info flex-1 min-w-0 flex flex-col justify-between text-left">
+
+  <!-- HOTEL TITLE -->
   <div>
-    <!-- Title & Stars -->
-    <div class="flex items-center gap-1.5 flex-wrap">
-      <a href={url} class="card-hotel-link text-base sm:text-lg md:text-xl font-black text-[#006ce4] hover:text-[#003b95] transition line-clamp-1 leading-snug">
-        {title}
-      </a>
-      
-      {stars > 0 && (
-        <div class="flex text-[#febb02] text-[10px] sm:text-xs shrink-0 mb-0.5">
-          {'★'.repeat(stars)}
-        </div>
-      )}
-    </div>
 
-    <!-- Address -->
-    <div class="flex items-start gap-1 text-xs text-slate-500 font-medium mt-1 leading-snug">
-      <span set:html={svgPin} class="inline-flex shrink-0"></span>
-      <span class="card-hotel-address hover:underline cursor-pointer line-clamp-1">{address}</span>
-    </div>
+    <div class="flex items-start justify-between gap-2">
 
-    <!-- Review Section -->
-    <div class="mt-3 min-h-[40px]"> <!-- min-h added to prevent layout jump -->
-      {latestReview && latestReview.comment ? (
-        <div class="review-snippet-box text-xs sm:text-[13px] leading-relaxed">
-          <div class="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-            <span class="text-amber-500 text-xs">“</span>
-            <span>Latest Guest Review</span>
+      <div class="min-w-0">
+        <a
+          href={url}
+          class="card-hotel-link block text-[17px] sm:text-lg md:text-xl
+                 font-extrabold text-[#0b1f3a]
+                 hover:text-[#006ce4]
+                 transition-colors duration-200
+                 leading-tight line-clamp-2"
+        >
+          {title}
+        </a>
+
+        <!-- Stars -->
+        {stars > 0 && (
+          <div
+            class="flex items-center gap-[2px] mt-1"
+            aria-label={`${stars} star hotel`}
+          >
+            {'★'.repeat(stars)}
           </div>
-          
-          <div class="text-slate-700 italic">
-            <span class="review-short">“{reviewWordsShort}”</span>
-            {isReviewLongerThan35 && (
+        )}
+      </div>
+
+      <!-- TOP RATED -->
+      {rating && Number(rating) >= 8.5 && (
+        <span
+          class="shrink-0 inline-flex items-center
+                 rounded-md bg-emerald-50
+                 border border-emerald-200
+                 px-2 py-1
+                 text-[9px] sm:text-[10px]
+                 font-extrabold uppercase
+                 tracking-wide text-emerald-700"
+        >
+          Top Rated
+        </span>
+      )}
+
+    </div>
+
+
+    <!-- LOCATION -->
+    <div
+      class="flex items-start gap-1.5 mt-2
+             text-[11px] sm:text-xs
+             text-slate-500 font-medium leading-snug"
+    >
+
+      <svg
+        class="w-4 h-4 shrink-0 mt-[1px] text-[#64748b]"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+
+      <span
+        class="card-hotel-address line-clamp-1"
+      >
+        {address}
+      </span>
+
+    </div>
+
+
+    <!-- GUEST REVIEW -->
+    <div class="mt-3">
+
+      {latestReview?.comment ? (
+
+        <div
+          class="review-snippet-box
+                 rounded-lg
+                 bg-slate-50/80
+                 border border-slate-100
+                 px-3 py-2.5"
+        >
+
+          <!-- Label -->
+          <div
+            class="flex items-center gap-1.5
+                   text-[9px] sm:text-[10px]
+                   font-extrabold
+                   uppercase tracking-wider
+                   text-emerald-700
+                   mb-1"
+          >
+
+            <span
+              class="flex items-center justify-center
+                     w-4 h-4 rounded-full
+                     bg-emerald-100
+                     text-emerald-700
+                     text-[11px]"
+            >
+              ✓
+            </span>
+
+            <span>Guest says</span>
+
+            {reviewsCount > 0 && (
+              <span class="text-slate-400 normal-case tracking-normal">
+                · {reviewsCount} reviews
+              </span>
+            )}
+
+          </div>
+
+
+          <!-- Review text -->
+          <div
+            class="text-[11px] sm:text-[12px]
+                   text-slate-700
+                   italic
+                   leading-relaxed"
+          >
+
+            <span class="review-short">
+              “{reviewShort}”
+            </span>
+
+            {hasMoreReview && (
               <>
-                <span class="review-full hidden">“{reviewWordsFull}”</span>
-                <button 
-                  type="button" 
-                  class="toggle-review-btn font-bold text-[#006ce4] hover:underline ml-1 cursor-pointer inline-block not-italic"
+                <span class="review-full hidden">
+                  “{reviewFull}”
+                </span>
+
+                <button
+                  type="button"
+                  class="toggle-review-btn
+                         ml-1
+                         font-bold
+                         text-[#006ce4]
+                         hover:text-[#003b95]
+                         hover:underline
+                         not-italic
+                         whitespace-nowrap"
                 >
                   See more
                 </button>
               </>
             )}
+
           </div>
 
-          <div class="flex items-center gap-2 mt-1.5">
-             <div class="w-4 h-px bg-slate-200"></div>
-             <span class="text-[10px] sm:text-[11px] font-bold text-slate-500">
-               {latestReview.name} {latestReview.date && <span class="font-medium text-slate-400 opacity-80">• {latestReview.date}</span>}
-             </span>
-          </div>
+
+          <!-- Reviewer -->
+          {latestReview.name && (
+            <div
+              class="mt-1.5
+                     text-[9px] sm:text-[10px]
+                     font-semibold
+                     text-slate-400"
+            >
+              {latestReview.name}
+
+              {latestReview.date && (
+                <span class="font-normal">
+                  · {latestReview.date}
+                </span>
+              )}
+            </div>
+          )}
+
         </div>
+
       ) : (
-        /* Fallback visible on both Mobile & Desktop but limited to 2 lines */
-        <p class="text-xs sm:text-[13px] text-slate-500 leading-relaxed line-clamp-2 italic opacity-90">
-          {fallbackAbout || "Explore this property for your next stay. High-quality service and great amenities await."}
-        </p>
+
+        <div
+          class="rounded-lg
+                 bg-slate-50
+                 border border-slate-100
+                 px-3 py-2.5"
+        >
+
+          <div
+            class="text-[9px]
+                   font-extrabold
+                   uppercase tracking-wider
+                   text-slate-400
+                   mb-1"
+          >
+            About this hotel
+          </div>
+
+          <p
+            class="text-[11px] sm:text-xs
+                   text-slate-600
+                   leading-relaxed
+                   line-clamp-2"
+          >
+            {fallbackAbout ||
+              "Explore this property for your next stay. High-quality service and great amenities await."}
+          </p>
+
+        </div>
+
       )}
+
     </div>
+
   </div>
 
-  <!-- Mobile Rating Badge -->
-  <div class="md:hidden flex items-center gap-2 mt-3 pt-2 border-t border-slate-50">
+
+  <!-- RATING -->
+  <div
+    class="md:hidden
+           flex items-center justify-between
+           mt-3 pt-2.5
+           border-t border-slate-100"
+  >
+
     {rating ? (
-      <div class="flex items-center gap-1.5">
-        <div class="bg-[#003b95] text-white font-black text-[11px] px-1.5 py-0.5 rounded-t-md rounded-br-md">
+
+      <div class="flex items-center gap-2">
+
+        <!-- SCORE -->
+        <div
+          class="flex items-center justify-center
+                 min-w-[38px] h-[30px]
+                 rounded-md
+                 bg-[#0b3b78]
+                 text-white
+                 font-extrabold
+                 text-[12px]"
+        >
           {rating}
         </div>
-        <div class="flex flex-col leading-none">
-            <span class="text-[11px] font-bold text-slate-900">{ratingLabel}</span>
-            <span class="text-[9px] text-slate-500 font-medium">{reviewsCount} reviews</span>
+
+
+        <!-- LABEL -->
+        <div class="leading-tight">
+
+          <div
+            class="text-[11px]
+                   font-bold
+                   text-[#0b1f3a]"
+          >
+            {ratingLabel}
+          </div>
+
+          <div
+            class="text-[9px]
+                   text-slate-500
+                   font-medium"
+          >
+            {reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'}
+          </div>
+
         </div>
+
       </div>
+
     ) : (
-      <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded">
-        New to site
+
+      <span
+        class="inline-flex items-center
+               rounded-md
+               bg-slate-100
+               px-2 py-1
+               text-[10px]
+               font-bold
+               text-slate-500"
+      >
+        New to GulshanHotels
       </span>
+
     )}
+
   </div>
+
 </div>
 
+
 <script>
-  // স্ক্রিপ্টকে আরও শক্তিশালী করা হয়েছে
-  const initToggle = () => {
-    document.querySelectorAll('.toggle-review-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const box = (e.currentTarget as HTMLElement).closest('.review-snippet-box');
+  const initReviewToggle = () => {
+    document.querySelectorAll('.toggle-review-btn').forEach((btn) => {
+
+      // Prevent duplicate listeners
+      if (btn.hasAttribute('data-review-ready')) return;
+
+      btn.setAttribute('data-review-ready', 'true');
+
+      btn.addEventListener('click', (event) => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const button = event.currentTarget as HTMLElement;
+        const box = button.closest('.review-snippet-box');
+
         if (!box) return;
 
-        const shortEl = box.querySelector('.review-short');
-        const fullEl = box.querySelector('.review-full');
-        const btnEl = e.currentTarget as HTMLElement;
+        const shortText = box.querySelector('.review-short');
+        const fullText = box.querySelector('.review-full');
 
-        if (shortEl && fullEl) {
-          const isHidden = fullEl.classList.contains('hidden');
-          if (isHidden) {
-            fullEl.classList.remove('hidden');
-            shortEl.classList.add('hidden');
-            btnEl.textContent = 'Show less';
-          } else {
-            fullEl.classList.add('hidden');
-            shortEl.classList.remove('hidden');
-            btnEl.textContent = 'See more';
-          }
+        if (!shortText || !fullText) return;
+
+        const expanded = !fullText.classList.contains('hidden');
+
+        if (expanded) {
+
+          fullText.classList.add('hidden');
+          shortText.classList.remove('hidden');
+
+          button.textContent = 'See more';
+
+        } else {
+
+          shortText.classList.add('hidden');
+          fullText.classList.remove('hidden');
+
+          button.textContent = 'Show less';
+
         }
+
       });
+
     });
   };
 
-  // Astro page load হ্যান্ডেল করা
-  initToggle();
-  document.addEventListener('astro:page-load', initToggle);
+  initReviewToggle();
+
+  document.addEventListener('astro:page-load', initReviewToggle);
 </script>
