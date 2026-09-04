@@ -23,17 +23,11 @@ const {
   reviewsCount
 } = Astro.props;
 
-
-// =====================================================
-// REVIEW PROCESSING
-// =====================================================
-
 let reviewWordsShort = '';
 let reviewWordsFull = '';
 let isReviewLongerThan22 = false;
 
 if (latestReview?.comment) {
-
   const cleanComment = latestReview.comment
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
@@ -46,24 +40,16 @@ if (latestReview?.comment) {
   reviewWordsFull = cleanComment;
 
   if (words.length > 22) {
-
     reviewWordsShort =
       words.slice(0, 22).join(' ') + '...';
 
     isReviewLongerThan22 = true;
-
   } else {
-
     reviewWordsShort = cleanComment;
     isReviewLongerThan22 = false;
-
   }
 }
 ---
-
-<!-- =====================================================
-     HOTEL INFORMATION
-====================================================== -->
 
 <div
   class="
@@ -75,10 +61,6 @@ if (latestReview?.comment) {
   "
 >
 
-  <!-- ===================================================
-       HOTEL TITLE + STARS
-  ==================================================== -->
-
   <div
     class="
       flex
@@ -88,101 +70,64 @@ if (latestReview?.comment) {
     "
   >
 
-    <!-- HOTEL NAME -->
-
     <a
       href={url}
       class="
         card-hotel-link
-
         min-w-0
-
         text-[17px]
         sm:text-lg
         md:text-xl
-
         font-black
-
         text-[#0b1f3a]
-
         hover:text-[#006ce4]
-
         transition-colors
         duration-200
-
         line-clamp-1
-
         leading-tight
       "
     >
       {title}
     </a>
 
-
-    <!-- STAR RATING -->
-
     {stars > 0 && (
-
       <div
         class="
           flex
           items-center
           shrink-0
-
           text-[#febb02]
-
           text-[10px]
           sm:text-xs
-
           leading-none
-
           tracking-tight
         "
         aria-label={`${stars} star hotel`}
       >
         {'★'.repeat(stars)}
       </div>
-
     )}
 
   </div>
 
-
-  <!-- ===================================================
-       ADDRESS
-  ==================================================== -->
 
   <div
     class="
       flex
       items-center
       gap-1
-
       mt-1
-
       text-[11px]
       sm:text-xs
-
       text-slate-500
-
       font-medium
-
       leading-tight
-
       min-w-0
     "
   >
 
-    <!-- LOCATION ICON -->
-
     <svg
-      class="
-        w-3.5
-        h-3.5
-        shrink-0
-
-        text-slate-500
-      "
+      class="w-3.5 h-3.5 shrink-0 text-slate-500"
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden="true"
@@ -198,15 +143,10 @@ if (latestReview?.comment) {
       />
     </svg>
 
-
-    <!-- ADDRESS TEXT -->
-
     <span
       class="
         card-hotel-address
-
         line-clamp-1
-
         min-w-0
       "
     >
@@ -216,102 +156,62 @@ if (latestReview?.comment) {
   </div>
 
 
-  <!-- ===================================================
-       REVIEW SECTION
-  ==================================================== -->
-
   <div class="mt-2">
 
     {latestReview?.comment ? (
-
-      <!-- REVIEW BOX -->
-
       <div
         class="
           review-snippet-box
-
           rounded-lg
-
           bg-slate-50
-
           border
           border-slate-100
-
           px-2.5
           py-2
         "
       >
-
-        <!-- =============================================
-             REVIEW HEADER
-             
-             GUEST SAYS = LEFT
-             REVIEW COUNT = RIGHT
-        ============================================== -->
 
         <div
           class="
             flex
             items-center
             justify-between
-
             gap-2
-
             mb-1
           "
         >
-
-          <!-- LEFT SIDE -->
 
           <div
             class="
               flex
               items-center
               gap-1.5
-
               min-w-0
-
               text-[9px]
-
               font-extrabold
-
               uppercase
-
               tracking-wide
-
               text-emerald-700
             "
           >
-
-            <!-- CHECK ICON -->
 
             <span
               class="
                 flex
                 items-center
                 justify-center
-
                 w-4
                 h-4
-
                 shrink-0
-
                 rounded-full
-
                 bg-emerald-100
-
                 text-emerald-700
-
                 text-[10px]
-
                 leading-none
               "
             >
               ✓
             </span>
-
-
-            <!-- LABEL -->
 
             <span class="truncate">
               Guest says
@@ -320,23 +220,14 @@ if (latestReview?.comment) {
           </div>
 
 
-          <!-- ===========================================
-               REVIEW COUNT - RIGHT SIDE
-          ============================================ -->
-
           <span
             class="
               shrink-0
-
               text-[9px]
               sm:text-[10px]
-
               font-bold
-
               text-slate-400
-
               whitespace-nowrap
-
               leading-none
             "
           >
@@ -347,232 +238,146 @@ if (latestReview?.comment) {
         </div>
 
 
-        <!-- =============================================
-             REVIEW TEXT
-        ============================================== -->
-
         <div
           class="
             text-[11px]
             sm:text-[12px]
-
             text-slate-700
-
             italic
-
             leading-[1.4]
           "
         >
-
-          <!-- SHORT REVIEW -->
 
           <span class="review-short">
             “{reviewWordsShort}”
           </span>
 
-
-          <!-- FULL REVIEW -->
-
           {isReviewLongerThan22 && (
-
             <>
-
               <span class="review-full hidden">
                 “{reviewWordsFull}”
               </span>
-
-
-              <!-- SEE MORE -->
 
               <button
                 type="button"
                 class="
                   toggle-review-btn
-
                   ml-1
-
                   text-[#006ce4]
-
                   hover:text-[#003b95]
-
                   font-bold
-
                   not-italic
-
                   whitespace-nowrap
-
                   cursor-pointer
                 "
               >
                 See more
               </button>
-
             </>
-
           )}
 
         </div>
 
 
-        <!-- =============================================
-             REVIEWER + DATE
-        ============================================== -->
-
         {latestReview.name && (
-
           <div
             class="
               mt-1
-
               text-[9px]
               sm:text-[10px]
-
               text-slate-400
-
               font-medium
-
               leading-none
-
               truncate
             "
           >
-
             {latestReview.name}
 
             {latestReview.date && (
-
               <span>
                 · {latestReview.date}
               </span>
-
             )}
-
           </div>
-
         )}
 
       </div>
-
-
     ) : (
-
-      <!-- =================================================
-           FALLBACK / NO REVIEW
-      ================================================== -->
-
       <p
         class="
           text-[11px]
           sm:text-xs
-
           text-slate-500
-
           leading-[1.4]
-
           line-clamp-2
-
           italic
-
           m-0
         "
       >
         {fallbackAbout ||
           "Explore this property for your next stay. High-quality service and great amenities await."}
       </p>
-
     )}
 
   </div>
 
 
-  <!-- ===================================================
-       MOBILE RATING
-  ==================================================== -->
-
   <div
     class="
       md:hidden
-
       flex
       items-center
-
       gap-2
-
       mt-2
-
       pt-2
-
       border-t
       border-slate-100
     "
   >
 
     {rating ? (
-
       <div
         class="
           flex
           items-center
-
           gap-2
         "
       >
-
-        <!-- SCORE -->
 
         <div
           class="
             flex
             items-center
             justify-center
-
             min-w-[36px]
             h-[29px]
-
             rounded-md
-
             bg-[#0b3b78]
-
             text-white
-
             text-[11px]
-
             font-black
-
             leading-none
           "
         >
           {rating}
         </div>
 
-
-        <!-- RATING TEXT -->
-
-        <div
-          class="
-            leading-none
-          "
-        >
+        <div class="leading-none">
 
           <div
             class="
               text-[11px]
-
               font-bold
-
               text-[#0b1f3a]
             "
           >
             {ratingLabel}
           </div>
 
-
           <div
             class="
               text-[9px]
-
               text-slate-500
-
               mt-0.5
             "
           >
@@ -583,31 +388,20 @@ if (latestReview?.comment) {
         </div>
 
       </div>
-
-
     ) : (
-
-      <!-- NO RATING -->
-
       <span
         class="
           text-[9px]
-
           font-bold
-
           text-slate-500
-
           bg-slate-100
-
           rounded-md
-
           px-2
           py-1
         "
       >
         New to GulshanHotels
       </span>
-
     )}
 
   </div>
@@ -615,18 +409,12 @@ if (latestReview?.comment) {
 </div>
 
 
-<!-- =====================================================
-     REVIEW TOGGLE SCRIPT
-====================================================== -->
-
 <script>
   const initReviewToggle = () => {
-
     document
       .querySelectorAll('.toggle-review-btn')
       .forEach((btn) => {
 
-        // Prevent duplicate event listeners
         if (btn.hasAttribute('data-review-ready')) {
           return;
         }
@@ -636,95 +424,56 @@ if (latestReview?.comment) {
           'true'
         );
 
-
         btn.addEventListener('click', (event) => {
-
           event.preventDefault();
           event.stopPropagation();
 
-
           const button =
             event.currentTarget as HTMLElement;
-
 
           const box =
             button.closest(
               '.review-snippet-box'
             );
 
-
           if (!box) {
             return;
           }
-
 
           const shortEl =
             box.querySelector(
               '.review-short'
             );
 
-
           const fullEl =
             box.querySelector(
               '.review-full'
             );
 
-
           if (!shortEl || !fullEl) {
             return;
           }
-
 
           const isExpanded =
             !fullEl.classList.contains(
               'hidden'
             );
 
-
           if (isExpanded) {
-
-            // SHOW SHORT
-
-            fullEl.classList.add(
-              'hidden'
-            );
-
-            shortEl.classList.remove(
-              'hidden'
-            );
-
-            button.textContent =
-              'See more';
-
+            fullEl.classList.add('hidden');
+            shortEl.classList.remove('hidden');
+            button.textContent = 'See more';
           } else {
-
-            // SHOW FULL
-
-            shortEl.classList.add(
-              'hidden'
-            );
-
-            fullEl.classList.remove(
-              'hidden'
-            );
-
-            button.textContent =
-              'Show less';
-
+            shortEl.classList.add('hidden');
+            fullEl.classList.remove('hidden');
+            button.textContent = 'Show less';
           }
-
         });
-
       });
-
   };
 
-
-  // Initial load
   initReviewToggle();
 
-
-  // Astro navigation
   document.addEventListener(
     'astro:page-load',
     initReviewToggle
