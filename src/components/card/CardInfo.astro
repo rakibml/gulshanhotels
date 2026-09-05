@@ -9,6 +9,7 @@ interface Props {
   rating: string | null;
   ratingLabel: string;
   reviewsCount: number;
+  amenities?: string[]; // নতুন প্রপস যোগ করা হয়েছে
 }
 
 const {
@@ -19,7 +20,8 @@ const {
   fallbackAbout,
   rating,
   ratingLabel,
-  reviewsCount
+  reviewsCount,
+  amenities = []
 } = Astro.props;
 
 // Review processing
@@ -40,41 +42,51 @@ if (latestReview?.comment) {
   }
 }
 
-const isGulshan2 = address.toLowerCase().includes('gulshan 2') || address.toLowerCase().includes('gulshan-2');
-const locationContext = isGulshan2 ? "GULSHAN 2, DHAKA" : "GULSHAN 1, DHAKA";
+// সঠিক রিভিউ টেক্সট নির্ধারণ (১টি হলে 'review', বেশি হলে 'reviews')
+const reviewText = reviewsCount === 1 ? 'review' : 'reviews';
 ---
 
 <div class="hotel-info flex-1 min-w-0 flex flex-col justify-start text-left font-['Plus_Jakarta_Sans',sans-serif]">
   
-  <!-- ১. টাইটেল (Top Rated badge বাদ দেওয়া হয়েছে) -->
+  <!-- ১. টাইটেল -->
   <div class="leading-tight">
     <a href={url} class="block text-[18px] sm:text-[20px] font-[800] text-[#00224f] hover:text-[#006ce4] transition-all tracking-[-0.03em] line-clamp-1">
       {title}
     </a>
 
-    <!-- ২. রেটিং স্কোর ও রিভিউ কাউন্ট (Stars এবং Dots বাদ দেওয়া হয়েছে) -->
+    <!-- ২. সঠিক রিভিউ কাউন্ট এবং রেটিং -->
     <div class="flex items-center gap-2 mt-0.5">
       <span class="text-[13px] font-[800] text-[#008234] tracking-tight">{rating || '5.0'}</span>
-      <span class="text-[12px] text-slate-500 font-medium tracking-tight">({reviewsCount} reviews)</span>
+      <span class="text-[12px] text-slate-500 font-medium tracking-tight">({reviewsCount} {reviewText})</span>
     </div>
   </div>
 
-  <!-- ৩. লোকেশন এবং বেস্ট ভ্যালু (Green dot বাদ দেওয়া হয়েছে এবং স্পেস কমানো হয়েছে) -->
-  <div class="mt-1.5 space-y-0.5">
-    <div class="flex items-center gap-1 text-[12px] text-slate-600 font-medium tracking-tight">
-      <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-      </svg>
-      <span class="line-clamp-1">{address}</span>
-    </div>
-    
-    <div class="text-[11px] font-[700] text-[#008234] uppercase tracking-wide">
-      Best Value in {locationContext}
-    </div>
+  <!-- ৩. লোকেশন -->
+  <div class="mt-1.5 flex items-center gap-1 text-[12px] text-slate-600 font-medium tracking-tight">
+    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    </svg>
+    <span class="line-clamp-1">{address}</span>
   </div>
 
-  <!-- ৪. গেস্ট রিভিউ (Review Label এবং Name বাদ দেওয়া হয়েছে) -->
-  <div class="mt-2 relative">
+  <!-- ৪. ডাইনামিক অ্যামেনিটিস (এক লাইনে) -->
+  {amenities && amenities.length > 0 && (
+    <div class="mt-1 flex items-center gap-2 overflow-hidden whitespace-nowrap">
+      <div class="flex items-center gap-1.5 flex-nowrap">
+        {amenities.slice(0, 5).map((item, index) => (
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[10px] font-[700] text-[#008234] uppercase tracking-wide">{item}</span>
+            {index < Math.min(amenities.length, 5) - 1 && (
+              <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- ৫. গেস্ট রিভিউ (ক্লিন লুক) -->
+  <div class="mt-2.5 relative">
     <p class="text-[13px] text-slate-700 leading-[1.5] italic font-medium tracking-tight border-l-[3px] border-slate-100 pl-3">
       <span class="review-short">“{reviewShort || fallbackAbout}”</span>
       {hasMoreReview && (
@@ -86,13 +98,13 @@ const locationContext = isGulshan2 ? "GULSHAN 2, DHAKA" : "GULSHAN 1, DHAKA";
     </p>
   </div>
 
-  <!-- ৫. মোবাইল স্কোর (স্পেসিং অ্যাডজাস্ট করা হয়েছে) -->
+  <!-- ৬. মোবাইল স্কোর -->
   <div class="md:hidden flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
      <div class="flex items-center gap-2">
         <div class="bg-[#003580] text-white font-[800] text-[12px] px-1.5 py-0.5 rounded-sm shadow-sm leading-none">{rating || '5.0'}</div>
         <div class="flex flex-col leading-tight">
           <span class="text-[11px] font-[700] text-[#00224f] tracking-tight">{ratingLabel}</span>
-          <span class="text-[9px] text-slate-400 font-bold uppercase">{reviewsCount} Reviews</span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase">{reviewsCount} {reviewText}</span>
         </div>
      </div>
      <span class="text-[9px] font-black text-[#008234] uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">Verified</span>
