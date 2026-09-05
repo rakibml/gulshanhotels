@@ -10,7 +10,7 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// --- লজিক সেকশন ---
+// --- Helpers ---
 const toTitleCase = (str: string) => {
   if (!str) return '';
   return str.toLowerCase().split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -35,9 +35,12 @@ const cleanPriceString = (priceRaw: string) => {
   return `৳ ${digits}`;
 };
 
+// --- Data Extraction ---
 const hData = hotelItem?.data || {};
 const rawTitle = String(hData.title || hData.name || "").trim();
 const hTitle = toTitleCase(rawTitle);
+const titleLowerStr = rawTitle.toLowerCase();
+
 const hSlug = String(hData.slug || hotelItem?.slug || hotelItem?.id || "").trim();
 const hotelUrl = `/${hSlug}`; 
 
@@ -46,18 +49,25 @@ const hImage = typeof rawImg === 'object' && rawImg !== null && rawImg.src ? raw
 
 const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka").trim();
 const locLower = hFullAddress.toLowerCase();
-const titleLowerStr = rawTitle.toLowerCase();
 
+// Area Logic
 let areaType = 'near';
 if (locLower.includes('gulshan 1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2')) areaType = 'gulshan-2';
+
+// Star Count Logic (এটি আগে মিসিং ছিল)
+const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
+const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
 
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 const rawAbout = hotelItem?.body || hData.about || hData.description || '';
 const hSnippet25Words = getFirst25Words(rawAbout);
 
+// Pricing Logic
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
 const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
+const rawDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
+let numericPrice = rawBasePrice.includes('$') ? Math.round(rawDigits * 120) : rawDigits;
 
 let lowestNum = 0, highestNum = 0;
 if (Array.isArray(hData.booking_channels)) {
@@ -78,7 +88,7 @@ if (highestNum > lowestNum && lowestNum > 0) {
   discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
 }
 
-// Reviews
+// Reviews Logic
 const matchedCmsReviews = allCmsReviews.filter(r => {
   const item = r.data || r;
   if (!item.approved) return false;
@@ -104,9 +114,13 @@ const hasValidTitle = hTitle.length > 0;
   <div 
     class="directory-card-item group bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row overflow-hidden mb-6"
     data-title={titleLowerStr}
+    data-stars={starCount.toString()}
     data-area={areaType}
+    data-numeric-price={numericPrice}
+    data-numeric-rating={numRating}
+    data-official-price={officialBaseStartingPrice}
   >
-    <!-- ১. ছবির মডিউল: মোবাইলে উপরে, ডেক্সটপে বামে -->
+    <!-- ১. ছবির মডিউল -->
     <div class="relative w-full md:w-64 lg:w-72 shrink-0 aspect-[16/10] md:aspect-auto overflow-hidden bg-slate-100">
       <CardImage 
         image={hImage} 
@@ -124,7 +138,7 @@ const hasValidTitle = hTitle.length > 0;
         <CardInfo 
           title={hTitle} 
           url={hotelUrl} 
-          stars={starCount ?? 0} 
+          stars={starCount} 
           address={hFullAddress} 
           latestReview={latestReview} 
           fallbackAbout={hSnippet25Words} 
