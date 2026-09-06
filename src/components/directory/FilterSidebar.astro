@@ -31,11 +31,7 @@ const {
       <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">Filters</h3>
       <p class="text-[10px] text-slate-500 font-medium">Showing <span id="sidebarCountDisplay">{totalCount}</span> options</p>
     </div>
-    <button 
-      type="button" 
-      id="resetFiltersBtn" 
-      class="text-xs font-bold text-[#006ce4] hover:text-[#0057b8] transition-colors cursor-pointer flex items-center gap-1 group"
-    >
+    <button type="button" id="resetFiltersBtn" class="text-xs font-bold text-[#006ce4] hover:text-[#0057b8] transition-colors cursor-pointer flex items-center gap-1 group">
       <svg class="w-3 h-3 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
       </svg>
@@ -45,34 +41,24 @@ const {
 
   <!-- SEARCH -->
   <div class="space-y-2">
-    <label for="sidebarSearchInput" class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Search Property</label>
+    <label class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Search Property</label>
     <div class="relative group">
-      <input 
-        type="text" 
-        id="sidebarSearchInput" 
-        placeholder="e.g. Radisson Blu" 
-        class="w-full bg-slate-50 group-hover:bg-slate-100 focus:bg-white text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition-all"
-      />
+      <input type="text" id="sidebarSearchInput" placeholder="e.g. Radisson Blu" class="w-full bg-slate-50 focus:bg-white text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition-all" />
       <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
   </div>
 
   <!-- SORT BY -->
   <div class="space-y-2 pt-2">
-    <label for="sidebarSortSelect" class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Sort By</label>
-    <div class="relative">
-      <select id="sidebarSortSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] cursor-pointer transition-all">
-        <option value="featured">Recommended</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-        <option value="rating-desc">Top Rated First</option>
-      </select>
-      <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-    </div>
+    <label class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Sort By</label>
+    <select id="sidebarSortSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] cursor-pointer transition-all">
+      <option value="featured">Recommended</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="rating-desc">Guest Rating</option>
+    </select>
   </div>
 
   <!-- NEIGHBORHOOD -->
@@ -85,54 +71,35 @@ const {
         { id: 'area-g2', val: 'gulshan-2', label: 'Gulshan 2', count: g2Count },
         { id: 'area-near', val: 'near', label: 'Near Gulshan', count: nearCount }
       ].map((area) => (
-        <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group transition-colors">
+        <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
           <span class="flex items-center gap-2.5">
-            <input type="radio" name="areaFilter" value={area.val} checked={area.val === 'all'} class="area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" id={area.id} />
-            <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{area.label}</span>
+            <input type="radio" name="areaFilter" value={area.val} checked={area.val === 'all'} class="area-radio w-4 h-4 accent-[#006ce4]" id={area.id} />
+            <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">{area.label}</span>
           </span>
-          <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md">{area.count}</span>
+          <span class="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-md font-bold text-slate-500">{area.count}</span>
         </label>
       ))}
     </div>
   </div>
 
-  <!-- PROPERTY RATING -->
+  <!-- PROPERTY RATING (Stars) -->
   <div class="space-y-3 pt-2">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Rating</span>
+    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Star Rating</span>
     <div class="space-y-1">
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="5" class="star-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="5" class="star-check w-4 h-4 accent-[#006ce4] rounded" />
           <span class="text-xs font-bold text-slate-700">5 Stars</span>
-          <span class="flex text-[#febb02] text-[10px]">★★★★★</span>
         </span>
         <span class="text-[10px] font-bold text-slate-400">{star5Count}</span>
       </label>
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="4" class="star-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="4" class="star-check w-4 h-4 accent-[#006ce4] rounded" />
           <span class="text-xs font-bold text-slate-700">4 Stars</span>
-          <span class="flex text-[#febb02] text-[10px]">★★★★</span>
         </span>
         <span class="text-[10px] font-bold text-slate-400">{star4Count}</span>
       </label>
-    </div>
-  </div>
-
-  <!-- REVIEW SCORE -->
-  <div class="space-y-3 pt-2">
-    <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Guest Review</span>
-    <div class="space-y-1">
-      {[
-        { val: '9', label: 'Exceptional: 9+' },
-        { val: '8', label: 'Excellent: 8+' },
-        { val: '7', label: 'Very Good: 7+' }
-      ].map(score => (
-        <label class="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
-          <input type="checkbox" value={score.val} class="rating-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
-          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{score.label}</span>
-        </label>
-      ))}
     </div>
   </div>
 
@@ -142,15 +109,15 @@ const {
     <div class="space-y-1">
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="hotel" class="type-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
-          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Hotels</span>
+          <input type="checkbox" value="hotel" class="type-check w-4 h-4 accent-[#006ce4] rounded" />
+          <span class="text-xs font-bold text-slate-700">Hotels</span>
         </span>
         <span class="text-[10px] font-bold text-slate-400">{hotelCount}</span>
       </label>
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="guesthouse" class="type-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
-          <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Guest Houses</span>
+          <input type="checkbox" value="guesthouse" class="type-check w-4 h-4 accent-[#006ce4] rounded" />
+          <span class="text-xs font-bold text-slate-700">Guest Houses</span>
         </span>
         <span class="text-[10px] font-bold text-slate-400">{guestHouseCount}</span>
       </label>
@@ -160,103 +127,113 @@ const {
 </aside>
 
 <script>
-  // ফিল্টারিং লজিক ফাংশন
-  const initFilters = () => {
+  function applyFilters() {
+    console.log("Filter engine initialized...");
+
     const searchInput = document.getElementById('sidebarSearchInput') as HTMLInputElement;
     const sortSelect = document.getElementById('sidebarSortSelect') as HTMLSelectElement;
-    const resetBtn = document.getElementById('resetFiltersBtn');
     const countDisplay = document.getElementById('sidebarCountDisplay');
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    
+    // মেইন লিস্ট কন্টেইনার এবং কার্ডগুলো সিলেক্ট করা
     const hotelCards = document.querySelectorAll('.directory-card-item') as NodeListOf<HTMLElement>;
-    const hotelContainer = hotelCards[0]?.parentElement;
+    
+    // কার্ডগুলো যদি না পাওয়া যায় তবে রিটার্ন
+    if (hotelCards.length === 0) {
+      console.warn("No hotel cards found with class .directory-card-item");
+      return;
+    }
 
-    if (!hotelCards.length) return;
+    const hotelContainer = hotelCards[0].parentElement;
 
-    const runFilters = () => {
-      const searchTerm = searchInput.value.toLowerCase().trim();
-      const selectedArea = (document.querySelector('input[name="areaFilter"]:checked') as HTMLInputElement)?.value;
+    const runFiltering = () => {
+      const searchTerm = searchInput?.value.toLowerCase().trim() || "";
+      const selectedArea = (document.querySelector('input[name="areaFilter"]:checked') as HTMLInputElement)?.value || "all";
       
-      const selectedStars = Array.from(document.querySelectorAll('.star-check:checked')).map((cb: any) => cb.value);
-      const selectedRatings = Array.from(document.querySelectorAll('.rating-check:checked')).map((cb: any) => parseFloat(cb.value));
-      const selectedTypes = Array.from(document.querySelectorAll('.type-check:checked')).map((cb: any) => cb.value);
+      const selectedStars = Array.from(document.querySelectorAll('.star-check:checked')).map((el: any) => el.value);
+      const selectedTypes = Array.from(document.querySelectorAll('.type-check:checked')).map((el: any) => el.value);
 
       let visibleCount = 0;
 
-      hotelCards.forEach(card => {
-        const title = card.getAttribute('data-title') || '';
-        const stars = card.getAttribute('data-stars') || '';
-        const area = card.getAttribute('data-area') || '';
-        const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
+      hotelCards.forEach((card) => {
+        // কার্ডের ভেতর থাকা ডাটা এট্রিবিউটগুলো পড়া
+        const title = (card.getAttribute('data-title') || "").toLowerCase();
+        const stars = card.getAttribute('data-stars') || "";
+        const area = card.getAttribute('data-area') || "";
         const isGuestHouse = card.getAttribute('data-guesthouse') === 'true';
         const type = isGuestHouse ? 'guesthouse' : 'hotel';
 
-        // শর্ত পরীক্ষা
-        const matchesSearch = title.includes(searchTerm);
+        // লজিক চেক
+        const matchesSearch = searchTerm === "" || title.includes(searchTerm);
         const matchesArea = selectedArea === 'all' || area === selectedArea;
         const matchesStars = selectedStars.length === 0 || selectedStars.includes(stars);
         const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
-        
-        let matchesRating = true;
-        if (selectedRatings.length > 0) {
-          matchesRating = selectedRatings.some(r => rating >= r);
-        }
 
-        if (matchesSearch && matchesArea && matchesStars && matchesRating && matchesType) {
-          card.classList.remove('hidden');
-          card.style.display = 'flex'; // আপনার কার্ড ফ্লেক্স হলে
+        if (matchesSearch && matchesArea && matchesStars && matchesType) {
+          card.style.display = 'block'; // অথবা আপনার লেআউট অনুযায়ী flex
           visibleCount++;
         } else {
-          card.classList.add('hidden');
           card.style.display = 'none';
         }
       });
 
       if (countDisplay) countDisplay.textContent = visibleCount.toString();
-      runSort(); // ফিল্টারের পর সর্টিং চালানো
+      
+      // সর্টিং কল করা
+      runSorting();
     };
 
-    const runSort = () => {
-      const sortBy = sortSelect.value;
-      const visibleCards = Array.from(hotelCards).filter(c => !c.classList.contains('hidden'));
+    const runSorting = () => {
+      if (!hotelContainer) return;
+      const sortBy = sortSelect?.value || "featured";
+      
+      // শুধুমাত্র দৃশ্যমান কার্ডগুলোকে অ্যারেতে নেওয়া
+      const cardsArray = Array.from(hotelCards);
 
-      visibleCards.sort((a, b) => {
-        const priceA = parseFloat(a.getAttribute('data-numeric-price') || '0');
-        const priceB = parseFloat(b.getAttribute('data-numeric-price') || '0');
-        const ratingA = parseFloat(a.getAttribute('data-numeric-rating') || '0');
-        const ratingB = parseFloat(b.getAttribute('data-numeric-rating') || '0');
+      cardsArray.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-numeric-price') || "0");
+        const priceB = parseFloat(b.getAttribute('data-numeric-price') || "0");
+        const ratingA = parseFloat(a.getAttribute('data-numeric-rating') || "0");
+        const ratingB = parseFloat(b.getAttribute('data-numeric-rating') || "0");
 
         if (sortBy === 'price-asc') return priceA - priceB;
         if (sortBy === 'price-desc') return priceB - priceA;
         if (sortBy === 'rating-desc') return ratingB - ratingA;
-        return 0; // Featured (Default)
+        return 0; // Default
       });
 
-      // ডম-এ কার্ডগুলো পুনরায় সাজানো
-      visibleCards.forEach(card => hotelContainer?.appendChild(card));
+      // ডম এলিমেন্টগুলোকে নতুন সিরিয়ালে সাজানো
+      cardsArray.forEach(card => hotelContainer.appendChild(card));
     };
 
-    // ইভেন্ট লিসেনার যোগ করা
-    searchInput?.addEventListener('input', runFilters);
-    sortSelect?.addEventListener('change', runFilters);
+    // ইভেন্ট লিসেনারগুলো যোগ করা
+    searchInput?.addEventListener('input', runFiltering);
+    sortSelect?.addEventListener('change', runFiltering);
     
-    document.querySelectorAll('.area-radio, .star-check, .rating-check, .type-check').forEach(el => {
-      el.addEventListener('change', runFilters);
+    document.querySelectorAll('.area-radio, .star-check, .type-check').forEach(input => {
+      input.addEventListener('change', runFiltering);
     });
 
+    // রিসেট বাটন লজিক
     resetBtn?.addEventListener('click', () => {
-      searchInput.value = '';
-      sortSelect.value = 'featured';
-      (document.getElementById('area-all') as HTMLInputElement).checked = true;
+      if (searchInput) searchInput.value = "";
+      if (sortSelect) sortSelect.value = "featured";
+      const allRadio = document.getElementById('area-all') as HTMLInputElement;
+      if (allRadio) allRadio.checked = true;
       document.querySelectorAll('input[type="checkbox"]').forEach((cb: any) => cb.checked = false);
-      runFilters();
+      runFiltering();
     });
   };
 
-  // Astro page loads (First time + Navigation)
-  initFilters();
-  document.addEventListener('astro:page-load', initFilters);
+  // Astro page loads (Navigation safe)
+  document.addEventListener('astro:page-load', applyFilters);
+  // First time load
+  applyFilters();
 </script>
 
 <style>
   .custom-scrollbar::-webkit-scrollbar { width: 4px; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+  /* ফাস্ট ফিল্টারিংয়ের জন্য ট্রানজিশন বন্ধ রাখা ভালো */
+  .directory-card-item { transition: none !important; }
 </style>
