@@ -8,8 +8,8 @@ interface Props {
   fallbackAbout: string;
   rating: string | null;
   ratingLabel: string;
-  reviewsCount: number;
-  amenities?: any[]; // নতুন প্রপস
+  reviewsCount: number; // প্যারেন্ট থেকে আসা সঠিক সংখ্যা
+  amenities?: any[]; 
 }
 
 const {
@@ -24,7 +24,7 @@ const {
   amenities = []
 } = Astro.props;
 
-// Review processing
+// Review text processing (See more logic)
 let reviewShort = '';
 let reviewFull = '';
 let hasMoreReview = false;
@@ -33,55 +33,58 @@ if (latestReview?.comment) {
   const cleanComment = latestReview.comment.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const words = cleanComment.split(/\s+/).filter(Boolean);
   reviewFull = cleanComment;
-
-  if (words.length > 22) {
-    reviewShort = words.slice(0, 22).join(' ') + '...';
+  if (words.length > 20) {
+    reviewShort = words.slice(0, 20).join(' ') + '...';
     hasMoreReview = true;
   } else {
     reviewShort = cleanComment;
   }
 }
 
-// Amenities Processing: প্রথম ৫-৬টি অ্যামেনিটি নেওয়া যাতে এক লাইনে সুন্দর দেখায়
-const displayAmenities = amenities.slice(0, 6).map(item => {
+// Amenities: এক লাইনে দেখানোর জন্য ফিল্টার
+const displayAmenities = amenities.slice(0, 5).map(item => {
   return typeof item === 'string' ? item : (item?.name || '');
-}).filter(name => name !== '');
+}).filter(n => n !== '');
+
+const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
 ---
 
 <div class="hotel-info flex-1 min-w-0 flex flex-col justify-start text-left font-['Plus_Jakarta_Sans',sans-serif]">
   
-  <!-- ১. টাইটেল সেকশন -->
+  <!-- ১. টাইটেল -->
   <div class="leading-tight">
-    <a href={url} class="block text-[18px] sm:text-[20px] font-[800] text-[#00224f] hover:text-[#006ce4] transition-all tracking-[-0.03em] line-clamp-1">
+    <a href={url} class="block text-[18px] sm:text-[20px] font-[800] text-[#00224f] hover:text-[#006ce4] transition-all tracking-[-0.03em] line-clamp-1 uppercase">
       {title}
     </a>
 
-    <!-- ২. রেটিং স্কোর ও রিভিউ কাউন্ট -->
+    <!-- ২. সঠিক রেটিং এবং কাউন্ট (সরাসরি প্রপস থেকে) -->
     <div class="flex items-center gap-2 mt-0.5">
-      <span class="text-[13px] font-[800] text-[#008234] tracking-tight">{rating || '5.0'}</span>
-      <span class="text-[12px] text-slate-500 font-medium tracking-tight">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
+      <span class="text-[13px] font-[800] text-[#008234] tracking-tight">
+        {rating || '5.0'}
+      </span>
+      <span class="text-[12px] text-slate-500 font-medium tracking-tight">
+        ({reviewsCount} {reviewSuffix})
+      </span>
     </div>
   </div>
 
-  <!-- ৩. লোকেশন সেকশন -->
-  <div class="mt-1 flex items-center gap-1 text-[12px] text-slate-600 font-medium tracking-tight">
+  <!-- ৩. লোকেশন -->
+  <div class="mt-1 flex items-center gap-1 text-[12px] text-slate-500 font-medium tracking-tight">
     <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
     </svg>
     <span class="line-clamp-1">{address}</span>
   </div>
 
-  <!-- ৪. ডাইনামিক অ্যামেনিটিস (Best Value এর জায়গায়) -->
+  <!-- ৪. অ্যামেনিটিস (এক লাইনে) -->
   {displayAmenities.length > 0 && (
-    <div class="mt-1 flex items-center overflow-hidden whitespace-nowrap">
+    <div class="mt-1 flex items-center overflow-hidden whitespace-nowrap opacity-90">
       <div class="flex items-center gap-1.5 flex-nowrap">
         {displayAmenities.map((name, index) => (
           <div class="flex items-center gap-1.5">
-            <span class="text-[11px] font-[700] text-[#008234] uppercase tracking-wide whitespace-nowrap">
-              {name}
-            </span>
+            <span class="text-[10px] font-[700] text-[#008234] uppercase tracking-wide">{name}</span>
             {index < displayAmenities.length - 1 && (
-              <span class="w-1 h-1 rounded-full bg-slate-300 shrink-0"></span>
+              <span class="w-0.5 h-0.5 rounded-full bg-slate-300"></span>
             )}
           </div>
         ))}
@@ -89,9 +92,9 @@ const displayAmenities = amenities.slice(0, 6).map(item => {
     </div>
   )}
 
-  <!-- ৫. গেস্ট রিভিউ (ক্লিন এবং কমপ্যাক্ট) -->
-  <div class="mt-2.5 relative">
-    <p class="text-[13px] text-slate-700 leading-[1.5] italic font-medium tracking-tight border-l-[3px] border-slate-100 pl-3">
+  <!-- ৫. গেস্ট রিভিউ বক্স -->
+  <div class="mt-2.5 relative border-l-[3px] border-slate-100 pl-3">
+    <p class="text-[13px] text-slate-700 leading-[1.5] italic font-medium tracking-tight">
       <span class="review-short">“{reviewShort || fallbackAbout}”</span>
       {hasMoreReview && (
         <>
@@ -102,7 +105,7 @@ const displayAmenities = amenities.slice(0, 6).map(item => {
     </p>
   </div>
 
-  <!-- ৬. মোবাইল রেটিং ফুটার (Compact) -->
+  <!-- ৬. মোবাইল ফুটার (Compact) -->
   <div class="md:hidden flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
      <div class="flex items-center gap-2">
         <div class="bg-[#003580] text-white font-[800] text-[12px] px-1.5 py-0.5 rounded-sm shadow-sm leading-none">{rating || '5.0'}</div>
@@ -116,31 +119,27 @@ const displayAmenities = amenities.slice(0, 6).map(item => {
 </div>
 
 <script>
-  const initReviewToggle = () => {
+  // See more toggle logic
+  const init = () => {
     document.querySelectorAll('.toggle-review-btn').forEach(btn => {
-      if (btn.hasAttribute('data-initialized')) return;
-      btn.setAttribute('data-initialized', 'true');
-
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        const currentBtn = e.currentTarget as HTMLElement;
-        const box = currentBtn.closest('.hotel-info');
-        const short = box?.querySelector('.review-short');
-        const full = box?.querySelector('.review-full');
-        
+        e.stopPropagation();
+        const container = (e.target as HTMLElement).closest('.hotel-info');
+        const short = container?.querySelector('.review-short');
+        const full = container?.querySelector('.review-full');
         if (full?.classList.contains('hidden')) {
           full.classList.remove('hidden');
           short?.classList.add('hidden');
-          currentBtn.innerText = 'Show less';
+          (e.target as HTMLElement).innerText = 'Show less';
         } else {
           full?.classList.add('hidden');
           short?.classList.remove('hidden');
-          currentBtn.innerText = 'See more';
+          (e.target as HTMLElement).innerText = 'See more';
         }
       });
     });
-  };
-
-  initReviewToggle();
-  document.addEventListener('astro:page-load', initReviewToggle);
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
 </script>
