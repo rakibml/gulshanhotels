@@ -10,7 +10,7 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// --- Helpers ---
+// --- ১. হেল্পার ফাংশনসমূহ ---
 const toTitleCase = (str: string) => {
   if (!str) return '';
   return str.toLowerCase().split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -35,7 +35,7 @@ const cleanPriceString = (priceRaw: string) => {
   return `৳ ${digits}`;
 };
 
-// --- Data Extraction ---
+// --- ২. ডাটা এক্সট্রাকশন ---
 const hData = hotelItem?.data || {};
 const rawTitle = String(hData.title || hData.name || "").trim();
 const hTitle = toTitleCase(rawTitle);
@@ -50,12 +50,11 @@ const hImage = typeof rawImg === 'object' && rawImg !== null && rawImg.src ? raw
 const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka").trim();
 const locLower = hFullAddress.toLowerCase();
 
-// Area Logic
+// এরিয়া এবং স্টার লজিক
 let areaType = 'near';
 if (locLower.includes('gulshan 1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2')) areaType = 'gulshan-2';
 
-// Star Count Logic
 const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
 
@@ -63,7 +62,7 @@ const isGuestHouse = locLower.includes('guest house') || locLower.includes('gues
 const rawAbout = hotelItem?.body || hData.about || hData.description || '';
 const hSnippet25Words = getFirst25Words(rawAbout);
 
-// Pricing Logic
+// --- ৩. প্রাইসিং লজিক ---
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
 const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
 const rawDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
@@ -88,25 +87,44 @@ if (highestNum > lowestNum && lowestNum > 0) {
   discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
 }
 
-// Reviews Logic
+// --- ৪. রিভিউ লজিক (সঠিক কাউন্ট নিশ্চিত করার জন্য মার্জ লজিক) ---
 const matchedCmsReviews = allCmsReviews.filter(r => {
   const item = r.data || r;
-  if (!item.approved) return false;
-  const rSlug = String(item.slug || item.hotelSlug || '').toLowerCase();
-  const rHotel = String(item.hotel || '').toLowerCase();
-  return rSlug === hSlug.toLowerCase() || rHotel === titleLowerStr;
-});
+  const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
+  if (!isApproved) return false;
 
-const finalReviewsList = matchedCmsReviews.length > 0 ? matchedCmsReviews.map(r => r.data || r) : (Array.isArray(hData.reviews) ? hData.reviews : []);
-const latestReview = finalReviewsList.length > 0 ? finalReviewsList[0] : null;
+  const rSlug = String(item.slug || item.hotelSlug || '').trim().toLowerCase();
+  const rHotel = String(item.hotel || '').trim().toLowerCase();
+
+  return (rSlug !== "" && rSlug === hSlug.toLowerCase()) || 
+         (rHotel !== "" && rHotel === titleLowerStr);
+}).map(r => r.data || r);
+
+const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : [];
+
+// CMS এবং Embedded রিভিউ একসাথে যোগ করা
+const finalReviewsList = [...matchedCmsReviews, ...embeddedReviews].map(rev => ({
+  name: rev.name || 'Verified Guest',
+  date: rev.date || 'Recent',
+  rating: Number(rev.rating) || 5,
+  comment: (rev.comment || '').trim()
+})).filter(r => r.comment.length > 2);
+
 const realCount = finalReviewsList.length;
-let realRating = realCount > 0 ? ((finalReviewsList.reduce((s:any, r:any) => s + (Number(r.rating) || 5), 0) / realCount) * 2).toFixed(1) : null;
+let realRating = null;
+
+if (realCount > 0) {
+  const totalStars = finalReviewsList.reduce((sum, r) => sum + r.rating, 0);
+  const avg = totalStars / realCount;
+  realRating = (avg * 2).toFixed(1); // ১০ ভিত্তিক রেটিং
+}
 
 const numRating = parseFloat(realRating || '0');
 let ratingLabel = 'Wonderful';
 if (numRating < 9.0 && numRating >= 8.0) ratingLabel = 'Very Good';
 else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 
+const latestReview = finalReviewsList.length > 0 ? finalReviewsList[0] : null;
 const hasValidTitle = hTitle.length > 0;
 ---
 
@@ -120,7 +138,7 @@ const hasValidTitle = hTitle.length > 0;
     data-numeric-rating={numRating}
     data-official-price={officialBaseStartingPrice}
   >
-    <!-- ১. ছবির মডিউল -->
+    <!-- ১. ছবির মডিউল (মোবাইলে উপরে, ডেক্সটপে বামে) -->
     <div class="relative w-full md:w-64 lg:w-72 shrink-0 aspect-[16/10] md:aspect-auto overflow-hidden bg-slate-100">
       <CardImage 
         image={hImage} 
@@ -134,7 +152,7 @@ const hasValidTitle = hTitle.length > 0;
     <div class="flex-1 flex flex-col justify-between p-4 sm:p-5 gap-4">
       
       <div class="flex flex-col md:flex-row justify-between gap-4 md:gap-2">
-        <!-- ২. টাইটেল, অ্যাড্রেস ও রিভিউ মডিউল (Amenities যোগ করা হয়েছে) -->
+        <!-- ২. টাইটেল, অ্যাড্রেস ও রিভিউ মডিউল (Amenities এবং Correct Count পাঠানো হয়েছে) -->
         <CardInfo 
           title={hTitle} 
           url={hotelUrl} 
@@ -147,6 +165,7 @@ const hasValidTitle = hTitle.length > 0;
           reviewsCount={realCount} 
           amenities={hData.amenities || []}
         />
+
         <!-- ৩. রেটিং স্কোর ও প্রাইসিং মডিউল -->
         <CardPricing 
           displayPrice={displayPrice} 
