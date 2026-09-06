@@ -17,31 +17,26 @@ const toTitleCase = (str: string) => {
 };
 
 const getFirst25Words = (text: string): string => {
-  if (!text || typeof text !== 'string') {
-    return "Experience world-class luxury suites, exceptional hospitality, fine dining, and prime comfort in the heart of Gulshan, Dhaka.";
-  }
+  if (!text || typeof text !== 'string') return "Experience prime comfort in the heart of Gulshan, Dhaka.";
   const clean = text.replace(/<[^>]+>/g, ' ').replace(/[#*`_~]/g, '').trim();
   const words = clean.split(/\s+/).filter(Boolean);
-  if (words.length <= 25) return words.join(' ');
-  return words.slice(0, 25).join(' ') + '...';
+  return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
 
 const cleanPriceString = (priceRaw: string) => {
   if (!priceRaw) return 'Contact for Rates';
   const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
   const digits = clean.replace(/[^0-9.,]/g, '').trim();
-  if (!digits) return 'Contact for Rates';
-  if (clean.includes('$')) return `$${digits}`;
-  return `৳ ${digits}`;
+  return clean.includes('$') ? `$${digits}` : `৳ ${digits}`;
 };
 
-// --- ২. হোটেলের মূল তথ্য নিষ্কাশন ---
+// --- ২. হোটেলের মূল তথ্য (হোটেল পেজের সাথে সামঞ্জস্য রেখে) ---
 const hData = hotelItem?.data || {};
-const rawTitle = String(hData.title || hData.name || "").trim();
-const hTitle = toTitleCase(rawTitle);
-const titleLowerStr = rawTitle.toLowerCase();
+const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
+const hotelSlug = (hData.slug || hotelItem?.slug || hotelItem?.id || "hotel").trim();
 
-const hSlug = String(hData.slug || hotelItem?.slug || hotelItem?.id || "").trim();
+const hTitle = toTitleCase(hotelTitle);
+const hSlug = hotelSlug;
 const hotelUrl = `/${hSlug}`; 
 
 const rawImg = hData.image || hData.coverImage || hData.featuredImage || hData.thumbnail || (Array.isArray(hData.gallery) ? hData.gallery[0] : null);
@@ -50,17 +45,13 @@ const hImage = typeof rawImg === 'object' && rawImg !== null && rawImg.src ? raw
 const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka").trim();
 const locLower = hFullAddress.toLowerCase();
 
-// এরিয়া এবং স্টার কাউন্ট
 let areaType = 'near';
 if (locLower.includes('gulshan 1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2')) areaType = 'gulshan-2';
 
 const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
-
-const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
-const rawAbout = hotelItem?.body || hData.about || hData.description || '';
-const hSnippet25Words = getFirst25Words(rawAbout);
+const hSnippet25Words = getFirst25Words(hotelItem?.body || hData.about || hData.description || '');
 
 // --- ৩. প্রাইসিং লজিক ---
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
@@ -78,7 +69,6 @@ if (Array.isArray(hData.booking_channels)) {
     }
   });
 }
-
 const displayPrice = lowestNum > 0 ? (rawBasePrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : officialBaseStartingPrice;
 let displayOriginalPrice = "";
 let discountPercent = 0;
@@ -87,92 +77,80 @@ if (highestNum > lowestNum && lowestNum > 0) {
   discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
 }
 
-// --- ৪. রিভিউ লজিক (১০০০% সঠিক কাউন্ট নিশ্চিত করার জন্য শক্তিশালী লজিক) ---
-const currentSlug = hSlug.toLowerCase().trim();
-const currentTitle = rawTitle.toLowerCase().trim();
+// --- ৪. রিভিউ লজিক (আপনার HotelReviews.astro থেকে হুবহু কপি করা) ---
+const searchTitle = hotelTitle.toLowerCase();
+const searchSlug = hotelSlug.toLowerCase();
 
-// ক) CMS থেকে সব রিভিউ সোর্স নেওয়া
-let reviewsToProcess = allCmsReviews || [];
-
-// যদি Props এ ডাটা না থাকে তবে সরাসরি ফাইল স্ক্যান করা (Fail-safe)
-if (reviewsToProcess.length === 0) {
-  try {
-    const globFiles = import.meta.glob('../content/reviews/*.md', { eager: true });
-    reviewsToProcess = Object.values(globFiles).map((f: any) => ({ data: f.frontmatter }));
-  } catch (e) {}
+// ৪.১: সব রিভিউ সোর্স থেকে নিয়ে আসা (Glob Path: কার্ড যদি src/components/ এ থাকে)
+let rawReviewsList: any[] = [];
+try {
+  // পাথ চেক করুন: কার্ড ফাইলটি যেখানে আছে সেখান থেকে content ফোল্ডারের দূরত্ব
+  const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
+  rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
+  
+  if (rawReviewsList.length === 0 && allCmsReviews.length > 0) {
+    rawReviewsList = allCmsReviews.map(r => r.data || r);
+  }
+} catch (e) {
+  rawReviewsList = allCmsReviews.map(r => r.data || r);
 }
 
-// খ) এই হোটেলের জন্য CMS রিভিউগুলো ফিল্টার করা
-const approvedCmsReviews = reviewsToProcess.filter(r => {
-  const item = r.data || r;
+// ৪.২: হোটেল পেজের মতো স্ট্রিক্ট ফিল্টারিং
+const approvedCmsReviews = rawReviewsList.filter(item => {
+  if (!item) return false;
   const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
   if (!isApproved) return false;
 
-  const rSlug = String(item.slug || item.hotelSlug || '').trim().toLowerCase();
-  const rHotel = String(item.hotel || '').trim().toLowerCase();
+  const rHotel = (item.hotel || "").trim().toLowerCase();
+  const rSlug = (item.slug || item.hotelSlug || "").trim().toLowerCase();
 
-  // স্মার্ট স্লাগ এবং টাইটেল ম্যাচিং
-  const match = (rSlug !== "" && (rSlug === currentSlug || currentSlug.includes(rSlug))) || 
-                (rHotel !== "" && (rHotel === currentTitle || currentTitle.includes(rHotel)));
-  return match;
-}).map(r => r.data || r);
+  return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
+});
 
-// গ) হোটেলের নিজস্ব হার্ডকোড করা রিভিউ নেওয়া
-const embeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : [];
-
-// ঘ) মার্জ লজিক (Merge CMS + Embedded)
-const finalReviewsList = [...approvedCmsReviews, ...embeddedReviews].map(rev => ({
+// ৪.৩: Embedded রিভিউ এবং CMS রিভিউ মার্জ করা
+const hotelEmbeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : [];
+const allApprovedReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].map((rev) => ({
   rating: Number(rev.rating) || 5,
-  comment: String(rev.comment || '').trim()
+  comment: (rev.comment || '').trim(),
+  name: rev.name || 'Verified Guest',
+  date: rev.date || 'Recent'
 })).filter(r => r.comment.length > 2);
 
-// ঙ) রেটিং এবং কাউন্ট ক্যালকুলেশন
-const realCount = finalReviewsList.length;
-let realRating = null;
+// ৪.৪: রেটিং এবং কাউন্ট ক্যালকুলেশন
+const realCount = allApprovedReviews.length;
+const totalStarsSum = allApprovedReviews.reduce((sum, r) => sum + r.rating, 0);
+const realRating = realCount > 0 ? (totalStarsSum / realCount * 2).toFixed(1) : null;
 
-if (realCount > 0) {
-  const totalStars = finalReviewsList.reduce((sum, r) => sum + r.rating, 0);
-  const avg = totalStars / realCount;
-  realRating = (avg * 2).toFixed(1); // ১০-এর স্কেলে রেটিং
-}
-
+// ৪.৫: লেবেল নির্ধারণ
 const numRating = parseFloat(realRating || '0');
 let ratingLabel = 'Wonderful';
 if (numRating < 9.0 && numRating >= 8.0) ratingLabel = 'Very Good';
 else if (numRating < 8.0 && numRating > 0) ratingLabel = 'Good';
 
-// সর্বশেষ একটি রিভিউ পাঠানো (ইন্টারফেসের জন্য)
-const latestReview = approvedCmsReviews.length > 0 ? approvedCmsReviews[0] : (embeddedReviews.length > 0 ? embeddedReviews[0] : null);
-
+const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 const hasValidTitle = hTitle.length > 0;
 ---
 
 {hasValidTitle && (
   <div 
     class="directory-card-item group bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row overflow-hidden mb-6"
-    data-title={titleLowerStr}
+    data-title={hotelTitle.toLowerCase()}
     data-stars={starCount.toString()}
     data-area={areaType}
     data-numeric-price={numericPrice}
     data-numeric-rating={numRating}
     data-official-price={officialBaseStartingPrice}
   >
-    <!-- ১. ছবির মডিউল: মোবাইলে উপরে, ডেক্সটপে বামে -->
-    <div class="relative w-full md:w-64 lg:w-72 shrink-0 aspect-[16/10] md:aspect-auto overflow-hidden bg-slate-100">
-      <CardImage 
-        image={hImage} 
-        title={hTitle} 
-        url={hotelUrl} 
-        price={displayPrice} 
-      />
+    <!-- ১. ছবির মডিউল (মোবাইলে উপরে) -->
+    <div class="relative w-full md:w-64 lg:w-72 shrink-0 aspect-[16/10] md:aspect-auto overflow-hidden bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
+      <CardImage image={hImage} title={hTitle} url={hotelUrl} price={displayPrice} />
     </div>
 
     <!-- ২য় ও ৩য় মডিউল র‍্যাপার -->
     <div class="flex-1 flex flex-col justify-between p-4 sm:p-5 gap-4">
-      
       <div class="flex flex-col md:flex-row justify-between gap-4 md:gap-2">
         
-        <!-- ২. টাইটেল, অ্যাড্রেস, অ্যামেনিটিস ও রিভিউ মডিউল -->
+        <!-- ২. টাইটেল, অ্যাড্রেস, অ্যামেনিটিস ও রিভিউ -->
         <CardInfo 
           title={hTitle} 
           url={hotelUrl} 
@@ -197,13 +175,10 @@ const hasValidTitle = hTitle.length > 0;
           title={hTitle} 
         />
       </div>
-
     </div>
   </div>
 )}
 
 <style is:global>
-  .directory-card-item {
-    margin-bottom: 20px !important;
-  }
+  .directory-card-item { margin-bottom: 20px !important; }
 </style>
