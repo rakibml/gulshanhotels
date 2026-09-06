@@ -10,25 +10,58 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// --- ১. লজিক সেকশন (আগের মতোই থাকবে) ---
+// --- ১. হেল্পার ফাংশনসমূহ ---
 const toTitleCase = (str: string) => str ? str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
 const getFirst25Words = (text: string) => {
-  if (!text) return "Experience world-class luxury in Gulshan.";
-  const clean = text.replace(/<[^>]+>/g, ' ').trim();
+  if (!text) return "Experience world-class luxury and comfort in Gulshan.";
+  const clean = text.replace(/<[^>]+>/g, ' ').replace(/[#*`_~]/g, '').trim();
   const words = clean.split(/\s+/);
   return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
-const cleanPriceString = (p: string) => p ? (p.includes('$') ? `$${p.replace(/[^0-9.]/g, '')}` : `৳ ${p.replace(/[^0-9.]/g, '')}`) : 'Contact for Rates';
 
+const cleanPriceString = (priceRaw: string) => {
+  if (!priceRaw) return 'Contact for Rates';
+  const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
+  const digits = clean.replace(/[^0-9.,]/g, '').trim();
+  return clean.includes('$') ? `$${digits}` : `৳ ${digits}`;
+};
+
+// --- ২. হোটেলের তথ্য নিষ্কাশন ---
 const hData = hotelItem?.data || {};
-const hTitle = toTitleCase(hData.title || hData.name || "");
-const hSlug = hData.slug || hotelItem?.slug || hotelItem?.id || "hotel";
-const hotelUrl = `/${hSlug}`; 
-const hImage = hData.image || hData.coverImage || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
-const hFullAddress = hData.address || hData.location || "Gulshan, Dhaka";
+const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
+const hotelSlug = (hData.slug || hotelItem?.slug || hotelItem?.id || "hotel").trim();
 
-// Pricing logic
+const hTitle = toTitleCase(hotelTitle);
+const hSlug = hotelSlug;
+const hotelUrl = `/${hSlug}`; 
+
+const rawImg = hData.image || hData.coverImage || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
+const hImage = typeof rawImg === 'object' && rawImg !== null && rawImg.src ? rawImg.src : (typeof rawImg === 'string' ? rawImg : "");
+
+const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka").trim();
+const locLower = hFullAddress.toLowerCase();
+const titleLowerStr = hotelTitle.toLowerCase();
+
+// --- ৩. ফিল্টার ডাটা সেট করা (খুবই গুরুত্বপূর্ণ) ---
+
+// Area Logic
+let areaType = 'near';
+if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) areaType = 'gulshan-1';
+else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) areaType = 'gulshan-2';
+
+// Star Count
+const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
+const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
+
+// Property Type (Guest House vs Hotel)
+const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
+
+// --- ৪. প্রাইসিং লজিক ---
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
+const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
+const rawDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
+let numericPrice = rawBasePrice.includes('$') ? Math.round(rawDigits * 120) : rawDigits;
+
 let lowestNum = 0, highestNum = 0;
 if (Array.isArray(hData.booking_channels)) {
   hData.booking_channels.forEach((ch: any) => {
@@ -39,7 +72,7 @@ if (Array.isArray(hData.booking_channels)) {
     }
   });
 }
-const displayPrice = lowestNum > 0 ? (rawBasePrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : cleanPriceString(rawBasePrice);
+const displayPrice = lowestNum > 0 ? (rawBasePrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : officialBaseStartingPrice;
 let displayOriginalPrice = "";
 let discountPercent = 0;
 if (highestNum > lowestNum) {
@@ -47,8 +80,9 @@ if (highestNum > lowestNum) {
   discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
 }
 
-// Reviews logic (Sync with Hotel Page)
-const searchSlug = hSlug.toLowerCase();
+// --- ৫. রিভিউ লজিক ---
+const searchTitle = hotelTitle.toLowerCase();
+const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
 try {
   const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
@@ -58,54 +92,63 @@ try {
 const approvedCmsReviews = rawReviewsList.filter(item => {
   if (!item || !item.approved) return false;
   const rSlug = (item.slug || item.hotelSlug || "").toLowerCase();
-  return rSlug === searchSlug;
+  const rHotel = (item.hotel || "").toLowerCase();
+  return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
 });
 const allApprovedReviews = [...approvedCmsReviews, ...(hData.reviews || [])];
 const realCount = allApprovedReviews.length;
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount * 2).toFixed(1) : "10.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
-const starCount = hData.starCategory?.includes('5') ? 5 : 4;
+const hasValidTitle = hTitle.length > 0;
 ---
 
-<div class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-500 mb-6 overflow-hidden">
-  
-  <!-- গ্রিড লেআউট: মোবাইলে ১ কলাম, ডেক্সটপে ৩ কলাম (Image | Info | Price) -->
-  <div class="flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px] min-h-[200px]">
-    
-    <!-- ১. ইমেজ সেকশন -->
-    <div class="relative w-full h-full min-h-[200px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100 overflow-hidden">
-      <CardImage image={hImage} title={hTitle} url={hotelUrl} price={displayPrice} />
-    </div>
+{hasValidTitle && (
+  <div 
+    class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-500 mb-6 overflow-hidden"
+    data-title={titleLowerStr}
+    data-stars={starCount.toString()}
+    data-area={areaType}
+    data-guesthouse={isGuestHouse ? 'true' : 'false'}
+    data-numeric-price={lowestNum > 0 ? lowestNum : rawDigits}
+    data-numeric-rating={parseFloat(realRating)}
+  >
+    <!-- গ্রিড লেআউট: পিসি এবং মোবাইলের জন্য -->
+    <div class="flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
+      
+      <!-- ১. ইমেজ মডিউল -->
+      <div class="relative w-full h-full min-h-[220px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
+        <CardImage image={hImage} title={hTitle} url={hotelUrl} price={displayPrice} />
+      </div>
 
-    <!-- ২. ইনফরমেশন সেকশন -->
-    <div class="p-4 sm:p-6 flex flex-col justify-center min-w-0">
-      <CardInfo 
-        title={hTitle} 
-        url={hotelUrl} 
-        stars={starCount} 
-        address={hFullAddress} 
-        latestReview={latestReview} 
-        fallbackAbout={getFirst25Words(hData.about)} 
-        rating={realRating} 
-        reviewsCount={realCount} 
-        amenities={hData.amenities || []}
-      />
-    </div>
+      <!-- ২. ইনফরমেশন মডিউল -->
+      <div class="p-5 sm:p-6 flex flex-col justify-center min-w-0">
+        <CardInfo 
+          title={hTitle} 
+          url={hotelUrl} 
+          stars={starCount} 
+          address={hFullAddress} 
+          latestReview={latestReview} 
+          fallbackAbout={getFirst25Words(hData.about)} 
+          rating={realRating} 
+          reviewsCount={realCount} 
+          amenities={hData.amenities || []}
+        />
+      </div>
 
-    <!-- ৩. প্রাইসিং সেকশন -->
-    <div class="p-4 sm:p-6 bg-slate-50/50 md:bg-white md:border-l border-slate-100 flex flex-col justify-center shrink-0">
-      <CardPricing 
-        displayPrice={displayPrice} 
-        displayOriginalPrice={displayOriginalPrice} 
-        discountPercent={discountPercent} 
-        title={hTitle} 
-      />
-    </div>
+      <!-- ৩. প্রাইসিং মডিউল -->
+      <div class="p-5 sm:p-6 bg-slate-50/50 md:bg-white md:border-l border-slate-100 flex flex-col justify-center">
+        <CardPricing 
+          displayPrice={displayPrice} 
+          displayOriginalPrice={displayOriginalPrice} 
+          discountPercent={discountPercent} 
+          title={hTitle} 
+        />
+      </div>
 
+    </div>
   </div>
-</div>
-
+)}
 <style is:global>
   .directory-card-item { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
