@@ -9,7 +9,7 @@ interface Props {
   rating: string | null;
   ratingLabel: string;
   reviewsCount: number;
-  amenities?: string[]; // নতুন প্রপস যোগ করা হয়েছে
+  amenities?: any[]; // নতুন প্রপস
 }
 
 const {
@@ -42,42 +42,46 @@ if (latestReview?.comment) {
   }
 }
 
-// সঠিক রিভিউ টেক্সট নির্ধারণ (১টি হলে 'review', বেশি হলে 'reviews')
-const reviewText = reviewsCount === 1 ? 'review' : 'reviews';
+// Amenities Processing: প্রথম ৫-৬টি অ্যামেনিটি নেওয়া যাতে এক লাইনে সুন্দর দেখায়
+const displayAmenities = amenities.slice(0, 6).map(item => {
+  return typeof item === 'string' ? item : (item?.name || '');
+}).filter(name => name !== '');
 ---
 
 <div class="hotel-info flex-1 min-w-0 flex flex-col justify-start text-left font-['Plus_Jakarta_Sans',sans-serif]">
   
-  <!-- ১. টাইটেল -->
+  <!-- ১. টাইটেল সেকশন -->
   <div class="leading-tight">
     <a href={url} class="block text-[18px] sm:text-[20px] font-[800] text-[#00224f] hover:text-[#006ce4] transition-all tracking-[-0.03em] line-clamp-1">
       {title}
     </a>
 
-    <!-- ২. সঠিক রিভিউ কাউন্ট এবং রেটিং -->
+    <!-- ২. রেটিং স্কোর ও রিভিউ কাউন্ট -->
     <div class="flex items-center gap-2 mt-0.5">
       <span class="text-[13px] font-[800] text-[#008234] tracking-tight">{rating || '5.0'}</span>
-      <span class="text-[12px] text-slate-500 font-medium tracking-tight">({reviewsCount} {reviewText})</span>
+      <span class="text-[12px] text-slate-500 font-medium tracking-tight">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
     </div>
   </div>
 
-  <!-- ৩. লোকেশন -->
-  <div class="mt-1.5 flex items-center gap-1 text-[12px] text-slate-600 font-medium tracking-tight">
+  <!-- ৩. লোকেশন সেকশন -->
+  <div class="mt-1 flex items-center gap-1 text-[12px] text-slate-600 font-medium tracking-tight">
     <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
     </svg>
     <span class="line-clamp-1">{address}</span>
   </div>
 
-  <!-- ৪. ডাইনামিক অ্যামেনিটিস (এক লাইনে) -->
-  {amenities && amenities.length > 0 && (
-    <div class="mt-1 flex items-center gap-2 overflow-hidden whitespace-nowrap">
+  <!-- ৪. ডাইনামিক অ্যামেনিটিস (Best Value এর জায়গায়) -->
+  {displayAmenities.length > 0 && (
+    <div class="mt-1 flex items-center overflow-hidden whitespace-nowrap">
       <div class="flex items-center gap-1.5 flex-nowrap">
-        {amenities.slice(0, 5).map((item, index) => (
-          <div class="flex items-center gap-1.5 shrink-0">
-            <span class="text-[10px] font-[700] text-[#008234] uppercase tracking-wide">{item}</span>
-            {index < Math.min(amenities.length, 5) - 1 && (
-              <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+        {displayAmenities.map((name, index) => (
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-[700] text-[#008234] uppercase tracking-wide whitespace-nowrap">
+              {name}
+            </span>
+            {index < displayAmenities.length - 1 && (
+              <span class="w-1 h-1 rounded-full bg-slate-300 shrink-0"></span>
             )}
           </div>
         ))}
@@ -85,7 +89,7 @@ const reviewText = reviewsCount === 1 ? 'review' : 'reviews';
     </div>
   )}
 
-  <!-- ৫. গেস্ট রিভিউ (ক্লিন লুক) -->
+  <!-- ৫. গেস্ট রিভিউ (ক্লিন এবং কমপ্যাক্ট) -->
   <div class="mt-2.5 relative">
     <p class="text-[13px] text-slate-700 leading-[1.5] italic font-medium tracking-tight border-l-[3px] border-slate-100 pl-3">
       <span class="review-short">“{reviewShort || fallbackAbout}”</span>
@@ -98,13 +102,13 @@ const reviewText = reviewsCount === 1 ? 'review' : 'reviews';
     </p>
   </div>
 
-  <!-- ৬. মোবাইল স্কোর -->
+  <!-- ৬. মোবাইল রেটিং ফুটার (Compact) -->
   <div class="md:hidden flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
      <div class="flex items-center gap-2">
         <div class="bg-[#003580] text-white font-[800] text-[12px] px-1.5 py-0.5 rounded-sm shadow-sm leading-none">{rating || '5.0'}</div>
         <div class="flex flex-col leading-tight">
           <span class="text-[11px] font-[700] text-[#00224f] tracking-tight">{ratingLabel}</span>
-          <span class="text-[9px] text-slate-400 font-bold uppercase">{reviewsCount} {reviewText}</span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase">{reviewsCount} Reviews</span>
         </div>
      </div>
      <span class="text-[9px] font-black text-[#008234] uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">Verified</span>
