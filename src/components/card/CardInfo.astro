@@ -8,7 +8,7 @@ interface Props {
   fallbackAbout: string;
   rating: string | null;
   ratingLabel: string;
-  reviewsCount: number; // প্যারেন্ট থেকে আসা সঠিক সংখ্যা
+  reviewsCount: number;
   amenities?: any[]; 
 }
 
@@ -19,12 +19,11 @@ const {
   latestReview,
   fallbackAbout,
   rating,
-  ratingLabel,
   reviewsCount,
   amenities = []
 } = Astro.props;
 
-// Review text processing (See more logic)
+// Review processing logic
 let reviewShort = '';
 let reviewFull = '';
 let hasMoreReview = false;
@@ -41,7 +40,7 @@ if (latestReview?.comment) {
   }
 }
 
-// Amenities: এক লাইনে দেখানোর জন্য ফিল্টার
+// Amenities Logic
 const displayAmenities = amenities.slice(0, 5).map(item => {
   return typeof item === 'string' ? item : (item?.name || '');
 }).filter(n => n !== '');
@@ -51,13 +50,12 @@ const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
 
 <div class="hotel-info flex-1 min-w-0 flex flex-col justify-start text-left font-['Plus_Jakarta_Sans',sans-serif]">
   
-  <!-- ১. টাইটেল -->
+  <!-- ১. টাইটেল এবং রেটিং -->
   <div class="leading-tight">
     <a href={url} class="block text-[18px] sm:text-[20px] font-[800] text-[#00224f] hover:text-[#006ce4] transition-all tracking-[-0.03em] line-clamp-1 uppercase">
       {title}
     </a>
 
-    <!-- ২. সঠিক রেটিং এবং কাউন্ট (সরাসরি প্রপস থেকে) -->
     <div class="flex items-center gap-2 mt-0.5">
       <span class="text-[13px] font-[800] text-[#008234] tracking-tight">
         {rating || '5.0'}
@@ -68,7 +66,7 @@ const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
     </div>
   </div>
 
-  <!-- ৩. লোকেশন -->
+  <!-- ২. লোকেশন -->
   <div class="mt-1 flex items-center gap-1 text-[12px] text-slate-500 font-medium tracking-tight">
     <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -76,9 +74,9 @@ const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
     <span class="line-clamp-1">{address}</span>
   </div>
 
-  <!-- ৪. অ্যামেনিটিস (এক লাইনে) -->
+  <!-- ৩. অ্যামেনিটিস -->
   {displayAmenities.length > 0 && (
-    <div class="mt-1 flex items-center overflow-hidden whitespace-nowrap opacity-90">
+    <div class="mt-1 flex items-center overflow-hidden whitespace-nowrap">
       <div class="flex items-center gap-1.5 flex-nowrap">
         {displayAmenities.map((name, index) => (
           <div class="flex items-center gap-1.5">
@@ -92,7 +90,7 @@ const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
     </div>
   )}
 
-  <!-- ৫. গেস্ট রিভিউ বক্স -->
+  <!-- ৪. গেস্ট রিভিউ (নিচে আর কোনো ডুপ্লিকেট রেটিং বা ভেরিফাইড ব্যাজ নেই) -->
   <div class="mt-2.5 relative border-l-[3px] border-slate-100 pl-3">
     <p class="text-[13px] text-slate-700 leading-[1.5] italic font-medium tracking-tight">
       <span class="review-short">“{reviewShort || fallbackAbout}”</span>
@@ -105,36 +103,23 @@ const reviewSuffix = reviewsCount === 1 ? 'review' : 'reviews';
     </p>
   </div>
 
-  <!-- ৬. মোবাইল ফুটার (Compact) -->
-  <div class="md:hidden flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-     <div class="flex items-center gap-2">
-        <div class="bg-[#003580] text-white font-[800] text-[12px] px-1.5 py-0.5 rounded-sm shadow-sm leading-none">{rating || '5.0'}</div>
-        <div class="flex flex-col leading-tight">
-          <span class="text-[11px] font-[700] text-[#00224f] tracking-tight">{ratingLabel}</span>
-          <span class="text-[9px] text-slate-400 font-bold uppercase">{reviewsCount} Reviews</span>
-        </div>
-     </div>
-     <span class="text-[9px] font-black text-[#008234] uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">Verified</span>
-  </div>
+  <!-- লাল মার্ক করা ওই সেকশনটি এখান থেকে সম্পূর্ণ রিমুভ করা হয়েছে -->
+
 </div>
 
 <script>
-  // See more toggle logic
   const init = () => {
     document.querySelectorAll('.toggle-review-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         const container = (e.target as HTMLElement).closest('.hotel-info');
         const short = container?.querySelector('.review-short');
         const full = container?.querySelector('.review-full');
         if (full?.classList.contains('hidden')) {
-          full.classList.remove('hidden');
-          short?.classList.add('hidden');
+          full.classList.remove('hidden'); short?.classList.add('hidden');
           (e.target as HTMLElement).innerText = 'Show less';
         } else {
-          full?.classList.add('hidden');
-          short?.classList.remove('hidden');
+          full?.classList.add('hidden'); short?.classList.remove('hidden');
           (e.target as HTMLElement).innerText = 'See more';
         }
       });
