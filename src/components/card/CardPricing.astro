@@ -5,75 +5,41 @@ interface Props {
   discountPercent: number;
   title: string;
 }
-
-const {
-  displayPrice,
-  displayOriginalPrice,
-  discountPercent,
-  title
-} = Astro.props;
+const { displayPrice, displayOriginalPrice, discountPercent, title } = Astro.props;
 ---
 
-<div class="h-full flex flex-row md:flex-col justify-between items-center md:items-end gap-3 font-['Plus_Jakarta_Sans',sans-serif]">
+<div class="flex flex-row md:flex-col justify-between items-center md:items-end gap-3 w-full">
   
-  <!-- ১. প্রাইসিং সেকশন -->
-  <div class="flex flex-col items-start md:items-end flex-1">
+  <!-- প্রাইস এরিয়া -->
+  <div class="flex flex-col items-start md:items-end">
     
-    <!-- অরিজিনাল প্রাইস এবং ডিসকাউন্ট ব্যাজ (একই লাইনে) -->
-    <div class="flex items-center gap-2 flex-wrap md:justify-end mb-1">
+    <div class="flex items-center gap-2 flex-wrap md:justify-end">
       {displayOriginalPrice && (
-        <span class="text-[13px] sm:text-[14px] font-bold text-slate-400 line-through decoration-slate-300">
-          {displayOriginalPrice}
-        </span>
+        <span class="text-[13px] font-bold text-slate-400 line-through">{displayOriginalPrice}</span>
       )}
-      
       {discountPercent > 0 && (
-        <span class="bg-red-600 text-white text-[10px] font-[900] px-1.5 py-0.5 rounded-sm uppercase tracking-tighter shadow-sm">
-          -{discountPercent}%
-        </span>
+        <span class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-sm">-{discountPercent}%</span>
       )}
-
-      <!-- মেইন প্রাইস -->
-      <div class="flex items-baseline gap-1">
-        <span class="text-[26px] sm:text-[32px] font-[800] text-[#008234] leading-none tracking-tighter">
-          {displayPrice}
-        </span>
-        <span class="text-[10px] font-[700] text-slate-400 uppercase tracking-tighter">
-          /night
-        </span>
-      </div>
     </div>
 
-    <!-- ট্রাস্ট ট্যাগ (Best Rate Found) -->
-    <div class="flex items-center gap-1.5">
-      <div class="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center">
-        <svg class="w-2.5 h-2.5 text-[#008234]" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-        </svg>
-      </div>
-      <span class="text-[10px] font-[800] text-[#008234] uppercase tracking-widest">
-        Best rate found
-      </span>
+    <div class="flex items-baseline gap-1 mt-1">
+      <span class="text-2xl lg:text-3xl font-[800] text-[#008234] leading-none tracking-tighter">{displayPrice}</span>
+      <span class="text-[10px] font-bold text-slate-400 uppercase">/night</span>
+    </div>
+
+    <div class="mt-2 flex items-center gap-1">
+      <svg class="w-3.5 h-3.5 text-[#008234]" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+      </svg>
+      <span class="text-[10px] font-bold text-[#008234] uppercase tracking-wider">Best rate found</span>
     </div>
   </div>
 
-  <!-- ২. অ্যাকশন বাটন -->
-  <div class="shrink-0 md:w-full md:mt-4">
-    <button 
-      type="button"
-      aria-label={`View details for ${title}`}
-      class="open-quick-view-btn group relative overflow-hidden bg-[#006ce4] hover:bg-[#0057b8] text-white py-3 px-6 md:w-full rounded-2xl transition-all duration-300 shadow-[0_4px_15px_rgba(0,108,228,0.2)] active:scale-95 flex items-center justify-center gap-2"
-    >
-      <span class="text-[11px] lg:text-xs font-[800] uppercase tracking-[0.1em]">
-        View <span class="hidden sm:inline">Hotel</span>
-      </span>
-      <svg 
-        class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform duration-300" 
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24" 
-        stroke-width="3"
-      >
+  <!-- বাটন এরিয়া -->
+  <div class="md:w-full md:mt-4">
+    <button class="open-quick-view-btn group bg-[#006ce4] hover:bg-[#0057b8] text-white py-3 px-5 md:w-full rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+      <span class="text-[11px] font-bold uppercase tracking-widest">View Hotel</span>
+      <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
         <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
