@@ -55,7 +55,7 @@ let areaType = 'near';
 if (locLower.includes('gulshan 1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2')) areaType = 'gulshan-2';
 
-// Star Count Logic (এটি আগে মিসিং ছিল)
+// Star Count Logic
 const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : (rawCat.includes('3') ? 3 : 0));
 
@@ -134,7 +134,7 @@ const hasValidTitle = hTitle.length > 0;
     <div class="flex-1 flex flex-col justify-between p-4 sm:p-5 gap-4">
       
       <div class="flex flex-col md:flex-row justify-between gap-4 md:gap-2">
-        <!-- ২. টাইটেল, অ্যাড্রেস ও রিভিউ মডিউল -->
+        <!-- ২. টাইটেল, অ্যাড্রেস ও রিভিউ মডিউল (Amenities যোগ করা হয়েছে) -->
         <CardInfo 
           title={hTitle} 
           url={hotelUrl} 
@@ -145,12 +145,8 @@ const hasValidTitle = hTitle.length > 0;
           rating={realRating} 
           ratingLabel={ratingLabel} 
           reviewsCount={realCount} 
+          amenities={hData.amenities || []}
         />
-<!-- HotelCard.astro এর ভেতরে যেখানে CardInfo কল করেছেন সেখানে এটি দিন -->
-<CardInfo 
-  ... 
-  amenities={hData.amenities || []} 
-/>
         <!-- ৩. রেটিং স্কোর ও প্রাইসিং মডিউল -->
         <CardPricing 
           displayPrice={displayPrice} 
