@@ -29,7 +29,7 @@ const {
   <div class="flex items-center justify-between border-b border-slate-100 pb-4">
     <div>
       <h3 class="text-sm font-black text-slate-900 uppercase tracking-tight">Filters</h3>
-      <p class="text-[10px] text-slate-500 font-medium">Showing {totalCount} options</p>
+      <p class="text-[10px] text-slate-500 font-medium">Showing <span id="sidebarCountDisplay">{totalCount}</span> options</p>
     </div>
     <button 
       type="button" 
@@ -51,7 +51,7 @@ const {
         type="text" 
         id="sidebarSearchInput" 
         placeholder="e.g. Radisson Blu" 
-        class="w-full bg-slate-50 group-hover:bg-slate-100 focus:bg-white text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-[#006ce4] focus:ring-4 focus:ring-blue-50 focus:outline-none transition-all"
+        class="w-full bg-slate-50 group-hover:bg-slate-100 focus:bg-white text-xs font-semibold rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition-all"
       />
       <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -63,7 +63,7 @@ const {
   <div class="space-y-2 pt-2">
     <label for="sidebarSortSelect" class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">Sort By</label>
     <div class="relative">
-      <select id="sidebarSortSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] focus:ring-4 focus:ring-blue-50 cursor-pointer transition-all">
+      <select id="sidebarSortSelect" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#006ce4] cursor-pointer transition-all">
         <option value="featured">Recommended</option>
         <option value="price-asc">Price: Low to High</option>
         <option value="price-desc">Price: High to Low</option>
@@ -87,10 +87,10 @@ const {
       ].map((area) => (
         <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group transition-colors">
           <span class="flex items-center gap-2.5">
-            <input type="radio" name="areaFilter" value={area.val} checked={area.val === 'all'} class="w-4 h-4 accent-[#006ce4] cursor-pointer" id={area.id} />
+            <input type="radio" name="areaFilter" value={area.val} checked={area.val === 'all'} class="area-radio w-4 h-4 accent-[#006ce4] cursor-pointer" id={area.id} />
             <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{area.label}</span>
           </span>
-          <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md group-hover:bg-blue-100 group-hover:text-[#006ce4] transition-colors">{area.count}</span>
+          <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md">{area.count}</span>
         </label>
       ))}
     </div>
@@ -102,7 +102,7 @@ const {
     <div class="space-y-1">
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="5" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="5" class="star-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
           <span class="text-xs font-bold text-slate-700">5 Stars</span>
           <span class="flex text-[#febb02] text-[10px]">★★★★★</span>
         </span>
@@ -110,7 +110,7 @@ const {
       </label>
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="4" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="4" class="star-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
           <span class="text-xs font-bold text-slate-700">4 Stars</span>
           <span class="flex text-[#febb02] text-[10px]">★★★★</span>
         </span>
@@ -129,7 +129,7 @@ const {
         { val: '7', label: 'Very Good: 7+' }
       ].map(score => (
         <label class="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
-          <input type="checkbox" value={score.val} class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value={score.val} class="rating-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
           <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4] transition-colors">{score.label}</span>
         </label>
       ))}
@@ -142,36 +142,121 @@ const {
     <div class="space-y-1">
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="hotel" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="hotel" class="type-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
           <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Hotels</span>
         </span>
-        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#006ce4]">{hotelCount}</span>
+        <span class="text-[10px] font-bold text-slate-400">{hotelCount}</span>
       </label>
       <label class="flex items-center justify-between p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 cursor-pointer group">
         <span class="flex items-center gap-2.5">
-          <input type="checkbox" value="guesthouse" class="w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
+          <input type="checkbox" value="guesthouse" class="type-check w-4 h-4 accent-[#006ce4] rounded cursor-pointer" />
           <span class="text-xs font-bold text-slate-700 group-hover:text-[#006ce4]">Guest Houses</span>
         </span>
-        <span class="text-[10px] font-bold text-slate-400 group-hover:text-[#006ce4]">{guestHouseCount}</span>
+        <span class="text-[10px] font-bold text-slate-400">{guestHouseCount}</span>
       </label>
     </div>
   </div>
 
 </aside>
 
+<script>
+  // ফিল্টারিং লজিক ফাংশন
+  const initFilters = () => {
+    const searchInput = document.getElementById('sidebarSearchInput') as HTMLInputElement;
+    const sortSelect = document.getElementById('sidebarSortSelect') as HTMLSelectElement;
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    const countDisplay = document.getElementById('sidebarCountDisplay');
+    const hotelCards = document.querySelectorAll('.directory-card-item') as NodeListOf<HTMLElement>;
+    const hotelContainer = hotelCards[0]?.parentElement;
+
+    if (!hotelCards.length) return;
+
+    const runFilters = () => {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const selectedArea = (document.querySelector('input[name="areaFilter"]:checked') as HTMLInputElement)?.value;
+      
+      const selectedStars = Array.from(document.querySelectorAll('.star-check:checked')).map((cb: any) => cb.value);
+      const selectedRatings = Array.from(document.querySelectorAll('.rating-check:checked')).map((cb: any) => parseFloat(cb.value));
+      const selectedTypes = Array.from(document.querySelectorAll('.type-check:checked')).map((cb: any) => cb.value);
+
+      let visibleCount = 0;
+
+      hotelCards.forEach(card => {
+        const title = card.getAttribute('data-title') || '';
+        const stars = card.getAttribute('data-stars') || '';
+        const area = card.getAttribute('data-area') || '';
+        const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
+        const isGuestHouse = card.getAttribute('data-guesthouse') === 'true';
+        const type = isGuestHouse ? 'guesthouse' : 'hotel';
+
+        // শর্ত পরীক্ষা
+        const matchesSearch = title.includes(searchTerm);
+        const matchesArea = selectedArea === 'all' || area === selectedArea;
+        const matchesStars = selectedStars.length === 0 || selectedStars.includes(stars);
+        const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
+        
+        let matchesRating = true;
+        if (selectedRatings.length > 0) {
+          matchesRating = selectedRatings.some(r => rating >= r);
+        }
+
+        if (matchesSearch && matchesArea && matchesStars && matchesRating && matchesType) {
+          card.classList.remove('hidden');
+          card.style.display = 'flex'; // আপনার কার্ড ফ্লেক্স হলে
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+          card.style.display = 'none';
+        }
+      });
+
+      if (countDisplay) countDisplay.textContent = visibleCount.toString();
+      runSort(); // ফিল্টারের পর সর্টিং চালানো
+    };
+
+    const runSort = () => {
+      const sortBy = sortSelect.value;
+      const visibleCards = Array.from(hotelCards).filter(c => !c.classList.contains('hidden'));
+
+      visibleCards.sort((a, b) => {
+        const priceA = parseFloat(a.getAttribute('data-numeric-price') || '0');
+        const priceB = parseFloat(b.getAttribute('data-numeric-price') || '0');
+        const ratingA = parseFloat(a.getAttribute('data-numeric-rating') || '0');
+        const ratingB = parseFloat(b.getAttribute('data-numeric-rating') || '0');
+
+        if (sortBy === 'price-asc') return priceA - priceB;
+        if (sortBy === 'price-desc') return priceB - priceA;
+        if (sortBy === 'rating-desc') return ratingB - ratingA;
+        return 0; // Featured (Default)
+      });
+
+      // ডম-এ কার্ডগুলো পুনরায় সাজানো
+      visibleCards.forEach(card => hotelContainer?.appendChild(card));
+    };
+
+    // ইভেন্ট লিসেনার যোগ করা
+    searchInput?.addEventListener('input', runFilters);
+    sortSelect?.addEventListener('change', runFilters);
+    
+    document.querySelectorAll('.area-radio, .star-check, .rating-check, .type-check').forEach(el => {
+      el.addEventListener('change', runFilters);
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      sortSelect.value = 'featured';
+      (document.getElementById('area-all') as HTMLInputElement).checked = true;
+      document.querySelectorAll('input[type="checkbox"]').forEach((cb: any) => cb.checked = false);
+      runFilters();
+    });
+  };
+
+  // Astro page loads (First time + Navigation)
+  initFilters();
+  document.addEventListener('astro:page-load', initFilters);
+</script>
+
 <style>
-  /* Sidebar-এর জন্য কাস্টম স্ক্রলবার যদি কন্টেন্ট বেশি বড় হয় */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
-  }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 </style>
