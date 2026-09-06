@@ -14,65 +14,64 @@ const {
 } = Astro.props;
 ---
 
-<div class="w-full md:w-52 lg:w-56 shrink-0 flex flex-row md:flex-col justify-between items-end md:items-end gap-3 md:pl-4 md:border-l border-slate-100 font-['Plus_Jakarta_Sans',sans-serif]">
+<div class="w-full md:w-52 lg:w-60 shrink-0 flex flex-row md:flex-col justify-between items-center md:items-end gap-3 md:pl-4 md:border-l border-slate-100 font-['Plus_Jakarta_Sans',sans-serif]">
   
-  <!-- ১. প্রাইসিং সেকশন -->
+  <!-- ১. প্রাইসিং সেকশন (এক লাইনে সব) -->
   <div class="flex flex-col items-start md:items-end flex-1">
     
-    <!-- ডিসকাউন্ট এবং অরিজিনাল প্রাইস লাইন -->
-    {displayOriginalPrice && (
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-[11px] font-bold text-slate-400 line-through decoration-slate-300">
+    <div class="flex items-center gap-2 flex-wrap md:justify-end">
+      <!-- অরিজিনাল প্রাইস (বড় এবং স্পষ্ট করা হয়েছে) -->
+      {displayOriginalPrice && (
+        <span class="text-[14px] sm:text-[15px] font-bold text-slate-500 line-through decoration-slate-400">
           {displayOriginalPrice}
         </span>
-        <span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-tighter shadow-sm">
+      )}
+
+      <!-- ডিসকাউন্ট ব্যাজ (বড় এবং গাঢ় লাল করা হয়েছে) -->
+      {discountPercent > 0 && (
+        <span class="bg-red-600 text-white text-[11px] sm:text-[12px] font-black px-2 py-0.5 rounded shadow-sm uppercase tracking-tighter">
           -{discountPercent}%
         </span>
-      </div>
-    )}
+      )}
 
-    <!-- মেইন প্রাইস -->
-    <div class="flex items-baseline gap-1">
-      <span class="text-2xl sm:text-3xl font-[800] text-[#008234] leading-none tracking-tighter">
-        {displayPrice}
-      </span>
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-        /night
-      </span>
+      <!-- মেইন ফাইনাল প্রাইস -->
+      <div class="flex items-baseline gap-0.5">
+        <span class="text-[26px] sm:text-[32px] font-[800] text-[#008234] leading-none tracking-tighter">
+          {displayPrice}
+        </span>
+        <span class="text-[10px] font-bold text-slate-400 uppercase">/night</span>
+      </div>
     </div>
 
     <!-- ট্রাস্ট ট্যাগ (Best Rate) -->
-    <div class="mt-1.5 flex items-center gap-1">
+    <div class="mt-1 flex items-center gap-1">
       <div class="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center">
-        <svg class="w-2 h-2 text-[#008234]" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-2.5 h-2.5 text-[#008234]" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
         </svg>
       </div>
-      <span class="text-[9px] font-[800] text-[#008234] uppercase tracking-widest">
+      <span class="text-[10px] font-[800] text-[#008234] uppercase tracking-wider">
         Best rate found
       </span>
     </div>
   </div>
 
-  <!-- ২. অ্যাকশন বাটন -->
+  <!-- ২. ভিউ বাটন -->
   <div class="shrink-0 md:w-full">
     <button 
       type="button"
-      class="open-quick-view-btn group relative overflow-hidden bg-[#006ce4] hover:bg-[#0057b8] text-white py-2.5 px-5 md:w-full rounded-xl transition-all duration-300 shadow-[0_4px_14px_rgba(0,108,228,0.25)] active:scale-95"
+      class="open-quick-view-btn group bg-[#006ce4] hover:bg-[#0057b8] text-white py-2.5 px-5 md:w-full rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,108,228,0.2)] active:scale-95 flex items-center justify-center gap-2"
     >
-      <div class="flex items-center justify-center gap-2">
-        <span class="text-[11px] sm:text-xs font-[800] uppercase tracking-widest">
-          View <span class="hidden sm:inline">Hotel</span>
-        </span>
-        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-          <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
+      <span class="text-[11px] sm:text-xs font-[800] uppercase tracking-widest">
+        View <span class="hidden sm:inline text-[10px]">Hotel</span>
+      </span>
+      <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+        <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </button>
   </div>
 
 </div>
-
 <style>
   /* মেইন প্রাইসের জন্য স্পেশাল ট্র্যাকিং */
   span {
