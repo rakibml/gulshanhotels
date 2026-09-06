@@ -1,93 +1,52 @@
 ---
 interface Props {
-  images: string[]; // এখন এটি একটি স্ট্রিং অ্যারে
+  image: string | null;
   title: string;
   url: string;
   price: string;
 }
 
-const { images = [], title, url, price } = Astro.props;
-const totalImages = images.length;
+const { image, title, url, price } = Astro.props;
 ---
 
 <div class="card-img-box relative group w-full md:w-64 lg:w-72 aspect-[16/10] md:aspect-auto shrink-0 bg-slate-200 overflow-hidden rounded-t-xl md:rounded-t-none md:rounded-l-xl">
   
-  <!-- ১. ইমেজ স্লাইডার ট্র্যাক (মোবাইলে টাচ স্ক্রল সমর্থিত) -->
-  <div class="image-slider-track flex overflow-x-auto scroll-smooth snap-x snap-mandatory h-full w-full no-scrollbar">
-    {images.length > 0 ? (
-      images.map((img, index) => (
-        <div class="snap-center shrink-0 w-full h-full relative">
-          <img 
-            src={img} 
-            alt={`${title} - Photo ${index + 1}`} 
-            loading={index === 0 ? "eager" : "lazy"}
-            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-          />
-        </div>
-      ))
-    ) : (
-      <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
-        <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        <span class="text-[10px] font-bold uppercase">No Photo</span>
-      </div>
-    )}
-  </div>
-
-  <!-- ২. ইমেজ কাউন্টার ব্যাজ (ডানদিকে নিচে) -->
-  {totalImages > 1 && (
-    <div class="absolute bottom-3 right-3 z-20">
-      <div class="bg-slate-900/70 backdrop-blur-md text-white text-[10px] font-black px-2 py-1 rounded-md border border-white/20 flex items-center gap-1 shadow-lg">
-        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        <span class="image-counter">1 / {totalImages}</span>
-      </div>
+  <!-- ১. মেইন ইমেজ: Lazy loading এবং Async decoding স্পিড বাড়াবে -->
+  {image ? (
+    <img 
+      src={image} 
+      alt={title} 
+      loading="lazy" 
+      decoding="async" 
+      class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+    />
+  ) : (
+    <div class="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
+      <svg class="w-8 h-8 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider">No Photo</span>
     </div>
   )}
 
-  <!-- ৩. উইশলিস্ট বাটন -->
+  <!-- Overlay: প্রিমিয়াম লুকের জন্য হালকা ডার্ক টিন্ট -->
+  <div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300"></div>
+
+  <!-- ২. উইশলিস্ট বাটন -->
   <button 
     type="button"
-    class="wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-white hover:text-red-500 hover:scale-110 active:scale-95 z-30"
+    class="wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-white hover:text-red-500 hover:scale-110 active:scale-95 z-20"
     aria-label="Add to wishlist"
   >
     <svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
     </svg>
   </button>
-
-  <!-- Overlay for better look -->
-  <div class="absolute inset-0 bg-black/5 pointer-events-none"></div>
 </div>
 
-<style>
-  /* স্ক্রলবার লুকানোর জন্য */
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
-
 <script>
-  const setupImageSliders = () => {
-    const boxes = document.querySelectorAll('.card-img-box');
-    
-    boxes.forEach(box => {
-      const track = box.querySelector('.image-slider-track');
-      const counter = box.querySelector('.image-counter');
-      const images = track?.querySelectorAll('img');
-      const total = images?.length || 0;
-
-      if (!track || !counter || total <= 1) return;
-
-      // স্ক্রল করলে কাউন্টার আপডেট করার লজিক
-      track.addEventListener('scroll', () => {
-        const width = track.clientWidth;
-        const scrollLeft = track.scrollLeft;
-        const currentIndex = Math.round(scrollLeft / width) + 1;
-        counter.textContent = `${currentIndex} / ${total}`;
-      }, { passive: true });
-    });
-
-    // Wishlist logic
+  // শুধু উইশলিস্ট লজিক রাখা হয়েছে
+  const initWishlist = () => {
     document.querySelectorAll('.wishlist-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
@@ -100,7 +59,6 @@ const totalImages = images.length;
       });
     });
   };
-
-  setupImageSliders();
-  document.addEventListener('astro:page-load', setupImageSliders);
+  initWishlist();
+  document.addEventListener('astro:page-load', initWishlist);
 </script>
