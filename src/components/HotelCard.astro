@@ -1,4 +1,5 @@
 ---
+// src/components/directory/DirectoryCard.astro
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -19,13 +20,6 @@ const getFirst25Words = (text: string) => {
   return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
 
-const cleanPriceString = (priceRaw: string) => {
-  if (!priceRaw) return 'Contact for Rates';
-  const clean = String(priceRaw).replace(/night/gi, '').replace(/\//g, '').trim();
-  const digits = clean.replace(/[^0-9.,]/g, '').trim();
-  return clean.includes('$') ? `$${digits}` : `৳ ${digits}`;
-};
-
 // --- ২. হোটেলের তথ্য নিষ্কাশন ---
 const hData = hotelItem?.data || {};
 const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
@@ -42,45 +36,51 @@ const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka")
 const locLower = hFullAddress.toLowerCase();
 const titleLowerStr = hotelTitle.toLowerCase();
 
-// --- ৩. ফিল্টার ডাটা সেট করা (খুবই গুরুত্বপূর্ণ) ---
-
-// Area Logic
+// --- ৩. ফিল্টার ডাটা সেট করা ---
 let areaType = 'near';
 if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) areaType = 'gulshan-2';
 
-// Star Count
 const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
-
-// Property Type (Guest House vs Hotel)
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
-// --- ৪. প্রাইসিং লজিক ---
+// --- ৪. প্রাইসিং লজিক (নিখুঁত টাকার ক্যালকুলেশন) ---
 const rawBasePrice = hData.price ? String(hData.price).trim() : "";
-const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
-const rawDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
-let numericPrice = rawBasePrice.includes('$') ? Math.round(rawDigits * 120) : rawDigits;
+const isDollar = rawBasePrice.includes('$');
+
+// বেজ প্রাইস থেকে সংখ্যা বের করা
+const baseDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
 
 let lowestNum = 0, highestNum = 0;
 if (Array.isArray(hData.booking_channels)) {
   hData.booking_channels.forEach((ch: any) => {
-    const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, '')) || 0;
+    const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, ''));
     if (pNum > 0) {
       if (lowestNum === 0 || pNum < lowestNum) lowestNum = pNum;
       if (pNum > highestNum) highestNum = pNum;
     }
   });
 }
-const displayPrice = lowestNum > 0 ? (rawBasePrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : officialBaseStartingPrice;
+
+// যদি বুকিং চ্যানেল না থাকে তবে বেজ প্রাইস ব্যবহার হবে
+const finalLowest = lowestNum > 0 ? lowestNum : baseDigits;
+const finalHighest = highestNum > lowestNum ? highestNum : 0;
+
+// ডিসপ্লে প্রাইস তৈরি করা (পপুলার হোটেলের মতো)
+const displayPrice = isDollar ? `$${finalLowest}` : `৳${finalLowest.toLocaleString()}`;
 let displayOriginalPrice = "";
 let discountPercent = 0;
-if (highestNum > lowestNum) {
-  displayOriginalPrice = rawBasePrice.includes('$') ? `$${highestNum}` : `৳ ${highestNum.toLocaleString()}`;
-  discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
+
+if (finalHighest > finalLowest) {
+  displayOriginalPrice = isDollar ? `$${finalHighest}` : `৳${finalHighest.toLocaleString()}`;
+  discountPercent = Math.round(((finalHighest - finalLowest) / finalHighest) * 100);
 }
 
-// --- ৫. রিভিউ লজিক ---
+// ফিল্টারের জন্য টাকার অংক (যদি ডলার হয় তবে ১২০ দিয়ে গুণ)
+const filterPriceBDT = isDollar ? Math.round(finalLowest * 120) : finalLowest;
+
+// --- ৫. রিভিউ লজিক (৫.০ স্কেলে) ---
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
@@ -95,8 +95,10 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
   const rHotel = (item.hotel || "").toLowerCase();
   return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
 });
+
 const allApprovedReviews = [...approvedCmsReviews, ...(hData.reviews || [])];
 const realCount = allApprovedReviews.length;
+// ৫.০ স্কেলে রেটিং
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
@@ -110,10 +112,9 @@ const hasValidTitle = hTitle.length > 0;
     data-stars={starCount.toString()}
     data-area={areaType}
     data-guesthouse={isGuestHouse ? 'true' : 'false'}
-    data-numeric-price={lowestNum > 0 ? lowestNum : rawDigits}
+    data-numeric-price={filterPriceBDT}
     data-numeric-rating={parseFloat(realRating)}
   >
-    <!-- গ্রিড লেআউট: পিসি এবং মোবাইলের জন্য -->
     <div class="flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
       <!-- ১. ইমেজ মডিউল -->
@@ -149,6 +150,7 @@ const hasValidTitle = hTitle.length > 0;
     </div>
   </div>
 )}
+
 <style is:global>
   .directory-card-item { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
