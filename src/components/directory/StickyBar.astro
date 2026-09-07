@@ -131,6 +131,12 @@
     const dealsBtn = document.getElementById('quickDealsBtn');
     let dealsActive = false;
 
+    // পপআপ এবং অ্যারো বন্ধ করার কমন ফাংশন
+    const closeAllPopups = () => {
+      popups.forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
+    };
+
     // মেইন ফিল্টার ফাংশন
     const runFiltering = () => {
       const hotelCards = document.querySelectorAll('.directory-card-item');
@@ -169,40 +175,46 @@
       });
     };
 
-    // ইভেন্ট লিসেনার সেটআপ (নিরাপদ উপায়)
-    if (searchInput) {
-      searchInput.addEventListener('input', runFiltering);
-    }
-
+    // পপআপের ভেতরের ইনপুট লজিক
     document.querySelectorAll('.filter-popup input').forEach(input => {
-      input.addEventListener('change', runFiltering);
+      input.onchange = () => {
+        runFiltering();
+        
+        // সিলেক্ট করার পর পপআপ বন্ধ করার লজিক (৩০০ মিলিসেকেন্ড পর যাতে ইউজার ক্লিকটা বুঝতে পারে)
+        setTimeout(() => {
+          closeAllPopups();
+        }, 300); 
+      };
     });
 
+    // সার্চ ইনপুট
+    searchInput?.addEventListener('input', runFiltering);
+
+    // পপআপ টগল (খোলা/বন্ধ)
     triggers.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.onclick = (e) => {
         e.stopPropagation();
         const targetId = btn.getAttribute('data-target');
         const targetBox = document.getElementById(targetId);
-        if (!targetBox) return;
-
         const isHidden = targetBox.classList.contains('hidden');
-        popups.forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
-        
+
+        closeAllPopups();
+
         if (isHidden) {
           targetBox.classList.remove('hidden');
           btn.querySelector('.arrow')?.classList.add('rotate-180');
         }
-      });
+      };
     });
 
+    // বাইরে ক্লিক করলে বন্ধ হবে
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.pill-container')) {
-        popups.forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
+        closeAllPopups();
       }
     });
 
+    // ডিলস বাটন
     if(dealsBtn) {
       dealsBtn.onclick = () => {
         dealsActive = !dealsActive;
