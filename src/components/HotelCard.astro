@@ -45,21 +45,40 @@ const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
-// --- ৪. প্রাইসিং লজিক (ঠিক পপুলার হোটেলের মতো) ---
-const rawPrice = hData.price || "$120"; // সরাসরি .md ফাইলের price থেকে
-const displayPrice = rawPrice.startsWith('$') || rawPrice.startsWith('৳') ? rawPrice : '$' + rawPrice;
+// --- ৪. প্রাইসিং লজিক (নিখুঁত টাকার ক্যালকুলেশন) ---
+const rawBasePrice = hData.price ? String(hData.price).trim() : "";
+const isDollar = rawBasePrice.includes('$');
 
-// অরিজিনাল প্রাইস এবং ডিসকাউন্ট (যদি .md ফাইলে থাকে)
-const rawOriginalPrice = hData.original_price || "";
-const displayOriginalPrice = rawOriginalPrice && !(rawOriginalPrice.startsWith('$') || rawOriginalPrice.startsWith('৳')) 
-  ? '$' + rawOriginalPrice 
-  : rawOriginalPrice;
+// বেজ প্রাইস থেকে সংখ্যা বের করা
+const baseDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
 
-const discountPercent = hData.discount_percent || 0;
+let lowestNum = 0, highestNum = 0;
+if (Array.isArray(hData.booking_channels)) {
+  hData.booking_channels.forEach((ch: any) => {
+    const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, ''));
+    if (pNum > 0) {
+      if (lowestNum === 0 || pNum < lowestNum) lowestNum = pNum;
+      if (pNum > highestNum) highestNum = pNum;
+    }
+  });
+}
 
-// ফিল্টারিং এর জন্য টাকার অংক (বাজেট ফিল্টার ঠিক রাখার জন্য)
-const rawDigits = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
-const filterPriceBDT = rawPrice.includes('$') ? Math.round(rawDigits * 120) : rawDigits;
+// যদি বুকিং চ্যানেল না থাকে তবে বেজ প্রাইস ব্যবহার হবে
+const finalLowest = lowestNum > 0 ? lowestNum : baseDigits;
+const finalHighest = highestNum > lowestNum ? highestNum : 0;
+
+// ডিসপ্লে প্রাইস তৈরি করা (পপুলার হোটেলের মতো)
+const displayPrice = isDollar ? `$${finalLowest}` : `৳${finalLowest.toLocaleString()}`;
+let displayOriginalPrice = "";
+let discountPercent = 0;
+
+if (finalHighest > finalLowest) {
+  displayOriginalPrice = isDollar ? `$${finalHighest}` : `৳${finalHighest.toLocaleString()}`;
+  discountPercent = Math.round(((finalHighest - finalLowest) / finalHighest) * 100);
+}
+
+// ফিল্টারের জন্য টাকার অংক (যদি ডলার হয় তবে ১২০ দিয়ে গুণ)
+const filterPriceBDT = isDollar ? Math.round(finalLowest * 120) : finalLowest;
 
 // --- ৫. রিভিউ লজিক (৫.০ স্কেলে) ---
 const searchTitle = hotelTitle.toLowerCase();
@@ -79,6 +98,7 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
 
 const allApprovedReviews = [...approvedCmsReviews, ...(hData.reviews || [])];
 const realCount = allApprovedReviews.length;
+// ৫.০ স্কেলে রেটিং
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
