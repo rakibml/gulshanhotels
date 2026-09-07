@@ -57,7 +57,7 @@ const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
 // --- ৪. প্রাইসিং লজিক ---
-const rawBasePrice = hData.price ? String(hData.price).trim() : "";
+const hPrice = hData.price ? String(hData.price).trim() : "";
 const officialBaseStartingPrice = cleanPriceString(rawBasePrice);
 const rawDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
 let numericPrice = rawBasePrice.includes('$') ? Math.round(rawDigits * 120) : rawDigits;
@@ -72,11 +72,11 @@ if (Array.isArray(hData.booking_channels)) {
     }
   });
 }
-const displayPrice = lowestNum > 0 ? (rawBasePrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : officialBaseStartingPrice;
+const displayPrice = lowestNum > 0 ? (hPrice.includes('$') ? `$${lowestNum}` : `৳ ${lowestNum.toLocaleString()}`) : officialBaseStartingPrice;
 let displayOriginalPrice = "";
 let discountPercent = 0;
 if (highestNum > lowestNum) {
-  displayOriginalPrice = rawBasePrice.includes('$') ? `$${highestNum}` : `৳ ${highestNum.toLocaleString()}`;
+  displayOriginalPrice = hPrice.includes('$') ? `$${highestNum}` : `৳ ${highestNum.toLocaleString()}`;
   discountPercent = Math.round(((highestNum - lowestNum) / highestNum) * 100);
 }
 
