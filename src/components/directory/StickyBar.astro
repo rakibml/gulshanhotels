@@ -10,13 +10,18 @@
       <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"/></svg>
       </div>
-      <input type="text" id="hotelSearchInput" placeholder="Search hotel name..." class="w-full bg-slate-100 focus:bg-white text-sm font-bold rounded-full pl-10 pr-4 py-2.5 outline-none border border-transparent focus:border-blue-500 transition-all shadow-inner" />
+      <input 
+        type="text" 
+        id="hotelSearchInput" 
+        placeholder="Search hotel name..." 
+        class="w-full bg-slate-100 focus:bg-white text-sm font-bold rounded-full pl-10 pr-4 py-2.5 outline-none border border-transparent focus:border-blue-500 transition-all shadow-inner" 
+      />
     </div>
 
     <!-- ২. পিল বাটন কন্টেইনার -->
     <div class="flex items-center gap-2 overflow-x-auto md:overflow-visible no-scrollbar relative pb-1">
       
-      <!-- PRICE PILL WITH DUAL SLIDER POPUP -->
+      <!-- PRICE PILL WITH DUAL SLIDER -->
       <div class="relative pill-container shrink-0">
         <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="priceBox">
           <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
@@ -24,14 +29,14 @@
           <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
 
-        <!-- MODERN PRICE POPUP (Airbnb Style) -->
-        <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[300px] bg-white border border-slate-200 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 z-[1000]">
+        <!-- MODERN PRICE POPUP -->
+        <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[300px] bg-white border border-slate-200 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 z-[110]">
           <div class="flex justify-between items-center mb-6">
              <h4 class="text-sm font-black text-slate-900">Total price</h4>
-             <button id="clearPriceRange" class="text-xs font-bold text-blue-600 hover:underline">Clear</button>
+             <button id="clearPriceRange" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Clear</button>
           </div>
 
-          <!-- Price Input Display -->
+          <!-- Price Display -->
           <div class="flex items-center gap-3 mb-8">
             <div class="flex-1 border border-slate-200 rounded-xl p-3">
               <span class="text-[10px] font-black text-slate-400 uppercase block">Min</span>
@@ -44,37 +49,51 @@
             </div>
           </div>
 
-          <!-- Price Histogram (Decorative Bars) -->
+          <!-- Histogram -->
           <div class="relative h-16 flex items-end justify-between gap-[2px] px-1 mb-[-10px]">
-             {Array.from({ length: 24 }).map((_, i) => (
+             {Array.from({ length: 24 }).map(() => (
                 <div class="w-full bg-slate-100 rounded-t-sm" style={`height: ${Math.random() * 100}%`}></div>
              ))}
-             <!-- Active Highlight Histogram Overlay -->
              <div id="histogramHighlight" class="absolute inset-0 flex items-end justify-between gap-[2px] px-1 pointer-events-none">
-                {Array.from({ length: 24 }).map((_, i) => (
+                {Array.from({ length: 24 }).map(() => (
                    <div class="w-full bg-[#003b95] rounded-t-sm histogram-bar" style={`height: ${Math.random() * 100}%`}></div>
                 ))}
              </div>
           </div>
 
-          <!-- Dual Slider Container -->
+          <!-- Dual Slider -->
           <div class="relative w-full h-10 flex items-center">
-            <input type="range" id="minRange" min="0" max="200" value="0" class="absolute w-full pointer-events-none appearance-none bg-transparent z-20">
-            <input type="range" id="maxRange" min="0" max="200" value="200" class="absolute w-full pointer-events-none appearance-none bg-transparent z-20">
-            <div class="slider-track absolute w-full h-1 bg-slate-200 rounded-full"></div>
+            <input type="range" id="minRange" min="0" max="200" value="0" class="custom-slider absolute w-full pointer-events-none appearance-none bg-transparent z-20">
+            <input type="range" id="maxRange" min="0" max="200" value="200" class="custom-slider absolute w-full pointer-events-none appearance-none bg-transparent z-20">
+            <div class="absolute w-full h-1 bg-slate-200 rounded-full"></div>
             <div id="activeTrack" class="absolute h-1 bg-[#003b95] rounded-full z-10"></div>
           </div>
         </div>
       </div>
 
-      <!-- RATING & AREA PILLS (Keep Same as Previous) -->
-      <!-- ... (Rating/Area/Deals buttons code) ... -->
+      <!-- RATING & AREA PILLS -->
+      <div class="relative pill-container shrink-0">
+        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="ratingBox">
+          <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <span>Rating</span>
+          <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+        <div id="ratingBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[110]">
+           <label class="flex items-center gap-2 cursor-pointer mb-3"><input type="checkbox" name="rating_score" value="9" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
+           <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
+        </div>
+      </div>
+
+      <!-- DEALS -->
+      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-[800] text-red-600 transition-all active:scale-95 hover:bg-red-50 cursor-pointer whitespace-nowrap outline-none">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"/></svg>
+        <span>Deals</span>
+      </button>
 
     </div>
 
-    <!-- Active Filter Chips -->
+    <!-- Active Chips -->
     <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
-       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
     </div>
   </div>
@@ -84,16 +103,28 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Custom Dual Slider CSS */
-  input[type="range"]::-webkit-slider-thumb {
-    @apply appearance-none pointer-events-auto w-6 h-6 rounded-full bg-white border-2 border-[#003b95] cursor-pointer shadow-md active:scale-90 transition-transform;
+  /* Standard CSS for Sliders (Avoiding @apply) */
+  .custom-slider::-webkit-slider-thumb {
+    appearance: none;
+    pointer-events: auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #003b95;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   }
-  input[type="range"]::-moz-range-thumb {
-    @apply appearance-none pointer-events-auto w-6 h-6 rounded-full bg-white border-2 border-[#003b95] cursor-pointer shadow-md;
+  .custom-slider::-moz-range-thumb {
+    appearance: none;
+    pointer-events: auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #003b95;
+    cursor: pointer;
   }
-
-  /* Histogram Bar Logic */
-  .histogram-bar { transition: opacity 0.2s; }
 
   @media (max-width: 768px) {
     .filter-popup {
@@ -106,89 +137,69 @@
 </style>
 
 <script is:inline>
-  function setupAdvancedFilters() {
+  function initFilters() {
     const minRange = document.getElementById('minRange');
     const maxRange = document.getElementById('maxRange');
     const minLabel = document.getElementById('minPriceLabel');
     const maxLabel = document.getElementById('maxPriceLabel');
     const activeTrack = document.getElementById('activeTrack');
-    const histogramBars = document.querySelectorAll('.histogram-bar');
     const hotelCards = document.querySelectorAll('.directory-card-item');
+    const histogramBars = document.querySelectorAll('.histogram-bar');
+    const dealsBtn = document.getElementById('quickDealsBtn');
+    let dealsActive = false;
 
-    // ১. স্লাইডার আপডেট লজিক
     function updateSlider() {
       let minVal = parseInt(minRange.value);
       let maxVal = parseInt(maxRange.value);
-
-      if (maxVal - minVal < 20) { // গ্যাপ মেইনটেইন করা
-        if (event?.target?.id === 'minRange') minRange.value = maxVal - 20;
+      if (maxVal - minVal < 20) {
+        if (this === minRange) minRange.value = maxVal - 20;
         else maxRange.value = minVal + 20;
       }
-
       minLabel.textContent = minRange.value;
       maxLabel.textContent = maxRange.value;
 
-      // ট্রাক হাইলাইট
-      const percent1 = (minRange.value / minRange.max) * 100;
-      const percent2 = (maxRange.value / maxRange.max) * 100;
-      activeTrack.style.left = percent1 + "%";
-      activeTrack.style.width = (percent2 - percent1) + "%";
+      const p1 = (minRange.value / minRange.max) * 100;
+      const p2 = (maxRange.value / maxRange.max) * 100;
+      activeTrack.style.left = p1 + "%";
+      activeTrack.style.width = (p2 - p1) + "%";
 
-      // গ্রাফ হাইলাইট (Histogram)
-      histogramBars.forEach((bar, index) => {
-        const barPercent = (index / histogramBars.length) * 100;
-        bar.style.opacity = (barPercent >= percent1 && barPercent <= percent2) ? "1" : "0";
+      histogramBars.forEach((bar, i) => {
+        const barP = (i / histogramBars.length) * 100;
+        bar.style.opacity = (barP >= p1 && barP <= p2) ? "1" : "0";
       });
-
       runFiltering();
     }
 
-    minRange.oninput = updateSlider;
-    maxRange.oninput = updateSlider;
-    updateSlider();
-
-    // ২. মেইন ফিল্টার ফাংশন (Price Range Integrated)
-    function runFiltering() {
+    const runFiltering = () => {
+      const minP = parseInt(minRange.value);
+      const maxP = parseInt(maxRange.value);
       const searchTerm = document.getElementById('hotelSearchInput')?.value.toLowerCase().trim() || "";
-      const minPrice = parseInt(minRange.value);
-      const maxPrice = parseInt(maxRange.value);
+      const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(cb => parseFloat(cb.value));
 
       hotelCards.forEach(card => {
         const title = (card.getAttribute('data-title') || "").toLowerCase();
         const price = parseFloat(card.getAttribute('data-numeric-price') || "0");
-        
-        const matchesSearch = searchTerm === "" || title.includes(searchTerm);
-        const matchesPrice = price >= minPrice && price <= maxPrice;
+        const rating = parseFloat(card.getAttribute('data-numeric-rating') || "0");
+        const hasDiscount = card.querySelector('.bg-red-600');
 
-        card.style.display = (matchesSearch && matchesPrice) ? 'flex' : 'none';
+        const mSearch = title.includes(searchTerm);
+        const mPrice = price >= minP && price <= maxP;
+        const mRating = selectedRatings.length === 0 || selectedRatings.some(r => rating >= r);
+        const mDeals = dealsActive ? !!hasDiscount : true;
+
+        card.style.display = (mSearch && mPrice && mRating && mDeals) ? 'flex' : 'none';
       });
-      
-      updateFilterChips();
-    }
+    };
 
-    // ৩. চিপস আপডেট
-    function updateFilterChips() {
-       const chipsList = document.getElementById('chipsList');
-       const container = document.getElementById('activeFiltersContainer');
-       chipsList.innerHTML = '';
-       
-       if (parseInt(minRange.value) > 0 || parseInt(maxRange.value) < 200) {
-         container.classList.remove('hidden');
-         const chip = document.createElement('div');
-         chip.className = "bg-blue-50 text-[#003b95] border border-blue-100 px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-2";
-         chip.innerHTML = `Price: $${minRange.value} - $${maxRange.value} <span class="cursor-pointer font-black">×</span>`;
-         chip.onclick = () => {
-           minRange.value = 0;
-           maxRange.value = 200;
-           updateSlider();
-         };
-         chipsList.appendChild(chip);
-       } else {
-         container.classList.add('hidden');
-       }
-    }
+    minRange.oninput = updateSlider;
+    maxRange.oninput = updateSlider;
+    
+    document.querySelectorAll('.filter-popup input').forEach(input => {
+      input.onchange = runFiltering;
+    });
 
-    // পপআপ টগল (আগের মতো)
+    document.getElementById('hotelSearchInput')?.addEventListener('input', runFiltering);
+
     document.querySelectorAll('.pill-trigger').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
@@ -199,15 +210,18 @@
       };
     });
 
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.pill-container')) document.querySelectorAll('.filter-popup').forEach(p => p.classList.add('hidden'));
-    });
+    dealsBtn.onclick = () => {
+      dealsActive = !dealsActive;
+      dealsBtn.classList.toggle('bg-red-600', dealsActive);
+      dealsBtn.classList.toggle('text-white', dealsActive);
+      runFiltering();
+    };
 
     document.getElementById('clearPriceRange').onclick = () => {
-       minRange.value = 0; maxRange.value = 200; updateSlider();
+      minRange.value = 0; maxRange.value = 200; updateSlider();
     };
   }
 
-  setupAdvancedFilters();
-  document.addEventListener('astro:page-load', setupAdvancedFilters);
+  initFilters();
+  document.addEventListener('astro:page-load', initFilters);
 </script>
