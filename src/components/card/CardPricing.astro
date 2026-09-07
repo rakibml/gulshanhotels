@@ -1,11 +1,21 @@
 ---
 interface Props {
-  displayPrice: string;
-  displayOriginalPrice: string;
-  discountPercent: number;
-  title: string;
+  displayPrice: string;          // .md ফাইলের 'price' থেকে আসবে
+  displayOriginalPrice?: string; // .md ফাইলের 'original_price' থেকে আসবে (ঐচ্ছিক)
+  discountPercent?: number;      // .md ফাইলের 'discount_percent' থেকে আসবে (ঐচ্ছিক)
+  title?: string;
 }
+
 const { displayPrice, displayOriginalPrice, discountPercent, title } = Astro.props;
+
+// পপুলার হোটেলের মতো একই লজিক: সিম্বল না থাকলে $ যোগ করবে
+const finalPrice = displayPrice && !(displayPrice.startsWith('$') || displayPrice.startsWith('৳')) 
+  ? '$' + displayPrice 
+  : displayPrice;
+
+const finalOriginalPrice = displayOriginalPrice && !(displayOriginalPrice.startsWith('$') || displayOriginalPrice.startsWith('৳')) 
+  ? '$' + displayOriginalPrice 
+  : displayOriginalPrice;
 ---
 
 <div class="flex flex-row md:flex-col justify-between items-center md:items-end gap-3 w-full">
@@ -14,16 +24,18 @@ const { displayPrice, displayOriginalPrice, discountPercent, title } = Astro.pro
   <div class="flex flex-col items-start md:items-end">
     
     <div class="flex items-center gap-2 flex-wrap md:justify-end">
-      {displayOriginalPrice && (
-        <span class="text-[13px] font-bold text-slate-400 line-through">{displayOriginalPrice}</span>
+      {finalOriginalPrice && (
+        <span class="text-[13px] font-bold text-slate-400 line-through">{finalOriginalPrice}</span>
       )}
-      {discountPercent > 0 && (
+      {discountPercent && discountPercent > 0 && (
         <span class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-sm">-{discountPercent}%</span>
       )}
     </div>
 
     <div class="flex items-baseline gap-1 mt-1">
-      <span class="text-2xl lg:text-3xl font-[800] text-[#008234] leading-none tracking-tighter">{displayPrice}</span>
+      <!-- স্টার্টিং প্রাইস বোঝাতে ছোট করে "from" যোগ করা হয়েছে -->
+      <span class="text-[10px] font-bold text-slate-500 uppercase mr-0.5">from</span>
+      <span class="text-2xl lg:text-3xl font-[800] text-[#008234] leading-none tracking-tighter">{finalPrice}</span>
       <span class="text-[10px] font-bold text-slate-400 uppercase">/night</span>
     </div>
 
@@ -48,13 +60,11 @@ const { displayPrice, displayOriginalPrice, discountPercent, title } = Astro.pro
 </div>
 
 <style>
-  /* সংখ্যাগুলোকে সুন্দরভাবে এলাইন করার জন্য */
   span {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "lnum" 1;
   }
 
-  /* ডেক্সটপে সাইডবার হিসেবে কাজ করার জন্য অতিরিক্ত স্টাইল */
   @media (min-width: 768px) {
     .open-quick-view-btn {
       min-height: 52px;
