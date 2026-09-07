@@ -2,100 +2,86 @@
 // src/components/directory/StickyBar.astro
 ---
 
-<!-- ১. ব্যাকগ্রাউন্ড ওভারলে (সবকিছুর উপরে থাকার জন্য high z-index) -->
-<div id="filterOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[9990] hidden transition-opacity"></div>
+<!-- ১. ব্যাকগ্রাউন্ড ওভারলে (সবার উপরে থাকার জন্য) -->
+<div id="filterOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-[2px] z-[9998] hidden transition-opacity duration-300"></div>
 
-<header class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
+<!-- ২. স্টিকি হেডার (এখানে শুধু বাটনগুলো থাকবে) -->
+<header class="sticky top-0 z-[100] bg-white border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
   <div class="max-w-[1280px] mx-auto px-4 py-3">
     
-    <!-- ২. পিল বাটন কন্টেইনার -->
-    <div class="flex items-center gap-2 overflow-x-auto md:overflow-visible no-scrollbar relative">
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar relative">
       
-      <!-- PRICE PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="priceBox">
-          <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
-          <span>Price</span>
-          <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
-        </button>
-        <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[240px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Budget (Per Night)</h4>
-          <div class="space-y-3">
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">All Prices</span>
-               <input type="radio" name="price" value="all" checked class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Budget Friendly</span>
-               <input type="radio" name="price" value="low" class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Premium Stays</span>
-               <input type="radio" name="price" value="high" class="w-4 h-4 accent-blue-600">
-             </label>
-          </div>
-        </div>
-      </div>
+      <!-- PRICE BUTTON -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="priceBox">
+        <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
+        <span>Price</span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
 
-      <!-- RATING PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="ratingBox">
-          <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-          <span>Rating</span>
-          <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
-        </button>
-        <div id="ratingBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Guest Rating</h4>
-          <div class="space-y-3">
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="9" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
-          </div>
-        </div>
-      </div>
+      <!-- RATING BUTTON -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="ratingBox">
+        <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <span>Rating</span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
 
-      <!-- AREA PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="areaBox">
-          <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
-          <span>Area</span>
-          <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
-        </button>
-        <div id="areaBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Neighborhood</h4>
-          <div class="space-y-3">
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">All Gulshan</span>
-               <input type="radio" name="area" value="all" checked class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Gulshan 1</span>
-               <input type="radio" name="area" value="gulshan-1" class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Gulshan 2</span>
-               <input type="radio" name="area" value="gulshan-2" class="w-4 h-4 accent-blue-600">
-             </label>
-          </div>
-        </div>
-      </div>
+      <!-- AREA BUTTON -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="areaBox">
+        <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
+        <span>Area</span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
 
-      <!-- DEALS -->
-      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-[800] text-red-600 transition-all active:scale-95 hover:bg-red-50 cursor-pointer whitespace-nowrap outline-none">
+      <!-- DEALS BUTTON -->
+      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-[800] text-red-600 transition-all active:scale-95">
         <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"/></svg>
         <span>Deals</span>
       </button>
-
     </div>
 
-    <!-- ৩. একটিভ ফিল্টার চিপস -->
-    <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
-       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Filters:</span>
+    <!-- একটিভ ফিল্টার চিপস -->
+    <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden transition-all">
+       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
-       <button id="clearAllFiltersBtn" class="text-[10px] font-black text-blue-600 hover:underline cursor-pointer ml-2 uppercase">Clear all</button>
+       <button id="clearAllFiltersBtn" class="text-[10px] font-black text-blue-600 hover:underline ml-2 uppercase">Clear all</button>
     </div>
-
   </div>
 </header>
+
+<!-- ৩. পপআপ বক্সগুলো (মোবাইলে যেন ভেতরে না ঢুকে যায় তাই এগুলো হেডারের বাইরে রাখা হয়েছে) -->
+<div id="popupPortal">
+  <!-- Price Popup -->
+  <div id="priceBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[115px] left-0 md:left-[20px] w-full md:w-[260px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[9999]">
+    <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4 md:hidden"></div>
+    <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Budget (Per Night)</h4>
+    <div class="space-y-4">
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">All Prices</span><input type="radio" name="price" value="all" checked class="w-5 h-5 accent-blue-600"></label>
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">Budget Friendly</span><input type="radio" name="price" value="low" class="w-5 h-5 accent-blue-600"></label>
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">Premium Stays</span><input type="radio" name="price" value="high" class="w-5 h-5 accent-blue-600"></label>
+    </div>
+  </div>
+
+  <!-- Rating Popup -->
+  <div id="ratingBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[115px] left-0 md:left-[140px] w-full md:w-[240px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[9999]">
+    <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4 md:hidden"></div>
+    <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Guest Rating</h4>
+    <div class="space-y-4">
+       <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="rating_score" value="9" class="w-5 h-5 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
+       <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-5 h-5 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
+    </div>
+  </div>
+
+  <!-- Area Popup -->
+  <div id="areaBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[115px] left-0 md:left-[240px] w-full md:w-[240px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[9999]">
+    <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4 md:hidden"></div>
+    <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Neighborhood</h4>
+    <div class="space-y-4">
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">All Gulshan</span><input type="radio" name="area" value="all" checked class="w-5 h-5 accent-blue-600"></label>
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">Gulshan 1</span><input type="radio" name="area" value="gulshan-1" class="w-5 h-5 accent-blue-600"></label>
+       <label class="flex items-center justify-between cursor-pointer group"><span class="text-sm font-bold text-slate-700">Gulshan 2</span><input type="radio" name="area" value="gulshan-2" class="w-5 h-5 accent-blue-600"></label>
+    </div>
+  </div>
+</div>
 
 <style>
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -103,22 +89,10 @@
   
   @media (max-width: 768px) {
     .filter-popup {
-      position: fixed !important;
-      top: auto !important; 
-      bottom: 0 !important; 
-      left: 0 !important; 
-      right: 0 !important;
-      width: 100% !important; 
-      margin: 0 !important;
-      z-index: 9999 !important; /* সবকিছুর উপরে দেখানোর জন্য */
-      border-radius: 24px 24px 0 0 !important;
-      box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-      animation: slideIn 0.3s ease-out;
-      max-height: 80vh;
-      overflow-y: auto;
+      animation: slideUp 0.3s ease-out;
     }
   }
-  @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>
 
 <script is:inline>
@@ -133,14 +107,13 @@
     
     let dealsActive = false;
 
-    // পপআপ বন্ধ করার ফাংশন
     const closeAllPopups = () => {
       popups.forEach(p => p.classList.add('hidden'));
       overlay.classList.add('hidden');
+      document.body.style.overflow = ''; // স্ক্রল আনলক
       document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
     };
 
-    // মেইন ফিল্টারিং লজিক
     const runFiltering = () => {
       const hotelCards = document.querySelectorAll('.directory-card-item');
       const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || "all";
@@ -154,15 +127,12 @@
         const hasDiscount = card.querySelector('.bg-red-600') || card.querySelector('span[class*="red"]');
 
         const matchesArea = (selectedArea === "all" || area === selectedArea);
-        
         let matchesPrice = true;
         if (selectedPrice === "low") matchesPrice = price < 5000;
         else if (selectedPrice === "high") matchesPrice = price >= 5000;
 
         let matchesRating = true;
-        if (selectedRatings.length > 0) {
-          matchesRating = selectedRatings.some(r => rating >= r);
-        }
+        if (selectedRatings.length > 0) matchesRating = selectedRatings.some(r => rating >= r);
 
         let matchesDeals = dealsActive ? !!hasDiscount : true;
 
@@ -172,7 +142,6 @@
       updateFilterChips();
     };
 
-    // চিপস আপডেট
     const updateFilterChips = () => {
       chipsList.innerHTML = '';
       let activeCount = 0;
@@ -182,11 +151,8 @@
           activeCount++;
           const label = input.closest('label').querySelector('span').innerText;
           createChip(label, () => {
-            if(input.type === 'radio') {
-              document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
-            } else {
-              input.checked = false;
-            }
+            if(input.type === 'radio') document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
+            else input.checked = false;
             runFiltering();
           });
         }
@@ -194,25 +160,19 @@
 
       if (dealsActive) {
         activeCount++;
-        createChip("Deals Active", () => {
-          dealsActive = false;
-          dealsBtn.classList.remove('bg-red-600', 'text-white');
-          runFiltering();
-        }, "bg-red-50 text-red-600 border-red-100");
+        createChip("Deals Active", () => { dealsActive = false; dealsBtn.classList.remove('bg-red-600', 'text-white'); runFiltering(); }, "bg-red-50 text-red-600 border-red-100");
       }
-
       chipsContainer.classList.toggle('hidden', activeCount === 0);
     };
 
     function createChip(text, onRemove, customClass = "bg-blue-50 text-blue-600 border-blue-100") {
       const chip = document.createElement('div');
       chip.className = `flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold ${customClass}`;
-      chip.innerHTML = `<span>${text}</span><button class="ml-1 hover:text-black font-black">&times;</button>`;
+      chip.innerHTML = `<span>${text}</span><button class="ml-1 font-black hover:text-black">&times;</button>`;
       chip.querySelector('button').onclick = onRemove;
       chipsList.appendChild(chip);
     }
 
-    // ইনপুট চেঞ্জ হ্যান্ডলার
     document.querySelectorAll('.filter-popup input').forEach(input => {
       input.onchange = () => {
         runFiltering();
@@ -220,7 +180,6 @@
       };
     });
 
-    // পিল বাটন ক্লিক হ্যান্ডলার
     triggers.forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
@@ -232,20 +191,14 @@
         if (isHidden) {
           targetBox.classList.remove('hidden');
           overlay.classList.remove('hidden');
+          if(window.innerWidth < 768) document.body.style.overflow = 'hidden'; // মোবাইলে স্ক্রল লক
           btn.querySelector('.arrow')?.classList.add('rotate-180');
         }
       };
     });
 
-    // বাইরে বা ওভারলেতে ক্লিক করলে বন্ধ হবে
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.pill-container') && !e.target.closest('.filter-popup')) {
-        closeAllPopups();
-      }
-    });
     overlay.onclick = closeAllPopups;
 
-    // ডিলস বাটন
     if(dealsBtn) {
       dealsBtn.onclick = () => {
         dealsActive = !dealsActive;
@@ -255,19 +208,15 @@
       };
     }
 
-    // ক্লিয়ার অল
     clearAllBtn.onclick = () => {
       document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
       document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-      if(dealsActive) {
-        dealsActive = false;
-        dealsBtn.classList.remove('bg-red-600', 'text-white');
-      }
+      if(dealsActive) { dealsActive = false; dealsBtn.classList.remove('bg-red-600', 'text-white'); }
       runFiltering();
     };
   }
 
-  // Astro Lifecycle
+  // Astro Lifecycle Handling
   setupStickyFilters();
   document.addEventListener('astro:after-swap', setupStickyFilters);
   document.addEventListener('astro:page-load', setupStickyFilters);
