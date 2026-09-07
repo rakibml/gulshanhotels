@@ -2,6 +2,9 @@
 // src/components/directory/StickyBar.astro
 ---
 
+<!-- ব্যাকগ্রাউন্ড ওভারলে (পপআপ ওপেন হলে দেখাবে) -->
+<div id="filterOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-[90] hidden transition-opacity"></div>
+
 <header class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
   <div class="max-w-[1280px] mx-auto px-4 py-2.5">
     
@@ -97,7 +100,7 @@
 
     </div>
 
-    <!-- একটিভ ফিল্টার চিপস -->
+    <!-- ৩. একটিভ ফিল্টার চিপস -->
     <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
        <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active Filters:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
@@ -128,6 +131,7 @@
     const searchInput = document.getElementById('hotelSearchInput');
     const triggers = document.querySelectorAll('.pill-trigger');
     const popups = document.querySelectorAll('.filter-popup');
+    const overlay = document.getElementById('filterOverlay');
     const dealsBtn = document.getElementById('quickDealsBtn');
     const chipsContainer = document.getElementById('activeFiltersContainer');
     const chipsList = document.getElementById('chipsList');
@@ -135,13 +139,23 @@
     
     let dealsActive = false;
 
-    // পপআপ বন্ধ করার ফাংশন
+    // ১. পপআপ বন্ধ করার ফাংশন
     const closeAllPopups = () => {
       popups.forEach(p => p.classList.add('hidden'));
+      overlay.classList.add('hidden');
       document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
     };
 
-    // মেইন ফিল্টার ফাংশন
+    // ২. পারফরম্যান্স অপ্টিমাইজেশন (Debounce)
+    function debounce(func, timeout = 300){
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
+
+    // ৩. মেইন ফিল্টারিং লজিক
     const runFiltering = () => {
       const hotelCards = document.querySelectorAll('.directory-card-item');
       const searchTerm = searchInput?.value.toLowerCase().trim() || "";
@@ -157,27 +171,20 @@
         const rating = parseFloat(card.getAttribute('data-numeric-rating') || "0");
         const hasDiscount = card.querySelector('.bg-red-600') || card.querySelector('span[class*="red"]');
 
-        // ১. সার্চ ম্যাচ
         const matchesSearch = searchTerm === "" || title.includes(searchTerm);
-        
-        // ২. এরিয়া ম্যাচ
         const matchesArea = (selectedArea === "all" || area === selectedArea);
         
-        // ৩. প্রাইস ম্যাচ (লজিক: Low < 100, High >= 100) - আপনার ডাটা অনুযায়ী এটি অ্যাডজাস্ট করতে পারেন
         let matchesPrice = true;
-        if (selectedPrice === "low") matchesPrice = price < 100;
-        else if (selectedPrice === "high") matchesPrice = price >= 100;
+        if (selectedPrice === "low") matchesPrice = price < 5000; // আপনার বাজেট অনুযায়ী পরিবর্তন করুন
+        else if (selectedPrice === "high") matchesPrice = price >= 5000;
 
-        // ৪. রেটিং ম্যাচ
         let matchesRating = true;
         if (selectedRatings.length > 0) {
           matchesRating = selectedRatings.some(r => rating >= r);
         }
 
-        // ৫. ডিলস ম্যাচ
         let matchesDeals = dealsActive ? !!hasDiscount : true;
 
-        // ফাইনাল রেজাল্ট
         if (matchesSearch && matchesArea && matchesPrice && matchesRating && matchesDeals) {
           card.style.display = 'flex';
         } else {
@@ -188,54 +195,57 @@
       updateFilterChips();
     };
 
-    // চিপস আপডেট লজিক
+    // ৪. ফিল্টার চিপস আপডেট
     const updateFilterChips = () => {
       chipsList.innerHTML = '';
       let activeCount = 0;
 
-      // Price, Area, Rating চিপস
       document.querySelectorAll('.filter-popup input').forEach(input => {
         if ((input.type === 'radio' && input.checked && input.value !== 'all') || (input.type === 'checkbox' && input.checked)) {
           activeCount++;
           const label = input.closest('label').querySelector('span').innerText;
-          const chip = document.createElement('div');
-          chip.className = "flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
-          chip.innerHTML = `<span>${label}</span><button class="ml-1 font-black">&times;</button>`;
-          chip.querySelector('button').onclick = () => {
+          createChip(label, () => {
             if(input.type === 'radio') {
               document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
             } else {
               input.checked = false;
             }
             runFiltering();
-          };
-          chipsList.appendChild(chip);
+          });
         }
       });
 
       if (dealsActive) {
         activeCount++;
-        const chip = document.createElement('div');
-        chip.className = "flex items-center gap-1 bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
-        chip.innerHTML = `<span>Deals Active</span><button class="ml-1 font-black">&times;</button>`;
-        chip.querySelector('button').onclick = () => {
-          dealsBtn.click();
-        };
-        chipsList.appendChild(chip);
+        createChip("Deals Active", () => {
+          dealsActive = false;
+          dealsBtn.classList.remove('bg-red-600', 'text-white');
+          runFiltering();
+        }, "bg-red-50 text-red-600 border-red-100");
       }
 
       chipsContainer.classList.toggle('hidden', activeCount === 0);
     };
 
-    // ইভেন্ট লিসেনার সেটআপ
+    function createChip(text, onRemove, customClass = "bg-blue-50 text-blue-600 border-blue-100") {
+      const chip = document.createElement('div');
+      chip.className = `flex items-center gap-1 border px-2 py-0.5 rounded-lg text-[11px] font-bold ${customClass}`;
+      chip.innerHTML = `<span>${text}</span><button class="ml-1 hover:text-black font-black">&times;</button>`;
+      chip.querySelector('button').onclick = onRemove;
+      chipsList.appendChild(chip);
+    }
+
+    // ৫. ইভেন্ট লিসেনারস
     document.querySelectorAll('.filter-popup input').forEach(input => {
       input.onchange = () => {
         runFiltering();
-        setTimeout(closeAllPopups, 300);
+        // রেডিও বাটন হলে অটো বন্ধ হবে, চেকবক্স হলে ইউজারকে ম্যানুয়ালি বন্ধ করতে হবে (ভাল UX)
+        if (input.type === 'radio') setTimeout(closeAllPopups, 200);
       };
     });
 
-    searchInput?.addEventListener('input', runFiltering);
+    // সার্চের জন্য Debounce কল করা হয়েছে
+    searchInput?.addEventListener('input', debounce(() => runFiltering(), 300));
 
     triggers.forEach(btn => {
       btn.onclick = (e) => {
@@ -243,18 +253,25 @@
         const targetId = btn.getAttribute('data-target');
         const targetBox = document.getElementById(targetId);
         const isHidden = targetBox.classList.contains('hidden');
+        
         closeAllPopups();
         if (isHidden) {
           targetBox.classList.remove('hidden');
+          overlay.classList.remove('hidden');
           btn.querySelector('.arrow')?.classList.add('rotate-180');
         }
       };
     });
 
+    // বাইরে ক্লিক করলে বন্ধ হবে
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.pill-container')) closeAllPopups();
+      if (!e.target.closest('.pill-container') && !e.target.closest('.filter-popup')) {
+        closeAllPopups();
+      }
     });
+    overlay.onclick = closeAllPopups;
 
+    // ডিলস বাটন লজিক
     if(dealsBtn) {
       dealsBtn.onclick = () => {
         dealsActive = !dealsActive;
@@ -264,14 +281,21 @@
       };
     }
 
+    // সব রিসেট করার লজিক
     clearAllBtn.onclick = () => {
       document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
       document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-      if(dealsActive) dealsActive = false, dealsBtn.classList.remove('bg-red-600', 'text-white');
+      if(searchInput) searchInput.value = '';
+      if(dealsActive) {
+        dealsActive = false;
+        dealsBtn.classList.remove('bg-red-600', 'text-white');
+      }
       runFiltering();
     };
   }
 
+  // Astro Initialization
   setupStickyFilters();
+  document.addEventListener('astro:after-swap', setupStickyFilters);
   document.addEventListener('astro:page-load', setupStickyFilters);
 </script>
