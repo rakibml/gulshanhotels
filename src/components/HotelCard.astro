@@ -1,5 +1,5 @@
 ---
-// src/components/directory/DirectoryCard.astro
+// src/components/directory/HotelCard.astro
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -11,8 +11,9 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// --- ১. হেল্পার ফাংশনসমূহ ---
+// --- 1. Helper Functions ---
 const toTitleCase = (str: string) => str ? str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
+
 const getFirst25Words = (text: string) => {
   if (!text) return "Experience world-class luxury and comfort in Gulshan.";
   const clean = text.replace(/<[^>]+>/g, ' ').replace(/[#*`_~]/g, '').trim();
@@ -20,7 +21,7 @@ const getFirst25Words = (text: string) => {
   return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
 
-// --- ২. হোটেলের তথ্য নিষ্কাশন ---
+// --- 2. Extract Basic Hotel Data ---
 const hData = hotelItem?.data || {};
 const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
 const hotelSlug = (hData.slug || hotelItem?.slug || hotelItem?.id || "hotel").trim();
@@ -36,7 +37,7 @@ const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka")
 const locLower = hFullAddress.toLowerCase();
 const titleLowerStr = hotelTitle.toLowerCase();
 
-// --- ৩. ফিল্টার ডাটা সেট করা ---
+// --- 3. Filter Data Logic ---
 let areaType = 'near';
 if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) areaType = 'gulshan-2';
@@ -45,45 +46,50 @@ const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
-// --- ৪. প্রাইসিং লজিক (নিখুঁত টাকার ক্যালকুলেশন) ---
-const rawBasePrice = hData.price ? String(hData.price).trim() : "";
-const isDollar = rawBasePrice.includes('$');
+// --- 4. Pricing Logic (Sync with Markdown and Channels) ---
+const mdPriceRaw = hData.price || "$100"; // Original price from .md file
+const isDollar = mdPriceRaw.includes('$');
+const mdPriceNumeric = parseFloat(mdPriceRaw.replace(/[^0-9.]/g, '')) || 0;
 
-// বেজ প্রাইস থেকে সংখ্যা বের করা
-const baseDigits = parseFloat(rawBasePrice.replace(/[^0-9.]/g, '')) || 0;
-
-let lowestNum = 0, highestNum = 0;
+let lowestChannelPrice = 0;
+// Find the lowest price among booking channels
 if (Array.isArray(hData.booking_channels)) {
   hData.booking_channels.forEach((ch: any) => {
     const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, ''));
     if (pNum > 0) {
-      if (lowestNum === 0 || pNum < lowestNum) lowestNum = pNum;
-      if (pNum > highestNum) highestNum = pNum;
+      if (lowestChannelPrice === 0 || pNum < lowestChannelPrice) {
+        lowestChannelPrice = pNum;
+      }
     }
   });
 }
 
-// যদি বুকিং চ্যানেল না থাকে তবে বেজ প্রাইস ব্যবহার হবে
-const finalLowest = lowestNum > 0 ? lowestNum : baseDigits;
-const finalHighest = highestNum > lowestNum ? highestNum : 0;
-
-// ডিসপ্লে প্রাইস তৈরি করা (পপুলার হোটেলের মতো)
-const displayPrice = isDollar ? `$${finalLowest}` : `৳${finalLowest.toLocaleString()}`;
-let displayOriginalPrice = "";
+// Pricing display variables
+let displayPrice = "";         // Main Green Price
+let displayOriginalPrice = ""; // Struck-through Price (from .md)
 let discountPercent = 0;
 
-if (finalHighest > finalLowest) {
-  displayOriginalPrice = isDollar ? `$${finalHighest}` : `৳${finalHighest.toLocaleString()}`;
-  discountPercent = Math.round(((finalHighest - finalLowest) / finalHighest) * 100);
+if (lowestChannelPrice > 0 && lowestChannelPrice < mdPriceNumeric) {
+  // Case: Discount available via booking channels
+  displayPrice = isDollar ? `$${lowestChannelPrice}` : `৳${lowestChannelPrice.toLocaleString()}`;
+  displayOriginalPrice = mdPriceRaw.startsWith('$') || mdPriceRaw.startsWith('৳') ? mdPriceRaw : '$' + mdPriceRaw;
+  discountPercent = Math.round(((mdPriceNumeric - lowestChannelPrice) / mdPriceNumeric) * 100);
+} else {
+  // Case: No channel discount, use .md price as primary
+  displayPrice = mdPriceRaw.startsWith('$') || mdPriceRaw.startsWith('৳') ? mdPriceRaw : '$' + mdPriceRaw;
+  displayOriginalPrice = "";
+  discountPercent = 0;
 }
 
-// ফিল্টারের জন্য টাকার অংক (যদি ডলার হয় তবে ১২০ দিয়ে গুণ)
-const filterPriceBDT = isDollar ? Math.round(finalLowest * 120) : finalLowest;
+// Convert price to BDT for StickyBar Filter Logic (USD * 120)
+const filterPriceVal = lowestChannelPrice > 0 ? lowestChannelPrice : mdPriceNumeric;
+const filterPriceBDT = isDollar ? Math.round(filterPriceVal * 120) : filterPriceVal;
 
-// --- ৫. রিভিউ লজিক (৫.০ স্কেলে) ---
+// --- 5. Review and Rating Logic (5.0 Scale) ---
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
+
 try {
   const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
   rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
@@ -98,7 +104,7 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
 
 const allApprovedReviews = [...approvedCmsReviews, ...(hData.reviews || [])];
 const realCount = allApprovedReviews.length;
-// ৫.০ স্কেলে রেটিং
+// Calculate rating on a 5.0 scale
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
@@ -117,12 +123,12 @@ const hasValidTitle = hTitle.length > 0;
   >
     <div class="flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
-      <!-- ১. ইমেজ মডিউল -->
+      <!-- Module 1: Image -->
       <div class="relative w-full h-full min-h-[220px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
         <CardImage image={hImage} title={hTitle} url={hotelUrl} price={displayPrice} />
       </div>
 
-      <!-- ২. ইনফরমেশন মডিউল -->
+      <!-- Module 2: Information -->
       <div class="p-5 sm:p-6 flex flex-col justify-center min-w-0">
         <CardInfo 
           title={hTitle} 
@@ -137,7 +143,7 @@ const hasValidTitle = hTitle.length > 0;
         />
       </div>
 
-      <!-- ৩. প্রাইসিং মডিউল -->
+      <!-- Module 3: Pricing -->
       <div class="p-5 sm:p-6 bg-slate-50/50 md:bg-white md:border-l border-slate-100 flex flex-col justify-center">
         <CardPricing 
           displayPrice={displayPrice} 
