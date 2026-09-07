@@ -2,11 +2,11 @@
 // src/components/directory/StickyBar.astro
 ---
 
-<header class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
+<header class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 font-sans">
   <div class="max-w-[1280px] mx-auto px-4 py-2.5">
     
     <!-- ১. সার্চ বার -->
-    <div class="relative group mb-3">
+    <div class="relative mb-3">
       <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"/></svg>
       </div>
@@ -14,94 +14,89 @@
         type="text" 
         id="hotelSearchInput" 
         placeholder="Search hotel name..." 
-        class="w-full bg-slate-100 focus:bg-white text-sm font-bold rounded-full pl-10 pr-4 py-2.5 outline-none border border-transparent focus:border-blue-500 transition-all shadow-inner" 
+        class="w-full bg-slate-100 focus:bg-white text-sm font-bold rounded-full pl-10 pr-4 py-2.5 outline-none border border-transparent focus:border-blue-500 transition-all" 
       />
     </div>
 
-    <!-- ২. পিল বাটন কন্টেইনার -->
+    <!-- ২. পিল বাটন এবং পপআপসমূহ -->
     <div class="flex items-center gap-2 overflow-x-auto md:overflow-visible no-scrollbar relative pb-1">
       
       <!-- PRICE PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="priceBox">
+      <div class="relative pill-group shrink-0">
+        <button type="button" class="pill-trigger flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="priceBox">
           <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
           <span>Price</span>
           <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
-        <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[240px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Budget (Per Night)</h4>
-          <div class="space-y-3">
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">All Prices</span>
-               <input type="radio" name="price" value="all" checked class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Budget Friendly</span>
-               <input type="radio" name="price" value="low" class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Premium Stays</span>
-               <input type="radio" name="price" value="high" class="w-4 h-4 accent-blue-600">
-             </label>
+
+        <!-- Price Range Popup (Airbnb Style) -->
+        <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[300px] bg-white border border-slate-200 rounded-3xl shadow-2xl p-6 z-[120]">
+          <div class="flex justify-between items-center mb-6">
+             <h4 class="text-sm font-black text-slate-900">Total price</h4>
+             <button id="resetPrice" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Clear</button>
           </div>
+
+          <div class="flex items-center gap-3 mb-8">
+            <div class="flex-1 border border-slate-200 rounded-xl p-2.5">
+              <span class="text-[9px] font-black text-slate-400 uppercase block">Min</span>
+              <span class="text-sm font-bold text-slate-800">$<span id="minText">0</span></span>
+            </div>
+            <div class="flex-1 border border-slate-200 rounded-xl p-2.5">
+              <span class="text-[9px] font-black text-slate-400 uppercase block">Max</span>
+              <span class="text-sm font-bold text-slate-800">$<span id="maxText">250</span>+</span>
+            </div>
+          </div>
+
+          <!-- Dual Slider -->
+          <div class="relative w-full h-8 flex items-center mb-4">
+            <input type="range" id="minRange" min="0" max="250" value="0" class="absolute w-full pointer-events-none appearance-none bg-transparent z-30 slider-thumb">
+            <input type="range" id="maxRange" min="0" max="250" value="250" class="absolute w-full pointer-events-none appearance-none bg-transparent z-30 slider-thumb">
+            <div class="absolute w-full h-1 bg-slate-100 rounded-full"></div>
+            <div id="sliderTrack" class="absolute h-1 bg-blue-600 rounded-full z-20"></div>
+          </div>
+          <p class="text-[10px] text-slate-400 font-medium text-center italic">Drag handles to filter by budget</p>
         </div>
       </div>
 
       <!-- RATING PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="ratingBox">
+      <div class="relative pill-group shrink-0">
+        <button type="button" class="pill-trigger flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="ratingBox">
           <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
           <span>Rating</span>
           <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
-        <div id="ratingBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Guest Rating</h4>
-          <div class="space-y-3">
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="9" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
-          </div>
+        <div id="ratingBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[120]">
+           <label class="flex items-center gap-3 cursor-pointer mb-3"><input type="checkbox" name="rating_score" value="9" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
+           <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
         </div>
       </div>
 
       <!-- AREA PILL -->
-      <div class="relative pill-container shrink-0">
-        <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="areaBox">
+      <div class="relative pill-group shrink-0">
+        <button type="button" class="pill-trigger flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 transition-all active:scale-95 hover:border-slate-400 cursor-pointer whitespace-nowrap outline-none" data-target="areaBox">
           <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
           <span>Area</span>
           <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
-        <div id="areaBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Neighborhood</h4>
-          <div class="space-y-3">
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">All Gulshan</span>
-               <input type="radio" name="area" value="all" checked class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Gulshan 1</span>
-               <input type="radio" name="area" value="gulshan-1" class="w-4 h-4 accent-blue-600">
-             </label>
-             <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Gulshan 2</span>
-               <input type="radio" name="area" value="gulshan-2" class="w-4 h-4 accent-blue-600">
-             </label>
-          </div>
+        <div id="areaBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[120]">
+             <label class="flex items-center justify-between cursor-pointer mb-3"><span class="text-sm font-bold text-slate-700">All Gulshan</span><input type="radio" name="area" value="all" checked class="w-4 h-4 accent-blue-600"></label>
+             <label class="flex items-center justify-between cursor-pointer mb-3"><span class="text-sm font-bold text-slate-700">Gulshan 1</span><input type="radio" name="area" value="gulshan-1" class="w-4 h-4 accent-blue-600"></label>
+             <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">Gulshan 2</span><input type="radio" name="area" value="gulshan-2" class="w-4 h-4 accent-blue-600"></label>
         </div>
       </div>
 
       <!-- DEALS -->
-      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-[800] text-red-600 transition-all active:scale-95 hover:bg-red-50 cursor-pointer whitespace-nowrap outline-none">
+      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-black text-red-600 transition-all active:scale-95 hover:bg-red-50 cursor-pointer whitespace-nowrap outline-none">
         <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"/></svg>
         <span>Deals</span>
       </button>
 
     </div>
 
-    <!-- একটিভ ফিল্টার চিপস -->
-    <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
-       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active Filters:</span>
+    <!-- Active Filter Chips Container -->
+    <div id="chipsContainer" class="hidden flex-wrap items-center gap-2 mt-2 border-t border-slate-50 pt-2">
+       <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest mr-1">Applied:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
-       <button id="clearAllFiltersBtn" class="text-[10px] font-black text-blue-600 hover:underline cursor-pointer ml-2 uppercase">Clear all</button>
     </div>
 
   </div>
@@ -110,45 +105,86 @@
 <style>
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
+
+  /* Standard CSS for Dual Range Slider */
+  .slider-thumb::-webkit-slider-thumb {
+    appearance: none;
+    pointer-events: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #2563eb;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  .slider-thumb::-moz-range-thumb {
+    appearance: none;
+    pointer-events: auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #2563eb;
+    cursor: pointer;
+  }
+
   @media (max-width: 768px) {
     .filter-popup {
       position: fixed !important;
       top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
       width: 100% !important; margin: 0 !important;
-      border-radius: 24px 24px 0 0 !important;
-      animation: slideIn 0.3s ease-out;
+      border-radius: 28px 28px 0 0 !important;
+      animation: slideUp 0.3s ease-out;
     }
   }
-  @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>
 
 <script is:inline>
-  function setupStickyFilters() {
+  function initStickyBar() {
     const searchInput = document.getElementById('hotelSearchInput');
-    const triggers = document.querySelectorAll('.pill-trigger');
-    const popups = document.querySelectorAll('.filter-popup');
+    const hotelCards = document.querySelectorAll('.directory-card-item');
+    const minRange = document.getElementById('minRange');
+    const maxRange = document.getElementById('maxRange');
+    const sliderTrack = document.getElementById('sliderTrack');
     const dealsBtn = document.getElementById('quickDealsBtn');
-    const chipsContainer = document.getElementById('activeFiltersContainer');
-    const chipsList = document.getElementById('chipsList');
-    const clearAllBtn = document.getElementById('clearAllFiltersBtn');
     
-    let dealsActive = false;
+    let isDealsActive = false;
 
-    // পপআপ বন্ধ করার ফাংশন
-    const closeAllPopups = () => {
-      popups.forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
-    };
+    // --- ১. পপআপ খোলা/বন্ধ লজিক ---
+    document.querySelectorAll('.pill-trigger').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const boxId = btn.getAttribute('data-target');
+        const box = document.getElementById(boxId);
+        const isHidden = box.classList.contains('hidden');
 
-    // মেইন ফিল্টার ফাংশন
-    const runFiltering = () => {
-      const hotelCards = document.querySelectorAll('.directory-card-item');
-      const searchTerm = searchInput?.value.toLowerCase().trim() || "";
-      
-      const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || "all";
+        // অন্য সব বন্ধ করো
+        document.querySelectorAll('.filter-popup').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
+
+        if (isHidden) {
+          box.classList.remove('hidden');
+          btn.querySelector('.arrow')?.classList.add('rotate-180');
+        }
+      };
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.pill-group')) {
+        document.querySelectorAll('.filter-popup').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
+      }
+    });
+
+    // --- ২. মেইন ফিল্টার ইঞ্জিন ---
+    const runFilterEngine = () => {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const minPrice = parseInt(minRange.value);
+      const maxPrice = parseInt(maxRange.value);
       const selectedArea = document.querySelector('input[name="area"]:checked')?.value || "all";
-      const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(cb => parseFloat(cb.value));
+      const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(i => parseFloat(i.value));
 
       hotelCards.forEach(card => {
         const title = (card.getAttribute('data-title') || "").toLowerCase();
@@ -157,121 +193,107 @@
         const rating = parseFloat(card.getAttribute('data-numeric-rating') || "0");
         const hasDiscount = card.querySelector('.bg-red-600') || card.querySelector('span[class*="red"]');
 
-        // ১. সার্চ ম্যাচ
-        const matchesSearch = searchTerm === "" || title.includes(searchTerm);
-        
-        // ২. এরিয়া ম্যাচ
-        const matchesArea = (selectedArea === "all" || area === selectedArea);
-        
-        // ৩. প্রাইস ম্যাচ (লজিক: Low < 100, High >= 100) - আপনার ডাটা অনুযায়ী এটি অ্যাডজাস্ট করতে পারেন
-        let matchesPrice = true;
-        if (selectedPrice === "low") matchesPrice = price < 100;
-        else if (selectedPrice === "high") matchesPrice = price >= 100;
+        const matchSearch = title.includes(searchTerm);
+        const matchArea = selectedArea === "all" || area === selectedArea;
+        const matchPrice = price >= minPrice && price <= maxPrice;
+        const matchRating = selectedRatings.length === 0 || selectedRatings.some(r => rating >= (r * 1)); // average matching
+        const matchDeals = isDealsActive ? !!hasDiscount : true;
 
-        // ৪. রেটিং ম্যাচ
-        let matchesRating = true;
-        if (selectedRatings.length > 0) {
-          matchesRating = selectedRatings.some(r => rating >= r);
-        }
-
-        // ৫. ডিলস ম্যাচ
-        let matchesDeals = dealsActive ? !!hasDiscount : true;
-
-        // ফাইনাল রেজাল্ট
-        if (matchesSearch && matchesArea && matchesPrice && matchesRating && matchesDeals) {
+        if (matchSearch && matchArea && matchPrice && matchRating && matchDeals) {
           card.style.display = 'flex';
         } else {
           card.style.display = 'none';
         }
       });
 
-      updateFilterChips();
+      updateChips();
     };
 
-    // চিপস আপডেট লজিক
-    const updateFilterChips = () => {
-      chipsList.innerHTML = '';
-      let activeCount = 0;
+    // --- ৩. স্লাইডার আপডেট লজিক ---
+    function handleSlider() {
+      let minVal = parseInt(minRange.value);
+      let maxVal = parseInt(maxRange.value);
 
-      // Price, Area, Rating চিপস
-      document.querySelectorAll('.filter-popup input').forEach(input => {
-        if ((input.type === 'radio' && input.checked && input.value !== 'all') || (input.type === 'checkbox' && input.checked)) {
-          activeCount++;
-          const label = input.closest('label').querySelector('span').innerText;
-          const chip = document.createElement('div');
-          chip.className = "flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
-          chip.innerHTML = `<span>${label}</span><button class="ml-1 font-black">&times;</button>`;
-          chip.querySelector('button').onclick = () => {
-            if(input.type === 'radio') {
-              document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
-            } else {
-              input.checked = false;
-            }
-            runFiltering();
-          };
-          chipsList.appendChild(chip);
-        }
-      });
-
-      if (dealsActive) {
-        activeCount++;
-        const chip = document.createElement('div');
-        chip.className = "flex items-center gap-1 bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
-        chip.innerHTML = `<span>Deals Active</span><button class="ml-1 font-black">&times;</button>`;
-        chip.querySelector('button').onclick = () => {
-          dealsBtn.click();
-        };
-        chipsList.appendChild(chip);
+      if (maxVal - minVal < 20) {
+        if (this === minRange) minRange.value = maxVal - 20;
+        else maxRange.value = minVal + 20;
       }
 
-      chipsContainer.classList.toggle('hidden', activeCount === 0);
-    };
+      document.getElementById('minText').textContent = minRange.value;
+      document.getElementById('maxText').textContent = maxRange.value;
 
-    // ইভেন্ট লিসেনার সেটআপ
-    document.querySelectorAll('.filter-popup input').forEach(input => {
-      input.onchange = () => {
-        runFiltering();
-        setTimeout(closeAllPopups, 300);
-      };
-    });
+      const p1 = (minRange.value / minRange.max) * 100;
+      const p2 = (maxRange.value / maxRange.max) * 100;
+      sliderTrack.style.left = p1 + "%";
+      sliderTrack.style.width = (p2 - p1) + "%";
 
-    searchInput?.addEventListener('input', runFiltering);
-
-    triggers.forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const targetId = btn.getAttribute('data-target');
-        const targetBox = document.getElementById(targetId);
-        const isHidden = targetBox.classList.contains('hidden');
-        closeAllPopups();
-        if (isHidden) {
-          targetBox.classList.remove('hidden');
-          btn.querySelector('.arrow')?.classList.add('rotate-180');
-        }
-      };
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.pill-container')) closeAllPopups();
-    });
-
-    if(dealsBtn) {
-      dealsBtn.onclick = () => {
-        dealsActive = !dealsActive;
-        dealsBtn.classList.toggle('bg-red-600', dealsActive);
-        dealsBtn.classList.toggle('text-white', dealsActive);
-        runFiltering();
-      };
+      runFilterEngine();
     }
 
-    clearAllBtn.onclick = () => {
-      document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
-      document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-      if(dealsActive) dealsActive = false, dealsBtn.classList.remove('bg-red-600', 'text-white');
-      runFiltering();
+    // --- ৪. চিপস লজিক ---
+    function updateChips() {
+      const container = document.getElementById('chipsContainer');
+      const list = document.getElementById('chipsList');
+      list.innerHTML = '';
+      let active = false;
+
+      // Price chip
+      if (parseInt(minRange.value) > 0 || parseInt(maxRange.value) < 250) {
+        active = true;
+        addChip(`$${minRange.value}-$${maxRange.value}`, () => {
+          minRange.value = 0; maxRange.value = 250; handleSlider();
+        });
+      }
+
+      // Area chip
+      const areaInp = document.querySelector('input[name="area"]:checked');
+      if (areaInp && areaInp.value !== 'all') {
+        active = true;
+        addChip(areaInp.value.toUpperCase(), () => {
+          document.querySelector('input[name="area"][value="all"]').checked = true;
+          runFilterEngine();
+        });
+      }
+
+      container.classList.toggle('hidden', !active);
+    }
+
+    function addChip(text, onRemove) {
+      const chip = document.createElement('div');
+      chip.className = "flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-600 px-2 py-1 rounded-md text-[10px] font-bold";
+      chip.innerHTML = `<span>${text}</span><button class="ml-1 cursor-pointer font-black">×</button>`;
+      chip.querySelector('button').onclick = onRemove;
+      document.getElementById('chipsList').appendChild(chip);
+    }
+
+    // ইভেন্ট লিসেনার যুক্ত করা
+    minRange.oninput = handleSlider;
+    maxRange.oninput = handleSlider;
+    searchInput.oninput = runFilterEngine;
+    
+    document.querySelectorAll('.filter-popup input').forEach(input => {
+      input.onchange = () => {
+        runFilterEngine();
+        if(input.name === 'area') setTimeout(() => document.querySelectorAll('.filter-popup').forEach(p => p.classList.add('hidden')), 400);
+      };
+    });
+
+    dealsBtn.onclick = () => {
+      isDealsActive = !isDealsActive;
+      dealsBtn.classList.toggle('bg-red-600', isDealsActive);
+      dealsBtn.classList.toggle('text-white', isDealsActive);
+      runFilterEngine();
     };
+
+    document.getElementById('resetPrice').onclick = () => {
+      minRange.value = 0; maxRange.value = 250; handleSlider();
+    };
+
+    // ইনিশিয়াল রান
+    handleSlider();
   }
 
-  setupStickyFilters();
-  document.addEventListener('astro:page-load', setupStickyFilters);
+  // রান করো
+  initStickyBar();
+  document.addEventListener('astro:page-load', initStickyBar);
 </script>
