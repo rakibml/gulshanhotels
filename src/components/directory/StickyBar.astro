@@ -2,13 +2,13 @@
 // src/components/directory/StickyBar.astro
 ---
 
-<!-- ব্যাকগ্রাউন্ড ওভারলে -->
-<div id="filterOverlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-[90] hidden transition-opacity"></div>
+<!-- ১. ব্যাকগ্রাউন্ড ওভারলে (সবকিছুর উপরে থাকার জন্য high z-index) -->
+<div id="filterOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[9990] hidden transition-opacity"></div>
 
 <header class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
   <div class="max-w-[1280px] mx-auto px-4 py-3">
     
-    <!-- পিল বাটন কন্টেইনার -->
+    <!-- ২. পিল বাটন কন্টেইনার -->
     <div class="flex items-center gap-2 overflow-x-auto md:overflow-visible no-scrollbar relative">
       
       <!-- PRICE PILL -->
@@ -87,7 +87,7 @@
 
     </div>
 
-    <!-- একটিভ ফিল্টার চিপস -->
+    <!-- ৩. একটিভ ফিল্টার চিপস -->
     <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
        <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Filters:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
@@ -104,10 +104,18 @@
   @media (max-width: 768px) {
     .filter-popup {
       position: fixed !important;
-      top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
-      width: 100% !important; margin: 0 !important;
+      top: auto !important; 
+      bottom: 0 !important; 
+      left: 0 !important; 
+      right: 0 !important;
+      width: 100% !important; 
+      margin: 0 !important;
+      z-index: 9999 !important; /* সবকিছুর উপরে দেখানোর জন্য */
       border-radius: 24px 24px 0 0 !important;
+      box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1) !important;
       animation: slideIn 0.3s ease-out;
+      max-height: 80vh;
+      overflow-y: auto;
     }
   }
   @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -125,15 +133,16 @@
     
     let dealsActive = false;
 
+    // পপআপ বন্ধ করার ফাংশন
     const closeAllPopups = () => {
       popups.forEach(p => p.classList.add('hidden'));
       overlay.classList.add('hidden');
       document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
     };
 
+    // মেইন ফিল্টারিং লজিক
     const runFiltering = () => {
       const hotelCards = document.querySelectorAll('.directory-card-item');
-      
       const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || "all";
       const selectedArea = document.querySelector('input[name="area"]:checked')?.value || "all";
       const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(cb => parseFloat(cb.value));
@@ -157,16 +166,13 @@
 
         let matchesDeals = dealsActive ? !!hasDiscount : true;
 
-        if (matchesArea && matchesPrice && matchesRating && matchesDeals) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
+        card.style.display = (matchesArea && matchesPrice && matchesRating && matchesDeals) ? 'flex' : 'none';
       });
 
       updateFilterChips();
     };
 
+    // চিপস আপডেট
     const updateFilterChips = () => {
       chipsList.innerHTML = '';
       let activeCount = 0;
@@ -206,6 +212,7 @@
       chipsList.appendChild(chip);
     }
 
+    // ইনপুট চেঞ্জ হ্যান্ডলার
     document.querySelectorAll('.filter-popup input').forEach(input => {
       input.onchange = () => {
         runFiltering();
@@ -213,12 +220,14 @@
       };
     });
 
+    // পিল বাটন ক্লিক হ্যান্ডলার
     triggers.forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
         const targetId = btn.getAttribute('data-target');
         const targetBox = document.getElementById(targetId);
         const isHidden = targetBox.classList.contains('hidden');
+        
         closeAllPopups();
         if (isHidden) {
           targetBox.classList.remove('hidden');
@@ -228,11 +237,15 @@
       };
     });
 
+    // বাইরে বা ওভারলেতে ক্লিক করলে বন্ধ হবে
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.pill-container') && !e.target.closest('.filter-popup')) closeAllPopups();
+      if (!e.target.closest('.pill-container') && !e.target.closest('.filter-popup')) {
+        closeAllPopups();
+      }
     });
     overlay.onclick = closeAllPopups;
 
+    // ডিলস বাটন
     if(dealsBtn) {
       dealsBtn.onclick = () => {
         dealsActive = !dealsActive;
@@ -242,6 +255,7 @@
       };
     }
 
+    // ক্লিয়ার অল
     clearAllBtn.onclick = () => {
       document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
       document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
@@ -253,6 +267,7 @@
     };
   }
 
+  // Astro Lifecycle
   setupStickyFilters();
   document.addEventListener('astro:after-swap', setupStickyFilters);
   document.addEventListener('astro:page-load', setupStickyFilters);
