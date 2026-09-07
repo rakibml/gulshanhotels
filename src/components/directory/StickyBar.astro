@@ -29,18 +29,18 @@
           <svg class="w-3 h-3 text-slate-400 transition-transform arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
         <div id="priceBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[240px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
-          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Price Range</h4>
+          <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Budget (Per Night)</h4>
           <div class="space-y-3">
              <label class="flex items-center justify-between cursor-pointer group">
                <span class="text-sm font-bold text-slate-700">All Prices</span>
                <input type="radio" name="price" value="all" checked class="w-4 h-4 accent-blue-600">
              </label>
              <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Under $50</span>
+               <span class="text-sm font-bold text-slate-700">Budget Friendly</span>
                <input type="radio" name="price" value="low" class="w-4 h-4 accent-blue-600">
              </label>
              <label class="flex items-center justify-between cursor-pointer group">
-               <span class="text-sm font-bold text-slate-700">Above $50</span>
+               <span class="text-sm font-bold text-slate-700">Premium Stays</span>
                <input type="radio" name="price" value="high" class="w-4 h-4 accent-blue-600">
              </label>
           </div>
@@ -57,8 +57,8 @@
         <div id="ratingBox" class="filter-popup hidden absolute top-[calc(100%+8px)] left-0 w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 z-[1000]">
           <h4 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">Guest Rating</h4>
           <div class="space-y-3">
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="9" name="rating_score" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
-             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="8" name="rating_score" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
+             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="9" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
+             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-4 h-4 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
           </div>
         </div>
       </div>
@@ -97,11 +97,11 @@
 
     </div>
 
-    <!-- ৩. একটিভ ফিল্টার চিপস (নিচে দেখাবে) -->
+    <!-- একটিভ ফিল্টার চিপস -->
     <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
-       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active:</span>
+       <span class="text-[10px] font-black uppercase text-slate-400 mr-1">Active Filters:</span>
        <div id="chipsList" class="flex flex-wrap gap-2"></div>
-       <button id="clearAllFiltersBtn" class="text-[10px] font-bold text-blue-600 hover:underline cursor-pointer ml-2">Clear all</button>
+       <button id="clearAllFiltersBtn" class="text-[10px] font-black text-blue-600 hover:underline cursor-pointer ml-2 uppercase">Clear all</button>
     </div>
 
   </div>
@@ -110,12 +110,22 @@
 <style>
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  @media (max-width: 768px) {
+    .filter-popup {
+      position: fixed !important;
+      top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+      width: 100% !important; margin: 0 !important;
+      border-radius: 24px 24px 0 0 !important;
+      animation: slideIn 0.3s ease-out;
+    }
+  }
+  @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
 </style>
 
 <script is:inline>
-  function setupStickyBar() {
+  function setupStickyFilters() {
     const searchInput = document.getElementById('hotelSearchInput');
-    const hotelCards = document.querySelectorAll('.directory-card-item');
     const triggers = document.querySelectorAll('.pill-trigger');
     const popups = document.querySelectorAll('.filter-popup');
     const dealsBtn = document.getElementById('quickDealsBtn');
@@ -125,67 +135,17 @@
     
     let dealsActive = false;
 
-    // ১. পপআপ বন্ধ করার ফাংশন
+    // পপআপ বন্ধ করার ফাংশন
     const closeAllPopups = () => {
       popups.forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
     };
 
-    // ২. ফিল্টার চিপস আপডেট করার ফাংশন
-    const updateFilterChips = () => {
-      chipsList.innerHTML = '';
-      let hasActiveFilters = false;
-
-      // রেডিও এবং চেক-বক্স চেক করা
-      document.querySelectorAll('.filter-popup input:checked').forEach(input => {
-        if (input.value !== 'all') {
-          hasActiveFilters = true;
-          const label = input.closest('label').querySelector('span').innerText;
-          createChip(label, input);
-        }
-      });
-
-      // ডিলস চেক করা
-      if (dealsActive) {
-        hasActiveFilters = true;
-        createChip('Deals Applied', dealsBtn);
-      }
-
-      // কন্টেইনার শো/হাইড
-      chipsContainer.classList.toggle('hidden', !hasActiveFilters);
-    };
-
-    // ৩. চিপ তৈরি করার ফাংশন
-    const createChip = (text, inputSource) => {
-      const chip = document.createElement('div');
-      chip.className = "flex items-center gap-1.5 bg-blue-50 border border-blue-100 text-[#006ce4] px-2.5 py-1 rounded-lg text-[11px] font-bold animate-in zoom-in-95 duration-200";
-      chip.innerHTML = `
-        <span>${text}</span>
-        <button class="hover:text-red-500 cursor-pointer text-[14px] leading-none">&times;</button>
-      `;
-
-      // চিপের ক্রস বাটন ক্লিক করলে রিসেট
-      chip.querySelector('button').onclick = () => {
-        if (inputSource === dealsBtn) {
-          dealsBtn.click();
-        } else if (inputSource.type === 'radio') {
-          // রেডিও হলে 'All' অপশনে ফেরত যাও
-          const groupName = inputSource.name;
-          document.querySelector(`input[name="${groupName}"][value="all"]`).checked = true;
-          runFiltering();
-        } else {
-          // চেক-বক্স হলে আনচেক করো
-          inputSource.checked = false;
-          runFiltering();
-        }
-      };
-
-      chipsList.appendChild(chip);
-    };
-
-    // ৪. মেইন ফিল্টার ফাংশন
+    // মেইন ফিল্টার ফাংশন
     const runFiltering = () => {
+      const hotelCards = document.querySelectorAll('.directory-card-item');
       const searchTerm = searchInput?.value.toLowerCase().trim() || "";
+      
       const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || "all";
       const selectedArea = document.querySelector('input[name="area"]:checked')?.value || "all";
       const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(cb => parseFloat(cb.value));
@@ -197,16 +157,74 @@
         const rating = parseFloat(card.getAttribute('data-numeric-rating') || "0");
         const hasDiscount = card.querySelector('.bg-red-600') || card.querySelector('span[class*="red"]');
 
+        // ১. সার্চ ম্যাচ
         const matchesSearch = searchTerm === "" || title.includes(searchTerm);
+        
+        // ২. এরিয়া ম্যাচ
         const matchesArea = (selectedArea === "all" || area === selectedArea);
-        let matchesPrice = (selectedPrice === "all") ? true : (selectedPrice === "low" ? price < 50 : price >= 50);
-        let matchesRating = (selectedRatings.length === 0) ? true : selectedRatings.some(r => rating >= r);
+        
+        // ৩. প্রাইস ম্যাচ (লজিক: Low < 100, High >= 100) - আপনার ডাটা অনুযায়ী এটি অ্যাডজাস্ট করতে পারেন
+        let matchesPrice = true;
+        if (selectedPrice === "low") matchesPrice = price < 100;
+        else if (selectedPrice === "high") matchesPrice = price >= 100;
+
+        // ৪. রেটিং ম্যাচ
+        let matchesRating = true;
+        if (selectedRatings.length > 0) {
+          matchesRating = selectedRatings.some(r => rating >= r);
+        }
+
+        // ৫. ডিলস ম্যাচ
         let matchesDeals = dealsActive ? !!hasDiscount : true;
 
-        card.style.display = (matchesSearch && matchesArea && matchesPrice && matchesRating && matchesDeals) ? 'flex' : 'none';
+        // ফাইনাল রেজাল্ট
+        if (matchesSearch && matchesArea && matchesPrice && matchesRating && matchesDeals) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
       });
 
       updateFilterChips();
+    };
+
+    // চিপস আপডেট লজিক
+    const updateFilterChips = () => {
+      chipsList.innerHTML = '';
+      let activeCount = 0;
+
+      // Price, Area, Rating চিপস
+      document.querySelectorAll('.filter-popup input').forEach(input => {
+        if ((input.type === 'radio' && input.checked && input.value !== 'all') || (input.type === 'checkbox' && input.checked)) {
+          activeCount++;
+          const label = input.closest('label').querySelector('span').innerText;
+          const chip = document.createElement('div');
+          chip.className = "flex items-center gap-1 bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
+          chip.innerHTML = `<span>${label}</span><button class="ml-1 font-black">&times;</button>`;
+          chip.querySelector('button').onclick = () => {
+            if(input.type === 'radio') {
+              document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
+            } else {
+              input.checked = false;
+            }
+            runFiltering();
+          };
+          chipsList.appendChild(chip);
+        }
+      });
+
+      if (dealsActive) {
+        activeCount++;
+        const chip = document.createElement('div');
+        chip.className = "flex items-center gap-1 bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-lg text-[11px] font-bold";
+        chip.innerHTML = `<span>Deals Active</span><button class="ml-1 font-black">&times;</button>`;
+        chip.querySelector('button').onclick = () => {
+          dealsBtn.click();
+        };
+        chipsList.appendChild(chip);
+      }
+
+      chipsContainer.classList.toggle('hidden', activeCount === 0);
     };
 
     // ইভেন্ট লিসেনার সেটআপ
@@ -247,13 +265,13 @@
     }
 
     clearAllBtn.onclick = () => {
-       document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
-       document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-       if(dealsActive) dealsBtn.click();
-       runFiltering();
+      document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
+      document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
+      if(dealsActive) dealsActive = false, dealsBtn.classList.remove('bg-red-600', 'text-white');
+      runFiltering();
     };
   }
 
-  setupStickyBar();
-  document.addEventListener('astro:page-load', setupStickyBar);
+  setupStickyFilters();
+  document.addEventListener('astro:page-load', setupStickyFilters);
 </script>
