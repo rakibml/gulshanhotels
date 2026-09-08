@@ -2,6 +2,7 @@
 // src/components/QuickViewModal.astro
 ---
 
+<!-- ১. মোডাল কন্টেইনার -->
 <div 
   id="globalQuickViewModal" 
   role="dialog" 
@@ -12,7 +13,7 @@
     id="quickViewDialog"
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[90vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
   >
-    <!-- TOP-CENTER CLOSE BUTTON -->
+    <!-- ২. ক্লোজ বাটন (Top Center) -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
@@ -23,61 +24,55 @@
       </svg>
     </button>
 
-    <!-- BODY -->
-    <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-5 rounded-t-3xl">
+    <!-- ৩. বডি সেকশন -->
+    <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-5">
       
-      <!-- IMAGE CAROUSEL -->
-      <div class="relative w-full h-52 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 shrink-0 shadow-inner group">
-        <img id="qvModalImg" src="" alt="Hotel" class="w-full h-full object-cover transition-opacity duration-300" />
-        
-        <!-- Navigation Arrows (Show only if multiple images) -->
-        <div id="qvNavBtns" class="hidden">
-            <button id="qvPrevImgBtn" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md hover:bg-black transition cursor-pointer">❮</button>
-            <button id="qvNextImgBtn" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md hover:bg-black transition cursor-pointer">❯</button>
-        </div>
-
+      <!-- ইমেজ প্রিভিউ -->
+      <div class="relative w-full h-52 sm:h-72 rounded-2xl overflow-hidden bg-slate-100 shadow-inner">
+        <img id="qvModalImg" src="" alt="Hotel" class="w-full h-full object-cover" />
         <span id="qvImgBadge" class="absolute bottom-3 right-4 bg-black/70 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full border border-white/20">
-          1 / 1
+          Preview Image
         </span>
       </div>
 
-      <!-- TITLE & RATING -->
+      <!-- টাইটেল ও ইনফো -->
       <div class="flex items-start justify-between gap-4">
-        <div>
-          <h3 id="qvHotelTitle" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">Title</h3>
-          <div id="qvStarsContainer" class="text-amber-500 text-sm mt-1"></div>
+        <div class="space-y-1">
+          <h3 id="qvHotelTitle" class="text-xl sm:text-2xl font-black text-slate-900 leading-tight uppercase tracking-tight">Hotel Title</h3>
+          <div id="qvStarsContainer" class="text-amber-500 text-sm"></div>
           <div class="flex items-center gap-1.5 text-xs text-slate-500 font-bold mt-2">
             <svg class="w-3.5 h-3.5 fill-slate-400" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></svg>
-            <span id="qvAddress">Gulshan, Dhaka</span>
+            <span id="qvAddress">Address Loading...</span>
           </div>
         </div>
         <div id="qvRatingBox" class="shrink-0 text-right"></div>
       </div>
 
-      <!-- AMENITIES -->
-      <div id="qvAmenitiesSection" class="pt-4 border-t border-slate-100">
-        <span class="text-[11px] font-black uppercase text-slate-400 tracking-widest block mb-3">Key Facilities</span>
-        <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      <!-- ফেসিলিটিজ (অটো-জেনারেটেড) -->
+      <div class="pt-4 border-t border-slate-100">
+        <span class="text-[11px] font-black uppercase text-slate-400 tracking-widest block mb-3">Hotel Amenities</span>
+        <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <!-- জাভাস্ক্রিপ্ট দিয়ে এখানে ডেটা বসবে -->
+        </div>
       </div>
 
-      <!-- BOOKING CHANNELS -->
+      <!-- বুকিং অপশন -->
       <div class="pt-4 border-t border-slate-100">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-xs font-black text-slate-900 uppercase tracking-wider">Booking Options</span>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-black text-slate-900 uppercase">Live Rate</span>
           <div class="text-right">
-            <span class="text-[10px] text-slate-400 uppercase font-bold block">Lowest Rate</span>
-            <span id="qvPrice" class="text-xl font-black text-[#008234]">৳ 0</span>
+            <span id="qvPrice" class="text-2xl font-black text-[#008234]">৳ 0</span>
+            <span class="text-[10px] text-slate-400 font-bold block">per night</span>
           </div>
         </div>
-        <div id="qvChannelsContainer" class="space-y-2.5"></div>
       </div>
 
     </div>
 
-    <!-- FOOTER BUTTON -->
-    <div class="p-4 bg-slate-50 border-t border-slate-200 shrink-0 rounded-b-3xl">
-      <a id="qvFullDetailsBtn" href="#" class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold text-sm py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]">
-        View Full Details & All Photos ➔
+    <!-- ৪. ফুটার বাটন -->
+    <div class="p-4 bg-slate-50 border-t border-slate-200 rounded-b-3xl">
+      <a id="qvFullDetailsBtn" href="#" class="w-full bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold text-sm py-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg active:scale-95">
+        Check Availability & Full Details ➔
       </a>
     </div>
 
@@ -85,98 +80,61 @@
 </div>
 
 <script is:inline>
-  function setupQuickViewSystem() {
+  function initQuickView() {
     const modal = document.getElementById('globalQuickViewModal');
     const dialog = document.getElementById('quickViewDialog');
     const closeBtn = document.getElementById('closeQvModalBtn');
+
     if (!modal || !dialog) return;
 
-    let currentImages = [];
-    let currentImgIdx = 0;
-
-    const showPhoto = (idx) => {
-      if (!currentImages.length) return;
-      currentImgIdx = (idx + currentImages.length) % currentImages.length;
-      const imgEl = document.getElementById('qvModalImg');
-      imgEl.style.opacity = '0.5';
-      setTimeout(() => {
-        imgEl.src = currentImages[currentImgIdx];
-        imgEl.style.opacity = '1';
-        document.getElementById('qvImgBadge').textContent = `${currentImgIdx + 1} / ${currentImages.length}`;
-      }, 100);
-    };
-
-    const openModal = (cardEl) => {
-      // ১. ডাটা এক্সট্রাকশন (কার্ড থেকে)
-      const title = cardEl.getAttribute('data-title') || "Hotel Details";
-      const stars = parseInt(cardEl.getAttribute('data-stars') || '0');
-      const address = cardEl.querySelector('.card-hotel-address')?.textContent || "Gulshan, Dhaka";
-      const rating = cardEl.getAttribute('data-numeric-rating') || "0";
-      const price = cardEl.querySelector('[class*="text-[#008234]"]')?.textContent || "Contact for Rates";
-      const slug = cardEl.getAttribute('data-slug') || "";
+    // মেইন ফাংশন: কার্ড থেকে ডেটা স্ক্র্যাপ (Scrape) করা
+    function openQuickView(cardEl) {
+      // ১. কার্ডের ভেতর থেকে সব তথ্য খুঁজে বের করা
+      const title = cardEl.querySelector('h3')?.innerText || "Hotel Details";
+      const image = cardEl.querySelector('img')?.src || "";
+      const address = cardEl.querySelector('[class*="location"], [class*="address"]')?.innerText || cardEl.querySelector('svg + span')?.innerText || "Gulshan, Dhaka";
       
-      // গ্যালারি ইমেজ হ্যান্ডলিং
-      try {
-        const gallery = JSON.parse(cardEl.getAttribute('data-gallery') || '[]');
-        currentImages = gallery.length > 0 ? gallery : [cardEl.querySelector('img')?.src];
-      } catch {
-        currentImages = [cardEl.querySelector('img')?.src];
-      }
+      // গ্রিন প্রাইসটি খুঁজে বের করা
+      const price = cardEl.querySelector('.text-[#008234]')?.innerText || "Contact for Rates";
+      
+      // রেটিং (data-numeric-rating অ্যাট্রিবিউট থেকে, যা ফিল্টারে ছিল)
+      const rating = cardEl.getAttribute('data-numeric-rating') || "5.0";
+      const stars = cardEl.getAttribute('data-stars') || "3";
+      
+      // লিংক খুঁজে বের করা
+      const link = cardEl.querySelector('a')?.href || "#";
 
-      // ২. UI আপডেট
-      document.getElementById('qvHotelTitle').textContent = title.toUpperCase();
-      document.getElementById('qvStarsContainer').textContent = '★'.repeat(stars);
-      document.getElementById('qvAddress').textContent = address;
-      document.getElementById('qvPrice').textContent = price;
-      document.getElementById('qvFullDetailsBtn').href = `/${slug}`;
+      // ২. মোডালে ডেটা বসানো
+      document.getElementById('qvHotelTitle').innerText = title;
+      document.getElementById('qvModalImg').src = image;
+      document.getElementById('qvAddress').innerText = address;
+      document.getElementById('qvPrice').innerText = price;
+      document.getElementById('qvStarsContainer').innerText = "★".repeat(parseInt(stars));
+      document.getElementById('qvFullDetailsBtn').href = link;
 
-      // ইমেজ নেভিগেশন শো/হাইড
-      document.getElementById('qvNavBtns').classList.toggle('hidden', currentImages.length <= 1);
-      showPhoto(0);
-
-      // ৩. রেটিং বক্স
+      // রেটিং বক্স আপডেট
       const ratingBox = document.getElementById('qvRatingBox');
-      if (parseFloat(rating) > 0) {
-        ratingBox.innerHTML = `
-          <div class="bg-[#003580] text-white font-black text-sm px-2 py-1 rounded-lg inline-block">${rating}</div>
-          <div class="text-[10px] font-bold text-slate-800 mt-1">Guest Score</div>
-        `;
-      } else {
-        ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-lg uppercase">New</span>`;
-      }
+      ratingBox.innerHTML = `
+        <div class="bg-[#003580] text-white font-black text-sm px-2 py-1 rounded-lg inline-block">${rating}</div>
+        <div class="text-[10px] font-bold text-slate-800 mt-1">Rating</div>
+      `;
 
-      // ৪. অ্যামেনিটিস (আইকনসহ)
-      try {
-        const amenities = JSON.parse(cardEl.getAttribute('data-amenities') || '[]');
-        const grid = document.getElementById('qvAmenitiesGrid');
-        grid.innerHTML = amenities.slice(0, 6).map(item => `
-          <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-700">
-            <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            <span class="truncate">${item}</span>
-          </div>
-        `).join('');
-      } catch {}
-
-      // ৫. কন্টাক্ট অপশন (হোয়াটসঅ্যাপ ও কল)
-      const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
-      const phone = cardEl.getAttribute('data-phone') || '';
-      const chContainer = document.getElementById('qvChannelsContainer');
-      let chHtml = '';
+      // অ্যামেনিটিস (কার্ডে যদি থাকে তবে নিবে, নাহলে ডিফল্ট দেখাবে)
+      const amenitiesGrid = document.getElementById('qvAmenitiesGrid');
+      let amenities = ['Free Wi-Fi', 'Swimming Pool', 'Air Conditioned', 'Restaurant', 'Gym', 'Parking'];
       
-      if (whatsapp) {
-        chHtml += `
-          <a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" target="_blank" class="flex items-center justify-between p-3 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition group">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 bg-[#25D366] rounded-lg flex items-center justify-center text-white">WA</div>
-              <span class="text-xs font-bold text-emerald-950">Book via WhatsApp</span>
-            </div>
-            <span class="text-[10px] font-black text-emerald-600">Chat Now</span>
-          </a>
-        `;
-      }
-      chContainer.innerHTML = chHtml || `<p class="text-center text-xs text-slate-400 py-2">View full details for more options</p>`;
+      // কার্ডে যদি স্পেশাল কোন লিস্ট থাকে তা নেওয়ার চেষ্টা করবে
+      const foundAmenities = Array.from(cardEl.querySelectorAll('.amenity-tag, .card-amenity')).map(el => el.innerText);
+      if (foundAmenities.length > 0) amenities = foundAmenities;
 
-      // ৬. মোডাল শো
+      amenitiesGrid.innerHTML = amenities.slice(0, 6).map(item => `
+        <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600">
+          <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          <span class="truncate">${item}</span>
+        </div>
+      `).join('');
+
+      // ৩. মোডাল শো করা
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
@@ -184,8 +142,9 @@
         dialog.classList.add('scale-100', 'opacity-100');
       }, 10);
 
-      window.history.pushState({ modal: true }, '', '#quick-view');
-    };
+      // ব্যাক বাটন ফিক্স
+      window.history.pushState({ modalOpen: true }, '', '#view');
+    }
 
     const closeModal = () => {
       dialog.classList.remove('scale-100', 'opacity-100');
@@ -194,26 +153,26 @@
         modal.classList.add('hidden');
         document.body.style.overflow = '';
       }, 200);
-      if (window.location.hash === '#quick-view') window.history.back();
+      if (window.location.hash === '#view') window.history.back();
     };
 
-    // ইভেন্ট লিসেনারস
-    document.getElementById('qvPrevImgBtn').onclick = (e) => { e.stopPropagation(); showPhoto(currentImgIdx - 1); };
-    document.getElementById('qvNextImgBtn').onclick = (e) => { e.stopPropagation(); showPhoto(currentImgIdx + 1); };
-    closeBtn.onclick = closeModal;
-    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-    window.addEventListener('popstate', () => { if (modal.classList.contains('hidden') === false) closeModal(); });
-
-    // গ্লোবাল ক্লিক হ্যান্ডলার
+    // ইভেন্ট লিসেনার: "View Hotel" বাটনে ক্লিক করলে
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.open-quick-view-btn');
       if (btn) {
+        e.preventDefault();
         const card = btn.closest('.directory-card-item');
-        if (card) openModal(card);
+        if (card) openQuickView(card);
       }
     });
+
+    closeBtn.onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+    window.addEventListener('popstate', () => { if (!modal.classList.contains('hidden')) closeModal(); });
   }
 
-  setupQuickViewSystem();
-  document.addEventListener('astro:after-swap', setupQuickViewSystem);
+  // ইনিশিয়ালাইজেশন
+  initQuickView();
+  document.addEventListener('astro:after-swap', initQuickView);
+  document.addEventListener('astro:page-load', initQuickView);
 </script>
