@@ -47,12 +47,11 @@ const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
 // --- 4. Pricing Logic (Sync with Markdown and Channels) ---
-const mdPriceRaw = hData.price || "$100"; // Original price from .md file
+const mdPriceRaw = hData.price || "$100"; 
 const isDollar = mdPriceRaw.includes('$');
 const mdPriceNumeric = parseFloat(mdPriceRaw.replace(/[^0-9.]/g, '')) || 0;
 
 let lowestChannelPrice = 0;
-// Find the lowest price among booking channels
 if (Array.isArray(hData.booking_channels)) {
   hData.booking_channels.forEach((ch: any) => {
     const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, ''));
@@ -64,28 +63,24 @@ if (Array.isArray(hData.booking_channels)) {
   });
 }
 
-// Pricing display variables
-let displayPrice = "";         // Main Green Price
-let displayOriginalPrice = ""; // Struck-through Price (from .md)
+let displayPrice = "";         
+let displayOriginalPrice = ""; 
 let discountPercent = 0;
 
 if (lowestChannelPrice > 0 && lowestChannelPrice < mdPriceNumeric) {
-  // Case: Discount available via booking channels
   displayPrice = isDollar ? `$${lowestChannelPrice}` : `৳${lowestChannelPrice.toLocaleString()}`;
   displayOriginalPrice = mdPriceRaw.startsWith('$') || mdPriceRaw.startsWith('৳') ? mdPriceRaw : '$' + mdPriceRaw;
   discountPercent = Math.round(((mdPriceNumeric - lowestChannelPrice) / mdPriceNumeric) * 100);
 } else {
-  // Case: No channel discount, use .md price as primary
   displayPrice = mdPriceRaw.startsWith('$') || mdPriceRaw.startsWith('৳') ? mdPriceRaw : '$' + mdPriceRaw;
   displayOriginalPrice = "";
   discountPercent = 0;
 }
 
-// Convert price to BDT for StickyBar Filter Logic (USD * 120)
 const filterPriceVal = lowestChannelPrice > 0 ? lowestChannelPrice : mdPriceNumeric;
 const filterPriceBDT = isDollar ? Math.round(filterPriceVal * 120) : filterPriceVal;
 
-// --- 5. Review and Rating Logic (5.0 Scale) ---
+// --- 5. Review and Rating Logic ---
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
@@ -104,7 +99,6 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
 
 const allApprovedReviews = [...approvedCmsReviews, ...(hData.reviews || [])];
 const realCount = allApprovedReviews.length;
-// Calculate rating on a 5.0 scale
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
@@ -117,11 +111,19 @@ const hasValidTitle = hTitle.length > 0;
     data-title={titleLowerStr}
     data-stars={starCount.toString()}
     data-area={areaType}
+    data-slug={hSlug}
     data-guesthouse={isGuestHouse ? 'true' : 'false'}
     data-numeric-price={filterPriceBDT}
     data-numeric-rating={parseFloat(realRating)}
+    
+    /* --- Modal Data Attributes --- */
+    data-md-price={mdPriceRaw}
+    data-booking-channels={JSON.stringify(hData.booking_channels || [])}
+    data-gallery={JSON.stringify(hData.gallery || [hImage])}
+    data-whatsapp={hData.whatsapp || ""}
+    data-phone={hData.phone || ""}
   >
-<div class="w-full flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
+    <div class="w-full flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
       <!-- Module 1: Image -->
       <div class="relative w-full h-full min-h-[220px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
