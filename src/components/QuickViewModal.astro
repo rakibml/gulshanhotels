@@ -2,86 +2,71 @@
 // src/components/QuickViewModal.astro
 ---
 
-<div 
-  id="globalQuickViewModal" 
-  class="fixed inset-0 z-[10001] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
->
-  <div 
-    id="quickViewDialog"
-    class="bg-white rounded-[32px] w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative flex flex-col max-h-[92vh] transition-all duration-300 scale-95 opacity-0 overflow-hidden"
-  >
-    <!-- TOP-CENTER CLOSE BUTTON -->
-    <button 
-      type="button" 
-      id="closeQvModalBtn" 
-      class="absolute -top-5 left-1/2 -translate-x-1/2 z-[10002] w-12 h-12 rounded-full bg-white text-slate-900 border-2 border-slate-200 shadow-2xl flex items-center justify-center cursor-pointer hover:bg-rose-600 hover:text-white transition-all"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
+<div id="globalQuickViewModal" class="fixed inset-0 z-[10001] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="quickViewDialog" class="bg-white rounded-[32px] w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative flex flex-col max-h-[95vh] transition-all duration-300 scale-95 opacity-0 overflow-hidden">
+    
+    <!-- Top Close Button -->
+    <button type="button" id="closeQvModalBtn" class="absolute top-4 right-4 z-[10002] w-10 h-10 rounded-full bg-white/90 text-slate-900 shadow-xl flex items-center justify-center cursor-pointer hover:bg-rose-600 hover:text-white transition-all">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M6 18L18 6M6 6l12 12" /></svg>
     </button>
 
     <div class="overflow-y-auto flex-1 p-0">
-      
-      <!-- 1. IMAGE CAROUSEL SECTION -->
+      <!-- 1. Image Slider Section -->
       <div class="relative w-full h-64 sm:h-80 bg-slate-100 overflow-hidden group">
         <img id="qvModalImg" src="" alt="Hotel" class="w-full h-full object-cover transition-all duration-500" />
-        
-        <!-- Navigation Arrows -->
-        <button id="qvPrevImg" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer">❮</button>
-        <button id="qvNextImg" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-black/60 text-white backdrop-blur-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer">❯</button>
-        
-        <!-- Image Badge -->
-        <div class="absolute bottom-4 right-6 bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full border border-white/20 uppercase tracking-widest">
-            <span id="qvImgIdx">1</span> / <span id="qvTotalImg">1</span> Photos
+        <button id="qvPrevImg" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/50 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❮</button>
+        <button id="qvNextImg" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/50 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❯</button>
+        <div class="absolute bottom-4 left-6 bg-black/50 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">
+          Photo <span id="qvImgIdx">1</span> / <span id="qvTotalImg">1</span>
         </div>
       </div>
 
-      <div class="p-5 sm:p-8 space-y-6">
-        
-        <!-- 2. HEADER INFO -->
+      <div class="p-6 sm:p-8 space-y-6">
+        <!-- 2. Header: Title, Stars, Rating -->
         <div class="flex justify-between items-start gap-4">
-          <div class="space-y-1.5">
-            <h3 id="qvHotelTitle" class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight uppercase tracking-tight">Hotel Name</h3>
-            <div id="qvStarsContainer" class="text-amber-500 text-sm flex gap-0.5"></div>
+          <div class="space-y-1">
+            <h3 id="qvHotelTitle" class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">Hotel Name</h3>
+            <div id="qvStarsContainer" class="text-amber-500 text-sm flex"></div>
             <div class="flex items-start gap-1.5 text-[11px] text-slate-500 font-bold uppercase tracking-wider pt-1">
               <svg class="w-4 h-4 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
-              <span id="qvAddress" class="leading-relaxed">Address Loading...</span>
+              <span id="qvAddress">Address...</span>
             </div>
           </div>
-          <div id="qvRatingBox" class="shrink-0 text-center">
-             <!-- Rating Badge Here -->
-          </div>
+          <div id="qvRatingBox" class="shrink-0 text-center"></div>
         </div>
 
-        <!-- 3. KEY FACILITIES GRID -->
+        <!-- 3. Key Facilities -->
         <div class="space-y-3">
-          <span class="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] block">Key Facilities</span>
-          <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              <!-- Amenities Tags Here -->
-          </div>
+          <span class="text-[11px] font-black uppercase text-slate-400 tracking-widest">Key Facilities</span>
+          <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
         </div>
 
-        <!-- 4. DIRECT BOOKING CHANNELS (The Professional Part) -->
-        <div class="space-y-3 pt-2">
-          <span class="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] block">Direct Booking Options</span>
-          <div id="qvBookingChannels" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <!-- WhatsApp and Call Buttons Here -->
+        <!-- 4. Real Booking Channels (Styled exactly like your Detail Page) -->
+        <div class="space-y-3">
+          <span class="text-[11px] font-black uppercase text-slate-400 tracking-widest">Where can you book this hotel?</span>
+          <div id="qvBookingChannels" class="space-y-2.5">
+            <!-- Channels will be injected here -->
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- 5. FIXED FOOTER ACTION -->
-    <div class="p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4 rounded-b-[32px]">
-      <div>
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Starting From</span>
-        <p id="qvPrice" class="text-2xl font-black text-[#008234] leading-none">৳ 0</p>
+    <!-- 5. Footer: Pricing Sync & CTA -->
+    <div class="p-6 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="text-left">
+            <span class="text-[10px] font-black text-slate-400 uppercase block leading-none mb-1">Starting From</span>
+            <div class="flex items-center gap-2">
+                <span id="qvOriginalPrice" class="text-sm font-bold text-slate-400 line-through"></span>
+                <p id="qvPrice" class="text-3xl font-black text-[#008234] leading-none">৳ 0</p>
+            </div>
+        </div>
+        <div id="qvDiscountBadge"></div>
       </div>
-      <a id="qvFullDetailsBtn" href="#" class="bg-[#006ce4] hover:bg-[#0057b8] text-white px-8 py-4 rounded-2xl font-black text-sm transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center gap-2">
-        Full Details <span>➔</span>
+      <a id="qvFullDetailsBtn" href="#" class="w-full sm:w-auto bg-[#006ce4] hover:bg-[#0057b8] text-white px-10 py-4 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95 text-center">
+        View All Details ➔
       </a>
     </div>
-
   </div>
 </div>
 
@@ -96,82 +81,100 @@
     let gallery = [];
     let currentIdx = 0;
 
+    // Preset Icons (Matched with your HotelAboutAndRates.astro)
+    const iconSvgs = {
+      agoda: `<div class="w-8 h-8 rounded-xl bg-[#1d3557] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-sm tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
+      booking: `<div class="w-8 h-8 rounded-xl bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm">B.</div>`,
+      expedia: `<div class="w-8 h-8 rounded-xl bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-sm">E.</div>`,
+      direct: `<div class="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-900 flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
+      whatsapp: `<div class="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`
+    };
+
     function updateImage() {
-        const img = document.getElementById('qvModalImg');
-        img.src = gallery[currentIdx];
-        document.getElementById('qvImgIdx').innerText = currentIdx + 1;
-        document.getElementById('qvTotalImg').innerText = gallery.length;
+      document.getElementById('qvModalImg').src = gallery[currentIdx];
+      document.getElementById('qvImgIdx').innerText = currentIdx + 1;
+      document.getElementById('qvTotalImg').innerText = gallery.length;
     }
 
     function openModal(card) {
-      // Data Scraper
-      const title = card.querySelector('h3')?.innerText || "Hotel Details";
-      const mainImg = card.querySelector('img')?.src || "";
-      const address = card.querySelector('.p-5 div span.truncate')?.innerText || "Gulshan, Dhaka";
-      
-      // Smart Price Scraper
-      let price = "Check Rates";
-      card.querySelectorAll('span').forEach(s => {
-          if ((s.innerText.includes('৳') || s.innerText.includes('$')) && s.innerText.length < 15) price = s.innerText;
-      });
+      const hTitle = card.querySelector('h3')?.innerText || "Hotel Details";
+      const hAddress = card.querySelector('.card-hotel-address')?.innerText || card.querySelector('svg + span')?.innerText || "Gulshan, Dhaka";
+      const hLink = card.querySelector('a')?.href || "#";
+      const hStars = parseInt(card.getAttribute('data-stars') || "3");
+      const hRating = card.getAttribute('data-numeric-rating') || "5.0";
 
-      // Gallery Logic (Try to find more images from card if available, else use main)
-      gallery = [mainImg]; 
-      // If you have data-gallery attribute on card, use it
-      const rawGallery = card.getAttribute('data-gallery');
-      if(rawGallery) {
-          try { gallery = JSON.parse(rawGallery); } catch(e) {}
+      // 1. Image Logic
+      gallery = [card.querySelector('img')?.src];
+      try {
+        const rawGal = card.getAttribute('data-gallery');
+        if(rawGal) gallery = JSON.parse(rawGal);
+      } catch(e) {}
+      currentIdx = 0;
+      updateImage();
+
+      // 2. Pricing Logic (Sync with your request)
+      const mdPriceStr = card.getAttribute('data-md-price') || "$120"; // Original Price from .md
+      const currentPriceStr = card.querySelector('.text-\\[\\#008234\\]')?.innerText || mdPriceStr; // Lowest from Channels
+      
+      document.getElementById('qvPrice').innerText = currentPriceStr;
+      
+      const origPriceEl = document.getElementById('qvOriginalPrice');
+      const discountBox = document.getElementById('qvDiscountBadge');
+      
+      if (mdPriceStr !== currentPriceStr) {
+          origPriceEl.innerText = mdPriceStr;
+          origPriceEl.classList.remove('hidden');
+          discountBox.innerHTML = `<span class="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded">DEAL</span>`;
+      } else {
+          origPriceEl.classList.add('hidden');
+          discountBox.innerHTML = '';
       }
 
-      const stars = parseInt(card.getAttribute('data-stars') || "3");
-      const rating = card.getAttribute('data-numeric-rating') || "5.0";
-      const link = card.querySelector('a')?.href || "#";
-      const whatsapp = card.getAttribute('data-whatsapp') || "8801700000000";
-      const phone = card.getAttribute('data-phone') || "01700000000";
+      // 3. Info Update
+      document.getElementById('qvHotelTitle').innerText = hTitle;
+      document.getElementById('qvAddress').innerText = hAddress;
+      document.getElementById('qvFullDetailsBtn').href = hLink;
+      document.getElementById('qvStarsContainer').innerHTML = "★".repeat(hStars);
+      document.getElementById('qvRatingBox').innerHTML = `<div class="bg-[#003580] text-white font-black px-3 py-1 rounded-xl text-lg shadow-lg">${hRating}</div>`;
 
-      // UI Populate
-      document.getElementById('qvHotelTitle').innerText = title;
-      document.getElementById('qvAddress').innerText = address;
-      document.getElementById('qvPrice').innerText = price;
-      document.getElementById('qvFullDetailsBtn').href = link;
-      document.getElementById('qvStarsContainer').innerHTML = "★".repeat(stars);
-      
-      document.getElementById('qvRatingBox').innerHTML = `
-        <div class="bg-[#003580] text-white font-black px-3 py-1.5 rounded-xl text-lg shadow-lg leading-none">${rating}</div>
-        <p class="text-[9px] font-black uppercase text-slate-400 mt-1">Score</p>
-      `;
-
-      // Amenities Logic (Filter out garbage)
-      const foundAmenities = Array.from(card.querySelectorAll('.p-5 span')).map(el => el.innerText.trim()).filter(t => t.length > 3 && t.length < 20 && isNaN(t.split('.')[0]));
+      // 4. Amenities Logic
+      const foundAmenities = Array.from(card.querySelectorAll('.p-5 span')).map(el => el.innerText.trim()).filter(t => t.length > 3 && t.length < 20 && isNaN(t.charAt(0)));
       const grid = document.getElementById('qvAmenitiesGrid');
-      grid.innerHTML = foundAmenities.slice(0, 6).map(text => `
-        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-600 uppercase tracking-tight">
+      grid.innerHTML = (foundAmenities.length > 0 ? foundAmenities.slice(0, 6) : ['Free Wi-Fi', 'Swimming Pool', 'Room Service']).map(text => `
+        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-600 uppercase">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
           <span class="truncate">${text}</span>
         </div>
       `).join('');
 
-      // Booking Channels Logic
-      const bookingArea = document.getElementById('qvBookingChannels');
-      bookingArea.innerHTML = `
-        <a href="https://wa.me/${whatsapp.replace(/\D/g,'')}" target="_blank" class="flex items-center justify-between p-3 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/20 hover:bg-[#25D366]/20 transition-all group">
-            <span class="text-xs font-black text-[#128C7E] uppercase">WhatsApp</span>
-            <div class="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-lg">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
-            </div>
-        </a>
-        <a href="tel:${phone}" class="flex items-center justify-between p-3 rounded-2xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-all group">
-            <span class="text-xs font-black text-slate-800 uppercase">Call Hotel</span>
-            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white shadow-lg">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-            </div>
-        </a>
-      `;
+      // 5. Channels Logic (Matching your Detail Page UI)
+      const channelsArea = document.getElementById('qvBookingChannels');
+      try {
+          const channels = JSON.parse(card.getAttribute('data-booking-channels') || '[]');
+          if (channels.length > 0) {
+              channelsArea.innerHTML = channels.map(ch => {
+                const icon = iconSvgs[ch.icon_preset] || iconSvgs.direct;
+                return `
+                  <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50">
+                    <div class="flex items-center gap-3">
+                      ${icon}
+                      <span class="text-xs font-bold text-slate-900">${ch.provider_name}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-black text-slate-900">${ch.price}</span>
+                      <a href="${ch.button_url}" target="_blank" class="bg-[#e52429] text-white font-extrabold text-[10px] px-4 py-2 rounded-xl uppercase">Book</a>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+          } else {
+              channelsArea.innerHTML = `<p class="text-center py-4 text-xs text-slate-400 font-bold uppercase tracking-widest border border-dashed border-slate-200 rounded-2xl">Check availability on full page</p>`;
+          }
+      } catch(e) {
+          channelsArea.innerHTML = '';
+      }
 
-      currentIdx = 0;
-      updateImage();
-
-      // Show
+      // Show Modal
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
@@ -189,13 +192,16 @@
       }, 200);
     }
 
-    // Image Nav
     document.getElementById('qvNextImg').onclick = (e) => { e.stopPropagation(); currentIdx = (currentIdx + 1) % gallery.length; updateImage(); };
     document.getElementById('qvPrevImg').onclick = (e) => { e.stopPropagation(); currentIdx = (currentIdx - 1 + gallery.length) % gallery.length; updateImage(); };
 
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.open-quick-view-btn');
-      if (btn) { e.preventDefault(); const card = btn.closest('.directory-card-item'); if (card) openModal(card); }
+      if (btn) {
+        e.preventDefault();
+        const card = btn.closest('.directory-card-item');
+        if (card) openModal(card);
+      }
     });
 
     closeBtn.onclick = closeModal;
@@ -204,5 +210,4 @@
 
   setupQuickView();
   document.addEventListener('astro:page-load', setupQuickView);
-  document.addEventListener('astro:after-swap', setupQuickView);
 </script>
