@@ -1,0 +1,71 @@
+---
+// src/components/layout/TopBanner.astro
+---
+
+<div id="top-promo-banner" class="relative bg-[#0d3b23] text-white py-2 px-4 overflow-hidden transition-all duration-300 z-[1001]">
+  <div class="max-w-[1280px] mx-auto flex items-center justify-center gap-3 pr-8 sm:pr-0">
+    
+    <!-- অফার আইকন ও টেক্সট -->
+    <div class="flex items-center gap-2">
+      <span class="flex h-2 w-2 relative">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      </span>
+      <p class="text-[10px] sm:text-xs font-bold tracking-wide uppercase italic leading-tight text-center">
+        Special Offer: Book directly with us and save up to 20% on luxury stays!
+      </p>
+    </div>
+
+    <!-- কল টু অ্যাকশন লিংক (ডেক্সটপে দেখাবে) -->
+    <a href="/deals" class="hidden md:inline-block bg-white text-[#0d3b23] text-[10px] font-black px-2 py-0.5 rounded uppercase hover:bg-emerald-100 transition shadow-sm whitespace-nowrap">
+      View Deals
+    </a>
+
+    <!-- ক্লোজ বাটন -->
+    <button id="close-banner" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition cursor-pointer p-1" aria-label="Close Banner">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  function initTopBanner() {
+    const banner = document.getElementById('top-promo-banner');
+    const closeBtn = document.getElementById('close-banner');
+    
+    if (!banner) return;
+
+    // চেক করা ইউজার আগে বন্ধ করেছে কি না
+    const isHidden = localStorage.getItem('promo-banner-hidden');
+    if (isHidden === 'true') {
+      banner.style.display = 'none';
+    } else {
+      banner.style.display = 'block';
+    }
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        banner.style.maxHeight = '0px';
+        banner.style.padding = '0px';
+        banner.style.opacity = '0';
+        localStorage.setItem('promo-banner-hidden', 'true');
+        setTimeout(() => {
+          banner.style.display = 'none';
+        }, 300);
+      };
+    }
+  }
+
+  // পেজ লোড এবং Astro ট্রানজিশনে রান হবে
+  initTopBanner();
+  document.addEventListener('astro:after-swap', initTopBanner);
+  document.addEventListener('astro:page-load', initTopBanner);
+</script>
+
+<style>
+  #top-promo-banner {
+    max-height: 100px; /* এনিমেশনের জন্য সেফ হাইট */
+  }
+</style>
