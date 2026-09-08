@@ -1,20 +1,18 @@
 ---
-// src/components/QuickViewModal.astro (100% Self-Contained, Auto-Reads Card Data & Top-Center Close)
+// src/components/QuickViewModal.astro (Top-Center Highlighted Close, Zero-Memory Load)
 ---
 
-<!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
 <div 
   id="globalQuickViewModal" 
   role="dialog" 
   aria-modal="true" 
   class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 pt-8 sm:pt-10 overflow-y-auto"
 >
-  <!-- MODAL DIALOG CONTAINER -->
   <div 
     id="quickViewDialog"
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
   >
-    <!-- ================= HIGHLIGHTED TOP-CENTER CLOSE BUTTON ================= -->
+    <!-- TOP-CENTER HIGHLIGHTED CLOSE BUTTON -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
@@ -29,7 +27,7 @@
     <!-- SCROLLABLE BODY -->
     <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl">
       
-      <!-- ================= 1. 5-IMAGE CAROUSEL SLIDER ================= -->
+      <!-- CAROUSEL -->
       <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
         <img 
           id="qvModalImg" 
@@ -38,7 +36,6 @@
           class="w-full h-full object-cover transition duration-300"
         />
 
-        <!-- Prev / Next Controls -->
         <button 
           type="button" 
           id="qvPrevImgBtn" 
@@ -56,7 +53,6 @@
           ❯
         </button>
 
-        <!-- 1/5 Photo Badge -->
         <span 
           id="qvImgBadge" 
           class="absolute bottom-2.5 right-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-white/20 tracking-wider pointer-events-none"
@@ -65,7 +61,7 @@
         </span>
       </div>
 
-      <!-- ================= 2. HOTEL NAME & RATING ================= -->
+      <!-- TITLE & RATING -->
       <div class="space-y-1">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -74,19 +70,16 @@
             </h3>
             <div id="qvStarsContainer" class="text-[#febb02] text-xs sm:text-sm tracking-tight mt-0.5"></div>
           </div>
-
-          <!-- Rating Score Badge -->
           <div id="qvRatingBox" class="shrink-0 text-right"></div>
         </div>
 
-        <!-- Location -->
         <div class="flex items-start gap-1.5 text-xs text-slate-600 font-medium pt-1">
           <svg class="w-3.5 h-3.5 fill-slate-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
           <span id="qvAddress" class="leading-snug">Address</span>
         </div>
       </div>
 
-      <!-- ================= 3. KEY AMENITIES & HIGHLIGHTS ================= -->
+      <!-- AMENITIES -->
       <div id="qvAmenitiesSection" class="pt-2 border-t border-slate-100 space-y-2">
         <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
           Key Facilities & Highlights
@@ -94,24 +87,22 @@
         <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
       </div>
 
-      <!-- ================= 4. PRICING & BOOKING CHANNELS ================= -->
+      <!-- PRICING & CHANNELS -->
       <div class="pt-2 border-t border-slate-100 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
           <div class="text-right">
-            <!-- আসল সঠিক স্টার্টিং প্রাইস -->
             <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none">Starting from</span>
             <span id="qvPrice" class="text-base sm:text-lg font-black text-[#008234]">৳ 0</span>
           </div>
         </div>
 
-        <!-- Channels & Direct Contacts (WhatsApp/Call/Agoda/Booking) -->
         <div id="qvChannelsContainer" class="space-y-2"></div>
       </div>
 
     </div>
 
-    <!-- ================= 5. VIEW FULL DETAILS FOOTER BUTTON ================= -->
+    <!-- FOOTER BUTTON -->
     <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0 rounded-b-2xl sm:rounded-b-3xl">
       <a 
         id="qvFullDetailsBtn" 
@@ -126,7 +117,6 @@
   </div>
 </div>
 
-<!-- CLIENT JAVASCRIPT: 100% SELF RELIANT -->
 <script is:inline>
   const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
@@ -163,15 +153,6 @@
       checkmark: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
     };
 
-    const presetSvgs = {
-      agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-black text-[9px] flex items-center justify-center shrink-0 tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
-      booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-xs">B.</div>`,
-      expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] text-slate-950 font-black text-xs flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
-      direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
-      whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
-      phone: `<div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`
-    };
-
     function showPhoto(idx) {
       if (!currentImages.length) return;
       currentImgIdx = (idx + currentImages.length) % currentImages.length;
@@ -182,62 +163,74 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
-    function openModal(data, cardEl) {
-      if (!data) return;
+    function openModal(cardEl) {
+      if (!cardEl) return;
       isModalOpen = true;
 
       if (window.location.hash !== '#quick-view') {
         window.history.pushState({ modalOpen: true }, '', '#quick-view');
       }
 
-      titleEl.textContent = data.title || 'Hotel Details';
-      starsEl.textContent = data.stars > 0 ? '★'.repeat(data.stars) : '';
-      addressEl.textContent = data.address || 'Gulshan, Dhaka';
-      fullDetailsBtn.href = data.url || '#';
+      const titleLink = cardEl.querySelector('.card-hotel-link');
+      const addressSpan = cardEl.querySelector('.card-hotel-address');
+      const finalPriceSpan = cardEl.querySelector('.card-final-price');
+      const strikethroughSpan = cardEl.querySelector('.line-through');
+      const imgTag = cardEl.querySelector('img');
 
-      // ================= 100% ACCURATE BASE STARTING PRICE DETECTOR =================
-      // কার্ডের কাটা দাগে যে আসল রেট ($120) ছিল, তা স্বয়ংক্রিয়ভাবে পড়ে আসল স্টার্টিং রেট হিসেবে দেখাবে!
-      const cardStrikethrough = cardEl ? cardEl.querySelector('.line-through')?.textContent?.trim() : '';
-      const actualOfficialPrice = data.officialPrice || cardStrikethrough || data.price || 'Contact for Rates';
-      priceEl.textContent = actualOfficialPrice;
+      const title = titleLink ? titleLink.textContent.trim() : 'Hotel Details';
+      const address = addressSpan ? addressSpan.textContent.trim() : 'Gulshan, Dhaka';
+      const url = titleLink ? titleLink.getAttribute('href') : '#';
+      const stars = parseInt(cardEl.getAttribute('data-stars') || '0', 10);
 
-      if (data.rating) {
+      // আসল সঠিক স্টার্টিং রেট (কার্ডে থাকা আসল মূল রেট)
+      const officialPrice = cardEl.getAttribute('data-official-price') || (strikethroughSpan ? strikethroughSpan.textContent.trim() : (finalPriceSpan ? finalPriceSpan.textContent.trim() : 'Contact for Rates'));
+      
+      const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
+      const phone = cardEl.getAttribute('data-phone') || '';
+
+      titleEl.textContent = title;
+      starsEl.textContent = stars > 0 ? '★'.repeat(stars) : '';
+      addressEl.textContent = address;
+      fullDetailsBtn.href = url;
+      priceEl.textContent = officialPrice;
+
+      // Rating
+      const numRating = cardEl.getAttribute('data-numeric-rating') || '0';
+      if (parseFloat(numRating) > 0) {
         ratingBox.innerHTML = `
           <div class="bg-[#003b95] text-white font-bold text-xs px-2 py-1 rounded-md inline-block shadow-2xs leading-none">
-            ${data.rating}
+            ${numRating}
           </div>
-          <div class="text-[10px] font-bold text-slate-800 mt-0.5">${data.ratingLabel || 'Very Good'}</div>
+          <div class="text-[10px] font-bold text-slate-800 mt-0.5">Very Good</div>
         `;
       } else {
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      currentImages = Array.isArray(data.images) && data.images.length > 0 ? data.images : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
+      // Photos
+      currentImages = (imgTag && imgTag.src) ? [imgTag.src] : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
       showPhoto(0);
 
-      // AMENITIES
+      // Amenities
       let parsedAmenities = [];
       try {
-        const rawAttr = cardEl ? cardEl.getAttribute('data-amenities') : '[]';
-        parsedAmenities = JSON.parse(rawAttr || '[]');
+        parsedAmenities = JSON.parse(cardEl.getAttribute('data-amenities') || '[]');
       } catch(e) {
         parsedAmenities = [];
       }
-
-      if (!parsedAmenities || parsedAmenities.length === 0) {
+      if (!parsedAmenities.length) {
         parsedAmenities = ['Free Wi-Fi', 'Air Conditioning', '24/7 Power', 'Room Service', 'Security'];
       }
 
-      const top6 = parsedAmenities.slice(0, 6);
       amenitiesSection.classList.remove('hidden');
-      amenitiesGrid.innerHTML = top6.map(item => {
+      amenitiesGrid.innerHTML = parsedAmenities.slice(0, 6).map(item => {
         const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
         const aLower = nameStr.toLowerCase();
         let icon = iconSvgs.checkmark;
         if (aLower.includes('pool')) icon = iconSvgs.pool;
         else if (aLower.includes('gym') || aLower.includes('fitness')) icon = iconSvgs.gym;
         else if (aLower.includes('wifi') || aLower.includes('wi-fi')) icon = iconSvgs.wifi;
-        else if (aLower.includes('restaurant') || aLower.includes('breakfast') || aLower.includes('dining')) icon = iconSvgs.restaurant;
+        else if (aLower.includes('restaurant') || aLower.includes('breakfast')) icon = iconSvgs.restaurant;
         else if (aLower.includes('park')) icon = iconSvgs.parking;
 
         return `
@@ -248,37 +241,40 @@
         `;
       }).join('');
 
-      // BOOKING CHANNELS
-      let channelsHtml = '';
-
-      if (data.whatsapp) {
-        const cleanWa = data.whatsapp.replace(/[^0-9]/g, '');
+      // Channels (Direct Call & WhatsApp)
+      let chHtml = '';
+      if (whatsapp) {
+        const cleanWa = whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
-        channelsHtml += `
+        chHtml += `
           <div class="flex items-center justify-between p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50">
             <div class="flex items-center gap-2.5">
-              ${presetSvgs.whatsapp}
+              <div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
+              </div>
               <div>
                 <span class="text-xs font-bold text-emerald-950 block">WhatsApp Booking</span>
                 <span class="text-[10px] text-emerald-700 font-semibold">Instant confirmation</span>
               </div>
             </div>
-            <a href="https://wa.me/${waNum}?text=${encodeURIComponent('Hi! I want to book a stay at ' + data.title)}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:bg-[#1ebd59] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
+            <a href="https://wa.me/${waNum}?text=${encodeURIComponent('Hi! I want to book a stay at ' + title)}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:bg-[#1ebd59] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
               Chat Now
             </a>
           </div>
         `;
       }
 
-      if (data.phone) {
-        const cleanPh = data.phone.replace(/[^0-9+]/g, '');
-        channelsHtml += `
+      if (phone) {
+        const cleanPh = phone.replace(/[^0-9+]/g, '');
+        chHtml += `
           <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50/70">
             <div class="flex items-center gap-2.5">
-              ${presetSvgs.phone}
+              <div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0">
+                <svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              </div>
               <div>
                 <span class="text-xs font-bold text-slate-900 block">Call Hotel Direct</span>
-                <span class="text-[10px] text-slate-500 font-semibold">${data.phone}</span>
+                <span class="text-[10px] text-slate-500 font-semibold">${phone}</span>
               </div>
             </div>
             <a href="tel:${cleanPh}" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
@@ -288,43 +284,11 @@
         `;
       }
 
-      if (Array.isArray(data.channels) && data.channels.length > 0) {
-        data.channels.forEach(ch => {
-          const pName = ch.provider_name || 'Booking Partner';
-          const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
-          
-          const pLower = pName.toLowerCase();
-          let preset = ch.icon_preset || '';
-          if (!preset || preset === 'whatsapp') {
-            if (pLower.includes('booking')) preset = 'booking';
-            else if (pLower.includes('agoda')) preset = 'agoda';
-            else if (pLower.includes('expedia')) preset = 'expedia';
-            else if (pLower.includes('whatsapp')) preset = 'whatsapp';
-            else if (pLower.includes('call') || pLower.includes('phone')) preset = 'phone';
-            else preset = 'direct';
-          }
-
-          const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
-          const btnUrl = ch.button_url || data.url || '#';
-
-          channelsHtml += `
-            <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 transition">
-              <div class="flex items-center gap-2.5">
-                ${icon}
-                <span class="text-xs font-bold text-slate-900">${pName}</span>
-              </div>
-              <div class="flex items-center gap-3">
-                ${pPrice ? `<span class="text-xs sm:text-sm font-black text-slate-900">${pPrice}</span>` : ''}
-                <a href="${btnUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
-                  ${ch.button_text || 'Book Now'}
-                </a>
-              </div>
-            </div>
-          `;
-        });
-      }
-
-      channelsContainer.innerHTML = channelsHtml || `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-600 font-medium">Please click below to view complete rates and contact info.</div>`;
+      channelsContainer.innerHTML = chHtml || `
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-600 font-medium">
+          Click below to view all booking channels and check live dates.
+        </div>
+      `;
 
       modal.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
@@ -366,7 +330,7 @@
       if (e.key === 'Escape' && isModalOpen) closeModal();
     });
 
-    // ================= GLOBAL DELEGATION =================
+    // GLOBAL CLICK LISTENER
     document.addEventListener('click', (e) => {
       const qvBtn = e.target.closest('.open-quick-view-btn');
       if (!qvBtn) return;
@@ -375,21 +339,7 @@
       e.stopPropagation();
 
       const card = qvBtn.closest('.directory-card-item');
-      if (!card) return;
-
-      const payloadEl = card.querySelector('.hotel-quickview-data, .hotel-quickview-json');
-      let data = null;
-
-      if (payloadEl) {
-        const raw = payloadEl.getAttribute('data-payload') || payloadEl.textContent || '{}';
-        try {
-          data = JSON.parse(raw);
-        } catch (err) {
-          data = null;
-        }
-      }
-
-      openModal(data, card);
+      if (card) openModal(card);
     });
   };
 
