@@ -11,9 +11,9 @@
             <span class="bg-emerald-500 text-[#0d3b23] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">
                 Direct Deal
             </span>
-            <!-- স্মার্ট মেসেজ: জাভাস্ক্রিপ্ট দিয়ে আপডেট হবে -->
-            <span id="smart-urgency-text" class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest opacity-80">
-                5 people viewing now
+            <!-- এখানে এখন বর্তমান মাস ও বছর দেখাবে, যা একদম সত্যি -->
+            <span id="current-month-year" class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest opacity-90">
+                Verified Rates for September 2024
             </span>
         </div>
         <h2 class="text-2xl sm:text-4xl font-black leading-tight tracking-tight">
@@ -26,10 +26,9 @@
       </div>
 
       <div class="shrink-0">
-        <!-- স্মার্ট বাটন: এটি ফিল্টার একটিভ করবে -->
         <button id="smart-deals-trigger" class="inline-flex items-center gap-2 bg-white text-[#0d3b23] hover:bg-emerald-50 px-8 py-4 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider transition-all shadow-xl active:scale-95 group cursor-pointer">
           Show Best Deals
-          <svg class="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
@@ -42,7 +41,7 @@
 <script is:inline>
   function initSmartBanner() {
     const greetingEl = document.getElementById('greeting-text');
-    const urgencyEl = document.getElementById('smart-urgency-text');
+    const dateEl = document.getElementById('current-month-year');
     const triggerBtn = document.getElementById('smart-deals-trigger');
 
     // ১. স্মার্ট গ্রিটিং লজিক (সময় অনুযায়ী)
@@ -51,24 +50,25 @@
     else if (hour < 18) greetingEl.innerText = "Good Afternoon!";
     else greetingEl.innerText = "Good Evening!";
 
-    // ২. স্মার্ট আরজেন্সি লজিক (র্যান্ডম ভিউয়ার সংখ্যা)
-    const randomViewers = Math.floor(Math.random() * (12 - 5 + 1) + 5);
-    if (urgencyEl) urgencyEl.innerText = `${randomViewers} people viewing Gulshan hotels now`;
+    // ২. রিয়েল টাইম ডেট লজিক (বর্তমান মাস ও বছর দেখাবে)
+    const now = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    if (dateEl) {
+      dateEl.innerText = `Verified Rates for ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    }
 
     // ৩. স্মার্ট বাটন লজিক (Scroll + Filter)
     if (triggerBtn) {
       triggerBtn.onclick = () => {
-        // ক) হোটেলের লিস্টে স্ক্রল করা
         const hotelSection = document.getElementById('hotels') || document.querySelector('.directory-card-item');
         if (hotelSection) {
           hotelSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // খ) StickyBar-এর "Deals" বাটনটি খুঁজে বের করে ক্লিক করা
-        // আমরা ১ সেকেন্ড অপেক্ষা করবো যেন স্ক্রল শেষ হয়, তারপর ক্লিক করবো
         setTimeout(() => {
           const dealsBtn = document.getElementById('quickDealsBtn');
-          // যদি ডিলস আগে থেকে একটিভ না থাকে, তবেই ক্লিক করবে
           if (dealsBtn && !dealsBtn.classList.contains('bg-red-600')) {
             dealsBtn.click();
           }
@@ -77,7 +77,6 @@
     }
   }
 
-  // Astro ট্রানজিশন সাপোর্ট
   initSmartBanner();
   document.addEventListener('astro:after-swap', initSmartBanner);
   document.addEventListener('astro:page-load', initSmartBanner);
