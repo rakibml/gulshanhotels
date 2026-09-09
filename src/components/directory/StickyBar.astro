@@ -1,85 +1,217 @@
 ---
-// src/components/directory/StickyBar.astro
+// src/components/directory/StickyBar.astro (Pro OTA Grade Sticky Bar with Full Filters)
 ---
 
-<header class="sticky top-0 z-[500] bg-white/95 border-b border-slate-200 font-['Plus_Jakarta_Sans',sans-serif]">
-  <div class="max-w-[1280px] mx-auto px-4 py-3 relative">
+<header class="sticky top-0 z-[500] bg-white/95 backdrop-blur-md border-b border-slate-200/90 font-['Plus_Jakarta_Sans',sans-serif] shadow-xs">
+  <div class="max-w-[1280px] mx-auto px-3 sm:px-4 py-2.5 relative">
     
-    <!-- ১. পিল বাটন কন্টেইনার (শুধুমাত্র বাটনগুলো স্ক্রল করবে) -->
-    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar relative z-10">
+    <!-- ১. অনুভূমিক স্ক্রলযোগ্য পিল বার -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar relative z-10 py-0.5">
       
-      <!-- Price Button -->
-      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="priceBox">
-        <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
+      <!-- Instant Search Pill -->
+      <div class="relative shrink-0 w-36 sm:w-48">
+        <input 
+          type="text" 
+          id="stickySearchInput" 
+          placeholder="Search hotel..." 
+          class="w-full bg-slate-100/90 focus:bg-white text-xs font-semibold rounded-full pl-7 pr-2.5 py-2 border border-slate-200 focus:border-[#006ce4] focus:outline-none transition"
+        />
+        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+
+      <!-- Price / Budget Pill -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="priceBox">
+        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 3H7.8a2 2 0 0 0-1.4.6l-3.8 3.8a2 2 0 0 0 0 2.8l8.2 8.2a2 2 0 0 0 2.8 0l3.8-3.8c.4-.4.6-.9.6-1.4V8.5a5.5 5.5 0 0 0-5.5-5.5z"/></svg>
         <span>Price</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
         <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
       </button>
 
-      <!-- Rating Button -->
-      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="ratingBox">
-        <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+      <!-- Hotel Stars Pill (New) -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="starsBox">
+        <span class="text-[#febb02] text-xs">★</span>
+        <span>Stars</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+
+      <!-- Guest Rating Pill -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="ratingBox">
+        <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
         <span>Rating</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
         <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
       </button>
 
-      <!-- Area Button -->
-      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-white text-[13px] font-bold text-slate-700 active:scale-95 transition-all" data-target="areaBox">
-        <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
+      <!-- Area / Neighborhood Pill -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="areaBox">
+        <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
         <span>Area</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
         <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
       </button>
 
-      <!-- Deals Button -->
-      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 bg-white text-[13px] font-[800] text-red-600 transition-all active:scale-95">
-        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"/></svg>
-        <span>Deals</span>
+      <!-- Amenities / Facilities Pill (New) -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="amenitiesBox">
+        <svg class="w-3.5 h-3.5 text-teal-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        <span>Amenities</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
       </button>
+
+      <!-- Property Type Pill (New) -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer" data-target="propertyTypeBox">
+        <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+        <span>Property Type</span>
+        <span class="pill-badge hidden bg-[#006ce4] text-white text-[10px] w-4 h-4 rounded-full items-center justify-center font-black"></span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+
+      <!-- Special Deals Toggle Pill -->
+      <button type="button" id="quickDealsBtn" class="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-rose-200 bg-rose-50/50 hover:bg-rose-50 text-xs font-black text-rose-600 transition-all active:scale-95 cursor-pointer">
+        <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42z"/></svg>
+        <span>Deals & Offers</span>
+      </button>
+
+      <!-- Sort By Pill (New) -->
+      <button type="button" class="pill-trigger shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition-all cursor-pointer ml-auto" data-target="sortBox">
+        <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M3 8h12m-12 4h6m8 2l4 4m0 0l-4 4m4-4H11"/></svg>
+        <span id="sortPillLabel">Sort</span>
+        <svg class="w-3 h-3 text-slate-400 arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+
     </div>
 
-    <!-- ২. একটিভ চিপস -->
-    <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 hidden">
-       <span class="text-[10px] font-black uppercase text-slate-400">Active:</span>
-       <div id="chipsList" class="flex flex-wrap gap-2"></div>
-       <button id="clearAllFiltersBtn" class="text-[10px] font-black text-blue-600 hover:underline uppercase">Clear</button>
+    <!-- ২. একটিভ ফিল্টার চিপস ও ক্লিয়ার বাটন -->
+    <div id="activeFiltersContainer" class="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-slate-100 hidden text-left">
+       <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Active:</span>
+       <div id="chipsList" class="flex flex-wrap gap-1.5"></div>
+       <button type="button" id="clearAllFiltersBtn" class="text-[11px] font-bold text-[#006ce4] hover:underline cursor-pointer ml-auto">
+         Reset all
+       </button>
     </div>
 
-    <!-- ৩. পপআপ পোর্টাল (হেডারের ভেতরে কিন্তু বাটনের বাইরে) -->
+    <!-- ৩. পপআপ পোর্টাল কন্টেইনার (মোবাইলে বটম শীট, ডেস্কটপে ড্রপডাউন) -->
     <div id="popupPortal" class="relative">
       
       <!-- Price Popup -->
-      <div id="priceBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[12px] left-0 md:left-0 w-full md:w-[260px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[1000]">
-        <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Budget</h4>
-        <div class="space-y-4">
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">All Prices</span><input type="radio" name="price" value="all" checked class="w-5 h-5 accent-blue-600"></label>
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">Budget Friendly</span><input type="radio" name="price" value="low" class="w-5 h-5 accent-blue-600"></label>
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">Premium Stays</span><input type="radio" name="price" value="high" class="w-5 h-5 accent-blue-600"></label>
+      <div id="priceBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[120px] w-full md:w-[280px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Budget (per night)</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-3">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">All Prices</span><input type="radio" name="sticky_price" value="all" checked class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Budget Friendly (&lt; ৳6,000)</span><input type="radio" name="sticky_price" value="low" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Mid-Range (৳6,000 - ৳15,000)</span><input type="radio" name="sticky_price" value="mid" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Luxury / Premium (&gt; ৳15,000)</span><input type="radio" name="sticky_price" value="high" class="w-4 h-4 accent-[#006ce4]"></label>
+        </div>
+      </div>
+
+      <!-- Hotel Stars Popup (New) -->
+      <div id="starsBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[210px] w-full md:w-[260px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Hotel Class</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-2.5">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50">
+             <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+               <span class="text-[#febb02]">★★★★★</span> 5 Stars
+             </span>
+             <input type="checkbox" name="sticky_stars" value="5" class="w-4 h-4 accent-[#006ce4] rounded">
+           </label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50">
+             <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+               <span class="text-[#febb02]">★★★★</span> 4 Stars
+             </span>
+             <input type="checkbox" name="sticky_stars" value="4" class="w-4 h-4 accent-[#006ce4] rounded">
+           </label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50">
+             <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+               <span class="text-[#febb02]">★★★</span> 3 Stars
+             </span>
+             <input type="checkbox" name="sticky_stars" value="3" class="w-4 h-4 accent-[#006ce4] rounded">
+           </label>
         </div>
       </div>
 
       <!-- Rating Popup -->
-      <div id="ratingBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[12px] left-0 md:left-[110px] w-full md:w-[240px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[1000]">
-        <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Guest Rating</h4>
-        <div class="space-y-4">
-           <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="rating_score" value="9" class="w-5 h-5 accent-blue-600"><span class="text-sm font-bold text-slate-700">Wonderful 9+</span></label>
-           <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="rating_score" value="8" class="w-5 h-5 accent-blue-600"><span class="text-sm font-bold text-slate-700">Very Good 8+</span></label>
+      <div id="ratingBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[290px] w-full md:w-[250px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Guest Rating</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-2.5">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Wonderful 9.0+</span><input type="checkbox" name="sticky_rating" value="9" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Very Good 8.0+</span><input type="checkbox" name="sticky_rating" value="8" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Good 7.0+</span><input type="checkbox" name="sticky_rating" value="7" class="w-4 h-4 accent-[#006ce4] rounded"></label>
         </div>
       </div>
 
       <!-- Area Popup -->
-      <div id="areaBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[12px] left-0 md:left-[210px] w-full md:w-[240px] bg-white border border-slate-200 rounded-t-[24px] md:rounded-[20px] shadow-2xl p-6 z-[1000]">
-        <h4 class="text-[12px] font-black uppercase text-slate-400 mb-4 tracking-widest">Neighborhood</h4>
-        <div class="space-y-4">
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">All Gulshan</span><input type="radio" name="area" value="all" checked class="w-5 h-5 accent-blue-600"></label>
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">Gulshan 1</span><input type="radio" name="area" value="gulshan-1" class="w-5 h-5 accent-blue-600"></label>
-           <label class="flex items-center justify-between cursor-pointer"><span class="text-sm font-bold text-slate-700">Gulshan 2</span><input type="radio" name="area" value="gulshan-2" class="w-5 h-5 accent-blue-600"></label>
+      <div id="areaBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[360px] w-full md:w-[250px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Neighborhood</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-3">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">All Gulshan</span><input type="radio" name="sticky_area" value="all" checked class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Gulshan 1</span><input type="radio" name="sticky_area" value="gulshan-1" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Gulshan 2</span><input type="radio" name="sticky_area" value="gulshan-2" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Near Gulshan</span><input type="radio" name="sticky_area" value="near" class="w-4 h-4 accent-[#006ce4]"></label>
+        </div>
+      </div>
+
+      <!-- Amenities / Facilities Popup (New) -->
+      <div id="amenitiesBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[430px] w-full md:w-[270px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Key Facilities</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-2.5">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">🏊 Swimming Pool</span><input type="checkbox" name="sticky_amenity" value="pool" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">📶 Free Wi-Fi</span><input type="checkbox" name="sticky_amenity" value="wifi" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">🍳 Free Breakfast</span><input type="checkbox" name="sticky_amenity" value="breakfast" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">🏋️ Fitness / Gym</span><input type="checkbox" name="sticky_amenity" value="gym" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">✈️ Airport Shuttle</span><input type="checkbox" name="sticky_amenity" value="shuttle" class="w-4 h-4 accent-[#006ce4] rounded"></label>
+        </div>
+      </div>
+
+      <!-- Property Type Popup (New) -->
+      <div id="propertyTypeBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] left-0 md:left-[520px] w-full md:w-[250px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Property Type</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-3">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">All Accommodations</span><input type="radio" name="sticky_type" value="all" checked class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Hotels Only</span><input type="radio" name="sticky_type" value="hotel" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Guest Houses Only</span><input type="radio" name="sticky_type" value="guesthouse" class="w-4 h-4 accent-[#006ce4]"></label>
+        </div>
+      </div>
+
+      <!-- Sort By Popup (New) -->
+      <div id="sortBox" class="filter-popup hidden fixed md:absolute top-auto bottom-0 md:bottom-auto md:top-[8px] right-0 w-full md:w-[250px] bg-white border border-slate-200 rounded-t-[28px] md:rounded-[20px] shadow-2xl p-5 z-[1000] text-left">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+          <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider">Sort Results</h4>
+          <button type="button" class="close-popup-btn md:hidden text-slate-400 text-lg font-bold p-1">&times;</button>
+        </div>
+        <div class="space-y-3">
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Top picks / Recommended</span><input type="radio" name="sticky_sort" value="featured" checked class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Price: Low to High</span><input type="radio" name="sticky_sort" value="price-asc" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Price: High to Low</span><input type="radio" name="sticky_sort" value="price-desc" class="w-4 h-4 accent-[#006ce4]"></label>
+           <label class="flex items-center justify-between cursor-pointer p-1.5 rounded-lg hover:bg-slate-50"><span class="text-xs font-bold text-slate-700">Guest Rating: High to Low</span><input type="radio" name="sticky_sort" value="rating-desc" class="w-4 h-4 accent-[#006ce4]"></label>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ৪. ওভারলে (হেডারের ভেতরে রাখা হয়েছে যেন z-index কন্ট্রোল করা যায়) -->
-  <div id="filterOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[900] hidden"></div>
+  <!-- ৪. ব্যাকড্রপ ওভারলে -->
+  <div id="filterOverlay" class="fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-[900] hidden"></div>
 </header>
 
 <style>
@@ -88,8 +220,8 @@
   
   @media (max-width: 768px) {
     .filter-popup {
-      z-index: 2000 !important; /* ওভারলে থেকে বেশি */
-      animation: slideUp 0.3s ease-out;
+      z-index: 2000 !important;
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -101,9 +233,11 @@
     const popups = document.querySelectorAll('.filter-popup');
     const overlay = document.getElementById('filterOverlay');
     const dealsBtn = document.getElementById('quickDealsBtn');
+    const searchInput = document.getElementById('stickySearchInput');
     const chipsList = document.getElementById('chipsList');
     const chipsContainer = document.getElementById('activeFiltersContainer');
     const clearAllBtn = document.getElementById('clearAllFiltersBtn');
+    const sortPillLabel = document.getElementById('sortPillLabel');
     
     let dealsActive = false;
 
@@ -114,93 +248,225 @@
       document.querySelectorAll('.arrow').forEach(a => a.classList.remove('rotate-180'));
     };
 
+    // মাস্টার ফিল্টারিং ফাংশন
     const runFiltering = () => {
-      const hotelCards = document.querySelectorAll('.directory-card-item');
-      const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || "all";
-      const selectedArea = document.querySelector('input[name="area"]:checked')?.value || "all";
-      const selectedRatings = Array.from(document.querySelectorAll('input[name="rating_score"]:checked')).map(cb => parseFloat(cb.value));
+      const hotelCards = Array.from(document.querySelectorAll('.directory-card-item'));
+      const container = document.getElementById('hotelCardsContainer');
+
+      const searchQuery = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      const selectedPrice = document.querySelector('input[name="sticky_price"]:checked')?.value || "all";
+      const selectedArea = document.querySelector('input[name="sticky_area"]:checked')?.value || "all";
+      const selectedType = document.querySelector('input[name="sticky_type"]:checked')?.value || "all";
+      const selectedStars = Array.from(document.querySelectorAll('input[name="sticky_stars"]:checked')).map(cb => cb.value);
+      const selectedRatings = Array.from(document.querySelectorAll('input[name="sticky_rating"]:checked')).map(cb => parseFloat(cb.value));
+      const selectedAmenities = Array.from(document.querySelectorAll('input[name="sticky_amenity"]:checked')).map(cb => cb.value.toLowerCase());
+      const selectedSort = document.querySelector('input[name="sticky_sort"]:checked')?.value || "featured";
+
+      let visibleCount = 0;
 
       hotelCards.forEach(card => {
-        const area = card.getAttribute('data-area') || "";
-        const price = parseFloat(card.getAttribute('data-numeric-price') || "0");
-        const rating = parseFloat(card.getAttribute('data-numeric-rating') || "0");
-        const hasDiscount = card.querySelector('.bg-red-600') || card.querySelector('span[class*="red"]');
+        const title = (card.getAttribute('data-title') || '').toLowerCase();
+        const area = card.getAttribute('data-area') || '';
+        const stars = card.getAttribute('data-stars') || '0';
+        const isGuest = card.getAttribute('data-guesthouse') === 'true';
+        const price = parseFloat(card.getAttribute('data-numeric-price') || '0');
+        const rating = parseFloat(card.getAttribute('data-numeric-rating') || '0');
+        const amenities = (card.getAttribute('data-amenities') || '').toLowerCase();
+        const hasDiscount = card.querySelector('.line-through') || card.querySelector('span[class*="rose"]') || card.querySelector('span[class*="red"]');
 
+        // ১. সার্চ
+        const matchesSearch = !searchQuery || title.includes(searchQuery);
+
+        // ২. এরিয়া
         const matchesArea = (selectedArea === "all" || area === selectedArea);
+
+        // ৩. বাজেট (BDT)
         let matchesPrice = true;
-        if (selectedPrice === "low") matchesPrice = price < 5000;
-        else if (selectedPrice === "high") matchesPrice = price >= 5000;
+        if (selectedPrice === "low") matchesPrice = price < 6000;
+        else if (selectedPrice === "mid") matchesPrice = (price >= 6000 && price <= 15000);
+        else if (selectedPrice === "high") matchesPrice = price > 15000;
+
+        // ৪. স্টার রেটিং
+        const matchesStars = (selectedStars.length === 0 || selectedStars.includes(stars));
+
+        // ৫. গেস্ট রেটিং স্কোর
         let matchesRating = true;
         if (selectedRatings.length > 0) matchesRating = selectedRatings.some(r => rating >= r);
+
+        // ৬. প্রপার্টি টাইপ
+        let matchesType = true;
+        if (selectedType === "hotel") matchesType = !isGuest;
+        else if (selectedType === "guesthouse") matchesType = isGuest;
+
+        // ৭. সুযোগ-সুবিধা (Amenities)
+        let matchesAmenities = true;
+        if (selectedAmenities.length > 0) {
+          matchesAmenities = selectedAmenities.every(a => amenities.includes(a));
+        }
+
+        // ৮. ডিল ও অফার
         let matchesDeals = dealsActive ? !!hasDiscount : true;
 
-        card.style.display = (matchesArea && matchesPrice && matchesRating && matchesDeals) ? 'flex' : 'none';
+        const isVisible = matchesSearch && matchesArea && matchesPrice && matchesStars && matchesRating && matchesType && matchesAmenities && matchesDeals;
+        
+        card.style.display = isVisible ? 'flex' : 'none';
+        if (isVisible) visibleCount++;
       });
 
-      updateChips();
+      // সর্টিং লজিক
+      if (container && selectedSort !== 'featured') {
+        const sorted = hotelCards.filter(c => c.style.display !== 'none').sort((a, b) => {
+          const pA = parseFloat(a.getAttribute('data-numeric-price') || '0');
+          const pB = parseFloat(b.getAttribute('data-numeric-price') || '0');
+          const rA = parseFloat(a.getAttribute('data-numeric-rating') || '0');
+          const rB = parseFloat(b.getAttribute('data-numeric-rating') || '0');
+
+          if (selectedSort === 'price-asc') return pA - pB;
+          if (selectedSort === 'price-desc') return pB - pA;
+          if (selectedSort === 'rating-desc') return rB - rA;
+          return 0;
+        });
+        sorted.forEach(c => container.appendChild(c));
+      }
+
+      // কাউন্টার আপডেট
+      const countEl = document.getElementById('propertiesFoundCount');
+      if (countEl) countEl.innerHTML = `Gulshan: <strong class="text-slate-900 font-black">${visibleCount} properties found</strong>`;
+
+      updateBadgesAndChips();
     };
 
-    const updateChips = () => {
+    // অ্যাক্টিভ ব্যাজ এবং চিপস আপডেট
+    const updateBadgesAndChips = () => {
       chipsList.innerHTML = '';
-      let activeCount = 0;
-      document.querySelectorAll('.filter-popup input').forEach(input => {
-        if ((input.type === 'radio' && input.checked && input.value !== 'all') || (input.type === 'checkbox' && input.checked)) {
-          activeCount++;
-          const chip = document.createElement('div');
-          chip.className = "bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1";
-          chip.innerHTML = `${input.closest('label').innerText} <button class="font-black">&times;</button>`;
-          chip.querySelector('button').onclick = () => {
-             if(input.type === 'radio') document.querySelector(`input[name="${input.name}"][value="all"]`).checked = true;
-             else input.checked = false;
-             runFiltering();
-          };
-          chipsList.appendChild(chip);
+      let activeFilterCount = 0;
+
+      // প্রতিটি পিলের ভেতরের অ্যাক্টিভ সংখ্যা হিসাব
+      triggers.forEach(btn => {
+        const targetId = btn.dataset.target;
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        let pillCount = 0;
+        target.querySelectorAll('input').forEach(input => {
+          if ((input.type === 'radio' && input.checked && input.value !== 'all' && input.value !== 'featured') || 
+              (input.type === 'checkbox' && input.checked)) {
+            pillCount++;
+            activeFilterCount++;
+
+            // চিপস তৈরি
+            const labelText = input.closest('label')?.innerText?.trim() || input.value;
+            const chip = document.createElement('div');
+            chip.className = "bg-blue-50 text-[#006ce4] border border-blue-200/80 px-2 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 shadow-2xs";
+            chip.innerHTML = `<span>${labelText}</span><button type="button" class="text-xs font-black hover:text-red-500 cursor-pointer">&times;</button>`;
+            
+            chip.querySelector('button').onclick = () => {
+              if (input.type === 'radio') {
+                const defaultRadio = target.querySelector('input[value="all"], input[value="featured"]');
+                if (defaultRadio) defaultRadio.checked = true;
+              } else {
+                input.checked = false;
+              }
+              runFiltering();
+            };
+            chipsList.appendChild(chip);
+          }
+        });
+
+        const badge = btn.querySelector('.pill-badge');
+        if (badge) {
+          if (pillCount > 0) {
+            badge.textContent = pillCount;
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+            btn.classList.add('border-[#006ce4]', 'bg-blue-50/50', 'text-[#006ce4]');
+          } else {
+            badge.classList.add('hidden');
+            badge.classList.remove('flex');
+            btn.classList.remove('border-[#006ce4]', 'bg-blue-50/50', 'text-[#006ce4]');
+          }
         }
       });
-      if(dealsActive) {
-        activeCount++;
+
+      // সর্ট পিল লেবেল আপডেট
+      const activeSortRadio = document.querySelector('input[name="sticky_sort"]:checked');
+      if (sortPillLabel && activeSortRadio) {
+        if (activeSortRadio.value === 'price-asc') sortPillLabel.textContent = "Price ↑";
+        else if (activeSortRadio.value === 'price-desc') sortPillLabel.textContent = "Price ↓";
+        else if (activeSortRadio.value === 'rating-desc') sortPillLabel.textContent = "Rating";
+        else sortPillLabel.textContent = "Sort";
+      }
+
+      // ডিল চিপ
+      if (dealsActive) {
+        activeFilterCount++;
         const chip = document.createElement('div');
-        chip.className = "bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1";
-        chip.innerHTML = `Deals Active <button class="font-black">&times;</button>`;
+        chip.className = "bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 shadow-2xs";
+        chip.innerHTML = `<span>🔥 Deals Active</span><button type="button" class="text-xs font-black hover:text-rose-800 cursor-pointer">&times;</button>`;
         chip.querySelector('button').onclick = () => dealsBtn.click();
         chipsList.appendChild(chip);
       }
-      chipsContainer.classList.toggle('hidden', activeCount === 0);
+
+      chipsContainer.classList.toggle('hidden', activeFilterCount === 0);
     };
 
-    document.querySelectorAll('.filter-popup input').forEach(i => i.onchange = () => {
-      runFiltering();
-      if(i.type === 'radio') setTimeout(closePopups, 200);
+    // ইনপুট ইভেন্ট লিসেনার
+    document.querySelectorAll('.filter-popup input').forEach(input => {
+      input.onchange = () => {
+        runFiltering();
+        if (input.type === 'radio') setTimeout(closePopups, 200);
+      };
     });
 
-    triggers.forEach(btn => btn.onclick = (e) => {
-      e.stopPropagation();
-      const target = document.getElementById(btn.dataset.target);
-      const isHidden = target.classList.contains('hidden');
-      closePopups();
-      if(isHidden) {
-        target.classList.remove('hidden');
-        overlay.classList.remove('hidden');
-        if(window.innerWidth < 768) document.body.style.overflow = 'hidden';
-        btn.querySelector('.arrow')?.classList.add('rotate-180');
-      }
+    if (searchInput) {
+      searchInput.oninput = () => runFiltering();
+    }
+
+    // পিল ওপেন/ক্লোজ
+    triggers.forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const target = document.getElementById(btn.dataset.target);
+        if (!target) return;
+
+        const isHidden = target.classList.contains('hidden');
+        closePopups();
+
+        if (isHidden) {
+          target.classList.remove('hidden');
+          overlay.classList.remove('hidden');
+          if (window.innerWidth < 768) document.body.style.overflow = 'hidden';
+          btn.querySelector('.arrow')?.classList.add('rotate-180');
+        }
+      };
+    });
+
+    // পপআপ ভেতরের ক্লোজ বাটন (মোবাইল)
+    document.querySelectorAll('.close-popup-btn').forEach(btn => {
+      btn.onclick = closePopups;
     });
 
     overlay.onclick = closePopups;
+
+    // ডিল বাটন টগল
     dealsBtn.onclick = () => {
       dealsActive = !dealsActive;
-      dealsBtn.classList.toggle('bg-red-600', dealsActive);
+      dealsBtn.classList.toggle('bg-rose-600', dealsActive);
       dealsBtn.classList.toggle('text-white', dealsActive);
+      dealsBtn.classList.toggle('border-rose-600', dealsActive);
       runFiltering();
     };
+
+    // রিসেট অল ফিল্টার
     clearAllBtn.onclick = () => {
-      document.querySelectorAll('input[value="all"]').forEach(i => i.checked = true);
-      document.querySelectorAll('input[type="checkbox"]').forEach(i => i.checked = false);
-      if(dealsActive) dealsBtn.click();
-      runFiltering();
+      if (searchInput) searchInput.value = '';
+      document.querySelectorAll('.filter-popup input[type="radio"][value="all"], .filter-popup input[type="radio"][value="featured"]').forEach(i => i.checked = true);
+      document.querySelectorAll('.filter-popup input[type="checkbox"]').forEach(i => i.checked = false);
+      if (dealsActive) dealsBtn.click();
+      else runFiltering();
     };
   }
 
   setupStickyFilters();
-  document.addEventListener('astro:after-swap', setupStickyFilters);
+  document.addEventListener('astro:page-load', setupStickyFilters);
 </script>
