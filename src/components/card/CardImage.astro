@@ -5,16 +5,22 @@ interface Props {
   url: string;
   price: string;
 }
+
 const { image, title, url, price } = Astro.props;
 ---
 
-<!-- aspect-[16/10] মোবাইলে কাজ করবে, আর md:h-full পিসিতে গ্রিডের পুরো উচ্চতা নেবে -->
-<div class="card-img-box relative group w-full h-full aspect-[16/10] md:aspect-none shrink-0 bg-slate-200 overflow-hidden">
+<!-- 
+  - aspect-[16/10] মোবাইলে এবং md:aspect-[4/3] ডেস্কটপে নির্দিষ্ট অনুপাত ধরে রাখবে
+  - এর ফলে ছবি বা ফন্ট লোড হওয়ার সময় কোনো Layout Shift (CLS) হবে না
+-->
+<div class="card-img-box relative group w-full h-full aspect-[16/10] md:aspect-[4/3] shrink-0 bg-slate-100 overflow-hidden">
   
   {image ? (
     <img 
       src={image} 
-      alt={title} 
+      alt={`${title} Photo`} 
+      width="400"
+      height="250"
       loading="lazy" 
       decoding="async" 
       class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
@@ -28,31 +34,49 @@ const { image, title, url, price } = Astro.props;
     </div>
   )}
 
-  <div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300"></div>
+  <!-- সূক্ষ্ম হোভার ওভারলে -->
+  <div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none"></div>
 
   <!-- উইশলিস্ট বাটন -->
-  <button type="button" class="wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-white hover:text-red-500 hover:scale-110 active:scale-95 z-20">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <button 
+    type="button" 
+    class="wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 flex items-center justify-center shadow-sm transition-all duration-300 hover:bg-white hover:text-red-500 hover:scale-110 active:scale-95 z-20 cursor-pointer"
+    data-title={title}
+    data-image={image || ''}
+    data-url={url}
+    data-price={price}
+    aria-label={`Save ${title} to wishlist`}
+  >
+    <svg class="w-4 h-4 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
     </svg>
   </button>
 </div>
 
+<!-- মেমোরি-সেফ উইশলিস্ট স্ক্রিপ্ট (ডুপ্লিকেট ইভেন্ট হবে না) -->
 <script>
-  // শুধু উইশলিস্ট লজিক রাখা হয়েছে
-  const initWishlist = () => {
-    document.querySelectorAll('.wishlist-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const icon = btn.querySelector('svg');
-        btn.classList.toggle('text-red-500');
-        if(icon) {
-          const isFilled = icon.getAttribute('fill') === 'currentColor';
-          icon.setAttribute('fill', isFilled ? 'none' : 'currentColor');
-        }
-      });
+  const setupWishlist = () => {
+    if ((window as any).__wishlistInitialized) return;
+    (window as any).__wishlistInitialized = true;
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      const btn = target?.closest('.wishlist-btn');
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const icon = btn.querySelector('svg');
+      btn.classList.toggle('text-red-500');
+
+      if (icon) {
+        const isFilled = icon.getAttribute('fill') === 'currentColor';
+        icon.setAttribute('fill', isFilled ? 'none' : 'currentColor');
+      }
     });
   };
-  initWishlist();
-  document.addEventListener('astro:page-load', initWishlist);
+
+  setupWishlist();
+  document.addEventListener('astro:page-load', setupWishlist);
 </script>
