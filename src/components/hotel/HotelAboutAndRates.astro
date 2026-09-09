@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (100% Dynamic Policies, Zero-Fake Data, KV Sync & Rate Cards)
+// src/components/hotel/HotelAboutAndRates.astro (Dynamic Policies with Custom SVG & Smart Auto-Icons)
 interface Props {
   hotel: any;
 }
@@ -11,10 +11,11 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// ================= 100% DYNAMIC POLICIES (ZERO FAKE DATA) =================
+// ================= 100% DYNAMIC POLICIES WITH CUSTOM SVG SUPPORT =================
 interface PolicyItem {
   label: string;
   value: string;
+  custom_svg?: string;
 }
 
 let policiesList: PolicyItem[] = [];
@@ -25,10 +26,11 @@ if (Array.isArray(data.policies) && data.policies.length > 0) {
     .filter((p: any) => p && p.label && p.value)
     .map((p: any) => ({
       label: String(p.label).trim(),
-      value: String(p.value).trim()
+      value: String(p.value).trim(),
+      custom_svg: p.custom_svg || p.svg || ""
     }));
 } else {
-  // ২. যদি আলাদা ফিল্ড হিসেবে ফাইলে রিয়েল ডেটা দেওয়া থাকে (কোনো ফেইক ডিফল্ট ভ্যালু ছাড়া)
+  // ২. পেছনের ফাইলগুলোতে যদি আলাদা ফিল্ড দেওয়া থাকে (কোনো ফেক ডিফল্ট ভ্যালু ছাড়া)
   if (data.checkIn || data.check_in) {
     policiesList.push({ label: 'Check-In', value: String(data.checkIn || data.check_in) });
   }
@@ -52,34 +54,55 @@ if (Array.isArray(data.policies) && data.policies.length > 0) {
   }
 }
 
-// স্মার্ট আইকন ডিটেক্টর (পলিসির নাম অনুযায়ী সঠিক আইকন বসাবে)
+// স্মার্ট অটোমেটিক আইকন ডিটেক্টর (রিসেপশন ও ভোল্টেজসহ সকল পরিচিত ফিল্ডের জন্য)
 const getPolicyIcon = (label: string) => {
   const l = label.toLowerCase();
+  
+  // Check-In
   if (l.includes('check-in') || l.includes('arrival') || l.includes('time')) {
     return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
   }
+  // Check-Out
   if (l.includes('check-out') || l.includes('departure')) {
     return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>`;
   }
-  if (l.includes('power') || l.includes('generator') || l.includes('backup') || l.includes('electricity')) {
+  // Reception / Front Desk (রিসেপশন বেল)
+  if (l.includes('reception') || l.includes('front desk') || l.includes('desk') || l.includes('open until')) {
+    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v1.07A7.002 7.002 0 0 1 19 11v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-1a7.002 7.002 0 0 1 6-6.93V3a1 1 0 0 1 1-1zm-7 13h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z"/></svg>`;
+  }
+  // Voltage / Socket / Plug (ইলেকট্রিক প্লাগ)
+  if (l.includes('voltage') || l.includes('plug') || l.includes('socket') || l.includes('220')) {
+    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M16 7V3h-2v4h-4V3H8v4a6 6 0 0 0 5 5.91V19h-2v2h6v-2h-2v-6.09A6 6 0 0 0 16 7z"/></svg>`;
+  }
+  // Power Backup
+  if (l.includes('power') || l.includes('generator') || l.includes('electricity') || l.includes('backup')) {
     return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
   }
+  // Smoking
   if (l.includes('smoke') || l.includes('smoking')) {
     return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>`;
   }
+  // Couple Policy / ID / Guests
   if (l.includes('couple') || l.includes('guest') || l.includes('id') || l.includes('marriage')) {
     return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`;
   }
+  // Payment / bKash / Cards
   if (l.includes('pay') || l.includes('bkash') || l.includes('card') || l.includes('cash')) {
     return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
   }
+  // Cancellation
   if (l.includes('cancel') || l.includes('refund')) {
     return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
   }
-  if (l.includes('pet')) {
+  // Pet
+  if (l.includes('pet') || l.includes('dog') || l.includes('cat') || l.includes('animal')) {
     return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M4.5 11c1.38 0 2.5-1.12 2.5-2.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11zm15 0c1.38 0 2.5-1.12 2.5-2.5S20.88 6 19.5 6 17 7.12 17 8.5s1.12 2.5 2.5 2.5zm-6.5-3c1.38 0 2.5-1.12 2.5-2.5S14.38 3 13 3s-2.5 1.12-2.5 2.5S11.62 8 13 8zm-5 0c1.38 0 2.5-1.12 2.5-2.5S9.38 3 8 3 5.5 4.12 5.5 5.5 6.62 8 8 8zm4 3.5c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5zM12 18.5c-1.38 0-2.5-1.12-2.5-2.5h5c0 1.38-1.12 2.5-2.5 2.5z"/></svg>`;
   }
-  // সাধারণ ডিফল্ট ইনফো আইকন
+  // Wi-Fi
+  if (l.includes('wifi') || l.includes('internet')) {
+    return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`;
+  }
+  // Default Generic Info Icon
   return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
 };
 
@@ -125,7 +148,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 }
 ---
 
-<!-- 2ND COMPONENT: ABOUT HOTEL & LIVE RATE COMPARISON -->
+<!-- ABOUT HOTEL & LIVE RATE COMPARISON -->
 <section id="about-and-rates" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
     
@@ -154,7 +177,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         </button>
       </div>
 
-      <!-- ================= 100% DYNAMIC HOTEL POLICIES (NO FAKE DATA) ================= -->
+      <!-- ================= DYNAMIC POLICIES WITH CUSTOM SVG SUPPORT ================= -->
       {policiesList.length > 0 && (
         <div class="pt-4 border-t border-slate-200/80 space-y-4 text-left">
           <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">
@@ -165,7 +188,13 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             {policiesList.map((item) => (
               <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-                  <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
+                  {item.custom_svg ? (
+                    <div class="w-4 h-4 flex items-center justify-center shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-slate-800">
+                      <Fragment set:html={item.custom_svg} />
+                    </div>
+                  ) : (
+                    <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
+                  )}
                 </div>
                 <div class="min-w-0">
                   <span class="text-slate-600 text-[11px] block font-extrabold uppercase truncate">
@@ -239,7 +268,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
         )}
 
-        <!-- BOOKING CHANNELS LIST -->
+        <!-- 100% CMS CONTROLLED BOOKING CHANNELS LIST -->
         <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-3 min-h-[200px]">
           {customChannels.length > 0 ? (
             customChannels.map((item: any) => {
