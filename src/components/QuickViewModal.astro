@@ -1,18 +1,20 @@
 ---
-// src/components/QuickViewModal.astro (Best Deal / Psychological Savings Badge & Clean Currency)
+// src/components/QuickViewModal.astro (Absolute Highest Z-Index 99999 - Zero Overlay Glitch)
 ---
 
-<!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
+<!-- QUICK VIEW GLOBAL MODAL OVERLAY (LOCKED AT Z-INDEX 99999) -->
 <div 
   id="globalQuickViewModal" 
   role="dialog" 
   aria-modal="true" 
-  class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 pt-8 sm:pt-10 overflow-y-auto"
+  class="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 pt-8 sm:pt-10 overflow-y-auto"
+  style="z-index: 99999 !important;"
 >
   <!-- MODAL DIALOG CONTAINER -->
   <div 
     id="quickViewDialog"
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
+    style="z-index: 100000 !important;"
   >
     <!-- ================= 1. TOP-CENTER HIGHLIGHTED CLOSE BUTTON ================= -->
     <button 
@@ -213,7 +215,6 @@
       const isDollar = rawPriceStr.includes('$');
       const basePriceNum = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 0;
       
-      // ক্লিন কারেন্সি ফরম্যাট ($120 / night)
       const cleanStartingPrice = basePriceNum > 0 
         ? (isDollar ? `$${basePriceNum} / night` : `৳ ${basePriceNum.toLocaleString()} / night`)
         : rawPriceStr;
@@ -294,7 +295,6 @@
         otaChannels = [];
       }
 
-      // সর্বনিম্ন চ্যানেল প্রাইস খোঁজা (Best Deal নির্ধারণের জন্য)
       let minChannelPrice = Infinity;
       otaChannels.forEach(ch => {
         const p = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, '')) || 0;
@@ -305,7 +305,7 @@
 
       let chHtml = '';
 
-      // Direct WhatsApp (যদি channels অ্যারেতে না থাকে)
+      // Direct WhatsApp
       if (whatsapp && otaChannels.length === 0) {
         const cleanWa = whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
@@ -351,7 +351,6 @@
           const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, '')) || 0;
           const cleanPrice = pNum > 0 ? (isDollar ? `$${pNum}` : `৳ ${pNum.toLocaleString()}`) : '';
 
-          // বেস্ট ডিল ও সেভিংস ক্যালকুলেশন
           const isBestDeal = (pNum > 0 && pNum === minChannelPrice);
           let savingsText = '';
           if (basePriceNum > pNum && pNum > 0) {
@@ -373,7 +372,6 @@
           const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
           const btnUrl = ch.button_url || url || '#';
 
-          // বেস্ট ডিল হলে হালকা গোল্ডেন/সবুজ বর্ডার
           const cardBorderClass = isBestDeal 
             ? 'border-emerald-300 bg-emerald-50/40 shadow-xs' 
             : 'border-slate-200/80 bg-white hover:bg-slate-50';
