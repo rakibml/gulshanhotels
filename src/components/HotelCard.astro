@@ -104,7 +104,7 @@ const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : nul
 
 const hotelGallery = Array.isArray(hData.gallery) && hData.gallery.length > 0 ? hData.gallery : [hImage];
 
-// --- 6. 100% Dynamic Policies Collection for Quick View Modal ---
+// --- 6. 100% Dynamic Policies Collection ---
 const rawPolicies = Array.isArray(hData.policies) ? hData.policies : [];
 let policiesList: any[] = [];
 
@@ -125,6 +125,30 @@ if (rawPolicies.length > 0) {
   if (hData.cancellation) policiesList.push({ label: 'Cancellation', value: String(hData.cancellation) });
 }
 
+// --- 7. COMPREHENSIVE AMENITIES EXTRACTION (FLAT + CATEGORIZED) ---
+// amenities এবং categorized_amenities উভয় জায়গা থেকেই নাম সংগ্রহ করা
+const allExtractedAmenities: string[] = [];
+
+if (Array.isArray(hData.amenities)) {
+  hData.amenities.forEach((item: any) => {
+    const name = typeof item === 'string' ? item : (item?.name || '');
+    if (name) allExtractedAmenities.push(name);
+  });
+}
+
+if (Array.isArray(hData.categorized_amenities)) {
+  hData.categorized_amenities.forEach((cat: any) => {
+    if (Array.isArray(cat?.items)) {
+      cat.items.forEach((sub: any) => {
+        const name = typeof sub === 'string' ? sub : (sub?.name || '');
+        if (name) allExtractedAmenities.push(name);
+      });
+    }
+  });
+}
+
+const amenitiesFilterString = allExtractedAmenities.join(' | ').toLowerCase();
+
 const hasValidTitle = hTitle.length > 0;
 ---
 
@@ -142,11 +166,12 @@ const hasValidTitle = hTitle.length > 0;
     data-numeric-price={filterPriceBDT}
     data-numeric-rating={parseFloat(realRating)}
     
-    /* --- Modal Data Attributes --- */
+    /* --- Modal & Filter Attributes --- */
     data-md-price={mdPriceRaw}
     data-booking-channels={JSON.stringify(hData.booking_channels || [])}
     data-gallery={JSON.stringify(hotelGallery)}
     data-policies={JSON.stringify(policiesList)}
+    data-amenities={amenitiesFilterString}
     data-whatsapp={hData.whatsapp || ""}
     data-phone={hData.phone || ""}
   >
@@ -168,7 +193,7 @@ const hasValidTitle = hTitle.length > 0;
           fallbackAbout={getFirst25Words(hData.about)} 
           rating={realRating} 
           reviewsCount={realCount} 
-          amenities={hData.amenities || []}
+          amenities={allExtractedAmenities}
         />
       </div>
 
