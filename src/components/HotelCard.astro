@@ -1,4 +1,5 @@
 ---
+// src/components/directory/HotelCard.astro
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -10,7 +11,7 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// Helpers
+// --- 1. Helper Functions ---
 const toTitleCase = (str: string) => str ? str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
 
 const getFirst25Words = (text: string) => {
@@ -20,7 +21,7 @@ const getFirst25Words = (text: string) => {
   return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
 
-// Data Extraction
+// --- 2. Extract Basic Hotel Data ---
 const hData = hotelItem?.data || {};
 const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
 const hotelSlug = (hData.slug || hotelItem?.slug || hotelItem?.id || "hotel").trim();
@@ -36,7 +37,7 @@ const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka")
 const locLower = hFullAddress.toLowerCase();
 const titleLowerStr = hotelTitle.toLowerCase();
 
-// Filter Data
+// --- 3. Filter Data Logic ---
 let areaType = 'near';
 if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) areaType = 'gulshan-2';
@@ -45,7 +46,7 @@ const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
-// Pricing
+// --- 4. Pricing Logic ---
 const mdPriceRaw = hData.price || "$100"; 
 const isDollar = mdPriceRaw.includes('$');
 const mdPriceNumeric = parseFloat(mdPriceRaw.replace(/[^0-9.]/g, '')) || 0;
@@ -79,7 +80,7 @@ if (lowestChannelPrice > 0 && lowestChannelPrice < mdPriceNumeric) {
 const filterPriceVal = lowestChannelPrice > 0 ? lowestChannelPrice : mdPriceNumeric;
 const filterPriceBDT = isDollar ? Math.round(filterPriceVal * 120) : filterPriceVal;
 
-// Reviews
+// --- 5. Reviews Logic ---
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
@@ -102,6 +103,28 @@ const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + 
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
 const hotelGallery = Array.isArray(hData.gallery) && hData.gallery.length > 0 ? hData.gallery : [hImage];
+
+// --- 6. 100% Dynamic Policies Collection for Quick View Modal ---
+const rawPolicies = Array.isArray(hData.policies) ? hData.policies : [];
+let policiesList: any[] = [];
+
+if (rawPolicies.length > 0) {
+  policiesList = rawPolicies
+    .filter((p: any) => p && p.label && p.value)
+    .map((p: any) => ({
+      label: String(p.label).trim(),
+      value: String(p.value).trim(),
+      custom_svg: p.custom_svg || p.svg || ""
+    }));
+} else {
+  if (hData.checkIn || hData.check_in) policiesList.push({ label: 'Check-In', value: String(hData.checkIn || hData.check_in) });
+  if (hData.checkOut || hData.check_out) policiesList.push({ label: 'Check-Out', value: String(hData.checkOut || hData.check_out) });
+  if (hData.powerBackup || hData.power_backup) policiesList.push({ label: 'Power Backup', value: String(hData.powerBackup || hData.power_backup) });
+  if (hData.smokingPolicy || hData.smoking) policiesList.push({ label: 'Smoking', value: String(hData.smokingPolicy || hData.smoking) });
+  if (hData.couplePolicy || hData.couple_policy) policiesList.push({ label: 'Couple Policy', value: String(hData.couplePolicy || hData.couple_policy) });
+  if (hData.cancellation) policiesList.push({ label: 'Cancellation', value: String(hData.cancellation) });
+}
+
 const hasValidTitle = hTitle.length > 0;
 ---
 
@@ -123,16 +146,9 @@ const hasValidTitle = hTitle.length > 0;
     data-md-price={mdPriceRaw}
     data-booking-channels={JSON.stringify(hData.booking_channels || [])}
     data-gallery={JSON.stringify(hotelGallery)}
+    data-policies={JSON.stringify(policiesList)}
     data-whatsapp={hData.whatsapp || ""}
     data-phone={hData.phone || ""}
-
-    /* --- Policy Attributes --- */
-    data-check-in={hData.checkIn || hData.check_in || "02:00 PM"}
-    data-check-out={hData.checkOut || hData.check_out || "12:00 PM"}
-    data-category={hData.category || (isGuestHouse ? "Guest House" : "Hotel")}
-    data-power={hData.powerBackup || hData.power_backup || "24/7 Generator"}
-    data-smoking={hData.smokingPolicy || hData.smoking || "Non-Smoking"}
-    data-cancellation={hData.cancellation || "Free Cancellation"}
   >
     <div class="w-full flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
