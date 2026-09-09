@@ -20,12 +20,24 @@ price: 120$ / night
 policies:
   - label: Check-in from
     value: 2:00 PM
+    custom_svg: ''
   - label: Check-out until
     value: 12:00 PM
+    custom_svg: ''
   - label: Reception open until
     value: 12:00 AM
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Bell Top Button -->
+        <path d="M12 2v2" />
+        <!-- Bell Dome -->
+        <path d="M19 14a7 7 0 0 0-14 0v1h14v-1z" />
+        <!-- Bell Base -->
+        <path d="M3 19h18a1 1 0 0 1 1 1v1H2v-1a1 1 0 0 1 1-1z" />
+      </svg>
   - label: 'Room voltage:'
     value: '220'
+    custom_svg: ''
 booking_channels:
   - provider_name: Whatsapp
     price: 99$
