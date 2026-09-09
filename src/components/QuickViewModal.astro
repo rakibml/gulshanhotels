@@ -1,8 +1,8 @@
 ---
-// src/components/QuickViewModal.astro (Absolute Highest Z-Index 99999 - Zero Overlay Glitch)
+// src/components/QuickViewModal.astro (Hotel Policies & Essential Info Integration)
 ---
 
-<!-- QUICK VIEW GLOBAL MODAL OVERLAY (LOCKED AT Z-INDEX 99999) -->
+<!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
 <div 
   id="globalQuickViewModal" 
   role="dialog" 
@@ -16,7 +16,7 @@
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
     style="z-index: 100000 !important;"
   >
-    <!-- ================= 1. TOP-CENTER HIGHLIGHTED CLOSE BUTTON ================= -->
+    <!-- ================= TOP-CENTER CLOSE BUTTON ================= -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
@@ -31,7 +31,7 @@
     <!-- SCROLLABLE BODY -->
     <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl">
       
-      <!-- ================= 2. 5-IMAGE CAROUSEL SLIDER ================= -->
+      <!-- ================= 1. 5-IMAGE CAROUSEL SLIDER ================= -->
       <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
         <img 
           id="qvModalImg" 
@@ -40,7 +40,6 @@
           class="w-full h-full object-cover transition duration-300"
         />
 
-        <!-- Controls -->
         <button 
           type="button" 
           id="qvPrevImgBtn" 
@@ -58,7 +57,6 @@
           ❯
         </button>
 
-        <!-- Counter Badge -->
         <span 
           id="qvImgBadge" 
           class="absolute bottom-2.5 right-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-white/20 tracking-wider pointer-events-none"
@@ -67,7 +65,7 @@
         </span>
       </div>
 
-      <!-- ================= 3. HOTEL NAME & RATING ================= -->
+      <!-- ================= 2. HOTEL NAME & RATING ================= -->
       <div class="space-y-1">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -85,15 +83,84 @@
         </div>
       </div>
 
-      <!-- ================= 4. KEY AMENITIES / HIGHLIGHTS ================= -->
-      <div id="qvAmenitiesSection" class="pt-2 border-t border-slate-100 space-y-2">
-        <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
-          Key Facilities & Highlights
-        </span>
-        <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      <!-- ================= 3. HOTEL POLICIES & ESSENTIAL INFO (REPLACED AMENITIES) ================= -->
+      <div class="pt-3 border-t border-slate-100 space-y-2.5">
+        <h4 class="text-[11px] font-black uppercase tracking-wider text-slate-500">
+          Hotel Policies & Essential Info
+        </h4>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 text-left">
+          
+          <!-- Check-In -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Check-In</span>
+              <span id="qvCheckIn" class="font-black text-slate-900 text-xs truncate block">02:00 PM</span>
+            </div>
+          </div>
+
+          <!-- Check-Out -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Check-Out</span>
+              <span id="qvCheckOut" class="font-black text-slate-900 text-xs truncate block">12:00 PM</span>
+            </div>
+          </div>
+
+          <!-- Property Type -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Property Type</span>
+              <span id="qvPropertyType" class="font-black text-slate-900 text-xs truncate block">Hotel</span>
+            </div>
+          </div>
+
+          <!-- Power Backup -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Power Backup</span>
+              <span id="qvPowerBackup" class="font-black text-emerald-900 text-xs truncate block">24/7 Generator</span>
+            </div>
+          </div>
+
+          <!-- Smoking -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Smoking</span>
+              <span id="qvSmokingPolicy" class="font-black text-slate-900 text-xs truncate block">Non-Smoking</span>
+            </div>
+          </div>
+
+          <!-- Cancellation Policy -->
+          <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100/70 border border-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+              <svg class="w-3.5 h-3.5 fill-emerald-800" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+            </div>
+            <div class="min-w-0">
+              <span class="text-slate-500 text-[10px] block font-extrabold uppercase leading-none mb-0.5">Cancellation</span>
+              <span id="qvCancellation" class="font-black text-emerald-900 text-xs truncate block">Free Cancellation</span>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      <!-- ================= 5. PRICING & BOOKING CHANNELS ================= -->
+      <!-- ================= 4. PRICING & BOOKING CHANNELS ================= -->
       <div class="pt-2 border-t border-slate-100 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
@@ -108,7 +175,7 @@
 
     </div>
 
-    <!-- ================= 6. VIEW FULL DETAILS FOOTER BUTTON ================= -->
+    <!-- ================= 5. VIEW FULL DETAILS FOOTER BUTTON ================= -->
     <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0 rounded-b-2xl sm:rounded-b-3xl">
       <a 
         id="qvFullDetailsBtn" 
@@ -123,7 +190,7 @@
   </div>
 </div>
 
-<!-- ================= CLIENT JAVASCRIPT LOGIC ================= -->
+<!-- ================= CLIENT JAVASCRIPT ================= -->
 <script is:inline>
   const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
@@ -141,8 +208,15 @@
     const starsEl = document.getElementById('qvStarsContainer');
     const ratingBox = document.getElementById('qvRatingBox');
     const addressEl = document.getElementById('qvAddress');
-    const amenitiesSection = document.getElementById('qvAmenitiesSection');
-    const amenitiesGrid = document.getElementById('qvAmenitiesGrid');
+
+    // Policy Elements
+    const checkInEl = document.getElementById('qvCheckIn');
+    const checkOutEl = document.getElementById('qvCheckOut');
+    const propTypeEl = document.getElementById('qvPropertyType');
+    const powerEl = document.getElementById('qvPowerBackup');
+    const smokingEl = document.getElementById('qvSmokingPolicy');
+    const cancelEl = document.getElementById('qvCancellation');
+
     const priceEl = document.getElementById('qvPrice');
     const channelsContainer = document.getElementById('qvChannelsContainer');
     const fullDetailsBtn = document.getElementById('qvFullDetailsBtn');
@@ -150,16 +224,6 @@
     let currentImages = [];
     let currentImgIdx = 0;
     let isModalOpen = false;
-
-    // Vector SVGs
-    const iconSvgs = {
-      pool: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M22 17c-1.1 0-2 .12-.3-3-.83-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83s-2.12-.3-3-.83c-.88.53-1.9.83-3 .83v-2c.67 0 1.3-.19 1.83-.53.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.88.53 1.9.83 3 .83s2.12-.3 3-.83c-.88-.53 1.9-.83 3-.83s2.12.3 3 .83c.53.34 1.16.53 1.83.53v2zM15 7.5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0z"/></svg>`,
-      gym: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 7.71 4.86 3.43 9.14 2 7.71 0.57 0.57 9.14 2 10.57 0.57 12 2 13.43 3.43 12 12 20.57 15.57 17 17 18.43 18.43 17 17 15.57 20.57 12z"/></svg>`,
-      wifi: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`,
-      restaurant: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.87 3.56 4.17L6 22h2l-.56-8.83C9.45 12.87 11 11.12 11 9zm9-7h-2c-1.1 0-2 .9-2 2v7h2v13h2V2z"/></svg>`,
-      parking: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M13.2 11H10V7h3.2c1.1 0 2 .9-2 2s-.9 2-2 2zM19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.8 10H10v4H8V5h5.2c2.2 0 4 1.8 4 4s-1.8 4-4 4z"/></svg>`,
-      checkmark: `<svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`
-    };
 
     const presetSvgs = {
       agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-black text-[9px] flex items-center justify-center shrink-0 tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
@@ -180,7 +244,6 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
-    // ================= SMART AUTO-DETECTION FUNCTION =================
     function openModal(cardEl) {
       if (!cardEl) return;
       isModalOpen = true;
@@ -189,7 +252,7 @@
         window.history.pushState({ modalOpen: true }, '', '#quick-view');
       }
 
-      // ১. হোটেল টাইটেল
+      // Title & Address
       const titleLink = cardEl.querySelector('.card-hotel-link') || cardEl.querySelector('a[href]');
       let rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
       if (!rawTitle && cardEl.getAttribute('data-title')) {
@@ -197,40 +260,39 @@
       }
       const title = rawTitle || 'Hotel Details';
 
-      // ২. ঠিকানা
       const addressSpan = cardEl.querySelector('.card-hotel-address') || cardEl.querySelector('.line-clamp-1');
       const address = cardEl.getAttribute('data-hotel-address') || (addressSpan ? addressSpan.textContent.trim() : 'Gulshan, Dhaka');
-
-      // ৩. ইউআরএল
       const url = cardEl.getAttribute('data-hotel-url') || (titleLink ? titleLink.getAttribute('href') : '#');
-
-      // ৪. স্টার
       const stars = parseInt(cardEl.getAttribute('data-stars') || '0', 10);
 
-      // ৫. বেস স্টার্টিং প্রাইস & সেভিংস ক্যালকুলেশন
-      const strikethroughSpan = cardEl.querySelector('.line-through');
-      const finalPriceSpan = cardEl.querySelector('.card-final-price');
-      const rawPriceStr = cardEl.getAttribute('data-md-price') || cardEl.getAttribute('data-official-price') || (strikethroughSpan ? strikethroughSpan.textContent.trim() : (finalPriceSpan ? finalPriceSpan.textContent.trim() : 'Contact for Rates'));
-      
+      // Price Formatting
+      const rawPriceStr = cardEl.getAttribute('data-md-price') || cardEl.getAttribute('data-official-price') || 'Contact for Rates';
       const isDollar = rawPriceStr.includes('$');
       const basePriceNum = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 0;
-      
       const cleanStartingPrice = basePriceNum > 0 
         ? (isDollar ? `$${basePriceNum} / night` : `৳ ${basePriceNum.toLocaleString()} / night`)
         : rawPriceStr;
 
-      // ৬. কন্টাক্ট ইনফো
+      // Contacts
       const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
       const phone = cardEl.getAttribute('data-phone') || '';
 
-      // ফিল্ডে ডাটা সেট
+      // Populate Basic Info
       titleEl.textContent = title;
       starsEl.textContent = stars > 0 ? '★'.repeat(stars) : '';
       addressEl.textContent = address;
       fullDetailsBtn.href = url;
       priceEl.textContent = cleanStartingPrice;
 
-      // রেটিং
+      // Populate Policies
+      if (checkInEl) checkInEl.textContent = cardEl.getAttribute('data-check-in') || '02:00 PM';
+      if (checkOutEl) checkOutEl.textContent = cardEl.getAttribute('data-check-out') || '12:00 PM';
+      if (propTypeEl) propTypeEl.textContent = cardEl.getAttribute('data-category') || (cardEl.getAttribute('data-guesthouse') === 'true' ? 'Guest House' : 'Hotel');
+      if (powerEl) powerEl.textContent = cardEl.getAttribute('data-power') || '24/7 Generator';
+      if (smokingEl) smokingEl.textContent = cardEl.getAttribute('data-smoking') || 'Non-Smoking';
+      if (cancelEl) cancelEl.textContent = cardEl.getAttribute('data-cancellation') || 'Free Cancellation';
+
+      // Rating
       const numRating = cardEl.getAttribute('data-numeric-rating') || '0';
       if (parseFloat(numRating) > 0) {
         ratingBox.innerHTML = `
@@ -243,7 +305,7 @@
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      // ৭. গ্যালারির ছবিগুলো
+      // Photos
       let imagesList = [];
       try {
         imagesList = JSON.parse(cardEl.getAttribute('data-gallery') || cardEl.getAttribute('data-hotel-images') || '[]');
@@ -257,37 +319,7 @@
       currentImages = imagesList.length > 0 ? imagesList : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
       showPhoto(0);
 
-      // ৮. অ্যামেনিটিস
-      let parsedAmenities = [];
-      try {
-        parsedAmenities = JSON.parse(cardEl.getAttribute('data-amenities') || '[]');
-      } catch(e) {
-        parsedAmenities = [];
-      }
-      if (!parsedAmenities.length) {
-        parsedAmenities = ['Free Wi-Fi', 'Air Conditioning', '24/7 Power', 'Room Service', 'Security'];
-      }
-
-      amenitiesSection.classList.remove('hidden');
-      amenitiesGrid.innerHTML = parsedAmenities.slice(0, 6).map(item => {
-        const nameStr = typeof item === 'string' ? item : (item?.name || 'Amenity');
-        const aLower = nameStr.toLowerCase();
-        let icon = iconSvgs.checkmark;
-        if (aLower.includes('pool')) icon = iconSvgs.pool;
-        else if (aLower.includes('gym') || aLower.includes('fitness')) icon = iconSvgs.gym;
-        else if (aLower.includes('wifi') || aLower.includes('wi-fi')) icon = iconSvgs.wifi;
-        else if (aLower.includes('restaurant') || aLower.includes('breakfast')) icon = iconSvgs.restaurant;
-        else if (aLower.includes('park')) icon = iconSvgs.parking;
-
-        return `
-          <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-800">
-            ${icon}
-            <span class="truncate">${nameStr}</span>
-          </div>
-        `;
-      }).join('');
-
-      // ৯. বুকিং চ্যানেলগুলো পার্স করা এবং সর্বনিম্ন রেট বের করা
+      // OTA Channels with Best Deal Badge
       let otaChannels = [];
       try {
         otaChannels = JSON.parse(cardEl.getAttribute('data-booking-channels') || '[]');
@@ -305,7 +337,6 @@
 
       let chHtml = '';
 
-      // Direct WhatsApp
       if (whatsapp && otaChannels.length === 0) {
         const cleanWa = whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
@@ -325,7 +356,6 @@
         `;
       }
 
-      // Direct Call
       if (phone && otaChannels.length === 0) {
         const cleanPh = phone.replace(/[^0-9+]/g, '');
         chHtml += `
@@ -344,7 +374,6 @@
         `;
       }
 
-      // OTA Channels (With "Best Value / Save $X" Badge)
       if (otaChannels.length > 0) {
         otaChannels.forEach(ch => {
           const pName = ch.provider_name || ch.name || 'Booking Partner';
@@ -455,7 +484,7 @@
       if (e.key === 'Escape' && isModalOpen) closeModal();
     });
 
-    // GLOBAL CLICK LISTENER
+    // Global Event Delegation
     document.addEventListener('click', (e) => {
       const target = e.target;
       const qvBtn = target?.closest ? target.closest('.open-quick-view-btn') : null;
