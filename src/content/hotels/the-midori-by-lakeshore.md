@@ -22,6 +22,10 @@ policies:
     value: 2:00 PM
   - label: Check-out until
     value: 12:00 PM
+  - label: Reception open until
+    value: 12:00 AM
+  - label: 'Room voltage:'
+    value: '220'
 booking_channels:
   - provider_name: Whatsapp
     price: 99$
