@@ -1,5 +1,5 @@
 ---
-// src/components/QuickViewModal.astro (Smart Auto-Detection, Real Title, 5 Photos & Live Booking Channels)
+// src/components/QuickViewModal.astro (Synced with HotelCard Data Attributes)
 ---
 
 <!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
@@ -14,7 +14,7 @@
     id="quickViewDialog"
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
   >
-    <!-- ================= 1. TOP-CENTER HIGHLIGHTED CLOSE BUTTON ================= -->
+    <!-- TOP-CENTER HIGHLIGHTED CLOSE BUTTON -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
@@ -29,7 +29,7 @@
     <!-- SCROLLABLE BODY -->
     <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl">
       
-      <!-- ================= 2. 5-IMAGE CAROUSEL SLIDER ================= -->
+      <!-- CAROUSEL -->
       <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
         <img 
           id="qvModalImg" 
@@ -65,7 +65,7 @@
         </span>
       </div>
 
-      <!-- ================= 3. HOTEL NAME & RATING ================= -->
+      <!-- TITLE & RATING -->
       <div class="space-y-1">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <!-- ================= 4. KEY AMENITIES / HIGHLIGHTS ================= -->
+      <!-- AMENITIES -->
       <div id="qvAmenitiesSection" class="pt-2 border-t border-slate-100 space-y-2">
         <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
           Key Facilities & Highlights
@@ -91,7 +91,7 @@
         <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
       </div>
 
-      <!-- ================= 5. PRICING & BOOKING CHANNELS ================= -->
+      <!-- PRICING & CHANNELS -->
       <div class="pt-2 border-t border-slate-100 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
@@ -106,7 +106,7 @@
 
     </div>
 
-    <!-- ================= 6. VIEW FULL DETAILS FOOTER BUTTON ================= -->
+    <!-- FOOTER BUTTON -->
     <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0 rounded-b-2xl sm:rounded-b-3xl">
       <a 
         id="qvFullDetailsBtn" 
@@ -121,7 +121,7 @@
   </div>
 </div>
 
-<!-- ================= CLIENT JAVASCRIPT LOGIC ================= -->
+<!-- CLIENT JAVASCRIPT -->
 <script is:inline>
   const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
@@ -178,7 +178,6 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
-    // ================= SMART AUTO-DETECTION FUNCTION =================
     function openModal(cardEl) {
       if (!cardEl) return;
       isModalOpen = true;
@@ -187,16 +186,13 @@
         window.history.pushState({ modalOpen: true }, '', '#quick-view');
       }
 
-      // ১. স্মার্ট টাইটেল ডিটেক্টর (কখনোই 'Hotel Details' দেখাবে না)
+      // ১. হোটেল টাইটেল
       const titleLink = cardEl.querySelector('.card-hotel-link') || cardEl.querySelector('a[href]');
-      let rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
-      if (!rawTitle && cardEl.getAttribute('data-title')) {
-        rawTitle = cardEl.getAttribute('data-title').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      }
+      const rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
       const title = rawTitle || 'Hotel Details';
 
-      // ২. স্মার্ট ঠিকানা ডিটেক্টর
-      const addressSpan = cardEl.querySelector('.card-hotel-address') || cardEl.querySelector('div:has(svg) span.line-clamp-1') || cardEl.querySelector('.line-clamp-1');
+      // ২. ঠিকানা
+      const addressSpan = cardEl.querySelector('.card-hotel-address') || cardEl.querySelector('.line-clamp-1');
       const address = cardEl.getAttribute('data-hotel-address') || (addressSpan ? addressSpan.textContent.trim() : 'Gulshan, Dhaka');
 
       // ৩. ইউআরএল
@@ -205,23 +201,20 @@
       // ৪. স্টার
       const stars = parseInt(cardEl.getAttribute('data-stars') || '0', 10);
 
-      // ৫. আসল বেস স্টার্টিং প্রাইস
-      const strikethroughSpan = cardEl.querySelector('.line-through');
-      const finalPriceSpan = cardEl.querySelector('.card-final-price');
-      const officialPrice = cardEl.getAttribute('data-official-price') || (strikethroughSpan ? strikethroughSpan.textContent.trim() : (finalPriceSpan ? finalPriceSpan.textContent.trim() : 'Contact for Rates'));
+      // ৫. আসল স্টার্টিং রেট (আপনার data-md-price থেকে পড়বে)
+      const officialPrice = cardEl.getAttribute('data-md-price') || cardEl.getAttribute('data-official-price') || 'Contact for Rates';
 
       // ৬. কন্টাক্ট ইনফো
       const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
       const phone = cardEl.getAttribute('data-phone') || '';
 
-      // ফিল্ডে ডাটা সেট
       titleEl.textContent = title;
       starsEl.textContent = stars > 0 ? '★'.repeat(stars) : '';
       addressEl.textContent = address;
       fullDetailsBtn.href = url;
       priceEl.textContent = officialPrice;
 
-      // রেটিং স্কোর
+      // রেটিং
       const numRating = cardEl.getAttribute('data-numeric-rating') || '0';
       if (parseFloat(numRating) > 0) {
         ratingBox.innerHTML = `
@@ -234,10 +227,10 @@
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      // ৭. স্মার্ট ফটো লোডার (সবগুলো ছবি লোড হবে)
+      // ৭. গ্যালারির ছবিগুলো (আপনার data-gallery থেকে সব ছবি রিড করবে)
       let imagesList = [];
       try {
-        imagesList = JSON.parse(cardEl.getAttribute('data-hotel-images') || '[]');
+        imagesList = JSON.parse(cardEl.getAttribute('data-gallery') || '[]');
       } catch (e) {
         imagesList = [];
       }
@@ -278,7 +271,7 @@
         `;
       }).join('');
 
-      // ৯. বুকিং চ্যানেল ও কন্টাক্ট
+      // ৯. বুকিং চ্যানেলগুলো (আপনার data-booking-channels থেকে রিড করবে)
       let chHtml = '';
 
       // Direct WhatsApp
@@ -320,17 +313,17 @@
         `;
       }
 
-      // OTA Channels (Booking.com, Agoda, etc.)
+      // OTA Channels (Booking.com, Agoda etc.)
       let otaChannels = [];
       try {
-        otaChannels = JSON.parse(cardEl.getAttribute('data-hotel-channels') || '[]');
+        otaChannels = JSON.parse(cardEl.getAttribute('data-booking-channels') || '[]');
       } catch (e) {
         otaChannels = [];
       }
 
       if (otaChannels.length > 0) {
         otaChannels.forEach(ch => {
-          const pName = ch.provider_name || 'Booking Partner';
+          const pName = ch.provider_name || ch.name || 'Booking Partner';
           const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
           
           const pLower = pName.toLowerCase();
@@ -410,7 +403,7 @@
       if (e.key === 'Escape' && isModalOpen) closeModal();
     });
 
-    // GLOBAL CLICK LISTENER (Delegation)
+    // GLOBAL CLICK LISTENER
     document.addEventListener('click', (e) => {
       const target = e.target;
       const qvBtn = target?.closest ? target.closest('.open-quick-view-btn') : null;
