@@ -3,91 +3,107 @@
 ---
 
 <div id="globalQuickViewModal" class="fixed inset-0 z-[10001] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-  <!-- Close Button wrapper outside overflow-hidden to prevent clipping -->
   <div class="relative w-full max-w-xl md:max-w-2xl my-auto">
-    <button type="button" id="closeQvModalBtn" class="absolute -top-5 right-2 sm:-right-5 z-[10002] w-10 h-10 rounded-full bg-white text-slate-900 border-2 border-slate-200 shadow-2xl flex items-center justify-center cursor-pointer hover:bg-rose-600 hover:text-white transition-all">
+    
+    <!-- Close Button (Top-Right) -->
+    <button type="button" id="closeQvModalBtn" class="absolute -top-4 -right-2 sm:-right-4 z-20 w-10 h-10 rounded-full bg-white text-slate-800 border border-slate-200 shadow-xl flex items-center justify-center cursor-pointer hover:bg-rose-600 hover:text-white transition-all">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12" /></svg>
     </button>
 
-    <div id="quickViewDialog" class="bg-white rounded-[32px] w-full shadow-2xl relative flex flex-col max-h-[90vh] transition-all duration-300 scale-95 opacity-0 overflow-hidden">
-      <div class="overflow-y-auto flex-1 p-0">
-        <!-- 1. Image Slider Section -->
-        <div class="relative w-full h-64 sm:h-80 bg-slate-100 overflow-hidden group">
-          <img id="qvModalImg" src="" alt="Hotel preview" class="w-full h-full object-cover transition-all duration-300" />
-          <button id="qvPrevImg" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❮</button>
-          <button id="qvNextImg" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❯</button>
-          <div class="absolute bottom-4 left-6 bg-black/60 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full border border-white/10 uppercase tracking-widest">
-             PHOTO <span id="qvImgIdx">1</span> / <span id="qvTotalImg">1</span>
+    <!-- Modal Box -->
+    <div id="quickViewDialog" class="bg-white rounded-3xl w-full shadow-2xl relative flex flex-col max-h-[90vh] transition-all duration-300 scale-95 opacity-0 overflow-hidden">
+      
+      <div class="overflow-y-auto flex-1">
+        
+        <!-- ১. ইমেজ স্লাইডার (সব ছবি) -->
+        <div class="relative w-full h-64 sm:h-80 bg-slate-100 overflow-hidden group select-none">
+          <img id="qvModalImg" src="" alt="Hotel Preview" class="w-full h-full object-cover transition-all duration-300" />
+          
+          <button id="qvPrevImg" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❮</button>
+          <button id="qvNextImg" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">❯</button>
+          
+          <div id="qvImgBadge" class="absolute bottom-3 left-4 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full border border-white/10 uppercase tracking-wider">
+             ছবি <span id="qvImgIdx">1</span> / <span id="qvTotalImg">1</span>
           </div>
         </div>
 
-        <div class="p-6 sm:p-8 space-y-6">
-          <!-- 2. Header -->
-          <div class="flex justify-between items-start gap-4">
-            <div class="space-y-1">
-              <h3 id="qvHotelTitle" class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight uppercase tracking-tight"></h3>
-              <div id="qvStarsContainer" class="text-amber-500 text-sm flex"></div>
-              <div id="qvAddressWrapper" class="flex items-start gap-1.5 text-[11px] text-slate-500 font-bold uppercase tracking-wider pt-1">
-                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"/></svg>
-                <span id="qvAddress" class="leading-relaxed"></span>
-              </div>
+        <div class="p-6 sm:p-7 space-y-5">
+          
+          <!-- ২ ও ৩. হোটেলের নাম এবং লোকেশন -->
+          <div class="space-y-1.5 border-b border-slate-100 pb-4">
+            <!-- ২. হোটেলের নাম -->
+            <h3 id="qvHotelTitle" class="text-xl sm:text-2xl font-black text-slate-900 leading-snug"></h3>
+            
+            <!-- ৩. লোকেশন -->
+            <div id="qvLocationWrapper" class="flex items-start gap-1.5 text-xs text-slate-500 font-medium">
+              <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span id="qvLocation"></span>
             </div>
-            <div id="qvRatingBox" class="shrink-0 text-center"></div>
           </div>
 
-          <!-- 3. Key Facilities -->
-          <div id="qvAmenitiesSection" class="space-y-3 pt-2">
-            <span class="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Key Facilities</span>
-            <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+          <!-- ৪. ৪টি অ্যামেনিটিজ (Key Facilities) -->
+          <div id="qvAmenitiesWrapper" class="space-y-2">
+            <h4 class="text-[11px] font-black uppercase text-slate-400 tracking-wider">প্রধান সুবিধাসমূহ</h4>
+            <div id="qvAmenitiesGrid" class="grid grid-cols-2 gap-2"></div>
           </div>
 
-          <!-- 4. Booking Channels -->
-          <div class="space-y-3 pt-2">
-            <span class="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Where can you book this hotel?</span>
-            <div id="qvBookingChannels" class="space-y-2.5"></div>
+          <!-- ৫. হোটেল সম্পর্কে (About) -->
+          <div id="qvAboutWrapper" class="space-y-2 border-t border-slate-100 pt-4">
+            <h4 class="text-[11px] font-black uppercase text-slate-400 tracking-wider">হোটেল সম্পর্কে</h4>
+            <p id="qvAboutText" class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line"></p>
           </div>
+
+          <!-- ৬. বুকিং অপশনগুলো -->
+          <div id="qvBookingWrapper" class="space-y-2.5 border-t border-slate-100 pt-4">
+            <h4 class="text-[11px] font-black uppercase text-slate-400 tracking-wider">বুকিং অপশন</h4>
+            <div id="qvBookingChannels" class="space-y-2"></div>
+          </div>
+
         </div>
       </div>
-
-      <!-- 5. Footer -->
-      <div class="p-6 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-b-[32px]">
-        <div class="flex flex-col text-left">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Starting From</span>
-            <div class="flex items-center gap-3">
-                <div class="flex flex-col">
-                    <span id="qvOriginalPrice" class="text-xs font-bold text-slate-400 line-through leading-none hidden"></span>
-                    <p id="qvPrice" class="text-3xl font-black text-[#008234] leading-tight">N/A</p>
-                </div>
-                <div id="qvDiscountBadge"></div>
-            </div>
-        </div>
-        <a id="qvFullDetailsBtn" href="#" class="w-full sm:w-auto bg-[#006ce4] hover:bg-[#0057b8] text-white px-8 py-3.5 rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95 text-center">
-          View All Details ➔
+      
+      <!-- Footer: সম্পূর্ণ ডিটেইলস বাটন -->
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <a id="qvFullDetailsBtn" href="#" class="w-full sm:w-auto bg-[#006ce4] hover:bg-[#0057b8] text-white px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider transition-all text-center">
+          সম্পূর্ণ বিবরণ দেখুন ➔
         </a>
       </div>
+
     </div>
   </div>
 </div>
 
 <script is:inline>
-  (function initModalScript() {
+  (function initQuickView() {
     let gallery = [];
     let currentIdx = 0;
 
     const iconSvgs = {
-      agoda: `<div class="w-8 h-8 rounded-xl bg-[#1d3557] text-white font-black text-[10px] flex items-center justify-center shrink-0">agoda</div>`,
-      booking: `<div class="w-8 h-8 rounded-xl bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0">B.</div>`,
-      whatsapp: `<div class="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
-      phone: `<div class="w-8 h-8 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`,
-      default: `<div class="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 font-black text-xs flex items-center justify-center shrink-0">🏨</div>`
+      agoda: `<div class="w-8 h-8 rounded-lg bg-[#1d3557] text-white font-black text-[9px] flex items-center justify-center shrink-0">agoda</div>`,
+      booking: `<div class="w-8 h-8 rounded-lg bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0">B.</div>`,
+      whatsapp: `<div class="w-8 h-8 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
+      phone: `<div class="w-8 h-8 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`,
+      default: `<div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 font-bold text-xs flex items-center justify-center shrink-0">🏨</div>`
     };
 
     function updateImage() {
-      const img = document.getElementById('qvModalImg');
+      const imgEl = document.getElementById('qvModalImg');
+      const idxEl = document.getElementById('qvImgIdx');
+      const totalEl = document.getElementById('qvTotalImg');
+      const prevBtn = document.getElementById('qvPrevImg');
+      const nextBtn = document.getElementById('qvNextImg');
+      const badge = document.getElementById('qvImgBadge');
+
       if (gallery.length > 0) {
-        img.src = gallery[currentIdx];
-        document.getElementById('qvImgIdx').innerText = currentIdx + 1;
-        document.getElementById('qvTotalImg').innerText = gallery.length;
+        imgEl.src = gallery[currentIdx];
+        idxEl.innerText = currentIdx + 1;
+        totalEl.innerText = gallery.length;
+        
+        // ছবি ১টি হলে অ্যারো বাটন হাইড থাকবে
+        const hasMultiple = gallery.length > 1;
+        prevBtn.style.display = hasMultiple ? 'flex' : 'none';
+        nextBtn.style.display = hasMultiple ? 'flex' : 'none';
+        badge.style.display = hasMultiple ? 'block' : 'none';
       }
     }
 
@@ -96,75 +112,74 @@
       const dialog = document.getElementById('quickViewDialog');
       if (!modal || !dialog) return;
 
-      // ১. রিয়েল ডেটা সংগ্রহ
-      const title = card.getAttribute('data-title') || "Hotel Details";
-      const stars = parseInt(card.getAttribute('data-stars') || "0");
-      const rating = card.getAttribute('data-numeric-rating');
-      const address = card.querySelector('.card-hotel-address')?.innerText?.trim() || "";
-      const slug = card.getAttribute('data-slug') || "";
-
-      // ২. গ্যালারি সেফ হ্যান্ডলিং
+      // ১. ছবি লোড করা (সব ছবি)
       try {
-        const rawGal = card.getAttribute('data-gallery');
-        gallery = rawGal ? JSON.parse(rawGal) : [];
+        const rawGallery = card.getAttribute('data-gallery');
+        gallery = rawGallery ? JSON.parse(rawGallery) : [];
       } catch { gallery = []; }
+      
       if (!gallery.length) {
-        const fallbackSrc = card.querySelector('img')?.src;
-        if (fallbackSrc) gallery.push(fallbackSrc);
+        const fallbackImg = card.querySelector('img')?.src;
+        if (fallbackImg) gallery.push(fallbackImg);
       }
       currentIdx = 0;
       updateImage();
 
-      // ৩. অ্যাড্রেস ও স্টার
-      document.getElementById('qvHotelTitle').innerText = title.toUpperCase();
-      const addrEl = document.getElementById('qvAddress');
-      const addrWrap = document.getElementById('qvAddressWrapper');
-      if (address) {
-        addrEl.innerText = address;
-        addrWrap.classList.remove('hidden');
+      // ২. হোটেলের নাম
+      const title = card.getAttribute('data-title') || card.querySelector('.card-hotel-title')?.innerText || '';
+      document.getElementById('qvHotelTitle').textContent = title;
+
+      // ৩. লোকেশন
+      const location = card.getAttribute('data-location') || card.querySelector('.card-hotel-address')?.innerText || '';
+      const locWrapper = document.getElementById('qvLocationWrapper');
+      if (location) {
+        document.getElementById('qvLocation').textContent = location;
+        locWrapper.classList.remove('hidden');
       } else {
-        addrWrap.classList.add('hidden');
+        locWrapper.classList.add('hidden');
       }
 
-      document.getElementById('qvStarsContainer').innerHTML = stars > 0 ? "★".repeat(stars) : "";
+      // ৪. ৪টি সুবিধা (Amenities)
+      let amenities = [];
+      try { amenities = JSON.parse(card.getAttribute('data-amenities') || '[]'); } catch {}
+      const amenGrid = document.getElementById('qvAmenitiesGrid');
+      const amenWrap = document.getElementById('qvAmenitiesWrapper');
       
-      // ৪. রেটিং বক্স (যদি রেটিং না থাকে তবে হাইড থাকবে, ফেক 5.0 বসবে না)
-      const ratingBox = document.getElementById('qvRatingBox');
-      if (rating) {
-        ratingBox.innerHTML = `<div class="bg-[#003580] text-white font-black px-3 py-1.5 rounded-xl text-lg shadow-lg leading-none">${rating}</div><p class="text-[9px] font-black uppercase text-slate-400 mt-1">Score</p>`;
-        ratingBox.classList.remove('hidden');
-      } else {
-        ratingBox.innerHTML = '';
-        ratingBox.classList.add('hidden');
-      }
-
-      document.getElementById('qvFullDetailsBtn').href = slug ? `/${slug}` : '#';
-
-      // ৫. অ্যামেনিটিজ (ফেক ডেটা ছাড়া)
-      let amenitiesArr = [];
-      try { amenitiesArr = JSON.parse(card.getAttribute('data-amenities') || '[]'); } catch {}
-      const grid = document.getElementById('qvAmenitiesGrid');
-      const amenSec = document.getElementById('qvAmenitiesSection');
-      if (amenitiesArr.length > 0) {
-        grid.innerHTML = amenitiesArr.slice(0, 6).map(text => `
-          <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-600 uppercase">
-            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></div>
-            <span class="truncate">${text}</span>
+      if (amenities.length > 0) {
+        amenWrap.classList.remove('hidden');
+        // সর্বোচ্চ ৪টি অ্যামেনিটি নেওয়া হয়েছে
+        amenGrid.innerHTML = amenities.slice(0, 4).map(item => `
+          <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-semibold text-slate-700">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <span class="truncate">${item}</span>
           </div>
         `).join('');
-        amenSec.classList.remove('hidden');
       } else {
-        amenSec.classList.add('hidden');
+        amenWrap.classList.add('hidden');
       }
 
-      // ৬. বুকিং চ্যানেল
+      // ৫. হোটেল সম্পর্কে (About)
+      const aboutText = card.getAttribute('data-about') || card.getAttribute('data-description') || '';
+      const aboutWrap = document.getElementById('qvAboutWrapper');
+      if (aboutText.trim()) {
+        document.getElementById('qvAboutText').textContent = aboutText;
+        aboutWrap.classList.remove('hidden');
+      } else {
+        aboutWrap.classList.add('hidden');
+      }
+
+      // ৬. বুকিং অপশনসমূহ
       let channels = [];
       try { channels = JSON.parse(card.getAttribute('data-booking-channels') || '[]'); } catch {}
       const channelsArea = document.getElementById('qvBookingChannels');
+      const bookWrap = document.getElementById('qvBookingWrapper');
+
       if (channels.length > 0) {
+        bookWrap.classList.remove('hidden');
         channelsArea.innerHTML = channels.map(ch => {
           const preset = (ch.icon_preset || '').toLowerCase();
           const provider = (ch.provider_name || '').toLowerCase();
+          
           let icon = iconSvgs.default;
           if (preset === 'agoda' || provider.includes('agoda')) icon = iconSvgs.agoda;
           else if (preset === 'booking' || provider.includes('booking')) icon = iconSvgs.booking;
@@ -172,26 +187,27 @@
           else if (preset === 'phone' || provider.includes('call')) icon = iconSvgs.phone;
 
           return `
-            <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/50">
-              <div class="flex items-center gap-3">
+            <div class="flex items-center justify-between p-2.5 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50 transition-colors">
+              <div class="flex items-center gap-2.5">
                 ${icon}
-                <span class="text-xs font-bold text-slate-900">${ch.provider_name || 'Booking Partner'}</span>
+                <span class="text-xs font-bold text-slate-800">${ch.provider_name || 'Book Online'}</span>
               </div>
               <div class="flex items-center gap-3">
-                <span class="text-sm font-black text-slate-900">${ch.price || ''}</span>
-                <a href="${ch.button_url || '#'}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] text-white font-extrabold text-[10px] px-4 py-2 rounded-xl uppercase">Book</a>
+                ${ch.price ? `<span class="text-xs font-black text-emerald-700">${ch.price}</span>` : ''}
+                <a href="${ch.button_url || '#'}" target="_blank" rel="noopener noreferrer" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] px-3.5 py-1.5 rounded-lg uppercase transition-all">Book</a>
               </div>
             </div>
           `;
         }).join('');
       } else {
-        channelsArea.innerHTML = `<p class="text-center py-4 text-xs text-slate-400 font-bold uppercase border border-dashed rounded-2xl">See full page for booking options</p>`;
+        bookWrap.classList.add('hidden');
       }
 
-      // ৭. প্রাইস
-      const currentPriceStr = card.getAttribute('data-price') || card.querySelector('.card-hotel-price')?.innerText || "Contact for price";
-      document.getElementById('qvPrice').innerText = currentPriceStr;
+      // সম্পূর্ণ বিবরণ বাটন লিংক
+      const slug = card.getAttribute('data-slug') || '';
+      document.getElementById('qvFullDetailsBtn').href = slug ? `/${slug}` : '#';
 
+      // মডাল দেখানো
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
@@ -212,29 +228,35 @@
       }, 200);
     }
 
-    // গ্লোবাল ইভেন্ট লিসেনার (একবারই রেজিস্টার হবে)
-    document.addEventListener('click', (e) => {
-      const modal = document.getElementById('globalQuickViewModal');
-      if (e.target.closest('#closeQvModalBtn') || e.target === modal) {
-        closeModal();
-        return;
-      }
-      if (e.target.closest('#qvNextImg') && gallery.length > 0) {
-        currentIdx = (currentIdx + 1) % gallery.length;
-        updateImage();
-        return;
-      }
-      if (e.target.closest('#qvPrevImg') && gallery.length > 0) {
-        currentIdx = (currentIdx - 1 + gallery.length) % gallery.length;
-        updateImage();
-        return;
-      }
-      const btn = e.target.closest('.open-quick-view-btn');
-      if (btn) {
-        e.preventDefault();
-        const card = btn.closest('.directory-card-item');
-        if (card) openModal(card);
-      }
-    });
+    // গ্লোবাল ইভেন্ট ডেলিগেশন
+    if (!window.__qvListenerBound) {
+      document.addEventListener('click', (e) => {
+        const modal = document.getElementById('globalQuickViewModal');
+        if (e.target.closest('#closeQvModalBtn') || e.target === modal) {
+          closeModal();
+          return;
+        }
+
+        if (e.target.closest('#qvNextImg') && gallery.length > 0) {
+          currentIdx = (currentIdx + 1) % gallery.length;
+          updateImage();
+          return;
+        }
+
+        if (e.target.closest('#qvPrevImg') && gallery.length > 0) {
+          currentIdx = (currentIdx - 1 + gallery.length) % gallery.length;
+          updateImage();
+          return;
+        }
+
+        const btn = e.target.closest('.open-quick-view-btn');
+        if (btn) {
+          e.preventDefault();
+          const card = btn.closest('.directory-card-item');
+          if (card) openModal(card);
+        }
+      });
+      window.__qvListenerBound = true;
+    }
   })();
 </script>
