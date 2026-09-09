@@ -1,5 +1,4 @@
 ---
-// src/components/directory/HotelCard.astro
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -11,7 +10,7 @@ interface Props {
 
 const { hotelItem, allCmsReviews = [] } = Astro.props;
 
-// --- 1. Helper Functions ---
+// Helpers
 const toTitleCase = (str: string) => str ? str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
 
 const getFirst25Words = (text: string) => {
@@ -21,7 +20,7 @@ const getFirst25Words = (text: string) => {
   return words.length <= 25 ? words.join(' ') : words.slice(0, 25).join(' ') + '...';
 };
 
-// --- 2. Extract Basic Hotel Data ---
+// Data Extraction
 const hData = hotelItem?.data || {};
 const hotelTitle = (hData.title || hData.name || "Hotel Details").trim();
 const hotelSlug = (hData.slug || hotelItem?.slug || hotelItem?.id || "hotel").trim();
@@ -37,7 +36,7 @@ const hFullAddress = String(hData.address || hData.location || "Gulshan, Dhaka")
 const locLower = hFullAddress.toLowerCase();
 const titleLowerStr = hotelTitle.toLowerCase();
 
-// --- 3. Filter Data Logic ---
+// Filter Data
 let areaType = 'near';
 if (locLower.includes('gulshan 1') || locLower.includes('gulshan-1')) areaType = 'gulshan-1';
 else if (locLower.includes('gulshan 2') || locLower.includes('gulshan-2')) areaType = 'gulshan-2';
@@ -46,7 +45,7 @@ const rawCat = String(hData.starCategory || hData.category || '').toLowerCase();
 const starCount = rawCat.includes('5') ? 5 : (rawCat.includes('4') ? 4 : 3);
 const isGuestHouse = locLower.includes('guest house') || locLower.includes('guesthouse') || titleLowerStr.includes('guest house');
 
-// --- 4. Pricing Logic (Sync with Markdown and Channels) ---
+// Pricing
 const mdPriceRaw = hData.price || "$100"; 
 const isDollar = mdPriceRaw.includes('$');
 const mdPriceNumeric = parseFloat(mdPriceRaw.replace(/[^0-9.]/g, '')) || 0;
@@ -80,7 +79,7 @@ if (lowestChannelPrice > 0 && lowestChannelPrice < mdPriceNumeric) {
 const filterPriceVal = lowestChannelPrice > 0 ? lowestChannelPrice : mdPriceNumeric;
 const filterPriceBDT = isDollar ? Math.round(filterPriceVal * 120) : filterPriceVal;
 
-// --- 5. Review and Rating Logic ---
+// Reviews
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 let rawReviewsList: any[] = [];
@@ -102,9 +101,7 @@ const realCount = allApprovedReviews.length;
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
-// গ্যালারির ছবিগুলো ফিল্টার
 const hotelGallery = Array.isArray(hData.gallery) && hData.gallery.length > 0 ? hData.gallery : [hImage];
-
 const hasValidTitle = hTitle.length > 0;
 ---
 
@@ -126,9 +123,16 @@ const hasValidTitle = hTitle.length > 0;
     data-md-price={mdPriceRaw}
     data-booking-channels={JSON.stringify(hData.booking_channels || [])}
     data-gallery={JSON.stringify(hotelGallery)}
-    data-amenities={JSON.stringify(hData.amenities || [])}
     data-whatsapp={hData.whatsapp || ""}
     data-phone={hData.phone || ""}
+
+    /* --- Policy Attributes --- */
+    data-check-in={hData.checkIn || hData.check_in || "02:00 PM"}
+    data-check-out={hData.checkOut || hData.check_out || "12:00 PM"}
+    data-category={hData.category || (isGuestHouse ? "Guest House" : "Hotel")}
+    data-power={hData.powerBackup || hData.power_backup || "24/7 Generator"}
+    data-smoking={hData.smokingPolicy || hData.smoking || "Non-Smoking"}
+    data-cancellation={hData.cancellation || "Free Cancellation"}
   >
     <div class="w-full flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
