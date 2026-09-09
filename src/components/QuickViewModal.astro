@@ -1,5 +1,5 @@
 ---
-// src/components/QuickViewModal.astro (Final Production Ready - Top-Center Close, Mobile Back-Safe)
+// src/components/QuickViewModal.astro (Smart Auto-Detection, Real Title, 5 Photos & Live Booking Channels)
 ---
 
 <!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
@@ -96,7 +96,6 @@
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
           <div class="text-right">
-            <!-- আসল বেস স্টার্টিং রেট -->
             <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none">Starting from</span>
             <span id="qvPrice" class="text-base sm:text-lg font-black text-[#008234]">৳ 0</span>
           </div>
@@ -179,6 +178,7 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
+    // ================= SMART AUTO-DETECTION FUNCTION =================
     function openModal(cardEl) {
       if (!cardEl) return;
       isModalOpen = true;
@@ -187,30 +187,41 @@
         window.history.pushState({ modalOpen: true }, '', '#quick-view');
       }
 
-      const titleLink = cardEl.querySelector('.card-hotel-link');
-      const addressSpan = cardEl.querySelector('.card-hotel-address');
-      const finalPriceSpan = cardEl.querySelector('.card-final-price');
-      const strikethroughSpan = cardEl.querySelector('.line-through');
-      const imgTag = cardEl.querySelector('img');
+      // ১. স্মার্ট টাইটেল ডিটেক্টর (কখনোই 'Hotel Details' দেখাবে না)
+      const titleLink = cardEl.querySelector('.card-hotel-link') || cardEl.querySelector('a[href]');
+      let rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
+      if (!rawTitle && cardEl.getAttribute('data-title')) {
+        rawTitle = cardEl.getAttribute('data-title').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
+      const title = rawTitle || 'Hotel Details';
 
-      const title = titleLink ? titleLink.textContent.trim() : 'Hotel Details';
-      const address = addressSpan ? addressSpan.textContent.trim() : 'Gulshan, Dhaka';
-      const url = titleLink ? titleLink.getAttribute('href') : '#';
+      // ২. স্মার্ট ঠিকানা ডিটেক্টর
+      const addressSpan = cardEl.querySelector('.card-hotel-address') || cardEl.querySelector('div:has(svg) span.line-clamp-1') || cardEl.querySelector('.line-clamp-1');
+      const address = cardEl.getAttribute('data-hotel-address') || (addressSpan ? addressSpan.textContent.trim() : 'Gulshan, Dhaka');
+
+      // ৩. ইউআরএল
+      const url = cardEl.getAttribute('data-hotel-url') || (titleLink ? titleLink.getAttribute('href') : '#');
+
+      // ৪. স্টার
       const stars = parseInt(cardEl.getAttribute('data-stars') || '0', 10);
 
-      // আসল বেস স্টার্টিং প্রাইস
+      // ৫. আসল বেস স্টার্টিং প্রাইস
+      const strikethroughSpan = cardEl.querySelector('.line-through');
+      const finalPriceSpan = cardEl.querySelector('.card-final-price');
       const officialPrice = cardEl.getAttribute('data-official-price') || (strikethroughSpan ? strikethroughSpan.textContent.trim() : (finalPriceSpan ? finalPriceSpan.textContent.trim() : 'Contact for Rates'));
-      
+
+      // ৬. কন্টাক্ট ইনফো
       const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
       const phone = cardEl.getAttribute('data-phone') || '';
 
+      // ফিল্ডে ডাটা সেট
       titleEl.textContent = title;
       starsEl.textContent = stars > 0 ? '★'.repeat(stars) : '';
       addressEl.textContent = address;
       fullDetailsBtn.href = url;
       priceEl.textContent = officialPrice;
 
-      // Rating
+      // রেটিং স্কোর
       const numRating = cardEl.getAttribute('data-numeric-rating') || '0';
       if (parseFloat(numRating) > 0) {
         ratingBox.innerHTML = `
@@ -223,11 +234,21 @@
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      // Photos
-      currentImages = (imgTag && imgTag.src) ? [imgTag.src] : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
+      // ৭. স্মার্ট ফটো লোডার (সবগুলো ছবি লোড হবে)
+      let imagesList = [];
+      try {
+        imagesList = JSON.parse(cardEl.getAttribute('data-hotel-images') || '[]');
+      } catch (e) {
+        imagesList = [];
+      }
+      const imgTag = cardEl.querySelector('img');
+      if (!imagesList.length && imgTag && imgTag.src) {
+        imagesList = [imgTag.src];
+      }
+      currentImages = imagesList.length > 0 ? imagesList : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'];
       showPhoto(0);
 
-      // Amenities (Card Dataset থেকে স্বয়ংক্রিয়ভাবে রিড হবে)
+      // ৮. অ্যামেনিটিস
       let parsedAmenities = [];
       try {
         parsedAmenities = JSON.parse(cardEl.getAttribute('data-amenities') || '[]');
@@ -257,8 +278,10 @@
         `;
       }).join('');
 
-      // Channels
+      // ৯. বুকিং চ্যানেল ও কন্টাক্ট
       let chHtml = '';
+
+      // Direct WhatsApp
       if (whatsapp) {
         const cleanWa = whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
@@ -278,6 +301,7 @@
         `;
       }
 
+      // Direct Call
       if (phone) {
         const cleanPh = phone.replace(/[^0-9+]/g, '');
         chHtml += `
@@ -296,9 +320,53 @@
         `;
       }
 
+      // OTA Channels (Booking.com, Agoda, etc.)
+      let otaChannels = [];
+      try {
+        otaChannels = JSON.parse(cardEl.getAttribute('data-hotel-channels') || '[]');
+      } catch (e) {
+        otaChannels = [];
+      }
+
+      if (otaChannels.length > 0) {
+        otaChannels.forEach(ch => {
+          const pName = ch.provider_name || 'Booking Partner';
+          const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
+          
+          const pLower = pName.toLowerCase();
+          let preset = ch.icon_preset || '';
+          if (!preset || preset === 'whatsapp') {
+            if (pLower.includes('booking')) preset = 'booking';
+            else if (pLower.includes('agoda')) preset = 'agoda';
+            else if (pLower.includes('expedia')) preset = 'expedia';
+            else if (pLower.includes('whatsapp')) preset = 'whatsapp';
+            else if (pLower.includes('call') || pLower.includes('phone')) preset = 'phone';
+            else preset = 'direct';
+          }
+
+          const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
+          const btnUrl = ch.button_url || url || '#';
+
+          chHtml += `
+            <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 transition">
+              <div class="flex items-center gap-2.5">
+                ${icon}
+                <span class="text-xs font-bold text-slate-900">${pName}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                ${pPrice ? `<span class="text-xs sm:text-sm font-black text-slate-900">${pPrice}</span>` : ''}
+                <a href="${btnUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
+                  ${ch.button_text || 'Book Now'}
+                </a>
+              </div>
+            </div>
+          `;
+        });
+      }
+
       channelsContainer.innerHTML = chHtml || `
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-600 font-medium">
-          Click below to view all booking channels and check live rates.
+          Click below to view all room rates and contact hotel directly.
         </div>
       `;
 
