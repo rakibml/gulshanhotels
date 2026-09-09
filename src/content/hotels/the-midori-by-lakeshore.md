@@ -17,10 +17,11 @@ enable_official_site: true
 popular: true
 about_notice: ''
 price: 120$ / night
-checkIn: 2:00 PM
-checkOut: 12:00 PM
-powerBackup: 24/7 Generator
-smokingPolicy: Non-Smoking
+policies:
+  - label: Check-in from
+    value: 2:00 PM
+  - label: Check-out until
+    value: 12:00 PM
 booking_channels:
   - provider_name: Whatsapp
     price: 99$
@@ -1310,16 +1311,20 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
+checkIn: 2:00 PM
+checkOut: 12:00 PM
 enable_faqs: true
 enable_nearby: true
 enable_rates: true
 image_alt: ''
 official_site_url: ''
+powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+smokingPolicy: Non-Smoking
 ---
 
 সামর্থ থাকলে দেশের প্রতিটা মানুষকে কথাগুলো জোর করে শোনাতাম || প্রফেসর মোখতার আহমেদ || Mukhtar ahmed 
