@@ -1,5 +1,5 @@
 ---
-// src/components/QuickViewModal.astro (Synced with HotelCard Data Attributes)
+// src/components/QuickViewModal.astro (Best Deal / Psychological Savings Badge & Clean Currency)
 ---
 
 <!-- QUICK VIEW GLOBAL MODAL OVERLAY -->
@@ -14,7 +14,7 @@
     id="quickViewDialog"
     class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 w-full max-w-xl md:max-w-2xl shadow-2xl my-auto relative text-left flex flex-col max-h-[88vh] transition-all duration-300 scale-95 opacity-0 overflow-visible"
   >
-    <!-- TOP-CENTER HIGHLIGHTED CLOSE BUTTON -->
+    <!-- ================= 1. TOP-CENTER HIGHLIGHTED CLOSE BUTTON ================= -->
     <button 
       type="button" 
       id="closeQvModalBtn" 
@@ -29,7 +29,7 @@
     <!-- SCROLLABLE BODY -->
     <div class="overflow-y-auto flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl">
       
-      <!-- CAROUSEL -->
+      <!-- ================= 2. 5-IMAGE CAROUSEL SLIDER ================= -->
       <div class="relative w-full h-52 sm:h-64 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shrink-0 shadow-inner group">
         <img 
           id="qvModalImg" 
@@ -65,7 +65,7 @@
         </span>
       </div>
 
-      <!-- TITLE & RATING -->
+      <!-- ================= 3. HOTEL NAME & RATING ================= -->
       <div class="space-y-1">
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <!-- AMENITIES -->
+      <!-- ================= 4. KEY AMENITIES / HIGHLIGHTS ================= -->
       <div id="qvAmenitiesSection" class="pt-2 border-t border-slate-100 space-y-2">
         <span class="text-[11px] font-black uppercase text-slate-400 tracking-wider block">
           Key Facilities & Highlights
@@ -91,7 +91,7 @@
         <div id="qvAmenitiesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
       </div>
 
-      <!-- PRICING & CHANNELS -->
+      <!-- ================= 5. PRICING & BOOKING CHANNELS ================= -->
       <div class="pt-2 border-t border-slate-100 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs sm:text-sm font-black text-slate-900">Where can you book this hotel?</span>
@@ -106,7 +106,7 @@
 
     </div>
 
-    <!-- FOOTER BUTTON -->
+    <!-- ================= 6. VIEW FULL DETAILS FOOTER BUTTON ================= -->
     <div class="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200/80 shrink-0 rounded-b-2xl sm:rounded-b-3xl">
       <a 
         id="qvFullDetailsBtn" 
@@ -121,7 +121,7 @@
   </div>
 </div>
 
-<!-- CLIENT JAVASCRIPT -->
+<!-- ================= CLIENT JAVASCRIPT LOGIC ================= -->
 <script is:inline>
   const setupQuickViewSystem = () => {
     const modal = document.getElementById('globalQuickViewModal');
@@ -178,6 +178,7 @@
     if (prevBtn) prevBtn.onclick = () => showPhoto(currentImgIdx - 1);
     if (nextBtn) nextBtn.onclick = () => showPhoto(currentImgIdx + 1);
 
+    // ================= SMART AUTO-DETECTION FUNCTION =================
     function openModal(cardEl) {
       if (!cardEl) return;
       isModalOpen = true;
@@ -188,7 +189,10 @@
 
       // ১. হোটেল টাইটেল
       const titleLink = cardEl.querySelector('.card-hotel-link') || cardEl.querySelector('a[href]');
-      const rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
+      let rawTitle = cardEl.getAttribute('data-hotel-name') || (titleLink ? titleLink.textContent.trim() : '');
+      if (!rawTitle && cardEl.getAttribute('data-title')) {
+        rawTitle = cardEl.getAttribute('data-title').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      }
       const title = rawTitle || 'Hotel Details';
 
       // ২. ঠিকানা
@@ -201,18 +205,29 @@
       // ৪. স্টার
       const stars = parseInt(cardEl.getAttribute('data-stars') || '0', 10);
 
-      // ৫. আসল স্টার্টিং রেট (আপনার data-md-price থেকে পড়বে)
-      const officialPrice = cardEl.getAttribute('data-md-price') || cardEl.getAttribute('data-official-price') || 'Contact for Rates';
+      // ৫. বেস স্টার্টিং প্রাইস & সেভিংস ক্যালকুলেশন
+      const strikethroughSpan = cardEl.querySelector('.line-through');
+      const finalPriceSpan = cardEl.querySelector('.card-final-price');
+      const rawPriceStr = cardEl.getAttribute('data-md-price') || cardEl.getAttribute('data-official-price') || (strikethroughSpan ? strikethroughSpan.textContent.trim() : (finalPriceSpan ? finalPriceSpan.textContent.trim() : 'Contact for Rates'));
+      
+      const isDollar = rawPriceStr.includes('$');
+      const basePriceNum = parseFloat(rawPriceStr.replace(/[^0-9.]/g, '')) || 0;
+      
+      // ক্লিন কারেন্সি ফরম্যাট ($120 / night)
+      const cleanStartingPrice = basePriceNum > 0 
+        ? (isDollar ? `$${basePriceNum} / night` : `৳ ${basePriceNum.toLocaleString()} / night`)
+        : rawPriceStr;
 
       // ৬. কন্টাক্ট ইনফো
       const whatsapp = cardEl.getAttribute('data-whatsapp') || '';
       const phone = cardEl.getAttribute('data-phone') || '';
 
+      // ফিল্ডে ডাটা সেট
       titleEl.textContent = title;
       starsEl.textContent = stars > 0 ? '★'.repeat(stars) : '';
       addressEl.textContent = address;
       fullDetailsBtn.href = url;
-      priceEl.textContent = officialPrice;
+      priceEl.textContent = cleanStartingPrice;
 
       // রেটিং
       const numRating = cardEl.getAttribute('data-numeric-rating') || '0';
@@ -227,10 +242,10 @@
         ratingBox.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">New</span>`;
       }
 
-      // ৭. গ্যালারির ছবিগুলো (আপনার data-gallery থেকে সব ছবি রিড করবে)
+      // ৭. গ্যালারির ছবিগুলো
       let imagesList = [];
       try {
-        imagesList = JSON.parse(cardEl.getAttribute('data-gallery') || '[]');
+        imagesList = JSON.parse(cardEl.getAttribute('data-gallery') || cardEl.getAttribute('data-hotel-images') || '[]');
       } catch (e) {
         imagesList = [];
       }
@@ -271,11 +286,27 @@
         `;
       }).join('');
 
-      // ৯. বুকিং চ্যানেলগুলো (আপনার data-booking-channels থেকে রিড করবে)
+      // ৯. বুকিং চ্যানেলগুলো পার্স করা এবং সর্বনিম্ন রেট বের করা
+      let otaChannels = [];
+      try {
+        otaChannels = JSON.parse(cardEl.getAttribute('data-booking-channels') || '[]');
+      } catch (e) {
+        otaChannels = [];
+      }
+
+      // সর্বনিম্ন চ্যানেল প্রাইস খোঁজা (Best Deal নির্ধারণের জন্য)
+      let minChannelPrice = Infinity;
+      otaChannels.forEach(ch => {
+        const p = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, '')) || 0;
+        if (p > 0 && p < minChannelPrice) {
+          minChannelPrice = p;
+        }
+      });
+
       let chHtml = '';
 
-      // Direct WhatsApp
-      if (whatsapp) {
+      // Direct WhatsApp (যদি channels অ্যারেতে না থাকে)
+      if (whatsapp && otaChannels.length === 0) {
         const cleanWa = whatsapp.replace(/[^0-9]/g, '');
         const waNum = cleanWa.startsWith('01') ? '88' + cleanWa : cleanWa;
         chHtml += `
@@ -295,7 +326,7 @@
       }
 
       // Direct Call
-      if (phone) {
+      if (phone && otaChannels.length === 0) {
         const cleanPh = phone.replace(/[^0-9+]/g, '');
         chHtml += `
           <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50/70">
@@ -313,19 +344,21 @@
         `;
       }
 
-      // OTA Channels (Booking.com, Agoda etc.)
-      let otaChannels = [];
-      try {
-        otaChannels = JSON.parse(cardEl.getAttribute('data-booking-channels') || '[]');
-      } catch (e) {
-        otaChannels = [];
-      }
-
+      // OTA Channels (With "Best Value / Save $X" Badge)
       if (otaChannels.length > 0) {
         otaChannels.forEach(ch => {
           const pName = ch.provider_name || ch.name || 'Booking Partner';
-          const pPrice = ch.price ? (ch.price.startsWith('$') || ch.price.startsWith('৳') ? ch.price : '$' + ch.price) : '';
-          
+          const pNum = parseFloat(String(ch?.price || '').replace(/[^0-9.]/g, '')) || 0;
+          const cleanPrice = pNum > 0 ? (isDollar ? `$${pNum}` : `৳ ${pNum.toLocaleString()}`) : '';
+
+          // বেস্ট ডিল ও সেভিংস ক্যালকুলেশন
+          const isBestDeal = (pNum > 0 && pNum === minChannelPrice);
+          let savingsText = '';
+          if (basePriceNum > pNum && pNum > 0) {
+            const savedAmount = Math.round(basePriceNum - pNum);
+            savingsText = isDollar ? `Save $${savedAmount}` : `Save ৳${savedAmount.toLocaleString()}`;
+          }
+
           const pLower = pName.toLowerCase();
           let preset = ch.icon_preset || '';
           if (!preset || preset === 'whatsapp') {
@@ -340,16 +373,37 @@
           const icon = ch.custom_svg ? `<div class="w-7 h-7 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full">${ch.custom_svg}</div>` : (presetSvgs[preset] || presetSvgs.direct);
           const btnUrl = ch.button_url || url || '#';
 
+          // বেস্ট ডিল হলে হালকা গোল্ডেন/সবুজ বর্ডার
+          const cardBorderClass = isBestDeal 
+            ? 'border-emerald-300 bg-emerald-50/40 shadow-xs' 
+            : 'border-slate-200/80 bg-white hover:bg-slate-50';
+
           chHtml += `
-            <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 transition">
+            <div class="flex items-center justify-between p-2.5 rounded-xl border ${cardBorderClass} transition">
               <div class="flex items-center gap-2.5">
                 ${icon}
-                <span class="text-xs font-bold text-slate-900">${pName}</span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-slate-900">${pName}</span>
+                    ${isBestDeal ? `
+                      <span class="inline-flex items-center gap-0.5 text-[9px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.2 rounded-full leading-tight">
+                        🔥 Best Value${savingsText ? ` • ${savingsText}` : ''}
+                      </span>
+                    ` : ''}
+                  </div>
+                  <span class="text-[10px] text-slate-500 block leading-tight">Instant confirmation</span>
+                </div>
               </div>
-              <div class="flex items-center gap-3">
-                ${pPrice ? `<span class="text-xs sm:text-sm font-black text-slate-900">${pPrice}</span>` : ''}
-                <a href="${btnUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition">
-                  ${ch.button_text || 'Book Now'}
+
+              <div class="flex items-center gap-2.5 sm:gap-3">
+                ${cleanPrice ? `
+                  <div class="text-right">
+                    <span class="text-xs sm:text-sm font-black text-slate-900 block leading-tight">${cleanPrice}</span>
+                    <span class="text-[9px] text-slate-400 block leading-none">per night</span>
+                  </div>
+                ` : ''}
+                <a href="${btnUrl}" target="_blank" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white text-[11px] font-black px-3.5 py-1.5 rounded-lg shadow-xs transition active:scale-95 whitespace-nowrap">
+                  ${ch.button_text || 'Book Now ➔'}
                 </a>
               </div>
             </div>
