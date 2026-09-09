@@ -102,6 +102,9 @@ const realCount = allApprovedReviews.length;
 const realRating = realCount > 0 ? (allApprovedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount).toFixed(1) : "5.0";
 const latestReview = allApprovedReviews.length > 0 ? allApprovedReviews[0] : null;
 
+// গ্যালারির ছবিগুলো ফিল্টার
+const hotelGallery = Array.isArray(hData.gallery) && hData.gallery.length > 0 ? hData.gallery : [hImage];
+
 const hasValidTitle = hTitle.length > 0;
 ---
 
@@ -109,6 +112,9 @@ const hasValidTitle = hTitle.length > 0;
   <div 
     class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-500 mb-6 overflow-hidden"
     data-title={titleLowerStr}
+    data-hotel-name={hTitle}
+    data-hotel-address={hFullAddress}
+    data-hotel-url={hotelUrl}
     data-stars={starCount.toString()}
     data-area={areaType}
     data-slug={hSlug}
@@ -119,7 +125,8 @@ const hasValidTitle = hTitle.length > 0;
     /* --- Modal Data Attributes --- */
     data-md-price={mdPriceRaw}
     data-booking-channels={JSON.stringify(hData.booking_channels || [])}
-    data-gallery={JSON.stringify(hData.gallery || [hImage])}
+    data-gallery={JSON.stringify(hotelGallery)}
+    data-amenities={JSON.stringify(hData.amenities || [])}
     data-whatsapp={hData.whatsapp || ""}
     data-phone={hData.phone || ""}
   >
