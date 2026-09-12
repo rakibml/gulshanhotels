@@ -1,5 +1,5 @@
 ---
-// src/components/directory/HotelCard.astro
+// src/components/directory/HotelCard.astro (100% Clickable Card with Smart Interactive Shield)
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -125,8 +125,7 @@ if (rawPolicies.length > 0) {
   if (hData.cancellation) policiesList.push({ label: 'Cancellation', value: String(hData.cancellation) });
 }
 
-// --- 7. COMPREHENSIVE AMENITIES EXTRACTION (FLAT + CATEGORIZED) ---
-// amenities এবং categorized_amenities উভয় জায়গা থেকেই নাম সংগ্রহ করা
+// --- 7. Comprehensive Amenities Extraction ---
 const allExtractedAmenities: string[] = [];
 
 if (Array.isArray(hData.amenities)) {
@@ -148,13 +147,12 @@ if (Array.isArray(hData.categorized_amenities)) {
 }
 
 const amenitiesFilterString = allExtractedAmenities.join(' | ').toLowerCase();
-
 const hasValidTitle = hTitle.length > 0;
 ---
 
 {hasValidTitle && (
   <div 
-    class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-500 mb-6 overflow-hidden"
+    class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-300 mb-6 overflow-hidden cursor-pointer"
     data-title={titleLowerStr}
     data-hotel-name={hTitle}
     data-hotel-address={hFullAddress}
@@ -214,3 +212,38 @@ const hasValidTitle = hTitle.length > 0;
 <style is:global>
   .directory-card-item { font-family: 'Plus Jakarta Sans', sans-serif; }
 </style>
+
+<!-- SMART WHOLE-CARD CLICK NAVIGATION SCRIPT -->
+<script>
+  const setupCardNavigation = () => {
+    if ((window as any).__cardNavInitialized) return;
+    (window as any).__cardNavInitialized = true;
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // যদি ইউজার Quick View, Wishlist বা See More বাটনে ক্লিক করে, তবে পেজ নেভিগেট হবে না!
+      if (target.closest('button, input, select, textarea, .open-quick-view-btn, .wishlist-btn, .toggle-review-btn')) {
+        return;
+      }
+
+      // কার্ডের যেকোনো জায়গায় ক্লিক পড়লে
+      const card = target.closest('.directory-card-item') as HTMLElement | null;
+      if (!card) return;
+
+      const url = card.getAttribute('data-hotel-url') || card.querySelector('a')?.getAttribute('href');
+      if (!url || url === '#') return;
+
+      // Ctrl বা Command চেপে ক্লিক করলে নতুন ট্যাবে ওপেন হবে
+      if (e.ctrlKey || e.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        window.location.href = url;
+      }
+    });
+  };
+
+  setupCardNavigation();
+  document.addEventListener('astro:page-load', setupCardNavigation);
+</script>
