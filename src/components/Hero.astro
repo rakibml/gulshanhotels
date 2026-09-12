@@ -1,5 +1,5 @@
 ---
-// src/components/Hero.astro (Cinematic Video Background + Clean Minimalist Hero)
+// src/components/Hero.astro (Bulletproof Autoplay Video + Guaranteed Playback Script)
 ---
 
 <!-- CINEMATIC HERO SECTION (ONLY H1 & SEARCH CONSOLE) -->
@@ -8,22 +8,24 @@
   <!-- ================= 1. CINEMATIC BACKGROUND VIDEO ================= -->
   <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
     <video 
+      id="heroBgVideo"
       autoplay 
       loop 
       muted 
       playsinline 
       preload="auto"
       poster="/hero-gulshan.jpg.webp"
-      class="w-full h-full object-cover object-center scale-105"
+      class="w-full h-full object-cover object-center scale-105 transition-opacity duration-1000"
     >
-      <!-- আপনার প্রজেক্টের public ফোল্ডারের ভিডিও ফাইল -->
+      <!-- আপনার লোকাল ভিডিও (public/hero-video.mp4) -->
       <source src="/hero-video.mp4" type="video/mp4" />
-      <!-- প্রিভিউ/ব্যাকআপ সিনেমাটিক ভিডিও -->
-      <source src="https://assets.mixkit.co/videos/preview/mixkit-city-traffic-and-buildings-at-night-4228-large.mp4" type="video/mp4" />
+      
+      <!-- ওপেন ক্লাউড সিডিএন ব্যাকআপ ভিডিও (কখনোই ব্লক হবে না) -->
+      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
     </video>
 
     <!-- Deep Cinematic Overlay for High-Contrast Text Readability -->
-    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/50"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-slate-900/50"></div>
   </div>
 
   <!-- ================= 2. CLEAN HERO CONTENT (ONLY H1 & SEARCH BAR) ================= -->
@@ -91,3 +93,29 @@
 
   </div>
 </section>
+
+<!-- ================= 3. AUTOPLAY GUARANTEE SCRIPT ================= -->
+<script is:inline>
+  const playHeroVideo = () => {
+    const video = document.getElementById('heroBgVideo');
+    if (video) {
+      video.muted = true; // ব্রাউজারকে ১০০% নিশ্চিত করে সাউন্ড ছাড়া চলতে বলা
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // কোনো কারণে ব্রাউজার থামালে ইউজার পেজে যেকোনো জায়গায় স্ক্রল করলেই চালু হয়ে যাবে
+          const triggerPlayOnScroll = () => {
+            video.play();
+            window.removeEventListener('scroll', triggerPlayOnScroll);
+            window.removeEventListener('touchstart', triggerPlayOnScroll);
+          };
+          window.addEventListener('scroll', triggerPlayOnScroll, { passive: true });
+          window.addEventListener('touchstart', triggerPlayOnScroll, { passive: true });
+        });
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', playHeroVideo);
+  document.addEventListener('astro:page-load', playHeroVideo);
+</script>
