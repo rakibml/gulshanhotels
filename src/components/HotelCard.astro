@@ -1,5 +1,5 @@
 ---
-// src/components/directory/HotelCard.astro (100% Clickable Card with Smart Interactive Shield)
+// src/components/directory/HotelCard.astro (Butter-Smooth 60FPS Mobile Optimized & Full Dynamic Features)
 import CardImage from './card/CardImage.astro';
 import CardInfo from './card/CardInfo.astro';
 import CardPricing from './card/CardPricing.astro';
@@ -152,7 +152,7 @@ const hasValidTitle = hTitle.length > 0;
 
 {hasValidTitle && (
   <div 
-    class="directory-card-item group bg-white rounded-[24px] sm:rounded-[32px] border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-300 mb-6 overflow-hidden cursor-pointer"
+    class="directory-card-item bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-md transition-shadow duration-200 mb-4 overflow-hidden cursor-pointer"
     data-title={titleLowerStr}
     data-hotel-name={hTitle}
     data-hotel-address={hFullAddress}
@@ -176,12 +176,12 @@ const hasValidTitle = hTitle.length > 0;
     <div class="w-full flex flex-col md:grid md:grid-cols-[280px_1fr_240px] lg:grid-cols-[320px_1fr_260px]">
       
       <!-- Module 1: Image -->
-      <div class="relative w-full h-full min-h-[220px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
+      <div class="relative w-full h-full min-h-[200px] md:min-h-0 bg-slate-100 border-b md:border-b-0 md:border-r border-slate-100">
         <CardImage image={hImage} title={hTitle} url={hotelUrl} price={displayPrice} />
       </div>
 
       <!-- Module 2: Information -->
-      <div class="p-5 sm:p-6 flex flex-col justify-center min-w-0">
+      <div class="p-4 sm:p-5 md:p-6 flex flex-col justify-center min-w-0">
         <CardInfo 
           title={hTitle} 
           url={hotelUrl} 
@@ -196,7 +196,7 @@ const hasValidTitle = hTitle.length > 0;
       </div>
 
       <!-- Module 3: Pricing -->
-      <div class="p-5 sm:p-6 bg-slate-50/50 md:bg-white md:border-l border-slate-100 flex flex-col justify-center">
+      <div class="p-4 sm:p-5 md:p-6 bg-slate-50/40 md:bg-white md:border-l border-slate-100 flex flex-col justify-center">
         <CardPricing 
           displayPrice={displayPrice} 
           displayOriginalPrice={displayOriginalPrice} 
@@ -210,7 +210,24 @@ const hasValidTitle = hTitle.length > 0;
 )}
 
 <style is:global>
-  .directory-card-item { font-family: 'Plus Jakarta Sans', sans-serif; }
+  /* ১. মোবাইলে ৬০ FPS মসৃণ স্ক্রলিং ও মেমোরি সেভার (Zero Jank / Zero Lag) */
+  .directory-card-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 200px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  /* ২. ব্যাকগ্রাউন্ড ধবধবে সাদা */
+  html, body, main {
+    background-color: #ffffff !important;
+  }
+
+  .directory-card-item:empty,
+  .directory-card-item[data-title=""] {
+    display: none !important;
+  }
 </style>
 
 <!-- SMART WHOLE-CARD CLICK NAVIGATION SCRIPT -->
@@ -235,7 +252,6 @@ const hasValidTitle = hTitle.length > 0;
       const url = card.getAttribute('data-hotel-url') || card.querySelector('a')?.getAttribute('href');
       if (!url || url === '#') return;
 
-      // Ctrl বা Command চেপে ক্লিক করলে নতুন ট্যাবে ওপেন হবে
       if (e.ctrlKey || e.metaKey) {
         window.open(url, '_blank');
       } else {
