@@ -1,9 +1,9 @@
 ---
-// src/components/Hero.astro (Bulletproof Autoplay Video + Guaranteed Playback Script)
+// src/components/Hero.astro (Cinematic Video Background + 50% Overlapping Bottom Search Bar)
 ---
 
-<!-- CINEMATIC HERO SECTION (ONLY H1 & SEARCH CONSOLE) -->
-<section class="relative bg-slate-950 min-h-[520px] sm:min-h-[600px] lg:min-h-[640px] flex items-center justify-center overflow-hidden text-left">
+<!-- CINEMATIC HERO SECTION -->
+<section class="relative bg-slate-950 min-h-[460px] sm:min-h-[520px] lg:min-h-[560px] flex flex-col justify-between text-left">
   
   <!-- ================= 1. CINEMATIC BACKGROUND VIDEO ================= -->
   <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
@@ -19,8 +19,7 @@
     >
       <!-- আপনার লোকাল ভিডিও (public/hero-video.mp4) -->
       <source src="/hero-video.mp4.mp4" type="video/mp4" />
-      
-      <!-- ওপেন ক্লাউড সিডিএন ব্যাকআপ ভিডিও (কখনোই ব্লক হবে না) -->
+      <!-- ওপেন ক্লাউড সিডিএন ব্যাকআপ ভিডিও -->
       <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
     </video>
 
@@ -28,16 +27,16 @@
     <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-slate-900/50"></div>
   </div>
 
-  <!-- ================= 2. CLEAN HERO CONTENT (ONLY H1 & SEARCH BAR) ================= -->
-  <div class="relative z-10 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center space-y-6 sm:space-y-8">
-    
-    <!-- Bold, Royal H1 Headline -->
-    <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] max-w-4xl mx-auto drop-shadow-xl">
+  <!-- ================= 2. H1 HEADLINE (CENTERED IN HERO AREA) ================= -->
+  <div class="relative z-10 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-12 text-center my-auto">
+    <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.14] max-w-4xl mx-auto drop-shadow-2xl">
       Hotels & Luxury Suites in Gulshan, Dhaka
     </h1>
+  </div>
 
-    <!-- Structured Luxury Search Console -->
-    <div class="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-2.5 sm:p-3 border border-white/20 text-left">
+  <!-- ================= 3. OVERLAPPING SEARCH CONSOLE (HALF ON VIDEO, HALF ON WHITE) ================= -->
+  <div class="relative z-30 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 translate-y-1/2">
+    <div class="bg-white rounded-2xl shadow-2xl p-2.5 sm:p-3 border border-slate-200/90 text-left">
       <form action="/hotels" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-center">
         
         <!-- Zone / Location -->
@@ -47,7 +46,7 @@
           </label>
           <div class="flex items-center gap-2">
             <svg class="w-3.5 h-3.5 text-[#006ce4] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
             <select name="area" class="w-full text-xs font-bold text-slate-800 bg-transparent outline-none cursor-pointer">
               <option value="all">All Gulshan District</option>
@@ -90,27 +89,26 @@
 
       </form>
     </div>
-
   </div>
+
 </section>
 
-<!-- ================= 3. AUTOPLAY GUARANTEE SCRIPT ================= -->
+<!-- ================= 4. AUTOPLAY SCRIPT ================= -->
 <script is:inline>
   const playHeroVideo = () => {
     const video = document.getElementById('heroBgVideo');
     if (video) {
-      video.muted = true; // ব্রাউজারকে ১০০% নিশ্চিত করে সাউন্ড ছাড়া চলতে বলা
+      video.muted = true;
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
-          // কোনো কারণে ব্রাউজার থামালে ইউজার পেজে যেকোনো জায়গায় স্ক্রল করলেই চালু হয়ে যাবে
-          const triggerPlayOnScroll = () => {
+          const triggerPlay = () => {
             video.play();
-            window.removeEventListener('scroll', triggerPlayOnScroll);
-            window.removeEventListener('touchstart', triggerPlayOnScroll);
+            window.removeEventListener('scroll', triggerPlay);
+            window.removeEventListener('touchstart', triggerPlay);
           };
-          window.addEventListener('scroll', triggerPlayOnScroll, { passive: true });
-          window.addEventListener('touchstart', triggerPlayOnScroll, { passive: true });
+          window.addEventListener('scroll', triggerPlay, { passive: true });
+          window.addEventListener('touchstart', triggerPlay, { passive: true });
         });
       }
     }
