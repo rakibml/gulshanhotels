@@ -1,184 +1,115 @@
 ---
-// src/components/Hero.astro (Mobile-first rewrite: clean dark overlay on mobile, original luxury layout preserved on desktop)
+// src/components/Hero.astro
+// Concept: Gulshan is known by its numbered roads and its lake — this hero leans into
+// that local geography instead of a generic luxury-hotel video banner.
+// A hand-drawn line-map of the lake + road markers replaces the video.
+// The search bar is a "concierge ticket" (perforated stub) instead of a floating card.
 ---
 
-<section class="relative bg-slate-950 overflow-visible">
+<section class="relative bg-[#0B1B29] overflow-hidden">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Piazzolla:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <!-- ================= HERO BLOCK ================= -->
-  <div class="relative min-h-[60dvh] sm:min-h-[70dvh] lg:min-h-screen flex flex-col justify-center lg:justify-between text-left overflow-hidden">
+  <div class="relative min-h-[68dvh] md:min-h-[78dvh] lg:min-h-[88vh] flex flex-col">
 
-    <!-- ================= 1. BACKGROUND VIDEO ================= -->
-    <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-      <video
-        id="heroBgVideo"
-        autoplay
-        loop
-        muted
-        playsinline
-        preload="auto"
-        poster="/hero-gulshan.jpg.webp"
-        class="w-full h-full object-cover object-center scale-105 opacity-100"
-      >
-        <source src="/hero-video.mp4.mp4" type="video/mp4" />
-        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
-      </video>
-
-      <!--
-        MOBILE (default -> sm): flat dark bottom-to-top overlay across the WHOLE video.
-        This guarantees text contrast no matter what's happening in the video frame,
-        instead of relying on a side-gradient that only covers part of a narrow screen.
-      -->
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/55 to-slate-950/20 md:hidden"></div>
-
-      <!--
-        DESKTOP (md and up): your original left-side white shade, unchanged.
-      -->
-      <div class="hidden md:block absolute inset-y-0 left-0 w-3/5 lg:w-1/2 bg-gradient-to-r from-white via-white/90 to-transparent pointer-events-none z-[5]"></div>
-
-      <!-- soft bottom shade, all breakpoints -->
-      <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/50 to-transparent pointer-events-none"></div>
+    <!-- ================= brass hairline, top ================= -->
+    <div class="max-w-[1400px] mx-auto w-full px-5 sm:px-10 pt-6">
+      <div class="h-px w-full bg-[#B08D57]/40"></div>
     </div>
 
-    <!-- ================= 2. CONTENT ================= -->
-    <div class="relative z-10 max-w-[1550px] mx-auto w-full px-5 sm:px-8 lg:px-12 pt-16 sm:pt-24 pb-10 md:pb-8 md:my-auto">
-      <div class="max-w-xl text-left space-y-4 sm:space-y-5">
+    <!-- ================= LINE-MAP MOTIF ================= -->
+    <!-- Mobile: compact horizontal band behind the headline area.
+         Desktop (lg+): full-height panel bleeding off the right edge. -->
+    <div class="pointer-events-none absolute inset-x-0 top-14 h-40 sm:h-48 lg:top-0 lg:h-full lg:inset-x-auto lg:right-0 lg:w-[52%] opacity-[0.55] lg:opacity-100">
+      <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" class="w-full h-full">
+        <path d="M60 250 C 160 120, 300 90, 420 160 C 540 230, 520 340, 400 380 C 280 420, 140 380, 100 300 C 80 260, 70 250, 60 250 Z"
+              fill="none" stroke="#B08D57" stroke-width="2" stroke-opacity="0.55" />
+        <path d="M0 40 L 800 40" stroke="#B08D57" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="2 10" />
+        <path d="M0 460 L 800 460" stroke="#B08D57" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="2 10" />
+        <path d="M180 0 L 180 500" stroke="#B08D57" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="2 10" />
+        <path d="M560 0 L 560 500" stroke="#B08D57" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="2 10" />
 
-        <!-- Top Red Eyebrow Badge -->
-        <div class="inline-flex items-center gap-1.5 text-[#ff5257] md:text-[#e52429] font-black text-xs sm:text-sm tracking-wider uppercase">
-          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" viewBox="0 0 24 24">
-            <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
-          </svg>
-          <span>Explore Without Limits</span>
-        </div>
+        <circle cx="220" cy="180" r="5" fill="#B08D57" />
+        <text x="234" y="184" fill="#D9C6A3" font-family="Work Sans, sans-serif" font-size="15">Road 11</text>
 
-        <!-- Main Headline: white on mobile (sits on dark overlay), dark on desktop (sits on white shade) -->
-        <h1
-          class="font-serif text-3xl sm:text-4xl lg:text-6xl font-black tracking-tight leading-[1.15] text-white md:text-slate-950"
-        >
-          Hotels in Gulshan, Dhaka
-        </h1>
+        <circle cx="470" cy="150" r="5" fill="#B08D57" />
+        <text x="484" y="154" fill="#D9C6A3" font-family="Work Sans, sans-serif" font-size="15">Road 90</text>
 
-        <!-- Subtitle -->
-        <p class="text-sm sm:text-base leading-relaxed max-w-lg text-slate-200 md:text-slate-800 font-medium">
-          Experience world-class luxury suites, diplomatic security, and verified rates in Gulshan 1, Gulshan 2, and the Diplomatic Zone.
+        <circle cx="230" cy="330" r="5" fill="#B08D57" />
+        <text x="244" y="334" fill="#D9C6A3" font-family="Work Sans, sans-serif" font-size="15">Lake front</text>
+
+        <circle cx="410" cy="330" r="5" fill="#B08D57" />
+        <text x="424" y="334" fill="#D9C6A3" font-family="Work Sans, sans-serif" font-size="15">Diplomatic zone</text>
+      </svg>
+    </div>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="relative z-10 max-w-[1400px] mx-auto w-full px-5 sm:px-10 flex-1 flex flex-col justify-center pt-8 pb-10 lg:py-16">
+      <div class="max-w-xl">
+
+        <p class="text-sm sm:text-[15px] text-[#B08D57] font-medium mb-4">
+          A guide to staying in Gulshan
         </p>
 
-        <!-- Red Action Button -->
-        <div class="pt-1">
-          <a
-            href="/hotels"
-            class="inline-flex items-center gap-2 bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs sm:text-sm px-6 py-3 sm:py-3.5 rounded-full shadow-lg active:scale-95 transition-all"
-          >
-            <span>Explore Hotels</span>
-            <span class="text-sm">➔</span>
-          </a>
-        </div>
+        <h1 class="font-serif text-[2.35rem] sm:text-5xl lg:text-[3.6rem] leading-[1.12] text-white mb-5" style="font-family: 'Piazzolla', serif; font-weight: 500;">
+          Hotels along Gulshan's numbered roads
+        </h1>
 
-        <!-- Three Circular Photo Badges: hidden on mobile to reduce clutter, shown from sm up -->
-        <div class="hidden sm:flex items-center gap-2.5 pt-1">
-          <a href="/hotels" title="Lakefront Hotels" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white ring-2 ring-slate-300/80 shadow-md hover:scale-110 transition-transform shrink-0">
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=80" alt="Gulshan Lakefront Stays" class="w-full h-full object-cover" />
-          </a>
-          <a href="/hotels?stars=5" title="5-Star Luxury Suites" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white ring-2 ring-slate-300/80 shadow-md hover:scale-110 transition-transform shrink-0">
-            <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=150&q=80" alt="Luxury Hotel Rooms" class="w-full h-full object-cover" />
-          </a>
-          <a href="/hotels?area=gulshan-2" title="Rooftop Pool & Spa" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white ring-2 ring-slate-300/80 shadow-md hover:scale-110 transition-transform shrink-0">
-            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=150&q=80" alt="Rooftop Pool & Dining" class="w-full h-full object-cover" />
-          </a>
+        <p class="text-[15px] sm:text-base leading-relaxed max-w-md text-[#AEB9C2] mb-8" style="font-family: 'Work Sans', sans-serif;">
+          From Road 11 to the Diplomatic Zone, we track verified rates at every stay near the embassies and the lake.
+        </p>
+
+        <!-- ================= CONCIERGE TICKET SEARCH ================= -->
+        <div class="relative">
+          <div class="bg-[#F5F1E6] rounded-lg shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+            <form action="/hotels" method="GET" class="flex flex-col sm:flex-row">
+
+              <div class="flex-1 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-[#0B1B29]/10">
+                <label class="flex-1 px-5 py-4">
+                  <span class="block text-[11px] text-[#0B1B29]/50 mb-1" style="font-family: 'Work Sans', sans-serif;">Where in Gulshan</span>
+                  <select name="area" class="w-full bg-transparent text-[15px] font-medium text-[#0B1B29] outline-none" style="font-family: 'Work Sans', sans-serif;">
+                    <option value="all">All Gulshan</option>
+                    <option value="gulshan-1">Gulshan 1</option>
+                    <option value="gulshan-2">Gulshan 2</option>
+                    <option value="near">Near Gulshan</option>
+                  </select>
+                </label>
+
+                <label class="flex-1 px-5 py-4">
+                  <span class="block text-[11px] text-[#0B1B29]/50 mb-1" style="font-family: 'Work Sans', sans-serif;">Property type</span>
+                  <select name="type" class="w-full bg-transparent text-[15px] font-medium text-[#0B1B29] outline-none" style="font-family: 'Work Sans', sans-serif;">
+                    <option value="all">All properties</option>
+                    <option value="hotel">5-star hotels</option>
+                    <option value="guesthouse">Guest houses</option>
+                  </select>
+                </label>
+              </div>
+
+              <!-- perforation -->
+              <div class="relative hidden sm:block w-0 border-l border-dashed border-[#0B1B29]/25 my-3">
+                <span class="absolute -top-3 -left-2 w-4 h-4 rounded-full bg-[#0B1B29]"></span>
+                <span class="absolute -bottom-3 -left-2 w-4 h-4 rounded-full bg-[#0B1B29]"></span>
+              </div>
+              <div class="relative block sm:hidden h-0 border-t border-dashed border-[#0B1B29]/25 mx-3">
+                <span class="absolute -left-3 -top-2 w-4 h-4 rounded-full bg-[#0B1B29]"></span>
+                <span class="absolute -right-3 -top-2 w-4 h-4 rounded-full bg-[#0B1B29]"></span>
+              </div>
+
+              <button type="submit" class="sm:w-44 px-6 py-4 bg-[#0B1B29] hover:bg-[#132C41] text-[#F5F1E6] font-medium text-[15px] transition-colors rounded-b-lg sm:rounded-b-none sm:rounded-r-lg" style="font-family: 'Work Sans', sans-serif;">
+                Search hotels
+              </button>
+            </form>
+          </div>
         </div>
 
       </div>
     </div>
-  </div>
 
-  <!-- ================= 3. SEARCH CONSOLE =================
-       MOBILE: sits in NORMAL flow right after the hero (own bg, no overlap, no translate).
-       DESKTOP (lg+): switches to your original overlapping card via lg:absolute + translate. -->
-  <div class="relative z-30 bg-slate-100 md:bg-transparent px-4 py-5 md:py-0
-              lg:absolute lg:left-0 lg:right-0 lg:bottom-0 lg:translate-y-1/2 lg:px-0 lg:bg-transparent">
-    <div class="max-w-4xl mx-auto w-full lg:px-6">
-      <div class="bg-white rounded-2xl shadow-2xl p-2.5 sm:p-3 border border-slate-200/90 text-left">
-        <form action="/hotels" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-center">
-
-          <!-- Location Dropdown -->
-          <div class="lg:col-span-4 p-2 px-3 bg-slate-50/90 rounded-xl border border-slate-200 hover:border-slate-300 transition">
-            <label class="text-[9px] font-black uppercase text-slate-400 tracking-wider block leading-none mb-1 truncate">
-              Location
-            </label>
-            <div class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 text-[#006ce4] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-              <select name="area" class="w-full text-xs font-bold text-slate-800 bg-transparent outline-none truncate">
-                <option value="all">All Gulshan</option>
-                <option value="gulshan-1">Gulshan 1</option>
-                <option value="gulshan-2">Gulshan 2</option>
-                <option value="near">Near Gulshan</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Category Dropdown -->
-          <div class="lg:col-span-4 p-2 px-3 bg-slate-50/90 rounded-xl border border-slate-200 hover:border-slate-300 transition">
-            <label class="text-[9px] font-black uppercase text-slate-400 tracking-wider block leading-none mb-1 truncate">
-              Category
-            </label>
-            <div class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/>
-              </svg>
-              <select name="type" class="w-full text-xs font-bold text-slate-800 bg-transparent outline-none truncate">
-                <option value="all">All Properties</option>
-                <option value="hotel">5-Star Hotels</option>
-                <option value="guesthouse">Guest Houses</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Search Button -->
-          <div class="lg:col-span-4 flex items-center">
-            <button
-              type="submit"
-              class="w-full bg-[#003b95] hover:bg-[#002b6e] text-white font-black text-sm py-3 sm:py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-98 tracking-wide"
-            >
-              <span>Search Properties</span>
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-              </svg>
-            </button>
-          </div>
-
-        </form>
-      </div>
+    <!-- ================= brass hairline, bottom ================= -->
+    <div class="max-w-[1400px] mx-auto w-full px-5 sm:px-10 pb-6">
+      <div class="h-px w-full bg-[#B08D57]/40"></div>
     </div>
+
   </div>
-
-  <!-- spacer so desktop's absolutely-positioned overlapping search card doesn't collide with the next section -->
-  <div class="hidden lg:block h-14"></div>
-
 </section>
-
-<!-- ================= 4. AUTOPLAY SCRIPT ================= -->
-<script is:inline>
-  const playHeroVideo = () => {
-    const video = document.getElementById('heroBgVideo');
-    if (video) {
-      video.muted = true;
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          const triggerPlay = () => {
-            video.play();
-            window.removeEventListener('scroll', triggerPlay);
-            window.removeEventListener('touchstart', triggerPlay);
-          };
-          window.addEventListener('scroll', triggerPlay, { passive: true });
-          window.addEventListener('touchstart', triggerPlay, { passive: true });
-        });
-      }
-    }
-  };
-
-  document.addEventListener('DOMContentLoaded', playHeroVideo);
-  document.addEventListener('astro:page-load', playHeroVideo);
-</script>
