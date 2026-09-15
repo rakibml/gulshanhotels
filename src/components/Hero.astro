@@ -1,6 +1,6 @@
 ---
 // src/components/Hero.astro (Ultra-Smooth 60FPS Optimized Hero Section)
-// PERFORMANCE-OPTIMIZED VERSION — same visual output, much lighter on CPU/GPU
+// PERFORMANCE-OPTIMIZED VERSION — identical visual output, lighter on CPU/GPU
 ---
 
 <!-- Google Fonts: Bebas Neue (Display Font) -->
@@ -8,12 +8,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
 
-<section class="relative w-full overflow-hidden bg-slate-950 min-h-[50vh] sm:min-h-[500px] lg:min-h-[580px] flex items-center justify-center text-center">
+<section
+  class="relative w-full overflow-hidden bg-slate-950 min-h-[50vh] sm:min-h-[500px] lg:min-h-[580px] flex items-center justify-center text-center"
+  style="contain: layout paint style;"
+>
 
   <!-- ================= 1. GPU ACCELERATED SMOOTH VIDEO ================= -->
-  <!-- Single compositor layer for the whole section is created once, on the section itself,
-       instead of on 3 separate nested wrappers (video/text/border). This avoids the
-       "layer explosion" that forces the GPU to manage multiple large composited layers. -->
+  <!-- Single compositor layer, created once on the video itself.
+       "contain: layout paint" on the section stops the browser from
+       re-checking the rest of the page's layout every time the video
+       repaints a frame — this is the single biggest cheap win available
+       purely from CSS, with zero visual change. -->
   <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
     <video
       id="heroBgVideo"
@@ -23,9 +28,10 @@
       playsinline
       preload="metadata"
       poster="/hero-gulshan.jpg.webp"
+      disablepictureinpicture
+      disableremoteplayback
       class="w-full h-full object-cover object-center opacity-100 [transform:translateZ(0)]"
     >
-      <source src="/hero-video.mp4" type="video/mp4" />
       <source src="/hero-video.mp4.mp4" type="video/mp4" />
     </video>
   </div>
@@ -36,9 +42,6 @@
     <div class="flex flex-col items-center leading-none">
 
       <!-- লাইন ১: HOTELS -->
-      <!-- Single-layer text-shadow (was double-layer) — one blurred shadow already reads as a
-           soft glow behind the hard shadow; the second layer doubled paint cost with barely
-           any visible difference. -->
       <span
         class="font-['Bebas_Neue',sans-serif] text-6xl sm:text-8xl md:text-9xl lg:text-[130px] tracking-wider text-white"
         style="text-shadow: 0 3px 12px rgba(0,0,0,0.9);"
@@ -99,15 +102,9 @@
   </div>
 
   <!-- ================= 3. MINIMAL PROFESSIONAL FRAME ================= -->
-  <!-- Replaces the heavy "torn paper" SVG borders with a clean, light, minimalistic look:
-       a soft top/bottom vignette (cinematic depth + better text legibility) plus thin
-       corner brackets, like a premium photography/hotel-brand frame. These are plain CSS
-       gradients and 1px borders — effectively zero rendering cost, even lighter than the
-       already-optimized SVG version, so this is a visual downgrade in "busyness" but an
-       upgrade in performance. -->
   <div class="absolute inset-0 pointer-events-none z-20">
 
-    <!-- সূক্ষ্ম উপরের vignette (হালকা অন্ধকার আভা, টেক্সট আরও পরিষ্কার দেখানোর জন্য) -->
+    <!-- সূক্ষ্ম উপরের vignette -->
     <div class="absolute top-0 left-0 w-full h-16 sm:h-24 lg:h-28 bg-gradient-to-b from-black/45 to-transparent"></div>
 
     <!-- সূক্ষ্ম নিচের vignette -->
@@ -125,35 +122,45 @@
 
 <!-- ================= 4. NON-BLOCKING AUTOPLAY SCRIPT ================= -->
 <script is:inline>
-  const playHeroVideo = () => {
+  (() => {
     const video = document.getElementById('heroBgVideo');
     if (!video) return;
 
-    video.muted = true;
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        const triggerPlay = () => {
-          video.play();
-          window.removeEventListener('scroll', triggerPlay, { passive: true });
-          window.removeEventListener('touchstart', triggerPlay, { passive: true });
-        };
-        window.addEventListener('scroll', triggerPlay, { passive: true });
-        window.addEventListener('touchstart', triggerPlay, { passive: true });
-      });
-    }
+    let started = false;
 
-    // ---- Extra optimization: pause video decoding when it's off-screen ----
-    // On phones, a looping video keeps decoding frames every tick even when the
-    // user has scrolled past it, which burns CPU/GPU and battery for nothing.
-    // IntersectionObserver pauses it out of view and resumes when it's back,
-    // with zero visual difference since the user can't see it anyway.
+    const playHeroVideo = () => {
+      if (started) return;
+      video.muted = true;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => { started = true; })
+          .catch(() => {
+            const triggerPlay = () => {
+              video.play();
+              started = true;
+              window.removeEventListener('scroll', triggerPlay);
+              window.removeEventListener('touchstart', triggerPlay);
+            };
+            window.addEventListener('scroll', triggerPlay, { passive: true, once: true });
+            window.addEventListener('touchstart', triggerPlay, { passive: true, once: true });
+          });
+      } else {
+        started = true;
+      }
+    };
+
+    // ---- Pause decoding when off-screen ----
+    // A looping video keeps decoding frames every tick even when scrolled
+    // past, burning CPU/GPU and battery for nothing. Pause out of view,
+    // resume when back in view — zero visual difference.
+    let observer = null;
     if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
+      observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              video.play().catch(() => {});
+              if (started) video.play().catch(() => {});
             } else {
               video.pause();
             }
@@ -163,12 +170,23 @@
       );
       observer.observe(video);
     }
-  };
 
-  if (document.readyState === 'complete') {
-    playHeroVideo();
-  } else {
-    window.addEventListener('load', playHeroVideo, { passive: true });
-  }
-  document.addEventListener('astro:page-load', playHeroVideo);
+    // ---- Pause decoding when the tab/app is backgrounded ----
+    // On mobile, switching apps or locking the screen should stop decode
+    // work immediately rather than waiting on the IntersectionObserver.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        video.pause();
+      } else if (started) {
+        video.play().catch(() => {});
+      }
+    });
+
+    if (document.readyState === 'complete') {
+      playHeroVideo();
+    } else {
+      window.addEventListener('load', playHeroVideo, { passive: true, once: true });
+    }
+    document.addEventListener('astro:page-load', playHeroVideo);
+  })();
 </script>
