@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Clean & Border-Free)
+// src/components/PopularHotels.astro (Border-Free & No Image Zoom)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -102,11 +102,11 @@ try {
 const dotsArray = [0, 1, 2, 3, 4];
 ---
 
-<!-- POPULAR HOTELS SECTION (NO BORDERS, NO DIVIDER LINES) -->
+<!-- POPULAR HOTELS SECTION -->
 <section id="hotels" class="w-full bg-white pt-4 pb-12 text-slate-900">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-5">
     
-    <!-- Section Header (দাগ/বর্ডার পুরোপুরি বাদ দেওয়া হয়েছে) -->
+    <!-- Section Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 text-left">
       <div class="space-y-1">
         <h2 class="text-2xl sm:text-3xl font-black font-sans text-slate-900 tracking-tight">
@@ -194,39 +194,40 @@ const dotsArray = [0, 1, 2, 3, 4];
           const ratingVal = realRating ? Math.min(Math.max(Number(realRating) || 5, 1), 5) : 0;
 
           return (
-            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl border border-slate-200 hover:border-slate-400 overflow-hidden transition-colors duration-200 flex flex-col justify-between group text-left relative">
+            /* HOTEL CARD (বর্ডার সম্পূর্ণ বাদ দেওয়া হয়েছে) */
+            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col justify-between text-left relative">
               
               <a href={`/${hSlug}`} class="block flex-1 flex flex-col justify-between">
                 <div>
-                  <!-- Card Image Header -->
-                  <div class="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-100">
+                  <!-- Card Image Header (জুম ছাড়া স্বাভাবিক ইমেজ) -->
+                  <div class="relative w-full h-48 sm:h-52 overflow-hidden rounded-2xl bg-slate-100">
                     <img 
                       src={hImage} 
                       alt={`${hTitle} Photo`} 
                       loading="lazy" 
                       decoding="async" 
-                      class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                      class="w-full h-full object-cover" 
                     />
 
                     <!-- Wishlist Heart Button -->
                     <button 
                       type="button"
-                      class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 transition cursor-pointer hover:scale-110 z-10"
+                      class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10"
                       data-title={hTitle}
                       data-image={hImage}
                       data-url={`/${hSlug}`}
                       data-price={hPrice}
                       aria-label="Add to Wishlist"
                     >
-                      <svg class="w-4 h-4 text-slate-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                      <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                     </button>
                   </div>
 
                   <!-- Card Body -->
-                  <div class="p-5 space-y-2">
+                  <div class="pt-3 pb-2 px-1 space-y-1.5">
                     
                     <!-- Hotel Title -->
-                    <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition line-clamp-2">
+                    <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2">
                       {hTitle}
                     </h3>
 
@@ -256,7 +257,7 @@ const dotsArray = [0, 1, 2, 3, 4];
                     )}
 
                     <!-- Price Line -->
-                    <div class="flex items-baseline gap-1.5 pt-2">
+                    <div class="flex items-baseline gap-1.5 pt-1">
                       <span class="text-xs text-slate-400 font-medium">from</span>
                       <span class="text-lg font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                     </div>
@@ -265,8 +266,8 @@ const dotsArray = [0, 1, 2, 3, 4];
                 </div>
 
                 <!-- Action Button -->
-                <div class="p-5 pt-0">
-                  <div class="w-full bg-[#0d3b23] group-hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition uppercase tracking-wider">
+                <div class="pt-2 px-1">
+                  <div class="w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs text-center py-3 rounded-xl transition uppercase tracking-wider">
                     View Details ➔
                   </div>
                 </div>
