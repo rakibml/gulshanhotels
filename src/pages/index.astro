@@ -1,13 +1,13 @@
 ---
-// src/pages/index.astro (100% Bulletproof Eager Glob Sync for Homepage CMS Settings)
+// src/pages/index.astro (Clean & Optimized)
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import PopularHotels from '../components/PopularHotels.astro';
 import WelcomeSection from '../components/WelcomeSection.astro';
+import PopularHotels from '../components/PopularHotels.astro';
 import GulshanSeoGuide from '../components/GulshanSeoGuide.astro';
 import { getCollection, getEntry } from 'astro:content';
 
-// 1. Fetch Homepage Settings from CMS (Eager Glob Direct File Scanner - 100% Bulletproof)
+// 1. Fetch Homepage Settings from CMS
 let homepageConfig: any = {};
 
 try {
@@ -20,7 +20,7 @@ try {
   console.warn('Homepage eager glob import fallback...', e);
 }
 
-// Fallback to Content Collections getEntry
+// Fallback
 if (!homepageConfig || Object.keys(homepageConfig).length === 0) {
   try {
     const homepageEntry = (await getEntry('homepage', 'popular-hotels')) || (await getEntry('homepage', 'popular_hotels'));
@@ -35,38 +35,6 @@ if (!homepageConfig || Object.keys(homepageConfig).length === 0) {
   }
 }
 
-// 2. Fetch Hotels Collection
-let hotels: any[] = [];
-try {
-  const collectionData = await getCollection('hotels');
-  if (collectionData && collectionData.length > 0) {
-    hotels = collectionData.map((item: any) => ({
-      slug: item.id?.replace(/\.md$/, '') || item.slug || 'hotel',
-      title: item.data?.title || item.data?.name || 'Gulshan Hotel',
-      category: item.data?.category || 'Luxury Hotel',
-      location: item.data?.location || 'Gulshan 2, Dhaka',
-      price: item.data?.price || '৳ 18,500 / night',
-      rating: item.data?.rating || 4.8,
-      reviews: item.data?.reviewsCount || '1,248',
-      description: item.data?.description || 'Premium hotel featuring elegant rooms, rooftop swimming pool, fine dining, and diplomatic security in Gulshan.',
-      image: item.data?.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-      popular: item.data?.popular ?? true,
-    }));
-  }
-} catch (err) {
-  hotels = [];
-}
-
-function toTitleCase(str: string) {
-  if (!str) return 'Gulshan Hotel';
-  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-}
-
-const popularHotels = hotels.map((h: any) => ({
-  ...h,
-  title: toTitleCase(h.title)
-})).filter((h: any) => h.popular !== false);
-
 const showPopularSection = homepageConfig.enable_popular_hotels !== false;
 ---
 
@@ -77,13 +45,12 @@ const showPopularSection = homepageConfig.enable_popular_hotels !== false;
   <!-- 2. WELCOME SECTION -->
   <WelcomeSection />
 
-  <!-- 3. POPULAR HOTELS SECTION (100% CMS CONTROLLED VIA EAGER GLOB) -->
+  <!-- 3. POPULAR HOTELS SECTION (Synced with Real Reviews & CMS) -->
   {showPopularSection && (
     <PopularHotels 
       title={homepageConfig.popular_hotels_title} 
       subtitle={homepageConfig.popular_hotels_subtitle}
       featuredHotels={homepageConfig.featured_hotels}
-      popularHotels={popularHotels} 
     />
   )}
 
