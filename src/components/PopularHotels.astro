@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Fixed - Accurate Single Review Count)
+// src/components/PopularHotels.astro (100% Approved-Only Real Reviews Count)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -69,22 +69,30 @@ if (hotels.length === 0) {
   hotels = Array.from(uniqueHotelsMap.values());
 }
 
-// ৩. FETCH REVIEWS (একক ফাইল লোড - ডাবলিং বন্ধ)
-let rawReviewsList: any[] = [];
+// ৩. FETCH APPROVED-ONLY REVIEWS (কোনো ডামি রিভিউ নয়)
+let allReviewsRaw: any[] = [];
 try {
-  const cmsReviews = await getCollection('reviews');
-  if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
-    rawReviewsList = cmsReviews.map(r => r.data || {});
-  }
+  const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
+  allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
 } catch (e) {}
 
-// Fallback: getCollection না পেলে শুধু একটি সিঙ্গেল পাথ থেকে রিড করবে
-if (rawReviewsList.length === 0) {
+if (allReviewsRaw.length === 0) {
   try {
-    const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
-    rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
+    const cmsReviews = await getCollection('reviews');
+    if (Array.isArray(cmsReviews)) {
+      allReviewsRaw = cmsReviews.map(r => r.data || {});
+    }
   } catch (e) {}
 }
+
+// ফিল্টার: শুধুমাত্র approved: true রিভিউগুলো নেওয়া হচ্ছে
+const approvedReviewsList = allReviewsRaw.filter(item => {
+  if (!item) return false;
+  return item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+});
+
+// স্ট্রিং ক্লিন করার হেল্পার ফাংশন (যাতে স্পেস বা বড়/ছোট হাতের অক্ষরে ভুল না হয়)
+const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 const dotsArray = [0, 1, 2, 3, 4];
 ---
@@ -136,52 +144,22 @@ const dotsArray = [0, 1, 2, 3, 4];
           const hPrice = hData.price || "";
           const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
 
-          // --- HotelReviews.astro-এর হুবহু সিংকড ফিল্টারিং ---
-          const searchTitle = hTitle.toLowerCase();
-          const searchSlug = hSlug.toLowerCase();
+          // স্ট্রিক্ট নরমালাইজড ম্যাচিং (title: "The Midori by Lakeshore" এর সাথে review: "hotel: The Midori by Lakeshore")
+          const normTitle = normalize(hTitle);
+          const normSlug = normalize(hSlug);
 
-          // CMS অনুমোদিত রিভিউ ফিল্টার
-          const approvedCmsReviews = rawReviewsList.filter(item => {
-            if (!item) return false;
-            const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
-            if (!isApproved) return false;
-
-            const rHotel = (item.hotel || "").trim().toLowerCase();
-            const rSlug = (item.slug || item.hotelSlug || "").replace(/\.md$/, '').trim().toLowerCase();
-
-            return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
+          const matchedReviews = approvedReviewsList.filter(rev => {
+            const revHotel = normalize(rev.hotel || rev.slug || rev.hotelSlug || '');
+            return revHotel !== '' && (revHotel === normTitle || revHotel === normSlug);
           });
 
-          // লোকাল ফ্রন্টম্যাটার রিভিউ
-          const hotelEmbeddedReviews = Array.isArray(hData.reviews) ? hData.reviews : [];
-
-          // মার্জ এবং ডুপ্লিকেট মুক্ত করা
-          const combinedAll = [...approvedCmsReviews, ...hotelEmbeddedReviews];
-          const uniqueReviewsList: any[] = [];
-          const seenKeys = new Set();
-
-          combinedAll.forEach((rev) => {
-            const comment = (rev.comment || '').trim();
-            const name = (rev.name || 'Verified Guest').trim();
-            const key = `${name}-${comment}`.toLowerCase();
-
-            if (comment.length > 2 && !seenKeys.has(key)) {
-              seenKeys.add(key);
-              uniqueReviewsList.push({
-                rating: Number(rev.rating) || 5,
-                comment: comment
-              });
-            }
-          });
-
-          // আসল রিভিউ সংখ্যা ও রেটিং
-          const reviewsCount = uniqueReviewsList.length;
+          // শুধুমাত্র অনুমোদিত রিভিউ কাউন্ট ও গড় রেটিং
+          const reviewsCount = matchedReviews.length;
           const avgRating = reviewsCount > 0 
-            ? (uniqueReviewsList.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) 
+            ? (matchedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewsCount).toFixed(1) 
             : null;
 
           const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
-          // --------------------------------------------------
 
           return (
             <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
@@ -227,7 +205,7 @@ const dotsArray = [0, 1, 2, 3, 4];
                     <span class="truncate">{hLocation}</span>
                   </div>
 
-                  <!-- Verified Reviews Display (সঠিক ও নির্ভুল) -->
+                  <!-- Verified Reviews Display (শুধুমাত্র আপনার অ্যাপ্রুভড কমেন্ট) -->
                   {reviewsCount > 0 && avgRating ? (
                     <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                       <span class="font-black text-slate-900 text-sm">{avgRating}</span>
