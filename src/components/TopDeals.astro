@@ -1,0 +1,282 @@
+---
+// src/components/TopDeals.astro (Exclusive Hotel Deals & Discounts)
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const { 
+  title = "Top Hotel Deals in Gulshan", 
+  subtitle = "Exclusive limited-time price drops, secret rates, and diplomatic discounts."
+} = Astro.props;
+
+// ১. Fetch Hotels
+let allHotels: any[] = [];
+try {
+  const collectionHotels = await getCollection('hotels');
+  if (Array.isArray(collectionHotels) && collectionHotels.length > 0) {
+    allHotels = collectionHotels;
+  } else {
+    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
+    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      slug: filePath.split('/').pop()?.replace('.md', ''),
+      data: item.frontmatter || {}
+    }));
+  }
+} catch (e) {
+  allHotels = [];
+}
+
+// ২. FILTER DEAL HOTELS (deal: true অথবা যাদের ডিসকাউন্ট ডাটা আছে)
+let dealHotels = allHotels.filter(h => {
+  const d = h.data || {};
+  return d.deal === true || d.is_deal === true || d.discount || d.old_price || d.original_price;
+});
+
+// Fallback: যদি কোনো হোটেলে deal ট্যাগ না থাকে, তবে প্রথম ৫টি হোটেলকে ডিল হিসেবে সাজানো হবে
+if (dealHotels.length === 0) {
+  dealHotels = allHotels.slice(0, 6);
+}
+
+// ৩. FETCH APPROVED-ONLY REVIEWS (হোটেল পেজের সাথে ১০০% সিংকড)
+let allReviewsRaw: any[] = [];
+try {
+  const cmsReviews = await getCollection('reviews');
+  if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
+    allReviewsRaw = cmsReviews.map(r => r.data || {});
+  }
+} catch (e) {}
+
+if (allReviewsRaw.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
+    allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
+  } catch (e) {}
+}
+
+const approvedReviewsList = allReviewsRaw.filter(item => {
+  if (!item) return false;
+  return item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+});
+
+const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const dotsArray = [0, 1, 2, 3, 4];
+---
+
+<!-- TOP DEALS SECTION (SHADOW-FREE, PURE WHITE) -->
+<section id="deals" class="w-full bg-white pt-6 pb-14 text-slate-900">
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
+    
+    <!-- Section Header -->
+    <div class="flex justify-between items-end gap-4 text-left">
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-black uppercase tracking-wider mb-0.5">
+          <span>🔥 Limited Time Offers</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black font-sans text-slate-900 tracking-tight">
+          {title}
+        </h2>
+        {subtitle && (
+          <p class="text-xs sm:text-sm text-slate-500 font-medium">
+            {subtitle}
+          </p>
+        )}
+      </div>
+
+      <!-- Desktop Button -->
+      <a 
+        href="/#hotels" 
+        class="hidden sm:inline-flex items-center justify-center px-5 py-2 sm:py-2.5 rounded-full border border-slate-300 hover:border-slate-900 bg-white hover:bg-slate-50 text-xs sm:text-sm font-bold text-[#0a2540] transition shrink-0"
+      >
+        View all deals
+      </a>
+    </div>
+
+    <!-- Carousel Track Container -->
+    <div class="relative group">
+      
+      <!-- Navigation Arrows -->
+      {dealHotels.length > 3 && (
+        <button id="dealsPrevBtn" aria-label="Previous Deals" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95 hidden">❮</button>
+      )}
+      {dealHotels.length > 3 && (
+        <button id="dealsNextBtn" aria-label="Next Deals" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
+      )}
+
+      <!-- Track -->
+      <div id="dealsHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {dealHotels.map((hotelItem: any) => {
+          const hData = hotelItem.data || {};
+          const rawTitle = (hData.title || hData.name || "Hotel Details").trim();
+          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").replace(/\.md$/, '').trim();
+          const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+          const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
+
+          // CLEAN PRICE CALCULATION (ডাবল $ বাগ ফিক্স)
+          const rawPrice = String(hData.price || "120").replace(/[$৳]/g, '').trim();
+          const currentPriceNum = parseFloat(rawPrice) || 120;
+          const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
+
+          // ডিলের আসল ও কাটা দাম
+          const discountPercent = hData.discount ? parseInt(String(hData.discount)) : 25;
+          const originalPriceNum = hData.old_price || hData.original_price 
+            ? parseFloat(String(hData.old_price || hData.original_price).replace(/[$৳]/g, '')) 
+            : Math.round(currentPriceNum * 1.30);
+
+          // APPROVED REVIEWS ONLY
+          const normTitle = normalize(rawTitle);
+          const normSlug = normalize(hSlug);
+
+          const matchedReviews = approvedReviewsList.filter(rev => {
+            const revHotel = normalize(rev.hotel || rev.slug || rev.hotelSlug || '');
+            return revHotel !== '' && (revHotel === normTitle || revHotel === normSlug);
+          });
+
+          const reviewsCount = matchedReviews.length;
+          const avgRating = reviewsCount > 0 
+            ? (matchedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewsCount).toFixed(1) 
+            : null;
+
+          const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
+
+          return (
+            <div class="deal-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
+              
+              <a href={`/${hSlug}`} class="block w-full">
+                <!-- Card Image Header -->
+                <div class="relative w-full h-48 sm:h-52 overflow-hidden rounded-2xl bg-slate-100">
+                  <img 
+                    src={hImage} 
+                    alt={`${rawTitle} Photo`} 
+                    loading="lazy" 
+                    decoding="async" 
+                    class="w-full h-full object-cover" 
+                  />
+
+                  <!-- DEAL BADGE (Top Left) -->
+                  <div class="absolute top-3 left-3 bg-rose-600 text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg z-10">
+                    {discountPercent}% OFF
+                  </div>
+
+                  <!-- Wishlist Heart Button -->
+                  <button 
+                    type="button"
+                    class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10"
+                    data-title={rawTitle}
+                    data-image={hImage}
+                    data-url={`/${hSlug}`}
+                    data-price={`${currencySymbol}${currentPriceNum}`}
+                    aria-label="Add to Wishlist"
+                  >
+                    <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  </button>
+                </div>
+
+                <!-- Card Body -->
+                <div class="pt-3 pb-1 px-0.5 space-y-1.5">
+                  
+                  <!-- Title (Auto Capitalized) -->
+                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors capitalize">
+                    {rawTitle}
+                  </h3>
+
+                  <!-- Location -->
+                  <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                    <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <span class="truncate">{hLocation}</span>
+                  </div>
+
+                  <!-- Reviews Display -->
+                  {reviewsCount > 0 && avgRating ? (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                      <span class="font-black text-slate-900 text-sm">{avgRating}</span>
+                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
+                        {dotsArray.map((i) => (
+                          <span key={i} class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-200'}`}></span>
+                        ))}
+                      </div>
+                      <span class="text-slate-400 font-normal">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  ) : (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium pt-0.5">
+                      <span class="bg-emerald-50 text-emerald-800 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded">★ Special Offer</span>
+                    </div>
+                  )}
+
+                  <!-- Price with Strikethrough & Savings -->
+                  <div class="flex items-baseline gap-2 pt-1">
+                    <span class="text-xs text-slate-400 font-medium">from</span>
+                    <span class="text-xs text-slate-400 line-through font-semibold">{currencySymbol}{originalPriceNum}</span>
+                    <span class="text-lg font-black text-rose-700">{currencySymbol}{currentPriceNum} / night</span>
+                  </div>
+
+                </div>
+              </a>
+
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+
+    <!-- Mobile Button -->
+    <div class="pt-3 flex sm:hidden justify-center w-full">
+      <a 
+        href="/#hotels" 
+        class="w-full py-3 px-6 rounded-full border border-slate-300 hover:border-slate-900 bg-white hover:bg-slate-50 text-sm font-bold text-[#0a2540] text-center transition shadow-none"
+      >
+        View all deals
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- SCRIPT -->
+<script is:inline>
+  const initTopDealsSection = () => {
+    const track = document.getElementById('dealsHotelsTrack');
+    const prevBtn = document.getElementById('dealsPrevBtn');
+    const nextBtn = document.getElementById('dealsNextBtn');
+
+    function updateArrows() {
+      if (!track || !prevBtn || !nextBtn) return;
+      const scrollLeft = track.scrollLeft;
+      const maxScroll = track.scrollWidth - track.clientWidth - 5;
+
+      if (scrollLeft <= 5) {
+        prevBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.remove('hidden');
+      }
+
+      if (scrollLeft >= maxScroll) {
+        nextBtn.classList.add('hidden');
+      } else {
+        nextBtn.classList.remove('hidden');
+      }
+    }
+
+    if (track && prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -320, behavior: 'smooth' });
+      });
+
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: 320, behavior: 'smooth' });
+      });
+
+      updateArrows();
+      track.addEventListener('scroll', updateArrows);
+      window.addEventListener('resize', updateArrows);
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', initTopDealsSection);
+  document.addEventListener('astro:page-load', initTopDealsSection);
+</script>
