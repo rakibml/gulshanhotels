@@ -1,5 +1,5 @@
 ---
-// src/components/TopDeals.astro (100% Dynamic - Real Comparison Lowest Price Deal Engine)
+// src/components/TopDeals.astro (100% Synced with PopularHotels Review Engine & Lowest Rate Deals)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,7 +12,7 @@ const {
   subtitle = "Exclusive rates where partner booking channels offer cheaper prices than starting rates."
 } = Astro.props;
 
-// ১. Fetch Hotels
+// ১. Fetch Hotels (PopularHotels এর হুবহু সেইম)
 let allHotels: any[] = [];
 try {
   const collectionHotels = await getCollection('hotels');
@@ -29,111 +29,48 @@ try {
   allHotels = [];
 }
 
-// ২. FETCH APPROVED-ONLY REVIEWS
+// ২. FETCH APPROVED-ONLY REVIEWS (PopularHotels.astro-র হুবহু একই কোড)
 let allReviewsRaw: any[] = [];
 try {
-  const cmsReviews = await getCollection('reviews');
-  if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
-    allReviewsRaw = cmsReviews.map(r => r.data || {});
-  }
+  const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
+  allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
 } catch (e) {}
 
 if (allReviewsRaw.length === 0) {
   try {
-    const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
-    allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
+    const cmsReviews = await getCollection('reviews');
+    if (Array.isArray(cmsReviews)) {
+      allReviewsRaw = cmsReviews.map(r => r.data || {});
+    }
   } catch (e) {}
 }
 
+// ফিল্টার: শুধুমাত্র approved: true রিভিউগুলো নেওয়া হচ্ছে
 const approvedReviewsList = allReviewsRaw.filter(item => {
   if (!item) return false;
   return item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
 });
 
+// স্ট্রিং ক্লিন করার হেল্পার ফাংশন
 const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
 const dotsArray = [0, 1, 2, 3, 4];
 
-// ৩. CALCULATE REAL DEALS BASED ON STARTING PRICE VS BOOKING_CHANNELS
-const processedHotels = allHotels.map(hotelItem => {
-  const hData = hotelItem.data || {};
-  const rawTitle = (hData.title || hData.name || "Hotel Details").trim();
-  const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").replace(/\.md$/, '').trim();
-  const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
-  const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
-
-  // ক. STARTING PRICE (মূল দাম)
-  const rawStartingPrice = String(hData.price || "120").replace(/[^0-9.]/g, '');
-  const startingPriceNum = parseFloat(rawStartingPrice) || 120;
-  const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
-
-  // খ. BOOKING CHANNELS থেকে সবচেয়ে কম দাম বের করা
-  const channels = Array.isArray(hData.booking_channels) ? hData.booking_channels : [];
-  const channelPrices = channels
-    .map((ch: any) => parseFloat(String(ch.price || '').replace(/[^0-9.]/g, '')))
-    .filter((p: number) => !isNaN(p) && p > 0);
-
-  // সবচেয়ে কম দাম (Lowest Channel Price)
-  const minChannelPrice = channelPrices.length > 0 ? Math.min(...channelPrices) : null;
-
-  // গ. যদি চ্যানেলের কোনো একটি দাম Starting Price এর চেয়ে কম হয় -> এটি আসল ডিল!
-  let dealPriceNum = startingPriceNum;
-  let originalPriceNum: number | null = null;
-  let discountPercent = 0;
-
-  if (minChannelPrice !== null && minChannelPrice < startingPriceNum) {
-    originalPriceNum = startingPriceNum; // মূল দাম (কাটা দাম)
-    dealPriceNum = minChannelPrice;      // সবচেয়ে কম দাম (অফার দাম)
-    discountPercent = Math.round(((startingPriceNum - minChannelPrice) / startingPriceNum) * 100);
-  } else if (hData.old_price || hData.original_price) {
-    // যদি ম্যানুয়ালি old_price দেওয়া থাকে
-    originalPriceNum = parseFloat(String(hData.old_price || hData.original_price).replace(/[^0-9.]/g, ''));
-    if (originalPriceNum > startingPriceNum) {
-      discountPercent = Math.round(((originalPriceNum - startingPriceNum) / originalPriceNum) * 100);
-    }
-  }
-
-  // ঘ. REVIEWS CALCULATION
-  const normTitle = normalize(rawTitle);
-  const normSlug = normalize(hSlug);
-
-  const matchedReviews = approvedReviewsList.filter(rev => {
-    const revHotel = normalize(rev.hotel || rev.slug || rev.hotelSlug || '');
-    return revHotel !== '' && (revHotel === normTitle || revHotel === normSlug);
-  });
-
-  const reviewsCount = matchedReviews.length;
-  const avgRating = reviewsCount > 0 
-    ? (matchedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewsCount).toFixed(1) 
-    : null;
-
-  const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
-
-  return {
-    rawTitle,
-    hSlug,
-    hImage,
-    hLocation,
-    currencySymbol,
-    dealPriceNum,
-    originalPriceNum,
-    discountPercent,
-    reviewsCount,
-    avgRating,
-    ratingVal,
-    isRealDeal: discountPercent > 0
+// ডিল থাকা হোটেলগুলোকে আগে সাজানো
+const dealHotels = [...allHotels].sort((a, b) => {
+  const getSavings = (h: any) => {
+    const startP = parseFloat(String(h.data?.price || '').replace(/[^0-9.]/g, '')) || 0;
+    const chs = (Array.isArray(h.data?.booking_channels) ? h.data?.booking_channels : [])
+      .map((c: any) => parseFloat(String(c.price || '').replace(/[^0-9.]/g, '')))
+      .filter((p: number) => !isNaN(p) && p > 0);
+    const minP = chs.length > 0 ? Math.min(...chs) : startP;
+    return minP < startP ? (startP - minP) : 0;
   };
+  return getSavings(b) - getSavings(a);
 });
-
-// ডিল অনুযায়ী সাজানো (যেগুলোতে সবচেয়ে বেশি ডিসকাউন্ট আছে সেগুলো আগে আসবে)
-let dealHotels = processedHotels.filter(h => h.isRealDeal).sort((a, b) => b.discountPercent - a.discountPercent);
-
-// Fallback: যদি কোনো চ্যানেলেই কম দাম না থাকে, তবে সাধারণ হোটেলগুলো স্বাভাবিকভাবে দেখাবে
-if (dealHotels.length === 0) {
-  dealHotels = processedHotels.slice(0, 6);
-}
 ---
 
-<!-- TOP DEALS SECTION (SHADOW-FREE, PURE WHITE) -->
+<!-- TOP DEALS SECTION -->
 <section id="deals" class="w-full bg-white pt-6 pb-14 text-slate-900">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
     
@@ -175,88 +112,139 @@ if (dealHotels.length === 0) {
 
       <!-- Track -->
       <div id="dealsHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {dealHotels.map((h) => (
-          <div class="deal-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
-            
-            <a href={`/${h.hSlug}`} class="block w-full">
-              <!-- Card Image Header -->
-              <div class="relative w-full h-48 sm:h-52 overflow-hidden rounded-2xl bg-slate-100">
-                <img 
-                  src={h.hImage} 
-                  alt={`${h.rawTitle} Photo`} 
-                  loading="lazy" 
-                  decoding="async" 
-                  class="w-full h-full object-cover" 
-                />
+        {dealHotels.map((hotelItem: any) => {
+          const hData = hotelItem.data || {};
+          const hTitle = (hData.title || hData.name || "Hotel Details").trim();
+          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").replace(/\.md$/, '').trim();
+          const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+          const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
 
-                <!-- REAL DISCOUNT BADGE (শুধুমাত্র ডিসকাউন্ট থাকলে দেখাবে) -->
-                {h.discountPercent > 0 && (
-                  <div class="absolute top-3 left-3 bg-rose-600 text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg z-10">
-                    {h.discountPercent}% OFF
-                  </div>
-                )}
+          // ১. REVIEWS CALCULATION (PopularHotels.astro-এর হুবহু একই কোড)
+          const normTitle = normalize(hTitle);
+          const normSlug = normalize(hSlug);
 
-                <!-- Wishlist Heart Button -->
-                <button 
-                  type="button"
-                  class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10"
-                  data-title={h.rawTitle}
-                  data-image={h.hImage}
-                  data-url={`/${h.hSlug}`}
-                  data-price={`${h.currencySymbol}${h.dealPriceNum}`}
-                  aria-label="Add to Wishlist"
-                >
-                  <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                </button>
-              </div>
+          const matchedReviews = approvedReviewsList.filter(rev => {
+            const revHotel = normalize(rev.hotel || rev.slug || rev.hotelSlug || '');
+            return revHotel !== '' && (revHotel === normTitle || revHotel === normSlug);
+          });
 
-              <!-- Card Body -->
-              <div class="pt-3 pb-1 px-0.5 space-y-1.5">
-                
-                <!-- Title (Auto Capitalized) -->
-                <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors capitalize">
-                  {h.rawTitle}
-                </h3>
+          const reviewsCount = matchedReviews.length;
+          const avgRating = reviewsCount > 0 
+            ? (matchedReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewsCount).toFixed(1) 
+            : null;
 
-                <!-- Location -->
-                <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                  <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                  </svg>
-                  <span class="truncate">{h.hLocation}</span>
-                </div>
+          const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
 
-                <!-- Reviews Display (Real Approved Count) -->
-                {h.reviewsCount > 0 && h.avgRating ? (
-                  <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                    <span class="font-black text-slate-900 text-sm">{h.avgRating}</span>
-                    <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                      {dotsArray.map((i) => (
-                        <span key={i} class={`w-2.5 h-2.5 rounded-full inline-block ${i < h.ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-200'}`}></span>
-                      ))}
+          // ২. REAL LOWEST RATE DEALS CALCULATION
+          const rawStartingPrice = String(hData.price || "120").replace(/[^0-9.]/g, '');
+          const startingPriceNum = parseFloat(rawStartingPrice) || 120;
+          const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
+
+          const channels = Array.isArray(hData.booking_channels) ? hData.booking_channels : [];
+          const channelPrices = channels
+            .map((ch: any) => parseFloat(String(ch.price || '').replace(/[^0-9.]/g, '')))
+            .filter((p: number) => !isNaN(p) && p > 0);
+
+          const minChannelPrice = channelPrices.length > 0 ? Math.min(...channelPrices) : null;
+
+          let dealPriceNum = startingPriceNum;
+          let originalPriceNum: number | null = null;
+          let discountPercent = 0;
+
+          if (minChannelPrice !== null && minChannelPrice < startingPriceNum) {
+            originalPriceNum = startingPriceNum;
+            dealPriceNum = minChannelPrice;
+            discountPercent = Math.round(((startingPriceNum - minChannelPrice) / startingPriceNum) * 100);
+          } else if (hData.old_price || hData.original_price) {
+            originalPriceNum = parseFloat(String(hData.old_price || hData.original_price).replace(/[^0-9.]/g, ''));
+            if (originalPriceNum > startingPriceNum) {
+              discountPercent = Math.round(((originalPriceNum - startingPriceNum) / originalPriceNum) * 100);
+            }
+          }
+
+          return (
+            <div class="deal-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
+              
+              <a href={`/${hSlug}`} class="block w-full">
+                <!-- Card Image Header -->
+                <div class="relative w-full h-48 sm:h-52 overflow-hidden rounded-2xl bg-slate-100">
+                  <img 
+                    src={hImage} 
+                    alt={`${hTitle} Photo`} 
+                    loading="lazy" 
+                    decoding="async" 
+                    class="w-full h-full object-cover" 
+                  />
+
+                  <!-- REAL DISCOUNT BADGE (শুধু ডিসকাউন্ট থাকলেই দেখাবে) -->
+                  {discountPercent > 0 && (
+                    <div class="absolute top-3 left-3 bg-rose-600 text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg z-10">
+                      {discountPercent}% OFF
                     </div>
-                    <span class="text-slate-400 font-normal">({h.reviewsCount} {h.reviewsCount === 1 ? 'review' : 'reviews'})</span>
-                  </div>
-                ) : (
-                  <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium pt-0.5">
-                    <span class="bg-emerald-50 text-emerald-800 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded">★ Special Offer</span>
-                  </div>
-                )}
-
-                <!-- Real Strikethrough & Deal Price -->
-                <div class="flex items-baseline gap-2 pt-1">
-                  <span class="text-xs text-slate-400 font-medium">from</span>
-                  {h.originalPriceNum && (
-                    <span class="text-xs text-slate-400 line-through font-semibold">{h.currencySymbol}{h.originalPriceNum}</span>
                   )}
-                  <span class="text-lg font-black text-rose-700">{h.currencySymbol}{h.dealPriceNum} / night</span>
+
+                  <!-- Wishlist Heart Button -->
+                  <button 
+                    type="button"
+                    class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10"
+                    data-title={hTitle}
+                    data-image={hImage}
+                    data-url={`/${hSlug}`}
+                    data-price={`${currencySymbol}${dealPriceNum}`}
+                    aria-label="Add to Wishlist"
+                  >
+                    <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  </button>
                 </div>
 
-              </div>
-            </a>
+                <!-- Card Body -->
+                <div class="pt-3 pb-1 px-0.5 space-y-1.5">
+                  
+                  <!-- Title (Auto Capitalized) -->
+                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors capitalize">
+                    {hTitle}
+                  </h3>
 
-          </div>
-        ))}
+                  <!-- Location -->
+                  <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                    <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <span class="truncate">{hLocation}</span>
+                  </div>
+
+                  <!-- Verified Reviews Display (PopularHotels এর সাথে ১০০% একই) -->
+                  {reviewsCount > 0 && avgRating ? (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                      <span class="font-black text-slate-900 text-sm">{avgRating}</span>
+                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
+                        {dotsArray.map((i) => (
+                          <span key={i} class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-200'}`}></span>
+                        ))}
+                      </div>
+                      <span class="text-slate-400 font-normal">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  ) : (
+                    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium pt-0.5">
+                      <span class="bg-emerald-50 text-emerald-800 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded">★ Special Offer</span>
+                    </div>
+                  )}
+
+                  <!-- Price with Strikethrough & Lowest Deal Price -->
+                  <div class="flex items-baseline gap-2 pt-1">
+                    <span class="text-xs text-slate-400 font-medium">from</span>
+                    {originalPriceNum && (
+                      <span class="text-xs text-slate-400 line-through font-semibold">{currencySymbol}{originalPriceNum}</span>
+                    )}
+                    <span class="text-lg font-black text-rose-700">{currencySymbol}{dealPriceNum} / night</span>
+                  </div>
+
+                </div>
+              </a>
+
+            </div>
+          );
+        })}
       </div>
 
     </div>
