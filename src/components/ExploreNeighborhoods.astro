@@ -1,192 +1,174 @@
 ---
-// src/components/StayStyles.astro (Hotels.com Inspired Lifestyle Tabs & Clean Editorial Layout)
+// src/components/GulshanLifestyle.astro (Hotels.com Inspired Lifestyle & Things to Do in Gulshan)
 interface Props {
   title?: string;
   subtitle?: string;
 }
 
 const { 
-  title = "Your style. These stays. A perfect match.", 
-  subtitle = "Average prices based on verified partner rates in Gulshan & Baridhara."
+  title = "Beyond the stay. Explore Gulshan.", 
+  subtitle = "Lakeside jogging parks, luxury shopping hubs, and wellness spas within minutes of your hotel."
 } = Astro.props;
 
-// গুলশানের বিভিন্ন ট্রাভেল স্টাইল ও তাদের হোটেল লিস্ট
-const styleCategories = [
+// ৪টি লাইফস্টাইল ক্যাটাগরি ও তাদের সেরা স্পটসমূহ
+const lifestyleCategories = [
   {
-    id: "luxury",
-    name: "5-Star Luxury",
-    hotels: [
+    id: "parks",
+    name: "Parks & Lakes",
+    items: [
       {
-        name: "The Westin Dhaka",
-        location: "Gulshan 2, Diplomatic Avenue",
-        price: "USD 185",
-        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Justice Shahabuddin Ahmed Park",
+        location: "Road 83, Gulshan 2 • 3 Mins from Westin",
+        status: "Free Entry",
+        meta: "Jogging track & lakeside cafes",
+        image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Justice+Shahabuddin+Ahmed+Park+Gulshan"
       },
       {
-        name: "Renaissance Dhaka Gulshan",
-        location: "Gulshan 1, Commercial Circle",
-        price: "USD 160",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Gulshan Lake Park",
+        location: "Road 63, Gulshan 2 • Walking Promenade",
+        status: "Free Entry",
+        meta: "Open 6:00 AM – 9:00 PM daily",
+        image: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Gulshan+Lake+Park"
       },
       {
-        name: "Amari Dhaka",
-        location: "Gulshan 2, Lake Promenade",
-        price: "USD 140",
-        image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Banani Lake Walkway",
+        location: "Kemal Ataturk Link • Scenic Waterfront",
+        status: "Public Walkway",
+        meta: "Evening strolls & street vibe",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Banani+Lake"
       },
       {
-        name: "Lakeshore Hotel",
-        location: "Road 41, Gulshan 2",
-        price: "USD 125",
-        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Baridhara Lake Promenade",
+        location: "Diplomatic Enclave • High Security",
+        status: "Secure Zone",
+        meta: "Quiet diplomatic green walkway",
+        image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Baridhara+Diplomatic+Zone"
       }
     ]
   },
   {
-    id: "rooftop",
-    name: "Rooftop Pools & Views",
-    hotels: [
+    id: "shopping",
+    name: "Luxury Shopping",
+    items: [
       {
-        name: "Amari Breeze Skyline",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 140",
-        image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Unimart Gulshan 2",
+        location: "Gulshan Centre Point • Ground & 1st Floor",
+        status: "Flagship Mega-Store",
+        meta: "Imported gourmet food & brands",
+        image: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Unimart+Gulshan+2"
       },
       {
-        name: "Westin Splash Rooftop",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 185",
-        image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "DCC Market & Souvenirs",
+        location: "Gulshan 1 Circle • Traditional Shopping",
+        status: "Handicrafts & Gifts",
+        meta: "Famous for brass, pearls & spices",
+        image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Gulshan+DCC+Market"
       },
       {
-        name: "The Midori by Lakeshore",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 120",
-        image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Pink City Shopping Complex",
+        location: "Road 103, Gulshan 2 • Luxury Boutiques",
+        status: "Designer Apparel",
+        meta: "Silk, jewelry & South Asian couture",
+        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Pink+City+Gulshan"
       },
       {
-        name: "Renaissance Sky Lounge",
-        location: "Gulshan 1, Dhaka",
-        price: "USD 160",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Police Plaza Concord",
+        location: "Hatirjheel-Gulshan 1 Link • Shopping Mall",
+        status: "Fashion & Electronics",
+        meta: "500+ premium stores & food court",
+        image: "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Police+Plaza+Concord"
       }
     ]
   },
   {
-    id: "business",
-    name: "Business & Executive",
-    hotels: [
+    id: "wellness",
+    name: "Wellness & Spas",
+    items: [
       {
-        name: "Hotel Sarina",
-        location: "Kemal Ataturk Ave, Banani",
-        price: "USD 95",
-        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Heavenly Spa by Westin",
+        location: "The Westin Dhaka • Level 6",
+        status: "Luxury Hotel Spa",
+        meta: "Aromatherapy, sauna & heated pool",
+        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
+        link: "/the-westin-dhaka"
       },
       {
-        name: "Golden Tulip The Grand Mark",
-        location: "Banani / Gulshan Hub",
-        price: "USD 85",
-        image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Breeze Spa at Amari",
+        location: "Amari Dhaka • Diplomatic Zone",
+        status: "Signature Thai Spa",
+        meta: "Body polish, jacuzzi & wellness",
+        image: "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=600&q=80",
+        link: "/amari-dhaka"
       },
       {
-        name: "Renaissance Business Suites",
-        location: "Gulshan 1, Dhaka",
-        price: "USD 160",
-        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Persona Signature Gulshan",
+        location: "Gulshan 1 Avenue • Elite Grooming",
+        status: "Salon & Spa Care",
+        meta: "Hair styling, facials & grooming",
+        image: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Persona+Gulshan"
       },
       {
-        name: "The Midori Executive",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 120",
-        image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Spa Ceylon Gulshan",
+        location: "Road 11, Banani-Gulshan Hub",
+        status: "Ayurvedic Luxury",
+        meta: "Ceylon herbal oils & relaxation",
+        image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Spa+Ceylon+Dhaka"
       }
     ]
   },
   {
-    id: "diplomatic",
-    name: "Diplomatic Enclaves",
-    hotels: [
+    id: "culture",
+    name: "Art & Culture",
+    items: [
       {
-        name: "Ascott The Residence",
-        location: "Baridhara Diplomatic Enclave",
-        price: "USD 145",
-        image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Bengal Shilpalaya",
+        location: "House 42, Road 27, Dhanmondi-Gulshan Link",
+        status: "Modern Art Gallery",
+        meta: "Contemporary art, cinema & cafe",
+        image: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Bengal+Shilpalaya"
       },
       {
-        name: "Lakeshore Diplomatic Suites",
-        location: "Road 41, Gulshan 2",
-        price: "USD 130",
-        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Edge Gallery",
+        location: "Bay's Edgewater, Gulshan 2 Waterfront",
+        status: "Fine Art Exhibits",
+        meta: "Overlooking Gulshan Lake & sculpture",
+        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Edge+Gallery+Gulshan"
       },
       {
-        name: "Ascott Palace",
-        location: "Baridhara Diplomatic Zone",
-        price: "USD 135",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Alliance Française de Dhaka",
+        location: "Gulshan Cultural Wing",
+        status: "French Cultural Hub",
+        meta: "Art exhibitions, library & concerts",
+        image: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Alliance+Francaise+Dhaka"
       },
       {
-        name: "The Westin Presidential",
-        location: "Gulshan 2 Circle",
-        price: "USD 220",
-        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
-      }
-    ]
-  },
-  {
-    id: "apartments",
-    name: "Serviced Apartments",
-    hotels: [
-      {
-        name: "Lakeshore Long Stay Suites",
-        location: "Gulshan 2 (With Full Kitchen)",
-        price: "USD 130",
-        image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
-      },
-      {
-        name: "Amari 2-Bedroom Suite",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 210",
-        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
-      },
-      {
-        name: "Ascott Executive Residence",
-        location: "Baridhara Enclave",
-        price: "USD 145",
-        image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
-      },
-      {
-        name: "Midori Serviced Rooms",
-        location: "Gulshan 2, Dhaka",
-        price: "USD 115",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-        link: "/#hotels"
+        name: "Gulshan Society Cultural Centre",
+        location: "Lakefront Park, Gulshan 2",
+        status: "Community Events",
+        meta: "Book fairs, live music & festivals",
+        image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80",
+        link: "https://maps.google.com/?q=Gulshan+Society+Lake+Park"
       }
     ]
   }
 ];
 ---
 
-<!-- HOTELS.COM STYLE LIFESTYLE SECTION -->
-<section id="stay-styles" class="w-full bg-white pt-8 pb-14 text-slate-900">
+<!-- HOTELS.COM STYLE GULSHAN LIFESTYLE SECTION -->
+<section id="gulshan-lifestyle" class="w-full bg-white pt-8 pb-14 text-slate-900">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
     
     <!-- Section Title & Subtitle (Hotels.com Serif Style) -->
@@ -201,59 +183,61 @@ const styleCategories = [
 
     <!-- Category Tabs with Underline Indicator -->
     <div class="flex items-center gap-6 sm:gap-8 border-b border-slate-200 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {styleCategories.map((cat, idx) => (
+      {lifestyleCategories.map((cat, idx) => (
         <button
           type="button"
           data-tab-target={cat.id}
-          class={`stay-tab-btn pb-3 text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap transition-all cursor-pointer border-b-2 -mb-[1px] ${idx === 0 ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
+          class={`lifestyle-tab-btn pb-3 text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap transition-all cursor-pointer border-b-2 -mb-[1px] ${idx === 0 ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
         >
           {cat.name}
         </button>
       ))}
     </div>
 
-    <!-- Category Hotel Groups -->
-    <div id="stayTabContentContainer" class="text-left">
-      {styleCategories.map((cat, idx) => (
+    <!-- Category Content Panels -->
+    <div id="lifestyleTabContentContainer" class="text-left">
+      {lifestyleCategories.map((cat, idx) => (
         <div 
-          id={`tab-panel-${cat.id}`} 
-          class={`stay-tab-panel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${idx === 0 ? 'grid' : 'hidden'}`}
+          id={`lifestyle-panel-${cat.id}`} 
+          class={`lifestyle-tab-panel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${idx === 0 ? 'grid' : 'hidden'}`}
         >
-          {cat.hotels.map((hotel) => (
+          {cat.items.map((item) => (
             <a 
-              href={hotel.link} 
+              href={item.link} 
+              target={item.link.startsWith('http') ? '_blank' : '_self'}
+              rel="noopener noreferrer"
               class="group block text-left cursor-pointer transition-opacity hover:opacity-95"
             >
-              <!-- Rounded Photo Header -->
+              <!-- Rounded Photo (Hotels.com Clean Aspect Ratio) -->
               <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100">
                 <img 
-                  src={hotel.image} 
-                  alt={`${hotel.name} Photo`} 
+                  src={item.image} 
+                  alt={`${item.name} Photo`} 
                   loading="lazy" 
                   decoding="async" 
                   class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" 
                 />
               </div>
 
-              <!-- Editorial Details Directly Below Photo (No Border, No Shadow) -->
+              <!-- Editorial Details Directly Below Photo (No Box, No Shadow) -->
               <div class="pt-3 space-y-0.5">
-                <!-- Hotel Name -->
+                <!-- Location Name -->
                 <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-snug group-hover:text-emerald-800 transition-colors">
-                  {hotel.name}
+                  {item.name}
                 </h3>
 
-                <!-- Location -->
+                <!-- Subtitle / Address -->
                 <p class="text-xs sm:text-sm text-slate-500 font-normal truncate">
-                  {hotel.location}
+                  {item.location}
                 </p>
 
-                <!-- Pricing (Hotels.com Format) -->
+                <!-- Status & Timing (Hotels.com Price Style) -->
                 <div class="pt-1.5">
                   <span class="text-base sm:text-lg font-black text-slate-900 block leading-tight">
-                    {hotel.price}
+                    {item.status}
                   </span>
                   <span class="text-[11px] text-slate-500 font-normal">
-                    avg per night
+                    {item.meta}
                   </span>
                 </div>
               </div>
@@ -268,15 +252,15 @@ const styleCategories = [
 
 <!-- TAB SWITCH SCRIPT -->
 <script is:inline>
-  const initStayStyleTabs = () => {
-    const tabs = document.querySelectorAll('.stay-tab-btn');
-    const panels = document.querySelectorAll('.stay-tab-panel');
+  const initLifestyleTabs = () => {
+    const tabs = document.querySelectorAll('.lifestyle-tab-btn');
+    const panels = document.querySelectorAll('.lifestyle-tab-panel');
 
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const targetId = tab.getAttribute('data-tab-target');
 
-        // Update tab styles
+        // Update active tab styles
         tabs.forEach(t => {
           t.classList.remove('border-slate-900', 'text-slate-900');
           t.classList.add('border-transparent', 'text-slate-500');
@@ -286,7 +270,7 @@ const styleCategories = [
 
         // Toggle corresponding panel
         panels.forEach(p => {
-          if (p.id === `tab-panel-${targetId}`) {
+          if (p.id === `lifestyle-panel-${targetId}`) {
             p.classList.remove('hidden');
             p.classList.add('grid');
           } else {
@@ -298,6 +282,6 @@ const styleCategories = [
     });
   };
 
-  document.addEventListener('DOMContentLoaded', initStayStyleTabs);
-  document.addEventListener('astro:page-load', initStayStyleTabs);
+  document.addEventListener('DOMContentLoaded', initLifestyleTabs);
+  document.addEventListener('astro:page-load', initLifestyleTabs);
 </script>
