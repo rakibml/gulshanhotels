@@ -1,147 +1,153 @@
 ---
-// src/components/GulshanSeoGuide.astro (Bold & High-Readability Edition)
+// src/components/GulshanFaq.astro (100% SEO Optimized Accordion with Google FAQPage Schema)
+
 interface Props {
   title?: string;
-  buttonText?: string;
-  buttonUrl?: string;
+  subtitle?: string;
 }
 
-const {
-  title = "Hotels in Gulshan, Dhaka",
-  buttonText = "Explore All Hotels in Gulshan ➔",
-  buttonUrl = "#hotels"
+const { 
+  title = "Frequently Asked Questions About Gulshan Hotels", 
+  subtitle = "Everything international travelers, diplomats, and business visitors need to know before booking in Gulshan, Dhaka."
 } = Astro.props;
 
-// Crisp High-Contrast Vector SVG Icons
-const icons = {
-  location: `<svg class="w-6 h-6 text-emerald-300 stroke-current stroke-2 fill-none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`,
-  connectivity: `<svg class="w-6 h-6 text-emerald-300 stroke-current stroke-2 fill-none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>`,
-  hotelChoice: `<svg class="w-6 h-6 text-emerald-300 stroke-current stroke-2 fill-none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>`,
-  safety: `<svg class="w-6 h-6 text-emerald-300 stroke-current stroke-2 fill-none" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`
+// প্রশ্ন ও উত্তরের তালিকা (গুগল সার্চ ও কি-ওয়ার্ড টার্গেটেড)
+const faqs = [
+  {
+    question: "Which are the best 5-star luxury hotels in Gulshan, Dhaka?",
+    answer: "The premier international 5-star hotels in Gulshan are The Westin Dhaka (Gulshan 2), Renaissance Dhaka Gulshan Hotel (Gulshan 1), and Amari Dhaka (Gulshan 2). Other top-rated executive boutique properties include Lakeshore Hotel Gulshan and The Midori by Lakeshore, all offering diplomatic-grade security, rooftop infinity pools, and world-class fine dining."
+  },
+  {
+    question: "How far is Gulshan from Hazrat Shahjalal International Airport (DAC)?",
+    answer: "Gulshan is approximately 8 to 11 kilometers from Dhaka Airport. With the modern Dhaka Elevated Expressway, transit time takes only 15 to 25 minutes depending on the time of day. Most 5-star and executive hotels in Gulshan provide dedicated private airport shuttle and chauffeur services upon request."
+  },
+  {
+    question: "Which hotels in Gulshan are closest to the US Embassy and foreign visa centres?",
+    answer: "The Westin Dhaka, Amari Dhaka, and Ascott The Residence are just 3 to 6 minutes away from the US Embassy, Canadian High Commission, and the Baridhara Diplomatic Enclave. For Indian Visa (IVAC) applicants and UK VFS Global, Gulshan 2 properties offer the most seamless early-morning commute."
+  },
+  {
+    question: "What is the average price of luxury and boutique hotels in Gulshan?",
+    answer: "Nightly rates in Gulshan vary by category: 5-star international hotels typically range between USD 130 to USD 220+ (৳15,000 to ৳26,000) per night. Premium executive boutique hotels and serviced suites generally cost between USD 60 to USD 110 (৳7,000 to ৳13,000) per night, often including complimentary breakfast."
+  },
+  {
+    question: "What are the ID requirements and guest policies for staying in Gulshan?",
+    answer: "International visitors and foreign passport holders must present a valid passport with a valid Bangladesh visa or arrival stamp during check-in. Local Bangladeshi citizens require a government-issued National ID (NID) or Smart Card. Most established 5-star and international business hotels welcome verified adult guests and international couples without hassle."
+  },
+  {
+    question: "Is Gulshan safe for international tourists, expats, and female solo travelers?",
+    answer: "Yes, Gulshan 1, Gulshan 2, and the Baridhara Enclave constitute the safest and most protected high-security zone in Bangladesh. The area is under 24/7 CCTV monitoring, round-the-clock Diplomatic Police patrols, and specialized private security at every major hotel entrance."
+  },
+  {
+    question: "Do Gulshan hotels offer early morning breakfast for visa interview attendees?",
+    answer: "Yes, top properties in Gulshan cater extensively to embassy visa candidates by offering early bird breakfast buffets starting as early as 6:00 AM, alongside 24-hour business centres for urgent document printing and express laundry."
+  }
+];
+
+// কি-ওয়ার্ড টপিক পিলস (Quick SEO Silo Tags)
+const quickTags = [
+  "Hotels with Rooftop Pool",
+  "Near US Embassy",
+  "Free Airport Shuttle",
+  "Near United Hospital",
+  "Complimentary Breakfast",
+  "Diplomatic Serviced Apartments"
+];
+
+// গুগল এসইও এর জন্য অফিসিয়াল FAQPage JSON-LD স্কিমা
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
 };
 ---
 
-<!-- GULSHAN SEO OVERVIEW & WHY STAY SECTION -->
-<section id="gulshan-seo-guide" class="bg-[#F8FAF9] py-12 sm:py-16 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-900 border-b border-slate-200/80">
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+<!-- GOOGLE FAQ SCHEMA INJECTION (RICH SNIPPETS) -->
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+<!-- GULSHAN SEO FAQ SECTION -->
+<section id="faq" class="w-full bg-white pt-10 pb-16 text-slate-900 border-b border-slate-100">
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
     
-    <!-- LEFT COLUMN: BOLD & HIGH-CONTRAST SEO CONTENT -->
-    <div class="lg:col-span-5 space-y-5 text-left">
-      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black font-sans text-slate-950 tracking-tight leading-tight">
-        {title}
-      </h2>
-
-      <div class="space-y-4 text-sm sm:text-base text-slate-800 leading-relaxed font-semibold">
-        <p>
-          Gulshan is one of the most popular areas to stay in Dhaka, especially for business travelers, international visitors and travelers looking for upscale accommodation. The area is home to a wide range of hotels in Gulshan, from internationally recognized five-star properties to boutique hotels and more affordable guest houses.
-        </p>
-
-        <p>
-          Gulshan 1 and Gulshan 2 are particularly popular because of their restaurants, shopping areas, offices, embassies and convenient access to other parts of Dhaka. Travelers staying in Gulshan can choose from luxury hotels, business-friendly properties, hotels near the US Embassy and accommodations suited to longer stays.
-        </p>
-
-        <p>
-          Whether you're looking for a luxury hotel in Gulshan, a hotel near the US Embassy, or a more affordable place to stay, our guide helps you compare your options and find the right area and hotel for your trip.
+    <div class="max-w-4xl mx-auto space-y-8 text-left">
+      
+      <!-- Section Title & Subtitle -->
+      <div class="space-y-2 text-center sm:text-left">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+          <span>✓ Traveler Guide & FAQs</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+          {title}
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed max-w-2xl">
+          {subtitle}
         </p>
       </div>
 
-      <div class="pt-2">
-        <a 
-          href={buttonUrl} 
-          class="inline-flex items-center gap-2 bg-[#06331e] hover:bg-[#042013] text-white font-extrabold text-sm px-7 py-4 rounded-xl transition shadow-md hover:shadow-lg cursor-pointer active:scale-95"
-        >
-          <span>{buttonText}</span>
-        </a>
+      <!-- Quick Topic Silo Tags (SEO Helper) -->
+      <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+        {quickTags.map((tag) => (
+          <a 
+            href="/#hotels" 
+            class="text-[11px] font-bold text-slate-600 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/90 hover:border-emerald-300 px-3 py-1 rounded-full transition-colors"
+          >
+            {tag}
+          </a>
+        ))}
       </div>
-    </div>
 
-    <!-- RIGHT COLUMN: CRYSTAL CLEAR "WHY STAY IN GULSHAN" CARD -->
-    <div class="lg:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-center p-6 sm:p-8 md:p-10 min-h-[420px] bg-slate-950 text-white border border-slate-800">
-      
-      <!-- Vivid City Skyline Image -->
-      <img 
-        src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80" 
-        alt="Gulshan Dhaka City Skyline Night Lights" 
-        loading="lazy" 
-        decoding="async" 
-        class="absolute inset-0 w-full h-full object-cover opacity-60"
-      />
-      
-      <!-- Balanced Gradient Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-900/60"></div>
+      <!-- Semantic Native HTML5 Accordion List (Ultra-Fast & SEO Friendly) -->
+      <div class="divide-y divide-slate-200/80 border-y border-slate-200/80 pt-1">
+        {faqs.map((faq, index) => (
+          <details 
+            class="group py-5 transition-colors cursor-pointer"
+            open={index === 0}
+          >
+            <summary class="flex justify-between items-center list-none font-bold text-base sm:text-lg text-slate-900 group-hover:text-emerald-800 transition-colors select-none">
+              <span class="pr-6 font-sans tracking-tight">{faq.question}</span>
+              
+              <!-- Plus / Minus Indicator -->
+              <span class="w-7 h-7 shrink-0 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 group-hover:bg-[#0d3b23] group-hover:text-white transition-all text-xs font-bold">
+                <span class="group-open:hidden">+</span>
+                <span class="hidden group-open:inline">−</span>
+              </span>
+            </summary>
 
-      <!-- Card Content -->
-      <div class="relative z-10 space-y-6 sm:space-y-8 text-center my-auto">
-        
+            <div class="pt-3 pr-8 text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
+              <p>{faq.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <!-- Direct Assistance Footer Line -->
+      <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-600">
         <div>
-          <h3 class="text-2xl sm:text-3xl md:text-4xl font-serif italic font-bold text-white tracking-wide drop-shadow-md">
-            Why Stay in Gulshan?
-          </h3>
-          <p class="text-xs sm:text-sm text-emerald-200/90 font-bold mt-1">
-            Dhaka's most prestigious diplomatic & business district
-          </p>
+          <span class="font-bold text-slate-900 block text-sm">Have more questions about staying in Gulshan?</span>
+          <span>Our local hotel audit team verifies rates, embassy distances, and checkout policies daily.</span>
         </div>
-
-        <!-- 4 Grid Feature Items -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center items-stretch">
-          
-          <!-- Feature 1: Location -->
-          <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 flex flex-col items-center justify-between transition shadow-sm">
-            <div class="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-2.5 shadow-inner">
-              <span set:html={icons.location} class="inline-flex"></span>
-            </div>
-            <div>
-              <h4 class="font-extrabold text-xs sm:text-sm text-white block mb-1">Prime Location</h4>
-              <p class="text-[11px] sm:text-xs text-slate-200 leading-snug font-medium">
-                Close to business hubs, embassies & shopping.
-              </p>
-            </div>
-          </div>
-
-          <!-- Feature 2: Connectivity -->
-          <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 flex flex-col items-center justify-between transition shadow-sm">
-            <div class="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-2.5 shadow-inner">
-              <span set:html={icons.connectivity} class="inline-flex"></span>
-            </div>
-            <div>
-              <h4 class="font-extrabold text-xs sm:text-sm text-white block mb-1">Great Connectivity</h4>
-              <p class="text-[11px] sm:text-xs text-slate-200 leading-snug font-medium">
-                Easy access to the airport and main Dhaka roads.
-              </p>
-            </div>
-          </div>
-
-          <!-- Feature 3: Hotel Choices -->
-          <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 flex flex-col items-center justify-between transition shadow-sm">
-            <div class="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-2.5 shadow-inner">
-              <span set:html={icons.hotelChoice} class="inline-flex"></span>
-            </div>
-            <div>
-              <h4 class="font-extrabold text-xs sm:text-sm text-white block mb-1">Wide Hotel Choices</h4>
-              <p class="text-[11px] sm:text-xs text-slate-200 leading-snug font-medium">
-                From 5-star luxury to budget-friendly stays.
-              </p>
-            </div>
-          </div>
-
-          <!-- Feature 4: Safety -->
-          <div class="bg-white/10 hover:bg-white/15 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/15 flex flex-col items-center justify-between transition shadow-sm">
-            <div class="w-11 h-11 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-2.5 shadow-inner">
-              <span set:html={icons.safety} class="inline-flex"></span>
-            </div>
-            <div>
-              <h4 class="font-extrabold text-xs sm:text-sm text-white block mb-1">Safe & Convenient</h4>
-              <p class="text-[11px] sm:text-xs text-slate-200 leading-snug font-medium">
-                Clean diplomatic zone with 24/7 security.
-              </p>
-            </div>
-          </div>
-
-        </div>
-
+        <a 
+          href="/about" 
+          class="shrink-0 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold px-5 py-2.5 rounded-xl transition text-[11px] uppercase tracking-wider"
+        >
+          Contact Our Concierge ➔
+        </a>
       </div>
 
     </div>
 
   </div>
 </section>
+
+<!-- Hide default details arrow in WebKit browsers -->
+<style>
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
