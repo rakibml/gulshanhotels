@@ -1,128 +1,102 @@
 ---
-// src/components/BrowseByArea.astro (Hotels Area Strip - Matching User's Reference)
+// src/components/BrowseByArea.astro (Focused 2-Zone Selector: Gulshan 1 vs Gulshan 2)
 
-const areas = [
+const zones = [
   {
     num: "01",
-    name: "Gulshan 2",
-    tagline: "Diplomatic & 5-Star Luxury",
+    name: "Gulshan 1 Hotels",
+    tagline: "Commercial Hub • DCC Market • Corporate Offices",
+    filterKey: "gulshan 1",
     link: "/#hotels"
   },
   {
     num: "02",
-    name: "Gulshan 1",
-    tagline: "Commercial Hub & Shopping",
-    link: "/#hotels"
-  },
-  {
-    num: "03",
-    name: "Banani (Road 11)",
-    tagline: "Trendy Cafes & Boutique Stays",
-    link: "/#hotels"
-  },
-  {
-    num: "04",
-    name: "Baridhara Enclave",
-    tagline: "Ultra-Secure Diplomatic Suites",
-    link: "/#hotels"
-  },
-  {
-    num: "05",
-    name: "Niketan / Link Rd",
-    tagline: "Quiet Serviced Apartments",
+    name: "Gulshan 2 Hotels",
+    tagline: "Diplomatic Zone • 5-Star Luxury • Lake Park",
+    filterKey: "gulshan 2",
     link: "/#hotels"
   }
 ];
 ---
 
-<!-- BROWSE BY AREA STRIP (MATCHING REFERENCE IMAGE) -->
-<section class="w-full bg-white py-4 text-slate-900">
+<!-- 2-ZONE BALANCED AREA STRIP (GULSHAN 1 vs GULSHAN 2) -->
+<section class="w-full bg-white py-4 sm:py-5 text-slate-900 border-b border-slate-100">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
     
-    <!-- SAGE GREEN CONTAINER (ছবির মতো রাউন্ডেড সফট বার) -->
-    <div class="bg-[#d5ded7] rounded-3xl p-3.5 sm:p-4 lg:p-5 flex items-center justify-between gap-4">
-      
-      <!-- HORIZONTAL SCROLLABLE AREA TRACK -->
-      <div 
-        id="areaStripTrack" 
-        class="flex items-center gap-6 sm:gap-8 lg:gap-10 overflow-x-auto scroll-smooth flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1"
-      >
-        {areas.map((area) => (
-          <a 
-            href={area.link} 
-            class="flex items-center gap-3.5 shrink-0 group cursor-pointer transition select-none"
-          >
-            <!-- DARK GREEN BADGE (CAT 01 স্টাইল) -->
-            <div class="w-12 h-12 rounded-xl bg-[#0d3b23] text-white flex flex-col items-center justify-center leading-none shrink-0 shadow-xs group-hover:bg-[#061e14] transition-colors">
-              <span class="text-[8px] font-black tracking-widest text-emerald-300 uppercase">
+    <!-- 2-COLUMN BALANCED 50/50 GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 text-left">
+      {zones.map((zone) => (
+        <a 
+          href={zone.link} 
+          data-zone-filter={zone.filterKey}
+          class="zone-filter-card group bg-[#d5ded7] hover:bg-[#c8d4cb] rounded-3xl p-4 sm:p-5 lg:p-6 flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#c2cfc5]"
+        >
+          <!-- Left: Badge + Area Info -->
+          <div class="flex items-center gap-4 sm:gap-5 min-w-0">
+            
+            <!-- DARK GREEN BADGE (AREA 01 / AREA 02) -->
+            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#0d3b23] text-white flex flex-col items-center justify-center leading-none shrink-0 shadow-xs group-hover:bg-[#061e14] transition-colors">
+              <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-emerald-300 uppercase">
                 AREA
               </span>
-              <span class="text-sm font-black mt-0.5">
-                {area.num}
+              <span class="text-base sm:text-lg font-black mt-0.5">
+                {zone.num}
               </span>
             </div>
 
-            <!-- AREA TEXT DETAILS -->
-            <div class="text-left">
-              <h3 class="font-extrabold text-[#0d3b23] text-sm sm:text-base leading-tight group-hover:text-emerald-900 transition-colors">
-                {area.name}
+            <!-- Text Details -->
+            <div class="min-w-0">
+              <h3 class="font-black text-[#0d3b23] text-base sm:text-lg lg:text-xl leading-tight group-hover:text-emerald-950 transition-colors truncate">
+                {zone.name}
               </h3>
               
-              <p class="text-[11px] sm:text-xs text-[#a35622] font-semibold flex items-center gap-1 mt-0.5">
+              <p class="text-xs sm:text-[13px] text-[#a35622] font-semibold flex items-center gap-1.5 mt-1 truncate">
                 <!-- Location Pin Icon -->
-                <svg class="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
-                <span class="truncate">{area.tagline}</span>
+                <span class="truncate">{zone.tagline}</span>
               </p>
             </div>
-          </a>
-        ))}
-      </div>
 
-      <!-- TERRACOTTA CIRCLE ARROWS (ছবির ডানদিকের অ্যারো বাটন) -->
-      <div class="flex items-center gap-2 shrink-0 pl-2">
-        <button 
-          id="areaStripPrev" 
-          type="button" 
-          aria-label="Previous Areas"
-          class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#bf5b27] hover:bg-[#a64e1f] text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
-        >
-          <svg class="w-4 h-4 fill-none stroke-current stroke-[3] -ml-0.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+          </div>
 
-        <button 
-          id="areaStripNext" 
-          type="button" 
-          aria-label="Next Areas"
-          class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#bf5b27] hover:bg-[#a64e1f] text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
-        >
-          <svg class="w-4 h-4 fill-none stroke-current stroke-[3] -mr-0.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
+          <!-- Right: Terracotta Circle Arrow -->
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#bf5b27] group-hover:bg-[#a64e1f] text-white flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:translate-x-1 shadow-xs ml-3">
+            <svg class="w-4 h-4 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </a>
+      ))}
     </div>
 
   </div>
 </section>
 
-<!-- SCRIPT FOR ARROW SCROLL -->
+<!-- SCRIPT: ক্লিক করলে সরাসরি ফিল্টার ও স্ক্রোল হবে -->
 <script is:inline>
-  const initAreaStrip = () => {
-    const track = document.getElementById('areaStripTrack');
-    const prevBtn = document.getElementById('areaStripPrev');
-    const nextBtn = document.getElementById('areaStripNext');
+  const initZoneClickFilter = () => {
+    document.querySelectorAll('.zone-filter-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const filterVal = card.getAttribute('data-zone-filter');
+        const input = document.getElementById('searchHotelInput') || document.getElementById('liveHotelSearchInput');
+        
+        // সার্চ ইনপুটে ভ্যালু সেট করে ট্রিগার করা
+        if (input && filterVal) {
+          input.value = filterVal;
+          input.dispatchEvent(new Event('input'));
+        }
 
-    if (track && prevBtn && nextBtn) {
-      prevBtn.onclick = () => track.scrollBy({ left: -260, behavior: 'smooth' });
-      nextBtn.onclick = () => track.scrollBy({ left: 260, behavior: 'smooth' });
-    }
+        const target = document.getElementById('hotels');
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
   };
 
-  document.addEventListener('DOMContentLoaded', initAreaStrip);
-  document.addEventListener('astro:page-load', initAreaStrip);
+  document.addEventListener('DOMContentLoaded', initZoneClickFilter);
+  document.addEventListener('astro:page-load', initZoneClickFilter);
 </script>
