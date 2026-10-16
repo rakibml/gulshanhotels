@@ -1,25 +1,29 @@
 ---
-// src/components/BrowseByArea.astro (Focused 2-Zone Selector: Gulshan 1 vs Gulshan 2)
+// src/components/BrowseByArea.astro (Cinematic Luxury Background Image Version)
 
 const zones = [
   {
     num: "01",
     name: "Gulshan 1 Hotels",
-    tagline: "Commercial Hub • DCC Market • Corporate Offices",
+    tagline: "Commercial Hub • DCC Market • Corporate Stays",
     filterKey: "gulshan 1",
-    link: "/#hotels"
+    link: "/#hotels",
+    // গুলশান ১ এর জন্য মডার্ন কমার্শিয়াল সিটি আর্কিটেকচার
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80"
   },
   {
     num: "02",
     name: "Gulshan 2 Hotels",
     tagline: "Diplomatic Zone • 5-Star Luxury • Lake Park",
     filterKey: "gulshan 2",
-    link: "/#hotels"
+    link: "/#hotels",
+    // গুলশান ২ এর জন্য প্রিমিয়াম স্কাইলাইন ও লেকভিউ
+    image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=900&q=80"
   }
 ];
 ---
 
-<!-- 2-ZONE BALANCED AREA STRIP (GULSHAN 1 vs GULSHAN 2) -->
+<!-- 2-ZONE CINEMATIC BACKGROUND STRIP -->
 <section class="w-full bg-white py-4 sm:py-5 text-slate-900 border-b border-slate-100">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
     
@@ -29,13 +33,25 @@ const zones = [
         <a 
           href={zone.link} 
           data-zone-filter={zone.filterKey}
-          class="zone-filter-card group bg-[#d5ded7] hover:bg-[#c8d4cb] rounded-3xl p-4 sm:p-5 lg:p-6 flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#c2cfc5]"
+          class="zone-filter-card group relative h-[105px] sm:h-[115px] lg:h-[125px] rounded-3xl overflow-hidden p-4 sm:p-5 lg:p-6 flex items-center justify-between transition-all duration-300 cursor-pointer border border-slate-800/20 shadow-xs"
         >
-          <!-- Left: Badge + Area Info -->
-          <div class="flex items-center gap-4 sm:gap-5 min-w-0">
+          <!-- 1. BACKGROUND PHOTO (হোভার করলে স্মুথ জুম হবে) -->
+          <img 
+            src={zone.image} 
+            alt={zone.name}
+            loading="lazy" 
+            decoding="async" 
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
+          />
+
+          <!-- 2. DARK LUXURY GRADIENT OVERLAY (লেখা স্পষ্ট পড়ার জন্য) -->
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/75 to-slate-950/55 transition-opacity group-hover:opacity-90"></div>
+
+          <!-- 3. CONTENT (RELATIVE Z-10) -->
+          <div class="relative z-10 flex items-center gap-4 sm:gap-5 min-w-0">
             
             <!-- DARK GREEN BADGE (AREA 01 / AREA 02) -->
-            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#0d3b23] text-white flex flex-col items-center justify-center leading-none shrink-0 shadow-xs group-hover:bg-[#061e14] transition-colors">
+            <div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#0d3b23] text-white flex flex-col items-center justify-center leading-none shrink-0 shadow-sm border border-emerald-500/30 group-hover:bg-[#061e14] transition-colors">
               <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-emerald-300 uppercase">
                 AREA
               </span>
@@ -46,13 +62,13 @@ const zones = [
 
             <!-- Text Details -->
             <div class="min-w-0">
-              <h3 class="font-black text-[#0d3b23] text-base sm:text-lg lg:text-xl leading-tight group-hover:text-emerald-950 transition-colors truncate">
+              <h3 class="font-black text-white text-base sm:text-lg lg:text-xl leading-tight group-hover:text-emerald-300 transition-colors truncate">
                 {zone.name}
               </h3>
               
-              <p class="text-xs sm:text-[13px] text-[#a35622] font-semibold flex items-center gap-1.5 mt-1 truncate">
+              <p class="text-xs sm:text-[13px] text-slate-300 font-medium flex items-center gap-1.5 mt-1 truncate">
                 <!-- Location Pin Icon -->
-                <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 fill-emerald-400 shrink-0" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <span class="truncate">{zone.tagline}</span>
@@ -61,8 +77,8 @@ const zones = [
 
           </div>
 
-          <!-- Right: Terracotta Circle Arrow -->
-          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#bf5b27] group-hover:bg-[#a64e1f] text-white flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:translate-x-1 shadow-xs ml-3">
+          <!-- 4. RIGHT: TERRACOTTA CIRCLE ARROW -->
+          <div class="relative z-10 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#bf5b27] group-hover:bg-[#d9662b] text-white flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:translate-x-1 shadow-sm ml-3">
             <svg class="w-4 h-4 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
@@ -82,7 +98,6 @@ const zones = [
         const filterVal = card.getAttribute('data-zone-filter');
         const input = document.getElementById('searchHotelInput') || document.getElementById('liveHotelSearchInput');
         
-        // সার্চ ইনপুটে ভ্যালু সেট করে ট্রিগার করা
         if (input && filterVal) {
           input.value = filterVal;
           input.dispatchEvent(new Event('input'));
