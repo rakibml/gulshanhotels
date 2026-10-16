@@ -1,81 +1,128 @@
 ---
-// src/components/BrandStrip.astro (Clean Monochrome Luxury Hotel Brand Strip)
+// src/components/BrowseByArea.astro (Hotels Area Strip - Matching User's Reference)
 
-const hotelBrands = [
+const areas = [
   {
-    name: "THE WESTIN",
-    sub: "DHAKA",
-    group: "MARRIOTT INTERNATIONAL",
-    link: "/the-westin-dhaka"
-  },
-  {
-    name: "RENAISSANCE",
-    sub: "HOTELS",
-    group: "MARRIOTT BONVOY",
+    num: "01",
+    name: "Gulshan 2",
+    tagline: "Diplomatic & 5-Star Luxury",
     link: "/#hotels"
   },
   {
-    name: "AMARI",
-    sub: "DHAKA",
-    group: "ONYX HOSPITALITY",
-    link: "/amari-dhaka"
-  },
-  {
-    name: "CROWNE PLAZA",
-    sub: "GULSHAN",
-    group: "IHG HOTELS & RESORTS",
+    num: "02",
+    name: "Gulshan 1",
+    tagline: "Commercial Hub & Shopping",
     link: "/#hotels"
   },
   {
-    name: "LAKESHORE",
-    sub: "HOTEL & APARTMENTS",
-    group: "LAKESHORE COLLECTION",
+    num: "03",
+    name: "Banani (Road 11)",
+    tagline: "Trendy Cafes & Boutique Stays",
     link: "/#hotels"
   },
   {
-    name: "ASCOTT",
-    sub: "THE RESIDENCE",
-    group: "THE ASCOTT LIMITED",
+    num: "04",
+    name: "Baridhara Enclave",
+    tagline: "Ultra-Secure Diplomatic Suites",
+    link: "/#hotels"
+  },
+  {
+    num: "05",
+    name: "Niketan / Link Rd",
+    tagline: "Quiet Serviced Apartments",
     link: "/#hotels"
   }
 ];
 ---
 
-<!-- LUXURY BRAND / HOTEL CHAINS STRIP -->
-<section class="w-full bg-white py-7 sm:py-8 border-b border-slate-100 text-slate-900">
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
+<!-- BROWSE BY AREA STRIP (MATCHING REFERENCE IMAGE) -->
+<section class="w-full bg-white py-4 text-slate-900">
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
     
-    <!-- Subtle Tagline -->
-    <div class="text-center">
-      <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">
-        Featuring Global Hospitality Chains & Diplomatic Partners in Gulshan
-      </span>
-    </div>
+    <!-- SAGE GREEN CONTAINER (ছবির মতো রাউন্ডেড সফট বার) -->
+    <div class="bg-[#d5ded7] rounded-3xl p-3.5 sm:p-4 lg:p-5 flex items-center justify-between gap-4">
+      
+      <!-- HORIZONTAL SCROLLABLE AREA TRACK -->
+      <div 
+        id="areaStripTrack" 
+        class="flex items-center gap-6 sm:gap-8 lg:gap-10 overflow-x-auto scroll-smooth flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1"
+      >
+        {areas.map((area) => (
+          <a 
+            href={area.link} 
+            class="flex items-center gap-3.5 shrink-0 group cursor-pointer transition select-none"
+          >
+            <!-- DARK GREEN BADGE (CAT 01 স্টাইল) -->
+            <div class="w-12 h-12 rounded-xl bg-[#0d3b23] text-white flex flex-col items-center justify-center leading-none shrink-0 shadow-xs group-hover:bg-[#061e14] transition-colors">
+              <span class="text-[8px] font-black tracking-widest text-emerald-300 uppercase">
+                AREA
+              </span>
+              <span class="text-sm font-black mt-0.5">
+                {area.num}
+              </span>
+            </div>
 
-    <!-- Minimalist Typography Brand Row -->
-    <div class="flex flex-wrap items-center justify-center sm:justify-between gap-6 sm:gap-8 lg:gap-10 pt-2">
-      {hotelBrands.map((brand) => (
-        <a 
-          href={brand.link}
-          class="group flex flex-col items-center justify-center text-center opacity-65 hover:opacity-100 transition-opacity duration-300 cursor-pointer select-none py-1"
+            <!-- AREA TEXT DETAILS -->
+            <div class="text-left">
+              <h3 class="font-extrabold text-[#0d3b23] text-sm sm:text-base leading-tight group-hover:text-emerald-900 transition-colors">
+                {area.name}
+              </h3>
+              
+              <p class="text-[11px] sm:text-xs text-[#a35622] font-semibold flex items-center gap-1 mt-0.5">
+                <!-- Location Pin Icon -->
+                <svg class="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span class="truncate">{area.tagline}</span>
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- TERRACOTTA CIRCLE ARROWS (ছবির ডানদিকের অ্যারো বাটন) -->
+      <div class="flex items-center gap-2 shrink-0 pl-2">
+        <button 
+          id="areaStripPrev" 
+          type="button" 
+          aria-label="Previous Areas"
+          class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#bf5b27] hover:bg-[#a64e1f] text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
         >
-          <!-- Brand Main Name -->
-          <span class="font-serif text-lg sm:text-xl lg:text-2xl font-black text-slate-800 tracking-wider group-hover:text-[#0d3b23] transition-colors leading-none">
-            {brand.name}
-          </span>
+          <svg class="w-4 h-4 fill-none stroke-current stroke-[3] -ml-0.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-          <!-- Sub Brand Line -->
-          <span class="text-[9px] font-black tracking-[0.25em] text-slate-500 uppercase mt-1">
-            {brand.sub}
-          </span>
+        <button 
+          id="areaStripNext" 
+          type="button" 
+          aria-label="Next Areas"
+          class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#bf5b27] hover:bg-[#a64e1f] text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-xs"
+        >
+          <svg class="w-4 h-4 fill-none stroke-current stroke-[3] -mr-0.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
 
-          <!-- Subtle Parent Group -->
-          <span class="text-[7px] font-bold tracking-widest text-slate-400 uppercase mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {brand.group}
-          </span>
-        </a>
-      ))}
     </div>
 
   </div>
 </section>
+
+<!-- SCRIPT FOR ARROW SCROLL -->
+<script is:inline>
+  const initAreaStrip = () => {
+    const track = document.getElementById('areaStripTrack');
+    const prevBtn = document.getElementById('areaStripPrev');
+    const nextBtn = document.getElementById('areaStripNext');
+
+    if (track && prevBtn && nextBtn) {
+      prevBtn.onclick = () => track.scrollBy({ left: -260, behavior: 'smooth' });
+      nextBtn.onclick = () => track.scrollBy({ left: 260, behavior: 'smooth' });
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', initAreaStrip);
+  document.addEventListener('astro:page-load', initAreaStrip);
+</script>
