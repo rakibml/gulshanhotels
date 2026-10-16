@@ -1,16 +1,17 @@
 ---
-// src/components/GulshanLifestyle.astro (Mobile Side-by-Side + 100% PageSpeed Optimized)
+// src/components/GulshanLifestyle.astro (Tab Conflict Fixed - 100% Core Web Vitals Ready)
 
 interface Props {
   title?: string;
   subtitle?: string;
 }
+
 const { 
   title = "Beyond the stay. Explore Gulshan.", 
   subtitle = "Lakeside jogging parks, luxury shopping hubs, and wellness spas within minutes of your hotel."
 } = Astro.props;
 
-// ৪টি লাইফস্টাইল ক্যাটাগরি ও তাদের সেরা স্পটসমূহ (বাস্তবসম্মত ছবি ও অটো-কম্প্রেশন)
+// ৪টি লাইফস্টাইল ক্যাটাগরি ও তাদের সেরা স্পটসমূহ
 const lifestyleCategories = [
   {
     id: "parks",
@@ -37,7 +38,6 @@ const lifestyleCategories = [
         location: "Kemal Ataturk Link • Scenic Waterfront",
         status: "Public Walkway",
         meta: "Evening strolls & street vibe",
-        // বাস্তব আরবান সিটি লেকসাইড ওয়াকওয়ে
         image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=500&q=75",
         link: "https://maps.google.com/?q=Banani+Lake"
       },
@@ -46,7 +46,6 @@ const lifestyleCategories = [
         location: "Diplomatic Enclave • High Security",
         status: "Secure Zone",
         meta: "Quiet diplomatic green walkway",
-        // সবুজ ও শান্ত ডিপ্লোম্যাটিক এভিনিউ
         image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=500&q=75",
         link: "https://maps.google.com/?q=Baridhara+Diplomatic+Zone"
       }
@@ -169,7 +168,7 @@ const lifestyleCategories = [
 ];
 ---
 
-<!-- HOTELS.COM STYLE LIFESTYLE SECTION (PAGESPEED 100 & MOBILE SIDE-BY-SIDE) -->
+<!-- HOTELS.COM STYLE LIFESTYLE SECTION -->
 <section 
   id="gulshan-lifestyle" 
   class="w-full bg-white pt-8 pb-14 text-slate-900 border-b border-slate-100"
@@ -205,7 +204,7 @@ const lifestyleCategories = [
       {lifestyleCategories.map((cat, idx) => (
         <div 
           id={`lifestyle-panel-${cat.id}`} 
-          class={`lifestyle-tab-panel flex overflow-x-auto sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pb-2 sm:pb-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${idx === 0 ? 'flex sm:grid' : 'hidden'}`}
+          class={`lifestyle-tab-panel overflow-x-auto sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pb-2 sm:pb-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${idx === 0 ? 'flex sm:grid' : 'hidden'}`}
         >
           {cat.items.map((item) => (
             <a 
@@ -214,7 +213,7 @@ const lifestyleCategories = [
               rel="noopener noreferrer"
               class="group block text-left cursor-pointer transition-opacity hover:opacity-95 w-[240px] sm:w-auto shrink-0 sm:shrink"
             >
-              <!-- Rounded Photo (CLS 0 & Speed Optimized) -->
+              <!-- Rounded Photo -->
               <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100">
                 <img 
                   src={item.image} 
@@ -257,17 +256,14 @@ const lifestyleCategories = [
   </div>
 </section>
 
-<!-- TAB SWITCH SCRIPT (MEMORY LEAK-FREE) -->
+<!-- TAB SWITCH SCRIPT (BULLETPROOF HIDING & SWITCHING) -->
 <script is:inline>
   const initLifestyleTabs = () => {
     const tabs = document.querySelectorAll('.lifestyle-tab-btn');
     const panels = document.querySelectorAll('.lifestyle-tab-panel');
 
-    if (!tabs.length || tabs[0].dataset.tabBound) return;
-    tabs[0].dataset.tabBound = 'true';
-
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
+      tab.onclick = () => {
         const targetId = tab.getAttribute('data-tab-target');
 
         tabs.forEach(t => {
@@ -286,7 +282,7 @@ const lifestyleCategories = [
             p.classList.remove('flex', 'sm:grid');
           }
         });
-      });
+      };
     });
   };
 
