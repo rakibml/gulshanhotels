@@ -1,5 +1,5 @@
 ---
-// src/components/TopDeals.astro (100% Synced with PopularHotels Review Engine & Lowest Rate Deals)
+// src/components/TopDeals.astro (100% PageSpeed & Core Web Vitals Optimized)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,7 +12,7 @@ const {
   subtitle = "Exclusive rates where partner booking channels offer cheaper prices than starting rates."
 } = Astro.props;
 
-// ১. Fetch Hotels (PopularHotels এর হুবহু সেইম)
+// ১. Fetch Hotels
 let allHotels: any[] = [];
 try {
   const collectionHotels = await getCollection('hotels');
@@ -29,7 +29,7 @@ try {
   allHotels = [];
 }
 
-// ২. FETCH APPROVED-ONLY REVIEWS (PopularHotels.astro-র হুবহু একই কোড)
+// ২. FETCH APPROVED-ONLY REVIEWS
 let allReviewsRaw: any[] = [];
 try {
   const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
@@ -45,15 +45,12 @@ if (allReviewsRaw.length === 0) {
   } catch (e) {}
 }
 
-// ফিল্টার: শুধুমাত্র approved: true রিভিউগুলো নেওয়া হচ্ছে
 const approvedReviewsList = allReviewsRaw.filter(item => {
   if (!item) return false;
   return item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
 });
 
-// স্ট্রিং ক্লিন করার হেল্পার ফাংশন
 const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
 const dotsArray = [0, 1, 2, 3, 4];
 
 // ডিল থাকা হোটেলগুলোকে আগে সাজানো
@@ -70,8 +67,12 @@ const dealHotels = [...allHotels].sort((a, b) => {
 });
 ---
 
-<!-- TOP DEALS SECTION -->
-<section id="deals" class="w-full bg-white pt-6 pb-14 text-slate-900">
+<!-- TOP DEALS SECTION (PAGESPEED OPTIMIZED WITH CONTENT-VISIBILITY) -->
+<section 
+  id="deals" 
+  class="w-full bg-white pt-6 pb-14 text-slate-900"
+  style="content-visibility: auto; contain-intrinsic-size: 1px 450px;"
+>
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
     
     <!-- Section Header -->
@@ -116,10 +117,15 @@ const dealHotels = [...allHotels].sort((a, b) => {
           const hData = hotelItem.data || {};
           const hTitle = (hData.title || hData.name || "Hotel Details").trim();
           const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").replace(/\.md$/, '').trim();
-          const hImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+          
+          let rawImg = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=75");
+          if (rawImg.includes('unsplash.com') && !rawImg.includes('q=')) {
+            rawImg += '&q=75&auto=format';
+          }
+          const hImage = rawImg;
           const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
 
-          // ১. REVIEWS CALCULATION (PopularHotels.astro-এর হুবহু একই কোড)
+          // ১. REVIEWS CALCULATION
           const normTitle = normalize(hTitle);
           const normSlug = normalize(hSlug);
 
@@ -166,17 +172,20 @@ const dealHotels = [...allHotels].sort((a, b) => {
             <div class="deal-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
               
               <a href={`/${hSlug}`} class="block w-full">
-                <!-- Card Image Header -->
-                <div class="relative w-full h-48 sm:h-52 overflow-hidden rounded-2xl bg-slate-100">
+                <!-- Card Image Header (CLS & Speed Optimized) -->
+                <div class="relative w-full aspect-[16/10] sm:aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
                   <img 
                     src={hImage} 
-                    alt={`${hTitle} Photo`} 
+                    alt={`${hTitle} Room Photo`} 
                     loading="lazy" 
                     decoding="async" 
+                    fetchpriority="low"
+                    width="320"
+                    height="200"
                     class="w-full h-full object-cover" 
                   />
 
-                  <!-- REAL DISCOUNT BADGE (শুধু ডিসকাউন্ট থাকলেই দেখাবে) -->
+                  <!-- REAL DISCOUNT BADGE -->
                   {discountPercent > 0 && (
                     <div class="absolute top-3 left-3 bg-rose-600 text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg z-10">
                       {discountPercent}% OFF
@@ -213,7 +222,7 @@ const dealHotels = [...allHotels].sort((a, b) => {
                     <span class="truncate">{hLocation}</span>
                   </div>
 
-                  <!-- Verified Reviews Display (PopularHotels এর সাথে ১০০% একই) -->
+                  <!-- Verified Reviews Display -->
                   {reviewsCount > 0 && avgRating ? (
                     <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
                       <span class="font-black text-slate-900 text-sm">{avgRating}</span>
@@ -262,32 +271,47 @@ const dealHotels = [...allHotels].sort((a, b) => {
   </div>
 </section>
 
-<!-- SCRIPT -->
+<!-- SCRIPT (PASSIVE 60FPS SCROLL ENGINE) -->
 <script is:inline>
   const initTopDealsSection = () => {
     const track = document.getElementById('dealsHotelsTrack');
     const prevBtn = document.getElementById('dealsPrevBtn');
     const nextBtn = document.getElementById('dealsNextBtn');
 
+    if (!track || track.dataset.optimizedBound) return;
+    track.dataset.optimizedBound = 'true';
+
+    let isUpdating = false;
     function updateArrows() {
-      if (!track || !prevBtn || !nextBtn) return;
-      const scrollLeft = track.scrollLeft;
-      const maxScroll = track.scrollWidth - track.clientWidth - 5;
+      if (isUpdating) return;
+      isUpdating = true;
 
-      if (scrollLeft <= 5) {
-        prevBtn.classList.add('hidden');
-      } else {
-        prevBtn.classList.remove('hidden');
-      }
+      requestAnimationFrame(() => {
+        if (!track || !prevBtn || !nextBtn) {
+          isUpdating = false;
+          return;
+        }
 
-      if (scrollLeft >= maxScroll) {
-        nextBtn.classList.add('hidden');
-      } else {
-        nextBtn.classList.remove('hidden');
-      }
+        const scrollLeft = track.scrollLeft;
+        const maxScroll = track.scrollWidth - track.clientWidth - 5;
+
+        if (scrollLeft <= 5) {
+          prevBtn.classList.add('hidden');
+        } else {
+          prevBtn.classList.remove('hidden');
+        }
+
+        if (scrollLeft >= maxScroll) {
+          nextBtn.classList.add('hidden');
+        } else {
+          nextBtn.classList.remove('hidden');
+        }
+
+        isUpdating = false;
+      });
     }
 
-    if (track && prevBtn && nextBtn) {
+    if (prevBtn && nextBtn) {
       prevBtn.addEventListener('click', () => {
         track.scrollBy({ left: -320, behavior: 'smooth' });
       });
@@ -297,8 +321,9 @@ const dealHotels = [...allHotels].sort((a, b) => {
       });
 
       updateArrows();
-      track.addEventListener('scroll', updateArrows);
-      window.addEventListener('resize', updateArrows);
+      // PASSIVE LISTENER: থ্রেড ব্লক করবে না
+      track.addEventListener('scroll', updateArrows, { passive: true });
+      window.addEventListener('resize', updateArrows, { passive: true });
     }
   };
 
