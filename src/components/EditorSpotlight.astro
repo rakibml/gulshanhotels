@@ -1,149 +1,113 @@
 ---
-// src/components/EditorSpotlight.astro (Curator's Spotlight - Hotel of the Month)
+// src/components/EditorSpotlight.astro (Clean Editorial Luxury - No Clunky Boxes, Proper Images)
 import { getCollection } from 'astro:content';
 
-interface Props {
-  badgeText?: string;
-}
-
-const { 
-  badgeText = "CURATOR'S CHOICE — HOTEL OF THE MONTH"
-} = Astro.props;
-
-// ১. স্পটলাইট হোটেল ফেচ করা (spotlight: true অথবা গুলশানের ফ্ল্যাগশিপ হোটেল ওয়েস্টিন)
 let spotlightHotel: any = null;
 try {
   const allHotels = await getCollection('hotels');
   if (Array.isArray(allHotels) && allHotels.length > 0) {
-    spotlightHotel = allHotels.find(h => h.data?.spotlight === true || h.data?.featured === true) 
-      || allHotels.find(h => (h.data?.title || h.data?.name || '').toLowerCase().includes('westin'))
-      || allHotels[0];
+    spotlightHotel = allHotels.find(h => (h.data?.title || h.data?.name || '').toLowerCase().includes('westin')) || allHotels[0];
   }
 } catch (e) {}
 
-if (!spotlightHotel) {
-  try {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    const list: any[] = Object.values(rawGlob);
-    spotlightHotel = list.find((item: any) => item.frontmatter?.spotlight === true || (item.frontmatter?.title || '').toLowerCase().includes('westin')) || list[0];
-  } catch (e) {}
-}
-
-const hData = spotlightHotel?.data || spotlightHotel?.frontmatter || {};
-const hotelTitle = (hData.title || hData.name || "The Westin Dhaka").trim();
+const hData = spotlightHotel?.data || {};
+const rawTitle = (hData.title || hData.name || "The Westin Dhaka").trim();
 const hotelSlug = (hData.slug || spotlightHotel?.slug || spotlightHotel?.id || "the-westin-dhaka").replace(/\.md$/, '').trim();
-const hotelLocation = hData.location || "Main Gulshan Avenue, Gulshan 2 Circle, Dhaka";
-const hotelPrice = hData.price || "$185 / night";
-const cleanPrice = String(hotelPrice).replace(/[$৳]/g, '').trim();
-const currencySymbol = String(hotelPrice).includes('৳') ? '৳' : '$';
+const hotelLocation = "Main Gulshan Avenue, Gulshan 2 Circle, Dhaka";
 
-// হাই-রেজ্যুলেশন প্রিমিয়াম ইমেজ
-const hotelImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80");
+// ডাবল / night ফিক্স করা আসল ক্লিন প্রাইস
+const rawPrice = String(hData.price || "185").replace(/[^0-9.]/g, '');
+const priceNum = parseFloat(rawPrice) || 185;
+const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
+
+// আসল আধুনিক ৫-স্টার হোটেল পুল ও স্কাইলাইনের ছবি (কোনো জঙ্গল নয়)
+const hotelImage = "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80";
 ---
 
-<!-- EDITOR'S SPOTLIGHT SECTION -->
+<!-- LUXURY EDITORIAL SHOWCASE (CLEAN WHITE BACKGROUND, NO CLUNKY FRAMES) -->
 <section id="spotlight" class="w-full bg-white py-10 sm:py-14 text-slate-900 border-b border-slate-100">
   <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
     
-    <!-- MAGAZINE SHOWCASE FRAME (সফট টিন্ট ও বর্ডার দিয়ে তৈরি ব্যালান্সড ফ্রেম) -->
-    <div class="bg-[#F8FAF9] rounded-3xl border border-slate-200/90 p-5 sm:p-8 lg:p-10 transition-all">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center text-left">
+      
+      <!-- 1. LEFT: CRISP MODERN 5-STAR PHOTO (কোনো ডার্ক জঙ্গল নয়) -->
+      <div class="lg:col-span-7 relative group">
+        <div class="relative aspect-[16/10] w-full rounded-3xl overflow-hidden bg-slate-900">
+          <img 
+            src={hotelImage} 
+            alt="The Westin Dhaka Luxury Suite" 
+            loading="lazy" 
+            decoding="async" 
+            class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out" 
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+          
+          <div class="absolute bottom-4 left-4 z-10">
+            <span class="text-white text-xs font-bold bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+              📍 Gulshan 2 Diplomatic Enclave
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. RIGHT: MINIMALIST LUXURY EDITORIAL (No Clunky Emoji Boxes) -->
+      <div class="lg:col-span-5 space-y-5">
         
-        <!-- 1. LEFT COLUMN: CINEMATIC LARGE PHOTO (lg:col-span-7) -->
-        <div class="lg:col-span-7 relative group">
-          <div class="relative aspect-[16/10] sm:aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-900">
-            <img 
-              src={hotelImage} 
-              alt={`${hotelTitle} Featured Photo`} 
-              loading="lazy" 
-              decoding="async" 
-              class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out" 
-            />
+        <div class="space-y-2">
+          <span class="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-800 block">
+            ★ CURATOR'S CHOICE OF THE MONTH
+          </span>
+          
+          <!-- Capitalized Proper Title -->
+          <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-slate-900 tracking-tight capitalize leading-tight">
+            {rawTitle}
+          </h2>
+          
+          <p class="text-xs sm:text-sm text-slate-500 font-medium">
+            {hotelLocation}
+          </p>
+        </div>
 
-            <!-- Top Floating Tag -->
-            <div class="absolute top-4 left-4 z-10">
-              <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-300 border border-emerald-500/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Flagship 5-Star Benchmark</span>
-              </span>
-            </div>
+        <!-- Editorial Text -->
+        <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
+          Commanding the skyline of Gulshan 2, this iconic property stands as Dhaka’s benchmark for diplomatic security, renowned Heavenly® bedding comfort, and world-class rooftop dining over the Gulshan Lake.
+        </p>
 
-            <!-- Bottom Gradient Overlay for Photo Contrast -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+        <!-- Clean Bullet Highlights (No Childish Emoji Pills) -->
+        <div class="space-y-1.5 text-xs text-slate-700 font-semibold pt-1">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-800 font-black">✓</span>
+            <span>Heated outdoor rooftop swimming pool & Italian dining at Prego</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-800 font-black">✓</span>
+            <span>Round-the-clock armed diplomatic security and private access</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-800 font-black">✓</span>
+            <span>18-minute express airport connection via Dhaka Elevated Expressway</span>
           </div>
         </div>
 
-        <!-- 2. RIGHT COLUMN: EDITORIAL CONTENT & HIGHLIGHTS (lg:col-span-5) -->
-        <div class="lg:col-span-5 space-y-5">
-          
-          <!-- Curator's Pick Badge -->
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-[10px] font-black uppercase tracking-wider">
-            <span>🏆 {badgeText}</span>
+        <!-- Clean Pricing & Action Button (Fixed /night repetition) -->
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+          <div>
+            <span class="text-[11px] text-slate-400 font-medium block">Starting from</span>
+            <span class="text-2xl font-black text-slate-900 leading-tight">
+              {currencySymbol}{priceNum} <span class="text-xs text-slate-500 font-normal">/ night</span>
+            </span>
           </div>
 
-          <!-- Hotel Name & Location -->
-          <div class="space-y-1">
-            <h2 class="font-serif text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              {hotelTitle}
-            </h2>
-            
-            <p class="text-xs sm:text-sm text-slate-500 font-semibold flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-              <span>{hotelLocation}</span>
-            </p>
-          </div>
-
-          <!-- Editorial Review Blurb -->
-          <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-            Commanding the prime skyline of Gulshan 2 Circle, {hotelTitle} stands as Dhaka's premier destination for foreign diplomats, corporate summits, and luxury staycations. Renowned for its heated rooftop pool, world-class Italian dining at Prego, and signature Heavenly® beds.
-          </p>
-
-          <!-- 4 Key Signature Amenities (2-Column Mini Grid) -->
-          <div class="grid grid-cols-2 gap-2.5 pt-1 text-xs">
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200/80 text-slate-700 font-semibold">
-              <span class="text-emerald-700 text-sm">🏊</span>
-              <span class="truncate">Heated Rooftop Pool</span>
-            </div>
-
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200/80 text-slate-700 font-semibold">
-              <span class="text-emerald-700 text-sm">🍽️</span>
-              <span class="truncate">5-Star Buffet & Dining</span>
-            </div>
-
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200/80 text-slate-700 font-semibold">
-              <span class="text-emerald-700 text-sm">🛡️</span>
-              <span class="truncate">Diplomatic Security</span>
-            </div>
-
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200/80 text-slate-700 font-semibold">
-              <span class="text-emerald-700 text-sm">✈️</span>
-              <span class="truncate">18-Min Express Airport Link</span>
-            </div>
-          </div>
-
-          <!-- Price & Action Button Line -->
-          <div class="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span class="text-[11px] text-slate-400 font-medium block">Starting from</span>
-              <span class="text-2xl font-black text-slate-900 leading-tight">
-                {currencySymbol}{cleanPrice} <span class="text-xs text-slate-500 font-normal">/ night</span>
-              </span>
-            </div>
-
-            <a 
-              href={`/${hotelSlug}`} 
-              class="inline-flex items-center justify-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition duration-200 shadow-sm uppercase tracking-wider shrink-0 cursor-pointer"
-            >
-              <span>Explore Property</span>
-              <span>➔</span>
-            </a>
-          </div>
-
+          <a 
+            href={`/${hotelSlug}`} 
+            class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition duration-200 uppercase tracking-wider shrink-0 cursor-pointer shadow-xs"
+          >
+            Explore Property ➔
+          </a>
         </div>
 
       </div>
+
     </div>
 
   </div>
