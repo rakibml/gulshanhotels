@@ -1,5 +1,5 @@
 ---
-// src/components/Hero.astro (Ultra-Smooth Video Hero with Minimalist Capsule Search)
+// src/components/Hero.astro (Real-Time Live Hotel Filter Engine)
 ---
 
 <!-- Google Fonts: Bebas Neue & Montserrat -->
@@ -89,7 +89,7 @@
 
   </section>
 
-  <!-- ================= 2. MINIMALIST CAPSULE SEARCH BAR (AIRBNB STYLE) ================= -->
+  <!-- ================= 2. MINIMALIST CAPSULE SEARCH BAR ================= -->
   <div class="relative z-30 max-w-3xl mx-auto px-4 -mt-7 sm:-mt-8 mb-6">
     <form 
       id="heroHotelSearchForm" 
@@ -102,12 +102,13 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <div class="flex flex-col min-w-0 flex-1">
-          <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 hidden sm:block">Destination</span>
+          <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 hidden sm:block">Destination / Hotel</span>
           <input 
             type="text" 
             id="searchHotelInput"
-            placeholder="Search hotels, Gulshan 1, Gulshan 2..." 
+            placeholder="Search hotel name, Gulshan 1, Gulshan 2..." 
             class="w-full bg-transparent text-xs sm:text-sm font-bold text-slate-900 placeholder-slate-400 outline-none truncate"
+            autocomplete="off"
           />
         </div>
       </div>
@@ -129,7 +130,7 @@
       <!-- 3. Minimal Round Search Button -->
       <button 
         type="submit" 
-        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs sm:text-sm px-5 sm:px-6 py-3 rounded-full transition shrink-0 flex items-center gap-2 cursor-pointer shadow-xs"
+        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs sm:text-sm px-5 sm:px-6 py-3 rounded-full transition shrink-0 flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
       >
         <span>Search</span>
         <span class="text-xs">➔</span>
@@ -140,10 +141,10 @@
 
 </div>
 
-<!-- ================= 3. SCRIPT ================= -->
+<!-- ================= 3. CLIENT SCRIPT (REAL-TIME LIVE HOTEL FILTER) ================= -->
 <script is:inline>
   (() => {
-    // 1. Video Autoplay
+    // 1. Video Autoplay Logic
     const video = document.getElementById('heroBgVideo');
     if (video) {
       let started = false;
@@ -201,22 +202,106 @@
       document.addEventListener('astro:page-load', playHeroVideo);
     }
 
-    // 2. Search Smooth Scroll
-    const initSearchScroll = () => {
-      const searchForm = document.getElementById('heroHotelSearchForm');
-      if (searchForm && !searchForm.dataset.bound) {
-        searchForm.dataset.bound = 'true';
-        searchForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const target = document.getElementById('hotels') || document.querySelector('section');
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 2. REAL LIVE HOTEL FILTER LOGIC
+    const setupLiveFilter = () => {
+      const form = document.getElementById('heroHotelSearchForm');
+      const input = document.getElementById('searchHotelInput');
+      const typeSelect = document.getElementById('searchTypeSelect');
+
+      if (!form || form.dataset.filterReady) return;
+      form.dataset.filterReady = 'true';
+
+      const performSearch = (e) => {
+        if (e) e.preventDefault();
+
+        const query = (input?.value || '').trim().toLowerCase();
+        const propertyType = (typeSelect?.value || 'all').toLowerCase();
+
+        // PopularHotels এবং TopDeals-এর সব হোটেল কার্ড ধরা হচ্ছে
+        const hotelCards = document.querySelectorAll('.popular-card-item, .deal-card-item');
+        let matchedCount = 0;
+
+        hotelCards.forEach(card => {
+          const cardText = (card.textContent || '').toLowerCase();
+          const cardTitle = (card.querySelector('h3')?.textContent || '').toLowerCase();
+
+          // ১. টেক্সট ম্যাচিং (নাম বা লোকেশন)
+          const matchesQuery = !query || cardTitle.includes(query) || cardText.includes(query);
+
+          // ২. প্রপার্টি টাইপ ম্যাচিং
+          let matchesType = true;
+          if (propertyType === 'luxury') {
+            matchesType = cardTitle.includes('westin') || cardTitle.includes('amari') || cardTitle.includes('renaissance') || cardText.includes('5-star') || cardText.includes('luxury');
+          } else if (propertyType === 'boutique') {
+            matchesType = cardTitle.includes('midori') || cardTitle.includes('lakeshore') || cardText.includes('boutique');
+          } else if (propertyType === 'guest-house') {
+            matchesType = cardTitle.includes('guest') || cardTitle.includes('house') || cardText.includes('guest house');
+          }
+
+          if (matchesQuery && matchesType) {
+            card.style.display = 'flex';
+            matchedCount++;
+          } else {
+            card.style.display = 'none';
           }
         });
+
+        // রেজাল্ট ফিডব্যাক বার দেখানো
+        let feedbackBanner = document.getElementById('liveSearchBanner');
+        const track = document.getElementById('popularHotelsTrack') || document.getElementById('hotels');
+
+        if (!feedbackBanner && track) {
+          feedbackBanner = document.createElement('div');
+          feedbackBanner.id = 'liveSearchBanner';
+          feedbackBanner.className = 'w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 my-3';
+          track.parentNode.insertBefore(feedbackBanner, track);
+        }
+
+        if (feedbackBanner) {
+          if (query || propertyType !== 'all') {
+            feedbackBanner.innerHTML = `
+              <div class="bg-emerald-50 border border-emerald-200 p-3 sm:p-3.5 rounded-2xl flex items-center justify-between text-xs sm:text-sm text-emerald-950 font-bold">
+                <span>
+                  Found <strong class="text-emerald-900">${matchedCount} hotel(s)</strong> matching "${query || propertyType}"
+                </span>
+                <button 
+                  id="resetSearchBtn" 
+                  type="button" 
+                  class="bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl text-xs font-black uppercase transition cursor-pointer"
+                >
+                  Clear Search ✕
+                </button>
+              </div>
+            `;
+            feedbackBanner.classList.remove('hidden');
+
+            document.getElementById('resetSearchBtn')?.addEventListener('click', () => {
+              if (input) input.value = '';
+              if (typeSelect) typeSelect.value = 'all';
+              feedbackBanner.classList.add('hidden');
+              hotelCards.forEach(c => c.style.display = 'flex');
+            });
+          } else {
+            feedbackBanner.classList.add('hidden');
+          }
+        }
+
+        // মসৃণ স্ক্রোলিং
+        const targetSection = document.getElementById('hotels');
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+
+      form.addEventListener('submit', performSearch);
+      
+      // অপশন পরিবর্তন করলে স্বয়ংক্রিয় ফিল্টার
+      if (typeSelect) {
+        typeSelect.addEventListener('change', performSearch);
       }
     };
 
-    document.addEventListener('DOMContentLoaded', initSearchScroll);
-    document.addEventListener('astro:page-load', initSearchScroll);
+    document.addEventListener('DOMContentLoaded', setupLiveFilter);
+    document.addEventListener('astro:page-load', setupLiveFilter);
   })();
 </script>
