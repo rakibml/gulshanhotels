@@ -124,7 +124,7 @@
             ]
           };
 
-          // 4. Guest Reviews & Subscribers Collections
+        // 4. Guest Reviews & Subscribers Collections
           let reviewsCollection = null;
           let subscribersCollection = null;
 
@@ -134,6 +134,15 @@
               const textRev = await resRev.text();
               reviewsCollection = jsyaml.load(textRev);
               if (reviewsCollection && Array.isArray(reviewsCollection.fields)) {
+                // 🎯 ফিক্স ২: approved ফিল্ড মিসিং থাকলে অটো যোগ করে দেবে যাতে সামারি এরর না দেয়
+                if (!reviewsCollection.fields.some(f => f.name === 'approved')) {
+                  reviewsCollection.fields.unshift({
+                    label: "Approved Status",
+                    name: "approved",
+                    widget: "boolean",
+                    default: false
+                  });
+                }
                 sanitizeSveltiaFields(reviewsCollection.fields);
               }
             }
