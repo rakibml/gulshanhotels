@@ -5,19 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GulshanHotels Admin - Sveltia CMS</title>
     
-    <!-- Prevent Auto Init before loading modular YML files -->
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
   </head>
   <body>
-    <!-- JS-YAML & Sveltia CMS Scripts -->
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- FAIL-SAFE MODULAR YML AUTO-LOADER -->
+    <!-- UNIVERSAL SMART AUTO-LOADER (PERMANENT SOLUTION) -->
     <script>
-      // ফিল্ড স্যানিটাইজার (Sveltia CMS-এর মিসিং নেম ফিক্সার)
       function sanitizeSveltiaFields(fields) {
         if (!Array.isArray(fields)) return;
         fields.forEach(f => {
@@ -35,15 +32,12 @@
 
       document.addEventListener('DOMContentLoaded', async () => {
         try {
-          // ১. বেস কনফিগ ফেচ
           const mainRes = await fetch('/admin/config.yml');
           const mainText = await mainRes.text();
           const config = jsyaml.load(mainText) || {};
           config.collections = [];
 
-          // ==========================================
-          // ২. HOTEL DIRECTORY (৬টি আলাদা ফাইল থেকে লোড)
-          // ==========================================
+          // ১. হোটেলের ৬টি খণ্ডাংশ স্বয়ংক্রিয়ভাবে জোড়া লাগানো
           const hotelSectionFiles = [
             '/admin/collections/hotel/1-header.yml',
             '/admin/collections/hotel/2-about-rates.yml',
@@ -62,9 +56,7 @@
                 const fieldsArr = jsyaml.load(text);
                 if (Array.isArray(fieldsArr)) hotelFields.push(...fieldsArr);
               }
-            } catch (err) {
-              console.error(`⚠️ Error in hotel section file [${fileUrl}]:`, err);
-            }
+            } catch (e) {}
           }
 
           if (hotelFields.length > 0) {
@@ -81,15 +73,12 @@
             });
           }
 
-          // ==========================================
-          // ৩. HOMEPAGE SETTINGS (popular-hotels.yml থেকে লোড)
-          // ==========================================
+          // ২. পপুলার হোটেলস হোমপেজ সেটিংস
           try {
             const resPop = await fetch('/admin/collections/popular-hotels.yml');
             if (resPop.ok) {
               const textPop = await resPop.text();
               const popFields = jsyaml.load(textPop);
-
               if (Array.isArray(popFields)) {
                 sanitizeSveltiaFields(popFields);
                 config.collections.push({
@@ -100,53 +89,39 @@
                       name: "popular_hotels",
                       label: "Popular Hotels Carousel Section",
                       file: "src/content/homepage/popular-hotels.md",
-                      fields: popFields // সরাসরি popular-hotels.yml থেকে আসবে!
+                      fields: popFields
                     }
                   ]
                 });
               }
             }
-          } catch (err) {
-            console.error('⚠️ Error in popular-hotels.yml, skipping section to keep CMS alive:', err);
-          }
+          } catch (e) {}
 
-          // ==========================================
-          // ৪. GUEST REVIEWS (guest-reviews.yml থেকে লোড)
-          // ==========================================
-          try {
-            const resRev = await fetch('/admin/collections/guest-reviews.yml');
-            if (resRev.ok) {
-              const textRev = await resRev.text();
-              const reviewsCol = jsyaml.load(textRev);
-              if (reviewsCol && Array.isArray(reviewsCol.fields)) {
-                sanitizeSveltiaFields(reviewsCol.fields);
-                config.collections.push(reviewsCol);
+          // ৩. ইউনিভার্সাল অটো-স্ক্যানার (সবগুলো কালেকশন অটোমেটিক হ্যান্ডেল করবে)
+          const allPossibleCollections = [
+            'posts.yml',          // ব্লগ ও ট্রাভেল গাইড
+            'pages.yml',          // সাধারণ পেজসমূহ (About, Terms, Privacy)
+            'guest-reviews.yml',  // রিভিউ অ্যাপ্রুভাল
+            'subscribers.yml'     // নিউজলেটার সাবস্ক্রাইবার্স
+          ];
+
+          for (const colFile of allPossibleCollections) {
+            try {
+              const res = await fetch(`/admin/collections/${colFile}`);
+              if (res.ok) {
+                const text = await res.text();
+                const colData = jsyaml.load(text);
+                if (colData && (Array.isArray(colData.fields) || Array.isArray(colData.files))) {
+                  if (Array.isArray(colData.fields)) sanitizeSveltiaFields(colData.fields);
+                  config.collections.push(colData);
+                }
               }
+            } catch (e) {
+              // ফাইল না থাকলে বা ভুল হলে চুপচাপ স্কিপ করবে, পুরো সাইট ক্র্যাশ করবে না
             }
-          } catch (err) {
-            console.error('⚠️ Error in guest-reviews.yml, skipping section:', err);
           }
 
-          // ==========================================
-          // ৫. SUBSCRIBERS (subscribers.yml থেকে লোড)
-          // ==========================================
-          try {
-            const resSub = await fetch('/admin/collections/subscribers.yml');
-            if (resSub.ok) {
-              const textSub = await resSub.text();
-              const subsCol = jsyaml.load(textSub);
-              if (subsCol && Array.isArray(subsCol.fields)) {
-                sanitizeSveltiaFields(subsCol.fields);
-                config.collections.push(subsCol);
-              }
-            }
-          } catch (err) {
-            console.error('⚠️ Error in subscribers.yml, skipping section:', err);
-          }
-
-          // ==========================================
-          // ৬. INITIALIZE SVELTIA CMS
-          // ==========================================
+          // ৪. Sveltia CMS ইনিশিয়ালাইজ
           if (window.CMS && typeof window.CMS.init === 'function') {
             window.CMS.init({ config });
           } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
@@ -154,7 +129,7 @@
           }
 
         } catch (e) {
-          console.error('Critical CMS Init Failure:', e);
+          console.error('CMS Loader Error:', e);
         }
       });
     </script>
