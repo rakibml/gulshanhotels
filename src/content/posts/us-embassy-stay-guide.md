@@ -7,9 +7,10 @@ category: Embassy Guide
 readTime: 4 min read
 author: Local Concierge Team
 image: https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80
+takeaways: []
 ---
 
-Attending an early morning foreign embassy visa interview in Dhaka can be stressful. Most morning appointments at the **US** [**Embass**](https://medium.com/illumination/the-darker-side-of-growing-old-b12973c28d25)**y, UK VFS Global, or Indian Visa Application Centre (IVAC)** require you to arrive as early as 7:00 AM.
+Attending an early morning foreign embassy visa interview in Dhaka can be stressful. Most morning appointments at the **US** [**_Embass_**](https://medium.com/illumination/the-darker-side-of-growing-old-b12973c28d25)***y*, UK VFS Global, or Indian Visa Application Centre (IVAC)** require you to arrive as early as 7:00 AM.
 
 Staying in central Gulshan 2 or Baridhara allows you to skip Dhaka's infamous traffic and walk or take a 3-minute ride directly to the embassy gate.
 
