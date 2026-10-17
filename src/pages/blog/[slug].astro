@@ -1,0 +1,169 @@
+---
+// src/pages/blog/[slug].astro (Dynamic Travel Guide & Post Template with Article SEO Schema)
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// ১. সব পোস্টের স্লাগ জেনারেট করা (SSG Routing)
+export async function getStaticPaths() {
+  let posts: any[] = [];
+  try {
+    const postCol = await getCollection('posts');
+    if (Array.isArray(postCol) && postCol.length > 0) {
+      posts = postCol;
+    }
+  } catch (e) {}
+
+  if (posts.length === 0) {
+    try {
+      const rawGlob = import.meta.glob('../../content/posts/*.md', { eager: true });
+      posts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+        slug: filePath.split('/').pop()?.replace('.md', ''),
+        data: item.frontmatter || {},
+        render: async () => ({ Content: item.Content || item.default })
+      }));
+    } catch (e) {}
+  }
+
+  return posts.map(post => ({
+    params: { slug: post.slug || post.id?.replace(/\.md$/, '') },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const data = post?.data || {};
+
+// পোস্টের মেটাডাটা
+const title = data.title || "Gulshan Travel Guide";
+const description = data.description || "Expert guide and recommendations for staying in Gulshan, Dhaka.";
+const publishDate = data.date || "Recent";
+const category = data.category || "Travel Guide";
+const readTime = data.readTime || "5 min read";
+const image = data.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
+const author = data.author || "GulshanHotels Editorial Team";
+
+// মার্কডাউন কনটেন্ট রেন্ডারার
+const { Content } = post.render ? await post.render() : { Content: null };
+
+// গুগল আর্টিকেল এসইও স্কিমা (BlogPosting Schema)
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "image": image,
+  "author": {
+    "@type": "Person",
+    "name": author
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "GulshanHotels.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://gulshanhotels.com/favicon.svg"
+    }
+  },
+  "datePublished": publishDate
+};
+---
+
+<Layout title={`${title} — GulshanHotels.com`} description={description} image={image}>
+  
+  <!-- GOOGLE ARTICLE SCHEMA -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <article class="w-full bg-white text-slate-900 pt-6 pb-16">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+      
+      <!-- BREADCRUMBS -->
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 py-3 text-left">
+        <a href="/" class="hover:text-emerald-800 transition">Home</a>
+        <span>/</span>
+        <a href="/blog" class="hover:text-emerald-800 transition">Guides & Posts</a>
+        <span>/</span>
+        <span class="text-slate-700 truncate max-w-xs">{title}</span>
+      </nav>
+
+      <!-- ARTICLE HEADER (CENTERED OR COMPACT) -->
+      <header class="max-w-4xl mx-auto text-left pt-4 pb-6 space-y-4">
+        
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-200">
+            {category}
+          </span>
+          <span class="text-xs text-slate-400 font-medium">
+            Published: {publishDate}
+          </span>
+          <span class="text-xs text-slate-400 font-medium">
+            • {readTime}
+          </span>
+        </div>
+
+        <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          {title}
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+          {description}
+        </p>
+
+        <!-- AUTHOR ROW -->
+        <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <div class="w-10 h-10 rounded-full bg-[#0d3b23] text-white flex items-center justify-center font-black text-sm shrink-0">
+            {author.charAt(0)}
+          </div>
+          <div class="text-xs">
+            <span class="font-bold text-slate-900 block">{author}</span>
+            <span class="text-slate-400">Verified Local Hospitality Specialist</span>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- FEATURED HERO IMAGE -->
+      <div class="max-w-4xl mx-auto my-6 aspect-[16/9] rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80">
+        <img 
+          src={image} 
+          alt={title}
+          width="1200"
+          height="675"
+          fetchpriority="high"
+          decoding="async"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <!-- MAIN ARTICLE BODY (PROSE TYPOGRAPHY) -->
+      <div class="max-w-3xl mx-auto text-left prose prose-slate prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl pt-4">
+        
+        {Content ? <Content /> : (
+          <div>
+            <p>
+              Gulshan is widely regarded as the diplomatic and commercial center of Dhaka. Whether you are arriving for business summits, embassy appointments, or a relaxing weekend getaway, finding the right hotel makes all the difference.
+            </p>
+            <h2>Strategic Locations in Gulshan</h2>
+            <p>
+              When choosing where to stay, consider the distinction between Gulshan 1 and Gulshan 2. Gulshan 1 is ideal for corporate headquarters and central connectivity, while Gulshan 2 provides tranquil lake parks and 5-star embassy security.
+            </p>
+          </div>
+        )}
+
+      </div>
+
+      <!-- IN-ARTICLE HOTEL BOOKING CALLOUT BOX -->
+      <div class="max-w-3xl mx-auto my-12 bg-emerald-50/60 border border-emerald-200/90 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-left">
+        <div class="space-y-1.5">
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800 block">Plan Your Stay</span>
+          <h3 class="text-xl sm:text-2xl font-black text-slate-900 font-serif">Visiting Gulshan Soon?</h3>
+          <p class="text-xs sm:text-sm text-slate-600">Compare verified rates and direct deals across all major 5-star hotels and boutique guest houses.</p>
+        </div>
+        <a href="/#hotels" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider shrink-0 transition shadow-xs">
+          Explore Hotels ➔
+        </a>
+      </div>
+
+    </div>
+  </article>
+
+</Layout>
