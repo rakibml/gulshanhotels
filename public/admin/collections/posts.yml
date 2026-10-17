@@ -7,6 +7,7 @@ slug: "{{slug}}"
 summary: "{{title}} — {{category}} ({{date}})"
 sortable_fields: ["date", "title"]
 
+# ক্যাটাগরি অনুযায়ী ফিল্টার করার বাটন
 view_filters:
   - label: "Travel Guides"
     field: "category"
@@ -17,14 +18,25 @@ view_filters:
   - label: "Food & Dining"
     field: "category"
     pattern: "Food & Dining"
+  - label: "Hotel Reviews"
+    field: "category"
+    pattern: "Hotel Review"
 
 fields:
-  - { label: "Post Title", name: "title", widget: "string" }
-  - { label: "URL Slug (e.g. 5-star-hotels-in-gulshan)", name: "slug", widget: "string", hint: "ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন।" }
-  - { label: "Short Description / Excerpt", name: "description", widget: "text" }
-  
-  # 🎯 Sveltia CMS এর জন্য সঠিক DateTime উইজেট:
-  - label: "Publish Date"
+  - label: "Post Title (মূল শিরোনাম)"
+    name: "title"
+    widget: "string"
+
+  - label: "URL Slug (e.g. 5-star-hotels-in-gulshan)"
+    name: "slug"
+    widget: "string"
+    hint: "শুধুমাত্র ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন।"
+
+  - label: "Short Description / Excerpt (গুগল এসইও ডেসক্রিপশন)"
+    name: "description"
+    widget: "text"
+
+  - label: "Publish Date (প্রকাশের তারিখ)"
     name: "date"
     widget: "datetime"
     date_format: "MMM DD, YYYY"
@@ -41,7 +53,28 @@ fields:
       - "Diplomatic Living"
     default: "Travel Guide"
 
-  - { label: "Read Time (e.g. 4 min read)", name: "readTime", widget: "string", default: "4 min read" }
-  - { label: "Author Name", name: "author", widget: "string", default: "Local Concierge Team" }
-  - { label: "Featured Image", name: "image", widget: "image" }
-  - { label: "Article Content", name: "body", widget: "markdown" }
+  - label: "Estimated Read Time"
+    name: "readTime"
+    widget: "string"
+    default: "4 min read"
+
+  - label: "Author Name"
+    name: "author"
+    widget: "string"
+    default: "Local Concierge Team"
+
+  - label: "Featured Cover Image (বড় কাভার ফটো)"
+    name: "image"
+    widget: "image"
+
+  # 🎯 নতুন যুক্ত: গুগলের Featured Snippet এবং আর্টিকেলের মাথার Key Takeaways বক্স
+  - label: "📌 Key Takeaways (আর্টিকেলের শুরুতে ৩-৪টি মূল পয়েন্ট)"
+    name: "takeaways"
+    widget: "list"
+    required: false
+    hint: "আর্টিকেলের মূল ৩-৪টি সিদ্ধান্ত বা পয়েন্ট লিখুন, যা পাঠক এক নজরে দেখতে পাবে।"
+    field: { label: "Takeaway Point", name: "point", widget: "string" }
+
+  - label: "Article Content (মূল লেখার বডি)"
+    name: "body"
+    widget: "markdown"
