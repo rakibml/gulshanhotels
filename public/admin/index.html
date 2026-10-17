@@ -15,37 +15,35 @@
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- AUTOMATICALLY FETCHES, FIXES AND MERGES YOUR MODULAR YML FILES -->
+    <!-- FAIL-SAFE MODULAR YML AUTO-LOADER -->
     <script>
-      // Recursive Schema Normalizer for Sveltia CMS
+      // ফিল্ড স্যানিটাইজার (Sveltia CMS-এর মিসিং নেম ফিক্সার)
       function sanitizeSveltiaFields(fields) {
         if (!Array.isArray(fields)) return;
         fields.forEach(f => {
           if (f && typeof f === 'object') {
-            // Auto-inject missing name inside single field list items
             if (f.field && typeof f.field === 'object' && !f.field.name) {
               f.field.name = f.field.label 
                 ? f.field.label.toLowerCase().replace(/[^a-z0-9]/g, '_') 
                 : (f.name ? f.name + '_item' : 'item');
             }
-            if (Array.isArray(f.fields)) {
-              sanitizeSveltiaFields(f.fields);
-            }
-            if (f.field && Array.isArray(f.field.fields)) {
-              sanitizeSveltiaFields(f.field.fields);
-            }
+            if (Array.isArray(f.fields)) sanitizeSveltiaFields(f.fields);
+            if (f.field && Array.isArray(f.field.fields)) sanitizeSveltiaFields(f.field.fields);
           }
         });
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
         try {
-          // 1. Fetch main base config
+          // ১. বেস কনফিগ ফেচ
           const mainRes = await fetch('/admin/config.yml');
           const mainText = await mainRes.text();
           const config = jsyaml.load(mainText) || {};
+          config.collections = [];
 
-          // 2. Fetch 6 individual section YML files for Hotel Directory
+          // ==========================================
+          // ২. HOTEL DIRECTORY (৬টি আলাদা ফাইল থেকে লোড)
+          // ==========================================
           const hotelSectionFiles = [
             '/admin/collections/hotel/1-header.yml',
             '/admin/collections/hotel/2-about-rates.yml',
@@ -56,136 +54,107 @@
           ];
 
           let hotelFields = [];
-
           for (const fileUrl of hotelSectionFiles) {
             try {
               const res = await fetch(fileUrl);
               if (res.ok) {
                 const text = await res.text();
                 const fieldsArr = jsyaml.load(text);
-                if (Array.isArray(fieldsArr)) {
-                  hotelFields.push(...fieldsArr);
-                }
+                if (Array.isArray(fieldsArr)) hotelFields.push(...fieldsArr);
               }
             } catch (err) {
-              console.warn('Could not load hotel YML section file:', fileUrl, err);
+              console.error(`⚠️ Error in hotel section file [${fileUrl}]:`, err);
             }
           }
 
-          // AUTO-FIX MISSING NAMES FOR SVELTIA CMS (Fixes gallery, photos, badges error!)
-          sanitizeSveltiaFields(hotelFields);
+          if (hotelFields.length > 0) {
+            sanitizeSveltiaFields(hotelFields);
+            config.collections.push({
+              name: "hotels",
+              label: "🏨 Hotels Directory",
+              label_singular: "Hotel",
+              folder: "src/content/hotels",
+              create: true,
+              slug: "{{slug}}",
+              summary: "{{title}} - Link: /{{slug}}",
+              fields: hotelFields
+            });
+          }
 
-          // 3. Homepage Settings Collection
-          const homepageCollection = {
-            name: "homepage",
-            label: "🏠 Homepage Settings",
-            files: [
-              {
-                name: "popular_hotels",
-                label: "Popular Hotels Carousel Section",
-                file: "src/content/homepage/popular-hotels.md",
-                fields: [
-                  {
-                    label: "Show Popular Hotels Section on Homepage?",
-                    name: "enable_popular_hotels",
-                    widget: "boolean",
-                    default: true
-                  },
-                  {
-                    label: "Section Title",
-                    name: "popular_hotels_title",
-                    widget: "string",
-                    default: "Popular Hotels in Gulshan, Dhaka"
-                  },
-                  {
-                    label: "Section Subtitle",
-                    name: "popular_hotels_subtitle",
-                    widget: "text",
-                    default: "Handpicked top luxury & executive stays recommended by verified guest reviews."
-                  },
-                  {
-                    label: "Select Hotels & Drag to Set Serial Order",
-                    name: "featured_hotels",
-                    widget: "list",
-                    required: false,
-                    hint: "Add hotels from dropdown and drag & drop to change serial order!",
-                    field: {
-                      label: "Select Hotel",
-                      name: "hotel_slug",
-                      widget: "relation",
-                      collection: "hotels",
-                      search_fields: ["title"],
-                      value_field: "{{slug}}",
-                      display_fields: ["title"]
+          // ==========================================
+          // ৩. HOMEPAGE SETTINGS (popular-hotels.yml থেকে লোড)
+          // ==========================================
+          try {
+            const resPop = await fetch('/admin/collections/popular-hotels.yml');
+            if (resPop.ok) {
+              const textPop = await resPop.text();
+              const popFields = jsyaml.load(textPop);
+
+              if (Array.isArray(popFields)) {
+                sanitizeSveltiaFields(popFields);
+                config.collections.push({
+                  name: "homepage",
+                  label: "🏠 Homepage Settings",
+                  files: [
+                    {
+                      name: "popular_hotels",
+                      label: "Popular Hotels Carousel Section",
+                      file: "src/content/homepage/popular-hotels.md",
+                      fields: popFields // সরাসরি popular-hotels.yml থেকে আসবে!
                     }
-                  }
-                ]
+                  ]
+                });
               }
-            ]
-          };
+            }
+          } catch (err) {
+            console.error('⚠️ Error in popular-hotels.yml, skipping section to keep CMS alive:', err);
+          }
 
-        // 4. Guest Reviews & Subscribers Collections
-          let reviewsCollection = null;
-          let subscribersCollection = null;
-
+          // ==========================================
+          // ৪. GUEST REVIEWS (guest-reviews.yml থেকে লোড)
+          // ==========================================
           try {
             const resRev = await fetch('/admin/collections/guest-reviews.yml');
             if (resRev.ok) {
               const textRev = await resRev.text();
-              reviewsCollection = jsyaml.load(textRev);
-              if (reviewsCollection && Array.isArray(reviewsCollection.fields)) {
-                // 🎯 ফিক্স ২: approved ফিল্ড মিসিং থাকলে অটো যোগ করে দেবে যাতে সামারি এরর না দেয়
-                if (!reviewsCollection.fields.some(f => f.name === 'approved')) {
-                  reviewsCollection.fields.unshift({
-                    label: "Approved Status",
-                    name: "approved",
-                    widget: "boolean",
-                    default: false
-                  });
-                }
-                sanitizeSveltiaFields(reviewsCollection.fields);
+              const reviewsCol = jsyaml.load(textRev);
+              if (reviewsCol && Array.isArray(reviewsCol.fields)) {
+                sanitizeSveltiaFields(reviewsCol.fields);
+                config.collections.push(reviewsCol);
               }
             }
-          } catch (err) {}
+          } catch (err) {
+            console.error('⚠️ Error in guest-reviews.yml, skipping section:', err);
+          }
 
+          // ==========================================
+          // ৫. SUBSCRIBERS (subscribers.yml থেকে লোড)
+          // ==========================================
           try {
             const resSub = await fetch('/admin/collections/subscribers.yml');
             if (resSub.ok) {
               const textSub = await resSub.text();
-              subscribersCollection = jsyaml.load(textSub);
-              if (subscribersCollection && Array.isArray(subscribersCollection.fields)) {
-                sanitizeSveltiaFields(subscribersCollection.fields);
+              const subsCol = jsyaml.load(textSub);
+              if (subsCol && Array.isArray(subsCol.fields)) {
+                sanitizeSveltiaFields(subsCol.fields);
+                config.collections.push(subsCol);
               }
             }
-          } catch (err) {}
+          } catch (err) {
+            console.error('⚠️ Error in subscribers.yml, skipping section:', err);
+          }
 
-          // 5. Build Hotel Collection
-          const hotelCollection = {
-            name: "hotels",
-            label: "🏨 Hotels Directory",
-            label_singular: "Hotel",
-            folder: "src/content/hotels",
-            create: true,
-            slug: "{{slug}}",
-            summary: "{{title}} - Link: /{{slug}}",
-            fields: hotelFields
-          };
-
-          // 6. Merge Collections
-          config.collections = [];
-          config.collections.push(hotelCollection);
-          config.collections.push(homepageCollection);
-          if (reviewsCollection) config.collections.push(reviewsCollection);
-          if (subscribersCollection) config.collections.push(subscribersCollection);
-
-          // 7. Initialize Sveltia CMS
+          // ==========================================
+          // ৬. INITIALIZE SVELTIA CMS
+          // ==========================================
           if (window.CMS && typeof window.CMS.init === 'function') {
             window.CMS.init({ config });
           } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
             window.SveltiaCMS.init({ config });
           }
+
         } catch (e) {
-          console.error('Manual CMS Init Error:', e);
+          console.error('Critical CMS Init Failure:', e);
         }
       });
     </script>
