@@ -4,8 +4,12 @@ label_singular: "Review"
 folder: "src/content/reviews"
 create: true
 slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-summary: "{{approved ? '✅ Approved' : '🔴 NEW / PENDING'}} | {{hotel}} — {{name}} ({{rating}}★)"
+
+# 🎯 ফিক্স: Sveltia CMS এর সঠিক পাইপ (|) টার্নারি সিনট্যাক্স ব্যবহার করা হয়েছে
+summary: "{{approved | ternary('✅ Approved', '🔴 NEW / PENDING')}} | {{hotel}} — {{name}} ({{rating}}★)"
+
 sortable_fields: ["date", "hotel", "approved", "rating"]
+
 view_filters:
   - label: "🔴 New / Unapproved Only"
     field: "approved"
@@ -13,6 +17,7 @@ view_filters:
   - label: "✅ Approved Only"
     field: "approved"
     pattern: true
+
 view_groups:
   - label: "Approval Status"
     field: "approved"
