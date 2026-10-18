@@ -7,6 +7,8 @@ category: Embassy Guide
 readTime: 4 min read
 author: Local Concierge Team
 image: https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80
+recommended_hotels:
+  - amari-dhaka
 takeaways: []
 ---
 
