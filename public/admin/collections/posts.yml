@@ -7,7 +7,6 @@ slug: "{{slug}}"
 summary: "{{title}} — {{category}} ({{date}})"
 sortable_fields: ["date", "title"]
 
-# ক্যাটাগরি অনুযায়ী ফিল্টার করার বাটন
 view_filters:
   - label: "Travel Guides"
     field: "category"
@@ -18,9 +17,6 @@ view_filters:
   - label: "Food & Dining"
     field: "category"
     pattern: "Food & Dining"
-  - label: "Hotel Reviews"
-    field: "category"
-    pattern: "Hotel Review"
 
 fields:
   - label: "Post Title (মূল শিরোনাম)"
@@ -30,13 +26,12 @@ fields:
   - label: "URL Slug (e.g. 5-star-hotels-in-gulshan)"
     name: "slug"
     widget: "string"
-    hint: "শুধুমাত্র ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন।"
 
-  - label: "Short Description / Excerpt (গুগল এসইও ডেসক্রিপশন)"
+  - label: "Short Description / Excerpt"
     name: "description"
     widget: "text"
 
-  - label: "Publish Date (প্রকাশের তারিখ)"
+  - label: "Publish Date"
     name: "date"
     widget: "datetime"
     date_format: "MMM DD, YYYY"
@@ -63,17 +58,30 @@ fields:
     widget: "string"
     default: "Local Concierge Team"
 
-  - label: "Featured Cover Image (বড় কাভার ফটো)"
+  - label: "Featured Cover Image"
     name: "image"
     widget: "image"
 
-  # 🎯 নতুন যুক্ত: গুগলের Featured Snippet এবং আর্টিকেলের মাথার Key Takeaways বক্স
-  - label: "📌 Key Takeaways (আর্টিকেলের শুরুতে ৩-৪টি মূল পয়েন্ট)"
+  # 🎯 হোটেল এম্বেড অপশন (ড্রপডাউন দিয়ে সিলেক্ট করার জন্য)
+  - label: "🏨 Recommended Hotels in this Guide (Live Booking Cards)"
+    name: "recommended_hotels"
+    widget: "list"
+    required: false
+    hint: "আর্টিকেলের শেষে লাইভ বুকিং কার্ড হিসেবে যে যে হোটেল দেখাতে চান সেগুলো ড্রপডাউন থেকে সিলেক্ট করুন।"
+    field:
+      label: "Select Hotel"
+      name: "hotel_slug"
+      widget: "relation"
+      collection: "hotels"
+      search_fields: ["title"]
+      value_field: "{{slug}}"
+      display_fields: ["title"]
+
+  - label: "📌 Key Takeaways"
     name: "takeaways"
     widget: "list"
     required: false
-    hint: "আর্টিকেলের মূল ৩-৪টি সিদ্ধান্ত বা পয়েন্ট লিখুন, যা পাঠক এক নজরে দেখতে পাবে।"
-    field: { label: "Takeaway Point", name: "point", widget: "string" }
+    field: { label: "Point", name: "point", widget: "string" }
 
   - label: "Article Content (মূল লেখার বডি)"
     name: "body"
