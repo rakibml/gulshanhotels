@@ -1,5 +1,5 @@
 ---
-// src/pages/blog/[slug].astro (With Live Interactive Hotel Embed Cards)
+// src/pages/blog/[slug].astro (Balanced Centered Editorial Layout - No Awkward Sidebars)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -65,8 +65,7 @@ const matchedHotels = allHotels.filter(h => {
   });
 });
 
-// ফলব্যাক: যদি পোস্টের ফ্রন্টম্যাটারে নির্দিষ্ট হোটেল না থাকে, তবে সেরা ২টি হোটেল অটোমেটিক সাজেস্ট করবে
-const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 2);
+const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 3);
 
 const takeaways = Array.isArray(data.takeaways) && data.takeaways.length > 0 
   ? data.takeaways 
@@ -93,20 +92,22 @@ const siteUrl = Astro.url.href;
   </div>
 
   <article class="w-full bg-white text-slate-900 pt-6 pb-20">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+    <!-- CENTERED CONTAINER (কোনো একপাশে চ্যাপ্টা সাইডবার ছাড়া পারফেক্ট রিডিং উইডথ) -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 space-y-8 text-left">
       
       <!-- BREADCRUMBS -->
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 py-3 text-left">
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span>/</span>
         <a href="/blog" class="hover:text-emerald-800 transition">Travel Guides</a>
         <span>/</span>
-        <span class="text-slate-800 truncate max-w-xs">{title}</span>
+        <span class="text-slate-700 truncate max-w-xs">{title}</span>
       </nav>
 
       <!-- ARTICLE HEADER -->
-      <header class="max-w-4xl mx-auto text-left pt-3 pb-6 space-y-4">
-        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+      <header class="space-y-4">
+        
+        <div class="flex flex-wrap items-center gap-2.5">
           <span class="bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-200">
             {category}
           </span>
@@ -114,12 +115,9 @@ const siteUrl = Astro.url.href;
             Updated: <strong class="text-slate-700">{publishDate}</strong>
           </span>
           <span class="text-xs text-slate-400 font-medium">• ⏱️ {readTime}</span>
-          <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50/70 px-2.5 py-0.5 rounded-md border border-emerald-100">
-            ✓ Fact-Checked
-          </span>
         </div>
 
-        <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+        <h1 class="font-serif text-3xl sm:text-4xl lg:text-[44px] font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h1>
 
@@ -127,176 +125,133 @@ const siteUrl = Astro.url.href;
           {description}
         </p>
 
-        <!-- AUTHOR & SHARE BAR -->
-        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- AUTHOR & SHARE BAR ROW -->
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-[#0d3b23] text-white flex items-center justify-center font-black text-sm shrink-0">
               {author.charAt(0)}
             </div>
-            <div class="text-xs text-left">
+            <div class="text-xs">
               <span class="font-bold text-slate-900 block">{author}</span>
-              <span class="text-slate-400">Local Gulshan Hospitality Specialist</span>
+              <span class="text-slate-400">Gulshan Hospitality Specialist</span>
             </div>
           </div>
 
-          <!-- Social Share Buttons -->
-          <div class="flex items-center gap-2 text-xs">
-            <span class="text-slate-400 font-bold text-[11px] uppercase mr-1">Share:</span>
+          <!-- Share Icons -->
+          <div class="flex items-center gap-2">
             <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + siteUrl)}`} target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition shadow-xs" title="Share on WhatsApp">
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
-            </a>
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl)}`} target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:opacity-90 transition shadow-xs" title="Share on Facebook">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 3.865 10.99 9.1 11.823v-8.367h-3.04v-3.456h3.04v-2.636c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.456h-2.796v8.367c5.235-.833 9.1-5.833 9.1-11.823z"/></svg>
             </a>
             <button id="copyLinkBtn" type="button" class="h-8 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <span id="copyLinkText">Copy Link</span>
             </button>
           </div>
         </div>
+
       </header>
 
       <!-- FEATURED COVER PHOTO -->
-      <div class="max-w-4xl mx-auto my-6">
-        <div class="relative aspect-[16/9] rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80">
-          <img src={image} alt={title} width="1200" height="675" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
+      <div class="w-full">
+        <div class="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80">
+          <img src={image} alt={title} width="1200" height="750" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
         </div>
       </div>
 
-      <!-- KEY TAKEAWAYS (SNIPPET BOX) -->
-      <div class="max-w-3xl mx-auto my-8 bg-slate-50 border border-slate-200/90 rounded-2xl p-5 sm:p-6 text-left space-y-3">
-        <div class="flex items-center gap-2 text-slate-900 font-bold text-sm uppercase tracking-wider">
-          <span class="text-emerald-700 text-base">📌</span>
-          <span>Key Takeaways at a Glance:</span>
+      <!-- KEY TAKEAWAYS (CLEAN COMPACT BOX) -->
+      <div class="bg-[#f5f8f6] border-l-4 border-emerald-800 rounded-r-2xl p-5 space-y-2.5">
+        <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
+          <span>📌 Key Takeaways at a Glance</span>
         </div>
-        <ul class="space-y-2 text-xs sm:text-sm text-slate-700 font-medium">
+        <ul class="space-y-1.5 text-xs sm:text-sm text-slate-700 font-medium">
           {takeaways.map((item: string) => (
-            <li class="flex items-start gap-2.5">
-              <span class="text-emerald-700 font-bold text-sm shrink-0">✓</span>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-700 font-bold shrink-0">✓</span>
               <span>{item}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <!-- 2-COLUMN ARTICLE LAYOUT -->
-      <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 text-left pt-2">
-        
-        <!-- MAIN CONTENT (lg:col-span-8) -->
-        <div class="lg:col-span-8 space-y-6">
-          <div 
-            id="articleBodyContent" 
-            class="prose prose-slate max-w-none prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl"
-          >
-            {Content ? <Content /> : <p>Article content loading...</p>}
+      <!-- ARTICLE CONTENT BODY -->
+      <div 
+        id="articleBodyContent" 
+        class="prose prose-slate max-w-none prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl pt-2"
+      >
+        {Content ? <Content /> : <p>Article content loading...</p>}
+      </div>
+
+      <!-- RECOMMENDED HOTELS (CLEAN HORIZONTAL CARDS) -->
+      {displayHotels.length > 0 && (
+        <div class="pt-8 border-t border-slate-200 space-y-4">
+          <div class="space-y-0.5">
+            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800">Featured Accommodations</span>
+            <h3 class="font-serif text-2xl font-black text-slate-900">Recommended Hotels Mentioned in this Guide</h3>
           </div>
 
-          <!-- 🎯 2. IN-ARTICLE REAL HOTEL BOOKING CARDS (কনভার্সন বুস্টার) -->
-          {displayHotels.length > 0 && (
-            <div class="my-10 pt-8 border-t border-slate-200 space-y-4">
-              <div class="space-y-1">
-                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800">Featured Properties in this Guide</span>
-                <h3 class="font-serif text-2xl font-black text-slate-900">Recommended Stays Mentioned:</h3>
-              </div>
+          <div class="space-y-3 pt-2">
+            {displayHotels.map((h: any) => {
+              const hd = h.data || {};
+              const hTitle = hd.title || hd.name || "Hotel";
+              const hSlug = (h.slug || h.id || hd.slug || '').replace(/\.md$/, '');
+              const hImg = hd.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=75";
+              const hPrice = hd.price || "$120";
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                {displayHotels.map((h: any) => {
-                  const hd = h.data || {};
-                  const hTitle = hd.title || hd.name || "Hotel";
-                  const hSlug = (h.slug || h.id || hd.slug || '').replace(/\.md$/, '');
-                  const hImg = hd.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=75";
-                  const hPrice = hd.price || "$120";
-
-                  return (
-                    <div class="bg-white rounded-2xl border border-slate-200 hover:border-slate-400 p-3.5 flex flex-col justify-between transition-colors shadow-none text-left">
-                      <div class="space-y-2.5">
-                        <div class="aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-100 relative">
-                          <img src={hImg} alt={hTitle} width="350" height="220" loading="lazy" decoding="async" class="w-full h-full object-cover" />
-                          <span class="absolute top-2 left-2 bg-[#0d3b23] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded">
-                            Verified Stay
-                          </span>
-                        </div>
-                        <div>
-                          <h4 class="font-bold text-slate-900 text-sm leading-tight capitalize truncate">{hTitle}</h4>
-                          <span class="text-[11px] text-slate-500 truncate block mt-0.5">{hd.location || "Gulshan, Dhaka"}</span>
-                        </div>
-                      </div>
-
-                      <div class="pt-3 border-t border-slate-100 flex items-center justify-between mt-2">
-                        <div>
-                          <span class="text-[10px] text-slate-400 block leading-none">Starting from</span>
-                          <span class="text-sm font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
-                        </div>
-                        <a href={`/${hSlug}`} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition">
-                          Check Rates ➔
-                        </a>
-                      </div>
+              return (
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200 hover:border-slate-400 bg-white transition-colors">
+                  <div class="flex items-center gap-4 min-w-0">
+                    <img src={hImg} alt={hTitle} width="160" height="100" loading="lazy" class="w-24 sm:w-32 h-20 rounded-xl object-cover shrink-0 border border-slate-100" />
+                    <div class="min-w-0">
+                      <span class="text-[9px] font-black uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mb-1">Verified Stay</span>
+                      <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-tight capitalize truncate">{hTitle}</h4>
+                      <p class="text-xs text-slate-500 truncate mt-0.5">{hd.location || "Gulshan, Dhaka"}</p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                  </div>
 
-          <!-- CONCIERGE CALLOUT -->
-          <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-10">
-            <span class="text-emerald-300 text-xs font-black uppercase tracking-widest block">Direct Booking Concierge</span>
-            <h3 class="font-serif text-2xl sm:text-3xl font-black">Planning Your Visit to Gulshan?</h3>
-            <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
-              Our local audit team verifies rates, embassy distances, and checkout policies daily. Explore handpicked 5-star hotels and boutique stays with zero booking markups.
-            </p>
-            <div class="pt-2">
-              <a href="/#hotels" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-xl uppercase tracking-wider transition">
-                Explore Verified Hotels ➔
-              </a>
-            </div>
+                  <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block leading-none">Starting from</span>
+                      <span class="text-base font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
+                    </div>
+                    <a href={`/${hSlug}`} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
+                      View Hotel ➔
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+      )}
 
-        <!-- RIGHT SIDEBAR (STICKY NAVIGATION) -->
-        <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
-            <span class="text-xs font-black uppercase tracking-wider text-slate-900 block border-b border-slate-200 pb-2">
-              🧭 Quick Travel Navigation
-            </span>
-            <ul class="space-y-2 text-xs font-bold text-slate-700">
-              <li><a href="/#hotels" class="hover:text-emerald-800 transition flex items-center justify-between"><span>🏨 Popular Gulshan Hotels</span> <span>➔</span></a></li>
-              <li><a href="/#deals" class="hover:text-emerald-800 transition flex items-center justify-between"><span>🔥 Top Price Drop Deals</span> <span>➔</span></a></li>
-              <li><a href="/#gulshan-lifestyle" class="hover:text-emerald-800 transition flex items-center justify-between"><span>🌳 Parks & Wellness Spas</span> <span>➔</span></a></li>
-              <li><a href="/#faq" class="hover:text-emerald-800 transition flex items-center justify-between"><span>❓ Gulshan Stay FAQs</span> <span>➔</span></a></li>
-            </ul>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-left space-y-2">
-            <div class="flex items-center gap-2 text-emerald-900 font-bold text-xs uppercase">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Need Quick Assistance?</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">
-              Have questions about foreign embassy appointments or airport pickups?
-            </p>
-            <a href="/about" class="inline-block text-xs font-black text-emerald-900 underline hover:text-emerald-700">
-              Contact Local Concierge Team ➔
-            </a>
-          </div>
-        </aside>
-
+      <!-- CONCIERGE CALLOUT BANNER -->
+      <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-8">
+        <span class="text-emerald-300 text-xs font-black uppercase tracking-widest block">Direct Concierge</span>
+        <h3 class="font-serif text-2xl font-black">Need Advice for Your Gulshan Visit?</h3>
+        <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
+          Our local audit team verifies rates, embassy distances, and checkout policies daily. Contact our desk for hotel recommendations and airport pickups.
+        </p>
+        <div class="pt-2">
+          <a href="/about" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-xl uppercase tracking-wider transition">
+            Ask Our Concierge ➔
+          </a>
+        </div>
       </div>
 
       <!-- RELATED GUIDES -->
       {relatedPosts.length > 0 && (
-        <div class="max-w-4xl mx-auto mt-16 pt-10 border-t border-slate-200 text-left space-y-6">
-          <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900">Related Gulshan Travel Guides</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="pt-10 border-t border-slate-200 space-y-4">
+          <h3 class="font-serif text-xl sm:text-2xl font-black text-slate-900">More Gulshan Travel Guides</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedPosts.map((rel: any) => {
               const rData = rel.data || {};
               const rSlug = rel.slug || rel.id?.replace(/\.md$/, '');
               return (
                 <a href={`/blog/${rSlug}`} class="group block space-y-2 cursor-pointer">
-                  <div class="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80">
+                  <div class="aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80">
                     <img src={rData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=500&q=75"} alt={rData.title} loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-104 transition duration-300" />
                   </div>
                   <span class="text-[10px] font-black uppercase text-emerald-800 tracking-wider block">{rData.category || "Guide"}</span>
-                  <h4 class="font-bold text-slate-900 text-sm leading-snug group-hover:text-emerald-800 transition line-clamp-2">{rData.title}</h4>
+                  <h4 class="font-bold text-slate-900 text-xs sm:text-sm leading-snug group-hover:text-emerald-800 transition line-clamp-2">{rData.title}</h4>
                 </a>
               );
             })}
