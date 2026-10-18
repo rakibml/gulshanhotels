@@ -1,5 +1,5 @@
 ---
-// src/components/PageView.astro (Modular Luxury Page Template)
+// src/components/PageView.astro (Image First -> Breadcrumbs -> Title -> Content Flow)
 import Layout from '../layouts/Layout.astro';
 
 interface Props {
@@ -30,60 +30,57 @@ if (typeof entry?.render === 'function') {
   description={pageDescription || `Read about ${pageTitle} on GulshanHotels.com`}
   image={pData.hero_image || undefined}
 >
-  <main class="w-full bg-white text-slate-900 pt-6 pb-20">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
-      
-      <!-- BREADCRUMBS -->
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
-        <a href="/" class="hover:text-emerald-800 transition">Home</a>
-        <span>/</span>
-        <span class="text-slate-800 truncate max-w-xs">{pageTitle}</span>
-      </nav>
-
-      <!-- 1. HERO HEADER WITH BADGE & SUBTITLE -->
-      <header class="max-w-4xl mx-auto text-center space-y-4 pt-2">
-        {pData.badge && (
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider border border-emerald-200">
-            <span>{pData.badge}</span>
-          </div>
-        )}
-
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
-          {pageTitle}
-        </h1>
-
-        {pageDescription && (
-          <p class="text-base sm:text-xl text-slate-600 font-normal leading-relaxed max-w-3xl mx-auto">
-            {pageDescription}
-          </p>
-        )}
-      </header>
-
-      <!-- 2. OPTIONAL HERO BANNER IMAGE -->
-      {pData.hero_image && (
-        <div class="max-w-5xl mx-auto rounded-3xl overflow-hidden aspect-[21/9] bg-slate-100 border border-slate-200/90 shadow-xs">
+  <main class="w-full bg-white text-slate-900 pt-3 sm:pt-4 pb-20">
+    
+    <!-- ================= 1. COVER IMAGE (হেডারের ঠিক নিচে সবার উপরে) ================= -->
+    {pData.hero_image && (
+      <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-6 sm:mb-8">
+        <div class="relative aspect-[21/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/90 shadow-xs">
           <img 
             src={pData.hero_image} 
             alt={pageTitle} 
-            width="1400" 
-            height="600" 
+            width="1550" 
+            height="660" 
             fetchpriority="high"
             decoding="async" 
             class="w-full h-full object-cover" 
           />
         </div>
-      )}
+      </div>
+    )}
 
-      <!-- 3. OPTIONAL STATS COUNTER STRIP -->
+    <!-- ================= 2. BREADCRUMBS -> TITLE -> CONTENT CONTAINER ================= -->
+    <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 text-left">
+      
+      <!-- ২. ব্রেডক্রাম্ব (ছবির ঠিক নিচে) -->
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+        <a href="/" class="hover:text-emerald-800 transition">Home</a>
+        <span>/</span>
+        <span class="text-slate-800 capitalize truncate">{pageTitle}</span>
+      </nav>
+
+      <!-- ৩. মূল টাইটেল (কোনো বাড়তি ব্যাজ ছাড়া পরিষ্কার ও বড় হাতের) -->
+      <header class="space-y-3 pb-3 border-b border-slate-100">
+        <h1 class="font-serif text-3xl sm:text-4xl lg:text-[44px] font-black text-slate-900 tracking-tight leading-tight capitalize">
+          {pageTitle}
+        </h1>
+        {pageDescription && (
+          <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+            {pageDescription}
+          </p>
+        )}
+      </header>
+
+      <!-- ৪. কী স্ট্যাটস বার (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.stats) && pData.stats.length > 0 && (
-        <div class="max-w-5xl mx-auto bg-[#F8FAF9] rounded-3xl border border-slate-200/90 p-6 sm:p-8">
-          <div class={`grid grid-cols-2 md:grid-cols-${Math.min(pData.stats.length, 4)} gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200/70`}>
+        <div class="bg-[#F8FAF9] rounded-2xl border border-slate-200/90 p-5 sm:p-6 my-6">
+          <div class={`grid grid-cols-2 md:grid-cols-${Math.min(pData.stats.length, 4)} gap-4 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200/70`}>
             {pData.stats.map((st: any) => (
-              <div class="space-y-1 pt-3 md:pt-0">
-                <span class="font-serif text-3xl sm:text-4xl font-black text-slate-900 block tracking-tight">
+              <div class="space-y-0.5 pt-2 md:pt-0">
+                <span class="font-serif text-2xl sm:text-3xl font-black text-slate-900 block tracking-tight">
                   {st.value}
                 </span>
-                <span class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider block">
+                <span class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">
                   {st.label}
                 </span>
               </div>
@@ -92,65 +89,63 @@ if (typeof entry?.render === 'function') {
         </div>
       )}
 
-      <!-- 4. OPTIONAL FEATURE / VALUE CARDS -->
+      <!-- ৫. ফিচার কার্ডস (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.features) && pData.features.length > 0 && (
-        <div class="max-w-5xl mx-auto space-y-4 text-left">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {pData.features.map((feat: any) => (
-              <div class="p-6 rounded-2xl bg-white border border-slate-200 hover:border-slate-400 transition-colors space-y-2">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-black">
-                  <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 class="font-bold text-slate-900 text-base">{feat.title}</h3>
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{feat.desc}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+          {pData.features.map((feat: any) => (
+            <div class="p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-400 transition-colors space-y-1.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center font-black">
+                <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-            ))}
-          </div>
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base">{feat.title}</h3>
+              <p class="text-xs text-slate-600 leading-relaxed font-normal">{feat.desc}</p>
+            </div>
+          ))}
         </div>
       )}
 
-      <!-- 5. MAIN CONTENT BODY (গোল্ডেন রেশিও ১৮px টেক্সট) -->
+      <!-- ৬. মূল লেখার কনটেন্ট (গোল্ডেন রেশিও ১৮px ফন্ট) -->
       {(PageContent || pageBody) && (
-        <div class="max-w-[760px] mx-auto text-left">
+        <div class="pt-2">
           <div class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl">
             {PageContent ? <PageContent /> : <div set:html={pageBody} />}
           </div>
         </div>
       )}
 
-      <!-- 6. OPTIONAL PAGE FAQS ACCORDION -->
+      <!-- ৭. পেজ এফএকিউ (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.faqs) && pData.faqs.length > 0 && (
-        <div class="max-w-[760px] mx-auto text-left space-y-5 pt-6 border-t border-slate-100">
+        <div class="space-y-4 pt-8 border-t border-slate-100">
           <h3 class="font-serif text-2xl font-black text-slate-900">Frequently Asked Questions</h3>
           <div class="divide-y divide-slate-200">
             {pData.faqs.map((faq: any, i: number) => (
-              <details class="group py-4 cursor-pointer" open={i === 0}>
-                <summary class="flex justify-between items-center list-none font-bold text-base text-slate-900 group-hover:text-emerald-800 transition select-none">
+              <details class="group py-3.5 cursor-pointer" open={i === 0}>
+                <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-800 transition select-none">
                   <span>{faq.question}</span>
-                  <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                  <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
                 </summary>
-                <p class="pt-2 text-sm text-slate-600 leading-relaxed font-normal">{faq.answer}</p>
+                <p class="pt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{faq.answer}</p>
               </details>
             ))}
           </div>
         </div>
       )}
 
-      <!-- 7. OPTIONAL HOTEL BOOKING CTA BANNER -->
+      <!-- ৮. হোটেল বুকিং সিটিএ ব্যানার -->
       {pData.show_cta !== false && (
-        <div class="max-w-5xl mx-auto bg-[#0d3b23] text-white p-8 sm:p-10 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-left">
-          <div class="space-y-1.5 max-w-2xl">
-            <span class="text-emerald-300 text-[11px] font-black uppercase tracking-widest block">Explore Gulshan Accommodations</span>
-            <h3 class="font-serif text-2xl sm:text-3xl font-black">Plan Your Stay in the Diplomatic Zone</h3>
-            <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
-              Direct hotel rates, verified embassy distances, and 5-star luxury accommodations with zero booking fees.
-            </p>
+        <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-10">
+          <span class="text-emerald-300 text-[10px] font-black uppercase tracking-widest block">Direct Concierge</span>
+          <h3 class="font-serif text-xl sm:text-2xl font-black">Plan Your Stay in Gulshan</h3>
+          <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
+            Direct hotel rates, verified embassy distances, and 5-star luxury accommodations with zero booking fees.
+          </p>
+          <div class="pt-2">
+            <a href="/#hotels" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl uppercase tracking-wider transition">
+              Explore Verified Hotels ➔
+            </a>
           </div>
-          <a href="/#hotels" class="shrink-0 bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider transition">
-            Explore Verified Hotels ➔
-          </a>
         </div>
       )}
 
