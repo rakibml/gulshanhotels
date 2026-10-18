@@ -1,5 +1,5 @@
 ---
-// src/pages/[slug].astro (Unified Master Route for Hotels & Custom CMS Pages)
+// src/pages/[slug].astro (Unified Master Route for Hotels & Custom CMS Pages - 100% Cloudflare Build Safe)
 import Layout from '../layouts/Layout.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelSubNav from '../components/hotel/HotelSubNav.astro';
@@ -12,9 +12,7 @@ import HotelNearbyHotels from '../components/hotel/HotelNearbyHotels.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  // ==========================================
   // ১. সব হোটেল ফেচ করা
-  // ==========================================
   let hotels: any[] = [];
   try {
     hotels = await getCollection('hotels');
@@ -35,39 +33,27 @@ export async function getStaticPaths() {
     }
   }
 
-  const hotelPaths = await Promise.all(
-    hotels.map(async (entry: any) => {
-      const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
-      const cleanSlug = rawSlug
-        .split('/')
-        .pop()
-        .replace(/\.md$/, '')
-        .toLowerCase();
+  const hotelPaths = hotels.map((entry: any) => {
+    const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
+    const cleanSlug = String(rawSlug)
+      .split('/')
+      .pop()
+      .replace(/\.md$/, '')
+      .trim()
+      .toLowerCase();
 
-      let renderedBody = entry.body || '';
-      if (typeof entry.render === 'function') {
-        try {
-          const { Content } = await entry.render();
-          renderedBody = Content;
-        } catch (e) {}
-      }
+    if (!cleanSlug) return null;
 
-      return {
-        params: { slug: cleanSlug || 'hotel' },
-        props: { 
-          type: 'hotel',
-          hotel: {
-            ...entry,
-            renderedBody
-          } 
-        },
-      };
-    })
-  );
+    return {
+      params: { slug: cleanSlug },
+      props: { 
+        type: 'hotel',
+        entry
+      },
+    };
+  }).filter(Boolean);
 
-  // ==========================================
-  // ২. CMS থেকে তৈরি করা পেজগুলো ফেচ করা (About, Privacy, Terms ইত্যাদি)
-  // ==========================================
+  // ২. সব কাস্টম পেজ ফেচ করা (About, Privacy, Terms)
   let pages: any[] = [];
   try {
     pages = await getCollection('pages');
@@ -81,7 +67,7 @@ export async function getStaticPaths() {
       pages = Object.entries(rawGlobPages).map(([filePath, item]: [string, any]) => ({
         id: filePath.split('/').pop()?.replace('.md', ''),
         data: item.frontmatter || {},
-        render: async () => ({ Content: item.default || item.Content }),
+        Content: item.default || item.Content || null,
         body: item.compiledContent ? item.compiledContent() : ''
       }));
     } catch (e) {
@@ -89,47 +75,60 @@ export async function getStaticPaths() {
     }
   }
 
-  const pagePaths = await Promise.all(
-    pages.map(async (entry: any) => {
-      const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
-      const cleanSlug = rawSlug
-        .split('/')
-        .pop()
-        .replace(/\.md$/, '')
-        .toLowerCase();
+  // হোটেলের সাথে যেন স্লাগ ডুপ্লিকেট না হয় সেফটি চেক
+  const existingHotelSlugs = new Set(hotelPaths.map(p => p.params.slug));
 
-      let renderedBody = entry.body || '';
-      let PageContent = null;
-      if (typeof entry.render === 'function') {
-        try {
-          const { Content } = await entry.render();
-          PageContent = Content;
-        } catch (e) {}
-      }
+  const pagePaths = pages.map((entry: any) => {
+    const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
+    const cleanSlug = String(rawSlug)
+      .split('/')
+      .pop()
+      .replace(/\.md$/, '')
+      .trim()
+      .toLowerCase();
 
-      return {
-        params: { slug: cleanSlug },
-        props: { 
-          type: 'page',
-          page: {
-            title: entry.data?.title || 'Page Details',
-            description: entry.data?.description || '',
-            date: entry.data?.date || '',
-            PageContent,
-            renderedBody
-          }
-        },
-      };
-    })
-  );
+    if (!cleanSlug || existingHotelSlugs.has(cleanSlug)) return null;
 
-  // হোটেল ও পেজ উভয় পাথ একসাথে রিটার্ন করা
+    return {
+      params: { slug: cleanSlug },
+      props: { 
+        type: 'page',
+        entry
+      },
+    };
+  }).filter(Boolean);
+
   return [...hotelPaths, ...pagePaths];
 }
 
-const { type = 'hotel', hotel, page } = Astro.props;
+const { type = 'hotel', entry } = Astro.props;
 
-// হোটেল মেটাডাটা
+// পেজ ডাটা হ্যান্ডেলিং (Astro স্ট্যান্ডার্ড নিয়মে ফ্রন্টম্যাটারে রেন্ডার)
+let PageContent = null;
+let pageTitle = "Page Details";
+let pageDescription = "Official information of GulshanHotels.com";
+let pageDate = "Oct 2026";
+let pageBody = "";
+
+if (type === 'page' && entry) {
+  const pData = entry.data || {};
+  pageTitle = pData.title || entry.title || "Page Details";
+  pageDescription = pData.description || entry.description || "Official information of GulshanHotels.com";
+  pageDate = pData.date || entry.date || "Oct 2026";
+  pageBody = entry.body || "";
+
+  if (typeof entry.render === 'function') {
+    try {
+      const rendered = await entry.render();
+      PageContent = rendered.Content;
+    } catch (e) {}
+  } else if (entry.Content) {
+    PageContent = entry.Content;
+  }
+}
+
+// হোটেল ডাটা হ্যান্ডেলিং
+const hotel = type === 'hotel' ? entry : null;
 const hotelData = hotel?.data || {};
 const hotelTitle = hotelData.title || hotelData.name || "Hotel Details";
 const hotelCategory = hotelData.category || "Luxury Stay";
@@ -142,10 +141,9 @@ const metaDescription = hotelData.seo_description
 ---
 
 {type === 'page' ? (
-  <!-- ================= 1. CMS CUSTOM PAGE VIEW (ABOUT, PRIVACY, TERMS) ================= -->
   <Layout 
-    title={`${page.title} — GulshanHotels.com`}
-    description={page.description || "Official information and policies of GulshanHotels.com"}
+    title={`${pageTitle} — GulshanHotels.com`}
+    description={pageDescription}
   >
     <main class="w-full bg-white text-slate-900 pt-8 pb-20">
       <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-8 text-left">
@@ -154,34 +152,34 @@ const metaDescription = hotelData.seo_description
         <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
           <a href="/" class="hover:text-emerald-800 transition">Home</a>
           <span>/</span>
-          <span class="text-slate-800 truncate">{page.title}</span>
+          <span class="text-slate-800 truncate">{pageTitle}</span>
         </nav>
 
         <!-- PAGE HEADER -->
         <header class="space-y-3 border-b border-slate-100 pb-6">
           <h1 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-tight">
-            {page.title}
+            {pageTitle}
           </h1>
-          {page.description && (
+          {pageDescription && (
             <p class="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
-              {page.description}
+              {pageDescription}
             </p>
           )}
-          {page.date && (
+          {pageDate && (
             <div class="text-[11px] font-semibold text-slate-400 pt-1">
-              Last Updated: <span class="text-slate-700 font-bold">{page.date}</span>
+              Last Updated: <span class="text-slate-700 font-bold">{pageDate}</span>
             </div>
           )}
         </header>
 
-        <!-- PAGE CONTENT (GOLDEN RATIO 18PX TYPOGRAPHY) -->
+        <!-- PAGE CONTENT (GOLDEN RATIO TYPOGRAPHY) -->
         <div class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl">
-          {page.PageContent ? (
-            <page.PageContent />
-          ) : page.renderedBody ? (
-            <Fragment set:html={page.renderedBody} />
+          {PageContent ? (
+            <PageContent />
+          ) : pageBody ? (
+            <div set:html={pageBody} />
           ) : (
-            <p>Content loading...</p>
+            <p>Page content coming soon...</p>
           )}
         </div>
 
@@ -189,34 +187,18 @@ const metaDescription = hotelData.seo_description
     </main>
   </Layout>
 ) : (
-  <!-- ================= 2. HOTEL DETAILS VIEW (100% UNCHANGED & INTACT) ================= -->
   <Layout 
     title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
     description={metaDescription}
     image={hotelImage}
   >
-    <!-- 1. HERO HEADER & TITLE -->
     <HotelHeader hotel={hotel} />
-
-    <!-- STICKY JUMP-NAVIGATION BAR -->
     <HotelSubNav hotel={hotel} />
-
-    <!-- 2. ABOUT HOTEL & LIVE STAY22 API RATES -->
     <HotelAboutAndRates hotel={hotel} />
-
-    <!-- 3. AMENITIES & FEATURED ROOMS -->
     <HotelAmenitiesAndRooms hotel={hotel} />
-
-    <!-- 4. LOCATION MAP -->
     <HotelLocationMap hotel={hotel} />
-
-    <!-- 5. GUEST REVIEWS -->
     <HotelReviews hotel={hotel} />
-
-    <!-- 6. FAQS ACCORDION -->
     <HotelFaqsSection hotel={hotel} />
-
-    <!-- 7. NEARBY SIMILAR HOTELS -->
     <HotelNearbyHotels currentHotel={hotel} />
   </Layout>
 )}
