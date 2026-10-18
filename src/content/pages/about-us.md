@@ -1,7 +1,13 @@
 ---
 title: about us
 slug: about
+badge: GulshanHotels Official
 description: ''
+hero_image: /images/hotels/hero-gulshan.jpg.webp
+stats: []
+features: []
+faqs: []
+show_cta: true
 date: Oct 18, 2026
 ---
 
