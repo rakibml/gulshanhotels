@@ -1,5 +1,5 @@
 ---
-// src/pages/blog/[slug].astro (Full-Width Balanced Layout matching 1550px Header)
+// src/pages/blog/[slug].astro (Golden Ratio Reading Comfort - Centered Editorial Layout)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -52,7 +52,7 @@ const description = data.description || "In-depth local guide for diplomats and 
 const publishDate = data.date || "Oct 2026";
 const category = data.category || "Travel Guide";
 const readTime = data.readTime || "4 min read";
-const image = data.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=80";
+const image = data.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
 const author = data.author || "Gulshan Concierge Team";
 
 // এম্বেড করার জন্য বাছাই করা হোটেলসমূহ
@@ -92,20 +92,21 @@ const siteUrl = Astro.url.href;
   </div>
 
   <article class="w-full bg-white text-slate-900 pt-6 pb-20">
-    <!-- হেডারের সাথে ১০০% মেলানো কন্টেইনার (max-w-[1550px]) -->
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8 text-left">
+    
+    <!-- 🎯 GOLDEN RATIO CENTERED CONTAINER (চোখের আরামদায়ক ফোকাসে মাঝখানে থাকবে) -->
+    <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-7 text-left">
       
-      <!-- BREADCRUMBS (হেডার লোগোর সমান বাম দিক থেকে শুরু) -->
+      <!-- BREADCRUMBS -->
       <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span>/</span>
         <a href="/blog" class="hover:text-emerald-800 transition">Travel Guides</a>
         <span>/</span>
-        <span class="text-slate-800 truncate max-w-md">{title}</span>
+        <span class="text-slate-700 truncate max-w-xs">{title}</span>
       </nav>
 
-      <!-- ARTICLE HEADER (চওড়া ও দৃষ্টিনন্দন) -->
-      <header class="max-w-5xl space-y-4">
+      <!-- ARTICLE HEADER -->
+      <header class="space-y-4">
         
         <div class="flex flex-wrap items-center gap-2.5">
           <span class="bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-200">
@@ -120,17 +121,18 @@ const siteUrl = Astro.url.href;
           </span>
         </div>
 
-        <!-- Headline (এখন চওড়া হয়ে সুন্দর ২ লাইনে বসবে) -->
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+        <!-- Headline (Golden Ratio H1: 44px with balanced tracking) -->
+        <h1 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-[1.2]">
           {title}
         </h1>
 
-        <p class="text-base sm:text-xl text-slate-600 font-normal leading-relaxed max-w-4xl">
+        <!-- Subtitle -->
+        <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
           {description}
         </p>
 
         <!-- AUTHOR & SHARE BAR ROW -->
-        <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl">
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-[#0d3b23] text-white flex items-center justify-center font-black text-sm shrink-0">
               {author.charAt(0)}
@@ -154,76 +156,70 @@ const siteUrl = Astro.url.href;
 
       </header>
 
-      <!-- FEATURED COVER PHOTO (চওড়া সিনেমাটিক ওয়াইড ব্যানার) -->
+      <!-- FEATURED COVER PHOTO (Centered in reading flow) -->
       <div class="w-full">
-        <div class="relative aspect-[21/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80">
-          <img src={image} alt={title} width="1550" height="660" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
+        <div class="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-xs">
+          <img src={image} alt={title} width="1200" height="750" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
         </div>
       </div>
 
-      <!-- KEY TAKEAWAYS (লম্বা না হয়ে পাশাপাশি ৩ কলামে সাজানো স্লিম বক্স) -->
-      <div class="bg-[#f5f8f6] border border-emerald-200/90 rounded-3xl p-6 sm:p-7 space-y-3">
+      <!-- KEY TAKEAWAYS (মার্জিত ও সেন্টারে খাপ খাওয়া বক্স) -->
+      <div class="bg-[#f5f8f6] border-l-4 border-emerald-800 rounded-r-2xl p-5 sm:p-6 space-y-3">
         <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
           <span class="text-emerald-800 text-base">📌</span>
           <span class="text-emerald-950 font-black">Key Takeaways at a Glance</span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+        <ul class="space-y-2 text-xs sm:text-[14px] text-slate-700 font-medium">
           {takeaways.map((item: string) => (
-            <div class="flex items-start gap-2.5 bg-white p-3.5 rounded-xl border border-emerald-100 shadow-2xs">
-              <span class="text-emerald-700 font-black text-sm shrink-0">✓</span>
-              <span class="text-xs sm:text-[13px] text-slate-700 font-semibold leading-snug">{item}</span>
-            </div>
+            <li class="flex items-start gap-2.5 leading-snug">
+              <span class="text-emerald-700 font-bold shrink-0 mt-0.5">✓</span>
+              <span>{item}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      <!-- ARTICLE CONTENT BODY (পড়ার সুবিধার জন্য অপটিমাল ও আরামদায়ক উইডথ) -->
-      <div class="max-w-4xl pt-2">
-        <div 
-          id="articleBodyContent" 
-          class="prose prose-slate max-w-none text-base sm:text-lg prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:leading-relaxed prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl"
-        >
-          {Content ? <Content /> : <p>Article content loading...</p>}
-        </div>
+      <!-- 🎯 GOLDEN RATIO BODY CONTENT (18px font with 1.8 line-height - Maximum Eye Comfort) -->
+      <div 
+        id="articleBodyContent" 
+        class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl"
+      >
+        {Content ? <Content /> : <p>Article content loading...</p>}
       </div>
 
-      <!-- RECOMMENDED HOTELS (লম্বা না হয়ে চওড়া ৩ কলামের গ্রিডে সাজানো) -->
+      <!-- RECOMMENDED HOTELS (সেন্টারে স্লিম ও ব্যালান্সড কার্ড) -->
       {displayHotels.length > 0 && (
-        <div class="pt-10 border-t border-slate-200 space-y-5">
-          <div class="space-y-1">
+        <div class="pt-8 border-t border-slate-200 space-y-4">
+          <div class="space-y-0.5">
             <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800">Featured Accommodations</span>
-            <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900">Recommended Hotels Mentioned in this Guide</h3>
+            <h3 class="font-serif text-2xl font-black text-slate-900">Recommended Hotels in this Guide</h3>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+          <div class="space-y-3 pt-2">
             {displayHotels.map((h: any) => {
               const hd = h.data || {};
               const hTitle = hd.title || hd.name || "Hotel";
               const hSlug = (h.slug || h.id || hd.slug || '').replace(/\.md$/, '');
-              const hImg = hd.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=75";
+              const hImg = hd.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=75";
               const hPrice = hd.price || "$120";
 
               return (
-                <div class="bg-white rounded-2xl border border-slate-200 hover:border-slate-400 p-4 flex flex-col justify-between transition-colors text-left space-y-4">
-                  <div class="space-y-3">
-                    <div class="aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-100 relative">
-                      <img src={hImg} alt={hTitle} width="400" height="250" loading="lazy" class="w-full h-full object-cover" />
-                      <span class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[9px] font-black uppercase px-2.5 py-0.5 rounded-md">
-                        Verified Stay
-                      </span>
-                    </div>
-                    <div>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200 hover:border-slate-400 bg-white transition-colors">
+                  <div class="flex items-center gap-4 min-w-0">
+                    <img src={hImg} alt={hTitle} width="160" height="100" loading="lazy" class="w-24 sm:w-28 h-20 rounded-xl object-cover shrink-0 border border-slate-100" />
+                    <div class="min-w-0">
+                      <span class="text-[9px] font-black uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mb-1">Verified Stay</span>
                       <h4 class="font-bold text-slate-900 text-base leading-tight capitalize truncate">{hTitle}</h4>
-                      <p class="text-xs text-slate-500 truncate mt-1">{hd.location || "Gulshan, Dhaka"}</p>
+                      <p class="text-xs text-slate-500 truncate mt-0.5">{hd.location || "Gulshan, Dhaka"}</p>
                     </div>
                   </div>
 
-                  <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
                     <div>
                       <span class="text-[10px] text-slate-400 block leading-none">Starting from</span>
                       <span class="text-base font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                     </div>
-                    <a href={`/${hSlug}`} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2 rounded-xl uppercase tracking-wider transition">
+                    <a href={`/${hSlug}`} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
                       View Hotel ➔
                     </a>
                   </div>
@@ -234,37 +230,35 @@ const siteUrl = Astro.url.href;
         </div>
       )}
 
-      <!-- CONCIERGE CALLOUT BANNER (চওড়া ও দৃষ্টিনন্দন) -->
-      <div class="bg-[#0d3b23] text-white p-8 sm:p-10 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mt-8">
-        <div class="space-y-2 max-w-2xl">
-          <span class="text-emerald-300 text-xs font-black uppercase tracking-widest block">Direct Concierge</span>
-          <h3 class="font-serif text-2xl sm:text-3xl font-black">Need Advice for Your Gulshan Visit?</h3>
-          <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
-            Our local audit team verifies rates, embassy distances, and checkout policies daily. Contact our desk for hotel recommendations and airport pickups.
-          </p>
-        </div>
-        <div class="shrink-0">
-          <a href="/about" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3.5 rounded-xl uppercase tracking-wider transition">
+      <!-- CONCIERGE CALLOUT BANNER -->
+      <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-8">
+        <span class="text-emerald-300 text-xs font-black uppercase tracking-widest block">Direct Concierge</span>
+        <h3 class="font-serif text-2xl font-black">Need Advice for Your Gulshan Visit?</h3>
+        <p class="text-xs sm:text-sm text-emerald-100 font-normal leading-relaxed">
+          Our local audit team verifies rates, embassy distances, and checkout policies daily. Contact our desk for hotel recommendations and airport pickups.
+        </p>
+        <div class="pt-2">
+          <a href="/about" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-xl uppercase tracking-wider transition">
             Ask Our Concierge ➔
           </a>
         </div>
       </div>
 
-      <!-- RELATED GUIDES (৩ কলামে গ্রিড) -->
+      <!-- RELATED GUIDES -->
       {relatedPosts.length > 0 && (
-        <div class="pt-10 border-t border-slate-200 space-y-5">
-          <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900">More Gulshan Travel Guides</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="pt-10 border-t border-slate-200 space-y-4">
+          <h3 class="font-serif text-xl sm:text-2xl font-black text-slate-900">More Gulshan Travel Guides</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedPosts.map((rel: any) => {
               const rData = rel.data || {};
               const rSlug = rel.slug || rel.id?.replace(/\.md$/, '');
               return (
-                <a href={`/blog/${rSlug}`} class="group block space-y-2.5 cursor-pointer">
-                  <div class="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80">
+                <a href={`/blog/${rSlug}`} class="group block space-y-2 cursor-pointer">
+                  <div class="aspect-[16/10] w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80">
                     <img src={rData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=500&q=75"} alt={rData.title} loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-104 transition duration-300" />
                   </div>
                   <span class="text-[10px] font-black uppercase text-emerald-800 tracking-wider block">{rData.category || "Guide"}</span>
-                  <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-emerald-800 transition line-clamp-2">{rData.title}</h4>
+                  <h4 class="font-bold text-slate-900 text-xs sm:text-sm leading-snug group-hover:text-emerald-800 transition line-clamp-2">{rData.title}</h4>
                 </a>
               );
             })}
