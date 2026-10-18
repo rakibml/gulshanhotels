@@ -1,5 +1,5 @@
 ---
-// src/pages/[slug].astro (Master Single Hotel Page Template - 100% SEO, Sitelinks & Internal Links)
+// src/pages/[slug].astro (Unified Master Route for Hotels & Custom CMS Pages)
 import Layout from '../layouts/Layout.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelSubNav from '../components/hotel/HotelSubNav.astro';
@@ -12,6 +12,9 @@ import HotelNearbyHotels from '../components/hotel/HotelNearbyHotels.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
+  // ==========================================
+  // ১. সব হোটেল ফেচ করা
+  // ==========================================
   let hotels: any[] = [];
   try {
     hotels = await getCollection('hotels');
@@ -32,7 +35,7 @@ export async function getStaticPaths() {
     }
   }
 
-  const paths = await Promise.all(
+  const hotelPaths = await Promise.all(
     hotels.map(async (entry: any) => {
       const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
       const cleanSlug = rawSlug
@@ -52,6 +55,7 @@ export async function getStaticPaths() {
       return {
         params: { slug: cleanSlug || 'hotel' },
         props: { 
+          type: 'hotel',
           hotel: {
             ...entry,
             renderedBody
@@ -61,48 +65,158 @@ export async function getStaticPaths() {
     })
   );
 
-  return paths;
+  // ==========================================
+  // ২. CMS থেকে তৈরি করা পেজগুলো ফেচ করা (About, Privacy, Terms ইত্যাদি)
+  // ==========================================
+  let pages: any[] = [];
+  try {
+    pages = await getCollection('pages');
+  } catch (e) {
+    pages = [];
+  }
+
+  if (!pages || pages.length === 0) {
+    try {
+      const rawGlobPages = import.meta.glob('../content/pages/*.md', { eager: true });
+      pages = Object.entries(rawGlobPages).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace('.md', ''),
+        data: item.frontmatter || {},
+        render: async () => ({ Content: item.default || item.Content }),
+        body: item.compiledContent ? item.compiledContent() : ''
+      }));
+    } catch (e) {
+      pages = [];
+    }
+  }
+
+  const pagePaths = await Promise.all(
+    pages.map(async (entry: any) => {
+      const rawSlug = entry.data?.slug || entry.id || entry.slug || '';
+      const cleanSlug = rawSlug
+        .split('/')
+        .pop()
+        .replace(/\.md$/, '')
+        .toLowerCase();
+
+      let renderedBody = entry.body || '';
+      let PageContent = null;
+      if (typeof entry.render === 'function') {
+        try {
+          const { Content } = await entry.render();
+          PageContent = Content;
+        } catch (e) {}
+      }
+
+      return {
+        params: { slug: cleanSlug },
+        props: { 
+          type: 'page',
+          page: {
+            title: entry.data?.title || 'Page Details',
+            description: entry.data?.description || '',
+            date: entry.data?.date || '',
+            PageContent,
+            renderedBody
+          }
+        },
+      };
+    })
+  );
+
+  // হোটেল ও পেজ উভয় পাথ একসাথে রিটার্ন করা
+  return [...hotelPaths, ...pagePaths];
 }
 
-const { hotel } = Astro.props;
-const data = hotel?.data || {};
+const { type = 'hotel', hotel, page } = Astro.props;
 
-const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelCategory = data.category || "Luxury Stay";
-const hotelLocation = data.location || "Dhaka, Bangladesh";
-const hotelImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+// হোটেল মেটাডাটা
+const hotelData = hotel?.data || {};
+const hotelTitle = hotelData.title || hotelData.name || "Hotel Details";
+const hotelCategory = hotelData.category || "Luxury Stay";
+const hotelLocation = hotelData.location || "Dhaka, Bangladesh";
+const hotelImage = hotelData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
-const metaDescription = data.seo_description 
-  || data.description 
+const metaDescription = hotelData.seo_description 
+  || hotelData.description 
   || `Book your stay at ${hotelTitle}, a verified ${hotelCategory} located in ${hotelLocation}. Check live room rates, amenities, photo gallery, and reviews.`;
 ---
 
-<Layout 
-  title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
-  description={metaDescription}
-  image={hotelImage}
->
-  <!-- 1. HERO HEADER & TITLE -->
-  <HotelHeader hotel={hotel} />
+{type === 'page' ? (
+  <!-- ================= 1. CMS CUSTOM PAGE VIEW (ABOUT, PRIVACY, TERMS) ================= -->
+  <Layout 
+    title={`${page.title} — GulshanHotels.com`}
+    description={page.description || "Official information and policies of GulshanHotels.com"}
+  >
+    <main class="w-full bg-white text-slate-900 pt-8 pb-20">
+      <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-8 text-left">
+        
+        <!-- BREADCRUMBS -->
+        <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+          <a href="/" class="hover:text-emerald-800 transition">Home</a>
+          <span>/</span>
+          <span class="text-slate-800 truncate">{page.title}</span>
+        </nav>
 
-  <!-- STICKY JUMP-NAVIGATION BAR (FOR GOOGLE SEARCH SITELINKS) -->
-  <HotelSubNav hotel={hotel} />
+        <!-- PAGE HEADER -->
+        <header class="space-y-3 border-b border-slate-100 pb-6">
+          <h1 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-tight">
+            {page.title}
+          </h1>
+          {page.description && (
+            <p class="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+              {page.description}
+            </p>
+          )}
+          {page.date && (
+            <div class="text-[11px] font-semibold text-slate-400 pt-1">
+              Last Updated: <span class="text-slate-700 font-bold">{page.date}</span>
+            </div>
+          )}
+        </header>
 
-  <!-- 2. ABOUT HOTEL & LIVE STAY22 API RATES -->
-  <HotelAboutAndRates hotel={hotel} />
+        <!-- PAGE CONTENT (GOLDEN RATIO 18PX TYPOGRAPHY) -->
+        <div class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl">
+          {page.PageContent ? (
+            <page.PageContent />
+          ) : page.renderedBody ? (
+            <Fragment set:html={page.renderedBody} />
+          ) : (
+            <p>Content loading...</p>
+          )}
+        </div>
 
-  <!-- 3. AMENITIES & FEATURED ROOMS -->
-  <HotelAmenitiesAndRooms hotel={hotel} />
+      </div>
+    </main>
+  </Layout>
+) : (
+  <!-- ================= 2. HOTEL DETAILS VIEW (100% UNCHANGED & INTACT) ================= -->
+  <Layout 
+    title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
+    description={metaDescription}
+    image={hotelImage}
+  >
+    <!-- 1. HERO HEADER & TITLE -->
+    <HotelHeader hotel={hotel} />
 
-  <!-- 4. LOCATION MAP -->
-  <HotelLocationMap hotel={hotel} />
+    <!-- STICKY JUMP-NAVIGATION BAR -->
+    <HotelSubNav hotel={hotel} />
 
-  <!-- 5. GUEST REVIEWS -->
-  <HotelReviews hotel={hotel} />
+    <!-- 2. ABOUT HOTEL & LIVE STAY22 API RATES -->
+    <HotelAboutAndRates hotel={hotel} />
 
-  <!-- 6. FAQS ACCORDION -->
-  <HotelFaqsSection hotel={hotel} />
+    <!-- 3. AMENITIES & FEATURED ROOMS -->
+    <HotelAmenitiesAndRooms hotel={hotel} />
 
-  <!-- 7. NEARBY SIMILAR HOTELS (INTERNAL LINKING MATRIX FOR GOOGLE PAGERANK) -->
-  <HotelNearbyHotels currentHotel={hotel} />
-</Layout>
+    <!-- 4. LOCATION MAP -->
+    <HotelLocationMap hotel={hotel} />
+
+    <!-- 5. GUEST REVIEWS -->
+    <HotelReviews hotel={hotel} />
+
+    <!-- 6. FAQS ACCORDION -->
+    <HotelFaqsSection hotel={hotel} />
+
+    <!-- 7. NEARBY SIMILAR HOTELS -->
+    <HotelNearbyHotels currentHotel={hotel} />
+  </Layout>
+)}
