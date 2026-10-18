@@ -1,5 +1,5 @@
 ---
-// src/components/PageView.astro (Image First -> Breadcrumbs -> Title -> Content Flow)
+// src/components/PageView.astro (Balanced Width & Left-Aligned Breadcrumbs)
 import Layout from '../layouts/Layout.astro';
 
 interface Props {
@@ -32,9 +32,9 @@ if (typeof entry?.render === 'function') {
 >
   <main class="w-full bg-white text-slate-900 pt-3 sm:pt-4 pb-20">
     
-    <!-- ================= 1. COVER IMAGE (হেডারের ঠিক নিচে সবার উপরে) ================= -->
+    <!-- ================= 1. COVER IMAGE (হেডারের ঠিক নিচে) ================= -->
     {pData.hero_image && (
-      <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-6 sm:mb-8">
+      <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-4">
         <div class="relative aspect-[21/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/90 shadow-xs">
           <img 
             src={pData.hero_image} 
@@ -49,18 +49,20 @@ if (typeof entry?.render === 'function') {
       </div>
     )}
 
-    <!-- ================= 2. BREADCRUMBS -> TITLE -> CONTENT CONTAINER ================= -->
-    <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-6 text-left">
-      
-      <!-- ২. ব্রেডক্রাম্ব (ছবির ঠিক নিচে) -->
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+    <!-- ================= 2. BREADCRUMBS (ছবির সমান বাম দিক থেকে শুরু) ================= -->
+    <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-6">
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span>/</span>
         <span class="text-slate-800 capitalize truncate">{pageTitle}</span>
       </nav>
+    </div>
 
-      <!-- ৩. মূল টাইটেল (কোনো বাড়তি ব্যাজ ছাড়া পরিষ্কার ও বড় হাতের) -->
-      <header class="space-y-3 pb-3 border-b border-slate-100">
+    <!-- ================= 3. চওড়া ও মানানসই কনটেন্ট বক্স (max-w-[940px] - আর চিকন লাগবে না) ================= -->
+    <div class="max-w-[940px] mx-auto px-4 sm:px-6 space-y-8 text-left">
+
+      <!-- মূল টাইটেল ও সাব-টাইটেল -->
+      <header class="space-y-3 pb-4 border-b border-slate-100 text-left">
         <h1 class="font-serif text-3xl sm:text-4xl lg:text-[44px] font-black text-slate-900 tracking-tight leading-tight capitalize">
           {pageTitle}
         </h1>
@@ -71,7 +73,7 @@ if (typeof entry?.render === 'function') {
         )}
       </header>
 
-      <!-- ৪. কী স্ট্যাটস বার (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
+      <!-- কী স্ট্যাটস বার (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.stats) && pData.stats.length > 0 && (
         <div class="bg-[#F8FAF9] rounded-2xl border border-slate-200/90 p-5 sm:p-6 my-6">
           <div class={`grid grid-cols-2 md:grid-cols-${Math.min(pData.stats.length, 4)} gap-4 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200/70`}>
@@ -89,7 +91,7 @@ if (typeof entry?.render === 'function') {
         </div>
       )}
 
-      <!-- ৫. ফিচার কার্ডস (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
+      <!-- ফিচার কার্ডস (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.features) && pData.features.length > 0 && (
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
           {pData.features.map((feat: any) => (
@@ -106,7 +108,7 @@ if (typeof entry?.render === 'function') {
         </div>
       )}
 
-      <!-- ৬. মূল লেখার কনটেন্ট (গোল্ডেন রেশিও ১৮px ফন্ট) -->
+      <!-- মূল লেখার কনটেন্ট (আরামদায়ক ১৮px চওড়া প্যারাগ্রাফ) -->
       {(PageContent || pageBody) && (
         <div class="pt-2">
           <div class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl">
@@ -115,7 +117,7 @@ if (typeof entry?.render === 'function') {
         </div>
       )}
 
-      <!-- ৭. পেজ এফএকিউ (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
+      <!-- পেজ এফএকিউ (যদি অ্যাডমিন প্যানেলে দেওয়া থাকে) -->
       {Array.isArray(pData.faqs) && pData.faqs.length > 0 && (
         <div class="space-y-4 pt-8 border-t border-slate-100">
           <h3 class="font-serif text-2xl font-black text-slate-900">Frequently Asked Questions</h3>
@@ -133,7 +135,7 @@ if (typeof entry?.render === 'function') {
         </div>
       )}
 
-      <!-- ৮. হোটেল বুকিং সিটিএ ব্যানার -->
+      <!-- হোটেল বুকিং সিটিএ ব্যানার -->
       {pData.show_cta !== false && (
         <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-10">
           <span class="text-emerald-300 text-[10px] font-black uppercase tracking-widest block">Direct Concierge</span>
