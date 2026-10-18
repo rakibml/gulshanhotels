@@ -3,7 +3,7 @@ title: The Ultimate Hotel Guide for US Embassy & Visa Interviews in Gulshan
 slug: Hotel-Guide-for-US-Embassy-dsa
 description: Everything you need to know about walking distances, early breakfast options, and secure hotels near the US Embassy in Baridhara, Dhaka.
 date: Oct 17, 2026
-category: Embassy Guide
+category: Food & Dining
 readTime: 4 min read
 author: Local Concierge Team
 image: https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80
