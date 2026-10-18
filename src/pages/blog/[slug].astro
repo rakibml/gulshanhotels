@@ -1,5 +1,5 @@
 ---
-// src/pages/blog/[slug].astro (Golden Ratio Reading + "You May Also Like" & "Discover More")
+// src/pages/blog/[slug].astro (Brand Tint Background + 100% SVG Icons - No Emojis)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -75,7 +75,7 @@ const takeaways = Array.isArray(data.takeaways) && data.takeaways.length > 0
       "Top luxury 5-star properties include The Westin, Renaissance, and Amari Dhaka."
     ];
 
-// ৪টি সম্পর্কিত আর্টিকেল (You may also like এর জন্য)
+// ৪টি সম্পর্কিত আর্টিকেল
 const currentSlug = post.slug || post.id?.replace(/\.md$/, '');
 const relatedPosts = allPosts
   .filter((p: any) => (p.slug || p.id?.replace(/\.md$/, '')) !== currentSlug)
@@ -113,12 +113,12 @@ const siteUrl = Astro.url.href;
 
   <!-- 1. TOP READING PROGRESS BAR -->
   <div class="fixed top-0 left-0 w-full h-1 bg-transparent z-[100] pointer-events-none">
-    <div id="readingProgressBar" class="h-full bg-emerald-700 w-0 transition-all duration-100 ease-out"></div>
+    <div id="readingProgressBar" class="h-full bg-[#0d3b23] w-0 transition-all duration-100 ease-out"></div>
   </div>
 
   <article class="w-full bg-white text-slate-900 pt-6 pb-12">
     
-    <!-- 🎯 GOLDEN RATIO READING COLUMN (মাঝখানে ব্যালান্সড রিডিং উইডথ) -->
+    <!-- 🎯 GOLDEN RATIO READING COLUMN -->
     <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-7 text-left">
       
       <!-- BREADCRUMBS -->
@@ -136,12 +136,26 @@ const siteUrl = Astro.url.href;
           <span class="bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-200">
             {category}
           </span>
+
           <span class="text-xs text-slate-400 font-medium">
             Updated: <strong class="text-slate-700">{publishDate}</strong>
           </span>
-          <span class="text-xs text-slate-400 font-medium">• ⏱️ {readTime}</span>
-          <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50/70 px-2.5 py-0.5 rounded-md border border-emerald-100">
-            ✓ Fact-Checked
+
+          <!-- Clock SVG Icon (No Emoji) -->
+          <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>{readTime}</span>
+          </span>
+
+          <!-- Checkmark SVG Icon (No Emoji) -->
+          <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50/70 px-2.5 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
+            <svg class="w-3 h-3 text-emerald-700 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Fact-Checked</span>
           </span>
         </div>
 
@@ -166,10 +180,17 @@ const siteUrl = Astro.url.href;
           </div>
 
           <div class="flex items-center gap-2">
+            <!-- WhatsApp SVG -->
             <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + siteUrl)}`} target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition shadow-xs" title="Share on WhatsApp">
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
             </a>
+            
+            <!-- Copy Link Button with SVG -->
             <button id="copyLinkBtn" type="button" class="h-8 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
               <span id="copyLinkText">Copy Link</span>
             </button>
           </div>
@@ -183,16 +204,20 @@ const siteUrl = Astro.url.href;
         </div>
       </div>
 
-      <!-- KEY TAKEAWAYS -->
-      <div class="bg-[#f5f8f6] border-l-4 border-emerald-800 rounded-r-2xl p-5 sm:p-6 space-y-3">
+      <!-- KEY TAKEAWAYS (Bookmark SVG instead of Emoji) -->
+      <div class="bg-[#f5f8f6] border-l-4 border-[#0d3b23] rounded-r-2xl p-5 sm:p-6 space-y-3">
         <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
-          <span class="text-emerald-800 text-base">📌</span>
+          <svg class="w-4 h-4 text-[#0d3b23] fill-current" viewBox="0 0 24 24">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
           <span class="text-emerald-950 font-black">Key Takeaways at a Glance</span>
         </div>
         <ul class="space-y-2 text-xs sm:text-[14px] text-slate-700 font-medium">
           {takeaways.map((item: string) => (
             <li class="flex items-start gap-2.5 leading-snug">
-              <span class="text-emerald-700 font-bold shrink-0 mt-0.5">✓</span>
+              <svg class="w-4 h-4 text-emerald-700 fill-none stroke-current stroke-[2.5] shrink-0 mt-0.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
               <span>{item}</span>
             </li>
           ))}
@@ -239,8 +264,9 @@ const siteUrl = Astro.url.href;
                       <span class="text-[10px] text-slate-400 block leading-none">Starting from</span>
                       <span class="text-base font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                     </div>
-                    <a href={`/${hSlug}`} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
-                      View Hotel ➔
+                    <a href={`/${hSlug}`} class="inline-flex items-center gap-1.5 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
+                      <span>View Hotel</span>
+                      <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
                   </div>
                 </div>
@@ -258,8 +284,9 @@ const siteUrl = Astro.url.href;
           Our local audit team verifies rates, embassy distances, and checkout policies daily. Contact our desk for hotel recommendations and airport pickups.
         </p>
         <div class="pt-2">
-          <a href="/about" class="inline-block bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-xl uppercase tracking-wider transition">
-            Ask Our Concierge ➔
+          <a href="/about" class="inline-flex items-center gap-2 bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-xl uppercase tracking-wider transition">
+            <span>Ask Our Concierge</span>
+            <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </a>
         </div>
       </div>
@@ -267,20 +294,18 @@ const siteUrl = Astro.url.href;
     </div>
 
     <!-- ======================================================== -->
-    <!-- 🎯 ১. YOU MAY ALSO LIKE... (ছবির হুবহু ৪-কলামের আর্টিকেলের লিস্ট) -->
+    <!-- 🎯 ১. YOU MAY ALSO LIKE... (SVG Arrows & No Emojis) -->
     <!-- ======================================================== -->
     {relatedPosts.length > 0 && (
       <section class="w-full bg-[#fbfbfa] border-t border-slate-200/80 mt-16 pt-12 pb-14 text-slate-900">
         <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
           
-          <!-- Centered Section Title -->
           <div class="text-center">
             <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 tracking-tight">
               You may also like...
             </h2>
           </div>
 
-          <!-- 4-Card Horizontal Track / Responsive Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
             {relatedPosts.map((rel: any) => {
               const rData = rel.data || {};
@@ -290,7 +315,6 @@ const siteUrl = Astro.url.href;
               return (
                 <article class="group flex flex-col justify-between space-y-3">
                   <a href={`/blog/${rSlug}`} class="block space-y-3">
-                    <!-- Rounded Photo (ছবির মতো রাউন্ডেড বক্স) -->
                     <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-200">
                       <img 
                         src={rImg} 
@@ -301,25 +325,23 @@ const siteUrl = Astro.url.href;
                       />
                     </div>
 
-                    <!-- Post Title -->
                     <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
                       {rData.title || "Gulshan Travel Guide"}
                     </h3>
 
-                    <!-- Excerpt Snippet (২ লাইনের সামারি) -->
                     <p class="text-xs text-slate-600 font-normal leading-relaxed line-clamp-2">
                       {rData.description || "Expert recommendations, embassy interview guides, and diplomatic stays."}
                     </p>
                   </a>
 
-                  <!-- READ MORE > Link (রেফারেন্সের হুবহু স্টাইল) -->
+                  <!-- READ MORE Link with SVG Arrow -->
                   <div class="pt-1">
                     <a 
                       href={`/blog/${rSlug}`} 
                       class="inline-flex items-center gap-1 font-black text-xs uppercase tracking-wider text-[#b45d2a] hover:text-[#8c4318] transition-colors"
                     >
                       <span>READ MORE</span>
-                      <span class="text-sm font-bold">›</span>
+                      <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                   </div>
                 </article>
@@ -332,14 +354,14 @@ const siteUrl = Astro.url.href;
     )}
 
     <!-- ======================================================== -->
-    <!-- 🎯 ২. DISCOVER MORE (ছবির হুবহু ক্যাটাগরি স্ট্রিপ) -->
+    <!-- 🎯 ২. DISCOVER MORE (হালকা ব্র্যান্ড কালার শেড ব্যাকগ্রাউন্ড) -->
     <!-- ======================================================== -->
-    <section class="w-full bg-[#f3ede4] py-12 text-slate-900 border-t border-b border-[#e3d7c5]">
+    <section class="w-full bg-[#edf4ef] py-12 text-slate-900 border-t border-b border-[#d5e4d8]">
       <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
         
-        <!-- Big Bold Heading (রেফারেন্সের মতো) -->
+        <!-- Big Bold Heading in Brand Color -->
         <div class="text-left">
-          <h2 class="font-['Bebas_Neue',Impact,sans-serif] text-4xl sm:text-5xl lg:text-6xl text-slate-800 tracking-wider">
+          <h2 class="font-['Bebas_Neue',Impact,sans-serif] text-4xl sm:text-5xl lg:text-6xl text-[#0d3b23] tracking-wider">
             DISCOVER MORE
           </h2>
         </div>
@@ -351,8 +373,7 @@ const siteUrl = Astro.url.href;
               href={cat.link} 
               class="group block space-y-2.5 cursor-pointer"
             >
-              <!-- Rounded Category Thumbnail -->
-              <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-300">
+              <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-200 border border-emerald-950/10">
                 <img 
                   src={cat.image} 
                   alt={cat.name} 
@@ -362,7 +383,6 @@ const siteUrl = Astro.url.href;
                 />
               </div>
 
-              <!-- Category Name Below Image (রেফারেন্সের মতো) -->
               <h3 class="font-bold text-slate-900 text-sm sm:text-base group-hover:text-emerald-800 transition-colors">
                 {cat.name}
               </h3>
@@ -396,7 +416,7 @@ const siteUrl = Astro.url.href;
       copyBtn.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(window.location.href);
-          copyText.innerText = 'Copied! ✓';
+          copyText.innerText = 'Copied!';
           setTimeout(() => { copyText.innerText = 'Copy Link'; }, 2500);
         } catch (err) { copyText.innerText = 'Error'; }
       });
