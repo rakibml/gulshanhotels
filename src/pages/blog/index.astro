@@ -1,0 +1,292 @@
+---
+// src/pages/blog/index.astro (Magazine-Grade Travel Guides & Blog Hub)
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+// ১. সব পোস্ট ফেচ করা
+let allPosts: any[] = [];
+try {
+  const postCol = await getCollection('posts');
+  if (Array.isArray(postCol) && postCol.length > 0) {
+    allPosts = postCol;
+  }
+} catch (e) {}
+
+if (allPosts.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('../../content/posts/*.md', { eager: true });
+    allPosts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      slug: filePath.split('/').pop()?.replace('.md', ''),
+      data: item.frontmatter || {}
+    }));
+  } catch (e) {}
+}
+
+// তারিখ অনুযায়ী সাজানো (নতুন পোস্ট আগে আসবে)
+const sortedPosts = allPosts.sort((a, b) => {
+  const dateA = new Date(a.data?.date || 0).getTime();
+  const dateB = new Date(b.data?.date || 0).getTime();
+  return dateB - dateA;
+});
+
+// প্রথম পোস্টটি বড় ফিচার্ড হিসেবে দেখানো হবে, বাকিগুলো গ্রিডে যাবে
+const featuredPost = sortedPosts[0] || null;
+const regularPosts = sortedPosts.slice(1);
+
+// ইউনিক ক্যাটাগরি তালিকা
+const categories = ["All", "Travel Guide", "Embassy Guide", "Hotel Review", "Food & Dining", "Diplomatic Living"];
+---
+
+<Layout 
+  title="Gulshan Travel Guides & Local Insights — GulshanHotels.com"
+  description="Expert local guides, foreign embassy stay advice, fine dining recommendations, and luxury hotel reviews in Gulshan, Dhaka."
+>
+
+  <div class="w-full bg-white text-slate-900 pt-6 pb-20">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-10">
+      
+      <!-- BREADCRUMB -->
+      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
+        <a href="/" class="hover:text-emerald-800 transition">Home</a>
+        <span>/</span>
+        <span class="text-slate-800">Travel Guides & Insights</span>
+      </nav>
+
+      <!-- PAGE HEADER & LIVE SEARCH -->
+      <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left border-b border-slate-100 pb-8">
+        <div class="space-y-2 max-w-2xl">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+            <span>📖 Editorial Insights</span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+            Gulshan Travel Guides & Insights
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-500 font-medium">
+            Verified advice from our local hotel inspection team on embassy visits, airport transit, and 5-star hospitality.
+          </p>
+        </div>
+
+        <!-- SEARCH INPUT BAR -->
+        <div class="w-full md:w-80 relative">
+          <input 
+            type="text" 
+            id="blogSearchInput"
+            placeholder="Search guides, hotels, tips..."
+            class="w-full bg-slate-50 border border-slate-200 focus:border-emerald-700 rounded-full px-5 py-3 text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 outline-none transition"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+        </div>
+      </header>
+
+      <!-- CATEGORY FILTER PILLS -->
+      <div class="flex items-center gap-2 overflow-x-auto scroll-smooth pb-1 text-left [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {categories.map((cat, idx) => (
+          <button 
+            type="button"
+            data-cat={cat.toLowerCase()}
+            class={`blog-cat-btn shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${idx === 0 ? 'bg-[#0d3b23] text-white border-[#0d3b23]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-800'}`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- 1. BIG FEATURED POST (THIS WEEK'S TOP GUIDE) -->
+      {featuredPost && (
+        <section id="featuredPostSection" class="w-full text-left">
+          <a 
+            href={`/blog/${featuredPost.slug || featuredPost.id?.replace(/\.md$/, '')}`}
+            class="group block bg-[#F8FAF9] rounded-3xl border border-slate-200/90 overflow-hidden p-6 sm:p-8 lg:p-10 hover:border-slate-400 transition-all duration-300"
+          >
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              <!-- Featured Image -->
+              <div class="lg:col-span-7 relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900">
+                <img 
+                  src={featuredPost.data?.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80"} 
+                  alt={featuredPost.data?.title || "Featured Guide"} 
+                  fetchpriority="high"
+                  width="800"
+                  height="500"
+                  class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out" 
+                />
+                <div class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                  ★ Featured Guide of the Week
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="lg:col-span-5 space-y-4">
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                  <span class="text-emerald-800 uppercase tracking-wider">{featuredPost.data?.category || "Travel Guide"}</span>
+                  <span>•</span>
+                  <span>{featuredPost.data?.date || "Recent"}</span>
+                  <span>•</span>
+                  <span>{featuredPost.data?.readTime || "4 min read"}</span>
+                </div>
+
+                <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-emerald-800 transition-colors">
+                  {featuredPost.data?.title}
+                </h2>
+
+                <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-3">
+                  {featuredPost.data?.description}
+                </p>
+
+                <div class="pt-2">
+                  <span class="inline-flex items-center gap-1.5 font-black text-xs uppercase tracking-wider text-[#0d3b23] group-hover:text-emerald-700">
+                    <span>Read Full Guide</span>
+                    <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </a>
+        </section>
+      )}
+
+      <!-- 2. REGULAR POSTS GRID (3 COLUMNS) -->
+      <section class="space-y-6 text-left">
+        <h3 class="text-xl sm:text-2xl font-serif font-black text-slate-900 tracking-tight">
+          All Articles & Travel Guides
+        </h3>
+
+        <div id="postsGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {sortedPosts.map((post: any) => {
+            const pData = post.data || {};
+            const pSlug = post.slug || post.id?.replace(/\.md$/, '');
+            const pTitle = pData.title || "Gulshan Travel Guide";
+            const pCat = pData.category || "Travel Guide";
+            const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
+
+            return (
+              <article 
+                class="post-card group block text-left cursor-pointer space-y-3"
+                data-category={pCat.toLowerCase()}
+                data-title={pTitle.toLowerCase()}
+              >
+                <a href={`/blog/${pSlug}`} class="block space-y-3">
+                  <!-- Thumbnail Photo -->
+                  <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80">
+                    <img 
+                      src={pImg} 
+                      alt={pTitle} 
+                      loading="lazy" 
+                      decoding="async" 
+                      width="500"
+                      height="312"
+                      class="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out" 
+                    />
+                    <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-slate-900 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md border border-slate-200">
+                      {pCat}
+                    </div>
+                  </div>
+
+                  <!-- Text Details -->
+                  <div class="space-y-1.5">
+                    <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-400">
+                      <span>{pData.date || "Recent"}</span>
+                      <span>•</span>
+                      <span>{pData.readTime || "4 min read"}</span>
+                    </div>
+
+                    <h4 class="font-serif text-lg sm:text-xl font-black text-slate-900 leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
+                      {pTitle}
+                    </h4>
+
+                    <p class="text-xs text-slate-600 font-normal leading-relaxed line-clamp-2">
+                      {pData.description || "In-depth guidance and local inspection details."}
+                    </p>
+                  </div>
+
+                  <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#0d3b23] group-hover:underline pt-1">
+                    Read Guide ➔
+                  </span>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+
+        <!-- No Results Fallback -->
+        <div id="noPostsFoundMsg" class="hidden py-16 text-center space-y-2">
+          <span class="text-3xl block">🔍</span>
+          <p class="text-base font-bold text-slate-800">No articles found matching your filter.</p>
+          <button id="resetFilterBtn" type="button" class="text-xs font-black uppercase tracking-wider text-emerald-800 underline">Show All Guides</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</Layout>
+
+<!-- CLIENT SCRIPT FOR LIVE SEARCH & CATEGORY FILTERING -->
+<script is:inline>
+  const initBlogFilter = () => {
+    const input = document.getElementById('blogSearchInput');
+    const catBtns = document.querySelectorAll('.blog-cat-btn');
+    const cards = document.querySelectorAll('.post-card');
+    const noResults = document.getElementById('noPostsFoundMsg');
+    const resetBtn = document.getElementById('resetFilterBtn');
+
+    let currentCat = 'all';
+
+    function applyFilter() {
+      const query = (input?.value || '').trim().toLowerCase();
+      let matchCount = 0;
+
+      cards.forEach(card => {
+        const title = card.getAttribute('data-title') || '';
+        const cat = card.getAttribute('data-category') || '';
+
+        const matchesQuery = !query || title.includes(query);
+        const matchesCat = currentCat === 'all' || cat.includes(currentCat);
+
+        if (matchesQuery && matchesCat) {
+          card.classList.remove('hidden');
+          matchCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      if (noResults) {
+        if (matchCount === 0) noResults.classList.remove('hidden');
+        else noResults.classList.add('hidden');
+      }
+    }
+
+    // Category button click
+    catBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCat = btn.getAttribute('data-cat') || 'all';
+
+        catBtns.forEach(b => {
+          b.classList.remove('bg-[#0d3b23]', 'text-white', 'border-[#0d3b23]');
+          b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+        });
+        btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+        btn.classList.add('bg-[#0d3b23]', 'text-white', 'border-[#0d3b23]');
+
+        applyFilter();
+      });
+    });
+
+    if (input) {
+      input.addEventListener('input', applyFilter);
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (input) input.value = '';
+        currentCat = 'all';
+        catBtns[0]?.click();
+      });
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', initBlogFilter);
+  document.addEventListener('astro:page-load', initBlogFilter);
+</script>
