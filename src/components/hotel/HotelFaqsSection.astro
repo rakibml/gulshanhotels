@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelFaqsSection.astro (100% Dynamic CMS FAQs - 0ms Forced Reflow Pure CSS Grid Accordion)
+// src/components/hotel/HotelFaqsSection.astro (100% Dynamic CMS FAQs, Vector SVG Accordion & Cloudflare Safe)
 interface Props {
   hotel: any;
 }
@@ -10,7 +10,7 @@ const data = hotel?.data || {};
 const hotelTitle = data.title || data.name || "Hotel Details";
 const sectionTitle = data.faqs_title || `FAQs about ${hotelTitle}`;
 
-// Fetch Dynamic FAQs from CMS (Zero Demo Questions)
+// Fetch Dynamic FAQs from CMS
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const showSection = data.enable_faqs !== false && rawFaqs.length > 0;
 
@@ -18,7 +18,10 @@ const showSection = data.enable_faqs !== false && rawFaqs.length > 0;
 const initialTop4 = rawFaqs.slice(0, 4);
 const remainingFaqs = rawFaqs.slice(4);
 
-// Dynamic Google FAQPage Schema Script for REAL FAQs ONLY
+// Clean text helper for Google Schema
+const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').trim();
+
+// Google FAQPage Schema Script
 const faqSchema = showSection ? {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -27,7 +30,7 @@ const faqSchema = showSection ? {
     "name": typeof item === 'string' ? item : (item?.question || ''),
     "acceptedAnswer": {
       "@type": "Answer",
-      "text": typeof item === 'object' ? (item?.answer || '') : ''
+      "text": typeof item === 'object' ? stripHtml(item?.answer || '') : ''
     }
   }))
 } : null;
@@ -38,38 +41,49 @@ const faqSchema = showSection ? {
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 )}
 
-<!-- 7TH COMPONENT: FAQS SECTION (RENDERED ONLY IF CMS FAQS EXIST) -->
+<!-- 7TH COMPONENT: FAQS SECTION (PURE WHITE & SCROLL-MT ALIGNED) -->
 {showSection && (
-  <section id="faqs" class="bg-[#F8FAF9] py-10 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
+  <section id="faqs" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
     <div class="space-y-6">
       
       <!-- Section Header -->
-      <div class="border-b border-slate-200/80 pb-3 text-left">
+      <div class="border-b border-slate-200 pb-3 text-left">
         <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
           {sectionTitle}
         </h2>
         <p class="text-xs text-slate-500 mt-1">Frequently asked questions by guests and travelers</p>
       </div>
 
-      <!-- INITIAL TOP 4 FAQS GRID (PURE CSS GRID ACCORDION - ZERO REFLOW) -->
+      <!-- INITIAL TOP 4 FAQS GRID -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-        {initialTop4.map((faq: any) => {
+        {initialTop4.map((faq: any, idx: number) => {
           const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
           const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
 
           return (
-            <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
+            <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden group transition duration-300">
               <button 
-                class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
+                type="button"
+                id={`faq-btn-${idx}`}
+                aria-controls={`faq-ans-${idx}`}
                 aria-expanded="false"
+                class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
               >
-                <span class="pr-2">{qText}</span>
-                <span class="faq-arrow-icon text-slate-400 text-xs shrink-0 transition-transform duration-300">▼</span>
+                <span class="pr-3 leading-snug">{qText}</span>
+                <!-- Crisp Vector SVG Chevron Icon -->
+                <svg class="faq-chevron w-4 h-4 text-slate-400 group-hover:text-emerald-800 transition-transform duration-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
               </button>
               
-              <div class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300">
+              <div 
+                id={`faq-ans-${idx}`}
+                role="region"
+                aria-labelledby={`faq-btn-${idx}`}
+                class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300"
+              >
                 <div class="overflow-hidden">
-                  <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
+                  <div class="p-4 sm:p-5 pt-2 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60 text-left">
                     {aText}
                   </div>
                 </div>
@@ -79,45 +93,62 @@ const faqSchema = showSection ? {
         })}
       </div>
 
-      <!-- REMAINING HIDDEN FAQS (EXPANDED ON READ MORE BUTTON CLICK) -->
+      <!-- REMAINING HIDDEN FAQS (WRAPPED SAFELY TO PREVENT CSS CONFLICT) -->
       {remainingFaqs.length > 0 && (
-        <div id="extraFaqsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-1">
-          {remainingFaqs.map((faq: any) => {
-            const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
-            const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
+        <div id="extraFaqsWrapper" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-2">
+            {remainingFaqs.map((faq: any, idx: number) => {
+              const qText = typeof faq === 'string' ? faq : (faq?.question || 'Question');
+              const aText = typeof faq === 'object' ? (faq?.answer || 'Answer details') : '';
+              const globalIdx = initialTop4.length + idx;
 
-            return (
-              <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden group transition duration-300">
-                <button 
-                  class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
-                  aria-expanded="false"
-                >
-                  <span class="pr-2">{qText}</span>
-                  <span class="faq-arrow-icon text-slate-400 text-xs shrink-0 transition-transform duration-300">▼</span>
-                </button>
+              return (
+                <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden group transition duration-300">
+                  <button 
+                    type="button"
+                    id={`faq-btn-${globalIdx}`}
+                    aria-controls={`faq-ans-${globalIdx}`}
+                    aria-expanded="false"
+                    class="faq-accordion-trigger w-full flex justify-between items-center p-4 sm:p-5 cursor-pointer select-none font-bold text-slate-900 text-xs sm:text-sm hover:text-emerald-800 transition text-left"
+                  >
+                    <span class="pr-3 leading-snug">{qText}</span>
+                    <svg class="faq-chevron w-4 h-4 text-slate-400 group-hover:text-emerald-800 transition-transform duration-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </button>
 
-                <div class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300">
-                  <div class="overflow-hidden">
-                    <div class="p-4 sm:p-5 pt-1 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/50 text-left">
-                      {aText}
+                  <div 
+                    id={`faq-ans-${globalIdx}`}
+                    role="region"
+                    aria-labelledby={`faq-btn-${globalIdx}`}
+                    class="faq-accordion-answer grid grid-rows-[0fr] transition-all duration-300"
+                  >
+                    <div class="overflow-hidden">
+                      <div class="p-4 sm:p-5 pt-2 text-xs sm:text-sm text-slate-600 border-t border-slate-100 leading-relaxed bg-slate-50/60 text-left">
+                        {aText}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
-      <!-- READ MORE FAQS BUTTON -->
+      <!-- READ MORE FAQS BUTTON WITH SVG -->
       {remainingFaqs.length > 0 && (
         <div class="flex justify-center pt-2">
           <button 
+            type="button"
             id="toggleFaqsBtn" 
-            class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-100/70 hover:bg-emerald-200/80 px-6 py-3 rounded-2xl border border-emerald-300/80 transition cursor-pointer flex items-center gap-2 shadow-sm"
+            data-count={remainingFaqs.length}
+            class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-50 hover:bg-emerald-100 px-6 py-3 rounded-2xl border border-emerald-300 transition cursor-pointer flex items-center gap-2 shadow-xs select-none"
           >
-            <span id="toggleFaqsText">Read More FAQs ({remainingFaqs.length}+)</span>
-            <span id="toggleFaqsArrow">➔</span>
+            <span id="toggleFaqsText">Read More FAQs (+{remainingFaqs.length})</span>
+            <svg id="toggleFaqsIcon" class="w-3.5 h-3.5 fill-current shrink-0 transition-transform duration-300" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
         </div>
       )}
@@ -126,16 +157,21 @@ const faqSchema = showSection ? {
   </section>
 )}
 
-<!-- CLIENT SCRIPT WITH PURE CSS GRID TOGGLE (ZERO REFLOW) -->
-<script is:inline>
-  const initHotelFaqs = () => {
-    // Pure CSS Grid Accordion - 0ms Forced Reflow
+<!-- CLIENT SCRIPT (ZERO DUPLICATE LISTENERS & 0MS REFLOW) -->
+<script>
+  let faqsAbortCtrl: AbortController | null = null;
+
+  function initHotelFaqs() {
+    if (faqsAbortCtrl) faqsAbortCtrl.abort();
+    faqsAbortCtrl = new AbortController();
+
+    // Accordion Toggle
     document.querySelectorAll('.faq-accordion-trigger').forEach(trigger => {
       trigger.addEventListener('click', (e) => {
         e.preventDefault();
         const wrapper = trigger.closest('.faq-item-wrapper');
         const answer = wrapper ? wrapper.querySelector('.faq-accordion-answer') : null;
-        const arrow = trigger.querySelector('.faq-arrow-icon');
+        const chevron = trigger.querySelector('.faq-chevron') as HTMLElement | null;
 
         const isOpen = trigger.getAttribute('aria-expanded') === 'true';
 
@@ -145,43 +181,41 @@ const faqSchema = showSection ? {
             answer.classList.remove('grid-rows-[1fr]');
             answer.classList.add('grid-rows-[0fr]');
           }
-          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
         } else {
           trigger.setAttribute('aria-expanded', 'true');
           if (answer) {
             answer.classList.remove('grid-rows-[0fr]');
             answer.classList.add('grid-rows-[1fr]');
           }
-          if (arrow) arrow.style.transform = 'rotate(180deg)';
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
         }
       });
     });
 
-    // Read More Toggle
+    // Read More / Less Toggle
     const toggleBtn = document.getElementById('toggleFaqsBtn');
-    const container = document.getElementById('extraFaqsContainer');
+    const wrapper = document.getElementById('extraFaqsWrapper');
     const toggleText = document.getElementById('toggleFaqsText');
-    const toggleArrow = document.getElementById('toggleFaqsArrow');
+    const toggleIcon = document.getElementById('toggleFaqsIcon');
 
-    if (toggleBtn && container && toggleText && toggleArrow) {
-      if (!toggleBtn.dataset.listenerSet) {
-        toggleBtn.dataset.listenerSet = 'true';
+    if (toggleBtn && wrapper && toggleText && toggleIcon) {
+      const remainingCount = toggleBtn.getAttribute('data-count') || '';
 
-        toggleBtn.addEventListener('click', () => {
-          const isHidden = container.classList.contains('hidden');
-          if (isHidden) {
-            container.classList.remove('hidden');
-            toggleText.textContent = 'Show Less FAQs';
-            toggleArrow.textContent = '▲';
-          } else {
-            container.classList.add('hidden');
-            toggleText.textContent = `Read More FAQs (${container.children.length}+)`;
-            toggleArrow.textContent = '➔';
-          }
-        });
-      }
+      toggleBtn.onclick = () => {
+        const isHidden = wrapper.classList.contains('hidden');
+        if (isHidden) {
+          wrapper.classList.remove('hidden');
+          toggleText.textContent = 'Show Less FAQs';
+          toggleIcon.style.transform = 'rotate(-90deg)';
+        } else {
+          wrapper.classList.add('hidden');
+          toggleText.textContent = `Read More FAQs (+${remainingCount})`;
+          toggleIcon.style.transform = 'rotate(0deg)';
+        }
+      };
     }
-  };
+  }
 
   document.addEventListener('DOMContentLoaded', initHotelFaqs);
   document.addEventListener('astro:page-load', initHotelFaqs);
