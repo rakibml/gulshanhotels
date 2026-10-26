@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Unique Multi-Review Loader & Cloudflare Build-Safe)
+// src/components/hotel/HotelReviews.astro (100% Strict Hotel-Specific Matching & Cloudflare Build-Safe)
 interface Props {
   hotel: any;
 }
@@ -7,59 +7,56 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ক্লিন টাইটেল ও স্লাগ
+// ১. হোটেলের নাম ও নিখুঁত ক্লিন স্লাগ তৈরি
 const hotelTitle = (data.title || data.name || "Hotel Details").trim();
-const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "hotel").trim();
+const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
+const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 
-// ১. ডিরেক্ট ফাইল লোডার (যাতে Duplicate ID-র কারণে Astro কোনো রিভিউ ওভাররাইট করতে না পারে)
+// ২. ডাটা ফেচিং (Vite Glob দিয়ে সব ফাইল সিঙ্গেল ইনস্ট্যান্সে রিড)
 let rawReviewsList: any[] = [];
-
 try {
-  const globA = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
-  const globB = import.meta.glob('../../content/reviews/*.{md,mdx}', { eager: true });
-  const allFilesMap = { ...globA, ...globB };
-
-  rawReviewsList = Object.values(allFilesMap).map((fileModule: any) => {
-    return fileModule?.frontmatter || fileModule?.data || fileModule || {};
-  });
+  const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
+  const entries = Object.values(globFiles);
+  
+  if (entries.length > 0) {
+    rawReviewsList = entries.map((item: any) => item?.frontmatter || item?.data || item || {});
+  } else {
+    // ফলব্যাক পাথ যদি রুট পাথ খালি পায়
+    const relFiles = import.meta.glob('../../content/reviews/*.{md,mdx}', { eager: true });
+    rawReviewsList = Object.values(relFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
+  }
 } catch (e) {
   rawReviewsList = [];
 }
 
-// ২. নিখুঁত ফিল্টারিং (id, slug, hotel সব ফিল্ড সাপোর্ট করে)
+// ৩. STRICT EXACT MATCHING (যাতে এক হোটেলের রিভিউ কোনোভাবেই অন্য হোটেলে না যায়)
 const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
 
-  // শুধু যেগুলোতে স্পষ্টভাবে approved: false আছে সেগুলো বাদ, বাকি সব গৃহীত
-  const isRejected = item.approved === false || String(item.approved).toLowerCase() === 'false';
-  if (isRejected) return false;
+  // Strict Approval: অবশ্যই approved: true থাকতে হবে
+  const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+  if (!isApproved) return false;
 
-  // ফিল্ডগুলো এক্সট্র্যাক্ট করা
-  const rId = String(item.id || "").trim().toLowerCase();
-  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || "").trim().toLowerCase();
-  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || "").trim().toLowerCase();
+  // রিভিউ ফাইলের ফিল্ডগুলো ক্লিন ও লোয়ারকেস করা
+  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
 
-  // স্লাগ অথবা আইডির সাথে ম্যাচ
-  const matchBySlug = (rSlug !== "" && rSlug === searchSlug) || (rId !== "" && rId === searchSlug);
+  // হুবহু এক্স্যাক্ট ম্যাচ (কোনো includes নেই)
+  const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug);
+  const matchTitle = searchTitle !== "" && (rHotel === searchTitle);
 
-  // হোটেলের টাইটেল দিয়ে ম্যাচ
-  const matchByTitle = rHotel !== "" && (
-    rHotel === searchTitle || 
-    rHotel.includes(searchTitle) || 
-    searchTitle.includes(rHotel)
-  );
-
-  return matchBySlug || matchByTitle;
+  return matchSlug || matchTitle;
 });
 
-// ৩. লোকাল (hotel.data.reviews) এবং ফাইল রিভিউ মার্জ করা
+// ৪. লোকাল (hotel.data.reviews) এবং সিএমএস রিভিউ মার্জ
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-// ৪. ক্লিন ডাটা ফরম্যাটিং ও ভ্যালিডেশন
+// ৫. ফরম্যাটিং ও ডাটা ক্লিনআপ
 const allReviews = combinedRawReviews.map((rev: any) => ({
   name: rev.name || rev.author || 'Verified Guest',
   date: rev.date || 'Recent',
@@ -76,7 +73,7 @@ const avgRating = reviewsCount > 0
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
-<!-- GUEST REVIEWS SECTION -->
+<!-- GUEST REVIEWS SECTION (PURE WHITE & SCROLL-MT ALIGNED) -->
 <section id="guest-reviews" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="space-y-8">
     
