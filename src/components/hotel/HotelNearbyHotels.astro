@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelNearbyHotels.astro (100% Real CMS Reviews & Ratings - Zero Fake Data)
+// src/components/hotel/HotelNearbyHotels.astro (100% Real CMS Reviews & Ratings - Zero Fake Data & Cloudflare Build-Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -43,7 +43,7 @@ if (allHotels.length === 0) {
   }
 }
 
-// ২. আসল রিভিউ ডাটা ফেচিং (যাতে রিয়েল রেটিং ও রিভিউ কাউন্ট বের করা যায়)
+// ২. আসল রিভিউ ডাটা ফেচিং (রিয়েল রেটিং ও রিভিউ কাউন্টের জন্য)
 try {
   const globReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
   allReviewsList = Object.values(globReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
@@ -51,7 +51,7 @@ try {
   allReviewsList = [];
 }
 
-// ৩. বর্তমান হোটেল বাদে কাছাকাছি ৪টি হোটেল নির্বাচন
+// ৩. বর্তমান হোটেল বাদে কাছাকাছি ৪টি হোটেল নির্বাচন (মোবাইলে ২x২ গ্রিডের জন্য ৪টি নিখুঁত)
 const nearbyHotels = allHotels
   .filter(h => {
     const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
@@ -86,11 +86,10 @@ const nearbyHotels = allHotels
           const hImage = hData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80";
           const hSlug = String(hData.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
 
-          // ================= REAL RATING & REVIEWS CALCULATION =================
+          // REAL RATING & REVIEWS CALCULATION
           const targetSlug = hSlug;
           const targetTitle = hTitle.toLowerCase();
 
-          // এই হোটেলের অনুমোদিত আসল রিভিউগুলো ফিল্টার করা
           const matchingReviews = allReviewsList.filter((rev: any) => {
             if (!rev) return false;
             const isApproved = rev.approved === true || String(rev.approved).trim().toLowerCase() === 'true';
@@ -104,7 +103,6 @@ const nearbyHotels = allHotels
                    (targetTitle !== "" && rHotel === targetTitle);
           });
 
-          // হোটেলের লোকাল/এমবেডেড রিভিউ মার্জ
           const embeddedRevs = Array.isArray(hData.reviews) ? hData.reviews : [];
           const totalRealReviews = [...matchingReviews, ...embeddedRevs];
 
@@ -121,7 +119,6 @@ const nearbyHotels = allHotels
             <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group">
               <div>
                 
-                <!-- Card Image & Badges -->
                 <div class="h-32 xs:h-36 sm:h-48 w-full overflow-hidden relative bg-slate-900">
                   <img 
                     src={hImage} 
@@ -131,23 +128,19 @@ const nearbyHotels = allHotels
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                   />
                   
-                  <!-- Best Value Badge -->
                   <div class="absolute top-2 left-2 flex flex-col gap-1">
                     <span class="bg-[#0d3b23] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md inline-block">
                       Best Value
                     </span>
                   </div>
 
-                  <!-- Category Tag on Right -->
                   <span class="hidden sm:inline-block absolute bottom-2 right-2 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-white/20">
                     {hCategory}
                   </span>
                 </div>
 
-                <!-- Card Content Details -->
                 <div class="p-3 sm:p-5 space-y-1.5 sm:space-y-2.5">
                   
-                  <!-- REAL RATINGS (যদি আসল রিভিউ থাকে তবেই দেখাবে, ফেক নয়) -->
                   {hasRealReviews && realRatingNumber ? (
                     <div class="flex items-center gap-1.5">
                       <div class="flex items-center gap-0.5">
@@ -165,7 +158,6 @@ const nearbyHotels = allHotels
                       )}
                     </div>
                   ) : (
-                    <!-- রিভিউ না থাকলে ফেক না দেখিয়ে জেনুইন ভেরিফায়েড ব্যাজ -->
                     <div class="flex items-center gap-1">
                       <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
                         <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
@@ -174,14 +166,12 @@ const nearbyHotels = allHotels
                     </div>
                   )}
 
-                  <!-- Hotel Title -->
                   <h3 class="font-black text-slate-900 text-xs sm:text-base group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
                     <a href={`/${hSlug}`} class="hover:underline">
                       {hTitle}
                     </a>
                   </h3>
 
-                  <!-- Location with SVG Pin -->
                   <p class="text-[10px] sm:text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
                     <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -189,7 +179,6 @@ const nearbyHotels = allHotels
                     <span class="truncate">{hLocation}</span>
                   </p>
 
-                  <!-- Price Snippet -->
                   <div class="pt-1 border-t border-slate-100 flex flex-col xs:flex-row xs:items-baseline justify-between gap-0.5">
                     <span class="text-[9px] sm:text-[11px] text-slate-400 font-bold uppercase">From</span>
                     <span class="text-xs sm:text-base font-black text-emerald-900 leading-tight">
@@ -200,7 +189,6 @@ const nearbyHotels = allHotels
                 </div>
               </div>
 
-              <!-- Action Button -->
               <div class="p-3 sm:p-5 pt-0">
                 <a 
                   href={`/${hSlug}`} 
