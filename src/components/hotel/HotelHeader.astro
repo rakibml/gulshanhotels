@@ -57,7 +57,7 @@ const titleStyleMap: Record<string, string> = {
 
 const titleCssClass = titleStyleMap[selectedStyle] || titleStyleMap.style_1;
 
-// IMAGE RESIZING & WEBP SPEED OPTIMIZER HELPER FUNCTION
+// Image Resizer Helper
 function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   if (!url) return '';
   if (url.includes('unsplash.com')) {
@@ -67,14 +67,12 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   return url;
 }
 
-// Pure Dynamic Gallery Images (Defensive Array Validation)
-const rawGallery = (Array.isArray(data.gallery) && data.gallery.length > 0)
+// Pure Dynamic Gallery Images
+const rawGallery: string[] = (Array.isArray(data.gallery) && data.gallery.length > 0)
   ? data.gallery
   : (hotelImage ? [hotelImage] : []);
 
 const totalPhotos = rawGallery.length;
-
-// Correct Math: 5 thumbnails visible in layout. Unseen remaining photos = totalPhotos - 5
 const remainingPhotos = totalPhotos > 5 ? totalPhotos - 5 : 0;
 
 // Dynamic Grid Layout based on thumbnail count
@@ -86,13 +84,24 @@ const gridColsClass = totalPhotos >= 5
       ? 'grid-cols-3'
       : 'grid-cols-2';
 
-const mainHeroUrlMobile = getOptimizedImageUrl(rawGallery[0], 640, 75);
-const mainHeroUrlDesktop = getOptimizedImageUrl(rawGallery[0], 1200, 80);
-const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 160, 65));
-const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1400, 82));
+// Responsive Image Sets
+const heroMobileUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 640, 75));
+const heroDesktopUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1200, 80));
+const thumbUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 200, 70));
+const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1600, 85));
+
+// Gallery Payload for JS Client
+const galleryPayload = {
+  mobile: heroMobileUrls,
+  desktop: heroDesktopUrls,
+  lightbox: lightboxUrls
+};
+
+// Dynamic Domain Fallback for SEO Schema
+const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin : 'https://gulshanhotels.com');
 ---
 
-<!-- EARLY LCP PRECONNECT & PRELOAD DIRECTIVES FOR GOOGLE LIGHTHOUSE 100% PASS -->
+<!-- EARLY LCP PRECONNECT & PRELOAD DIRECTIVES -->
 {totalPhotos > 0 && (
   <>
     <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
@@ -100,8 +109,8 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
     <link
       rel="preload"
       as="image"
-      href={mainHeroUrlDesktop}
-      imagesrcset={`${mainHeroUrlMobile} 640w, ${mainHeroUrlDesktop} 1200w`}
+      href={heroDesktopUrls[0]}
+      imagesrcset={`${heroMobileUrls[0]} 640w, ${heroDesktopUrls[0]} 1200w`}
       imagesizes="(max-width: 1024px) 100vw, 1024px"
       fetchpriority="high"
     />
@@ -116,13 +125,13 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
     <div class="text-center max-w-4xl mx-auto space-y-3">
 
       <!-- Breadcrumbs Navigation -->
-      <div class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
+      <nav aria-label="Breadcrumb" class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
         <a href="/" class="hover:text-emerald-700 transition">Home</a>
         <span>›</span>
         <a href="/#hotels" class="hover:text-emerald-700 transition">Hotels</a>
         <span>›</span>
-        <span class="text-slate-800 font-bold">{hotelTitle}</span>
-      </div>
+        <span class="text-slate-800 font-bold" aria-current="page">{hotelTitle}</span>
+      </nav>
 
       <!-- Category Pill Badge -->
       {hotelCategory && (
@@ -133,7 +142,7 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
         </div>
       )}
 
-      <!-- PRIMARY SEO HEADING (H1) WITH CMS TYPOGRAPHY STYLES -->
+      <!-- PRIMARY SEO HEADING (H1) -->
       <h1 class={titleCssClass}>
         {hotelTitle}
       </h1>
@@ -183,12 +192,12 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
     {totalPhotos > 0 && (
       <div class="max-w-5xl mx-auto space-y-3 pt-2">
 
-        <!-- 1. MAIN LARGE HERO COVER PHOTO -->
+        <!-- 1. MAIN HERO COVER PHOTO -->
         <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200/80 bg-slate-900">
           <img
             id="heroMainViewImg"
-            src={mainHeroUrlDesktop}
-            srcset={`${mainHeroUrlMobile} 640w, ${mainHeroUrlDesktop} 1200w`}
+            src={heroDesktopUrls[0]}
+            srcset={`${heroMobileUrls[0]} 640w, ${heroDesktopUrls[0]} 1200w`}
             sizes="(max-width: 1024px) 100vw, 1024px"
             width="1200"
             height="480"
@@ -199,37 +208,48 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
             class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer"
           />
 
-          <!-- Left/Right Arrow Navigation over Main Image -->
+          <!-- Left/Right Arrow Navigation -->
           {totalPhotos > 1 && (
-            <button id="heroPrevImgBtn" aria-label="Previous Image" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
-              ❮
-            </button>
-          )}
-
-          {totalPhotos > 1 && (
-            <button id="heroNextImgBtn" aria-label="Next Image" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10">
-              ❯
-            </button>
+            <>
+              <button
+                type="button"
+                id="heroPrevImgBtn"
+                aria-label="Previous Image"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
+              >
+                ❮
+              </button>
+              <button
+                type="button"
+                id="heroNextImgBtn"
+                aria-label="Next Image"
+                class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
+              >
+                ❯
+              </button>
+            </>
           )}
 
           <!-- Photo Counter Badge -->
-          <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20">
+          <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20 select-none">
             <span id="heroCurrentIdx">1</span> / <span>{totalPhotos}</span>
           </div>
         </div>
 
-        <!-- 2. SMALL THUMBNAIL PHOTOS ROW -->
+        <!-- 2. THUMBNAILS ROW -->
         {thumbUrls.length > 1 && (
           <div class={`grid gap-2 sm:gap-3 ${gridColsClass}`}>
             {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
               <button
+                type="button"
+                aria-label={`View photo ${idx + 1}`}
                 class={`hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : 'border-transparent'}`}
                 data-index={idx}
               >
                 <img
                   src={img}
-                  alt={`${hotelTitle} Thumb ${idx + 1}`}
-                  width="160"
+                  alt={`${hotelTitle} Thumbnail ${idx + 1}`}
+                  width="200"
                   height="120"
                   loading="lazy"
                   decoding="async"
@@ -238,17 +258,19 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
               </button>
             ))}
 
-            <!-- 5th Thumbnail with 'More Photos' Pop-up Badge -->
+            <!-- 5th Thumbnail with 'More Photos' Pop-up Badge if needed -->
             {thumbUrls[4] && (
               <button
-                id="triggerFullGalleryBtn"
+                type="button"
+                id="triggerFifthThumbBtn"
+                aria-label={remainingPhotos > 0 ? `View all ${totalPhotos} photos` : `View photo 5`}
                 class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-transparent hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
                 data-index="4"
               >
                 <img
                   src={thumbUrls[4]}
-                  alt="More Photos"
-                  width="160"
+                  alt="Gallery Thumbnail 5"
+                  width="200"
                   height="120"
                   loading="lazy"
                   decoding="async"
@@ -273,33 +295,66 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
   </div>
 </section>
 
-<!-- SAFE HIDDEN SCRIPT TAG FOR LIGHTBOX IMAGES DATA -->
-<script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(lightboxUrls)}></script>
+<!-- HIDDEN SCRIPT TAG FOR OPTIMIZED GALLERY DATA -->
+<script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(galleryPayload)}></script>
 
-<!-- FULL SCREEN PHOTO LIGHTBOX POP-UP MODAL -->
-<div id="heroLightboxModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex flex-col justify-between p-4 sm:p-8 text-white">
+<!-- FULL SCREEN PHOTO LIGHTBOX MODAL -->
+<div
+  id="heroLightboxModal"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image Gallery Lightbox"
+  class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex-col justify-between p-4 sm:p-8 text-white select-none"
+>
   <div class="flex items-center justify-between max-w-6xl mx-auto w-full border-b border-slate-800 pb-4">
     <div>
-      <h3 class="text-lg font-black font-serif text-white">{hotelTitle}</h3>
+      <h3 class="text-base sm:text-lg font-black font-serif text-white">{hotelTitle}</h3>
       <span class="text-xs text-slate-400">Photo Gallery</span>
     </div>
     <div class="flex items-center gap-4">
       <span class="text-xs font-bold bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
         <span id="lightboxModalIdx">1</span> / <span>{totalPhotos}</span>
       </span>
-      <button id="closeHeroLightboxBtn" aria-label="Close Lightbox" class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer">&times;</button>
+      <button
+        type="button"
+        id="closeHeroLightboxBtn"
+        aria-label="Close Lightbox"
+        class="text-slate-400 hover:text-white text-3xl font-bold p-1 cursor-pointer transition active:scale-90"
+      >
+        &times;
+      </button>
     </div>
   </div>
 
   <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
-    <img id="lightboxModalImg" src={lightboxUrls[0]} alt={hotelTitle} loading="lazy" decoding="async" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" />
+    <img
+      id="lightboxModalImg"
+      src={lightboxUrls[0]}
+      alt={hotelTitle}
+      loading="lazy"
+      decoding="async"
+      class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200"
+    />
     
     {totalPhotos > 1 && (
-      <button id="lightboxPrevBtn" aria-label="Previous Lightbox Photo" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❮</button>
-    )}
-    
-    {totalPhotos > 1 && (
-      <button id="lightboxNextBtn" aria-label="Next Lightbox Photo" class="absolute right-2 sm:left-auto sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition cursor-pointer">❯</button>
+      <>
+        <button
+          type="button"
+          id="lightboxPrevBtn"
+          aria-label="Previous Lightbox Photo"
+          class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition active:scale-95 cursor-pointer z-10"
+        >
+          ❮
+        </button>
+        <button
+          type="button"
+          id="lightboxNextBtn"
+          aria-label="Next Lightbox Photo"
+          class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition active:scale-95 cursor-pointer z-10"
+        >
+          ❯
+        </button>
+      </>
     )}
   </div>
 </div>
@@ -313,13 +368,13 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://gulshanhotels.com/"
+      "item": `${siteUrl}/`
     },
     {
       "@type": "ListItem",
       "position": 2,
       "name": "Hotels",
-      "item": "https://gulshanhotels.com/#hotels"
+      "item": `${siteUrl}/#hotels`
     },
     {
       "@type": "ListItem",
@@ -329,10 +384,17 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
   ]
 })}></script>
 
-<!-- CLIENT SCRIPT WITH CLICK LISTENERS & BACK-BUTTON SAFETY -->
-<script is:inline>
-  const initHotelHeader = () => {
-    const mainImg = document.getElementById('heroMainViewImg');
+<!-- CLIENT SCRIPT -->
+<script>
+  let abortCtrl: AbortController | null = null;
+
+  function initHotelGallery() {
+    // Clean up previous event listeners (Astro View Transitions / Page loads safe)
+    if (abortCtrl) abortCtrl.abort();
+    abortCtrl = new AbortController();
+    const { signal } = abortCtrl;
+
+    const mainImg = document.getElementById('heroMainViewImg') as HTMLImageElement | null;
     const prevBtn = document.getElementById('heroPrevImgBtn');
     const nextBtn = document.getElementById('heroNextImgBtn');
     const currentIdxSpan = document.getElementById('heroCurrentIdx');
@@ -340,31 +402,39 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
 
     const modal = document.getElementById('heroLightboxModal');
     const closeModalBtn = document.getElementById('closeHeroLightboxBtn');
-    const modalImg = document.getElementById('lightboxModalImg');
+    const modalImg = document.getElementById('lightboxModalImg') as HTMLImageElement | null;
     const modalIdxSpan = document.getElementById('lightboxModalIdx');
     const modalPrevBtn = document.getElementById('lightboxPrevBtn');
     const modalNextBtn = document.getElementById('lightboxNextBtn');
 
-    // Parse gallery images JSON safely
+    // Parse data safely
     const galleryScript = document.getElementById('hotel-gallery-data');
-    let images = [];
+    let gallery = { mobile: [] as string[], desktop: [] as string[], lightbox: [] as string[] };
     try {
-      images = JSON.parse(galleryScript?.textContent || '[]');
-    } catch (e) {
-      images = [];
+      gallery = JSON.parse(galleryScript?.textContent || '{}');
+    } catch {
+      gallery = { mobile: [], desktop: [], lightbox: [] };
     }
+
+    const count = gallery.desktop?.length || 0;
+    if (count === 0) return;
 
     let activeIdx = 0;
 
-    function updateMainImage(idx) {
-      if (!mainImg || !images.length) return;
-      activeIdx = (idx + images.length) % images.length;
-      mainImg.src = images[activeIdx];
-      mainImg.removeAttribute('srcset'); // Remove responsive hero srcset when manually changing
+    // Control body scroll when lightbox is opened
+    function toggleBodyScroll(disable: boolean) {
+      document.body.style.overflow = disable ? 'hidden' : '';
+    }
+
+    function updateMainImage(idx: number) {
+      if (!mainImg) return;
+      activeIdx = (idx + count) % count;
+      
+      mainImg.src = gallery.desktop[activeIdx];
+      mainImg.srcset = `${gallery.mobile[activeIdx]} 640w, ${gallery.desktop[activeIdx]} 1200w`;
       
       if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
 
-      // Update thumbnail active borders
       thumbBtns.forEach((btn, i) => {
         if (i === activeIdx) {
           btn.classList.add('border-emerald-600');
@@ -376,81 +446,99 @@ const lightboxUrls = rawGallery.map((img: string) => getOptimizedImageUrl(img, 1
       });
     }
 
-    // Lightbox Control with Hash #gallery Safety
-    function hideLightboxDOM() {
-      if (modal) modal.classList.add('hidden');
+    function updateModalImage(idx: number) {
+      if (!modalImg) return;
+      activeIdx = (idx + count) % count;
+      modalImg.src = gallery.lightbox[activeIdx];
+      if (modalIdxSpan) modalIdxSpan.textContent = (activeIdx + 1).toString();
+      updateMainImage(activeIdx);
     }
 
-    function openLightbox(startIdx) {
+    function hideLightboxDOM() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      toggleBodyScroll(false);
+    }
+
+    function openLightbox(startIdx?: number) {
       if (!modal) return;
       const idxToOpen = startIdx !== undefined ? startIdx : activeIdx;
       updateModalImage(idxToOpen);
+      
       modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      toggleBodyScroll(true);
 
       if (window.location.hash !== '#gallery') {
-        window.location.hash = 'gallery';
+        history.pushState({ modalOpen: true }, '', '#gallery');
       }
     }
 
     function closeLightboxByUI() {
       if (window.location.hash === '#gallery') {
-        history.back(); // Reverts hash, triggering hashchange to close modal
+        history.back();
       } else {
         hideLightboxDOM();
       }
     }
 
-    function updateModalImage(idx) {
-      if (!modalImg || !images.length) return;
-      activeIdx = (idx + images.length) % images.length;
-      modalImg.src = images[activeIdx];
-      if (modalIdxSpan) modalIdxSpan.textContent = (activeIdx + 1).toString();
-    }
-
-    // Listen to Mobile Back Button or Hash Change
-    window.addEventListener('hashchange', () => {
+    // Hash change / Mobile back button listener
+    window.addEventListener('popstate', () => {
       if (window.location.hash !== '#gallery') {
         hideLightboxDOM();
       } else if (modal && modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
+        openLightbox(activeIdx);
       }
-    });
+    }, { signal });
 
-    // Initial Hash Check
+    // Keyboard Accessibility (Esc to close, Left/Right arrow keys)
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (!modal || modal.classList.contains('hidden')) return;
+
+      if (e.key === 'Escape') closeLightboxByUI();
+      if (e.key === 'ArrowLeft') updateModalImage(activeIdx - 1);
+      if (e.key === 'ArrowRight') updateModalImage(activeIdx + 1);
+    }, { signal });
+
+    // Check initial hash on page load
     if (window.location.hash === '#gallery') {
       openLightbox(0);
     }
 
-    // UI Listeners
-    if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx - 1); });
-    if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); updateMainImage(activeIdx + 1); });
+    // Attach Click Listeners
+    prevBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateMainImage(activeIdx - 1);
+    });
+
+    nextBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateMainImage(activeIdx + 1);
+    });
 
     thumbBtns.forEach((btn, i) => {
       btn.addEventListener('click', () => {
         updateMainImage(i);
-        if (i === 4 && images.length > 5) {
-          openLightbox(4); // Open lightbox if clicking 5th thumb with "+X Photos" badge
+        // If clicking 5th thumb with "+X Photos" badge, open lightbox
+        if (i === 4 && count > 5) {
+          openLightbox(4);
         }
       });
     });
 
-    if (mainImg) {
-      mainImg.addEventListener('click', () => openLightbox(activeIdx));
-    }
+    mainImg?.addEventListener('click', () => openLightbox(activeIdx));
+    closeModalBtn?.addEventListener('click', closeLightboxByUI);
 
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeLightboxByUI);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeLightboxByUI();
+    });
 
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeLightboxByUI();
-      });
-    }
+    modalPrevBtn?.addEventListener('click', () => updateModalImage(activeIdx - 1));
+    modalNextBtn?.addEventListener('click', () => updateModalImage(activeIdx + 1));
+  }
 
-    if (modalPrevBtn) modalPrevBtn.addEventListener('click', () => updateModalImage(activeIdx - 1));
-    if (modalNextBtn) modalNextBtn.addEventListener('click', () => updateModalImage(activeIdx + 1));
-  };
-
-  // Astro Lifecycle Listeners
-  document.addEventListener('DOMContentLoaded', initHotelHeader);
-  document.addEventListener('astro:page-load', initHotelHeader);
+  // Support both classic load and Astro View Transitions
+  document.addEventListener('DOMContentLoaded', initHotelGallery);
+  document.addEventListener('astro:page-load', initHotelGallery);
 </script>
