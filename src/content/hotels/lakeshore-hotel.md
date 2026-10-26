@@ -17,10 +17,7 @@ enable_official_site: true
 popular: true
 about_notice: ''
 price: 150$ / night
-checkIn: 2:00 PM
-checkOut: 12:00 PM
-powerBackup: 24/7 Generator
-smokingPolicy: Non-Smoking
+policies: []
 booking_channels:
   - provider_name: Whatsapp
     price: 79$
@@ -1309,17 +1306,41 @@ reviews_notice: ''
 reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
-faqs: []
+faqs:
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+  - question: What documents are required to check in as a couple?
+    answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
+checkIn: 2:00 PM
+checkOut: 12:00 PM
 enable_faqs: true
 enable_nearby: true
 enable_rates: true
 image_alt: ''
 official_site_url: ''
+powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
 seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+smokingPolicy: Non-Smoking
 ---
 
 সামর্থ থাকলে দেশের প্রতিটা মানুষকে কথাগুলো জোর করে শোনাতাম || প্রফেসর মোখতার আহমেদ || Mukhtar ahmed 
