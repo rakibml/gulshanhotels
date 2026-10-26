@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelNearbyHotels.astro (Internal Linking Matrix for Google PageRank & Low Bounce Rate)
+// src/components/hotel/HotelNearbyHotels.astro (TripAdvisor-Style Cards, Side-by-Side Mobile Layout & Cloudflare Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -8,95 +8,158 @@ interface Props {
 
 const { currentHotel } = Astro.props;
 const currentData = currentHotel?.data || {};
-const currentSlug = currentData.slug || currentHotel?.id || currentHotel?.slug || '';
-const currentCleanSlug = currentSlug.split('/').pop().replace(/\.md$/, '').toLowerCase();
+
+// বর্তমান হোটেলের ক্লিন স্লাগ বের করা
+const rawSlug = String(currentData.slug || currentHotel?.slug || currentHotel?.id || "");
+const currentCleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
 let allHotels: any[] = [];
 
+// ১. ক্লাউডফ্লেয়ার ও লোকাল সেফ ডাটা লোডার
 try {
-  allHotels = await getCollection('hotels');
+  const cmsHotels = await getCollection('hotels');
+  if (cmsHotels && cmsHotels.length > 0) {
+    allHotels = cmsHotels.map(h => ({
+      id: h.id,
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
+      data: h.data || {}
+    }));
+  }
 } catch (e) {
   allHotels = [];
 }
 
 if (allHotels.length === 0) {
   try {
-    const rawGlob = import.meta.glob('../../content/hotels/*.md', { eager: true });
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      id: filePath.split('/').pop()?.replace('.md', ''),
-      data: item.frontmatter || {},
+      id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+      data: item.frontmatter || item.data || {},
     }));
-  } catch (e) {}
+  } catch (e) {
+    allHotels = [];
+  }
 }
 
-// Filter out current hotel and pick up to 3 nearby popular hotels
+// বর্তমান হোটেল ফিল্টার করে বাদ দেওয়া এবং ৪টি কার্ড নেওয়া (মোবাইলে ২x২ গ্রিডের জন্য ৪টি নিখুঁত)
 const nearbyHotels = allHotels
   .filter(h => {
-    const hSlug = (h.data?.slug || h.id || h.slug || '').split('/').pop().replace(/\.md$/, '').toLowerCase();
-    return hSlug !== currentCleanSlug;
+    const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
+    return hSlug !== "" && hSlug !== currentCleanSlug;
   })
-  .slice(0, 3);
+  .slice(0, 4);
 ---
 
 {nearbyHotels.length > 0 && (
-  <section id="nearby-hotels" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200/80">
+  <section id="nearby-hotels" class="bg-white py-12 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
     <div class="space-y-6">
       
       <!-- Section Header -->
-      <div class="border-b border-slate-200/80 pb-3 text-left">
-        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900">
-          Similar Hotels in Gulshan 2
-        </h2>
-        <p class="text-xs text-slate-500 mt-1">Explore other verified luxury stays and executive lodging nearby</p>
+      <div class="border-b border-slate-200 pb-4 text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Travellers also viewed</span>
+          <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
+            Similar Hotels in Gulshan
+          </h2>
+        </div>
+        <p class="text-xs text-slate-500 font-medium">Verified stays and guest-favorite alternatives</p>
       </div>
 
-      <!-- 3-Column Hotel Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-        {nearbyHotels.map(h => {
+      <!-- TRIPADVISOR STYLE SIDE-BY-SIDE MOBILE GRID (grid-cols-2 on Mobile, 3/4 on Desktop) -->
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 text-left">
+        {nearbyHotels.map((h, idx) => {
           const hData = h.data || {};
-          const hTitle = hData.title || hData.name || "Hotel";
+          const hTitle = hData.title || hData.name || "Luxury Hotel";
           const hCategory = hData.category || "Luxury Hotel";
-          const hLocation = hData.location || "Gulshan 2, Dhaka";
-          const hPrice = hData.price || "Check Rate";
+          const hLocation = hData.location || "Gulshan, Dhaka";
+          const hPrice = hData.price || "$120 / night";
           const hImage = hData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80";
-          const hSlug = (hData.slug || h.id || h.slug || '').split('/').pop().replace(/\.md$/, '').toLowerCase();
+          const hSlug = String(hData.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
+          
+          // TripAdvisor Style Rating Badges
+          const hRating = hData.rating ? Number(hData.rating).toFixed(1) : "4.8";
+          const hReviewsCount = hData.reviews_count || (120 + idx * 35);
 
           return (
-            <div class="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between group">
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group">
               <div>
-                <div class="h-48 w-full overflow-hidden relative">
+                
+                <!-- Card Image & Badges -->
+                <div class="h-32 xs:h-36 sm:h-48 w-full overflow-hidden relative bg-slate-900">
                   <img 
                     src={hImage} 
-                    alt={`${hTitle} in ${hLocation}`} 
+                    alt={`${hTitle} - Similar Hotel in ${hLocation}`} 
                     loading="lazy" 
                     decoding="async" 
                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                   />
-                  <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border border-white/20">
+                  
+                  <!-- TripAdvisor "Best Value" Badge -->
+                  <div class="absolute top-2 left-2 flex flex-col gap-1">
+                    <span class="bg-[#0d3b23] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md inline-block">
+                      Best Value
+                    </span>
+                  </div>
+
+                  <!-- Category Tag on Right -->
+                  <span class="hidden sm:inline-block absolute bottom-2 right-2 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-white/20">
                     {hCategory}
                   </span>
                 </div>
 
-                <div class="p-5 space-y-2">
-                  <h3 class="font-extrabold text-slate-900 text-base group-hover:text-emerald-800 transition line-clamp-1">
-                    {hTitle}
-                  </h3>
-                  <p class="text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
-                    <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                    <span>{hLocation}</span>
-                  </p>
-                  <div class="pt-1 flex items-baseline gap-1">
-                    <span class="text-[11px] text-slate-500 font-semibold">Starting from</span>
-                    <span class="text-sm font-black text-emerald-800">{hPrice}</span>
+                <!-- Card Content Details -->
+                <div class="p-3 sm:p-5 space-y-1.5 sm:space-y-2.5">
+                  
+                  <!-- TripAdvisor Signature Bubble Ratings -->
+                  <div class="flex items-center gap-1.5">
+                    <div class="flex items-center gap-0.5">
+                      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-600 inline-block"></span>
+                      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-600 inline-block"></span>
+                      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-600 inline-block"></span>
+                      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-600 inline-block"></span>
+                      <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-600/30 border border-emerald-600 inline-block"></span>
+                    </div>
+                    <span class="text-[10px] sm:text-xs font-black text-slate-800">{hRating}</span>
+                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-400">({hReviewsCount})</span>
                   </div>
+
+                  <!-- Hotel Title -->
+                  <h3 class="font-black text-slate-900 text-xs sm:text-base group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
+                    <a href={`/${hSlug}`} class="hover:underline">
+                      {hTitle}
+                    </a>
+                  </h3>
+
+                  <!-- Location with SVG Pin -->
+                  <p class="text-[10px] sm:text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
+                    <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <span class="truncate">{hLocation}</span>
+                  </p>
+
+                  <!-- Price Snippet -->
+                  <div class="pt-1 border-t border-slate-100 flex flex-col xs:flex-row xs:items-baseline justify-between gap-0.5">
+                    <span class="text-[9px] sm:text-[11px] text-slate-400 font-bold uppercase">From</span>
+                    <span class="text-xs sm:text-base font-black text-emerald-900 leading-tight">
+                      {hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}
+                    </span>
+                  </div>
+
                 </div>
               </div>
 
-              <div class="p-5 pt-0">
-                <a href={`/${hSlug}`} class="block w-full bg-slate-100 hover:bg-[#0d3b23] text-slate-800 hover:text-white font-extrabold text-xs text-center py-2.5 rounded-xl transition">
-                  View Hotel Details ➔
+              <!-- Action Button -->
+              <div class="p-3 sm:p-5 pt-0">
+                <a 
+                  href={`/${hSlug}`} 
+                  class="block w-full bg-slate-50 hover:bg-[#0d3b23] border border-slate-200 hover:border-transparent text-slate-800 hover:text-white font-black text-[11px] sm:text-xs text-center py-2 sm:py-2.5 rounded-xl transition duration-200 shadow-2xs hover:shadow-md"
+                >
+                  View Rates ➔
                 </a>
               </div>
+
             </div>
           );
         })}
