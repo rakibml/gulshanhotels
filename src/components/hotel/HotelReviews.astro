@@ -1,7 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Cloudflare Build-Safe, Zero Syntax Error & Vector SVGs)
-import { getCollection } from 'astro:content';
-
+// src/components/hotel/HotelReviews.astro (100% Unique Multi-Review Loader & Cloudflare Build-Safe)
 interface Props {
   hotel: any;
 }
@@ -13,55 +11,67 @@ const data = hotel?.data || {};
 const hotelTitle = (data.title || data.name || "Hotel Details").trim();
 const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "hotel").trim();
 
-// ১. ডাটা ফেচিং (Layered Fail-Safe: Collection + Glob fallback)
+const searchTitle = hotelTitle.toLowerCase();
+const searchSlug = hotelSlug.toLowerCase();
+
+// ১. ডিরেক্ট ফাইল লোডার (যাতে Duplicate ID-র কারণে Astro কোনো রিভিউ ওভাররাইট করতে না পারে)
 let rawReviewsList: any[] = [];
+
 try {
-  const cmsReviews = await getCollection('reviews');
-  if (cmsReviews && cmsReviews.length > 0) {
-    rawReviewsList = cmsReviews.map((r: any) => r.data || r.frontmatter || {});
-  }
+  const globA = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
+  const globB = import.meta.glob('../../content/reviews/*.{md,mdx}', { eager: true });
+  const allFilesMap = { ...globA, ...globB };
+
+  rawReviewsList = Object.values(allFilesMap).map((fileModule: any) => {
+    return fileModule?.frontmatter || fileModule?.data || fileModule || {};
+  });
 } catch (e) {
   rawReviewsList = [];
 }
 
-if (rawReviewsList.length === 0) {
-  try {
-    const rawGlob = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
-    rawReviewsList = Object.values(rawGlob).map((item: any) => item?.frontmatter || item?.data || {});
-  } catch (e) {
-    rawReviewsList = [];
-  }
-}
-
-// ২. ফিল্টারিং
-const searchTitle = hotelTitle.toLowerCase();
-const searchSlug = hotelSlug.toLowerCase();
-
-const approvedCmsReviews = rawReviewsList.filter(item => {
+// ২. নিখুঁত ফিল্টারিং (id, slug, hotel সব ফিল্ড সাপোর্ট করে)
+const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
-  const isApproved = item.approved === true || String(item.approved).toLowerCase() === 'true';
-  if (!isApproved) return false;
 
-  const rHotel = (item.hotel || "").trim().toLowerCase();
-  const rSlug = (item.slug || item.hotelSlug || "").trim().toLowerCase();
+  // শুধু যেগুলোতে স্পষ্টভাবে approved: false আছে সেগুলো বাদ, বাকি সব গৃহীত
+  const isRejected = item.approved === false || String(item.approved).toLowerCase() === 'false';
+  if (isRejected) return false;
 
-  return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
+  // ফিল্ডগুলো এক্সট্র্যাক্ট করা
+  const rId = String(item.id || "").trim().toLowerCase();
+  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || "").trim().toLowerCase();
+  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || "").trim().toLowerCase();
+
+  // স্লাগ অথবা আইডির সাথে ম্যাচ
+  const matchBySlug = (rSlug !== "" && rSlug === searchSlug) || (rId !== "" && rId === searchSlug);
+
+  // হোটেলের টাইটেল দিয়ে ম্যাচ
+  const matchByTitle = rHotel !== "" && (
+    rHotel === searchTitle || 
+    rHotel.includes(searchTitle) || 
+    searchTitle.includes(rHotel)
+  );
+
+  return matchBySlug || matchByTitle;
 });
 
-// ৩. লোকাল (hotel.data.reviews) এবং CMS ফাইল রিভিউ মার্জ
+// ৩. লোকাল (hotel.data.reviews) এবং ফাইল রিভিউ মার্জ করা
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-const allReviews = combinedRawReviews.map((rev) => ({
-  name: rev.name || 'Verified Guest',
+// ৪. ক্লিন ডাটা ফরম্যাটিং ও ভ্যালিডেশন
+const allReviews = combinedRawReviews.map((rev: any) => ({
+  name: rev.name || rev.author || 'Verified Guest',
   date: rev.date || 'Recent',
   rating: Number(rev.rating) || 5,
-  comment: (rev.comment || '').trim()
-})).filter(r => r.comment.length > 2);
+  comment: String(rev.comment || rev.review || rev.body || '').trim()
+})).filter(r => r.comment.length > 1);
 
-// রেটিং ক্যালকুলেশন
+// রেটিং ও কাউন্ট ক্যালকুলেশন
 const reviewsCount = allReviews.length;
-const avgRating = reviewsCount > 0 ? (allReviews.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) : "5.0";
+const avgRating = reviewsCount > 0 
+  ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount).toFixed(1) 
+  : "5.0";
 
 const starsArray = [1, 2, 3, 4, 5];
 ---
