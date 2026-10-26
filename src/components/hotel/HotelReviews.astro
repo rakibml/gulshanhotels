@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro
+// src/components/hotel/HotelReviews.astro (100% Vector SVG Icons, Pure White, Scroll-MT & Safe Modal)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -42,10 +42,12 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
   return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
 });
 
-// ৩. লোকাল এবং CMS রিভিউ মার্জ করা
+// ৩. লোকাল এবং CMS রিভিউ সঠিকভাবে মার্জ করা
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const allReviews = [...approvedCmsReviews].map((rev, index) => ({
-name: rev.name || 'Verified Guest',
+const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
+
+const allReviews = combinedRawReviews.map((rev) => ({
+  name: rev.name || 'Verified Guest',
   date: rev.date || 'Recent',
   rating: Number(rev.rating) || 5,
   comment: (rev.comment || '').trim()
@@ -56,233 +58,314 @@ const reviewsCount = allReviews.length;
 const avgRating = reviewsCount > 0 ? (allReviews.reduce((s, r) => s + r.rating, 0) / reviewsCount).toFixed(1) : "5.0";
 
 const starsArray = [1, 2, 3, 4, 5];
-
-// Google Schema for SEO
-const schema = reviewsCount > 0 ? {
-  "@context": "https://schema.org",
-  "@type": "Hotel",
-  "name": hotelTitle,
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": avgRating,
-    "reviewCount": reviewsCount
-  }
-} : null;
 ---
 
-{schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
-
-<section id="guest-reviews" class="bg-[#F8FAF9] py-12 px-4 sm:px-8 max-w-[1450px] mx-auto border-b border-slate-200">
+<!-- GUEST REVIEWS SECTION (PURE WHITE & SCROLL-MT ALIGNED) -->
+<section id="guest-reviews" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="space-y-8">
     
     <!-- Section Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 pb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 pb-6 text-left">
       <div class="space-y-1">
-        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">Guest reviews & experiences</h2>
-        <p class="text-sm text-slate-500 font-medium">Verified stays and ratings for <span class="text-slate-800">{hotelTitle}</span></p>
+        <h2 class="text-2xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight leading-tight">
+          Guest reviews & experiences
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">
+          Verified stays and ratings for <strong class="text-slate-800 font-bold">{hotelTitle}</strong>
+        </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
         {reviewsCount > 0 && (
-          <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="bg-[#003580] text-white font-black px-2 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">{avgRating}</div>
+          <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="bg-[#0d3b23] text-white font-black px-2.5 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">
+              {avgRating}
+            </div>
             <div class="flex flex-col justify-center">
-              <div class="flex text-amber-500 text-[10px]">
-                {starsArray.map(s => (<span>{s <= Math.round(Number(avgRating)) ? '★' : '☆'}</span>))}
+              <!-- SVG Golden Stars -->
+              <div class="flex items-center gap-0.5 mb-1">
+                {starsArray.map(s => (
+                  <svg class={`w-3.5 h-3.5 shrink-0 ${s <= Math.round(Number(avgRating)) ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                ))}
               </div>
-              <span class="text-[11px] font-bold text-slate-700 uppercase">{reviewsCount} Reviews</span>
+              <span class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{reviewsCount} Verified Reviews</span>
             </div>
           </div>
         )}
 
-        <div class="flex items-center gap-2">
-            <button id="reviewPrevBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 transition active:scale-90 cursor-pointer font-bold">❮</button>
-            <button id="reviewNextBtn" type="button" class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 transition active:scale-90 cursor-pointer font-bold">❯</button>
-        </div>
+        <!-- Carousel Arrows (Only show if more than 1 review) -->
+        {reviewsCount > 1 && (
+          <div class="flex items-center gap-1.5">
+            <button id="reviewPrevBtn" type="button" aria-label="Previous Review" class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 shadow-xs flex items-center justify-center hover:bg-[#0d3b23] hover:text-white transition active:scale-95 cursor-pointer font-bold text-xs text-slate-700">❮</button>
+            <button id="reviewNextBtn" type="button" aria-label="Next Review" class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 shadow-xs flex items-center justify-center hover:bg-[#0d3b23] hover:text-white transition active:scale-95 cursor-pointer font-bold text-xs text-slate-700">❯</button>
+          </div>
+        )}
 
-        <button type="button" class="open-write-review-trigger bg-[#003580] hover:bg-[#00224f] text-white font-black text-[11px] px-5 py-3 rounded-xl transition shadow-md cursor-pointer uppercase tracking-wider">
-          Write a Review
+        <!-- Write Review Button with Vector Pencil SVG -->
+        <button type="button" class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-5 py-2.5 rounded-xl transition shadow-xs cursor-pointer uppercase tracking-wider inline-flex items-center gap-2">
+          <span>Write a Review</span>
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+          </svg>
         </button>
       </div>
     </div>
 
     <!-- Carousel Track -->
     {reviewsCount > 0 ? (
-      <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-6 no-scrollbar">
+      <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {allReviews.map((rev) => {
           const isLong = rev.comment.length > 180;
           return (
-            <div class="w-[290px] sm:w-[360px] shrink-0 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-all duration-300 min-h-[260px] sm:min-h-[280px]">
+            <div class="w-[290px] sm:w-[350px] shrink-0 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-emerald-600/50 hover:shadow-md transition-all duration-300 min-h-[260px] text-left">
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <div class="flex text-amber-500 text-xs">
-                    {starsArray.map(s => (<span>{s <= rev.rating ? '★' : '☆'}</span>))}
+                  <!-- SVG Stars in Card -->
+                  <div class="flex items-center gap-0.5">
+                    {starsArray.map(s => (
+                      <svg class={`w-3.5 h-3.5 shrink-0 ${s <= rev.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                      </svg>
+                    ))}
                   </div>
                   <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rev.date}</span>
                 </div>
                 
                 <div class="review-content relative">
-                    <p class="text-[13px] sm:text-sm text-slate-700 leading-relaxed font-medium italic">
-                        <span class="short-text">{isLong ? rev.comment.substring(0, 180) + '...' : rev.comment}</span>
-                        {isLong && <span class="full-text hidden">{rev.comment}</span>}
-                    </p>
-                    {isLong && (
-                        <button type="button" class="see-more-btn text-[#006ce4] text-[11px] font-black mt-2 hover:underline cursor-pointer uppercase">See more</button>
-                    )}
+                  <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal italic">
+                    <span class="short-text">{isLong ? rev.comment.substring(0, 180) + '...' : rev.comment}</span>
+                    {isLong && <span class="full-text hidden">{rev.comment}</span>}
+                  </p>
+                  {isLong && (
+                    <button type="button" class="see-more-btn text-emerald-800 text-[11px] font-black mt-2 hover:underline cursor-pointer uppercase block">
+                      See more ➔
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div class="mt-6 pt-4 border-t border-slate-50 flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black text-[#003580] uppercase border border-slate-200">{rev.name.charAt(0)}</div>
-                  <div class="flex flex-col">
-                    <span class="text-xs font-black text-slate-900 leading-none">{rev.name}</span>
-                    <span class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Verified Guest</span>
-                  </div>
+              <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-900 flex items-center justify-center text-xs font-black uppercase border border-emerald-200">
+                  {rev.name.charAt(0)}
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-bold text-slate-900 leading-tight">{rev.name}</span>
+                  <span class="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">Verified Guest</span>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
     ) : (
-      <div class="bg-white rounded-3xl border border-dashed border-slate-300 p-16 text-center">
-        <div class="text-4xl mb-4">💬</div>
-        <p class="text-slate-500 font-medium italic">No guest reviews yet. Be the first to share your experience at {hotelTitle}!</p>
-        <button type="button" class="open-write-review-trigger mt-4 text-[#003580] font-black underline uppercase text-xs tracking-widest">Write Review now</button>
+      <!-- Empty State with Clean Vector Chat SVG -->
+      <div class="bg-slate-50/60 rounded-3xl border border-dashed border-slate-300 p-12 sm:p-16 text-center">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-400">
+          <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
+          </svg>
+        </div>
+        <p class="text-slate-600 font-medium text-sm italic">
+          No guest reviews yet. Be the first to share your experience at {hotelTitle}!
+        </p>
+        <button type="button" class="open-write-review-trigger mt-4 text-emerald-800 hover:text-emerald-950 font-black underline uppercase text-xs tracking-widest cursor-pointer inline-flex items-center gap-1.5">
+          <span>Write Review now</span>
+          <span>➔</span>
+        </button>
       </div>
     )}
   </div>
 </section>
 
-<!-- MODAL SECTION -->
-<div id="writeReviewModal" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[95vh] overflow-y-auto">
-    <div class="flex items-center justify-between border-b pb-4 mb-5">
-      <h3 class="text-lg font-black text-slate-900 leading-tight">Review for {hotelTitle}</h3>
-      <button id="closeWriteReviewBtn" type="button" class="text-slate-400 hover:text-slate-900 text-3xl font-light cursor-pointer">&times;</button>
+<!-- WRITE REVIEW MODAL -->
+<div 
+  id="writeReviewModal" 
+  role="dialog" 
+  aria-modal="true" 
+  aria-labelledby="writeReviewModalTitle"
+  class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 text-left select-none"
+>
+  <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[92vh] overflow-y-auto border border-slate-200">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-5">
+      <div>
+        <span class="text-[10px] font-black uppercase tracking-widest text-emerald-800 block">Verified Stay Feedback</span>
+        <h3 id="writeReviewModalTitle" class="text-lg font-black font-serif text-slate-900 leading-tight">Review for {hotelTitle}</h3>
+      </div>
+      <button id="closeWriteReviewBtn" type="button" aria-label="Close Modal" class="text-slate-400 hover:text-slate-900 text-3xl font-light cursor-pointer">&times;</button>
     </div>
 
     <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4">
       <div>
-        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Full Name</label>
-        <input type="text" id="reviewerName" required placeholder="e.g. Rakib Ahmed" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 outline-none focus:border-blue-600 text-sm font-medium" />
+        <label for="reviewerName" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Full Name</label>
+        <input type="text" id="reviewerName" required placeholder="e.g. Tanvir Ahmed" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium" />
       </div>
       <div>
-        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Rating Score</label>
-        <select id="reviewerRating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 outline-none focus:border-blue-600 font-bold text-amber-600 text-sm">
-          <option value="5">★ ★ ★ ★ ★ 5 / 5 Excellent</option>
-          <option value="4">★ ★ ★ ★ ☆ 4 / 5 Very Good</option>
-          <option value="3">★ ★ ★ ☆ ☆ 3 / 5 Average</option>
-          <option value="2">★ ★ ☆ ☆ ☆ 2 / 5 Poor</option>
-          <option value="1">★ ☆ ☆ ☆ ☆ 1 / 5 Terrible</option>
+        <label for="reviewerRating" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Rating Score</label>
+        <select id="reviewerRating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-amber-600 text-xs sm:text-sm">
+          <option value="5">5 / 5 (Excellent Experience)</option>
+          <option value="4">4 / 5 (Very Good Stay)</option>
+          <option value="3">3 / 5 (Average Service)</option>
+          <option value="2">2 / 5 (Poor Facilities)</option>
+          <option value="1">1 / 5 (Terrible Experience)</option>
         </select>
       </div>
       <div>
-        <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Your Experience</label>
-        <textarea id="reviewerComment" rows="4" required placeholder="Tell us about the room, service, and food..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 outline-none focus:border-blue-600 text-sm leading-relaxed font-medium"></textarea>
+        <label for="reviewerComment" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Experience</label>
+        <textarea id="reviewerComment" rows="4" required placeholder="Tell us about the room comfort, cleanliness, service, and breakfast..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm leading-relaxed font-medium"></textarea>
       </div>
-      <button type="submit" id="submitReviewBtn" class="w-full bg-[#003580] hover:bg-[#00224f] text-white font-black py-4 rounded-xl shadow-lg transition uppercase tracking-widest text-[11px] mt-2">Submit Review For Approval</button>
+      <button type="submit" id="submitReviewBtn" class="w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-black py-3.5 rounded-xl shadow-md transition uppercase tracking-wider text-xs mt-2 cursor-pointer">
+        Submit Review For Approval
+      </button>
     </form>
     
-    <div id="reviewSuccessMsg" class="hidden p-8 bg-emerald-50 text-emerald-900 font-bold rounded-2xl text-center text-sm border border-emerald-100">
-      <div class="text-3xl mb-2">✅</div>
-      <p>Thank you! Your review has been submitted and is currently pending admin approval.</p>
+    <!-- Success Message with Vector Checkmark Circle SVG -->
+    <div id="reviewSuccessMsg" class="hidden p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-2">
+      <div class="w-12 h-12 mx-auto rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shadow-xs">
+        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      </div>
+      <p class="text-sm font-black text-emerald-900">Submission Successful!</p>
+      <p class="text-xs text-slate-600 font-normal">Thank you for your feedback. Your review will appear once verified by our moderation team.</p>
     </div>
   </div>
 </div>
 
-<style>
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
+<!-- CLIENT SCRIPT -->
+<script>
+  let reviewsAbortCtrl: AbortController | null = null;
 
-<script is:inline>
   function setupReviews() {
+    if (reviewsAbortCtrl) reviewsAbortCtrl.abort();
+    reviewsAbortCtrl = new AbortController();
+    const { signal } = reviewsAbortCtrl;
+
     const track = document.getElementById('reviewsCarouselTrack');
     const modal = document.getElementById('writeReviewModal');
-    const form = document.getElementById('submitReviewForm');
+    const form = document.getElementById('submitReviewForm') as HTMLFormElement | null;
     const successMsg = document.getElementById('reviewSuccessMsg');
-    
-    // Slider Logic
+    const closeBtn = document.getElementById('closeWriteReviewBtn');
     const prevBtn = document.getElementById('reviewPrevBtn');
     const nextBtn = document.getElementById('reviewNextBtn');
-    if(prevBtn) prevBtn.onclick = () => track?.scrollBy({ left: -360, behavior: 'smooth' });
-    if(nextBtn) nextBtn.onclick = () => track?.scrollBy({ left: 360, behavior: 'smooth' });
 
-    // See More/Less Toggle Logic
+    function toggleBodyScroll(disable: boolean) {
+      document.body.style.overflow = disable ? 'hidden' : '';
+    }
+
+    function openModal() {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      successMsg?.classList.add('hidden');
+      form?.classList.remove('hidden');
+      toggleBodyScroll(true);
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      toggleBodyScroll(false);
+    }
+
+    prevBtn?.addEventListener('click', () => track?.scrollBy({ left: -360, behavior: 'smooth' }));
+    nextBtn?.addEventListener('click', () => track?.scrollBy({ left: 360, behavior: 'smooth' }));
+
     document.querySelectorAll('.see-more-btn').forEach(btn => {
-      btn.onclick = (e) => {
-        const content = e.target.closest('.review-content');
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const content = target.closest('.review-content');
+        if (!content) return;
         const short = content.querySelector('.short-text');
         const full = content.querySelector('.full-text');
-        const isHidden = full.classList.contains('hidden');
+        const isHidden = full?.classList.contains('hidden');
         
-        if(isHidden) {
-          full.classList.remove('hidden');
-          short.classList.add('hidden');
-          btn.innerText = 'See less';
+        if (isHidden) {
+          full?.classList.remove('hidden');
+          short?.classList.add('hidden');
+          target.textContent = 'See less ↩';
         } else {
-          full.classList.add('hidden');
-          short.classList.remove('hidden');
-          btn.innerText = 'See more';
+          full?.classList.add('hidden');
+          short?.classList.remove('hidden');
+          target.textContent = 'See more ➔';
         }
-      };
+      });
     });
 
-    // Modal logic
     document.querySelectorAll('.open-write-review-trigger').forEach(btn => {
-      btn.onclick = () => {
-        modal?.classList.remove('hidden');
-        successMsg?.classList.add('hidden');
-        form?.classList.remove('hidden');
-      };
+      btn.addEventListener('click', openModal);
     });
 
-    const closeBtn = document.getElementById('closeWriteReviewBtn');
-    if(closeBtn) closeBtn.onclick = () => modal?.classList.add('hidden');
-    if(modal) modal.onclick = (e) => { if(e.target === modal) modal.classList.add('hidden'); };
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
 
-    // Form Submit
-    if(form) {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    }, { signal });
+
+    if (form) {
       form.onsubmit = async (e) => {
         e.preventDefault();
-        const submitBtn = document.getElementById('submitReviewBtn');
+        const submitBtn = document.getElementById('submitReviewBtn') as HTMLButtonElement | null;
+        const nameInput = document.getElementById('reviewerName') as HTMLInputElement | null;
+        const ratingInput = document.getElementById('reviewerRating') as HTMLSelectElement | null;
+        const commentInput = document.getElementById('reviewerComment') as HTMLTextAreaElement | null;
+
+        if (!nameInput || !ratingInput || !commentInput) return;
+
         const payload = {
-          hotel: form.getAttribute('data-hotel-title'),
-          slug: form.getAttribute('data-hotel-slug'),
-          name: document.getElementById('reviewerName').value,
-          rating: document.getElementById('reviewerRating').value,
-          comment: document.getElementById('reviewerComment').value,
+          hotel: form.getAttribute('data-hotel-title') || '',
+          slug: form.getAttribute('data-hotel-slug') || '',
+          name: nameInput.value.trim(),
+          rating: ratingInput.value,
+          comment: commentInput.value.trim(),
           approved: false,
           date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
         };
 
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Submitting...';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+        }
 
         try {
           const res = await fetch('https://gatlin.rmollah394.workers.dev/api/submit-review', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal
           });
 
           if (res.ok) {
             form.classList.add('hidden');
-            successMsg.classList.remove('hidden');
-            setTimeout(() => modal.classList.add('hidden'), 4000);
+            form.reset();
+            successMsg?.classList.remove('hidden');
+            setTimeout(() => {
+              closeModal();
+            }, 3500);
           } else {
-            alert('Failed to submit. Please try again.');
+            alert('Failed to submit review. Please try again.');
           }
-        } catch (err) {
-          alert('Network error: ' + err.message);
+        } catch (err: any) {
+          if (err.name !== 'AbortError') {
+            alert('Network error. Please check your connection.');
+          }
         } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerText = 'Submit Review For Approval';
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Review For Approval';
+          }
         }
       };
     }
   }
 
-  setupReviews();
+  document.addEventListener('DOMContentLoaded', setupReviews);
   document.addEventListener('astro:page-load', setupReviews);
 </script>
