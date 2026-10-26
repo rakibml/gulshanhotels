@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Vector SVG Icons, Pure White, Scroll-MT & Safe Modal)
+// src/components/hotel/HotelReviews.astro (100% Cloudflare Build-Safe, Zero Syntax Error & Vector SVGs)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,25 +9,31 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ক্লিন টাইটেল ও স্লাগ (Strict Matching এর জন্য)
+// ক্লিন টাইটেল ও স্লাগ
 const hotelTitle = (data.title || data.name || "Hotel Details").trim();
 const hotelSlug = (data.slug || hotel?.slug || hotel?.id || "hotel").trim();
 
-// ১. ডাটা ফেচিং (Layered Fail-Safe)
+// ১. ডাটা ফেচিং (Layered Fail-Safe: Collection + Glob fallback)
 let rawReviewsList: any[] = [];
 try {
-  const rawGlob = import.meta.glob('../../content/reviews/*.md', { eager: true });
-  rawReviewsList = Object.values(rawGlob).map((item: any) => item.frontmatter || {});
-  
-  if (rawReviewsList.length === 0) {
-    const cmsReviews = await getCollection('reviews');
-    if (cmsReviews) rawReviewsList = cmsReviews.map(r => r.data || {});
+  const cmsReviews = await getCollection('reviews');
+  if (cmsReviews && cmsReviews.length > 0) {
+    rawReviewsList = cmsReviews.map((r: any) => r.data || r.frontmatter || {});
   }
 } catch (e) {
-  console.error("Review loading error:", e);
+  rawReviewsList = [];
 }
 
-// ২. স্ট্রিক্ট ফিল্টারিং (যাতে অন্য হোটেলের রিভিউ না আসে)
+if (rawReviewsList.length === 0) {
+  try {
+    const rawGlob = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
+    rawReviewsList = Object.values(rawGlob).map((item: any) => item?.frontmatter || item?.data || {});
+  } catch (e) {
+    rawReviewsList = [];
+  }
+}
+
+// ২. ফিল্টারিং
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 
@@ -42,7 +48,7 @@ const approvedCmsReviews = rawReviewsList.filter(item => {
   return (rSlug !== "" && rSlug === searchSlug) || (rHotel !== "" && rHotel === searchTitle);
 });
 
-// ৩. লোকাল এবং CMS রিভিউ সঠিকভাবে মার্জ করা
+// ৩. লোকাল (hotel.data.reviews) এবং CMS ফাইল রিভিউ মার্জ
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
@@ -60,7 +66,7 @@ const avgRating = reviewsCount > 0 ? (allReviews.reduce((s, r) => s + r.rating, 
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
-<!-- GUEST REVIEWS SECTION (PURE WHITE & SCROLL-MT ALIGNED) -->
+<!-- GUEST REVIEWS SECTION -->
 <section id="guest-reviews" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="space-y-8">
     
@@ -82,7 +88,6 @@ const starsArray = [1, 2, 3, 4, 5];
               {avgRating}
             </div>
             <div class="flex flex-col justify-center">
-              <!-- SVG Golden Stars -->
               <div class="flex items-center gap-0.5 mb-1">
                 {starsArray.map(s => (
                   <svg class={`w-3.5 h-3.5 shrink-0 ${s <= Math.round(Number(avgRating)) ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
@@ -95,7 +100,6 @@ const starsArray = [1, 2, 3, 4, 5];
           </div>
         )}
 
-        <!-- Carousel Arrows (Only show if more than 1 review) -->
         {reviewsCount > 1 && (
           <div class="flex items-center gap-1.5">
             <button id="reviewPrevBtn" type="button" aria-label="Previous Review" class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 shadow-xs flex items-center justify-center hover:bg-[#0d3b23] hover:text-white transition active:scale-95 cursor-pointer font-bold text-xs text-slate-700">❮</button>
@@ -103,7 +107,6 @@ const starsArray = [1, 2, 3, 4, 5];
           </div>
         )}
 
-        <!-- Write Review Button with Vector Pencil SVG -->
         <button type="button" class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-5 py-2.5 rounded-xl transition shadow-xs cursor-pointer uppercase tracking-wider inline-flex items-center gap-2">
           <span>Write a Review</span>
           <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
@@ -122,7 +125,6 @@ const starsArray = [1, 2, 3, 4, 5];
             <div class="w-[290px] sm:w-[350px] shrink-0 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-emerald-600/50 hover:shadow-md transition-all duration-300 min-h-[260px] text-left">
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <!-- SVG Stars in Card -->
                   <div class="flex items-center gap-0.5">
                     {starsArray.map(s => (
                       <svg class={`w-3.5 h-3.5 shrink-0 ${s <= rev.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
@@ -160,7 +162,6 @@ const starsArray = [1, 2, 3, 4, 5];
         })}
       </div>
     ) : (
-      <!-- Empty State with Clean Vector Chat SVG -->
       <div class="bg-slate-50/60 rounded-3xl border border-dashed border-slate-300 p-12 sm:p-16 text-center">
         <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-400">
           <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
@@ -220,7 +221,6 @@ const starsArray = [1, 2, 3, 4, 5];
       </button>
     </form>
     
-    <!-- Success Message with Vector Checkmark Circle SVG -->
     <div id="reviewSuccessMsg" class="hidden p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-2">
       <div class="w-12 h-12 mx-auto rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shadow-xs">
         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
