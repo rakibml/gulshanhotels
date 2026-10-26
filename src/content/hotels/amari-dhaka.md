@@ -1361,4 +1361,6 @@ We’re at the centre of the business and diplomat districts of Dhaka, and conve
 
 Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight.
 
-Whether you’re with us for a couple of nights or longer, we’ll do all we can to ensure you have the comforts you need to brighten your stay.
+Whether you’re with us for a couple of nights or longer, we’ll do all we can to ensure you have the comforts you need to brighten your stay. Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight.  
+
+Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight.
