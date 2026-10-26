@@ -13,7 +13,7 @@ gallery:
   - https://picsum.photos/id/181/1920/1280.webp
   - https://picsum.photos/id/690/1920/1280.webp
 enable_view_prices: true
-enable_official_site: true
+enable_official_site: false
 popular: true
 about_notice: ''
 price: 120$ / night
