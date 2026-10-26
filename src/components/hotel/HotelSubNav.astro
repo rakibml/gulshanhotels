@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelSubNav.astro (Sticky Anchor Jump Navigation for Google Sitelinks)
+// src/components/hotel/HotelSubNav.astro (Sticky Anchor Jump Navigation for Google Sitelinks & ScrollSpy)
 interface Props {
   hotel: any;
 }
@@ -7,30 +7,149 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 const hotelTitle = data.title || data.name || "Hotel Details";
+
+// Dynamic section controls from CMS
+const showRates = data.enable_view_prices !== false;
+const hasReviews = data.enable_reviews !== false;
+const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_faqs !== false;
 ---
 
-<nav id="hotelSubNav" class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs transition-all duration-300">
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-12 text-xs font-bold text-slate-700 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+<nav
+  id="hotelSubNav"
+  aria-label="Hotel Section Jump Navigation"
+  class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all duration-300"
+>
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-12 text-xs font-bold text-slate-600">
     
-    <!-- Left Jump Links -->
-    <div class="flex items-center gap-6 sm:gap-8 shrink-0">
-      <span class="font-serif font-black text-slate-900 text-sm hidden lg:inline-block truncate max-w-[200px] border-r border-slate-200 pr-6">
+    <!-- Left Jump Links with Horizontal Scroll on Mobile -->
+    <div
+      id="subNavLinksContainer"
+      class="flex items-center gap-6 sm:gap-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1"
+    >
+      <!-- Hotel Name on Large Screen -->
+      <span class="font-serif font-black text-slate-900 text-sm hidden lg:inline-block truncate max-w-[220px] border-r border-slate-200 pr-6 shrink-0 select-none">
         {hotelTitle}
       </span>
-      <a href="#about-and-rates" class="hover:text-emerald-800 transition py-3">Overview & Rates</a>
-      <a href="#amenities-and-rooms" class="hover:text-emerald-800 transition py-3">Amenities</a>
-      <a href="#amenities-and-rooms" class="hover:text-emerald-800 transition py-3">Rooms</a>
-      <a href="#location-map" class="hover:text-emerald-800 transition py-3">Location</a>
-      <a href="#guest-reviews" class="hover:text-emerald-800 transition py-3">Reviews</a>
-      <a href="#faqs" class="hover:text-emerald-800 transition py-3">FAQs</a>
+
+      <!-- Jump Anchors (Active states controlled via JS ScrollSpy) -->
+      <a href="#about-and-rates" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        Overview
+      </a>
+      <a href="#amenities" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        Amenities
+      </a>
+      <a href="#rooms" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        Rooms
+      </a>
+      <a href="#location-map" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        Location
+      </a>
+
+      {hasReviews && (
+        <a href="#guest-reviews" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+          Reviews
+        </a>
+      )}
+
+      {hasFaqs && (
+        <a href="#faqs" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+          FAQs
+        </a>
+      )}
     </div>
 
-    <!-- Right Quick Action Button -->
-    <div class="shrink-0 pl-4 hidden sm:block">
-      <a href="#rates-card" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[11px] px-4 py-1.5 rounded-lg shadow-2xs transition">
-        View Prices ➔
-      </a>
-    </div>
+    <!-- Right Quick Action Button (Desktop & Tablet) -->
+    {showRates && (
+      <div class="shrink-0 pl-4 hidden sm:block">
+        <a
+          href="#rates-card"
+          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[11px] uppercase tracking-wider px-4 py-2 rounded-xl shadow-xs transition hover:scale-105 inline-flex items-center gap-1"
+        >
+          <span>View Prices</span>
+          <span>➔</span>
+        </a>
+      </div>
+    )}
 
   </div>
 </nav>
+
+<!-- CLIENT SCRIPT FOR SMOOTH SCROLLSPY & ACTIVE LINK HIGHLIGHTING -->
+<script>
+  let subNavAbortCtrl: AbortController | null = null;
+
+  function initSubNavScrollSpy() {
+    if (subNavAbortCtrl) subNavAbortCtrl.abort();
+    subNavAbortCtrl = new AbortController();
+
+    const links = document.querySelectorAll<HTMLAnchorElement>('.subnav-link');
+    const container = document.getElementById('subNavLinksContainer');
+    if (!links.length) return;
+
+    // Map each link to its target section element
+    const linkMap: { link: HTMLAnchorElement; section: HTMLElement }[] = [];
+    links.forEach((link) => {
+      const targetId = link.getAttribute('href');
+      if (targetId && targetId.startsWith('#')) {
+        const section = document.querySelector<HTMLElement>(targetId);
+        if (section) {
+          linkMap.push({ link, section });
+        }
+      }
+    });
+
+    if (!linkMap.length) return;
+
+    function setActiveLink(activeLink: HTMLAnchorElement) {
+      links.forEach((l) => {
+        l.classList.remove('text-emerald-800', 'border-emerald-700', 'font-black');
+        l.classList.add('text-slate-600', 'border-transparent');
+      });
+
+      activeLink.classList.remove('text-slate-600', 'border-transparent');
+      activeLink.classList.add('text-emerald-800', 'border-emerald-700', 'font-black');
+
+      // On mobile, auto-scroll horizontal bar so active tab is always visible
+      if (container) {
+        const linkRect = activeLink.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        if (linkRect.left < containerRect.left || linkRect.right > containerRect.right) {
+          activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
+    }
+
+    // High performance IntersectionObserver for section detection
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find visible sections
+        const visibleEntries = entries.filter((e) => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          // Sort to find the one closest to the top of viewport
+          const topEntry = visibleEntries.reduce((prev, curr) =>
+            Math.abs(curr.boundingClientRect.top - 60) < Math.abs(prev.boundingClientRect.top - 60) ? curr : prev
+          );
+
+          const matched = linkMap.find((item) => item.section === topEntry.target);
+          if (matched) {
+            setActiveLink(matched.link);
+          }
+        }
+      },
+      {
+        rootMargin: '-60px 0px -70% 0px',
+        threshold: [0, 0.2, 0.5]
+      }
+    );
+
+    linkMap.forEach(({ section }) => observer.observe(section));
+
+    // Cleanup observer on View Transitions
+    subNavAbortCtrl.signal.addEventListener('abort', () => {
+      observer.disconnect();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initSubNavScrollSpy);
+  document.addEventListener('astro:page-load', initSubNavScrollSpy);
+</script>
