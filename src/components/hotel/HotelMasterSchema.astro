@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (100% Green Rich Snippet Validated)
+// src/components/hotel/HotelMasterSchema.astro (100% Pure CMS Data - Zero Fake Values, Google & AI Compliant)
 interface Props {
   hotel: any;
 }
@@ -7,25 +7,26 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ১. বেসিক ডাটা
-const hotelTitle = (data.title || data.name || "Hotel Details").trim();
+// ১. বেসিক ডাটা (কোনো ফেক ফলব্যাক ছাড়া)
+const hotelTitle = (data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-const hotelDescription = data.description || `${hotelTitle} is a premier luxury stay located in Gulshan, Dhaka, offering world-class hospitality, executive suites, and dining.`;
-const hotelLocation = data.location || "Gulshan 2, Dhaka 1212, Bangladesh";
-const hotelPrice = data.price || "$120";
+// ডেসক্রিপশন (CMS এ থাকলে যাবে, নয়তো ফাঁকা)
+const hotelDescription = data.seo_description || data.description || "";
+const hotelLocation = data.address || data.location || "";
+const hotelPrice = data.price ? String(data.price).trim() : "";
 const officialSite = data.officialSite || data.official_site_url || "";
-const hotelPhone = data.phone || data.telephone || data.contact_phone || "+8801700000000";
+const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
 
 // ডোমেইন ইউআরএল
 const siteOrigin = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin : "https://gulshanhotels.com");
 const canonicalUrl = `${siteOrigin}/${hotelSlug}`;
 
-// ২. ছবি
+// ২. আসল ছবি (CMS-এ যা আপলোড করা আছে শুধুই তা)
 const rawGallery: string[] = Array.isArray(data.gallery) && data.gallery.length > 0 
-  ? data.gallery 
-  : (data.image ? [data.image] : ["https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"]);
+  ? data.gallery.filter(Boolean)
+  : (data.image ? [data.image] : []);
 
 // ৩. আসল রিভিউ সংগ্রহ
 let allReviewsList: any[] = [];
@@ -60,7 +61,7 @@ const ratingValue = reviewCount > 0
   ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
   : (data.rating ? Number(data.rating).toFixed(1) : null);
 
-// ৪. অ্যামেনিটিস সংগ্রহ
+// ৪. অ্যামেনিটিস (শুধুমাত্র CMS-এ থাকা আসল তালিকা)
 const amenitiesList: string[] = Array.isArray(data.amenities) ? data.amenities : [];
 const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
@@ -79,22 +80,22 @@ flattenedAmenities = Array.from(new Set(flattenedAmenities.filter(Boolean)));
 // ৫. রুম টাইপ
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 
-// ৬. পলিসি
-const checkIn = data.checkIn || data.check_in || "14:00";
-const checkOut = data.checkOut || data.check_out || "12:00";
+// ৬. আসল পলিসি (CMS ফিল্ড)
+const checkIn = data.checkIn || data.check_in || "";
+const checkOut = data.checkOut || data.check_out || "";
 
-// ৭. এফএকিউ
+// ৭. আসল এফএকিউ
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const cleanFaqs = rawFaqs.map((faq: any) => ({
   question: typeof faq === 'string' ? faq : (faq?.question || ''),
   answer: typeof faq === 'object' ? String(faq?.answer || '').replace(/<[^>]*>?/gm, '').trim() : ''
 })).filter((f: any) => f.question && f.answer);
 
-// ৮. জিপিএস
-const lat = data.latitude || data.lat || data.geo?.lat || 23.7925;
-const lng = data.longitude || data.lng || data.geo?.lng || 90.4078;
+// ৮. জিপিএস কোঅর্ডিনেট (CMS-এ থাকলে তবেই নেওয়া হবে)
+const lat = data.latitude || data.lat || data.geo?.lat;
+const lng = data.longitude || data.lng || data.geo?.lng;
 
-// ================= MASTER JSON-LD KNOWLEDGE GRAPH =================
+// ================= MASTER JSON-LD (100% PURE & CONDITIONAL) =================
 const masterGraph: any = {
   "@context": "https://schema.org",
   "@graph": [
@@ -118,43 +119,49 @@ const masterGraph: any = {
         {
           "@type": "ListItem",
           "position": 3,
-          "name": hotelTitle
+          "name": hotelTitle || "Hotel"
         }
       ]
     },
 
-    // 2. Hotel / Lodging Entity
+    // 2. Hotel Entity (Strictly Conditional)
     {
       "@type": ["Hotel", "LodgingBusiness"],
       "@id": `${canonicalUrl}#hotel`,
       "name": hotelTitle,
-      "description": hotelDescription,
       "url": canonicalUrl,
-      "image": rawGallery,
-      "telephone": hotelPhone,
-      "priceRange": hotelPrice.includes('$') || hotelPrice.includes('৳') ? hotelPrice : `$${hotelPrice}`,
-      "currenciesAccepted": "USD, BDT",
-      "paymentAccepted": "Cash, Credit Card, bKash",
-      "checkinTime": checkIn,
-      "checkoutTime": checkOut,
-      "petsAllowed": false,
+
+      // শুধুমাত্র আসল ডাটা থাকলে এই ফিল্ডগুলো ইনসার্ট হবে
+      ...(hotelDescription ? { "description": hotelDescription } : {}),
+      ...(rawGallery.length > 0 ? { "image": rawGallery } : {}),
+      ...(hotelPhone ? { "telephone": hotelPhone } : {}),
+      ...(hotelPrice ? { "priceRange": hotelPrice } : {}),
+      ...(checkIn ? { "checkinTime": checkIn } : {}),
+      ...(checkOut ? { "checkoutTime": checkOut } : {}),
       ...(officialSite ? { "sameAs": [officialSite] } : {}),
 
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": hotelLocation,
-        "addressLocality": "Gulshan, Dhaka",
-        "addressRegion": "Dhaka Division",
-        "postalCode": "1212",
-        "addressCountry": "BD"
-      },
+      // আসল ঠিকানা
+      ...(hotelLocation ? {
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": hotelLocation,
+          "addressLocality": "Gulshan, Dhaka",
+          "addressRegion": "Dhaka Division",
+          "postalCode": "1212",
+          "addressCountry": "BD"
+        }
+      } : {}),
 
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": Number(lat),
-        "longitude": Number(lng)
-      },
+      // জিপিএস (যদি CMS-এ থাকে)
+      ...(lat && lng ? {
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": Number(lat),
+          "longitude": Number(lng)
+        }
+      } : {}),
 
+      // আসল রিভিউ
       ...(ratingValue && reviewCount > 0 ? {
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -180,6 +187,7 @@ const masterGraph: any = {
         }))
       } : {}),
 
+      // আসল অ্যামেনিটিস
       ...(flattenedAmenities.length > 0 ? {
         "amenityFeature": flattenedAmenities.map((amenity: string) => ({
           "@type": "LocationFeatureSpecification",
@@ -188,22 +196,29 @@ const masterGraph: any = {
         }))
       } : {}),
 
+      // আসল রুমের বিবরণ
       ...(roomsList.length > 0 ? {
         "containsPlace": roomsList.map((room: any) => ({
           "@type": "HotelRoom",
-          "name": room.name || "Executive Suite",
-          "description": room.price ? `Rate starting from ${room.price}` : "Spacious luxury room",
+          "name": room.name || "Room",
+          ...(room.price ? { "description": `Rate: ${room.price}` } : {}),
           ...(room.guests ? {
             "occupancy": {
               "@type": "QuantitativeValue",
               "value": room.guests
+            }
+          } : {}),
+          ...(room.bed ? {
+            "bed": {
+              "@type": "BedDetails",
+              "typeOfBed": room.bed
             }
           } : {})
         }))
       } : {})
     },
 
-    // 3. FAQPage Schema
+    // 3. FAQPage Schema (যদি CMS-এ থাকে)
     ...(cleanFaqs.length > 0 ? [{
       "@type": "FAQPage",
       "@id": `${canonicalUrl}#faq`,
@@ -221,5 +236,5 @@ const masterGraph: any = {
 };
 ---
 
-<!-- MASTER CONNECTED GOOGLE & AI JSON-LD SCHEMA -->
+<!-- 100% PURE REAL-DATA MASTER SCHEMA -->
 <script type="application/ld+json" set:html={JSON.stringify(masterGraph)} />
