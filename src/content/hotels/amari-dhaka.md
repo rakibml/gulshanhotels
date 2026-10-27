@@ -4,7 +4,7 @@ title: amari dhaka
 title_style: style_7
 category: 5-Star Luxury Stay
 location: Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
-description: ''
+seo_description: ''
 image: /images/hotels/hero-gulshan.jpg.webp
 gallery:
   - /images/hotels/hero-gulshan.jpg.webp
@@ -1341,6 +1341,7 @@ faqs_title: Travelers are asking
 faqs: []
 checkIn: 2:00 PM
 checkOut: 12:00 PM
+description: ''
 enable_faqs: true
 enable_nearby: true
 enable_rates: true
@@ -1349,9 +1350,6 @@ official_site_url: ''
 powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
-seo_description: |-
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 smokingPolicy: Non-Smoking
 ---
 
