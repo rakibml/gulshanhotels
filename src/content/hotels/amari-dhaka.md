@@ -73,9 +73,9 @@ booking_channels:
           <path d="M 46 59 L 49 64 L 47 65 L 45 60 Z" />
         </g>
       </svg>
-officialSite: ''
-whatsapp: ''
-phone: ''
+officialSite: https://www.amari.com/dhaka
+whatsapp: '01996322761'
+phone: +1 01945529869
 amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
