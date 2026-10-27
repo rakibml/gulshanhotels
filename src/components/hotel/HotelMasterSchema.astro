@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (100% Pure CMS Data - Zero Fake Values, Google & AI Compliant)
+// src/components/hotel/HotelMasterSchema.astro (Localhost-Free & Strict Identity Validated)
 interface Props {
   hotel: any;
 }
@@ -7,26 +7,32 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ১. বেসিক ডাটা (কোনো ফেক ফলব্যাক ছাড়া)
+// ১. বেসিক ডাটা ক্লিনআপ
 const hotelTitle = (data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// ডেসক্রিপশন (CMS এ থাকলে যাবে, নয়তো ফাঁকা)
-const hotelDescription = data.seo_description || data.description || "";
+// ডেসক্রিপশন
+const hotelDescription = (data.seo_description || data.description || "").trim();
 const hotelLocation = data.address || data.location || "";
 const hotelPrice = data.price ? String(data.price).trim() : "";
-const officialSite = data.officialSite || data.official_site_url || "";
+const rawOfficialSite = (data.officialSite || data.official_site_url || "").trim();
 const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
 
-// ডোমেইন ইউআরএল
-const siteOrigin = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin : "https://gulshanhotels.com");
+// লোকালহোস্ট প্রতিরোধ: প্রোডাকশনে সবসময় আসল ডোমেইন লক করা থাকবে
+const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${hotelSlug}`;
 
-// ২. আসল ছবি (CMS-এ যা আপলোড করা আছে শুধুই তা)
-const rawGallery: string[] = Array.isArray(data.gallery) && data.gallery.length > 0 
+// sameAs ফিল্টারিং (ইউটিউব ভিডিও ওয়াচ লিংক থাকলে তা sameAs হিসেবে ঢুকবে না)
+const isValidSameAs = rawOfficialSite && 
+  !rawOfficialSite.includes('youtube.com/watch') && 
+  !rawOfficialSite.includes('youtu.be/');
+
+// ২. ছবি ক্লিনআপ (example-test.site জাতীয় ফেক ডোমেইন ফিল্টার)
+const rawGallery: string[] = (Array.isArray(data.gallery) && data.gallery.length > 0 
   ? data.gallery.filter(Boolean)
-  : (data.image ? [data.image] : []);
+  : (data.image ? [data.image] : [])
+).filter((img: string) => !img.includes('example-test.site'));
 
 // ৩. আসল রিভিউ সংগ্রহ
 let allReviewsList: any[] = [];
@@ -61,7 +67,7 @@ const ratingValue = reviewCount > 0
   ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
   : (data.rating ? Number(data.rating).toFixed(1) : null);
 
-// ৪. অ্যামেনিটিস (শুধুমাত্র CMS-এ থাকা আসল তালিকা)
+// ৪. অ্যামেনিটিস
 const amenitiesList: string[] = Array.isArray(data.amenities) ? data.amenities : [];
 const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
@@ -80,26 +86,25 @@ flattenedAmenities = Array.from(new Set(flattenedAmenities.filter(Boolean)));
 // ৫. রুম টাইপ
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 
-// ৬. আসল পলিসি (CMS ফিল্ড)
+// ৬. পলিসি
 const checkIn = data.checkIn || data.check_in || "";
 const checkOut = data.checkOut || data.check_out || "";
 
-// ৭. আসল এফএকিউ
+// ৭. এফএকিউ
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const cleanFaqs = rawFaqs.map((faq: any) => ({
   question: typeof faq === 'string' ? faq : (faq?.question || ''),
   answer: typeof faq === 'object' ? String(faq?.answer || '').replace(/<[^>]*>?/gm, '').trim() : ''
 })).filter((f: any) => f.question && f.answer);
 
-// ৮. জিপিএস কোঅর্ডিনেট (CMS-এ থাকলে তবেই নেওয়া হবে)
+// ৮. জিপিএস
 const lat = data.latitude || data.lat || data.geo?.lat;
 const lng = data.longitude || data.lng || data.geo?.lng;
 
-// ================= MASTER JSON-LD (100% PURE & CONDITIONAL) =================
+// ================= MASTER JSON-LD =================
 const masterGraph: any = {
   "@context": "https://schema.org",
   "@graph": [
-    // 1. Breadcrumbs
     {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
@@ -124,23 +129,20 @@ const masterGraph: any = {
       ]
     },
 
-    // 2. Hotel Entity (Strictly Conditional)
     {
       "@type": ["Hotel", "LodgingBusiness"],
       "@id": `${canonicalUrl}#hotel`,
       "name": hotelTitle,
       "url": canonicalUrl,
 
-      // শুধুমাত্র আসল ডাটা থাকলে এই ফিল্ডগুলো ইনসার্ট হবে
       ...(hotelDescription ? { "description": hotelDescription } : {}),
       ...(rawGallery.length > 0 ? { "image": rawGallery } : {}),
       ...(hotelPhone ? { "telephone": hotelPhone } : {}),
       ...(hotelPrice ? { "priceRange": hotelPrice } : {}),
       ...(checkIn ? { "checkinTime": checkIn } : {}),
       ...(checkOut ? { "checkoutTime": checkOut } : {}),
-      ...(officialSite ? { "sameAs": [officialSite] } : {}),
+      ...(isValidSameAs ? { "sameAs": [rawOfficialSite] } : {}),
 
-      // আসল ঠিকানা
       ...(hotelLocation ? {
         "address": {
           "@type": "PostalAddress",
@@ -152,7 +154,6 @@ const masterGraph: any = {
         }
       } : {}),
 
-      // জিপিএস (যদি CMS-এ থাকে)
       ...(lat && lng ? {
         "geo": {
           "@type": "GeoCoordinates",
@@ -161,7 +162,6 @@ const masterGraph: any = {
         }
       } : {}),
 
-      // আসল রিভিউ
       ...(ratingValue && reviewCount > 0 ? {
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -187,7 +187,6 @@ const masterGraph: any = {
         }))
       } : {}),
 
-      // আসল অ্যামেনিটিস
       ...(flattenedAmenities.length > 0 ? {
         "amenityFeature": flattenedAmenities.map((amenity: string) => ({
           "@type": "LocationFeatureSpecification",
@@ -196,7 +195,6 @@ const masterGraph: any = {
         }))
       } : {}),
 
-      // আসল রুমের বিবরণ
       ...(roomsList.length > 0 ? {
         "containsPlace": roomsList.map((room: any) => ({
           "@type": "HotelRoom",
@@ -218,7 +216,6 @@ const masterGraph: any = {
       } : {})
     },
 
-    // 3. FAQPage Schema (যদি CMS-এ থাকে)
     ...(cleanFaqs.length > 0 ? [{
       "@type": "FAQPage",
       "@id": `${canonicalUrl}#faq`,
