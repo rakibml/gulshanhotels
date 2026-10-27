@@ -1350,8 +1350,12 @@ powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
 seo_description: |-
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+We’re at the centre of the business and diplomat districts of Dhaka, and conveniently near United Nations departments and offices, banks and embassies. If you are here on business, you’ll find everything you need close by. Hazrat Shahjalal International Airport is also a convenient 20-minute drive away.
+
+Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight.
+
+Whether you’re with us for a couple of nights or longer, we’ll do all we can to ensure you have the comforts you need to brighten your stay. Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight.  
+
 smokingPolicy: Non-Smoking
 ---
 
