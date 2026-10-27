@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (Localhost-Free & Strict Identity Validated)
+// src/components/hotel/HotelMasterSchema.astro (About Section Description & Pure Real Data)
 interface Props {
   hotel: any;
 }
@@ -12,23 +12,40 @@ const hotelTitle = (data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// ডেসক্রিপশন
-const hotelDescription = (data.seo_description || data.description || "").trim();
+// ================= ABOUT সেকশন থেকে ডেসক্রিপশন তৈরি =================
+function cleanAboutText(raw: string) {
+  if (!raw) return "";
+  return raw
+    .replace(/<[^>]*>?/gm, '') // HTML ট্যাগ মুছে ফেলবে
+    .replace(/[#*`_~]/g, '')    // Markdown বোল্ড/হেডিং চিহ্ন মুছবে
+    .replace(/\s+/g, ' ')       // অতিরিক্ত নতুন লাইন ও স্পেস ঠিক করবে
+    .trim();
+}
+
+// About সেকশনের টেক্সট (hotel.body) গ্রহণ
+const rawAboutText = hotel?.body || data.about || data.overview || data.description || "";
+const cleanAbout = cleanAboutText(rawAboutText);
+
+// গুগলের স্কিমার জন্য আদর্শ দৈর্ঘ্য (১ম প্যারাগ্রাফ / ৩০০ ক্যারেক্টার)
+const hotelDescription = cleanAbout.length > 320 
+  ? cleanAbout.substring(0, 320).trim() + "..." 
+  : cleanAbout;
+
 const hotelLocation = data.address || data.location || "";
 const hotelPrice = data.price ? String(data.price).trim() : "";
 const rawOfficialSite = (data.officialSite || data.official_site_url || "").trim();
 const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
 
-// লোকালহোস্ট প্রতিরোধ: প্রোডাকশনে সবসময় আসল ডোমেইন লক করা থাকবে
+// ডোমেইন লক (লোকালহোস্ট প্রতিরোধ)
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${hotelSlug}`;
 
-// sameAs ফিল্টারিং (ইউটিউব ভিডিও ওয়াচ লিংক থাকলে তা sameAs হিসেবে ঢুকবে না)
+// sameAs ফিল্টারিং (ইউটিউব ওয়াচ লিংক বাদ)
 const isValidSameAs = rawOfficialSite && 
   !rawOfficialSite.includes('youtube.com/watch') && 
   !rawOfficialSite.includes('youtu.be/');
 
-// ২. ছবি ক্লিনআপ (example-test.site জাতীয় ফেক ডোমেইন ফিল্টার)
+// ২. আসল ছবি
 const rawGallery: string[] = (Array.isArray(data.gallery) && data.gallery.length > 0 
   ? data.gallery.filter(Boolean)
   : (data.image ? [data.image] : [])
@@ -101,10 +118,11 @@ const cleanFaqs = rawFaqs.map((faq: any) => ({
 const lat = data.latitude || data.lat || data.geo?.lat;
 const lng = data.longitude || data.lng || data.geo?.lng;
 
-// ================= MASTER JSON-LD =================
+// ================= MASTER JSON-LD KNOWLEDGE GRAPH =================
 const masterGraph: any = {
   "@context": "https://schema.org",
   "@graph": [
+    // 1. Breadcrumbs
     {
       "@type": "BreadcrumbList",
       "@id": `${canonicalUrl}#breadcrumb`,
@@ -129,12 +147,14 @@ const masterGraph: any = {
       ]
     },
 
+    // 2. Hotel Entity (Strictly Conditional)
     {
       "@type": ["Hotel", "LodgingBusiness"],
       "@id": `${canonicalUrl}#hotel`,
       "name": hotelTitle,
       "url": canonicalUrl,
 
+      // এখন About সেকশনের ফ্রেশ লেখা সরাসরি এখানে ঢুকবে
       ...(hotelDescription ? { "description": hotelDescription } : {}),
       ...(rawGallery.length > 0 ? { "image": rawGallery } : {}),
       ...(hotelPhone ? { "telephone": hotelPhone } : {}),
@@ -216,6 +236,7 @@ const masterGraph: any = {
       } : {})
     },
 
+    // 3. FAQPage Schema
     ...(cleanFaqs.length > 0 ? [{
       "@type": "FAQPage",
       "@id": `${canonicalUrl}#faq`,
@@ -233,5 +254,5 @@ const masterGraph: any = {
 };
 ---
 
-<!-- 100% PURE REAL-DATA MASTER SCHEMA -->
+<!-- 100% REAL ABOUT-DATA MASTER SCHEMA -->
 <script type="application/ld+json" set:html={JSON.stringify(masterGraph)} />
