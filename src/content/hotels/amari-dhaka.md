@@ -75,7 +75,7 @@ booking_channels:
       </svg>
 officialSite: https://www.amari.com/dhaka
 whatsapp: '01996322761'
-phone: +1 01945529869
+phone: '+8801945529869'
 amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
