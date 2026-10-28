@@ -4,8 +4,10 @@ title: the westin dhaka
 title_style: style_6
 category: 5-Star Luxury Stay
 location: Main Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
-description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-image: https://picsum.photos/id/254/1920/1280.webp
+seo_description: |-
+  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+image: https://media.gulshanhotels.com/34884184.jpg
 gallery:
   - /images/hotels/hero-gulshan.jpg.webp
   - https://picsum.photos/id/1060/1920/1280.webp
@@ -17,10 +19,7 @@ enable_official_site: true
 popular: true
 about_notice: ''
 price: $60 / night
-checkIn: 2:00 PM
-checkOut: 12:00 PM
-powerBackup: 24/7 Generator
-smokingPolicy: Non-Smoking
+policies: []
 booking_channels:
   - provider_name: Whatsapp
     price: $55
@@ -1201,16 +1200,18 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
+checkIn: 2:00 PM
+checkOut: 12:00 PM
+description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 enable_faqs: true
 enable_nearby: true
 enable_rates: true
 image_alt: ''
 official_site_url: ''
+powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
-seo_description: |-
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+smokingPolicy: Non-Smoking
 ---
 
 আসসালামু আলাইকুম।
