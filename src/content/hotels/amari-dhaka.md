@@ -7,9 +7,9 @@ location: Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
 seo_description: ''
 image: https://media.gulshanhotels.com/533410075.jpg
 gallery:
+  - https://media.gulshanhotels.com/533410075.jpg
+  - https://media.gulshanhotels.com/34884184.jpg
   - https://media.gulshanhotels.com/34884165.jpg
-  - https://media.gulshanhotels.com/34884165.jpg
-  - https://picsum.photos/id/590/1920/1280.webp
   - https://picsum.photos/id/181/1920/1280.webp
   - https://picsum.photos/id/690/1920/1280.webp
 enable_view_prices: true
