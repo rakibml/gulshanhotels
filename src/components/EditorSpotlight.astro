@@ -1,146 +1,168 @@
 ---
-// src/components/EditorSpotlight.astro (100% SVG Icons - Zero Emojis & Compact Design)
+// src/components/EditorSpotlight.astro (100% Dynamic Sponsored/Featured Property Section)
 import { getCollection } from 'astro:content';
 
-let spotlightHotel: any = null;
+let allHotels: any[] = [];
+
 try {
-  const allHotels = await getCollection('hotels');
-  if (Array.isArray(allHotels) && allHotels.length > 0) {
-    spotlightHotel = allHotels.find(h => (h.data?.title || h.data?.name || '').toLowerCase().includes('westin')) || allHotels[0];
+  const collection = await getCollection('hotels');
+  if (Array.isArray(collection) && collection.length > 0) {
+    allHotels = collection;
   }
-} catch (e) {}
+} catch (e) {
+  allHotels = [];
+}
+
+if (allHotels.length === 0) {
+  try {
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+      data: item.frontmatter || item.data || {},
+    }));
+  } catch (e) {}
+}
+
+// ১. স্পন্সরড হোটেল খুঁজে বের করা (sponsored: true অথবা spotlight: true)
+const spotlightHotel = allHotels.find(h => 
+  h.data?.sponsored === true || 
+  h.data?.spotlight === true || 
+  h.data?.is_featured === true
+);
+
+// স্পন্সর না থাকলে সেকশনটি পেজে দেখাবে না
+const hasSponsor = Boolean(spotlightHotel);
 
 const hData = spotlightHotel?.data || {};
-const rawTitle = (hData.title || hData.name || "The Westin Dhaka").trim();
-const hotelSlug = (hData.slug || spotlightHotel?.slug || spotlightHotel?.id || "the-westin-dhaka").replace(/\.md$/, '').trim();
-const hotelLocation = "Gulshan 2 Circle, Diplomatic Enclave";
+const hotelTitle = (hData.title || hData.name || "").trim();
 
-// ক্লিন প্রাইস
-const rawPrice = String(hData.price || "185").replace(/[^0-9.]/g, '');
-const priceNum = parseFloat(rawPrice) || 185;
-const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
+const rawSlug = String(hData.slug || spotlightHotel?.slug || spotlightHotel?.id || "");
+const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// প্রিমিয়াম ৫-স্টার হোটেল ভিউ
-const hotelImage = "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=75";
+const hotelLocation = hData.location || hData.address || "Gulshan, Dhaka";
+const hotelPrice = hData.price ? String(hData.price).trim() : "$150 / night";
+
+// আসল ছবি (CMS ইমেজ অথবা গ্যালারির ১ম ছবি)
+const hotelImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "");
+
+// ডেসক্রিপশন (স্পটলাইট স্পেশাল টেক্সট অথবা হোটেলের ডেসক্রিপশন)
+const spotlightDesc = hData.spotlight_desc || hData.seo_description || hData.description || "Experience executive hospitality, refined suites, and world-class dining in the heart of Dhaka's diplomatic zone.";
+
+// হোটেলের আসল অ্যামেনিটিস থেকে শীর্ষ ৩টি ফিচার নেওয়া
+const rawAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
+const topFeatures = rawAmenities.slice(0, 3).map((a: any) => typeof a === 'string' ? a : (a?.name || 'Amenity'));
 ---
 
-<!-- COMPACT SLIM EDITORIAL SPOTLIGHT (ZERO EMOJIS - 100% SVG ICONS) -->
-<section 
-  id="spotlight" 
-  class="w-full bg-white py-6 sm:py-8 text-slate-900 border-b border-slate-100"
-  style="content-visibility: auto; contain-intrinsic-size: 1px 320px;"
->
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
-    
-    <!-- COMPACT 50/50 CARD -->
-    <div class="bg-[#F8FAF9] rounded-2xl border border-slate-200/90 p-4 sm:p-6 lg:p-7">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center text-left">
-        
-        <!-- 1. LEFT: COMPACT PHOTO -->
-        <div class="lg:col-span-5 relative group">
-          <div class="relative w-full h-[220px] sm:h-[260px] lg:h-[280px] rounded-xl overflow-hidden bg-slate-900">
-            <img 
-              src={hotelImage} 
-              alt="The Westin Dhaka Luxury Suite" 
-              loading="lazy" 
-              decoding="async" 
-              fetchpriority="low"
-              width="600" 
-              height="380" 
-              class="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out" 
-            />
-            
-            <!-- Location Tag with SVG Pin (No Emoji) -->
-            <div class="absolute bottom-3 left-3 z-10">
-              <span class="text-white text-[10px] font-bold bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 flex items-center gap-1.5">
-                <svg class="w-3 h-3 fill-current text-emerald-400 shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-                <span>Gulshan 2 Enclave</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. RIGHT: TIGHT & SLIM CONTENT -->
-        <div class="lg:col-span-7 space-y-3">
+{hasSponsor && hotelTitle && (
+  <section 
+    id="spotlight" 
+    class="w-full bg-white py-8 sm:py-10 text-slate-900 border-b border-slate-200"
+    style="content-visibility: auto; contain-intrinsic-size: 1px 320px;"
+  >
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12">
+      
+      <!-- SPONSORED / SPOTLIGHT CARD CONTAINER -->
+      <div class="bg-slate-50/80 rounded-3xl border border-slate-200 p-4 sm:p-6 lg:p-8 shadow-xs">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center text-left">
           
-          <div class="space-y-1">
-            <!-- Badge with SVG Star (No Emoji) -->
-            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-800 flex items-center gap-1.5">
-              <svg class="w-3 h-3 fill-current text-emerald-800 shrink-0" viewBox="0 0 24 24">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-              </svg>
-              <span>SPOTLIGHT PROPERTY OF THE MONTH</span>
-            </span>
-            
-            <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight capitalize leading-tight">
-              {rawTitle}
-            </h2>
-            
-            <p class="text-xs text-slate-500 font-semibold">
-              {hotelLocation}
-            </p>
+          <!-- 1. LEFT: HOTEL PHOTO -->
+          <div class="lg:col-span-5 relative group">
+            <div class="relative w-full h-[230px] sm:h-[270px] lg:h-[300px] rounded-2xl overflow-hidden bg-slate-900 shadow-sm border border-slate-200">
+              {hotelImage && (
+                <img 
+                  src={hotelImage} 
+                  alt={`${hotelTitle} Featured Spotlight`} 
+                  loading="lazy" 
+                  decoding="async" 
+                  width="600" 
+                  height="380" 
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                />
+              )}
+              
+              <!-- Location Tag -->
+              <div class="absolute bottom-3 left-3 z-10">
+                <span class="text-white text-[10px] font-bold bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5 shadow-sm">
+                  <svg class="w-3 h-3 fill-emerald-400 shrink-0" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  <span class="truncate max-w-[200px]">{hotelLocation}</span>
+                </span>
+              </div>
+            </div>
           </div>
 
-          <!-- সংক্ষিপ্ত বিবরণ -->
-          <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2">
-            Dhaka's 5-star diplomatic benchmark featuring heated rooftop infinity pool, Italian fine dining at Prego, and signature Heavenly® beds.
-          </p>
-
-          <!-- ফিচার চিপস (১০০% এসভিজি আইকন - নো ইমোজি) -->
-          <div class="flex flex-wrap gap-2 pt-0.5 text-[11px] font-bold text-slate-700">
+          <!-- 2. RIGHT: SPONSOR CONTENT DETAILS -->
+          <div class="lg:col-span-7 space-y-3.5">
             
-            <!-- 1. Rooftop Pool SVG -->
-            <span class="bg-white border border-slate-200/90 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-              <svg class="w-3.5 h-3.5 text-emerald-700 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 15c2 0 3-1 5-1s3 1 5 1 3-1 5-1 3 1 5 1M3 19c2 0 3-1 5-1s3 1 5 1 3-1 5-1 3 1 5 1M14 6a2 2 0 10-4 0 2 2 0 004 0zM12 8v3l3 2" />
-              </svg>
-              <span>Heated Rooftop Pool</span>
-            </span>
-
-            <!-- 2. Shield / Diplomatic Security SVG -->
-            <span class="bg-white border border-slate-200/90 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-              <svg class="w-3.5 h-3.5 text-emerald-700 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2l8 4v6c0 5.5-3.8 10.7-8 12-4.2-1.3-8-6.5-8-12V6l8-4z" />
-              </svg>
-              <span>Diplomatic Armed Security</span>
-            </span>
-
-            <!-- 3. Express Airport Link SVG -->
-            <span class="bg-white border border-slate-200/90 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-              <svg class="w-3.5 h-3.5 text-emerald-700 fill-current shrink-0" viewBox="0 0 24 24">
-                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-              </svg>
-              <span>18-Min Express Airport Link</span>
-            </span>
-
-          </div>
-
-          <!-- প্রাইস এবং বাটন উইথ এসভিজি অ্যারো -->
-          <div class="pt-2.5 border-t border-slate-200/80 flex items-center justify-between gap-4">
-            <div>
-              <span class="text-[10px] text-slate-400 font-medium block">Starting from</span>
-              <span class="text-xl sm:text-2xl font-black text-slate-900 leading-none">
-                {currencySymbol}{priceNum} <span class="text-xs text-slate-500 font-normal">/ night</span>
-              </span>
+            <div class="space-y-1.5">
+              <!-- Official Sponsored Badge (100% Google Compliant) -->
+              <div class="flex items-center gap-2">
+                <span class="bg-[#0d3b23] text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-xs">
+                  <svg class="w-2.5 h-2.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  <span>Featured Partner</span>
+                </span>
+                <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Sponsored Spotlight</span>
+              </div>
+              
+              <!-- Dynamic Hotel Title -->
+              <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                <a href={`/${hotelSlug}`} class="hover:text-emerald-800 transition-colors">
+                  {hotelTitle}
+                </a>
+              </h2>
+              
+              <p class="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                <span>{hotelLocation}</span>
+              </p>
             </div>
 
-            <a 
-              href={`/${hotelSlug}`} 
-              class="inline-flex items-center gap-1.5 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition duration-200 uppercase tracking-wider shrink-0 shadow-xs"
-            >
-              <span>Explore Property</span>
-              <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-              </svg>
-            </a>
+            <!-- Dynamic Description -->
+            <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2">
+              {spotlightDesc}
+            </p>
+
+            <!-- Dynamic Feature Chips (হোটেলের নিজস্ব ৩টি আসল সুবিধা) -->
+            {topFeatures.length > 0 ? (
+              <div class="flex flex-wrap gap-2 pt-0.5 text-[11px] font-bold text-slate-700">
+                {topFeatures.map((feat: string) => (
+                  <span class="bg-white border border-slate-200 px-3 py-1 rounded-xl flex items-center gap-1.5 shadow-2xs">
+                    <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span>{feat}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            <!-- Price and Action Button -->
+            <div class="pt-3 border-t border-slate-200/90 flex items-center justify-between gap-4">
+              <div>
+                <span class="text-[10px] text-slate-400 font-medium block">Starting from</span>
+                <span class="text-xl sm:text-2xl font-black text-slate-900 leading-none">
+                  {hotelPrice.startsWith('$') || hotelPrice.startsWith('৳') ? hotelPrice : '$' + hotelPrice}
+                </span>
+              </div>
+
+              <a 
+                href={`/${hotelSlug}`} 
+                class="inline-flex items-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl transition-all duration-200 uppercase tracking-wider shrink-0 shadow-xs hover:scale-105 active:scale-95"
+              >
+                <span>Explore Property</span>
+                <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </a>
+            </div>
+
           </div>
 
         </div>
-
       </div>
-    </div>
 
-  </div>
-</section>
+    </div>
+  </section>
+)}
