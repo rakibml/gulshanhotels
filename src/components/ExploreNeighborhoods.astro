@@ -1,5 +1,5 @@
 ---
-// src/components/GulshanLifestyle.astro (Side-by-Side Mobile 2-Column & Clean Editorial Layout)
+// src/components/RecentGuestReviews.astro (100% Real-Time Recent Hotel Reviews Feed - 2-Column Mobile)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -8,76 +8,93 @@ interface Props {
 }
 
 const { 
-  title = "Beyond the stay. Explore Gulshan.", 
-  subtitle = "Curated embassy guides, fine dining spots, and local tips updated weekly."
+  title = "Recent Guest Feedback", 
+  subtitle = "Real experiences and ratings from travelers staying across luxury hotels in Gulshan."
 } = Astro.props;
 
-// ১. ব্লগ পোস্ট ডাটা লোডার
-let allPosts: any[] = [];
+// ১. সব হোটেলের ডাটা লোড করা (যাতে হোটেলের আসল ছবি ও নাম পাওয়া যায়)
+let allHotels: any[] = [];
 try {
-  const postCol = await getCollection('posts');
-  if (Array.isArray(postCol) && postCol.length > 0) allPosts = postCol;
+  const hotelCol = await getCollection('hotels');
+  if (Array.isArray(hotelCol) && hotelCol.length > 0) allHotels = hotelCol;
 } catch (e) {}
 
-if (allPosts.length === 0) {
+if (allHotels.length === 0) {
   try {
-    const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../content/posts/*.{md,mdx}'], { eager: true });
-    allPosts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
-      data: item.frontmatter || item.data || {}
+    const rawGlobHotels = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.values(rawGlobHotels).map((item: any) => ({
+      data: item?.frontmatter || item?.data || {}
     }));
   } catch (e) {}
 }
 
-const hasPosts = allPosts.length > 0;
+// ২. সব রিভিউ ডাটা লোড করা
+let allReviews: any[] = [];
+try {
+  const rawGlobReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../content/reviews/*.{md,mdx}'], { eager: true });
+  allReviews = Object.values(rawGlobReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
+} catch (e) {}
 
-// ২. তারিখ অনুযায়ী সর্টিং (লেটেস্ট পোস্ট সবার আগে)
-const sortedPosts = allPosts.sort((a, b) => {
-  const dateA = new Date(a.data?.date || 0).getTime();
-  const dateB = new Date(b.data?.date || 0).getTime();
+// ৩. শুধুমাত্র অনুমোদিত এবং বাস্তব রিভিউগুলো ফিল্টার করা
+const approvedReviews = allReviews.filter((r: any) => {
+  if (!r) return false;
+  const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
+  return isApproved && String(r.comment || '').trim().length > 2;
+});
+
+// ৪. তারিখ অনুযায়ী সাজানো (সবচেয়ে নতুন রিভিউ সবার আগে থাকবে)
+const sortedReviews = approvedReviews.sort((a, b) => {
+  const dateA = new Date(a.date || 0).getTime();
+  const dateB = new Date(b.date || 0).getTime();
   return dateB - dateA;
 });
 
-// ৩. যেসব ক্যাটাগরিতে পোস্ট আছে শুধুই সেগুলো ফিল্টারে আসবে
-const rawCategories = [
-  { id: "all", name: "All Guides" },
-  { id: "embassy", name: "Embassy Guides" },
-  { id: "dining", name: "Food & Dining" },
-  { id: "reviews", name: "Hotel Reviews" },
-  { id: "travel", name: "Travel Guides" }
-];
+// ৫. প্রতিটি রিভিউর সাথে তার নির্দিষ্ট হোটেলের ছবি ও লিংক জোড়া লাগানো
+const enrichedReviews = sortedReviews.map((rev: any) => {
+  const rSlug = String(rev.slug || rev.hotelSlug || rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
+  const rHotel = String(rev.hotel || '').trim().toLowerCase();
 
-const getCategoryMatch = (p: any, catId: string) => {
-  if (catId === "all") return true;
-  const cat = String(p.data?.category || '').toLowerCase();
-  if (catId === "embassy") return cat.includes("embassy") || cat.includes("visa");
-  if (catId === "dining") return cat.includes("food") || cat.includes("dining") || cat.includes("restaurant");
-  if (catId === "reviews") return cat.includes("review") || cat.includes("hotel");
-  if (catId === "travel") return cat.includes("travel") || cat.includes("guide");
-  return false;
-};
+  // রিভিউ যে হোটেলের, সেই হোটেলকে খুঁজে বের করা
+  const matchedHotel = allHotels.find((h: any) => {
+    const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
+    const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
+    return (rSlug !== '' && hSlug === rSlug) || (rHotel !== '' && hTitle === rHotel);
+  });
 
-const activeCategories = rawCategories.filter(cat => 
-  cat.id === "all" || sortedPosts.some(p => getCategoryMatch(p, cat.id))
-);
+  const hData = matchedHotel?.data || {};
+  const hotelTitle = hData.title || hData.name || rev.hotel || "Gulshan Luxury Hotel";
+  const hotelSlug = String(hData.slug || matchedHotel?.slug || matchedHotel?.id || rSlug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+  const hotelImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=75");
+  const hotelLocation = hData.location || "Gulshan, Dhaka";
 
-const getPostsByCategory = (catId: string) => {
-  return sortedPosts.filter(p => getCategoryMatch(p, catId)).slice(0, 4);
-};
+  return {
+    reviewerName: rev.name || rev.author || "Verified Guest",
+    date: rev.date || "Recent Stay",
+    rating: Number(rev.rating) || 5,
+    comment: String(rev.comment || rev.review || '').trim(),
+    hotelTitle,
+    hotelSlug,
+    hotelImage,
+    hotelLocation
+  };
+}).slice(0, 4); // মোবাইলে ২x২ গ্রিডের জন্য সর্বশেষ ৪টি রিভিউ
+
+const hasReviews = enrichedReviews.length > 0;
+const starsArray = [1, 2, 3, 4, 5];
 ---
 
-{hasPosts && (
+{hasReviews && (
   <section 
-    id="gulshan-lifestyle" 
+    id="recent-reviews" 
     class="w-full bg-white py-10 sm:py-12 text-slate-900 border-b border-slate-200"
-    style="content-visibility: auto; contain-intrinsic-size: 1px 400px;"
   >
     <div class="max-w-[1550px] mx-auto px-3 sm:px-8 lg:px-12 space-y-5">
       
       <!-- Section Header -->
       <div class="space-y-1 text-left border-b border-slate-100 pb-3">
-        <span class="text-[9px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
-          Gulshan Insider & Local Secrets
+        <span class="text-[9px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Verified Stay Experiences</span>
         </span>
         <h2 class="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
           {title}
@@ -87,151 +104,86 @@ const getPostsByCategory = (catId: string) => {
         </p>
       </div>
 
-      <!-- Clean Category Tabs (Horizontal Scrollable) -->
-      {activeCategories.length > 1 && (
-        <div class="flex items-center gap-1.5 sm:gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
-          {activeCategories.map((cat, idx) => (
-            <button
-              type="button"
-              data-tab-target={cat.id}
-              class={`lifestyle-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-extrabold rounded-full transition-all cursor-pointer shrink-0 border select-none ${
-                idx === 0 
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <!-- Dynamic Category Content Panels -->
-      <div id="lifestyleTabContentContainer" class="text-left pt-1">
-        {activeCategories.map((cat, idx) => {
-          const postsForThisTab = getPostsByCategory(cat.id);
-
-          return (
-            <div 
-              id={`lifestyle-panel-${cat.id}`} 
-              class={`lifestyle-tab-panel ${idx === 0 ? 'grid' : 'hidden'} grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6`}
-            >
-              {postsForThisTab.map((post: any) => {
-                const pData = post.data || {};
-                const rawSlug = String(pData.slug || post.slug || post.id || '').trim();
-                const pSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+      <!-- SIDE-BY-SIDE MOBILE 2-COLUMN & DESKTOP 4-COLUMN GRID -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-left">
+        {enrichedReviews.map((item) => (
+          <div class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
+            <div>
+              
+              <!-- ১. হোটেলের ছবি ও লোকেশন ব্যাজ -->
+              <a href={`/${item.hotelSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                <img 
+                  src={item.hotelImage} 
+                  alt={item.hotelTitle} 
+                  loading="lazy" 
+                  decoding="async" 
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 
-                const pTitle = pData.title || "Gulshan Travel Guide";
-                const pDesc = pData.description || "In-depth recommendations and local tips.";
-                const pCat = pData.category || "Guide";
-                const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
-                const pReadTime = pData.readTime || pData.read_time || "4 min";
+                <!-- হোটেলের নাম ছবির ওপরে মার্জিতভাবে -->
+                <div class="absolute bottom-2 left-2 right-2 text-left">
+                  <h4 class="text-white text-[10px] sm:text-xs font-bold leading-tight truncate drop-shadow-sm">
+                    {item.hotelTitle}
+                  </h4>
+                  <span class="text-slate-300 text-[8px] sm:text-[9px] font-medium truncate block">
+                    {item.hotelLocation}
+                  </span>
+                </div>
+              </a>
 
-                return (
-                  <article class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
-                    <div>
-                      
-                      <!-- Card Image & Badge -->
-                      <a href={`/blog/${pSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
-                        <img 
-                          src={pImg} 
-                          alt={pTitle} 
-                          loading="lazy" 
-                          decoding="async" 
-                          width="400"
-                          height="250"
-                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
-                        />
-                        <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-md text-slate-900 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
-                          {pCat}
-                        </div>
-                      </a>
+              <!-- ২. কাস্টমারের আসল রিভিউ ও স্টার -->
+              <div class="p-2.5 sm:p-4 space-y-1.5">
+                
+                <!-- গোল্ডেন ভেক্টর স্টার -->
+                <div class="flex items-center gap-0.5">
+                  {starsArray.map(s => (
+                    <svg class={`w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                  ))}
+                  <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold ml-1">{item.rating}.0</span>
+                </div>
 
-                      <!-- Content Body (2-Column Mobile Friendly) -->
-                      <div class="p-2.5 sm:p-4 space-y-1 sm:space-y-1.5">
-                        <h3 class="font-bold text-slate-900 text-xs sm:text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
-                          <a href={`/blog/${pSlug}`}>
-                            {pTitle}
-                          </a>
-                        </h3>
-
-                        <p class="text-[10px] sm:text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed hidden xs:block">
-                          {pDesc}
-                        </p>
-                      </div>
-                    </div>
-
-                    <!-- Footer Details -->
-                    <div class="p-2.5 sm:p-4 pt-0">
-                      <div class="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span class="text-slate-400 font-medium flex items-center gap-1 text-[9px] sm:text-[11px]">
-                          <svg class="w-3 h-3 text-slate-400 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                          </svg>
-                          <span>{pReadTime}</span>
-                        </span>
-
-                        <a 
-                          href={`/blog/${pSlug}`} 
-                          class="inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#0d3b23] hover:underline"
-                        >
-                          <span>Read</span>
-                          <svg class="w-2.5 h-2.5 fill-none stroke-current stroke-[3] shrink-0" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                          </svg>
-                        </a>
-                      </div>
-                    </div>
-
-                  </article>
-                );
-              })}
+                <!-- কাস্টমারের মন্তব্য -->
+                <p class="text-[10px] sm:text-xs text-slate-700 italic font-normal line-clamp-3 leading-relaxed">
+                  "{item.comment}"
+                </p>
+              </div>
             </div>
-          );
-        })}
+
+            <!-- ৩. কাস্টমারের নাম, তারিখ এবং হোটেল লিংক -->
+            <div class="p-2.5 sm:p-4 pt-0">
+              <div class="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between">
+                
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 text-[10px] font-black uppercase flex items-center justify-center shrink-0">
+                    {item.reviewerName.charAt(0)}
+                  </div>
+                  <div class="min-w-0">
+                    <span class="text-[10px] sm:text-xs font-bold text-slate-900 truncate block leading-tight">
+                      {item.reviewerName}
+                    </span>
+                    <span class="text-[8px] sm:text-[9px] text-slate-400 font-medium block truncate">
+                      {item.date}
+                    </span>
+                  </div>
+                </div>
+
+                <a 
+                  href={`/${item.hotelSlug}`} 
+                  class="shrink-0 text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#0d3b23] hover:underline flex items-center gap-0.5 pl-1"
+                >
+                  <span class="hidden xs:inline">Stay</span>
+                  <span>➔</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        ))}
       </div>
 
     </div>
   </section>
 )}
-
-<!-- TAB SWITCHING SCRIPT -->
-<script>
-  let lifestyleAbortCtrl: AbortController | null = null;
-
-  function initLifestyleTabs() {
-    if (lifestyleAbortCtrl) lifestyleAbortCtrl.abort();
-    lifestyleAbortCtrl = new AbortController();
-
-    const tabs = document.querySelectorAll('.lifestyle-tab-btn');
-    const panels = document.querySelectorAll('.lifestyle-tab-panel');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetId = tab.getAttribute('data-tab-target');
-
-        tabs.forEach(t => {
-          t.classList.remove('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
-          t.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
-        });
-
-        tab.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
-        tab.classList.add('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
-
-        panels.forEach(p => {
-          if (p.id === `lifestyle-panel-${targetId}`) {
-            p.classList.remove('hidden');
-            p.classList.add('grid');
-          } else {
-            p.classList.add('hidden');
-            p.classList.remove('grid');
-          }
-        });
-      });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', initLifestyleTabs);
-  document.addEventListener('astro:page-load', initLifestyleTabs);
-</script>
