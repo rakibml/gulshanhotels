@@ -1,5 +1,5 @@
 ---
-// src/components/RecentGuestReviews.astro (Ultra-Clean Image-Free Guest Feedback Wall)
+// src/components/RecentGuestReviews.astro (Ultra-Clean Guest Feedback - Full Names & Normal Styling)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,7 +12,7 @@ const {
   subtitle = "Real ratings and experiences from verified travelers staying across Gulshan."
 } = Astro.props;
 
-// ১. হোটেল ডাটা লোডার (শুধুমাত্র হোটেলের নাম ও লিংকের জন্য)
+// ১. হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await getCollection('hotels');
@@ -63,7 +63,7 @@ allHotels.forEach((h: any) => {
   });
 });
 
-// ৪. ফিল্টারিং (অনুমোদিত রিভিউ)
+// ৪. ফিল্টারিং
 const approvedReviews = allReviews.filter((r: any) => {
   if (!r) return false;
   const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
@@ -127,12 +127,8 @@ const starsArray = [1, 2, 3, 4, 5];
   <section id="recent-reviews" class="w-full bg-white py-12 text-slate-900 border-b border-slate-200">
     <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
       
-      <!-- Section Header -->
+      <!-- Section Header (Verified Stay Experiences বাদ দেওয়া হয়েছে) -->
       <div class="space-y-1 text-left border-b border-slate-100 pb-4">
-        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-          <span>Verified Stay Experiences</span>
-        </span>
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h2>
@@ -148,27 +144,24 @@ const starsArray = [1, 2, 3, 4, 5];
             
             <div class="space-y-3">
               
-              <!-- ১. টপ বার: রেটিং স্টার এবং হোটেলের ব্যাজ -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between gap-1 flex-wrap">
-                  <!-- গোল্ডেন ভেক্টর স্টার -->
-                  <div class="flex items-center gap-0.5">
-                    {starsArray.map(s => (
-                      <svg class={`w-3.5 h-3.5 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                      </svg>
-                    ))}
-                  </div>
-
-                  <!-- হোটেলের নামযুক্ত ট্যাগ/পিল -->
-                  <a 
-                    href={`/${item.hotelSlug}`} 
-                    class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200/80 border border-emerald-200 px-2 py-0.5 rounded-md truncate max-w-[130px] transition-colors"
-                    title={item.hotelTitle}
-                  >
-                    {item.hotelTitle}
-                  </a>
+              <!-- ১. টপ বার: রেটিং স্টার এবং হোটেলের সম্পূর্ণ আসল নাম (কোনো ব্যাকগ্রাউন্ড ছাড়া) -->
+              <div class="flex items-start justify-between gap-2">
+                <!-- গোল্ডেন ভেক্টর স্টার -->
+                <div class="flex items-center gap-0.5 shrink-0 pt-0.5">
+                  {starsArray.map(s => (
+                    <svg class={`w-3.5 h-3.5 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                  ))}
                 </div>
+
+                <!-- হোটেলের সম্পূর্ণ নাম (কোনো ব্যাকগ্রাউন্ড বা বর্ডার নেই, ফুল নাম শো করবে) -->
+                <a 
+                  href={`/${item.hotelSlug}`} 
+                  class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-800 hover:text-emerald-800 hover:underline transition-colors text-right leading-tight"
+                >
+                  {item.hotelTitle}
+                </a>
               </div>
 
               <!-- ২. কাস্টমারের আসল রিভিউ কমেন্ট -->
