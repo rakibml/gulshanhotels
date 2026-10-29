@@ -9,7 +9,7 @@ seo_description: |-
   Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 image: https://media.gulshanhotels.com/34884165.jpg
 gallery:
-  - /images/hotels/hero-gulshan.jpg.webp
+  - https://media.gulshanhotels.com/34884184.jpg
   - https://picsum.photos/id/1060/1920/1280.webp
   - https://picsum.photos/id/590/1920/1280.webp
   - https://picsum.photos/id/181/1920/1280.webp
@@ -17,6 +17,8 @@ gallery:
 enable_view_prices: true
 enable_official_site: true
 popular: true
+sponsored: false
+spotlight_desc: ''
 about_notice: ''
 price: 120$ / night
 policies:
