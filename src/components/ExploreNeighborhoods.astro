@@ -1,6 +1,7 @@
 ---
-// src/components/RecentGuestReviews.astro (Ultra-Clean & Symmetrical Hotel Reviews Grid)
+// src/components/RecentGuestReviews.astro (100% Exact Hotel Photo & Slug Matching)
 import { getCollection } from 'astro:content';
+
 interface Props {
   title?: string;
   subtitle?: string;
@@ -11,17 +12,25 @@ const {
   subtitle = "Real experiences and ratings from travelers staying across luxury hotels in Gulshan."
 } = Astro.props;
 
-// ১. সব হোটেলের ডাটা লোড করা
+// ১. সব হোটেলের ডাটা নিখুঁতভাবে লোড করা (Path & Slug সহ)
 let allHotels: any[] = [];
 try {
   const hotelCol = await getCollection('hotels');
-  if (Array.isArray(hotelCol) && hotelCol.length > 0) allHotels = hotelCol;
+  if (Array.isArray(hotelCol) && hotelCol.length > 0) {
+    allHotels = hotelCol.map(h => ({
+      id: h.id,
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
+      data: h.data || {}
+    }));
+  }
 } catch (e) {}
 
 if (allHotels.length === 0) {
   try {
     const rawGlobHotels = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.values(rawGlobHotels).map((item: any) => ({
+    allHotels = Object.entries(rawGlobHotels).map(([filePath, item]: [string, any]) => ({
+      id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
     }));
   } catch (e) {}
@@ -39,11 +48,11 @@ try {
   allReviews = [];
 }
 
-// ৩. লোকাল রিভিউ মার্জ
+// ৩. হোটেলের লোকাল রিভিউ মার্জ
 allHotels.forEach((h: any) => {
   const hData = h.data || {};
   const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
-  const hSlug = String(hData.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
+  const hSlug = String(h.slug || hData.slug || h.id || '').toLowerCase();
   embedded.forEach((rev: any) => {
     allReviews.push({
       ...rev,
@@ -54,7 +63,7 @@ allHotels.forEach((h: any) => {
   });
 });
 
-// ৪. ফিল্টারিং
+// ৪. ফিল্টারিং (শুধুমাত্র আসল ও অ্যাপ্রুভড রিভিউ)
 const approvedReviews = allReviews.filter((r: any) => {
   if (!r) return false;
   const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
@@ -79,29 +88,34 @@ const parseReviewDateToTime = (rev: any) => {
   return 0;
 };
 
-// ৬. Newest-First সর্টিং
+// ৬. Newest-First সর্টিং (সর্বশেষ রিভিউ সবার আগে)
 const sortedReviews = approvedReviews.sort((a, b) => {
   return parseReviewDateToTime(b) - parseReviewDateToTime(a);
 });
 
-// ৭. ডেটা এনরিচমেন্ট ও ক্লিনআপ
+// ৭. প্রতিটি রিভিউর সাথে তার হোটেলের আসল ছবি ও ডাটা লিঙ্ক করা
 const enrichedReviews = sortedReviews.map((rev: any) => {
   const rSlug = String(rev.slug || rev.hotelSlug || rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
   const rHotel = String(rev.hotel || '').trim().toLowerCase();
 
+  // নিখুঁত হোটেল ম্যাচিং
   const matchedHotel = allHotels.find((h: any) => {
-    const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
+    const hSlug = String(h.slug || h.data?.slug || h.id || '').toLowerCase();
     const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
     return (rSlug !== '' && hSlug === rSlug) || (rHotel !== '' && (hTitle === rHotel || hSlug === rHotel));
   });
 
   const hData = matchedHotel?.data || {};
   const hotelTitle = hData.title || hData.name || rev.hotel || "Gulshan Hotel";
-  const hotelSlug = String(hData.slug || matchedHotel?.slug || matchedHotel?.id || rSlug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
-  const hotelImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=75");
-  const hotelLocation = hData.location || "Gulshan 2, Dhaka";
+  const hotelSlug = String(matchedHotel?.slug || hData.slug || matchedHotel?.id || rSlug || '').toLowerCase();
 
-  // তারিখ থেকে অপ্রয়োজনীয় সময় (at 03:46 PM) মুছে শুধু তারিখ রাখা
+  // হোটেলের পেজের নিয়মে আসল ছবি নেওয়া (Gallery[0] কে ১ নম্বর প্রাধান্য দেওয়া)
+  const hotelGallery = Array.isArray(hData.gallery) && hData.gallery.length > 0 ? hData.gallery : [];
+  const hotelImage = hotelGallery[0] || hData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80";
+
+  const hotelLocation = hData.location || hData.address || "Gulshan 2, Dhaka";
+
+  // তারিখ ক্লিনআপ (অপ্রয়োজনীয় সময় রিমুভ)
   const cleanDate = String(rev.date || 'Recent').replace(/\s+at\s+.*$/i, '').trim();
 
   return {
@@ -138,13 +152,13 @@ const starsArray = [1, 2, 3, 4, 5];
         </p>
       </div>
 
-      <!-- CLEAN SYMMETRICAL GRID (2-Cols Mobile, 4-Cols Desktop) -->
+      <!-- CLEAN SYMMETRICAL GRID -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
         {enrichedReviews.map((item) => (
           <div class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 hover:border-emerald-600/50 hover:shadow-lg transition-all duration-300 overflow-hidden">
             
             <div>
-              <!-- ১. সম্পূর্ণ ক্লিয়ার ছবি (ছবির ওপর কোনো হিবিজিবি লেখা নেই) -->
+              <!-- ১. হোটেলের পেজের সাথে ১০০% মিল থাকা আসল ছবি -->
               <a href={`/${item.hotelSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
                 <img 
                   src={item.hotelImage} 
@@ -155,10 +169,10 @@ const starsArray = [1, 2, 3, 4, 5];
                 />
               </a>
 
-              <!-- ২. কার্ড বডি: সুশৃঙ্খল ও সমান প্যাটার্ন -->
+              <!-- ২. কার্ড বডি -->
               <div class="p-4 space-y-2.5">
                 
-                <!-- হোটেলের নাম ও লোকেশন -->
+                <!-- হোটেলের আসল নাম ও লোকেশন -->
                 <div>
                   <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-emerald-800 transition line-clamp-1 capitalize">
                     <a href={`/${item.hotelSlug}`}>
@@ -179,7 +193,7 @@ const starsArray = [1, 2, 3, 4, 5];
                   ))}
                 </div>
 
-                <!-- কাস্টমারের কমেন্ট (মিনিমাম হাইট ফিক্সড যাতে ১ শব্দ হলেও কার্ড সমান থাকে) -->
+                <!-- কাস্টমারের কমেন্ট (ফিক্সড মিনিমাম হাইট) -->
                 <p class="text-xs text-slate-600 italic font-normal line-clamp-3 min-h-[48px] leading-relaxed">
                   "{item.comment}"
                 </p>
@@ -187,7 +201,7 @@ const starsArray = [1, 2, 3, 4, 5];
               </div>
             </div>
 
-            <!-- ৩. ফুটার: রিভিউয়ার ও ক্লিন তারিখ -->
+            <!-- ৩. ফুটার: রিভিউয়ার ও তারিখ -->
             <div class="p-4 pt-0">
               <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 
