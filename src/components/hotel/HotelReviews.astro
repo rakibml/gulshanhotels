@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Strict Hotel-Specific Matching & Cloudflare Build-Safe)
+// src/components/hotel/HotelReviews.astro (100% Strict Matching & Newest-First Sorted)
 interface Props {
   hotel: any;
 }
@@ -24,7 +24,6 @@ try {
   if (entries.length > 0) {
     rawReviewsList = entries.map((item: any) => item?.frontmatter || item?.data || item || {});
   } else {
-    // ফলব্যাক পাথ যদি রুট পাথ খালি পায়
     const relFiles = import.meta.glob('../../content/reviews/*.{md,mdx}', { eager: true });
     rawReviewsList = Object.values(relFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
   }
@@ -36,16 +35,13 @@ try {
 const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
 
-  // Strict Approval: অবশ্যই approved: true থাকতে হবে
   const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
   if (!isApproved) return false;
 
-  // রিভিউ ফাইলের ফিল্ডগুলো ক্লিন ও লোয়ারকেস করা
   const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
   const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
   const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
 
-  // হুবহু এক্স্যাক্ট ম্যাচ (কোনো includes নেই)
   const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug);
   const matchTitle = searchTitle !== "" && (rHotel === searchTitle);
 
@@ -56,13 +52,28 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-// ৫. ফরম্যাটিং ও ডাটা ক্লিনআপ
-const allReviews = combinedRawReviews.map((rev: any) => ({
+// ৫. ফরম্যাটিং
+const unformattedReviews = combinedRawReviews.map((rev: any) => ({
   name: rev.name || rev.author || 'Verified Guest',
   date: rev.date || 'Recent',
   rating: Number(rev.rating) || 5,
   comment: String(rev.comment || rev.review || rev.body || '').trim()
 })).filter(r => r.comment.length > 1);
+
+// ৬. তারিখ পার্সার হেল্পার (তারিখের ফরম্যাটে "at" থাকলেও ক্র্যাশ করবে না)
+const parseDateToTime = (dStr: any) => {
+  if (!dStr || dStr === 'Recent') return 0;
+  const cleanStr = String(dStr).replace(' at ', ' ').trim();
+  const time = new Date(cleanStr).getTime();
+  return isNaN(time) ? 0 : time;
+};
+
+// ৭. NEWEST-TO-OLDEST SORTING (সবচেয়ে নতুন রিভিউ সবার আগে বামে থাকবে)
+const allReviews = unformattedReviews.sort((a, b) => {
+  const timeA = parseDateToTime(a.date);
+  const timeB = parseDateToTime(b.date);
+  return timeB - timeA; // লেটেস্ট রিভিউ আগে আসবে
+});
 
 // রেটিং ও কাউন্ট ক্যালকুলেশন
 const reviewsCount = allReviews.length;
@@ -73,7 +84,7 @@ const avgRating = reviewsCount > 0
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
-<!-- GUEST REVIEWS SECTION (PURE WHITE & SCROLL-MT ALIGNED) -->
+<!-- GUEST REVIEWS SECTION -->
 <section id="guest-reviews" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="space-y-8">
     
@@ -123,7 +134,7 @@ const starsArray = [1, 2, 3, 4, 5];
       </div>
     </div>
 
-    <!-- Carousel Track -->
+    <!-- Carousel Track (Newest Review at Index 0 on the Left) -->
     {reviewsCount > 0 ? (
       <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {allReviews.map((rev) => {
