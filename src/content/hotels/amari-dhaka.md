@@ -15,6 +15,8 @@ gallery:
 enable_view_prices: true
 enable_official_site: false
 popular: true
+sponsored: true
+spotlight_desc: sponsored
 about_notice: ''
 price: 120$ / night
 policies: []
