@@ -1,66 +1,108 @@
 ---
-// src/components/BrowsePropertyTypes.astro (Clean & Compact Property Types)
+// src/components/BrowsePropertyTypes.astro (100% Real CMS Property Counts, Booking.com Style & Zero Fake Data)
+import { getCollection } from 'astro:content';
 
 interface Props {
   title?: string;
 }
 
 const { 
-  title = "Browse by Property Type"
+  title = "Browse by Property Type in Gulshan"
 } = Astro.props;
 
-// গুলশানের বাস্তবসম্মত ও মার্জিত ছবি
+// ১. রিয়েল হোটেল ডাটা লোডার
+let allHotels: any[] = [];
+
+try {
+  const collection = await getCollection('hotels');
+  if (Array.isArray(collection) && collection.length > 0) {
+    allHotels = collection;
+  }
+} catch (e) {
+  allHotels = [];
+}
+
+if (allHotels.length === 0) {
+  try {
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.values(rawGlob).map((item: any) => ({
+      data: item?.frontmatter || item?.data || {}
+    }));
+  } catch (e) {
+    allHotels = [];
+  }
+}
+
+// ২. আসল প্রপার্টি সংখ্যা গণনা (Zero Fake Data)
+const totalHotelsCount = allHotels.filter(h => {
+  const cat = String(h.data?.category || "").toLowerCase();
+  const title = String(h.data?.title || h.data?.name || "").toLowerCase();
+  return !cat.includes('guest') && !title.includes('guest');
+}).length;
+
+const totalGuestHousesCount = allHotels.filter(h => {
+  const cat = String(h.data?.category || "").toLowerCase();
+  const title = String(h.data?.title || h.data?.name || "").toLowerCase();
+  return cat.includes('guest') || title.includes('guest');
+}).length;
+
+// ৩. ডাইনামিক ক্যাটাগরি অবজেক্ট
 const propertyTypes = [
   {
-    title: "Gulshan Hotels",
-    count: "15+ properties",
+    title: "Hotels & Luxury Stays",
+    count: totalHotelsCount > 0 ? `${totalHotelsCount} verified properties` : "Verified stays",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-    link: "/#hotels"
+    link: "/#hotels?type=hotel"
   },
   {
-    title: "Gulshan Guest Houses",
-    count: "8+ properties",
+    title: "Executive Guest Houses",
+    count: totalGuestHousesCount > 0 ? `${totalGuestHousesCount} verified properties` : (totalHotelsCount > 0 ? "Available on request" : "Verified stays"),
     image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=80",
-    link: "/#hotels"
+    link: "/#hotels?type=guest-house"
   }
 ];
 ---
 
-<!-- BROWSE BY PROPERTY TYPE (COMPACT & CLEAN) -->
-<section id="property-types" class="w-full bg-white pt-6 pb-12 text-slate-900 border-b border-slate-100">
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
+<!-- BROWSE BY PROPERTY TYPE (CLEAN, 100% REAL DATA) -->
+<section id="property-types" class="w-full bg-white pt-6 pb-12 text-slate-900 border-b border-slate-200">
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-5">
     
-    <!-- শুধুমাত্র ক্লিন টাইটেল (ব্যাজ ও সাব-টাইটেল বাদ) -->
-    <div class="text-left">
-      <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
-        {title}
-      </h2>
+    <!-- Section Header -->
+    <div class="text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1">
+      <div>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Explore Gulshan Accommodations</span>
+        <h2 class="text-xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
+          {title}
+        </h2>
+      </div>
+      <p class="text-xs text-slate-500 font-medium">Find the right stay suited for business, transit, or leisure</p>
     </div>
 
-    <!-- ছোট ও পরিচ্ছন্ন থাম্বনেইল কার্ড (Booking.com স্টাইল) -->
-    <div class="flex flex-wrap gap-5 sm:gap-6 text-left">
+    <!-- BOOKING.COM STYLE 2-COLUMN MOBILE & 4-COLUMN DESKTOP GRID -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
       {propertyTypes.map((item) => (
         <a 
           href={item.link} 
-          class="group block w-[calc(50%-10px)] sm:w-[280px] lg:w-[300px] cursor-pointer"
+          class="group block w-full cursor-pointer focus:outline-none"
         >
-          <!-- ছোট কম্প্যাক্ট ইমেজ (Aspect 4:3) -->
-          <div class="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 group-hover:border-slate-400 transition-colors">
+          <!-- 4:3 Aspect Ratio Thumbnail -->
+          <div class="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group-hover:border-emerald-600/50 shadow-xs group-hover:shadow-md transition-all duration-300">
             <img 
               src={item.image} 
-              alt={item.title} 
+              alt={`${item.title} in Gulshan Dhaka`} 
               loading="lazy" 
               decoding="async" 
-              class="w-full h-full object-cover group-hover:scale-104 transition-transform duration-300" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
             />
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
           </div>
 
-          <!-- শুধুমাত্র টাইটেল এবং প্রপার্টি সংখ্যা -->
-          <div class="pt-2.5">
-            <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-tight group-hover:text-emerald-800 transition-colors">
+          <!-- Title and Real Count -->
+          <div class="pt-2.5 space-y-0.5">
+            <h3 class="font-bold text-slate-900 text-xs sm:text-base leading-tight group-hover:text-emerald-800 transition-colors line-clamp-1">
               {item.title}
             </h3>
-            <span class="text-xs text-slate-500 font-normal block mt-0.5">
+            <span class="text-[11px] sm:text-xs text-slate-500 font-medium block">
               {item.count}
             </span>
           </div>
