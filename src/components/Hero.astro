@@ -1,61 +1,67 @@
 ---
-// src/components/Hero.astro (Zero-Lag 60FPS Mobile & Desktop Speed 100 Engine)
+// src/components/Hero.astro (Zero-Lag 60FPS, Perfect SEO H1, SVG Icons & Instant Autocomplete)
 import { getCollection } from 'astro:content';
 
 let searchableHotels: any[] = [];
+
 try {
   const collection = await getCollection('hotels');
   if (Array.isArray(collection) && collection.length > 0) {
-    searchableHotels = collection.map(h => ({
-      title: (h.data?.title || h.data?.name || "Hotel").trim(),
-      slug: (h.data?.slug || h.slug || h.id || "hotel").replace(/\.md$/, '').trim(),
-      location: (h.data?.location || h.data?.category || "Gulshan, Dhaka").trim(),
-      price: (h.data?.price || "$120").trim(),
-      image: h.data?.image || (Array.isArray(h.data?.gallery) ? h.data?.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=75")
-    }));
+    searchableHotels = collection.map(h => {
+      const rawSlug = String(h.data?.slug || h.slug || h.id || "hotel").trim();
+      const cleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+      return {
+        title: (h.data?.title || h.data?.name || "Hotel").trim(),
+        slug: cleanSlug,
+        location: (h.data?.location || h.data?.category || "Gulshan, Dhaka").trim(),
+        price: (h.data?.price || "$120").trim(),
+        image: h.data?.image || (Array.isArray(h.data?.gallery) ? h.data?.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=75")
+      };
+    });
   }
 } catch (e) {}
 
 if (searchableHotels.length === 0) {
   try {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    searchableHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      title: (item.frontmatter?.title || item.frontmatter?.name || "Hotel").trim(),
-      slug: filePath.split('/').pop()?.replace('.md', '').trim(),
-      location: (item.frontmatter?.location || "Gulshan, Dhaka").trim(),
-      price: (item.frontmatter?.price || "$120").trim(),
-      image: item.frontmatter?.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=75"
-    }));
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
+    searchableHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => {
+      const cleanSlug = filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase() || "";
+      const frontmatter = item?.frontmatter || item?.data || {};
+      return {
+        title: (frontmatter.title || frontmatter.name || "Hotel").trim(),
+        slug: cleanSlug,
+        location: (frontmatter.location || "Gulshan, Dhaka").trim(),
+        price: (frontmatter.price || "$120").trim(),
+        image: frontmatter.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=150&q=75"
+      };
+    });
   } catch (e) {}
 }
 ---
 
-<!-- NON-BLOCKING FONT PRECONNECT & SWAP -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-
 <div class="relative w-full">
 
-  <!-- ================= 1. ZERO-LAG HERO SECTION ================= -->
+  <!-- ================= 1. ZERO-LAG HERO BANNER ================= -->
   <section
     class="relative w-full overflow-hidden bg-slate-950 min-h-[46vh] sm:min-h-[460px] lg:min-h-[520px] flex items-center justify-center text-center"
     style="contain: layout paint;"
   >
 
-    <!-- SMART GPU ACCELERATED BACKGROUND (মোবাইলে হালকা ইমেজ, ডেক্সটপে ভিডিও) -->
+    <!-- GPU ACCELERATED BACKGROUND (IMAGE FOR MOBILE, VIDEO FOR DESKTOP) -->
     <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
       
-      <!-- ১. অপটিমাইজড ইনস্ট্যান্ট পোস্টার (মোবাইলে ০ সেকেন্ডে রেন্ডার হবে) -->
+      <!-- ১. ফাস্ট LCP ইমেজ (মোবাইলে ০ms রেন্ডার) -->
       <img 
         src="https://media.gulshanhotels.com/34884184.jpg" 
-        alt="Hotels in Gulshan Dhaka" 
+        alt="Luxury Hotels in Gulshan Dhaka" 
+        width="1920"
+        height="1080"
         fetchpriority="high"
         decoding="async"
         class="w-full h-full object-cover object-center absolute inset-0"
       />
 
-      <!-- ২. ৬০FPS ভিডিও (মেমোরি ও ব্যাটারি সেভিং ডিকোডার) -->
+      <!-- ২. ৬০FPS ভিডিও (ডেস্কটপের জন্য) -->
       <video
         id="heroBgVideo"
         autoplay
@@ -63,29 +69,26 @@ if (searchableHotels.length === 0) {
         muted
         playsinline
         preload="none"
-        poster="/hero-gulshan.jpg.webp"
         disablepictureinpicture
         disableremoteplayback
         class="hidden sm:block w-full h-full object-cover object-center opacity-100 will-change-transform"
       >
-        <source src="https://media.gulshanhotels.com/hero-video.mp4.mp4" type="video/mp4" />
+        <source src="https://media.gulshanhotels.com/hero-video.mp4" type="video/mp4" />
       </video>
     </div>
 
-    <!-- GPU-FRIENDLY TYPOGRAPHY (ভারী শ্যাডো বাদ দিয়ে হালকা ড্রপ-শ্যাডো) -->
+    <!-- ================= PERFECT SEO HEADING (H1) ================= -->
     <div class="relative z-10 flex flex-col items-center justify-center select-none px-4 py-6 pb-14 sm:pb-16 will-change-transform">
-      <div class="flex flex-col items-center leading-none">
-
+      <h1 class="flex flex-col items-center leading-none text-white drop-shadow-md">
+        
         <!-- লাইন ১: HOTELS -->
-        <h1
-          class="font-['Bebas_Neue',sans-serif] text-6xl sm:text-8xl md:text-9xl lg:text-[120px] tracking-wider text-white drop-shadow-md"
-        >
+        <span class="font-['Bebas_Neue',sans-serif] text-6xl sm:text-8xl md:text-9xl lg:text-[120px] tracking-wider block">
           HOTELS
-        </h1>
+        </span>
 
-        <!-- লাইন ২: [ ~ IN ~ ] GULSHAN -->
-        <div class="flex items-center justify-center gap-2 sm:gap-5 -mt-2 sm:-mt-5">
-          <div class="flex flex-col items-center justify-center px-1">
+        <!-- লাইন ২: IN GULSHAN -->
+        <span class="flex items-center justify-center gap-2 sm:gap-5 -mt-2 sm:-mt-5">
+          <span class="flex flex-col items-center justify-center px-1">
             <svg class="w-8 sm:w-16 md:w-20 h-2 sm:h-3.5 text-white fill-none stroke-current stroke-[4] sm:stroke-[4.5] stroke-linecap-round" viewBox="0 0 60 10">
               <path d="M 4 8 Q 28 1 56 6" />
             </svg>
@@ -95,31 +98,30 @@ if (searchableHotels.length === 0) {
             <svg class="w-8 sm:w-16 md:w-20 h-2 sm:h-3.5 text-white fill-none stroke-current stroke-[4] sm:stroke-[4.5] stroke-linecap-round" viewBox="0 0 60 10">
               <path d="M 4 3 Q 32 9 56 3" />
             </svg>
-          </div>
+          </span>
 
           <span class="font-['Bebas_Neue',sans-serif] text-6xl sm:text-8xl md:text-9xl lg:text-[120px] tracking-wider text-white drop-shadow-md">
             GULSHAN
           </span>
-        </div>
+        </span>
 
         <!-- লাইন ৩: DHAKA -->
-        <div class="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-4">
+        <span class="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-4">
           <span class="h-[2px] w-6 sm:w-14 bg-white/90"></span>
           <span class="font-['Montserrat',sans-serif] text-xs sm:text-sm md:text-base font-black tracking-[0.4em] sm:tracking-[0.5em] text-white uppercase drop-shadow-sm">
             DHAKA
           </span>
           <span class="h-[2px] w-6 sm:w-14 bg-white/90"></span>
-        </div>
+        </span>
 
-      </div>
+      </h1>
     </div>
 
-    <!-- LIGHTWEIGHT VIGNETTES -->
+    <!-- VIGNETTES & DECORATIVE BORDERS -->
     <div class="absolute inset-0 pointer-events-none z-20">
       <div class="absolute top-0 left-0 w-full h-16 sm:h-20 bg-gradient-to-b from-black/50 to-transparent"></div>
       <div class="absolute bottom-0 left-0 w-full h-20 sm:h-28 bg-gradient-to-t from-black/65 to-transparent"></div>
 
-      <!-- হালকা ফ্রেম ব্র্যাকেট -->
       <div class="absolute top-4 left-4 sm:top-6 sm:left-6 w-6 sm:w-10 h-6 sm:h-10 border-t border-l border-white/40"></div>
       <div class="absolute top-4 right-4 sm:top-6 sm:right-6 w-6 sm:w-10 h-6 sm:h-10 border-t border-r border-white/40"></div>
       <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 w-6 sm:w-10 h-6 sm:h-10 border-b border-l border-white/40"></div>
@@ -128,10 +130,12 @@ if (searchableHotels.length === 0) {
 
   </section>
 
-  <!-- ================= 2. LIVE AUTOCOMPLETE SEARCH ENGINE BAR ================= -->
-  <div class="relative z-40 max-w-3xl mx-auto px-4 -mt-7 sm:-mt-8 mb-6">
+  <!-- ================= 2. LIVE AUTOCOMPLETE SEARCH BAR ================= -->
+  <div id="heroSearchWrapper" class="relative z-40 max-w-3xl mx-auto px-4 -mt-7 sm:-mt-8 mb-6">
     <div class="relative">
-      <div class="bg-white rounded-full p-2 pl-4 sm:pl-6 border border-slate-200 shadow-lg flex items-center justify-between gap-2 sm:gap-3">
+      
+      <!-- FORM WRAPPER FOR ENTER KEY SUBMISSION -->
+      <form id="heroHotelSearchForm" class="bg-white rounded-full p-2 pl-4 sm:pl-6 border border-slate-200 shadow-lg flex items-center justify-between gap-2 sm:gap-3" onsubmit="return false;">
         
         <div class="flex-1 flex items-center gap-2.5 min-w-0">
           <svg class="w-4 h-4 text-emerald-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,6 +153,7 @@ if (searchableHotels.length === 0) {
         <button 
           id="clearSearchBtn"
           type="button" 
+          aria-label="Clear Search"
           class="hidden text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
         >
           ✕
@@ -160,9 +165,11 @@ if (searchableHotels.length === 0) {
           class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 rounded-full transition shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95"
         >
           <span>Search</span>
-          <span class="text-xs">➔</span>
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
-      </div>
+      </form>
 
       <!-- AUTOCOMPLETE DROPDOWN -->
       <div 
@@ -191,10 +198,10 @@ if (searchableHotels.length === 0) {
 <!-- DATA ISLAND -->
 <script id="hotelsDataStore" type="application/json" set:html={JSON.stringify(searchableHotels)} />
 
-<!-- CLIENT SCRIPT (PASSIVE & 100% LAG-FREE) -->
+<!-- CLIENT SCRIPT -->
 <script is:inline>
   (() => {
-    // 1. SMART NON-BLOCKING VIDEO PLAY (CPU সেভিং)
+    // 1. NON-BLOCKING VIDEO PLAY (DESKTOP ONLY)
     const video = document.getElementById('heroBgVideo');
     if (video && window.innerWidth >= 640) {
       const playVideo = () => {
@@ -206,29 +213,31 @@ if (searchableHotels.length === 0) {
       if ('requestIdleCallback' in window) {
         requestIdleCallback(playVideo);
       } else {
-        setTimeout(playVideo, 800);
+        setTimeout(playVideo, 600);
       }
 
-      // স্ক্রিন থেকে দূরে স্ক্রোল করলে ডিকোডার পজ হবে (ব্যাটারি ও স্পিড বাঁচবে)
       if ('IntersectionObserver' in window) {
         new IntersectionObserver((entries) => {
           entries.forEach((e) => {
-            if (e.isIntersecting) { video.play().catch(() => {}); }
-            else { video.pause(); }
+            if (e.isIntersecting) video.play().catch(() => {});
+            else video.pause();
           });
         }, { threshold: 0.01 }).observe(video);
       }
     }
 
-    // 2. AUTOCOMPLETE ENGINE (PASSIVE & FAST)
+    // 2. AUTOCOMPLETE ENGINE (CLICK, ENTER & OUTSIDE CLICK SAFE)
     const initAutocomplete = () => {
+      const form = document.getElementById('heroHotelSearchForm');
       const input = document.getElementById('liveHotelSearchInput');
       const dropdown = document.getElementById('liveSearchDropdown');
       const resultsContainer = document.getElementById('dropdownResultsList');
       const countEl = document.getElementById('dropdownMatchCount');
       const headerTitle = document.getElementById('dropdownHeaderTitle');
       const clearBtn = document.getElementById('clearSearchBtn');
+      const triggerBtn = document.getElementById('triggerSearchBtn');
       const dataScript = document.getElementById('hotelsDataStore');
+      const searchWrapper = document.getElementById('heroSearchWrapper');
 
       if (!input || !dropdown || !resultsContainer || !dataScript || input.dataset.ready) return;
       input.dataset.ready = 'true';
@@ -238,15 +247,23 @@ if (searchableHotels.length === 0) {
         hotels = JSON.parse(dataScript.textContent || '[]');
       } catch (err) { hotels = []; }
 
+      let currentMatches = [];
+
       const renderList = (matches, isTrending = false) => {
+        currentMatches = matches;
         if (headerTitle) headerTitle.textContent = isTrending ? 'Popular Stays in Gulshan' : 'Matching Hotels';
 
         if (matches.length === 0) {
           if (countEl) countEl.textContent = '0 found';
+          // Clean Vector SVG Search Icon (No direct emoji)
           resultsContainer.innerHTML = `
-            <div class="p-6 text-center text-slate-500 space-y-1">
-              <span class="text-2xl block">🔍</span>
-              <p class="text-xs sm:text-sm font-semibold">No hotels found matching "${input.value}".</p>
+            <div class="p-6 text-center text-slate-500 space-y-2">
+              <div class="w-10 h-10 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+              </div>
+              <p class="text-xs sm:text-sm font-bold text-slate-700">No hotels found matching "${input.value}".</p>
               <p class="text-[11px] text-slate-400">Try searching for "Westin", "Amari", "Midori", or "Gulshan 2".</p>
             </div>
           `;
@@ -276,7 +293,10 @@ if (searchableHotels.length === 0) {
 
             <div class="text-right shrink-0 pl-3">
               <span class="text-xs sm:text-sm font-black text-slate-900 block">${h.price.startsWith('$') || h.price.startsWith('৳') ? h.price : '$' + h.price}</span>
-              <span class="text-[10px] text-emerald-800 font-extrabold group-hover:underline">View ➔</span>
+              <span class="text-[10px] text-emerald-800 font-extrabold group-hover:underline inline-flex items-center gap-0.5">
+                <span>View</span>
+                <span>➔</span>
+              </span>
             </div>
           </a>
         `).join('');
@@ -306,17 +326,32 @@ if (searchableHotels.length === 0) {
         renderList(filtered, false);
       };
 
+      // Search Action on Click or Enter
+      const executeTopSearch = () => {
+        if (currentMatches.length > 0 && currentMatches[0].slug) {
+          window.location.href = `/${currentMatches[0].slug}`;
+        }
+      };
+
       input.addEventListener('input', handleSearch, { passive: true });
       input.addEventListener('focus', handleSearch, { passive: true });
 
-      if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-          input.value = '';
-          clearBtn.classList.add('hidden');
-          renderList(hotels.slice(0, 4), true);
-          input.focus();
-        });
-      }
+      // Enter key handler
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          executeTopSearch();
+        }
+      });
+
+      triggerBtn?.addEventListener('click', executeTopSearch);
+
+      clearBtn?.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.classList.add('hidden');
+        renderList(hotels.slice(0, 4), true);
+        input.focus();
+      });
 
       document.querySelectorAll('.quick-area-tag').forEach(tag => {
         tag.addEventListener('click', (e) => {
@@ -326,8 +361,9 @@ if (searchableHotels.length === 0) {
         });
       });
 
+      // Safe Click Outside Detector
       document.addEventListener('click', (e) => {
-        if (!e.target.closest('#heroHotelSearchForm') && !e.target.closest('#liveSearchDropdown')) {
+        if (searchWrapper && !searchWrapper.contains(e.target)) {
           dropdown.classList.add('hidden');
         }
       });
