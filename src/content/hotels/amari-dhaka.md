@@ -16,7 +16,7 @@ enable_view_prices: true
 enable_official_site: false
 popular: true
 sponsored: true
-spotlight_desc: sponsored
+spotlight_desc: Welcome to Amari Dhaka. We’re looking forward to brightening your stay, every day. We’re at the centre of the business and diplomat districts of Dhaka, and conveniently near United Nations departments and offices, banks and embassies. If you are here on business, you’ll find everything you need close by. Hazrat Shahjalal International Airport is also a convenient 20-minute drive away. Our stylish spaces offer a home-from-home warmth with beautiful yet subtle Bangladeshi touches to the décor. All rooms feature floor-to-ceiling windows that let in an abundance of natural daylight. Whether you’re with us for a couple of nights or longer, we’ll do all we can to ensure you have the comforts you need to brighten your stay.
 about_notice: ''
 price: 120$ / night
 policies: []
