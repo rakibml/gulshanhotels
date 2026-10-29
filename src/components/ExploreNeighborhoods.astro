@@ -1,5 +1,5 @@
 ---
-// src/components/GulshanLifestyle.astro (100% Dynamic - Auto Fetches Latest Guides by Category)
+// src/components/GulshanLifestyle.astro (Clean Editorial Travel Magazine Layout & Smart Filter)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,10 +9,10 @@ interface Props {
 
 const { 
   title = "Beyond the stay. Explore Gulshan.", 
-  subtitle = "Curated travel guides, embassy interview tips, and local dining recommendations updated weekly."
+  subtitle = "Curated embassy guides, fine dining spots, and local tips updated weekly."
 } = Astro.props;
 
-// ১. সব পোস্ট ফেচ করা
+// ১. ব্লগ পোস্ট ডাটা লোডার
 let allPosts: any[] = [];
 try {
   const postCol = await getCollection('posts');
@@ -21,23 +21,25 @@ try {
 
 if (allPosts.length === 0) {
   try {
-    const rawGlob = import.meta.glob('../content/posts/*.md', { eager: true });
+    const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../content/posts/*.{md,mdx}'], { eager: true });
     allPosts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      slug: filePath.split('/').pop()?.replace('.md', ''),
-      data: item.frontmatter || {}
+      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+      data: item.frontmatter || item.data || {}
     }));
   } catch (e) {}
 }
 
-// তারিখ অনুযায়ী সাজানো (লেটেস্ট পোস্ট সবার আগে)
+const hasPosts = allPosts.length > 0;
+
+// ২. তারিখ অনুযায়ী সর্টিং
 const sortedPosts = allPosts.sort((a, b) => {
   const dateA = new Date(a.data?.date || 0).getTime();
   const dateB = new Date(b.data?.date || 0).getTime();
   return dateB - dateA;
 });
 
-// ক্যাটাগরি তালিকা
-const categories = [
+// ৩. শুধুমাত্র যেসব ক্যাটাগরিতে পোস্ট আছে সেগুলোই দেখানো হবে
+const rawCategories = [
   { id: "all", name: "All Guides" },
   { id: "embassy", name: "Embassy Guides" },
   { id: "dining", name: "Food & Dining" },
@@ -45,166 +47,190 @@ const categories = [
   { id: "travel", name: "Travel Guides" }
 ];
 
-// ক্যাটাগরি ফিল্টার হেল্পার
+const getCategoryMatch = (p: any, catId: string) => {
+  if (catId === "all") return true;
+  const cat = String(p.data?.category || '').toLowerCase();
+  if (catId === "embassy") return cat.includes("embassy") || cat.includes("visa");
+  if (catId === "dining") return cat.includes("food") || cat.includes("dining") || cat.includes("restaurant");
+  if (catId === "reviews") return cat.includes("review") || cat.includes("hotel");
+  if (catId === "travel") return cat.includes("travel") || cat.includes("guide");
+  return false;
+};
+
+// যে ক্যাটাগরিতে অন্তত ১টি পোস্ট আছে শুধু সেগুলোই ফিল্টারে থাকবে
+const activeCategories = rawCategories.filter(cat => 
+  cat.id === "all" || sortedPosts.some(p => getCategoryMatch(p, cat.id))
+);
+
 const getPostsByCategory = (catId: string) => {
-  if (catId === "all") return sortedPosts.slice(0, 4);
-
-  const filtered = sortedPosts.filter(p => {
-    const cat = String(p.data?.category || '').toLowerCase();
-    if (catId === "embassy") return cat.includes("embassy") || cat.includes("visa");
-    if (catId === "dining") return cat.includes("food") || cat.includes("dining") || cat.includes("restaurant");
-    if (catId === "reviews") return cat.includes("review") || cat.includes("hotel");
-    if (catId === "travel") return cat.includes("travel") || cat.includes("guide");
-    return false;
-  });
-
-  // কোনো ক্যাটাগরিতে পোস্ট কম থাকলে লেটেস্ট পোস্ট দিয়ে ব্যাকআপ রাখা যাতে সেকশন খালি না দেখায়
-  return filtered.length > 0 ? filtered.slice(0, 4) : sortedPosts.slice(0, 4);
+  return sortedPosts.filter(p => getCategoryMatch(p, catId)).slice(0, 4);
 };
 ---
 
-<!-- DYNAMIC LIFESTYLE & GUIDES SECTION -->
-<section 
-  id="gulshan-lifestyle" 
-  class="w-full bg-white pt-8 pb-14 text-slate-900 border-b border-slate-100"
-  style="content-visibility: auto; contain-intrinsic-size: 1px 400px;"
->
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
-    
-    <!-- Section Title & Subtitle -->
-    <div class="space-y-1 text-left">
-      <h2 class="text-3xl sm:text-4xl lg:text-[40px] font-serif font-black text-slate-900 tracking-tight leading-tight">
-        {title}
-      </h2>
-      <p class="text-xs sm:text-sm text-slate-500 font-medium">
-        {subtitle}
-      </p>
-    </div>
+{hasPosts && (
+  <section 
+    id="gulshan-lifestyle" 
+    class="w-full bg-white py-12 text-slate-900 border-b border-slate-200"
+    style="content-visibility: auto; contain-intrinsic-size: 1px 400px;"
+  >
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
+      
+      <!-- Section Header -->
+      <div class="space-y-1.5 text-left border-b border-slate-100 pb-4">
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
+          Gulshan Insider & Local Secrets
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+          {title}
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">
+          {subtitle}
+        </p>
+      </div>
 
-    <!-- Category Tabs with Underline Indicator -->
-    <div class="flex items-center gap-6 sm:gap-8 border-b border-slate-200 overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {categories.map((cat, idx) => (
-        <button
-          type="button"
-          data-tab-target={cat.id}
-          class={`lifestyle-tab-btn pb-3 text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap transition-all cursor-pointer border-b-2 -mb-[1px] ${idx === 0 ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
-        >
-          {cat.name}
-        </button>
-      ))}
-    </div>
+      <!-- Clean Minimalist Category Tabs -->
+      {activeCategories.length > 1 && (
+        <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
+          {activeCategories.map((cat, idx) => (
+            <button
+              type="button"
+              data-tab-target={cat.id}
+              class={`lifestyle-tab-btn px-4 py-2 text-xs font-extrabold rounded-full transition-all cursor-pointer shrink-0 border select-none ${
+                idx === 0 
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      )}
 
-    <!-- Dynamic Category Content Panels -->
-    <div id="lifestyleTabContentContainer" class="text-left">
-      {categories.map((cat, idx) => {
-        const postsForThisTab = getPostsByCategory(cat.id);
+      <!-- Content Panels -->
+      <div id="lifestyleTabContentContainer" class="text-left pt-2">
+        {activeCategories.map((cat, idx) => {
+          const postsForThisTab = getPostsByCategory(cat.id);
 
-        return (
-          <div 
-            id={`lifestyle-panel-${cat.id}`} 
-            class={`lifestyle-tab-panel overflow-x-auto sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pb-2 sm:pb-0 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${idx === 0 ? 'flex sm:grid' : 'hidden'}`}
-          >
-            {postsForThisTab.map((post: any) => {
-              const pData = post.data || {};
-              const pSlug = post.slug || post.id?.replace(/\.md$/, '');
-              const pTitle = pData.title || "Gulshan Travel Guide";
-              const pDesc = pData.description || "In-depth recommendations and local tips.";
-              const pCat = pData.category || "Travel Guide";
-              const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
-              const pReadTime = pData.readTime || "4 min read";
+          return (
+            <div 
+              id={`lifestyle-panel-${cat.id}`} 
+              class={`lifestyle-tab-panel ${idx === 0 ? 'grid' : 'hidden'} grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6`}
+            >
+              {postsForThisTab.map((post: any) => {
+                const pData = post.data || {};
+                const rawSlug = String(pData.slug || post.slug || post.id || '').trim();
+                const pSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+                
+                const pTitle = pData.title || "Gulshan Travel Guide";
+                const pDesc = pData.description || "In-depth recommendations and local tips.";
+                const pCat = pData.category || "Travel Guide";
+                const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
+                const pReadTime = pData.readTime || pData.read_time || "4 min read";
 
-              return (
-                <a 
-                  href={`/blog/${pSlug}`} 
-                  class="group block text-left cursor-pointer transition-opacity hover:opacity-95 w-[240px] sm:w-auto shrink-0 sm:shrink space-y-2.5"
-                >
-                  <!-- Rounded Photo -->
-                  <div class="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80">
-                    <img 
-                      src={pImg} 
-                      alt={pTitle} 
-                      loading="lazy" 
-                      decoding="async" 
-                      fetchpriority="low"
-                      width="400"
-                      height="250"
-                      class="w-full h-full object-cover group-hover:scale-104 transition duration-500 ease-out" 
-                    />
+                return (
+                  <article class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
+                    <div>
+                      <!-- Card Image -->
+                      <a href={`/blog/${pSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                        <img 
+                          src={pImg} 
+                          alt={pTitle} 
+                          loading="lazy" 
+                          decoding="async" 
+                          width="400"
+                          height="250"
+                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                        />
+                        <div class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-slate-900 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md border border-slate-200 shadow-xs">
+                          {pCat}
+                        </div>
+                      </a>
 
-                    <!-- Category Badge -->
-                    <div class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-slate-900 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md border border-slate-200">
-                      {pCat}
+                      <!-- Content Body -->
+                      <div class="p-4 space-y-2">
+                        <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
+                          <a href={`/blog/${pSlug}`}>
+                            {pTitle}
+                          </a>
+                        </h3>
+
+                        <p class="text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed">
+                          {pDesc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <!-- Details -->
-                  <div class="space-y-1">
-                    <h3 class="font-bold text-slate-900 text-base sm:text-lg leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2 capitalize">
-                      {pTitle}
-                    </h3>
+                    <!-- Footer Details -->
+                    <div class="p-4 pt-0">
+                      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-400 font-medium flex items-center gap-1.5 text-[11px]">
+                          <svg class="w-3.5 h-3.5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                          </svg>
+                          <span>{pReadTime}</span>
+                        </span>
 
-                    <p class="text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed">
-                      {pDesc}
-                    </p>
-
-                    <!-- Read Time & Link Line (Hotels.com Format with SVG) -->
-                    <div class="pt-2 flex items-center justify-between text-xs border-t border-slate-100">
-                      <span class="text-slate-400 font-semibold flex items-center gap-1 text-[11px]">
-                        <svg class="w-3.5 h-3.5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <span>{pReadTime}</span>
-                      </span>
-
-                      <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#0d3b23] group-hover:underline">
-                        <span>Read Guide</span>
-                        <svg class="w-3 h-3 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
+                        <a 
+                          href={`/blog/${pSlug}`} 
+                          class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#0d3b23] hover:underline"
+                        >
+                          <span>Read</span>
+                          <svg class="w-3 h-3 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        );
-      })}
+
+                  </article>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
     </div>
+  </section>
+)}
 
-  </div>
-</section>
+<!-- TAB SWITCHING SCRIPT -->
+<script>
+  let lifestyleAbortCtrl: AbortController | null = null;
 
-<!-- TAB SWITCH SCRIPT -->
-<script is:inline>
-  const initLifestyleTabs = () => {
+  function initLifestyleTabs() {
+    if (lifestyleAbortCtrl) lifestyleAbortCtrl.abort();
+    lifestyleAbortCtrl = new AbortController();
+
     const tabs = document.querySelectorAll('.lifestyle-tab-btn');
     const panels = document.querySelectorAll('.lifestyle-tab-panel');
 
     tabs.forEach(tab => {
-      tab.onclick = () => {
+      tab.addEventListener('click', () => {
         const targetId = tab.getAttribute('data-tab-target');
 
         tabs.forEach(t => {
-          t.classList.remove('border-slate-900', 'text-slate-900');
-          t.classList.add('border-transparent', 'text-slate-500');
+          t.classList.remove('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
+          t.classList.add('bg-slate-50', 'text-slate-600', 'border-slate-200');
         });
-        tab.classList.remove('border-transparent', 'text-slate-500');
-        tab.classList.add('border-slate-900', 'text-slate-900');
+
+        tab.classList.remove('bg-slate-50', 'text-slate-600', 'border-slate-200');
+        tab.classList.add('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
 
         panels.forEach(p => {
           if (p.id === `lifestyle-panel-${targetId}`) {
             p.classList.remove('hidden');
-            p.classList.add('flex', 'sm:grid');
+            p.classList.add('grid');
           } else {
             p.classList.add('hidden');
-            p.classList.remove('flex', 'sm:grid');
+            p.classList.remove('grid');
           }
         });
-      };
+      });
     });
-  };
+  }
 
   document.addEventListener('DOMContentLoaded', initLifestyleTabs);
   document.addEventListener('astro:page-load', initLifestyleTabs);
