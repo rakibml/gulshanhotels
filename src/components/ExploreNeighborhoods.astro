@@ -1,5 +1,5 @@
 ---
-// src/components/RecentGuestReviews.astro (100% Real-Time Newest-First Hotel Reviews Feed - 2-Column Mobile)
+// src/components/RecentGuestReviews.astro (Ultra-Clean & Symmetrical Hotel Reviews Grid)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,7 +12,7 @@ const {
   subtitle = "Real experiences and ratings from travelers staying across luxury hotels in Gulshan."
 } = Astro.props;
 
-// ১. সব হোটেলের ডাটা লোড করা (যাতে হোটেলের আসল ছবি ও নাম পাওয়া যায়)
+// ১. সব হোটেলের ডাটা লোড করা
 let allHotels: any[] = [];
 try {
   const hotelCol = await getCollection('hotels');
@@ -40,7 +40,7 @@ try {
   allReviews = [];
 }
 
-// ৩. হোটেলের ফ্রন্টম্যাটারে থাকা লোকাল রিভিউও মার্জ করা
+// ৩. লোকাল রিভিউ মার্জ
 allHotels.forEach((h: any) => {
   const hData = h.data || {};
   const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
@@ -55,14 +55,14 @@ allHotels.forEach((h: any) => {
   });
 });
 
-// ৪. শুধুমাত্র অনুমোদিত এবং বাস্তব রিভিউগুলো ফিল্টার করা
+// ৪. ফিল্টারিং
 const approvedReviews = allReviews.filter((r: any) => {
   if (!r) return false;
   const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
-  return isApproved && String(r.comment || r.review || r.body || '').trim().length > 2;
+  return isApproved && String(r.comment || r.review || r.body || '').trim().length > 1;
 });
 
-// ৫. স্মার্ট তারিখ পার্সার হেল্পার ("at" সরিয়ে মিলি-সেকেন্ডে রূপান্তর ও ফাইলনেম ফলব্যাক)
+// ৫. তারিখ পার্সার হেল্পার
 const parseReviewDateToTime = (rev: any) => {
   const dStr = rev.date;
   if (dStr && dStr !== 'Recent' && dStr !== 'Recent Stay') {
@@ -70,7 +70,6 @@ const parseReviewDateToTime = (rev: any) => {
     const time = new Date(cleanStr).getTime();
     if (!isNaN(time) && time > 0) return time;
   }
-  // ফলব্যাক: যদি ফাইলের নামে তারিখ থাকে (যেমন: 2026-10-25-...)
   if (rev._fileName) {
     const fileMatch = String(rev._fileName).match(/^(\d{4}-\d{2}-\d{2})/);
     if (fileMatch) {
@@ -81,19 +80,16 @@ const parseReviewDateToTime = (rev: any) => {
   return 0;
 };
 
-// ৬. NEWEST-TO-OLDEST SORTING (সবচেয়ে নতুন রিভিউ সবার আগে থাকবে)
+// ৬. Newest-First সর্টিং
 const sortedReviews = approvedReviews.sort((a, b) => {
-  const timeA = parseReviewDateToTime(a);
-  const timeB = parseReviewDateToTime(b);
-  return timeB - timeA; // লেটেস্ট রিভিউ আগে আসবে
+  return parseReviewDateToTime(b) - parseReviewDateToTime(a);
 });
 
-// ৭. প্রতিটি রিভিউর সাথে তার নির্দিষ্ট হোটেলের ছবি ও লিংক জোড়া লাগানো
+// ৭. ডেটা এনরিচমেন্ট ও ক্লিনআপ
 const enrichedReviews = sortedReviews.map((rev: any) => {
   const rSlug = String(rev.slug || rev.hotelSlug || rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
   const rHotel = String(rev.hotel || '').trim().toLowerCase();
 
-  // রিভিউ যে হোটেলের, সেই হোটেলকে খুঁজে বের করা
   const matchedHotel = allHotels.find((h: any) => {
     const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
     const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
@@ -101,14 +97,17 @@ const enrichedReviews = sortedReviews.map((rev: any) => {
   });
 
   const hData = matchedHotel?.data || {};
-  const hotelTitle = hData.title || hData.name || rev.hotel || "Gulshan Luxury Hotel";
+  const hotelTitle = hData.title || hData.name || rev.hotel || "Gulshan Hotel";
   const hotelSlug = String(hData.slug || matchedHotel?.slug || matchedHotel?.id || rSlug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
   const hotelImage = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=75");
-  const hotelLocation = hData.location || "Gulshan, Dhaka";
+  const hotelLocation = hData.location || "Gulshan 2, Dhaka";
+
+  // তারিখ থেকে অপ্রয়োজনীয় সময় (at 03:46 PM) মুছে শুধু তারিখ রাখা
+  const cleanDate = String(rev.date || 'Recent').replace(/\s+at\s+.*$/i, '').trim();
 
   return {
     reviewerName: rev.name || rev.author || "Verified Guest",
-    date: rev.date || "Recent Stay",
+    date: cleanDate,
     rating: Number(rev.rating) || 5,
     comment: String(rev.comment || rev.review || rev.body || '').trim(),
     hotelTitle,
@@ -116,41 +115,38 @@ const enrichedReviews = sortedReviews.map((rev: any) => {
     hotelImage,
     hotelLocation
   };
-}).slice(0, 4); // মোবাইলে ২x২ গ্রিডের জন্য সর্বশেষ ৪টি রিভিউ
+}).slice(0, 4);
 
 const hasReviews = enrichedReviews.length > 0;
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
 {hasReviews && (
-  <section 
-    id="recent-reviews" 
-    class="w-full bg-white py-10 sm:py-12 text-slate-900 border-b border-slate-200"
-  >
-    <div class="max-w-[1550px] mx-auto px-3 sm:px-8 lg:px-12 space-y-5">
+  <section id="recent-reviews" class="w-full bg-white py-12 text-slate-900 border-b border-slate-200">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
       
       <!-- Section Header -->
-      <div class="space-y-1 text-left border-b border-slate-100 pb-3">
-        <span class="text-[9px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <div class="space-y-1 text-left border-b border-slate-100 pb-4">
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
           <span>Verified Stay Experiences</span>
         </span>
-        <h2 class="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h2>
-        <p class="text-[11px] sm:text-sm text-slate-500 font-medium">
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">
           {subtitle}
         </p>
       </div>
 
-      <!-- SIDE-BY-SIDE MOBILE 2-COLUMN & DESKTOP 4-COLUMN GRID -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-left">
+      <!-- CLEAN SYMMETRICAL GRID (2-Cols Mobile, 4-Cols Desktop) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
         {enrichedReviews.map((item) => (
-          <div class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
+          <div class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 hover:border-emerald-600/50 hover:shadow-lg transition-all duration-300 overflow-hidden">
+            
             <div>
-              
-              <!-- ১. হোটেলের ছবি ও লোকেশন ব্যাজ -->
-              <a href={`/${item.hotelSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+              <!-- ১. সম্পূর্ণ ক্লিয়ার ছবি (ছবির ওপর কোনো হিবিজিবি লেখা নেই) -->
+              <a href={`/${item.hotelSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
                 <img 
                   src={item.hotelImage} 
                   alt={item.hotelTitle} 
@@ -158,52 +154,53 @@ const starsArray = [1, 2, 3, 4, 5];
                   decoding="async" 
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                
-                <!-- হোটেলের নাম ছবির ওপরে -->
-                <div class="absolute bottom-2 left-2 right-2 text-left">
-                  <h4 class="text-white text-[10px] sm:text-xs font-bold leading-tight truncate drop-shadow-sm">
-                    {item.hotelTitle}
-                  </h4>
-                  <span class="text-slate-300 text-[8px] sm:text-[9px] font-medium truncate block">
-                    {item.hotelLocation}
-                  </span>
-                </div>
               </a>
 
-              <!-- ২. কাস্টমারের আসল রিভিউ ও স্টার -->
-              <div class="p-2.5 sm:p-4 space-y-1.5">
+              <!-- ২. কার্ড বডি: সুশৃঙ্খল ও সমান প্যাটার্ন -->
+              <div class="p-4 space-y-2.5">
                 
-                <!-- গোল্ডেন ভেক্টর স্টার -->
-                <div class="flex items-center gap-0.5">
+                <!-- হোটেলের নাম ও লোকেশন -->
+                <div>
+                  <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-emerald-800 transition line-clamp-1 capitalize">
+                    <a href={`/${item.hotelSlug}`}>
+                      {item.hotelTitle}
+                    </a>
+                  </h4>
+                  <p class="text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                    {item.hotelLocation}
+                  </p>
+                </div>
+
+                <!-- গোল্ডেন স্টার -->
+                <div class="flex items-center gap-0.5 pt-0.5">
                   {starsArray.map(s => (
-                    <svg class={`w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                    <svg class={`w-3.5 h-3.5 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                     </svg>
                   ))}
-                  <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold ml-1">{item.rating}.0</span>
                 </div>
 
-                <!-- কাস্টমারের মন্তব্য -->
-                <p class="text-[10px] sm:text-xs text-slate-700 italic font-normal line-clamp-3 leading-relaxed">
+                <!-- কাস্টমারের কমেন্ট (মিনিমাম হাইট ফিক্সড যাতে ১ শব্দ হলেও কার্ড সমান থাকে) -->
+                <p class="text-xs text-slate-600 italic font-normal line-clamp-3 min-h-[48px] leading-relaxed">
                   "{item.comment}"
                 </p>
+
               </div>
             </div>
 
-            <!-- ৩. কাস্টমারের নাম, তারিখ এবং হোটেল লিংক -->
-            <div class="p-2.5 sm:p-4 pt-0">
-              <div class="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between">
+            <!-- ৩. ফুটার: রিভিউয়ার ও ক্লিন তারিখ -->
+            <div class="p-4 pt-0">
+              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 text-[10px] font-black uppercase flex items-center justify-center shrink-0">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 uppercase border border-slate-200">
                     {item.reviewerName.charAt(0)}
                   </div>
                   <div class="min-w-0">
-                    <span class="text-[10px] sm:text-xs font-bold text-slate-900 truncate block leading-tight">
+                    <span class="text-xs font-bold text-slate-900 truncate block leading-tight">
                       {item.reviewerName}
                     </span>
-                    <span class="text-[8px] sm:text-[9px] text-slate-400 font-medium block truncate">
+                    <span class="text-[10px] text-slate-400 font-medium block truncate mt-0.5">
                       {item.date}
                     </span>
                   </div>
@@ -211,11 +208,12 @@ const starsArray = [1, 2, 3, 4, 5];
 
                 <a 
                   href={`/${item.hotelSlug}`} 
-                  class="shrink-0 text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#0d3b23] hover:underline flex items-center gap-0.5 pl-1"
+                  class="shrink-0 text-emerald-800 font-black text-xs hover:underline flex items-center gap-0.5 pl-1"
                 >
-                  <span class="hidden xs:inline">Stay</span>
+                  <span>Stay</span>
                   <span>➔</span>
                 </a>
+
               </div>
             </div>
 
