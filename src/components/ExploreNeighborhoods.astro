@@ -1,5 +1,5 @@
 ---
-// src/components/RecentGuestReviews.astro (100% Real-Time Recent Hotel Reviews Feed - 2-Column Mobile)
+// src/components/RecentGuestReviews.astro (100% Real-Time Newest-First Hotel Reviews Feed - 2-Column Mobile)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -32,24 +32,63 @@ if (allHotels.length === 0) {
 let allReviews: any[] = [];
 try {
   const rawGlobReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../content/reviews/*.{md,mdx}'], { eager: true });
-  allReviews = Object.values(rawGlobReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
-} catch (e) {}
+  allReviews = Object.entries(rawGlobReviews).map(([filePath, item]: [string, any]) => ({
+    ...(item?.frontmatter || item?.data || item || {}),
+    _fileName: filePath.split('/').pop() || ''
+  }));
+} catch (e) {
+  allReviews = [];
+}
 
-// ৩. শুধুমাত্র অনুমোদিত এবং বাস্তব রিভিউগুলো ফিল্টার করা
+// ৩. হোটেলের ফ্রন্টম্যাটারে থাকা লোকাল রিভিউও মার্জ করা
+allHotels.forEach((h: any) => {
+  const hData = h.data || {};
+  const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
+  const hSlug = String(hData.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
+  embedded.forEach((rev: any) => {
+    allReviews.push({
+      ...rev,
+      hotel: rev.hotel || hData.title || hData.name || '',
+      slug: hSlug,
+      approved: true
+    });
+  });
+});
+
+// ৪. শুধুমাত্র অনুমোদিত এবং বাস্তব রিভিউগুলো ফিল্টার করা
 const approvedReviews = allReviews.filter((r: any) => {
   if (!r) return false;
   const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
-  return isApproved && String(r.comment || '').trim().length > 2;
+  return isApproved && String(r.comment || r.review || r.body || '').trim().length > 2;
 });
 
-// ৪. তারিখ অনুযায়ী সাজানো (সবচেয়ে নতুন রিভিউ সবার আগে থাকবে)
+// ৫. স্মার্ট তারিখ পার্সার হেল্পার ("at" সরিয়ে মিলি-সেকেন্ডে রূপান্তর ও ফাইলনেম ফলব্যাক)
+const parseReviewDateToTime = (rev: any) => {
+  const dStr = rev.date;
+  if (dStr && dStr !== 'Recent' && dStr !== 'Recent Stay') {
+    const cleanStr = String(dStr).replace(' at ', ' ').trim();
+    const time = new Date(cleanStr).getTime();
+    if (!isNaN(time) && time > 0) return time;
+  }
+  // ফলব্যাক: যদি ফাইলের নামে তারিখ থাকে (যেমন: 2026-10-25-...)
+  if (rev._fileName) {
+    const fileMatch = String(rev._fileName).match(/^(\d{4}-\d{2}-\d{2})/);
+    if (fileMatch) {
+      const fTime = new Date(fileMatch[1]).getTime();
+      if (!isNaN(fTime)) return fTime;
+    }
+  }
+  return 0;
+};
+
+// ৬. NEWEST-TO-OLDEST SORTING (সবচেয়ে নতুন রিভিউ সবার আগে থাকবে)
 const sortedReviews = approvedReviews.sort((a, b) => {
-  const dateA = new Date(a.date || 0).getTime();
-  const dateB = new Date(b.date || 0).getTime();
-  return dateB - dateA;
+  const timeA = parseReviewDateToTime(a);
+  const timeB = parseReviewDateToTime(b);
+  return timeB - timeA; // লেটেস্ট রিভিউ আগে আসবে
 });
 
-// ৫. প্রতিটি রিভিউর সাথে তার নির্দিষ্ট হোটেলের ছবি ও লিংক জোড়া লাগানো
+// ৭. প্রতিটি রিভিউর সাথে তার নির্দিষ্ট হোটেলের ছবি ও লিংক জোড়া লাগানো
 const enrichedReviews = sortedReviews.map((rev: any) => {
   const rSlug = String(rev.slug || rev.hotelSlug || rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
   const rHotel = String(rev.hotel || '').trim().toLowerCase();
@@ -58,7 +97,7 @@ const enrichedReviews = sortedReviews.map((rev: any) => {
   const matchedHotel = allHotels.find((h: any) => {
     const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
     const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
-    return (rSlug !== '' && hSlug === rSlug) || (rHotel !== '' && hTitle === rHotel);
+    return (rSlug !== '' && hSlug === rSlug) || (rHotel !== '' && (hTitle === rHotel || hSlug === rHotel));
   });
 
   const hData = matchedHotel?.data || {};
@@ -71,7 +110,7 @@ const enrichedReviews = sortedReviews.map((rev: any) => {
     reviewerName: rev.name || rev.author || "Verified Guest",
     date: rev.date || "Recent Stay",
     rating: Number(rev.rating) || 5,
-    comment: String(rev.comment || rev.review || '').trim(),
+    comment: String(rev.comment || rev.review || rev.body || '').trim(),
     hotelTitle,
     hotelSlug,
     hotelImage,
@@ -121,7 +160,7 @@ const starsArray = [1, 2, 3, 4, 5];
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 
-                <!-- হোটেলের নাম ছবির ওপরে মার্জিতভাবে -->
+                <!-- হোটেলের নাম ছবির ওপরে -->
                 <div class="absolute bottom-2 left-2 right-2 text-left">
                   <h4 class="text-white text-[10px] sm:text-xs font-bold leading-tight truncate drop-shadow-sm">
                     {item.hotelTitle}
