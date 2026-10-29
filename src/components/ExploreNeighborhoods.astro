@@ -1,5 +1,5 @@
 ---
-// src/components/GulshanLifestyle.astro (Clean Editorial Travel Magazine Layout & Smart Filter)
+// src/components/GulshanLifestyle.astro (Side-by-Side Mobile 2-Column & Clean Editorial Layout)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -31,14 +31,14 @@ if (allPosts.length === 0) {
 
 const hasPosts = allPosts.length > 0;
 
-// ২. তারিখ অনুযায়ী সর্টিং
+// ২. তারিখ অনুযায়ী সর্টিং (লেটেস্ট পোস্ট সবার আগে)
 const sortedPosts = allPosts.sort((a, b) => {
   const dateA = new Date(a.data?.date || 0).getTime();
   const dateB = new Date(b.data?.date || 0).getTime();
   return dateB - dateA;
 });
 
-// ৩. শুধুমাত্র যেসব ক্যাটাগরিতে পোস্ট আছে সেগুলোই দেখানো হবে
+// ৩. যেসব ক্যাটাগরিতে পোস্ট আছে শুধুই সেগুলো ফিল্টারে আসবে
 const rawCategories = [
   { id: "all", name: "All Guides" },
   { id: "embassy", name: "Embassy Guides" },
@@ -57,7 +57,6 @@ const getCategoryMatch = (p: any, catId: string) => {
   return false;
 };
 
-// যে ক্যাটাগরিতে অন্তত ১টি পোস্ট আছে শুধু সেগুলোই ফিল্টারে থাকবে
 const activeCategories = rawCategories.filter(cat => 
   cat.id === "all" || sortedPosts.some(p => getCategoryMatch(p, cat.id))
 );
@@ -70,32 +69,32 @@ const getPostsByCategory = (catId: string) => {
 {hasPosts && (
   <section 
     id="gulshan-lifestyle" 
-    class="w-full bg-white py-12 text-slate-900 border-b border-slate-200"
+    class="w-full bg-white py-10 sm:py-12 text-slate-900 border-b border-slate-200"
     style="content-visibility: auto; contain-intrinsic-size: 1px 400px;"
   >
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
+    <div class="max-w-[1550px] mx-auto px-3 sm:px-8 lg:px-12 space-y-5">
       
       <!-- Section Header -->
-      <div class="space-y-1.5 text-left border-b border-slate-100 pb-4">
-        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
+      <div class="space-y-1 text-left border-b border-slate-100 pb-3">
+        <span class="text-[9px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
           Gulshan Insider & Local Secrets
         </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+        <h2 class="text-xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h2>
-        <p class="text-xs sm:text-sm text-slate-500 font-medium">
+        <p class="text-[11px] sm:text-sm text-slate-500 font-medium">
           {subtitle}
         </p>
       </div>
 
-      <!-- Clean Minimalist Category Tabs -->
+      <!-- Clean Category Tabs (Horizontal Scrollable) -->
       {activeCategories.length > 1 && (
-        <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
+        <div class="flex items-center gap-1.5 sm:gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1">
           {activeCategories.map((cat, idx) => (
             <button
               type="button"
               data-tab-target={cat.id}
-              class={`lifestyle-tab-btn px-4 py-2 text-xs font-extrabold rounded-full transition-all cursor-pointer shrink-0 border select-none ${
+              class={`lifestyle-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-extrabold rounded-full transition-all cursor-pointer shrink-0 border select-none ${
                 idx === 0 
                   ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
                   : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-900'
@@ -107,15 +106,15 @@ const getPostsByCategory = (catId: string) => {
         </div>
       )}
 
-      <!-- Content Panels -->
-      <div id="lifestyleTabContentContainer" class="text-left pt-2">
+      <!-- Dynamic Category Content Panels -->
+      <div id="lifestyleTabContentContainer" class="text-left pt-1">
         {activeCategories.map((cat, idx) => {
           const postsForThisTab = getPostsByCategory(cat.id);
 
           return (
             <div 
               id={`lifestyle-panel-${cat.id}`} 
-              class={`lifestyle-tab-panel ${idx === 0 ? 'grid' : 'hidden'} grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6`}
+              class={`lifestyle-tab-panel ${idx === 0 ? 'grid' : 'hidden'} grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6`}
             >
               {postsForThisTab.map((post: any) => {
                 const pData = post.data || {};
@@ -124,14 +123,15 @@ const getPostsByCategory = (catId: string) => {
                 
                 const pTitle = pData.title || "Gulshan Travel Guide";
                 const pDesc = pData.description || "In-depth recommendations and local tips.";
-                const pCat = pData.category || "Travel Guide";
+                const pCat = pData.category || "Guide";
                 const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
-                const pReadTime = pData.readTime || pData.read_time || "4 min read";
+                const pReadTime = pData.readTime || pData.read_time || "4 min";
 
                 return (
                   <article class="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
                     <div>
-                      <!-- Card Image -->
+                      
+                      <!-- Card Image & Badge -->
                       <a href={`/blog/${pSlug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
                         <img 
                           src={pImg} 
@@ -142,30 +142,30 @@ const getPostsByCategory = (catId: string) => {
                           height="250"
                           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
                         />
-                        <div class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-slate-900 text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md border border-slate-200 shadow-xs">
+                        <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-md text-slate-900 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
                           {pCat}
                         </div>
                       </a>
 
-                      <!-- Content Body -->
-                      <div class="p-4 space-y-2">
-                        <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
+                      <!-- Content Body (2-Column Mobile Friendly) -->
+                      <div class="p-2.5 sm:p-4 space-y-1 sm:space-y-1.5">
+                        <h3 class="font-bold text-slate-900 text-xs sm:text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">
                           <a href={`/blog/${pSlug}`}>
                             {pTitle}
                           </a>
                         </h3>
 
-                        <p class="text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed">
+                        <p class="text-[10px] sm:text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed hidden xs:block">
                           {pDesc}
                         </p>
                       </div>
                     </div>
 
                     <!-- Footer Details -->
-                    <div class="p-4 pt-0">
-                      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span class="text-slate-400 font-medium flex items-center gap-1.5 text-[11px]">
-                          <svg class="w-3.5 h-3.5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                    <div class="p-2.5 sm:p-4 pt-0">
+                      <div class="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-400 font-medium flex items-center gap-1 text-[9px] sm:text-[11px]">
+                          <svg class="w-3 h-3 text-slate-400 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                           </svg>
@@ -174,10 +174,10 @@ const getPostsByCategory = (catId: string) => {
 
                         <a 
                           href={`/blog/${pSlug}`} 
-                          class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#0d3b23] hover:underline"
+                          class="inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#0d3b23] hover:underline"
                         >
                           <span>Read</span>
-                          <svg class="w-3 h-3 fill-none stroke-current stroke-[3]" viewBox="0 0 24 24">
+                          <svg class="w-2.5 h-2.5 fill-none stroke-current stroke-[3] shrink-0" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                           </svg>
                         </a>
