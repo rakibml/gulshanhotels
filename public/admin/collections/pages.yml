@@ -5,30 +5,36 @@ folder: "src/content/pages"
 create: true
 slug: "{{slug}}"
 summary: "{{title}} — /{{slug}}"
-sortable_fields: ["title"]
+sortable_fields: ["title", "last_updated"]
 
 fields:
   - label: "Page Title (মূল শিরোনাম যেমন: About Us, Privacy Policy)"
     name: "title"
     widget: "string"
 
-  - label: "URL Slug (যেমন: about, privacy-policy, contact)"
+  - label: "URL Slug (যেমন: about, privacy-policy, disclaimer, terms)"
     name: "slug"
     widget: "string"
-    hint: "ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন।"
+    hint: "ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন (যেমন: privacy-policy)।"
 
-  - label: "Hero Badge Tag (যেমন: Official Directory, Legal Notice)"
+  - label: "Effective Date / Last Updated (কার্যকর তারিখ)"
+    name: "last_updated"
+    widget: "string"
+    default: "October 2026"
+    hint: "আইনি পেজ বা তথ্যের কার্যকারিতা বোঝাতে মাস ও বছর লিখুন (যেমন: October 2026)।"
+
+  - label: "Hero Badge Tag (ট্যাগ ব্যাজ - ঐচ্ছিক)"
     name: "badge"
     widget: "string"
     required: false
-    default: "GulshanHotels Official"
+    hint: "ফাঁকা রাখলে স্বয়ংক্রিয়ভাবে প্রফেশনাল ব্যাজ বসবে। চাইলে লিখতে পারেন (যেমন: Official Policy, Company Mission)।"
 
   - label: "Short Description / Lead Text (সাব-টাইটেল)"
     name: "description"
     widget: "text"
     required: false
 
-  # ১. বড় কভার ছবি আপলোড করার অপশন
+  # ১. বড় কভার ছবি (Cloudflare R2-তে সরাসরি আপলোড হবে)
   - label: "Featured Hero Banner Image (বড় কভার ফটো - ঐচ্ছিক)"
     name: "hero_image"
     widget: "image"
@@ -39,16 +45,18 @@ fields:
     name: "stats"
     widget: "list"
     required: false
+    summary: "{{fields.value}} — {{fields.label}}"
     hint: "প্লাস (+) বাটনে ক্লিক করে সংখ্যা ও লেবেল যোগ করুন (যেমন: Value: 50+, Label: Luxury Stays)"
     fields:
       - { label: "Value (যেমন: 50+, 18-Min, 100%)", name: "value", widget: "string" }
       - { label: "Label (যেমন: Luxury Hotels, Airport Transit)", name: "label", widget: "string" }
 
-  # ৩. ফিচার ও ভ্যালু কার্ডসমূহ (৩ কলামের আইকন গ্রিড)
+  # ৩. ফিচার ও ভ্যালু কার্ডসমূহ (আইকন গ্রিড)
   - label: "🛡️ Feature / Value Cards (ঐচ্ছিক)"
     name: "features"
     widget: "list"
     required: false
+    summary: "{{fields.title}}"
     hint: "প্লাস (+) বাটনে চাপ দিয়ে আপনার মূল সেবার কার্ডগুলো যোগ করুন।"
     fields:
       - { label: "Card Title (শিরোনাম)", name: "title", widget: "string" }
@@ -65,6 +73,7 @@ fields:
     name: "faqs"
     widget: "list"
     required: false
+    summary: "{{fields.question}}"
     hint: "প্লাস (+) বাটনে চাপ দিয়ে পেজের জন্য প্রশ্ন ও উত্তর যোগ করুন।"
     fields:
       - { label: "Question (প্রশ্ন)", name: "question", widget: "string" }
