@@ -4,10 +4,12 @@ title: Lakeshore hotel
 title_style: style_13
 category: 5-Star Luxury Stay
 location: Gulshan Avenue, Gulshan 2, Dhaka 1212, Bangladesh
-description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+seo_description: |-
+  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
+  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 image: https://picsum.photos/id/348/1920/1280.webp
 gallery:
-  - /images/hotels/hero-gulshan.jpg.webp
+  - https://media.gulshanhotels.com/34884184.jpg
   - https://picsum.photos/id/1060/1920/1280.webp
   - https://picsum.photos/id/590/1920/1280.webp
   - https://picsum.photos/id/181/1920/1280.webp
@@ -15,6 +17,8 @@ gallery:
 enable_view_prices: true
 enable_official_site: true
 popular: true
+sponsored: false
+spotlight_desc: ''
 about_notice: ''
 price: 150$ / night
 policies: []
@@ -1329,6 +1333,7 @@ faqs:
     answer: A valid Passport or National ID (NID) for local or foreign guests is standard. Some properties may have specific local policies for unmarried couples, so it is best to check with the front desk beforehand
 checkIn: 2:00 PM
 checkOut: 12:00 PM
+description: Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 enable_faqs: true
 enable_nearby: true
 enable_rates: true
@@ -1337,9 +1342,6 @@ official_site_url: ''
 powerBackup: 24/7 Generator
 rating: ''
 reviewsCount: ''
-seo_description: |-
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
-  Experience world-class 5-star hospitality, luxury suites, and fine dining in the heart of Gulshan, Dhaka.
 smokingPolicy: Non-Smoking
 ---
 
