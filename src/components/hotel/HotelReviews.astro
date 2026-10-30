@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (100% Strict Matching & Newest-First Sorted)
+// src/components/hotel/HotelReviews.astro (100% Strict Matching, Newest-First & Trip-Type Enabled)
 interface Props {
   hotel: any;
 }
@@ -15,7 +15,7 @@ const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCa
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 
-// ২. ডাটা ফেচিং (Vite Glob দিয়ে সব ফাইল সিঙ্গেল ইনস্ট্যান্সে রিড)
+// ২. ডাটা ফেচিং
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -31,7 +31,7 @@ try {
   rawReviewsList = [];
 }
 
-// ৩. STRICT EXACT MATCHING (যাতে এক হোটেলের রিভিউ কোনোভাবেই অন্য হোটেলে না যায়)
+// ৩. STRICT EXACT MATCHING
 const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
 
@@ -48,19 +48,20 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   return matchSlug || matchTitle;
 });
 
-// ৪. লোকাল (hotel.data.reviews) এবং সিএমএস রিভিউ মার্জ
+// ৪. লোকাল এবং সিএমএস রিভিউ মার্জ
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-// ৫. ফরম্যাটিং
+// ৫. ফরম্যাটিং (Trip Type সহ)
 const unformattedReviews = combinedRawReviews.map((rev: any) => ({
   name: rev.name || rev.author || 'Verified Guest',
   date: rev.date || 'Recent',
   rating: Number(rev.rating) || 5,
+  tripType: rev.trip_type || rev.tripType || "Verified Stay",
   comment: String(rev.comment || rev.review || rev.body || '').trim()
 })).filter(r => r.comment.length > 1);
 
-// ৬. তারিখ পার্সার হেল্পার (তারিখের ফরম্যাটে "at" থাকলেও ক্র্যাশ করবে না)
+// ৬. তারিখ পার্সার হেল্পার
 const parseDateToTime = (dStr: any) => {
   if (!dStr || dStr === 'Recent') return 0;
   const cleanStr = String(dStr).replace(' at ', ' ').trim();
@@ -68,11 +69,9 @@ const parseDateToTime = (dStr: any) => {
   return isNaN(time) ? 0 : time;
 };
 
-// ৭. NEWEST-TO-OLDEST SORTING (সবচেয়ে নতুন রিভিউ সবার আগে বামে থাকবে)
+// ৭. NEWEST-TO-OLDEST SORTING
 const allReviews = unformattedReviews.sort((a, b) => {
-  const timeA = parseDateToTime(a.date);
-  const timeB = parseDateToTime(b.date);
-  return timeB - timeA; // লেটেস্ট রিভিউ আগে আসবে
+  return parseDateToTime(b.date) - parseDateToTime(a.date);
 });
 
 // রেটিং ও কাউন্ট ক্যালকুলেশন
@@ -134,7 +133,7 @@ const starsArray = [1, 2, 3, 4, 5];
       </div>
     </div>
 
-    <!-- Carousel Track (Newest Review at Index 0 on the Left) -->
+    <!-- Carousel Track -->
     {reviewsCount > 0 ? (
       <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {allReviews.map((rev) => {
@@ -142,7 +141,7 @@ const starsArray = [1, 2, 3, 4, 5];
           return (
             <div class="w-[290px] sm:w-[350px] shrink-0 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-emerald-600/50 hover:shadow-md transition-all duration-300 min-h-[260px] text-left">
               <div class="space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                   <div class="flex items-center gap-0.5">
                     {starsArray.map(s => (
                       <svg class={`w-3.5 h-3.5 shrink-0 ${s <= rev.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
@@ -150,7 +149,11 @@ const starsArray = [1, 2, 3, 4, 5];
                       </svg>
                     ))}
                   </div>
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rev.date}</span>
+
+                  <!-- TRIP TYPE BADGE (গুগলের জন্য E-E-A-T সিগন্যাল) -->
+                  <span class="text-[9px] font-black uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-200/90 px-2 py-0.5 rounded-md truncate max-w-[140px]">
+                    {rev.tripType}
+                  </span>
                 </div>
                 
                 <div class="review-content relative">
@@ -166,14 +169,21 @@ const starsArray = [1, 2, 3, 4, 5];
                 </div>
               </div>
 
-              <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-900 flex items-center justify-center text-xs font-black uppercase border border-emerald-200">
-                  {rev.name.charAt(0)}
+              <!-- Footer with Reviewer info & Date -->
+              <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-900 flex items-center justify-center text-xs font-black uppercase border border-emerald-200">
+                    {rev.name.charAt(0)}
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-900 leading-tight">{rev.name}</span>
+                    <span class="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">{rev.date}</span>
+                  </div>
                 </div>
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-slate-900 leading-tight">{rev.name}</span>
-                  <span class="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">Verified Guest</span>
-                </div>
+
+                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  Verified
+                </span>
               </div>
             </div>
           );
@@ -216,24 +226,54 @@ const starsArray = [1, 2, 3, 4, 5];
     </div>
 
     <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4">
+      
+      <!-- Full Name -->
       <div>
         <label for="reviewerName" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Full Name</label>
         <input type="text" id="reviewerName" required placeholder="e.g. Tanvir Ahmed" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium" />
       </div>
-      <div>
-        <label for="reviewerRating" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Rating Score</label>
-        <select id="reviewerRating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-amber-600 text-xs sm:text-sm">
-          <option value="5">5 / 5 (Excellent Experience)</option>
-          <option value="4">4 / 5 (Very Good Stay)</option>
-          <option value="3">3 / 5 (Average Service)</option>
-          <option value="2">2 / 5 (Poor Facilities)</option>
-          <option value="1">1 / 5 (Terrible Experience)</option>
-        </select>
+
+      <!-- 2-COLUMNS: TRIP TYPE & RATING SCORE -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        
+        <!-- TRIP TYPE DROPDOWN -->
+        <div>
+          <label for="reviewerTripType" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Trip Purpose</label>
+          <select id="reviewerTripType" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-slate-800 text-xs sm:text-sm">
+            <option value="Business Stay">Business Trip</option>
+            <option value="Solo Traveler">Solo / Transit</option>
+            <option value="Couple Getaway">Couple Stay</option>
+            <option value="Family Vacation">Family Vacation</option>
+            <option value="Embassy / Visa">Embassy / Visa Visit</option>
+          </select>
+        </div>
+
+        <!-- RATING SCORE -->
+        <div>
+          <label for="reviewerRating" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Rating Score</label>
+          <select id="reviewerRating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-amber-600 text-xs sm:text-sm">
+            <option value="5">5 / 5 (Excellent Experience)</option>
+            <option value="4">4 / 5 (Very Good Stay)</option>
+            <option value="3">3 / 5 (Average Service)</option>
+            <option value="2">2 / 5 (Poor Facilities)</option>
+            <option value="1">1 / 5 (Terrible Experience)</option>
+          </select>
+        </div>
+
       </div>
+
+      <!-- SMART REVIEW PROMPT (SEO KEYWORD MINING) -->
       <div>
-        <label for="reviewerComment" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Experience</label>
-        <textarea id="reviewerComment" rows="4" required placeholder="Tell us about the room comfort, cleanliness, service, and breakfast..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm leading-relaxed font-medium"></textarea>
+        <label for="reviewerComment" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Detailed Experience</label>
+        <textarea 
+          id="reviewerComment" 
+          rows="4" 
+          required 
+          placeholder="How was the room comfort, airport transit/pickup, breakfast buffet, and location near Gulshan 2 / embassies?" 
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm leading-relaxed font-medium"
+        ></textarea>
       </div>
+
       <button type="submit" id="submitReviewBtn" class="w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-black py-3.5 rounded-xl shadow-md transition uppercase tracking-wider text-xs mt-2 cursor-pointer">
         Submit Review For Approval
       </button>
@@ -332,6 +372,7 @@ const starsArray = [1, 2, 3, 4, 5];
         e.preventDefault();
         const submitBtn = document.getElementById('submitReviewBtn') as HTMLButtonElement | null;
         const nameInput = document.getElementById('reviewerName') as HTMLInputElement | null;
+        const tripTypeInput = document.getElementById('reviewerTripType') as HTMLSelectElement | null;
         const ratingInput = document.getElementById('reviewerRating') as HTMLSelectElement | null;
         const commentInput = document.getElementById('reviewerComment') as HTMLTextAreaElement | null;
 
@@ -341,6 +382,7 @@ const starsArray = [1, 2, 3, 4, 5];
           hotel: form.getAttribute('data-hotel-title') || '',
           slug: form.getAttribute('data-hotel-slug') || '',
           name: nameInput.value.trim(),
+          trip_type: tripTypeInput ? tripTypeInput.value : 'Business Stay',
           rating: ratingInput.value,
           comment: commentInput.value.trim(),
           approved: false,
