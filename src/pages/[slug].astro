@@ -1,5 +1,5 @@
 ---
-// src/pages/[slug].astro (PERMANENT LOCKED ROUTER — 100% BUILD-SAFE & MASTER SCHEMA INTEGRATED)
+// src/pages/[slug].astro (PERMANENT LOCKED ROUTER — 100% BUILD-SAFE & 3-WAY ROUTING)
 import Layout from '../layouts/Layout.astro';
 import HotelMasterSchema from '../components/hotel/HotelMasterSchema.astro';
 import LocationCategoryTemplate from '../components/landing/LocationCategoryTemplate.astro';
@@ -36,7 +36,6 @@ export async function getStaticPaths() {
     }
   }
 
-  // ১০০% টাইপ-সেফ পাথ জেনারেটর (Null বা Undefined এরর মুক্ত)
   const hotelPaths: any[] = [];
   for (const entry of hotels) {
     const rawSlug = entry.data?.slug || entry.slug || entry.id || '';
@@ -48,15 +47,40 @@ export async function getStaticPaths() {
       });
     }
   }
-// 2. getStaticPaths এর ভেতরে যুক্ত করুন:
-let destinations: any[] = [];
-try { destinations = await getCollection('destinations'); } catch (e) {}
 
-const destinationPaths = destinations.map((entry: any) => ({
-  params: { slug: (entry.data?.slug || entry.slug || entry.id).replace(/\.(md|mdx)$/, '') },
-  props: { type: 'destination', entry }
-}));
-  // ২. সাধারণ পেজ ডাটা লোডার (About, Privacy, Terms etc.)
+  // ২. লোকেশন ও ক্যাটাগরি ক্লাস্টার ডাটা লোডার (SEO Landing Pages)
+  let destinations: any[] = [];
+  try { 
+    destinations = await getCollection('destinations'); 
+  } catch (e) {
+    destinations = [];
+  }
+
+  if (!destinations || destinations.length === 0) {
+    try {
+      const rawGlobDest = import.meta.glob(['/src/content/destinations/*.{md,mdx}', '../content/destinations/*.{md,mdx}'], { eager: true });
+      destinations = Object.entries(rawGlobDest).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+        data: item.frontmatter || item.data || {},
+      }));
+    } catch (e) {
+      destinations = [];
+    }
+  }
+
+  const destinationPaths: any[] = [];
+  for (const entry of destinations) {
+    const rawSlug = entry.data?.slug || entry.slug || entry.id || '';
+    const cleanSlug = String(rawSlug).split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase();
+    if (cleanSlug) {
+      destinationPaths.push({
+        params: { slug: cleanSlug },
+        props: { type: 'destination', entry }
+      });
+    }
+  }
+
+  // ৩. সাধারণ পেজ ডাটা লোডার (About, Privacy, Terms etc.)
   let pages: any[] = [];
   try { 
     pages = await getCollection('pages'); 
@@ -79,13 +103,16 @@ const destinationPaths = destinations.map((entry: any) => ({
   }
 
   // ডুপ্লিকেট ইউআরএল প্রতিরোধ
-  const existingHotelSlugs = new Set(hotelPaths.map((p: any) => p.params.slug));
-  const pagePaths: any[] = [];
+  const takenSlugs = new Set([
+    ...hotelPaths.map((p: any) => p.params.slug),
+    ...destinationPaths.map((p: any) => p.params.slug)
+  ]);
 
+  const pagePaths: any[] = [];
   for (const entry of pages) {
     const rawSlug = entry.data?.slug || entry.slug || entry.id || '';
     const cleanSlug = String(rawSlug).split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase();
-    if (cleanSlug && !existingHotelSlugs.has(cleanSlug)) {
+    if (cleanSlug && !takenSlugs.has(cleanSlug)) {
       pagePaths.push({
         params: { slug: cleanSlug },
         props: { type: 'page', entry }
@@ -93,9 +120,8 @@ const destinationPaths = destinations.map((entry: any) => ({
     }
   }
 
-  return [...hotelPaths, ...pagePaths];
-return [...hotelPaths, ...destinationPaths, ...pagePaths];
-
+  // একক রিটার্ন (বাগ ফিক্সড)
+  return [...hotelPaths, ...destinationPaths, ...pagePaths];
 }
 
 const { type = 'hotel', entry } = Astro.props;
@@ -112,25 +138,21 @@ const metaDescription = hotelData.seo_description
   || hotelData.description 
   || `Book your stay at ${hotelTitle}, a verified ${hotelCategory} located in ${hotelLocation}.`;
 ---
-{type === 'hotel' ? (
-  <Layout ...> ... </Layout>
-) : type === 'destination' ? (
+
+{type === 'destination' ? (
+  <!-- ১. লোকেশন ও ক্যাটাগরি ক্লাস্টার পেজ -->
   <LocationCategoryTemplate entry={entry} />
-) : (
-  <PageView entry={entry} />
-)}
-{type === 'page' ? (
+) : type === 'page' ? (
+  <!-- ২. সাধারণ পেজ (Privacy, Disclaimer, About etc.) -->
   <PageView entry={entry} />
 ) : (
+  <!-- ৩. একক হোটেলের পেজ -->
   <Layout 
     title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
     description={metaDescription}
     image={hotelImage}
   >
-    <!-- ১. গুগল ও এআই-এর জন্য MASTER SCHEMA (সবার উপরে) -->
     <HotelMasterSchema hotel={hotel} />
-
-    <!-- ২. ভিজ্যুয়াল সেকশনসমূহ -->
     <HotelHeader hotel={hotel} />
     <HotelSubNav hotel={hotel} />
     <HotelAboutAndRates hotel={hotel} />
@@ -141,4 +163,3 @@ const metaDescription = hotelData.seo_description
     <HotelNearbyHotels currentHotel={hotel} />
   </Layout>
 )}
-
