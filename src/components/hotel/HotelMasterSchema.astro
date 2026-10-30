@@ -12,7 +12,6 @@ const hotelTitle = (data.title || data.name || "Hotel Details").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// ডেসক্রিপশন ক্লিনআপ
 function cleanAboutText(raw: string) {
   if (!raw) return "";
   return raw
@@ -30,7 +29,7 @@ const hotelDescription = cleanAbout.length > 300
   : (cleanAbout || `${hotelTitle} is a verified luxury accommodation in Gulshan, Dhaka.`);
 
 const hotelLocation = data.address || data.location || "Gulshan, Dhaka 1212, Bangladesh";
-const hotelPrice = data.price ? String(data.price).trim() : "";
+const hotelPrice = data.price ? String(data.price).trim() : "$$$";
 const rawOfficialSite = (data.officialSite || data.official_site_url || "").trim();
 const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
 
@@ -104,7 +103,7 @@ const ratingValue = reviewCount > 0
   ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
   : (data.rating ? Number(data.rating).toFixed(1) : null);
 
-// ৪. অ্যামেনিটিস
+// ৪. অ্যামেনিটিস সংগ্রহ
 const amenitiesList: string[] = Array.isArray(data.amenities) ? data.amenities : [];
 const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
@@ -123,9 +122,14 @@ flattenedAmenities = Array.from(new Set(flattenedAmenities.filter(Boolean)));
 // ৫. রুম টাইপ
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 
-// ৬. পলিসি
-const checkIn = data.checkIn || data.check_in || "";
-const checkOut = data.checkOut || data.check_out || "";
+// ৬. পলিসি টাইম ফরম্যাট
+function formatTime(tStr: string) {
+  if (!tStr) return "";
+  const clean = tStr.replace(/[^0-9:]/g, '');
+  return clean.length >= 4 ? clean : "";
+}
+const checkIn = formatTime(data.checkIn || data.check_in || "");
+const checkOut = formatTime(data.checkOut || data.check_out || "");
 
 // ৭. এফএকিউ
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
@@ -209,6 +213,10 @@ const masterGraph: any = {
         },
         "review": totalRealReviews.slice(0, 5).map((rev: any) => ({
           "@type": "Review",
+          "itemReviewed": {
+            "@type": "Hotel",
+            "name": hotelTitle
+          },
           "author": {
             "@type": "Person",
             "name": rev.name || rev.author || "Verified Guest"
@@ -224,11 +232,12 @@ const masterGraph: any = {
         }))
       } : {}),
 
+      // Schema.org ভ্যালিডেটর ফ্রেন্ডলি LocationFeatureSpecification
       ...(flattenedAmenities.length > 0 ? {
         "amenityFeature": flattenedAmenities.map((amenity: string) => ({
           "@type": "LocationFeatureSpecification",
           "name": amenity,
-          "value": true
+          "value": "Yes"
         }))
       } : {}),
 
