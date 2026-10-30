@@ -1,5 +1,5 @@
 ---
-// src/pages/blog/[slug].astro (Brand Tint Background + 100% SVG Icons - No Emojis)
+// src/pages/blog/[slug].astro (100% Real CMS Data, Google Article Schema & Zero Broken Anchors)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -12,11 +12,11 @@ export async function getStaticPaths() {
 
   if (posts.length === 0) {
     try {
-      const rawGlob = import.meta.glob('../../content/posts/*.md', { eager: true });
+      const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../../content/posts/*.{md,mdx}'], { eager: true });
       posts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-        slug: filePath.split('/').pop()?.replace('.md', ''),
-        data: item.frontmatter || {},
-        render: async () => ({ Content: item.Content || item.default })
+        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+        data: item.frontmatter || item.data || {},
+        render: async () => ({ Content: item.default || item.Content })
       }));
     } catch (e) {}
   }
@@ -30,68 +30,67 @@ export async function getStaticPaths() {
 
   if (allHotels.length === 0) {
     try {
-      const rawHotels = import.meta.glob('../../content/hotels/*.md', { eager: true });
+      const rawHotels = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
       allHotels = Object.entries(rawHotels).map(([filePath, item]: [string, any]) => ({
-        slug: filePath.split('/').pop()?.replace('.md', ''),
-        data: item.frontmatter || {}
+        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+        data: item.frontmatter || item.data || {}
       }));
     } catch (e) {}
   }
 
-  return posts.map(post => ({
-    params: { slug: post.slug || post.id?.replace(/\.md$/, '') },
-    props: { post, allPosts: posts, allHotels }
-  }));
+  return posts.map(post => {
+    const postSlug = String(post.slug || post.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
+    return {
+      params: { slug: postSlug },
+      props: { post, allPosts: posts, allHotels }
+    };
+  });
 }
 
 const { post, allPosts = [], allHotels = [] } = Astro.props;
 const data = post?.data || {};
 
-const title = data.title || "Gulshan Hotel & Travel Guide";
-const description = data.description || "In-depth local guide for diplomats and luxury travelers.";
-const publishDate = data.date || "Oct 2026";
+const title = (data.title || "Gulshan Travel Guide").trim();
+const description = (data.description || "Expert local guide and curated stay advice in Gulshan, Dhaka.").trim();
+const publishDate = data.date || "Recent";
 const category = data.category || "Travel Guide";
-const readTime = data.readTime || "4 min read";
+const readTime = data.readTime || data.read_time || "4 min read";
 const image = data.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
-const author = data.author || "Gulshan Concierge Team";
+const author = data.author || "Gulshan Editorial Team";
 
-// এম্বেড করার জন্য বাছাই করা হোটেলসমূহ
+// এম্বেড করার জন্য শুধুমাত্র আসল রিকমেন্ডেড হোটেল
 const recommendedSlugs = Array.isArray(data.recommended_hotels) ? data.recommended_hotels : [];
 const matchedHotels = allHotels.filter(h => {
-  const s = (h.slug || h.id || h.data?.slug || '').replace(/\.md$/, '').toLowerCase();
+  const s = String(h.slug || h.id || h.data?.slug || '').replace(/\.(md|mdx)$/, '').toLowerCase();
   return recommendedSlugs.some((r: any) => {
     const target = (typeof r === 'object' ? r.hotel_slug : String(r)).toLowerCase();
     return target === s || s.includes(target);
   });
 });
 
-const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 3);
+// কোনো ফেক ফলব্যাক টেকঅ্যাওয়ে নেই—CMS-এ থাকলে তবেই আসবে
+const takeaways = Array.isArray(data.takeaways) && data.takeaways.length > 0 ? data.takeaways : [];
 
-const takeaways = Array.isArray(data.takeaways) && data.takeaways.length > 0 
-  ? data.takeaways 
-  : [
-      "Gulshan 2 offers maximum diplomatic security and proximity to US/UK embassies.",
-      "18-minute express connection to Dhaka Airport (DAC) via Elevated Expressway.",
-      "Top luxury 5-star properties include The Westin, Renaissance, and Amari Dhaka."
-    ];
-
-// ৪টি সম্পর্কিত আর্টিকেল
-const currentSlug = post.slug || post.id?.replace(/\.md$/, '');
+// সম্পর্কিত পোস্ট (বর্তমান পোস্টটি বাদে বাকি ৪টি)
+const currentSlug = String(post.slug || post.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
 const relatedPosts = allPosts
-  .filter((p: any) => (p.slug || p.id?.replace(/\.md$/, '')) !== currentSlug)
+  .filter((p: any) => {
+    const pSlug = String(p.slug || p.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
+    return pSlug !== currentSlug;
+  })
   .slice(0, 4);
 
-// DISCOVER MORE ক্যাটাগরি ডাটা
+// কার্যকরী ক্যাটাগরি লিংক
 const discoverCategories = [
   {
-    name: "Food & Drink",
+    name: "Food & Dining",
     image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=75",
-    link: "/#gulshan-lifestyle"
+    link: "/blog"
   },
   {
-    name: "Shopping & DCC",
+    name: "Embassy Guides",
     image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=75",
-    link: "/#gulshan-lifestyle"
+    link: "/blog"
   },
   {
     name: "5-Star Luxury Stays",
@@ -99,17 +98,56 @@ const discoverCategories = [
     link: "/#hotels"
   },
   {
-    name: "Parks & Wellness Spas",
+    name: "Transit & Airport Info",
     image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=75",
-    link: "/#gulshan-lifestyle"
+    link: "/blog"
   }
 ];
 
 const { Content } = post.render ? await post.render() : { Content: null };
-const siteUrl = Astro.url.href;
+
+const siteOrigin = "https://gulshanhotels.com";
+const canonicalArticleUrl = `${siteOrigin}/blog/${currentSlug}`;
+
+// তারিখ পার্সার (Schema ISO 8601)
+const isoDate = (() => {
+  const parsed = new Date(publishDate);
+  return isNaN(parsed.getTime()) ? new Date().toISOString().split('T')[0] : parsed.toISOString().split('T')[0];
+})();
+
+// GOOGLE ARTICLE / BLOGPOSTING SCHEMA
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": canonicalArticleUrl
+  },
+  "headline": title,
+  "description": description,
+  "image": [image],
+  "datePublished": isoDate,
+  "dateModified": isoDate,
+  "author": {
+    "@type": "Person",
+    "name": author
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "GulshanHotels.com",
+    "url": siteOrigin,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteOrigin}/favicon.svg`
+    }
+  }
+};
 ---
 
 <Layout title={`${title} — GulshanHotels Guide`} description={description} image={image}>
+
+  <!-- GOOGLE ARTICLE RICH SNIPPET SCHEMA -->
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
   <!-- 1. TOP READING PROGRESS BAR -->
   <div class="fixed top-0 left-0 w-full h-1 bg-transparent z-[100] pointer-events-none">
@@ -118,16 +156,16 @@ const siteUrl = Astro.url.href;
 
   <article class="w-full bg-white text-slate-900 pt-6 pb-12">
     
-    <!-- 🎯 GOLDEN RATIO READING COLUMN -->
+    <!-- GOLDEN RATIO READING COLUMN -->
     <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-7 text-left">
       
       <!-- BREADCRUMBS -->
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span>/</span>
         <a href="/blog" class="hover:text-emerald-800 transition">Travel Guides</a>
         <span>/</span>
-        <span class="text-slate-700 truncate max-w-xs">{title}</span>
+        <span class="text-slate-700 truncate max-w-xs" aria-current="page">{title}</span>
       </nav>
 
       <!-- ARTICLE HEADER -->
@@ -141,7 +179,6 @@ const siteUrl = Astro.url.href;
             Updated: <strong class="text-slate-700">{publishDate}</strong>
           </span>
 
-          <!-- Clock SVG Icon (No Emoji) -->
           <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
             <svg class="w-3.5 h-3.5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10"></circle>
@@ -150,7 +187,6 @@ const siteUrl = Astro.url.href;
             <span>{readTime}</span>
           </span>
 
-          <!-- Checkmark SVG Icon (No Emoji) -->
           <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50/70 px-2.5 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
             <svg class="w-3 h-3 text-emerald-700 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -180,12 +216,16 @@ const siteUrl = Astro.url.href;
           </div>
 
           <div class="flex items-center gap-2">
-            <!-- WhatsApp SVG -->
-            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + siteUrl)}`} target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition shadow-xs" title="Share on WhatsApp">
+            <a 
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + canonicalArticleUrl)}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition shadow-xs" 
+              title="Share on WhatsApp"
+            >
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
             </a>
             
-            <!-- Copy Link Button with SVG -->
             <button id="copyLinkBtn" type="button" class="h-8 px-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <svg class="w-3.5 h-3.5 text-slate-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -204,27 +244,29 @@ const siteUrl = Astro.url.href;
         </div>
       </div>
 
-      <!-- KEY TAKEAWAYS (Bookmark SVG instead of Emoji) -->
-      <div class="bg-[#f5f8f6] border-l-4 border-[#0d3b23] rounded-r-2xl p-5 sm:p-6 space-y-3">
-        <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
-          <svg class="w-4 h-4 text-[#0d3b23] fill-current" viewBox="0 0 24 24">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span class="text-emerald-950 font-black">Key Takeaways at a Glance</span>
+      <!-- KEY TAKEAWAYS (শুধুমাত্র ফাইলে লেখা থাকলেই রেন্ডার হবে - নো ফেক ডাটা) -->
+      {takeaways.length > 0 && (
+        <div class="bg-[#f5f8f6] border-l-4 border-[#0d3b23] rounded-r-2xl p-5 sm:p-6 space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
+            <svg class="w-4 h-4 text-[#0d3b23] fill-current" viewBox="0 0 24 24">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="text-emerald-950 font-black">Key Takeaways at a Glance</span>
+          </div>
+          <ul class="space-y-2 text-xs sm:text-[14px] text-slate-700 font-medium">
+            {takeaways.map((item: string) => (
+              <li class="flex items-start gap-2.5 leading-snug">
+                <svg class="w-4 h-4 text-emerald-700 fill-none stroke-current stroke-[2.5] shrink-0 mt-0.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul class="space-y-2 text-xs sm:text-[14px] text-slate-700 font-medium">
-          {takeaways.map((item: string) => (
-            <li class="flex items-start gap-2.5 leading-snug">
-              <svg class="w-4 h-4 text-emerald-700 fill-none stroke-current stroke-[2.5] shrink-0 mt-0.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      )}
 
-      <!-- 18px GOLDEN RATIO BODY TEXT -->
+      <!-- ARTICLE BODY TEXT -->
       <div 
         id="articleBodyContent" 
         class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl"
@@ -232,8 +274,8 @@ const siteUrl = Astro.url.href;
         {Content ? <Content /> : <p>Article content loading...</p>}
       </div>
 
-      <!-- RECOMMENDED HOTELS -->
-      {displayHotels.length > 0 && (
+      <!-- RECOMMENDED HOTELS (শুধুমাত্র যদি আর্টিকেলে নির্দিষ্ট করা থাকে) -->
+      {matchedHotels.length > 0 && (
         <div class="pt-8 border-t border-slate-200 space-y-4">
           <div class="space-y-0.5">
             <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800">Featured Accommodations</span>
@@ -241,11 +283,11 @@ const siteUrl = Astro.url.href;
           </div>
 
           <div class="space-y-3 pt-2">
-            {displayHotels.map((h: any) => {
+            {matchedHotels.map((h: any) => {
               const hd = h.data || {};
               const hTitle = hd.title || hd.name || "Hotel";
-              const hSlug = (h.slug || h.id || hd.slug || '').replace(/\.md$/, '');
-              const hImg = hd.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=75";
+              const hSlug = (h.slug || h.id || hd.slug || '').replace(/\.(md|mdx)$/, '');
+              const hImg = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=75");
               const hPrice = hd.price || "$120";
 
               return (
@@ -293,9 +335,7 @@ const siteUrl = Astro.url.href;
 
     </div>
 
-    <!-- ======================================================== -->
-    <!-- 🎯 ১. YOU MAY ALSO LIKE... (SVG Arrows & No Emojis) -->
-    <!-- ======================================================== -->
+    <!-- RELATED GUIDES -->
     {relatedPosts.length > 0 && (
       <section class="w-full bg-[#fbfbfa] border-t border-slate-200/80 mt-16 pt-12 pb-14 text-slate-900">
         <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
@@ -309,7 +349,7 @@ const siteUrl = Astro.url.href;
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
             {relatedPosts.map((rel: any) => {
               const rData = rel.data || {};
-              const rSlug = rel.slug || rel.id?.replace(/\.md$/, '');
+              const rSlug = String(rel.slug || rel.id || '').replace(/\.(md|mdx)$/, '');
               const rImg = rData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
 
               return (
@@ -321,7 +361,7 @@ const siteUrl = Astro.url.href;
                         alt={rData.title || "Related Guide"} 
                         loading="lazy" 
                         decoding="async" 
-                        class="w-full h-full object-cover group-hover:scale-104 transition duration-500 ease-out" 
+                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out" 
                       />
                     </div>
 
@@ -334,7 +374,6 @@ const siteUrl = Astro.url.href;
                     </p>
                   </a>
 
-                  <!-- READ MORE Link with SVG Arrow -->
                   <div class="pt-1">
                     <a 
                       href={`/blog/${rSlug}`} 
@@ -353,20 +392,16 @@ const siteUrl = Astro.url.href;
       </section>
     )}
 
-    <!-- ======================================================== -->
-    <!-- 🎯 ২. DISCOVER MORE (হালকা ব্র্যান্ড কালার শেড ব্যাকগ্রাউন্ড) -->
-    <!-- ======================================================== -->
+    <!-- DISCOVER MORE -->
     <section class="w-full bg-[#edf4ef] py-12 text-slate-900 border-t border-b border-[#d5e4d8]">
       <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
         
-        <!-- Big Bold Heading in Brand Color -->
         <div class="text-left">
           <h2 class="font-['Bebas_Neue',Impact,sans-serif] text-4xl sm:text-5xl lg:text-6xl text-[#0d3b23] tracking-wider">
             DISCOVER MORE
           </h2>
         </div>
 
-        <!-- 4-Column Category Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
           {discoverCategories.map((cat) => (
             <a 
