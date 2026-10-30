@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (Schema.org 0-Errors Strictly Validated)
+// src/components/hotel/HotelMasterSchema.astro (100% Zero-Error Strictly Cleaned Schema)
 interface Props {
   hotel: any;
 }
@@ -103,26 +103,46 @@ const ratingValue = reviewCount > 0
   ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
   : (data.rating ? Number(data.rating).toFixed(1) : null);
 
-// ৪. অ্যামেনিটিস সংগ্রহ
-const amenitiesList: string[] = Array.isArray(data.amenities) ? data.amenities : [];
-const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
+// ৪. অ্যামেনিটিস থেকে শুধুই আসল স্ট্রিং নাম ফিল্টার (BUG FIXED 🎯)
+const rawAmenities = Array.isArray(data.amenities) ? data.amenities : [];
+const rawCategorized = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
-let flattenedAmenities: string[] = [...amenitiesList];
-if (categorizedList.length > 0) {
-  categorizedList.forEach((cat: any) => {
-    if (Array.isArray(cat.items)) {
-      cat.items.forEach((sub: any) => {
-        flattenedAmenities.push(typeof sub === 'string' ? sub : (sub?.name || ''));
-      });
+const cleanAmenitiesNames: string[] = [];
+
+// সাধারণ তালিকা থেকে নাম এক্সট্র্যাক্ট করা (SVG ও আইকন সম্পূর্ণ বাদ)
+rawAmenities.forEach((item: any) => {
+  if (typeof item === 'string' && item.trim()) {
+    cleanAmenitiesNames.push(item.trim());
+  } else if (item && typeof item === 'object') {
+    const n = item.name || item.title || item.label;
+    if (typeof n === 'string' && n.trim()) {
+      cleanAmenitiesNames.push(n.trim());
     }
-  });
-}
-flattenedAmenities = Array.from(new Set(flattenedAmenities.filter(Boolean)));
+  }
+});
+
+// ক্যাটাগরি তালিকা থেকেও নাম এক্সট্র্যাক্ট করা
+rawCategorized.forEach((cat: any) => {
+  if (Array.isArray(cat?.items)) {
+    cat.items.forEach((sub: any) => {
+      if (typeof sub === 'string' && sub.trim()) {
+        cleanAmenitiesNames.push(sub.trim());
+      } else if (sub && typeof sub === 'object') {
+        const n = sub.name || sub.title || sub.label;
+        if (typeof n === 'string' && n.trim()) {
+          cleanAmenitiesNames.push(n.trim());
+        }
+      }
+    });
+  }
+});
+
+const uniqueAmenities = Array.from(new Set(cleanAmenitiesNames));
 
 // ৫. রুম টাইপ
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 
-// ৬. পলিসি টাইম ফরম্যাট
+// ৬. পলিসি
 function formatTime(tStr: string) {
   if (!tStr) return "";
   const clean = tStr.replace(/[^0-9:]/g, '');
@@ -219,7 +239,7 @@ const masterGraph: any = {
           },
           "author": {
             "@type": "Person",
-            "name": rev.name || rev.author || "Verified Guest"
+            "name": String(rev.name || rev.author || "Verified Guest")
           },
           "datePublished": toIsoDate(rev.date) || defaultDate,
           "reviewBody": String(rev.comment || rev.review || '').replace(/"/g, "'").trim(),
@@ -232,11 +252,11 @@ const masterGraph: any = {
         }))
       } : {}),
 
-      // Schema.org ভ্যালিডেটর ফ্রেন্ডলি LocationFeatureSpecification
-      ...(flattenedAmenities.length > 0 ? {
-        "amenityFeature": flattenedAmenities.map((amenity: string) => ({
+      // খাঁটি টেক্সট নামের LocationFeatureSpecification
+      ...(uniqueAmenities.length > 0 ? {
+        "amenityFeature": uniqueAmenities.map((amenityName: string) => ({
           "@type": "LocationFeatureSpecification",
-          "name": amenity,
+          "name": String(amenityName),
           "value": "Yes"
         }))
       } : {}),
@@ -244,8 +264,8 @@ const masterGraph: any = {
       ...(roomsList.length > 0 ? {
         "containsPlace": roomsList.map((room: any) => ({
           "@type": "HotelRoom",
-          "name": room.name || "Room",
-          ...(room.price ? { "description": `Starting from ${room.price}` } : {})
+          "name": String(typeof room === 'string' ? room : (room?.name || "Room")),
+          ...(room?.price ? { "description": `Starting from ${room.price}` } : {})
         }))
       } : {})
     },
