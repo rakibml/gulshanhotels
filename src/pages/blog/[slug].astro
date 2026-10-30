@@ -1,5 +1,5 @@
 ---
-// src/pages/blog/[slug].astro (100% Real CMS Data, Google Article Schema & Zero Broken Anchors)
+// src/pages/blog/[slug].astro (Automatic New-Tab Links & High-Visibility Anchor Styling)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -58,7 +58,7 @@ const readTime = data.readTime || data.read_time || "4 min read";
 const image = data.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80";
 const author = data.author || "Gulshan Editorial Team";
 
-// এম্বেড করার জন্য শুধুমাত্র আসল রিকমেন্ডেড হোটেল
+// রিকমেন্ডেড হোটেল
 const recommendedSlugs = Array.isArray(data.recommended_hotels) ? data.recommended_hotels : [];
 const matchedHotels = allHotels.filter(h => {
   const s = String(h.slug || h.id || h.data?.slug || '').replace(/\.(md|mdx)$/, '').toLowerCase();
@@ -68,10 +68,8 @@ const matchedHotels = allHotels.filter(h => {
   });
 });
 
-// কোনো ফেক ফলব্যাক টেকঅ্যাওয়ে নেই—CMS-এ থাকলে তবেই আসবে
 const takeaways = Array.isArray(data.takeaways) && data.takeaways.length > 0 ? data.takeaways : [];
 
-// সম্পর্কিত পোস্ট (বর্তমান পোস্টটি বাদে বাকি ৪টি)
 const currentSlug = String(post.slug || post.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
 const relatedPosts = allPosts
   .filter((p: any) => {
@@ -80,7 +78,6 @@ const relatedPosts = allPosts
   })
   .slice(0, 4);
 
-// কার্যকরী ক্যাটাগরি লিংক
 const discoverCategories = [
   {
     name: "Food & Dining",
@@ -109,13 +106,12 @@ const { Content } = post.render ? await post.render() : { Content: null };
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalArticleUrl = `${siteOrigin}/blog/${currentSlug}`;
 
-// তারিখ পার্সার (Schema ISO 8601)
 const isoDate = (() => {
   const parsed = new Date(publishDate);
   return isNaN(parsed.getTime()) ? new Date().toISOString().split('T')[0] : parsed.toISOString().split('T')[0];
 })();
 
-// GOOGLE ARTICLE / BLOGPOSTING SCHEMA
+// Google BlogPosting Schema
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -146,7 +142,6 @@ const articleSchema = {
 
 <Layout title={`${title} — GulshanHotels Guide`} description={description} image={image}>
 
-  <!-- GOOGLE ARTICLE RICH SNIPPET SCHEMA -->
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
   <!-- 1. TOP READING PROGRESS BAR -->
@@ -244,7 +239,7 @@ const articleSchema = {
         </div>
       </div>
 
-      <!-- KEY TAKEAWAYS (শুধুমাত্র ফাইলে লেখা থাকলেই রেন্ডার হবে - নো ফেক ডাটা) -->
+      <!-- KEY TAKEAWAYS -->
       {takeaways.length > 0 && (
         <div class="bg-[#f5f8f6] border-l-4 border-[#0d3b23] rounded-r-2xl p-5 sm:p-6 space-y-3">
           <div class="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
@@ -266,15 +261,22 @@ const articleSchema = {
         </div>
       )}
 
-      <!-- ARTICLE BODY TEXT -->
+      <!-- ======================================================== -->
+      <!-- 🎯 HIGH-VISIBILITY ANCHOR STYLED ARTICLE BODY CONTENT -->
+      <!-- ======================================================== -->
       <div 
         id="articleBodyContent" 
-        class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline prose-img:rounded-2xl"
+        class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 
+               prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight 
+               prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 
+               prose-img:rounded-2xl
+               [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline [&_a]:decoration-emerald-500/80 [&_a]:underline-offset-4 
+               hover:[&_a]:text-emerald-950 hover:[&_a]:decoration-emerald-800 transition-colors"
       >
         {Content ? <Content /> : <p>Article content loading...</p>}
       </div>
 
-      <!-- RECOMMENDED HOTELS (শুধুমাত্র যদি আর্টিকেলে নির্দিষ্ট করা থাকে) -->
+      <!-- RECOMMENDED HOTELS -->
       {matchedHotels.length > 0 && (
         <div class="pt-8 border-t border-slate-200 space-y-4">
           <div class="space-y-0.5">
@@ -306,7 +308,7 @@ const articleSchema = {
                       <span class="text-[10px] text-slate-400 block leading-none">Starting from</span>
                       <span class="text-base font-black text-slate-900">{hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}</span>
                     </div>
-                    <a href={`/${hSlug}`} class="inline-flex items-center gap-1.5 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
+                    <a href={`/${hSlug}`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition">
                       <span>View Hotel</span>
                       <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
@@ -432,8 +434,10 @@ const articleSchema = {
 
 </Layout>
 
+<!-- CLIENT SCRIPT: PROGRESS BAR & AUTO NEW-TAB FOR ARTICLE LINKS -->
 <script is:inline>
   const initArticleInteractions = () => {
+    // ১. রিডিং প্রগ্রেস বার
     const progressBar = document.getElementById('readingProgressBar');
     if (progressBar) {
       window.addEventListener('scroll', () => {
@@ -444,6 +448,7 @@ const articleSchema = {
       }, { passive: true });
     }
 
+    // ২. কপি লিংক বাটন
     const copyBtn = document.getElementById('copyLinkBtn');
     const copyText = document.getElementById('copyLinkText');
     if (copyBtn && copyText && !copyBtn.dataset.bound) {
@@ -456,6 +461,17 @@ const articleSchema = {
         } catch (err) { copyText.innerText = 'Error'; }
       });
     }
+
+    // ৩. ব্লগের ভেতরের সব লিংকে স্বয়ংক্রিয়ভাবে target="_blank" সেট করা
+    const articleLinks = document.querySelectorAll('#articleBodyContent a');
+    articleLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      // শুধুমাত্র পেজের ভেতরের # জাম্প লিংক ছাড়া বাকি সব লিংক নতুন ট্যাবে খুলবে
+      if (href && !href.startsWith('#')) {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
   };
 
   document.addEventListener('DOMContentLoaded', initArticleInteractions);
