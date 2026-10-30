@@ -3,7 +3,7 @@ title: about us
 slug: about
 badge: ''
 description: ''
-hero_image: /images/hotels/hero-gulshan.jpg.webp
+hero_image: https://media.gulshanhotels.com/34884184.jpg
 stats: []
 features: []
 faqs: []
