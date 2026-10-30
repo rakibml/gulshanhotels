@@ -8,7 +8,7 @@ hero_image: https://media.gulshanhotels.com/34884184.jpg
 filter_keyword: Gulshan 1
 area_tips:
   - title: 'Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh.'
-    desc: '12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue,'
+    desc: '12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue'
   - title: 'Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh.'
     desc: 'Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh. Address: 12 Madani Avenue, Baridhara, Dhaka 1212, Bangladesh.'
 faqs:
