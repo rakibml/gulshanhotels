@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (About Section Description & Pure Real Data)
+// src/components/hotel/HotelMasterSchema.astro (100% Real Data, Connected Knowledge Graph & Google Freshness Signal)
 interface Props {
   hotel: any;
 }
@@ -12,21 +12,18 @@ const hotelTitle = (data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// ================= ABOUT সেকশন থেকে ডেসক্রিপশন তৈরি =================
+// About সেকশন থেকে পরিষ্কার ডেসক্রিপশন তৈরি
 function cleanAboutText(raw: string) {
   if (!raw) return "";
   return raw
-    .replace(/<[^>]*>?/gm, '') // HTML ট্যাগ মুছে ফেলবে
-    .replace(/[#*`_~]/g, '')    // Markdown বোল্ড/হেডিং চিহ্ন মুছবে
-    .replace(/\s+/g, ' ')       // অতিরিক্ত নতুন লাইন ও স্পেস ঠিক করবে
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/[#*`_~]/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-// About সেকশনের টেক্সট (hotel.body) গ্রহণ
 const rawAboutText = hotel?.body || data.about || data.overview || data.description || "";
 const cleanAbout = cleanAboutText(rawAboutText);
-
-// গুগলের স্কিমার জন্য আদর্শ দৈর্ঘ্য (১ম প্যারাগ্রাফ / ৩০০ ক্যারেক্টার)
 const hotelDescription = cleanAbout.length > 320 
   ? cleanAbout.substring(0, 320).trim() + "..." 
   : cleanAbout;
@@ -36,22 +33,31 @@ const hotelPrice = data.price ? String(data.price).trim() : "";
 const rawOfficialSite = (data.officialSite || data.official_site_url || "").trim();
 const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
 
-// ডোমেইন লক (লোকালহোস্ট প্রতিরোধ)
+// ডোমেইন ইউআরএল
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${hotelSlug}`;
 
-// sameAs ফিল্টারিং (ইউটিউব ওয়াচ লিংক বাদ)
 const isValidSameAs = rawOfficialSite && 
   !rawOfficialSite.includes('youtube.com/watch') && 
   !rawOfficialSite.includes('youtu.be/');
 
-// ২. আসল ছবি
+// ২. ছবির অ্যাবসোলিউট ইউআরএল
+function toAbsoluteImageUrl(url: string) {
+  if (!url) return "";
+  const clean = url.trim();
+  if (clean.includes('example-test.site')) return "";
+  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+  return `${siteOrigin}${clean.startsWith('/') ? '' : '/'}${clean}`;
+}
+
 const rawGallery: string[] = (Array.isArray(data.gallery) && data.gallery.length > 0 
   ? data.gallery.filter(Boolean)
   : (data.image ? [data.image] : [])
-).filter((img: string) => !img.includes('example-test.site'));
+)
+  .map(toAbsoluteImageUrl)
+  .filter(Boolean);
 
-// ৩. আসল রিভিউ সংগ্রহ
+// ৩. আসল রিভিউ ও লেটেস্ট তারিখ ক্যালকুলেশন
 let allReviewsList: any[] = [];
 try {
   const globReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
@@ -79,12 +85,50 @@ const approvedReviews = allReviewsList.filter((item: any) => {
 const embeddedRevs = Array.isArray(data.reviews) ? data.reviews : [];
 const totalRealReviews = [...approvedReviews, ...embeddedRevs];
 
+// তারিখ পার্সার (ISO 8601: YYYY-MM-DD ফরম্যাট)
+function toIsoDate(dStr: any) {
+  if (!dStr || dStr === 'Recent' || dStr === 'Recent Stay') return null;
+  const cleanStr = String(dStr).replace(' at ', ' ').trim();
+  const parsed = new Date(cleanStr);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toISOString().split('T')[0];
+  }
+  const match = String(dStr).match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  return null;
+}
+
+// ৪. ================= GOOGLE FRESHNESS SIGNAL =================
+// পেজের আসল পাবলিশ ও মোডিফাই তারিখ নির্ধারণ
+const defaultDate = new Date().toISOString().split('T')[0];
+const hotelPublishDate = toIsoDate(data.datePublished || data.publishDate || data.date) || "2026-01-01";
+
+// রিভিউগুলোর মধ্যে সবচেয়ে সাম্প্রতিক তারিখটি বের করা
+let latestReviewIsoDate: string | null = null;
+if (totalRealReviews.length > 0) {
+  const reviewTimestamps = totalRealReviews
+    .map(r => {
+      const iso = toIsoDate(r.date);
+      return iso ? new Date(iso).getTime() : 0;
+    })
+    .filter(t => t > 0);
+
+  if (reviewTimestamps.length > 0) {
+    const maxTime = Math.max(...reviewTimestamps);
+    latestReviewIsoDate = new Date(maxTime).toISOString().split('T')[0];
+  }
+}
+
+// dateModified: হোটেলের নিজস্ব আপডেট তারিখ অথবা সর্বশেষ রিভিউর তারিখ
+const finalDateModified = latestReviewIsoDate || toIsoDate(data.dateModified || data.updated) || defaultDate;
+
+// রেটিং
 const reviewCount = totalRealReviews.length;
 const ratingValue = reviewCount > 0 
   ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
   : (data.rating ? Number(data.rating).toFixed(1) : null);
 
-// ৪. অ্যামেনিটিস
+// ৫. অ্যামেনিটিস
 const amenitiesList: string[] = Array.isArray(data.amenities) ? data.amenities : [];
 const categorizedList = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
 
@@ -100,25 +144,25 @@ if (categorizedList.length > 0) {
 }
 flattenedAmenities = Array.from(new Set(flattenedAmenities.filter(Boolean)));
 
-// ৫. রুম টাইপ
+// ৬. রুম টাইপ
 const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
 
-// ৬. পলিসি
+// ৭. পলিসি
 const checkIn = data.checkIn || data.check_in || "";
 const checkOut = data.checkOut || data.check_out || "";
 
-// ৭. এফএকিউ
+// ৮. এফএকিউ
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const cleanFaqs = rawFaqs.map((faq: any) => ({
   question: typeof faq === 'string' ? faq : (faq?.question || ''),
   answer: typeof faq === 'object' ? String(faq?.answer || '').replace(/<[^>]*>?/gm, '').trim() : ''
 })).filter((f: any) => f.question && f.answer);
 
-// ৮. জিপিএস
+// ৯. জিপিএস
 const lat = data.latitude || data.lat || data.geo?.lat;
 const lng = data.longitude || data.lng || data.geo?.lng;
 
-// ================= MASTER JSON-LD KNOWLEDGE GRAPH =================
+// ================= MASTER CONNECTED KNOWLEDGE GRAPH =================
 const masterGraph: any = {
   "@context": "https://schema.org",
   "@graph": [
@@ -147,14 +191,34 @@ const masterGraph: any = {
       ]
     },
 
-    // 2. Hotel Entity (Strictly Conditional)
+    // 2. WebPage Node (গুগলের Freshness Signal এর মূল ভিত্তি)
+    {
+      "@type": "ItemPage",
+      "@id": `${canonicalUrl}#webpage`,
+      "url": canonicalUrl,
+      "name": `${hotelTitle} — Verified Stay & Rates`,
+      "description": hotelDescription,
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": `${siteOrigin}/#website`,
+        "name": "GulshanHotels.com",
+        "url": `${siteOrigin}/`
+      },
+      "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+      "mainEntity": { "@id": `${canonicalUrl}#hotel` },
+      "datePublished": hotelPublishDate,
+      "dateModified": finalDateModified
+    },
+
+    // 3. Hotel Entity
     {
       "@type": ["Hotel", "LodgingBusiness"],
       "@id": `${canonicalUrl}#hotel`,
       "name": hotelTitle,
       "url": canonicalUrl,
+      "mainEntityOfPage": { "@id": `${canonicalUrl}#webpage` },
 
-      // এখন About সেকশনের ফ্রেশ লেখা সরাসরি এখানে ঢুকবে
       ...(hotelDescription ? { "description": hotelDescription } : {}),
       ...(rawGallery.length > 0 ? { "image": rawGallery } : {}),
       ...(hotelPhone ? { "telephone": hotelPhone } : {}),
@@ -196,7 +260,7 @@ const masterGraph: any = {
             "@type": "Person",
             "name": rev.name || rev.author || "Verified Guest"
           },
-          "datePublished": rev.date || new Date().toISOString().split('T')[0],
+          "datePublished": toIsoDate(rev.date) || defaultDate,
           "reviewBody": String(rev.comment || rev.review || '').trim(),
           "reviewRating": {
             "@type": "Rating",
@@ -236,7 +300,7 @@ const masterGraph: any = {
       } : {})
     },
 
-    // 3. FAQPage Schema
+    // 4. FAQPage Schema
     ...(cleanFaqs.length > 0 ? [{
       "@type": "FAQPage",
       "@id": `${canonicalUrl}#faq`,
@@ -254,5 +318,5 @@ const masterGraph: any = {
 };
 ---
 
-<!-- 100% REAL ABOUT-DATA MASTER SCHEMA -->
+<!-- 100% REAL DATA MASTER SCHEMA WITH GOOGLE FRESHNESS SIGNAL -->
 <script type="application/ld+json" set:html={JSON.stringify(masterGraph)} />
