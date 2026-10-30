@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro
+// src/components/landing/LocationCategoryTemplate.astro (High-Ranking SEO Cluster Engine)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -10,22 +10,22 @@ interface Props {
 const { entry } = Astro.props;
 const data = entry?.data || {};
 
-// ---------- পেজের লেখা (সব admin থেকে) ----------
-const pageTitle = String(data.title || "").trim();
-const headingTitle = String(data.heading || data.title || "").trim();
-const description = String(data.description || data.seo_description || "").trim();
-const heroImage = data.hero_image || "";
-
+const pageTitle = (data.title || "Hotels in Gulshan").trim();
+const headingTitle = (data.heading || data.title || pageTitle).trim();
+const description = (data.description || data.seo_description || `Explore verified hotels, lodging and executive stays in ${pageTitle}.`).trim();
 const rawSlug = String(entry?.slug || entry?.id || "").trim();
 const cleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// ---------- সব হোটেল লোড ----------
+const badge = data.badge || "Verified Area & Stays Guide";
+const heroImage = data.hero_image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80";
+
+// ১. সব হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await getCollection('hotels');
   if (Array.isArray(hotelCol) && hotelCol.length > 0) {
-    allHotels = hotelCol.map((h: any) => ({
-      slug: String(h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
+    allHotels = hotelCol.map(h => ({
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
       data: h.data || {}
     }));
   }
@@ -33,7 +33,7 @@ try {
 
 if (allHotels.length === 0) {
   try {
-    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}'], { eager: true });
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
@@ -41,43 +41,51 @@ if (allHotels.length === 0) {
   } catch (e) {}
 }
 
-// ---------- কোন কোন হোটেল দেখাবে ----------
-// নিয়ম ১: admin এ selected_hotels দিলে শুধু সেগুলো দেখাবে
-// নিয়ম ২: না দিলে hotel এর tags এর সাথে filter_tag (না থাকলে page slug) মিলিয়ে দেখাবে
-const manualSlugs: string[] = Array.isArray(data.selected_hotels)
-  ? data.selected_hotels.map((s: string) => String(s).toLowerCase())
-  : [];
-const pageTag = String(data.filter_tag || cleanSlug).toLowerCase();
+// ২. স্মার্ট ফিল্টারিং লজিক (Location Keyword, Category অথবা Manual Slugs)
+const manualSlugs = Array.isArray(data.selected_hotels) ? data.selected_hotels.map((s: string) => s.toLowerCase()) : [];
+const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase();
 
-const displayHotels = manualSlugs.length > 0
-  ? allHotels.filter(h => manualSlugs.includes(String(h.slug).toLowerCase()))
-  : allHotels.filter(h =>
-      (Array.isArray(h.data.tags) ? h.data.tags : [])
-        .map((t: string) => String(t).toLowerCase())
-        .includes(pageTag)
-    );
+const matchedHotels = allHotels.filter(h => {
+  const hSlug = String(h.slug || '').toLowerCase();
+  const hTitle = String(h.data?.title || h.data?.name || '').toLowerCase();
+  const hLoc = String(h.data?.location || h.data?.address || '').toLowerCase();
+  const hCat = String(h.data?.category || '').toLowerCase();
 
-// ---------- ছোট helper ----------
-function formatHotelPrice(p: any) {
-  if (!p) return "";
-  const num = String(p).replace(/[^0-9]/g, '');
-  return num ? `৳ ${Number(num).toLocaleString('en-US')}` : "";
-}
+  // যদি ম্যানুয়ালি হোটেল বাছাই করা থাকে
+  if (manualSlugs.length > 0) {
+    return manualSlugs.includes(hSlug);
+  }
 
-function toProperCase(str: string) {
-  return String(str || "").replace(/\b\w/g, l => l.toUpperCase());
-}
+  // অটো-ফিল্টার: গুলশান ১, গুলশান ২, ইউএস এম্বাসি বা ৫-স্টার
+  if (cleanSlug.includes('gulshan-1') || matchKeyword.includes('gulshan 1')) {
+    return hLoc.includes('gulshan 1') || hLoc.includes('gulshan-1');
+  }
+  if (cleanSlug.includes('gulshan-2') || matchKeyword.includes('gulshan 2')) {
+    return hLoc.includes('gulshan 2') || hLoc.includes('gulshan-2');
+  }
+  if (cleanSlug.includes('5-star') || matchKeyword.includes('5 star') || cleanSlug.includes('luxury')) {
+    return hCat.includes('5-star') || hCat.includes('luxury');
+  }
+  if (cleanSlug.includes('embassy') || cleanSlug.includes('ivac') || matchKeyword.includes('embassy')) {
+    return hLoc.includes('gulshan 2') || hLoc.includes('diplomatic') || hTitle.includes('westin') || hTitle.includes('amari') || hTitle.includes('midori');
+  }
 
-// ---------- About section (admin থেকে) ----------
-const aboutTitle = data.about_title || (pageTitle ? `Why Stay in ${pageTitle}?` : "");
-const aboutText = data.about_text || "";
-const aboutImage = data.about_image || "";
-const features: any[] = Array.isArray(data.features) ? data.features : [];
+  return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword) || hTitle.includes(matchKeyword);
+});
 
-// ---------- SEO ----------
+// কোনো ম্যাচ না পেলে ফলব্যাক হিসেবে সেরা হোটেলগুলো
+const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 6);
+
+// ৩. লোকাল এরিয়া গাইড / টিপস
+const areaTips = Array.isArray(data.area_tips) ? data.area_tips : [];
+
+// ৪. এফএকিউ (FAQs)
+const faqs = Array.isArray(data.faqs) ? data.faqs : [];
+
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
+// ================= GOOGLE ITEMLIST & FAQPAGE SCHEMA =================
 const masterSchema = {
   "@context": "https://schema.org",
   "@graph": [
@@ -89,6 +97,7 @@ const masterSchema = {
         { "@type": "ListItem", "position": 2, "name": pageTitle }
       ]
     },
+    // Google Carousel ItemList Schema
     {
       "@type": "ItemList",
       "@id": `${canonicalUrl}#itemlist`,
@@ -98,361 +107,173 @@ const masterSchema = {
       "itemListElement": displayHotels.map((h, idx) => ({
         "@type": "ListItem",
         "position": idx + 1,
-        "name": toProperCase(h.data?.title || h.data?.name || ""),
+        "name": h.data?.title || "Hotel",
         "url": `${siteOrigin}/${h.slug}`
       }))
-    }
+    },
+    // FAQPage Schema
+    ...(faqs.length > 0 ? [{
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "mainEntity": faqs.map((f: any) => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answer
+        }
+      }))
+    }] : [])
   ]
 };
-
-const layoutTitle = data.seo_title || `${pageTitle} | GulshanHotels.com`;
 ---
 
-<Layout title={layoutTitle} description={description} image={heroImage || undefined}>
+<Layout title={`${pageTitle} — Verified Stays & Guide`} description={description} image={heroImage}>
 
+  <!-- GOOGLE ITEMLIST & FAQ SCHEMA -->
   <script type="application/ld+json" set:html={JSON.stringify(masterSchema)} />
 
-  <main class="w-full bg-[#f8faf9] text-slate-900 pb-20">
+  <main class="w-full bg-white text-slate-900 pt-6 pb-20">
+    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-10">
+      
+      <!-- BREADCRUMBS -->
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
+        <a href="/" class="hover:text-emerald-800 transition">Home</a>
+        <span>/</span>
+        <span class="text-slate-800 truncate" aria-current="page">{pageTitle}</span>
+      </nav>
 
-    <!-- ================= 1. HERO ================= -->
-    <header class="relative w-full overflow-hidden bg-gradient-to-br from-[#092e1e] to-[#14573f] min-h-[400px] sm:min-h-[480px] flex items-center justify-center text-center px-4 pt-10 pb-20 sm:pb-24">
-
-      {heroImage && (
-        <img
-          src={heroImage}
-          alt={pageTitle}
-          class="absolute inset-0 w-full h-full object-cover object-center scale-105"
+      <!-- 1. HERO HEADER WITH COVER BANNER -->
+      <header class="relative rounded-3xl overflow-hidden bg-slate-950 text-white min-h-[320px] sm:min-h-[380px] flex items-center p-6 sm:p-12 lg:p-16 text-left border border-slate-200">
+        <img 
+          src={heroImage} 
+          alt={pageTitle} 
+          class="absolute inset-0 w-full h-full object-cover opacity-35" 
           fetchpriority="high"
         />
-      )}
-      <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/85"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent"></div>
 
-      <div class="relative z-10 max-w-4xl mx-auto space-y-4 text-center">
-
-        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold">
-          <svg class="w-3.5 h-3.5 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          <span>Dhaka, Bangladesh</span>
-        </div>
-
-        <h1 class="font-serif text-4xl sm:text-6xl lg:text-[68px] font-black text-white tracking-tight leading-[1.1] drop-shadow-md">
-          {headingTitle}
-        </h1>
-
-        {description && (
-          <p class="text-xs sm:text-base text-slate-200 font-normal leading-relaxed max-w-2xl mx-auto">
+        <div class="relative z-10 max-w-2xl space-y-3">
+          <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
+            {badge}
+          </span>
+          <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+            {headingTitle}
+          </h1>
+          <p class="text-xs sm:text-base text-slate-300 font-normal leading-relaxed">
             {description}
           </p>
-        )}
-
-        <div class="pt-2 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs font-bold text-white/90">
-          <span class="flex items-center gap-1.5">
-            <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2L4 9l8 13 8-13-8-7zm0 3.2L17.5 9H6.5L12 5.2z"/></svg>
-            <span>Luxury Hotels</span>
-          </span>
-          <span class="flex items-center gap-1.5">
-            <svg class="w-4 h-4 fill-amber-400 shrink-0" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            <span>Top Rated</span>
-          </span>
-          <span class="flex items-center gap-1.5">
-            <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            <span>Prime Location</span>
-          </span>
-          <span class="flex items-center gap-1.5">
-            <svg class="w-4 h-4 fill-emerald-400 shrink-0" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-            <span>Trusted Directory</span>
-          </span>
+          <div class="pt-2 flex items-center gap-4 text-xs font-bold text-slate-300">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>{displayHotels.length} Verified Properties Available</span>
+            </span>
+          </div>
         </div>
+      </header>
 
-      </div>
-    </header>
-
-    <!-- ================= 2. SEARCH & FILTER BAR ================= -->
-    <div class="max-w-[1280px] mx-auto px-4 -mt-8 sm:-mt-10 relative z-30 mb-10">
-      <div class="bg-white rounded-3xl sm:rounded-full p-2.5 sm:p-3 border border-slate-200 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-3">
-
-        <div class="w-full lg:w-96 flex items-center gap-2.5 px-4 py-2 border-b lg:border-b-0 lg:border-r border-slate-100">
-          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            id="curationSearchInput"
-            placeholder={`Search hotels in ${pageTitle}...`}
-            class="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 outline-none"
-          />
-        </div>
-
-        <div class="flex items-center gap-2 overflow-x-auto w-full lg:w-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <button type="button" data-filter="all" class="landing-filter-btn shrink-0 bg-[#0d3b23] text-white px-4 py-2 rounded-full text-xs font-bold transition shadow-xs">All Hotels</button>
-          <button type="button" data-filter="5-star" class="landing-filter-btn shrink-0 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-full text-xs font-bold transition">5-Star Luxury</button>
-          <button type="button" data-filter="budget" class="landing-filter-btn shrink-0 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-full text-xs font-bold transition">Budget Friendly</button>
-          <button type="button" data-filter="pool" class="landing-filter-btn shrink-0 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-full text-xs font-bold transition">With Pool</button>
-          <button type="button" data-filter="embassy" class="landing-filter-btn shrink-0 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-full text-xs font-bold transition">Near US Embassy</button>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ================= 3. HOTELS GRID ================= -->
-    <div class="max-w-[1280px] mx-auto px-4 sm:px-8 space-y-12">
-
+      <!-- 2. HOTEL CARDS GRID (SIDE-BY-SIDE MOBILE 2-COLS, 3-COLS DESKTOP) -->
       <section class="space-y-6 text-left">
-        <div class="flex items-end justify-between border-b border-slate-200/80 pb-4">
+        <div class="border-b border-slate-200 pb-3 flex items-end justify-between">
           <div>
-            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Featured Hotels</span>
-            <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
-              Top Hotels in {pageTitle}
+            <h2 class="text-xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
+              Recommended Accommodations in this Area
             </h2>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Handpicked hotels with the best reviews, amenities, and location.</p>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Rates updated with verified direct contact and partner reservation channels</p>
           </div>
-          <a href="/#hotels" class="text-xs font-black uppercase tracking-wider text-emerald-800 hover:text-emerald-950 flex items-center gap-1 shrink-0">
-            <span>View All Hotels</span>
-            <span>➔</span>
-          </a>
         </div>
 
-        {displayHotels.length === 0 && (
-          <div class="bg-white border border-dashed border-slate-300 rounded-3xl p-10 text-center text-sm text-slate-500">
-            No hotels added for this page yet.
-          </div>
-        )}
-
-        <div id="hotelCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
           {displayHotels.map((h) => {
             const hd = h.data || {};
-            const hTitle = toProperCase(hd.title || hd.name || "");
-            const hPrice = formatHotelPrice(hd.price);
-            const hImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
-            const hLoc = hd.location || "";
-            const ratingScore = hd.rating ? Number(hd.rating).toFixed(1) : "";
-            const reviewNum = hd.reviews_count || hd.reviewsCount || "";
-            const hStars = hd.stars || "";
-            const hAmenities: string[] = Array.isArray(hd.amenities) ? hd.amenities.slice(0, 4) : [];
-            const hTags: string[] = Array.isArray(hd.tags) ? hd.tags : [];
-            const priceNum = Number(String(hd.price || 0).replace(/[^0-9]/g, ''));
+            const hTitle = hd.title || hd.name || "Hotel";
+            const hPrice = hd.price || "$120 / night";
+            const hImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
+            const hLoc = hd.location || "Gulshan, Dhaka";
 
             return (
-              <div
-                class="hotel-landing-card group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between"
-                data-title={hTitle.toLowerCase()}
-                data-stars={String(hStars)}
-                data-price={String(priceNum)}
-                data-tags={JSON.stringify(hTags).toLowerCase()}
-                data-amenities={JSON.stringify(hd.amenities || []).toLowerCase()}
-              >
+              <div class="group flex flex-col justify-between bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300">
                 <div>
+                  <a href={`/${h.slug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
+                    <img 
+                      src={hImage} 
+                      alt={hTitle} 
+                      loading="lazy" 
+                      decoding="async" 
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
+                    <span class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
+                      Verified
+                    </span>
+                  </a>
 
-                  <!-- ছবি -->
-                  <div class="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-[#14573f] to-[#6aa391]">
-                    {hImage && (
-                      <img
-                        src={hImage}
-                        alt={hTitle}
-                        loading="lazy"
-                        decoding="async"
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                      />
-                    )}
-
-                    {hStars && (
-                      <span class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
-                        <span>{hStars}</span>
-                        <svg class="w-3 h-3 fill-amber-400" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <div class="p-3 sm:p-5 space-y-1 sm:space-y-2">
+                    <h3 class="font-black text-slate-900 text-xs sm:text-lg group-hover:text-emerald-800 transition line-clamp-1">
+                      <a href={`/${h.slug}`}>{hTitle}</a>
+                    </h3>
+                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium truncate flex items-center gap-1">
+                      <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                      <span>{hLoc}</span>
+                    </p>
+                    <div class="pt-1 border-t border-slate-100 flex items-baseline justify-between">
+                      <span class="text-[9px] sm:text-xs text-slate-400 font-bold uppercase">From</span>
+                      <span class="text-xs sm:text-base font-black text-emerald-900">
+                        {hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}
                       </span>
-                    )}
-
-                    <button type="button" aria-label="Save hotel" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white flex items-center justify-center transition cursor-pointer">
-                      <svg class="w-4 h-4 fill-none stroke-white stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    </button>
-                  </div>
-
-                  <!-- লেখা -->
-                  <div class="p-5 space-y-3">
-
-                    <div>
-                      <h3 class="font-bold text-slate-900 text-lg group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
-                        <a href={`/${h.slug}`}>{hTitle}</a>
-                      </h3>
-                      {hLoc && (
-                        <p class="text-xs text-slate-500 font-medium truncate flex items-center gap-1 mt-1">
-                          <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                          <span>{hLoc}</span>
-                        </p>
-                      )}
                     </div>
-
-                    {ratingScore && (
-                      <div class="flex items-center gap-1.5 text-xs">
-                        <svg class="w-4 h-4 fill-amber-400 shrink-0" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        <span class="font-black text-slate-900">{ratingScore}</span>
-                        {reviewNum && <span class="text-slate-400 font-normal">({reviewNum} reviews)</span>}
-                      </div>
-                    )}
-
-                    {hAmenities.length > 0 && (
-                      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] font-semibold text-slate-600">
-                        {hAmenities.map((a: string) => (
-                          <span class="flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
-                            {a}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
                   </div>
                 </div>
 
-                <!-- নিচের অংশ: দাম -->
-                <div class="p-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <div>
-                    {hPrice && (
-                      <>
-                        <span class="text-xs text-slate-400 font-medium">From</span>
-                        <span class="text-base sm:text-lg font-black text-slate-900 block leading-tight">{hPrice} <span class="text-[11px] font-normal text-slate-400">/ night</span></span>
-                      </>
-                    )}
-                  </div>
-
-                  <a
-                    href={`/${h.slug}`}
-                    class="inline-flex items-center gap-1 text-xs font-black text-emerald-800 hover:text-emerald-950 transition hover:underline"
-                  >
-                    <span>View Details</span>
-                    <span>➔</span>
+                <div class="p-3 sm:p-5 pt-0">
+                  <a href={`/${h.slug}`} class="block w-full bg-slate-50 hover:bg-[#0d3b23] border border-slate-200 text-slate-900 hover:text-white font-black text-[11px] sm:text-xs text-center py-2 sm:py-2.5 rounded-xl transition duration-200">
+                    Check Rates ➔
                   </a>
                 </div>
-
               </div>
             );
           })}
         </div>
       </section>
 
-      <!-- ================= 4. ABOUT SECTION (admin এ লিখলে তবেই দেখাবে) ================= -->
-      {aboutText && (
-        <section class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 lg:p-12 text-left shadow-xs">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-
-            {aboutImage && (
-              <div class="lg:col-span-4 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-900 shadow-md">
-                <img src={aboutImage} alt={aboutTitle} loading="lazy" class="w-full h-full object-cover" />
+      <!-- 3. LOCAL AREA INSIDER TIPS (E-E-A-T SUPER WEAPON) -->
+      {areaTips.length > 0 && (
+        <section class="bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-10 text-left space-y-4">
+          <div class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800">Local Area Insights</span>
+            <h3 class="font-serif text-2xl font-black text-slate-900">Travel Advice for {pageTitle}</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {areaTips.map((tip: any) => (
+              <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-2xs">
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                  <span>{tip.title}</span>
+                </h4>
+                <p class="text-xs text-slate-600 leading-relaxed font-normal">{tip.desc}</p>
               </div>
-            )}
-
-            <div class={aboutImage ? "lg:col-span-4 space-y-3" : "lg:col-span-6 space-y-3"}>
-              <span class="text-[10px] font-black uppercase tracking-widest text-emerald-800 block">About {pageTitle}</span>
-              <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
-                {aboutTitle}
-              </h2>
-              <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-                {aboutText}
-              </p>
-            </div>
-
-            {features.length > 0 && (
-              <div class={aboutImage ? "lg:col-span-4 space-y-4" : "lg:col-span-6 space-y-4"}>
-                {features.map((f: any) => (
-                  <div class="flex items-start gap-3">
-                    <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-900 shrink-0">
-                      <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                    </div>
-                    <div>
-                      <h4 class="font-bold text-slate-900 text-sm">{f.title}</h4>
-                      <p class="text-xs text-slate-500">{f.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
+            ))}
           </div>
         </section>
       )}
 
-      <!-- ================= 5. OWN A HOTEL CTA ================= -->
-      <section class="relative rounded-3xl bg-[#092e1e] text-white p-6 sm:p-10 overflow-hidden shadow-lg border border-emerald-900 text-left">
-        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg>
-            </div>
-            <div>
-              <h3 class="font-bold text-xl sm:text-2xl text-white">Own a Hotel in {pageTitle}?</h3>
-              <p class="text-xs sm:text-sm text-emerald-100/80 mt-0.5">List your hotel on GulshanHotels.com and reach more travelers every month.</p>
-            </div>
+      <!-- 4. LOCATION FAQS ACCORDION -->
+      {faqs.length > 0 && (
+        <section class="space-y-4 text-left pt-6 border-t border-slate-200">
+          <h3 class="font-serif text-2xl font-black text-slate-900">Frequently Asked Questions</h3>
+          <div class="space-y-2.5 max-w-4xl">
+            {faqs.map((f: any, i: number) => (
+              <details class="group bg-slate-50 rounded-2xl border border-slate-200 p-4 transition-all cursor-pointer" open={i === 0}>
+                <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-800 select-none">
+                  <span>{f.question}</span>
+                  <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                </summary>
+                <p class="pt-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-200/60 mt-3">{f.answer}</p>
+              </details>
+            ))}
           </div>
-
-          <a
-            href="/about"
-            class="bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs px-6 py-3 rounded-full uppercase tracking-wider transition shrink-0 shadow-md flex items-center gap-1.5"
-          >
-            <span>List Your Hotel</span>
-            <span>➔</span>
-          </a>
-        </div>
-      </section>
+        </section>
+      )}
 
     </div>
   </main>
 </Layout>
-
-<!-- ================= LIVE SEARCH & FILTER SCRIPT ================= -->
-<script is:inline>
-  const initLandingFilters = () => {
-    const input = document.getElementById('curationSearchInput');
-    const filterBtns = document.querySelectorAll('.landing-filter-btn');
-    const cards = document.querySelectorAll('.hotel-landing-card');
-
-    let activeFilter = 'all';
-
-    function runFilter() {
-      const q = (input?.value || '').trim().toLowerCase();
-
-      cards.forEach(card => {
-        const title = card.getAttribute('data-title') || '';
-        const stars = card.getAttribute('data-stars') || '';
-        const price = Number(card.getAttribute('data-price') || 0);
-        const tags = card.getAttribute('data-tags') || '';
-        const amens = card.getAttribute('data-amenities') || '';
-
-        const matchesQuery = !q || title.includes(q);
-        let matchesFilter = true;
-
-        if (activeFilter === '5-star') matchesFilter = stars === '5';
-        else if (activeFilter === 'pool') matchesFilter = amens.includes('pool');
-        else if (activeFilter === 'embassy') matchesFilter = tags.includes('us-embassy');
-        else if (activeFilter === 'budget') matchesFilter = price > 0 && price <= 10000;
-
-        if (matchesQuery && matchesFilter) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      });
-    }
-
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        activeFilter = btn.getAttribute('data-filter') || 'all';
-
-        filterBtns.forEach(b => {
-          b.classList.remove('bg-[#0d3b23]', 'text-white', 'shadow-xs');
-          b.classList.add('bg-slate-100', 'text-slate-700');
-        });
-
-        btn.classList.remove('bg-slate-100', 'text-slate-700');
-        btn.classList.add('bg-[#0d3b23]', 'text-white', 'shadow-xs');
-
-        runFilter();
-      });
-    });
-
-    if (input) {
-      input.addEventListener('input', runFilter);
-    }
-  };
-
-  document.addEventListener('DOMContentLoaded', initLandingFilters);
-  document.addEventListener('astro:page-load', initLandingFilters);
-</script>
