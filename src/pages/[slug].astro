@@ -2,6 +2,7 @@
 // src/pages/[slug].astro (PERMANENT LOCKED ROUTER — 100% BUILD-SAFE & MASTER SCHEMA INTEGRATED)
 import Layout from '../layouts/Layout.astro';
 import HotelMasterSchema from '../components/hotel/HotelMasterSchema.astro';
+import LocationCategoryTemplate from '../components/landing/LocationCategoryTemplate.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelSubNav from '../components/hotel/HotelSubNav.astro';
 import HotelAboutAndRates from '../components/hotel/HotelAboutAndRates.astro';
@@ -47,7 +48,14 @@ export async function getStaticPaths() {
       });
     }
   }
+// 2. getStaticPaths এর ভেতরে যুক্ত করুন:
+let destinations: any[] = [];
+try { destinations = await getCollection('destinations'); } catch (e) {}
 
+const destinationPaths = destinations.map((entry: any) => ({
+  params: { slug: (entry.data?.slug || entry.slug || entry.id).replace(/\.(md|mdx)$/, '') },
+  props: { type: 'destination', entry }
+}));
   // ২. সাধারণ পেজ ডাটা লোডার (About, Privacy, Terms etc.)
   let pages: any[] = [];
   try { 
@@ -86,6 +94,8 @@ export async function getStaticPaths() {
   }
 
   return [...hotelPaths, ...pagePaths];
+return [...hotelPaths, ...destinationPaths, ...pagePaths];
+
 }
 
 const { type = 'hotel', entry } = Astro.props;
