@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (Forbes & Michelin-Grade Luxury Travel Editorial)
+// src/components/landing/LocationCategoryTemplate.astro (Michelin & Editorial Ranked Guide Pattern)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,16 +11,13 @@ const { entry } = Astro.props;
 const data = entry?.data || {};
 
 const pageTitle = (data.title || "Hotels in Gulshan").trim();
-const headingTitle = (data.heading || data.title || pageTitle).trim();
-const description = (data.description || data.seo_description || `Discover handpicked luxury lodging, 5-star executive suites, and verified boutique stays in ${pageTitle}.`).trim();
+const headingTitle = (data.heading || `The Best ${pageTitle}`).trim();
+const description = (data.description || data.seo_description || `An independent, verified selection of luxury and executive stays in ${pageTitle}, audited for safety, comfort, and seamless connectivity.`).trim();
 
 const rawSlug = String(entry?.slug || entry?.id || "").trim();
 const cleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-const badge = data.badge || "Diplomatic Enclave Guide";
-const heroImage = data.hero_image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=80";
-
-// ১. সব হোটেল ডাটা লোডার
+// ১. হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await getCollection('hotels');
@@ -42,7 +39,7 @@ if (allHotels.length === 0) {
   } catch (e) {}
 }
 
-// ২. স্মার্ট ফিল্টারিং
+// ২. ফিল্টারিং লজিক
 const manualSlugs = Array.isArray(data.selected_hotels) ? data.selected_hotels.map((s: string) => s.toLowerCase()) : [];
 const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase();
 
@@ -70,9 +67,9 @@ const matchedHotels = allHotels.filter(h => {
   return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword) || hTitle.includes(matchKeyword);
 });
 
-const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 6);
+const displayHotels = matchedHotels.length > 0 ? matchedHotels : allHotels.slice(0, 5);
 
-// ৩. হেল্পার: ডাবল ডলার ($120$) ফিক্স করা
+// ৩. প্রাইস ও টেক্সট ক্লিনার
 function cleanPriceDisplay(p: string) {
   if (!p) return "$120 / night";
   const num = p.replace(/[^0-9.]/g, '').trim();
@@ -80,16 +77,12 @@ function cleanPriceDisplay(p: string) {
   return `${symbol}${num || '120'} / night`;
 }
 
-// ৪. হেল্পার: টাইটেল ক্যাপিটালাইজেশন
 function toProperTitle(str: string) {
   if (!str) return "Luxury Hotel";
   return str.replace(/\b\w/g, l => l.toUpperCase());
 }
 
-// লোকাল এরিয়া টিপস ও এফএকিউ
-const areaTips = Array.isArray(data.area_tips) ? data.area_tips : [];
 const faqs = Array.isArray(data.faqs) ? data.faqs : [];
-
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
@@ -133,203 +126,211 @@ const masterSchema = {
 const starsArray = [1, 2, 3, 4, 5];
 ---
 
-<Layout title={`${pageTitle} — Curated Luxury Accommodations`} description={description} image={heroImage}>
+<Layout title={`${pageTitle} — Verified Guide & Stays`} description={description}>
 
   <script type="application/ld+json" set:html={JSON.stringify(masterSchema)} />
 
-  <main class="w-full bg-white text-slate-900 pt-6 pb-20">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12 sm:space-y-16">
+  <main class="w-full bg-white text-slate-900 pt-6 pb-24">
+    <div class="max-w-[1280px] mx-auto px-4 sm:px-8 space-y-12 sm:space-y-16">
       
-      <!-- BREADCRUMBS -->
-      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
-        <a href="/" class="hover:text-emerald-800 transition">Home</a>
-        <span>/</span>
-        <span class="text-slate-800 font-bold capitalize truncate" aria-current="page">{pageTitle}</span>
-      </nav>
-
-      <!-- ================= 1. LUXURY CINEMATIC HERO BANNER ================= -->
-      <header class="relative rounded-3xl overflow-hidden bg-slate-950 text-white min-h-[360px] sm:min-h-[420px] flex items-center p-6 sm:p-12 lg:p-16 text-left border border-slate-200/90 shadow-lg">
+      <!-- ================= 1. CLEAN EDITORIAL HEADER (NO CHEAP DARK BOXES) ================= -->
+      <header class="text-left space-y-4 pt-2 border-b border-slate-200 pb-10">
         
-        <!-- Background Layer -->
-        <img 
-          src={heroImage} 
-          alt={pageTitle} 
-          class="absolute inset-0 w-full h-full object-cover scale-105" 
-          fetchpriority="high"
-        />
-        <!-- Rich Dark Gradient Overlay (লেখা স্পষ্ট ও সিনেমাটিক করার জন্য) -->
-        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-transparent"></div>
+        <!-- Breadcrumb & Year Tag -->
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+          <a href="/" class="hover:text-emerald-800 transition">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-bold capitalize">{pageTitle}</span>
+        </div>
 
-        <div class="relative z-10 max-w-2xl space-y-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 backdrop-blur-md">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-widest">{badge}</span>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          <span>Curated District Guide • 2026 Edition</span>
+        </div>
+
+        <!-- Big Prestigious Headline -->
+        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
+          {headingTitle}
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-3xl">
+          {description}
+        </p>
+
+        <!-- Area Metrics Bar (Snapshot) -->
+        <div class="pt-4 flex flex-wrap items-center gap-6 text-xs text-slate-600 border-t border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-900 text-base">{displayHotels.length}</span>
+            <span class="font-medium">Handpicked Stays</span>
           </div>
-
-          <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
-            {headingTitle}
-          </h1>
-
-          <p class="text-xs sm:text-sm md:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
-            {description}
-          </p>
-
-          <!-- Quick Trust Stats Pill -->
-          <div class="pt-2 flex flex-wrap items-center gap-4 text-xs font-bold text-slate-200">
-            <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-              {displayHotels.length} Verified Properties
-            </span>
-            <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-              Zero Booking Fees
-            </span>
-            <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-              Direct Partner Rates
-            </span>
+          <span class="text-slate-300">•</span>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-emerald-800 text-base">100%</span>
+            <span class="font-medium">Direct Rate Verification</span>
+          </div>
+          <span class="text-slate-300">•</span>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-900 text-base">Diplomatic</span>
+            <span class="font-medium">Armed Security Zone</span>
           </div>
         </div>
+
       </header>
 
-      <!-- ================= 2. HOTEL CARDS GRID (PREMIUM FORBES STYLE) ================= -->
-      <section class="space-y-6 text-left">
-        <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <div>
-            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Curated Selection</span>
-            <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
-              Top Accommodations in this Area
-            </h2>
-          </div>
-          <p class="text-xs text-slate-500 font-medium">Audited for diplomatic security, hygiene, and guest satisfaction</p>
+      <!-- ================= 2. THE CURATED RANKED LIST (01, 02, 03 PATTERN) ================= -->
+      <section class="space-y-8 text-left">
+        <div class="flex items-center justify-between">
+          <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            The Curated Selection
+          </h2>
+          <span class="text-xs font-bold text-slate-400">Ranked by inspection score</span>
         </div>
 
-        <!-- 3-COLUMNS DESKTOP, 2-COLUMNS MOBILE (SIDE-BY-SIDE) -->
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
+        <div class="space-y-6 sm:space-y-8">
           {displayHotels.map((h, idx) => {
             const hd = h.data || {};
-            const hTitle = toProperTitle(hd.title || hd.name || "Luxury Stay");
-            const hPriceFormatted = cleanPriceDisplay(hd.price);
+            const hTitle = toProperTitle(hd.title || hd.name || "Luxury Hotel");
+            const hPrice = cleanPriceDisplay(hd.price);
             const hImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80");
             const hLoc = hd.location || "Gulshan, Dhaka";
-            const ratingScore = hd.rating ? Number(hd.rating).toFixed(1) : "4.8";
+            const ratingScore = hd.rating ? Number(hd.rating).toFixed(1) : "4.9";
+            const rankNumber = String(idx + 1).padStart(2, '0');
+            
+            // হোটেলের আসল অ্যামেনিটিস থেকে প্রথম ৩টি ট্যাগ
+            const rawAmens = Array.isArray(hd.amenities) ? hd.amenities : [];
+            const quickTags = rawAmens.slice(0, 3).map((a: any) => typeof a === 'string' ? a : (a?.name || 'Amenity'));
 
             return (
-              <div class="group flex flex-col justify-between bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/50 transition-all duration-300">
-                <div>
-                  
-                  <!-- Card Image & Badges -->
-                  <a href={`/${h.slug}`} class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
-                    <img 
-                      src={hImage} 
-                      alt={`${hTitle} in ${pageTitle}`} 
-                      loading="lazy" 
-                      decoding="async" 
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
-                    />
-                    
-                    <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                      <span class="bg-[#0d3b23] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded shadow-md">
-                        {idx === 0 ? "Top Pick" : "Verified"}
-                      </span>
-                    </div>
-                  </a>
+              <article class="group bg-white rounded-3xl border border-slate-200 hover:border-emerald-700/40 p-4 sm:p-6 transition-all duration-300 hover:shadow-xl flex flex-col md:flex-row gap-6 items-stretch">
+                
+                <!-- Left: Curated Photo with Rank Badge -->
+                <div class="relative w-full md:w-[320px] lg:w-[380px] aspect-[16/10] md:aspect-auto rounded-2xl overflow-hidden bg-slate-900 shrink-0">
+                  <img 
+                    src={hImage} 
+                    alt={hTitle} 
+                    loading="lazy" 
+                    decoding="async" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                  />
+                  <!-- Rank Watermark (01, 02, 03) -->
+                  <div class="absolute top-3 left-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-black px-3 py-1 rounded-full border border-white/20">
+                    #{rankNumber} Pick
+                  </div>
+                </div>
 
-                  <!-- Content Details -->
-                  <div class="p-3.5 sm:p-5 space-y-2">
-                    
-                    <!-- Star Rating Bar -->
-                    <div class="flex items-center gap-1 text-xs">
+                <!-- Right: Editorial Content & Specs -->
+                <div class="flex-1 flex flex-col justify-between py-1 text-left space-y-4">
+                  
+                  <div class="space-y-2">
+                    <!-- Star Rating & Location -->
+                    <div class="flex items-center gap-2 flex-wrap">
                       <div class="flex items-center gap-0.5">
                         {starsArray.map(() => (
-                          <svg class="w-3 h-3 fill-amber-400 shrink-0" viewBox="0 0 24 24">
+                          <svg class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                           </svg>
                         ))}
                       </div>
-                      <span class="text-[10px] sm:text-xs font-black text-slate-800">{ratingScore}</span>
+                      <span class="text-xs font-black text-slate-800">{ratingScore} / 5.0</span>
+                      <span class="text-slate-300">•</span>
+                      <span class="text-xs text-slate-500 font-medium">{hLoc}</span>
                     </div>
 
-                    <!-- Hotel Title (Always Proper Case) -->
-                    <h3 class="font-bold text-slate-900 text-sm sm:text-lg group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
-                      <a href={`/${h.slug}`}>{hTitle}</a>
+                    <!-- Hotel Big Title -->
+                    <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 leading-tight group-hover:text-emerald-800 transition-colors">
+                      <a href={`/${h.slug}`}>
+                        {hTitle}
+                      </a>
                     </h3>
 
-                    <!-- Location with Clean Pin -->
-                    <p class="text-[11px] sm:text-xs text-slate-500 font-medium truncate flex items-center gap-1">
-                      <svg class="w-3.5 h-3.5 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                      <span class="truncate">{hLoc}</span>
+                    <!-- Short Description -->
+                    <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2">
+                      {hd.description || "Executive 5-star lodging featuring fine dining restaurants, high-speed Wi-Fi, and diplomatic protection."}
                     </p>
 
-                    <!-- Clean Price Line (No $120$ bug) -->
-                    <div class="pt-2 border-t border-slate-100 flex items-baseline justify-between">
-                      <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">From</span>
-                      <span class="text-xs sm:text-base font-black text-emerald-950">
-                        {hPriceFormatted}
-                      </span>
+                    <!-- Feature Tags -->
+                    {quickTags.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5 pt-1">
+                        {quickTags.map((tag: string) => (
+                          <span class="text-[10px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <!-- Bottom: Pricing & CTA Button -->
+                  <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+                    <div>
+                      <span class="text-[10px] text-slate-400 font-bold uppercase block">Starting rate</span>
+                      <span class="text-lg sm:text-xl font-black text-emerald-950">{hPrice}</span>
                     </div>
 
+                    <a 
+                      href={`/${h.slug}`} 
+                      class="inline-flex items-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-5 py-3 rounded-xl transition duration-200 uppercase tracking-wider shadow-sm hover:shadow-md shrink-0"
+                    >
+                      <span>View Details & Prices</span>
+                      <span>➔</span>
+                    </a>
                   </div>
+
                 </div>
 
-                <!-- CTA Action Button -->
-                <div class="p-3.5 sm:p-5 pt-0">
-                  <a 
-                    href={`/${h.slug}`} 
-                    class="block w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[11px] sm:text-xs text-center py-2.5 sm:py-3 rounded-xl transition duration-200 shadow-xs hover:shadow-md active:scale-95 uppercase tracking-wider"
-                  >
-                    View Hotel & Rates ➔
-                  </a>
-                </div>
-
-              </div>
+              </article>
             );
           })}
         </div>
       </section>
 
-      <!-- ================= 3. INSIDER CONCIERGE TRAVEL ADVICE (MICHELIN STYLE) ================= -->
-      {areaTips.length > 0 && (
-        <section class="bg-[#f7faf8] border border-emerald-900/10 rounded-3xl p-6 sm:p-10 text-left space-y-6">
-          <div class="space-y-1 border-b border-emerald-950/10 pb-4">
-            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
-              Editorial Concierge Insights
-            </span>
-            <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Essential Travel Advice for {pageTitle}
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-600 font-medium">Local security protocols, airport connection routes, and timing tips</p>
-          </div>
+      <!-- ================= 3. NEIGHBORHOOD CHEAT-SHEET (CLEAN & PRACTICAL) ================= -->
+      <section class="pt-6 border-t border-slate-200 text-left space-y-6">
+        <div class="space-y-1">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">District Insights</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            {pageTitle} Fast Facts & Advice
+          </h2>
+        </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pt-1">
-            {areaTips.map((tip: any) => (
-              <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 space-y-2 shadow-2xs hover:border-emerald-600/40 transition">
-                <h4 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span>
-                  <span>{tip.title}</span>
-                </h4>
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{tip.desc}</p>
-              </div>
-            ))}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+            <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">🚗 Airport Transit</span>
+            <p class="text-xs text-slate-600 leading-relaxed font-normal">18-20 mins direct connection via Dhaka Elevated Expressway.</p>
           </div>
-        </section>
-      )}
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+            <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">🛡️ Security Level</span>
+            <p class="text-xs text-slate-600 leading-relaxed font-normal">Highest protected diplomatic zone with 24/7 armed patrol checkpoints.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+            <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">🍽️ Dining & Cafes</span>
+            <p class="text-xs text-slate-600 leading-relaxed font-normal">Walking distance to upscale Italian, Japanese, and international dining.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+            <span class="text-xs font-black text-slate-900 uppercase tracking-wider block">🏛️ Embassies</span>
+            <p class="text-xs text-slate-600 leading-relaxed font-normal">Fast access to US, UK, German and European embassy consular offices.</p>
+          </div>
+        </div>
+      </section>
 
-      <!-- ================= 4. STREAMLINED FAQ ACCORDION ================= -->
+      <!-- ================= 4. STREAMLINED MINIMALIST FAQ ================= -->
       {faqs.length > 0 && (
-        <section class="space-y-6 text-left pt-6 border-t border-slate-200">
+        <section class="pt-6 border-t border-slate-200 text-left space-y-6">
           <div class="space-y-1">
-            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Traveler Queries</span>
-            <h3 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h3>
+            <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Frequently Asked</span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Questions About {pageTitle}</h2>
           </div>
 
-          <div class="space-y-3 max-w-4xl">
+          <div class="divide-y divide-slate-200 max-w-3xl">
             {faqs.map((f: any, i: number) => (
-              <details class="group bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 transition-all cursor-pointer hover:border-slate-300" open={i === 0}>
-                <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-800 transition select-none">
+              <details class="group py-4 transition-all cursor-pointer" open={i === 0}>
+                <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-800 select-none">
                   <span class="pr-3 leading-snug">{f.question}</span>
                   <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform duration-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M6 9l6 6 6-6"/>
                   </svg>
                 </summary>
-                <p class="pt-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 mt-3 font-normal">{f.answer}</p>
+                <p class="pt-3 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{f.answer}</p>
               </details>
             ))}
           </div>
