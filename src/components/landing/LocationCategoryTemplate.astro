@@ -18,7 +18,7 @@ const description = (data.description || data.seo_description || "").trim();
 const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const heroImage = data.hero_image || data.image || "";
 
-// ২. সেফ হোটেল লোডার (যাতে কোনো স্কিমা এররে ক্লাউডফ্লেয়ার বিল্ড ফেইল না করে)
+// ২. সেফ হোটেল লোডার (যাতে ক্লাউডফ্লেয়ার বিল্ড কখনো ক্র্যাশ না করে)
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -29,9 +29,8 @@ try {
     }));
   }
 } catch (err) {
-  // ফলব্যাক হিসেবে import.meta.glob দিয়ে লোড করা
   try {
-    const rawGlob = import.meta.glob(['/src/content/*.{md,mdx}', '../../content/*.{md,mdx}'], { eager: true });
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
@@ -117,7 +116,7 @@ const aboutText = data.about_text || description;
 const siteOrigin = Astro.site ? Astro.site.origin : "";
 const canonicalUrl = siteOrigin ? `${siteOrigin}/${cleanSlug}` : `/${cleanSlug}`;
 
-// এসইও স্কিমা
+// এসইও স্কিমা (সরাসরি রুট লিংকে আপডেট করা)
 const masterSchema = {
   "@context": "https://schema.org",
   "@graph": [
@@ -273,7 +272,9 @@ const masterSchema = {
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
-            const hotelUrl = `${h.slug}`;
+            
+            // রুট ডোমেন অনুযায়ী লিংক (যেমন: /amari-dhaka)
+            const hotelUrl = `/${h.slug}`;
             const review = getReviewData(hd);
 
             return (
@@ -331,7 +332,7 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW (Clean JSX) -->
+                    <!-- REAL REVIEW ROW -->
                     {review.hasData ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         {review.score && (
@@ -410,7 +411,7 @@ const masterSchema = {
                   </div>
                 </div>
 
-                <!-- Price & Details CTA Button -->
+                <!-- Price & Details CTA Button (সরাসরি রুট লিংকে আপডেট করা) -->
                 <div class="px-4 sm:px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
                   {price ? (
                     <div>
