@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro
+// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Zero Hardcoded Fluff)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,14 +11,14 @@ interface Props {
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
 
-// ১. পেজের মেটাডাটা
+// ১. পেজের আসল মেটাডাটা
 const pageTitle = (data.title || "").trim();
-const locationSubtitle = data.location_subtitle || "Dhaka, Bangladesh";
+const locationSubtitle = data.location_subtitle || data.location || "";
 const description = (data.description || data.seo_description || "").trim();
 const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const heroImage = data.hero_image || data.image || "";
 
-// ২. সব হোটেল লোডার (প্রথমে getCollection, না হলে glob fallback)
+// ২. সব হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -29,36 +29,24 @@ try {
     }));
   }
 } catch (err) {
-  console.warn('[LocationCategoryTemplate] getCollection(hotels) failed, using glob:', err);
   try {
     const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
     }));
-  } catch (e) {
-    console.warn('[LocationCategoryTemplate] hotels glob failed:', e);
-  }
+  } catch (e) {}
 }
 
-// ৩. সব রিভিউ ডাটা ফেচিং
+// ৩. সব রিভিউ ডাটা লোডার (রিয়েল রেটিং ও রিভিউ কাউন্টের জন্য)
 let rawReviewsList: any[] = [];
 try {
-  const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
-  const entries = Object.values(globFiles);
-
-  if (entries.length > 0) {
-    rawReviewsList = entries.map((item: any) => item?.frontmatter || item?.data || item || {});
-  } else {
-    const relFiles = import.meta.glob('../../content/reviews/*.{md,mdx}', { eager: true });
-    rawReviewsList = Object.values(relFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
-  }
+  const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
+  rawReviewsList = Object.values(globFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
 } catch (e) {
-  console.warn('[LocationCategoryTemplate] reviews glob failed:', e);
   rawReviewsList = [];
 }
 
-// ৩.১ রিভিউগুলো একবারই হোটেল অনুযায়ী গ্রুপ করা (দ্রুত build এর জন্য)
 const reviewsByKey = new Map<string, any[]>();
 for (const item of rawReviewsList) {
   if (!item) continue;
@@ -69,7 +57,6 @@ for (const item of rawReviewsList) {
   const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
   const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
 
-  // একই রিভিউ একই key তে দুইবার যেন না যায়
   const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
   for (const k of keys) {
     if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
@@ -77,23 +64,34 @@ for (const item of rawReviewsList) {
   }
 }
 
-// ৪. হোটেল ফিল্টারিং (title দিয়ে আর ফিল্টার হবে না, শুধু location আর category)
+// ৪. স্মার্ট কি-ওয়ার্ড এক্সট্র্যাক্টর (BUG FIXED: 'hotels-in-gulshan-1' -> 'gulshan 1')
 const manualSlugs = Array.isArray(data.selected_hotels)
   ? data.selected_hotels.map((s: string) => String(s).toLowerCase().trim())
   : [];
-const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase().trim();
+
+const cleanTargetKeyword = String(data.filter_keyword || cleanSlug)
+  .replace(/^hotels?-in-/i, '')
+  .replace(/^hotels?-near-/i, '')
+  .replace(/^hotels?-/i, '')
+  .replace(/-hotels?$/i, '')
+  .replace(/-/g, ' ')
+  .toLowerCase()
+  .trim();
 
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
-  const hLoc = String(h.data?.location || '').toLowerCase();
+  const hLoc = String(h.data?.location || h.data?.address || '').toLowerCase();
   const hCat = String(h.data?.category || '').toLowerCase();
+  const hTitle = String(h.data?.title || h.data?.name || '').toLowerCase();
 
+  // যদি ম্যানুয়ালি হোটেল বাছাই করা থাকে
   if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  if (!matchKeyword) return false;
-  return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword);
+  if (!cleanTargetKeyword) return true;
+
+  return hLoc.includes(cleanTargetKeyword) || hCat.includes(cleanTargetKeyword) || hTitle.includes(cleanTargetKeyword);
 });
 
-// ৫. টেক্সট ও ডাটা হেল্পার ফাংশন
+// ৫. টেক্সট ও ডাটা হেল্পার
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -114,47 +112,44 @@ function formatShortLocation(loc: string) {
 function formatPriceDisplay(rawPrice: any) {
   if (!rawPrice) return null;
   const pStr = String(rawPrice).trim();
-  const base = pStr.includes('/') ? pStr.split('/')[0].trim() : pStr;
-  return base;
+  return pStr.includes('/') ? pStr.split('/')[0].trim() : pStr;
 }
 
-// HTML / markdown সরিয়ে plain text বানায় (Google FAQ schema এর জন্য)
 function plainText(str: any) {
   return String(str || '')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/<[^>]*>/g, '')
     .replace(/[*_`#>]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// ৬. "Why Stay" এবং FAQs ডাটা
-const aboutImage = data.about_image || heroImage;
-const aboutText = data.about_text || description;
+// ৬. আসল এরিয়া টেক্সট ও হাইলাইটস (কোনো ফেক রিপিটেশন নেই)
+const aboutImage = data.about_image || "";
+const aboutText = data.about_text || "";
+const areaHighlights = Array.isArray(data.area_highlights) ? data.area_highlights : [];
 const faqs = Array.isArray(data.faqs) ? data.faqs : [];
 
-const siteOrigin = Astro.site ? Astro.site.origin : "";
-const canonicalUrl = siteOrigin ? `${siteOrigin}/${cleanSlug}` : `/${cleanSlug}`;
+const siteOrigin = "https://gulshanhotels.com";
+const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
-// ৭. গুগল এসইও স্কিমা (Breadcrumb + ItemList + FAQPage)
+// ৭. গুগল এসইও স্কিমা
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
     "@id": `${canonicalUrl}#breadcrumb`,
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": siteOrigin ? `${siteOrigin}/` : "/" },
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
       { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle), "item": canonicalUrl }
     ]
   }
 ];
 
-// হোটেল থাকলেই শুধু ItemList যাবে
 if (displayHotels.length > 0) {
   schemaGraph.push({
     "@type": "ItemList",
     "@id": `${canonicalUrl}#itemlist`,
     "name": pageTitle,
-    "description": description,
+    ...(description ? { "description": description } : {}),
     "numberOfItems": displayHotels.length,
     "itemListElement": displayHotels.map((h, idx) => ({
       "@type": "ListItem",
@@ -191,81 +186,57 @@ const masterSchema = {
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
 
-    <!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
-    <header class="relative bg-slate-950 text-white min-h-[460px] flex items-center pb-20 pt-14 px-4 sm:px-6 lg:px-8">
+    <!-- ================= 1. HERO BANNER (100% REAL DATA) ================= -->
+    <header class="relative bg-slate-950 text-white min-h-[380px] sm:min-h-[440px] flex items-center pb-20 pt-12 px-4 sm:px-6 lg:px-8">
       {heroImage && (
         <img
           src={heroImage}
           alt={pageTitle}
-          class="absolute inset-0 w-full h-full object-cover opacity-40"
+          class="absolute inset-0 w-full h-full object-cover opacity-45"
           fetchpriority="high"
         />
       )}
-      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/30"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40"></div>
 
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
 
-        <!-- Location Subtitle with Map Pin SVG -->
-        <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-slate-300 font-medium tracking-wide">
-          <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span>{locationSubtitle}</span>
-        </div>
+        <!-- Location Subtitle (শুধুমাত্র CMS-এ থাকলে আসবে) -->
+        {locationSubtitle && (
+          <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-emerald-400 font-semibold tracking-wide">
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <span>{locationSubtitle}</span>
+          </div>
+        )}
 
-        <!-- Heading -->
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
+        <!-- Main Title -->
+        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
           {toTitleCase(pageTitle)}
         </h1>
 
         <!-- Subtitle Description -->
         {description && (
-          <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-light leading-relaxed">
+          <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-normal leading-relaxed">
             {description}
           </p>
         )}
 
-        <!-- Feature Badges Row -->
-        <div class="flex flex-wrap items-center justify-start gap-4 sm:gap-7 pt-3 text-xs sm:text-sm text-slate-200">
-
-          <span class="flex items-center gap-1.5 font-medium">
-            <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 3h12l4 6-10 12L2 9z"/>
-              <path d="M11 3 8 9l4 12 4-12-3-6"/>
-            </svg>
-            <span>Luxury Hotels</span>
+        <!-- Real Stats Row -->
+        <div class="flex flex-wrap items-center gap-4 pt-2 text-xs font-bold text-slate-200">
+          <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
+            {displayHotels.length} Verified {displayHotels.length === 1 ? 'Property' : 'Properties'}
           </span>
-
-          <span class="flex items-center gap-1.5 font-medium">
-            <svg class="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            <span>Top Rated</span>
+          <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
+            Direct Local Rates
           </span>
-
-          <span class="flex items-center gap-1.5 font-medium">
-            <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span>Prime Location</span>
-          </span>
-
-          <span class="flex items-center gap-1.5 font-medium">
-            <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 12 2 2 4-4"/>
-            </svg>
-            <span>Trusted Directory</span>
-          </span>
-
         </div>
+
       </div>
 
-      <!-- Floating Search Bar -->
+      <!-- Live On-Page Filter Bar (কোনো ভাঙা /search লিংক নয়) -->
       <div class="absolute -bottom-7 left-4 right-4 max-w-7xl mx-auto z-20 px-0 sm:px-6 lg:px-8">
-        <form action="/search" method="GET" class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-100 max-w-3xl">
+        <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-200 max-w-3xl">
           <div class="pl-3 pr-2 text-slate-400">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
@@ -274,20 +245,13 @@ const masterSchema = {
           </div>
           <input
             type="text"
-            name="q"
-            placeholder={`Search hotels in ${toTitleCase(pageTitle)}...`}
-            class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+            id="onPageHotelFilterInput"
+            placeholder={`Filter hotels listed below...`}
+            class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none font-medium"
           />
-          <button type="submit" aria-label="Search" class="bg-[#0d3b23] hover:bg-[#082918] text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition duration-200 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          </button>
-        </form>
+        </div>
       </div>
     </header>
-
 
     <!-- ================= 2. FEATURED HOTELS SECTION ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-8">
@@ -295,28 +259,25 @@ const masterSchema = {
       <!-- Section Header -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
         <div>
-          <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— FEATURED HOTELS</span>
+          <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— CURATED ACCOMMODATIONS</span>
           <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">Top {toTitleCase(pageTitle)}</h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1">Handpicked hotels with verified amenities and locations.</p>
         </div>
-        <a href="/hotels" class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
-          <span>View All Hotels</span>
+        <a href="/#hotels" class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
+          <span>All Gulshan Hotels</span>
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
       </div>
 
       <!-- Hotels Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+      <div id="landingHotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
         {displayHotels.length === 0 ? (
-          <div class="col-span-full text-center py-12 text-slate-500 text-sm">
-            No hotels currently listed for this area.
+          <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
+            No hotels currently match this filter.
           </div>
         ) : (
           displayHotels.map((h) => {
             const hd = h.data || {};
             const hotelTitle = (hd.title || hd.name || "Hotel Details").trim();
-
-            // এক জায়গা থেকেই slug (উপরে ready করা h.slug)
             const hotelSlug = String(h.slug || "").trim();
             const hotelUrl = `/${hotelSlug}`;
 
@@ -324,23 +285,24 @@ const masterSchema = {
             const shortLoc = formatShortLocation(hd.location || "");
             const price = formatPriceDisplay(hd.price);
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
+            
+            // অ্যামেনিটিস হ্যান্ডলিং (অবজেক্ট এবং স্ট্রিং দুটোই নিখুঁতভাবে হ্যান্ডেল করা)
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
-            const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
+            const topAmenities = rawAmenities.slice(0, 4).map((a: any) => {
+              if (typeof a === 'string') return a.trim();
+              if (typeof a === 'object') return (a?.name || a?.title || '').trim();
+              return '';
+            }).filter(Boolean);
 
-            // ================= রিভিউ (আগে থেকে গ্রুপ করা map থেকে) =================
+            // আসল রিভিউ গণনা
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
-
             const approvedSet = new Set<any>([
               ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
               ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
             ]);
-            const approvedCmsReviews = Array.from(approvedSet);
+            const combinedRawReviews = [...Array.from(approvedSet), ...(Array.isArray(hd.reviews) ? hd.reviews : [])];
 
-            const hotelEmbeddedReviews = Array.isArray(hd.reviews) ? hd.reviews : [];
-            const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
-
-            // rating না থাকলে ওই রিভিউ বাদ (আর 5 ধরা হবে না)
             const validReviews = combinedRawReviews.map((rev: any) => ({
               rating: Number(rev.rating) || 0,
               comment: String(rev.comment || rev.review || rev.body || '').trim()
@@ -349,10 +311,14 @@ const masterSchema = {
             const reviewCount = validReviews.length;
             const reviewScore = reviewCount > 0
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
-              : (hd.rating || "");
+              : (hd.rating ? Number(hd.rating).toFixed(1) : null);
 
             return (
-              <div class="bg-white rounded-2xl border border-slate-200/85 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-700/30 transition-all duration-300 flex flex-col justify-between group">
+              <div 
+                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/85 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-700/30 transition-all duration-300 flex flex-col justify-between group text-left"
+                data-name={hotelTitle.toLowerCase()}
+                data-location={shortLoc.toLowerCase()}
+              >
                 <div>
 
                   <!-- Hotel Cover Image -->
@@ -369,7 +335,7 @@ const masterSchema = {
                       </a>
                     )}
 
-                    <!-- Star Badge -->
+                    <!-- Star Badge (শুধুমাত্র CMS-এ স্টার থাকলে আসবে) -->
                     {starCount && (
                       <div class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
                         <span>{starCount}</span>
@@ -381,7 +347,7 @@ const masterSchema = {
                   </div>
 
                   <!-- Details Body -->
-                  <div class="p-4 sm:p-5 space-y-2 text-left">
+                  <div class="p-4 sm:p-5 space-y-2">
 
                     <!-- Title & Location -->
                     <div>
@@ -399,77 +365,34 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW -->
+                    <!-- REAL REVIEW ROW (কোনো ফেক রিভিউ বা ফেক রেটিং নেই) -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
-                        {reviewScore && (
-                          <div class="flex items-center gap-1 text-amber-500 font-bold">
-                            <svg class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
-                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <span>{reviewScore}</span>
-                          </div>
-                        )}
+                        <div class="flex items-center gap-1 text-amber-500 font-bold">
+                          <svg class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                          <span>{reviewScore}</span>
+                        </div>
                         <span class="text-slate-400 font-normal">
                           ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
                         </span>
                       </div>
                     ) : (
                       <div class="flex items-center gap-1 text-[11px] text-slate-400 pt-0.5">
-                        <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        <span>No reviews yet</span>
+                        <span class="text-emerald-700 font-medium">Verified Property</span>
                       </div>
                     )}
 
-                    <!-- Amenities with Clean SVG Icons -->
+                    <!-- Amenities (বাস্তব অ্যামেনিটিস তালিকা) -->
                     {topAmenities.length > 0 && (
-                      <div class="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1.5 text-[11px] text-slate-600">
-                        {topAmenities.map((item: string) => {
-                          const lower = String(item).toLowerCase();
-                          return (
-                            <span class="flex items-center gap-1">
-                              {lower.includes('pool') && (
-                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M2 12c1.5 0 2.5.8 4 1 1.5.2 2.5-.8 4-1 1.5-.2 2.5.8 4 1 1.5.2 2.5-.8 4-1 1.5-.2 2.5.8 4 1"/>
-                                  <path d="M2 18c1.5 0 2.5.8 4 1 1.5.2 2.5-.8 4-1 1.5-.2 2.5.8 4 1 1.5.2 2.5-.8 4-1 1.5-.2 2.5.8 4 1"/>
-                                  <circle cx="12" cy="5" r="2"/>
-                                </svg>
-                              )}
-
-                              {(lower.includes('wi-fi') || lower.includes('wifi')) && (
-                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                                  <circle cx="12" cy="20" r="1" fill="currentColor"/>
-                                </svg>
-                              )}
-
-                              {(lower.includes('spa') || lower.includes('wellness')) && (
-                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M12 2a5 5 0 0 0-5 5c0 4 5 10 5 10s5-6 5-10a5 5 0 0 0-5-5z"/>
-                                  <path d="M7 14c-3 1-5 4-5 6h20c0-2-2-5-5-6"/>
-                                </svg>
-                              )}
-
-                              {(lower.includes('gym') || lower.includes('fitness')) && (
-                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="m6.5 6.5 11 11M4 9l2-2 4 4-2 2zM14 19l2-2 4 4-2 2zM2 13l3-3M19 6l3-3"/>
-                                </svg>
-                              )}
-
-                              {lower.includes('restaurant') && (
-                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M18 2v20M2 2v6a4 4 0 0 0 4 4v10M6 2v6M10 2v6"/>
-                                </svg>
-                              )}
-
-                              <span>{item}</span>
-                            </span>
-                          );
-                        })}
+                      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-slate-600">
+                        {topAmenities.map((item: string) => (
+                          <span class="flex items-center gap-1">
+                            <svg class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>{item}</span>
+                          </span>
+                        ))}
                       </div>
                     )}
 
@@ -501,104 +424,60 @@ const masterSchema = {
       </div>
     </section>
 
+    <!-- ================= 3. "WHY STAY IN..." (শুধুমাত্র CMS এ আসল টেক্সট থাকলে দেখাবে) ================= -->
+    {(aboutText || aboutImage || areaHighlights.length > 0) && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-    <!-- ================= 3. "WHY STAY IN..." (ABOUT AREA) SECTION ================= -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
-      <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-
-          <!-- Left: Area Cover Image -->
-          <div class="lg:col-span-4 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
+            <!-- Left: Area Image (যদি CMS-এ দেওয়া থাকে) -->
             {aboutImage && (
-              <img src={aboutImage} alt={pageTitle} class="w-full h-full object-cover" />
+              <div class="lg:col-span-5 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
+                <img src={aboutImage} alt={pageTitle} class="w-full h-full object-cover" />
+              </div>
             )}
-          </div>
 
-          <!-- Middle: Real Text Content -->
-          <div class="lg:col-span-5 space-y-3">
-            <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">ABOUT {pageTitle.toUpperCase()}</span>
-            <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
-              Why Stay in {toTitleCase(pageTitle)}?
-            </h2>
-            {aboutText && (
-              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                {aboutText}
-              </p>
-            )}
-          </div>
+            <!-- Right: Real Text & Real Highlights -->
+            <div class={aboutImage ? "lg:col-span-7 space-y-4" : "lg:col-span-12 space-y-4"}>
+              <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">ABOUT {pageTitle.toUpperCase()}</span>
+              <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
+                Why Stay in {toTitleCase(pageTitle)}?
+              </h2>
+              {aboutText && (
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                  {aboutText}
+                </p>
+              )}
 
-          <!-- Right: 4 Highlights / USPs -->
-          <div class="lg:col-span-3 space-y-4">
-
-            <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-xs sm:text-sm font-bold text-slate-900">Prime Location</h4>
-                <p class="text-[11px] text-slate-500">Close to business & shopping hubs</p>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-xs sm:text-sm font-bold text-slate-900">Top-Class Amenities</h4>
-                <p class="text-[11px] text-slate-500">Pools, gyms, spas, fine dining</p>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="m9 12 2 2 4-4"/>
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-xs sm:text-sm font-bold text-slate-900">Safe & Secure</h4>
-                <p class="text-[11px] text-slate-500">Well-planned and peaceful area</p>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11 2 11.5 2 12v4c0 .6.4 1 1 1h2"/>
-                  <circle cx="7" cy="17" r="2"/>
-                  <path d="M9 17h6"/>
-                  <circle cx="17" cy="17" r="2"/>
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-xs sm:text-sm font-bold text-slate-900">Easy Transportation</h4>
-                <p class="text-[11px] text-slate-500">Quick access to all parts of Dhaka</p>
-              </div>
+              <!-- আসল হাইলাইটস (যদি CMS-এ যোগ করা থাকে, কোনো হার্ডকোডেড টেক্সট নয়) -->
+              {areaHighlights.length > 0 && (
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {areaHighlights.map((hl: any) => (
+                    <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
+                      <svg class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <div>
+                        <h4 class="text-xs font-bold text-slate-900">{hl.title}</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">{hl.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>
-
         </div>
-      </div>
-    </section>
+      </section>
+    )}
 
-
-    <!-- ================= 4. LOCATION FAQS ACCORDION ================= -->
+    <!-- ================= 4. REAL FAQS (শুধুমাত্র আসল প্রশ্নোত্তর থাকলে আসবে) ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
         <div class="border-b border-slate-200 pb-4 mb-6">
           <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— FREQUENTLY ASKED QUESTIONS</span>
           <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">
-            Everything you need to know about stays in {toTitleCase(pageTitle)}
+            Questions About Stays in {toTitleCase(pageTitle)}
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1">Verified answers to common traveler queries</p>
         </div>
 
         <div class="space-y-3 max-w-4xl">
@@ -619,8 +498,7 @@ const masterSchema = {
       </section>
     )}
 
-
-    <!-- 5. Markdown Article Body (CMS থেকে আর্টিকেল লিখলে দেখাবে) -->
+    <!-- 5. Markdown Body (যদি CMS-এ সরাসরি কোনো আর্টিকেল লেখা হয়) -->
     {Content && (
       <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
         <article class="prose prose-slate max-w-none">
@@ -631,3 +509,29 @@ const masterSchema = {
 
   </div>
 </Layout>
+
+<!-- CLIENT SCRIPT (ON-PAGE INSTANT FILTER) -->
+<script is:inline>
+  const initOnPageFilter = () => {
+    const input = document.getElementById('onPageHotelFilterInput');
+    const cards = document.querySelectorAll('.landing-hotel-card');
+
+    if (input && cards.length > 0) {
+      input.addEventListener('input', () => {
+        const query = input.value.trim().toLowerCase();
+        cards.forEach(card => {
+          const name = card.getAttribute('data-name') || '';
+          const loc = card.getAttribute('data-location') || '';
+          if (!query || name.includes(query) || loc.includes(query)) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', initOnPageFilter);
+  document.addEventListener('astro:page-load', initOnPageFilter);
+</script>
