@@ -1,5 +1,6 @@
 ---
 title: hotels in Gulshan 1
+slug: hotels-in-Gulshan-1
 location_subtitle: Dhaka, Bangladesh
 filter_keyword: gulshan
 hero_image: https://media.gulshanhotels.com/34884184.jpg
@@ -9,11 +10,23 @@ selected_hotels:
   - the-midori-by-lakeshore
   - amari-dhaka
   - lakeshore-hotel
+  - demo-hotel-1
 about_image: https://media.gulshanhotels.com/34884165.jpg
 about_text: |-
   The Royal Palace Uttara in Dhaka offers family rooms with air-conditioning, private bathrooms, and city views. Each room includes a work desk, mini-bar, and free WiFi.
   Dining Experience: Guests can enjoy a family-friendly restaurant serving continental, buffet, Italian, vegetarian, vegan, halal, Asian breakfasts with local specialties, fresh pastries, and more. The restaurant offers lunch, dinner, high tea, and cocktails in a welcoming ambiance.
   Leisure Facilities: The hotel features a garden, fitness room, and outdoor seating area. Additional amenities include a coffee shop, child-friendly buffet, and free on-site private parking.
+area_highlights:
+  - title: Palace Uttara
+    desc: Palace Uttara
+  - title: Palace Uttara
+    desc: Palace Uttara
+  - title: Palace Uttara
+    desc: Palace Uttara
+  - title: Palace Uttara
+    desc: Palace Uttara
+  - title: Palace Uttara
+    desc: Palace Uttara
 faqs:
   - question: The Royal Palace Uttara in Dhaka offers family rooms with air-conditioning
     answer: The Royal Palace Uttara in Dhaka offers family rooms with air-conditioning
@@ -46,5 +59,4 @@ faqs:
 area_tips: []
 badge: Area Stays Guide
 heading: Gulshan 1 hotels
-slug: hotels-in-Gulshan-1
 ---
