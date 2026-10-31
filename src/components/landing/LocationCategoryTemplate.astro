@@ -18,7 +18,7 @@ const description = (data.description || data.seo_description || "").trim();
 const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const heroImage = data.hero_image || data.image || "";
 
-// ২. আসল হোটেল কালেকশন লোড ও ডাইনামিক ফিল্টারিং
+// ২. আসল হোটেল কালেকশন লোড ও ফিল্টারিং লজিক
 const hotelCol = await getCollection('hotels');
 const allHotels = hotelCol.map(h => ({
   slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
@@ -30,7 +30,7 @@ const manualSlugs = Array.isArray(data.selected_hotels)
   : [];
 const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase().trim();
 
-// শুধুমাত্র ফিল্টারের সাথে ম্যাচ করা আসল হোটেল
+// শুধুমাত্র ফিল্টারের সাথে ম্যাচ করা আসল হোটেলসমূহ
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
   const hTitle = String(h.data?.title || '').toLowerCase();
@@ -41,7 +41,7 @@ const displayHotels = allHotels.filter(h => {
   return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword) || hTitle.includes(matchKeyword);
 });
 
-// ৩. হেল্পার ফাংশন
+// ৩. টেক্সট ও ডাটা হেল্পার ফাংশন
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -66,7 +66,39 @@ function formatPriceDisplay(rawPrice: any) {
   return base;
 }
 
-// ৪. "Why Stay" সেকশন ডাটা
+// ৪. মার্কডাউন থেকে রিয়েল রিভিউ ও রেটিং বের করার লজিক
+function getReviewData(hd: any) {
+  const reviewsList = Array.isArray(hd.reviews) ? hd.reviews : [];
+
+  // রিভিউ সংখ্যা
+  let count = "";
+  if (hd.reviewsCount && String(hd.reviewsCount).trim() !== "") {
+    count = String(hd.reviewsCount).trim();
+  } else if (reviewsList.length > 0) {
+    count = String(reviewsList.length);
+  }
+
+  // রেটিং স্কোর
+  let score = "";
+  if (hd.rating && String(hd.rating).trim() !== "") {
+    score = String(hd.rating).trim();
+  } else if (reviewsList.length > 0) {
+    const validScores = reviewsList
+      .map((r: any) => Number(r.rating || r.score || r.stars))
+      .filter((n: number) => !isNaN(n) && n > 0);
+    if (validScores.length > 0) {
+      score = (validScores.reduce((a: number, b: number) => a + b, 0) / validScores.length).toFixed(1);
+    }
+  }
+
+  return {
+    score,
+    count,
+    hasData: Boolean(score || count)
+  };
+}
+
+// ৫. "Why Stay" সেকশন ডাটা
 const aboutImage = data.about_image || heroImage;
 const aboutText = data.about_text || description;
 
@@ -94,12 +126,12 @@ const masterSchema = {
 };
 ---
 
-<Layout title={`${pageTitle} — Directory & Guide`} description={description} image={heroImage}>
+<Layout title={`${toTitleCase(pageTitle)} — Verified Stays & Guide`} description={description} image={heroImage}>
   <script type="application/ld+json" set:html={JSON.stringify(masterSchema)} />
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
     
-<!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
+    <!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
     <header class="relative bg-slate-950 text-white min-h-[460px] flex items-center pb-20 pt-14 px-4 sm:px-6 lg:px-8">
       {heroImage && (
         <img 
@@ -109,13 +141,13 @@ const masterSchema = {
           fetchpriority="high" 
         />
       )}
-      <!-- Left-to-right dark gradient for better text readability -->
-      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/30"></div>
+      <!-- Left-to-right dark gradient for clear text readability -->
+      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/30"></div>
 
-      <!-- Max-w-7xl container to align perfectly with the hotels grid below -->
+      <!-- Max-w-7xl Left-aligned container -->
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
         
-        <!-- Location Subtitle with Map Pin (Left-aligned) -->
+        <!-- Location Subtitle with Map Pin SVG -->
         <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-slate-300 font-medium tracking-wide">
           <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
@@ -124,12 +156,12 @@ const masterSchema = {
           <span>{locationSubtitle}</span>
         </div>
 
-        <!-- Heading (Auto-Capitalized & Left-aligned) -->
+        <!-- Heading -->
         <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
           {toTitleCase(pageTitle)}
         </h1>
 
-        <!-- Subtitle Description (Left-aligned without mx-auto) -->
+        <!-- Subtitle Description -->
         {description && (
           <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-light leading-relaxed">
             {description}
@@ -202,14 +234,15 @@ const masterSchema = {
       </div>
     </header>
 
+
     <!-- ================= 2. FEATURED HOTELS SECTION ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-8">
       
       <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
         <div>
           <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— FEATURED HOTELS</span>
-          <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">Top {pageTitle}</h2>
+          <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">Top {toTitleCase(pageTitle)}</h2>
           <p class="text-xs sm:text-sm text-slate-500 mt-1">Handpicked hotels with verified amenities and locations.</p>
         </div>
         <a href="/hotels" class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
@@ -235,12 +268,13 @@ const masterSchema = {
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
             const hotelUrl = `/hotels/${h.slug}`;
+            const review = getReviewData(hd);
 
             return (
               <div class="bg-white rounded-2xl border border-slate-200/85 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-700/30 transition-all duration-300 flex flex-col justify-between group">
                 <div>
                   
-                  <!-- Hotel Image -->
+                  <!-- Hotel Cover Image -->
                   <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
                     {cardImage && (
                       <a href={hotelUrl} class="block w-full h-full">
@@ -264,7 +298,7 @@ const masterSchema = {
                       </div>
                     )}
 
-                    <!-- Wishlist Heart SVG -->
+                    <!-- Wishlist Heart Button -->
                     <button aria-label="Save to Wishlist" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/25 hover:bg-black/50 backdrop-blur text-white flex items-center justify-center transition">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -273,7 +307,9 @@ const masterSchema = {
                   </div>
 
                   <!-- Details Body -->
-                  <div class="p-4 sm:p-5 space-y-2.5 text-left">
+                  <div class="p-4 sm:p-5 space-y-2 text-left">
+                    
+                    <!-- Title & Location -->
                     <div>
                       <h3 class="font-serif font-bold text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition line-clamp-1">
                         <a href={hotelUrl}>{hotelTitle}</a>
@@ -289,24 +325,36 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- Rating & Reviews (আসল ডাটা থাকলেই রেন্ডার হবে) -->
-                    {hd.rating && (
-                      <div class="flex items-center gap-1.5 text-xs">
-                        <div class="flex items-center gap-1 text-amber-500 font-bold">
-                          <svg class="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                          <span>{hd.rating}</span>
-                        </div>
-                        {hd.reviewsCount && (
-                          <span class="text-slate-400 font-normal">({hd.reviewsCount} reviews)</span>
+                    <!-- ================= REAL REVIEW ROW (লোকেশন এর ঠিক নিচে) ================= -->
+                    {review.hasData ? (
+                      <div class="flex items-center gap-1.5 text-xs pt-0.5">
+                        {review.score && (
+                          <div class="flex items-center gap-1 text-amber-500 font-bold">
+                            <svg class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span>{review.score}</span>
+                          </div>
                         )}
+                        {review.count && (
+                          <span class="text-slate-400 font-normal">
+                            ({review.count} {review.count === "1" ? "review" : "reviews"})
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <!-- ফাইলে রিভিউ ফাঁকা থাকলে এই ব্যাজটি আসবে -->
+                      <div class="flex items-center gap-1 text-[11px] text-slate-400 pt-0.5">
+                        <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span>No reviews yet</span>
                       </div>
                     )}
 
                     <!-- Amenities with Clean SVG Icons -->
                     {topAmenities.length > 0 && (
-                      <div class="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 pt-1 text-[11px] text-slate-600">
+                      <div class="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-1.5 text-[11px] text-slate-600">
                         {topAmenities.map((item: string) => {
                           const lower = String(item).toLowerCase();
                           return (
@@ -404,7 +452,7 @@ const masterSchema = {
           <div class="lg:col-span-5 space-y-3">
             <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">ABOUT {pageTitle.toUpperCase()}</span>
             <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
-              Why Stay in {pageTitle}?
+              Why Stay in {toTitleCase(pageTitle)}?
             </h2>
             {aboutText && (
               <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
@@ -479,7 +527,7 @@ const masterSchema = {
       </div>
     </section>
 
-    <!-- 4. Markdown Article Body (CMS থেকে অতিরিক্ত কনটেন্ট লিখলে আসবে) -->
+    <!-- 4. Markdown Article Body (CMS থেকে আর্টিকেল লিখলে দেখাবে) -->
     {Content && (
       <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
         <article class="prose prose-slate max-w-none">
