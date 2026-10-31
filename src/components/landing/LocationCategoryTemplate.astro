@@ -18,7 +18,7 @@ const description = (data.description || data.seo_description || "").trim();
 const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const heroImage = data.hero_image || data.image || "";
 
-// ২. সব হোটেল লোডার
+// ২. সব হোটেল লোডার (প্রথমে getCollection, না হলে glob fallback)
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -29,21 +29,24 @@ try {
     }));
   }
 } catch (err) {
+  console.warn('[LocationCategoryTemplate] getCollection(hotels) failed, using glob:', err);
   try {
     const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
     }));
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[LocationCategoryTemplate] hotels glob failed:', e);
+  }
 }
 
-// ৩. সব রিভিউ ডাটা ফেচিং (হুবহু HotelReviews.astro এর ডাটা লোডার)
+// ৩. সব রিভিউ ডাটা ফেচিং
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
   const entries = Object.values(globFiles);
-  
+
   if (entries.length > 0) {
     rawReviewsList = entries.map((item: any) => item?.frontmatter || item?.data || item || {});
   } else {
@@ -51,23 +54,43 @@ try {
     rawReviewsList = Object.values(relFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
   }
 } catch (e) {
+  console.warn('[LocationCategoryTemplate] reviews glob failed:', e);
   rawReviewsList = [];
 }
 
-// ৪. হোটেল ফিল্টারিং
-const manualSlugs = Array.isArray(data.selected_hotels) 
-  ? data.selected_hotels.map((s: string) => String(s).toLowerCase().trim()) 
+// ৩.১ রিভিউগুলো একবারই হোটেল অনুযায়ী গ্রুপ করা (দ্রুত build এর জন্য)
+const reviewsByKey = new Map<string, any[]>();
+for (const item of rawReviewsList) {
+  if (!item) continue;
+  const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+  if (!isApproved) continue;
+
+  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
+
+  // একই রিভিউ একই key তে দুইবার যেন না যায়
+  const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
+  for (const k of keys) {
+    if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
+    reviewsByKey.get(k)!.push(item);
+  }
+}
+
+// ৪. হোটেল ফিল্টারিং (title দিয়ে আর ফিল্টার হবে না, শুধু location আর category)
+const manualSlugs = Array.isArray(data.selected_hotels)
+  ? data.selected_hotels.map((s: string) => String(s).toLowerCase().trim())
   : [];
 const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase().trim();
 
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
-  const hTitle = String(h.data?.title || '').toLowerCase();
   const hLoc = String(h.data?.location || '').toLowerCase();
   const hCat = String(h.data?.category || '').toLowerCase();
 
   if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword) || hTitle.includes(matchKeyword);
+  if (!matchKeyword) return false;
+  return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword);
 });
 
 // ৫. টেক্সট ও ডাটা হেল্পার ফাংশন
@@ -95,6 +118,16 @@ function formatPriceDisplay(rawPrice: any) {
   return base;
 }
 
+// HTML / markdown সরিয়ে plain text বানায় (Google FAQ schema এর জন্য)
+function plainText(str: any) {
+  return String(str || '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/<[^>]*>/g, '')
+    .replace(/[*_`#>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // ৬. "Why Stay" এবং FAQs ডাটা
 const aboutImage = data.about_image || heroImage;
 const aboutText = data.about_text || description;
@@ -103,44 +136,53 @@ const faqs = Array.isArray(data.faqs) ? data.faqs : [];
 const siteOrigin = Astro.site ? Astro.site.origin : "";
 const canonicalUrl = siteOrigin ? `${siteOrigin}/${cleanSlug}` : `/${cleanSlug}`;
 
-// ৭. অল-ইন-ওয়ান গুগল এসইও স্কিমা (Breadcrumb + ItemList Carousel + FAQPage Rich Snippets)
+// ৭. গুগল এসইও স্কিমা (Breadcrumb + ItemList + FAQPage)
+const schemaGraph: any[] = [
+  {
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": siteOrigin ? `${siteOrigin}/` : "/" },
+      { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle), "item": canonicalUrl }
+    ]
+  }
+];
+
+// হোটেল থাকলেই শুধু ItemList যাবে
+if (displayHotels.length > 0) {
+  schemaGraph.push({
+    "@type": "ItemList",
+    "@id": `${canonicalUrl}#itemlist`,
+    "name": pageTitle,
+    "description": description,
+    "numberOfItems": displayHotels.length,
+    "itemListElement": displayHotels.map((h, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+      "name": toTitleCase(h.data?.title || ""),
+      "url": `${siteOrigin}/${h.slug}`
+    }))
+  });
+}
+
+if (faqs.length > 0) {
+  schemaGraph.push({
+    "@type": "FAQPage",
+    "@id": `${canonicalUrl}#faq`,
+    "mainEntity": faqs.map((f: any) => ({
+      "@type": "Question",
+      "name": plainText(f.question),
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": plainText(f.answer)
+      }
+    }))
+  });
+}
+
 const masterSchema = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}#breadcrumb`,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
-        { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle), "item": canonicalUrl }
-      ]
-    },
-    {
-      "@type": "ItemList",
-      "@id": `${canonicalUrl}#itemlist`,
-      "name": pageTitle,
-      "description": description,
-      "numberOfItems": displayHotels.length,
-      "itemListElement": displayHotels.map((h, idx) => ({
-        "@type": "ListItem",
-        "position": idx + 1,
-        "name": toTitleCase(h.data?.title || ""),
-        "url": `${siteOrigin}/${h.slug}`
-      }))
-    },
-    ...(faqs.length > 0 ? [{
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq`,
-      "mainEntity": faqs.map((f: any) => ({
-        "@type": "Question",
-        "name": f.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": f.answer
-        }
-      }))
-    }] : [])
-  ]
+  "@graph": schemaGraph
 };
 ---
 
@@ -148,21 +190,21 @@ const masterSchema = {
   <script type="application/ld+json" set:html={JSON.stringify(masterSchema)} />
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
-    
+
     <!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
     <header class="relative bg-slate-950 text-white min-h-[460px] flex items-center pb-20 pt-14 px-4 sm:px-6 lg:px-8">
       {heroImage && (
-        <img 
-          src={heroImage} 
-          alt={pageTitle} 
-          class="absolute inset-0 w-full h-full object-cover opacity-40" 
-          fetchpriority="high" 
+        <img
+          src={heroImage}
+          alt={pageTitle}
+          class="absolute inset-0 w-full h-full object-cover opacity-40"
+          fetchpriority="high"
         />
       )}
       <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/30"></div>
 
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
-        
+
         <!-- Location Subtitle with Map Pin SVG -->
         <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-slate-300 font-medium tracking-wide">
           <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -184,9 +226,9 @@ const masterSchema = {
           </p>
         )}
 
-        <!-- Feature Badges Row (All Clean SVGs) -->
+        <!-- Feature Badges Row -->
         <div class="flex flex-wrap items-center justify-start gap-4 sm:gap-7 pt-3 text-xs sm:text-sm text-slate-200">
-          
+
           <span class="flex items-center gap-1.5 font-medium">
             <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 3h12l4 6-10 12L2 9z"/>
@@ -230,10 +272,10 @@ const masterSchema = {
               <path d="m21 21-4.35-4.35"/>
             </svg>
           </div>
-          <input 
-            type="text" 
-            name="q" 
-            placeholder={`Search hotels in ${toTitleCase(pageTitle)}...`} 
+          <input
+            type="text"
+            name="q"
+            placeholder={`Search hotels in ${toTitleCase(pageTitle)}...`}
             class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
           />
           <button type="submit" aria-label="Search" class="bg-[#0d3b23] hover:bg-[#082918] text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition duration-200 shrink-0">
@@ -249,7 +291,7 @@ const masterSchema = {
 
     <!-- ================= 2. FEATURED HOTELS SECTION ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-8">
-      
+
       <!-- Section Header -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
         <div>
@@ -273,8 +315,9 @@ const masterSchema = {
           displayHotels.map((h) => {
             const hd = h.data || {};
             const hotelTitle = (hd.title || hd.name || "Hotel Details").trim();
-            const rawSlug = String(hd.slug || h?.slug || h?.id || "").trim();
-            const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+
+            // এক জায়গা থেকেই slug (উপরে ready করা h.slug)
+            const hotelSlug = String(h.slug || "").trim();
             const hotelUrl = `/${hotelSlug}`;
 
             const starCount = extractStarsNumber(hd.category);
@@ -284,58 +327,49 @@ const masterSchema = {
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
 
-            // ================= হুবহু HotelReviews.astro ফিল্টারিং লজিক =================
+            // ================= রিভিউ (আগে থেকে গ্রুপ করা map থেকে) =================
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
 
-            const approvedCmsReviews = rawReviewsList.filter((item: any) => {
-              if (!item) return false;
-
-              const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
-              if (!isApproved) return false;
-
-              const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-              const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-              const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
-
-              const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug);
-              const matchTitle = searchTitle !== "" && (rHotel === searchTitle);
-
-              return matchSlug || matchTitle;
-            });
+            const approvedSet = new Set<any>([
+              ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
+              ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
+            ]);
+            const approvedCmsReviews = Array.from(approvedSet);
 
             const hotelEmbeddedReviews = Array.isArray(hd.reviews) ? hd.reviews : [];
             const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
+            // rating না থাকলে ওই রিভিউ বাদ (আর 5 ধরা হবে না)
             const validReviews = combinedRawReviews.map((rev: any) => ({
-              rating: Number(rev.rating) || 5,
+              rating: Number(rev.rating) || 0,
               comment: String(rev.comment || rev.review || rev.body || '').trim()
-            })).filter(r => r.comment.length > 1);
+            })).filter(r => r.comment.length > 1 && r.rating > 0);
 
             const reviewCount = validReviews.length;
-            const reviewScore = reviewCount > 0 
+            const reviewScore = reviewCount > 0
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
               : (hd.rating || "");
 
             return (
               <div class="bg-white rounded-2xl border border-slate-200/85 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-700/30 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  
+
                   <!-- Hotel Cover Image -->
                   <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
                     {cardImage && (
                       <a href={hotelUrl} class="block w-full h-full">
-                        <img 
-                          src={cardImage} 
-                          alt={hotelTitle} 
-                          loading="lazy" 
-                          decoding="async" 
-                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        <img
+                          src={cardImage}
+                          alt={hotelTitle}
+                          loading="lazy"
+                          decoding="async"
+                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </a>
                     )}
 
-                    <!-- Star Badge with SVG Star -->
+                    <!-- Star Badge -->
                     {starCount && (
                       <div class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
                         <span>{starCount}</span>
@@ -344,18 +378,11 @@ const masterSchema = {
                         </svg>
                       </div>
                     )}
-
-                    <!-- Wishlist Heart Button -->
-                    <button aria-label="Save to Wishlist" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/25 hover:bg-black/50 backdrop-blur text-white flex items-center justify-center transition">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                      </svg>
-                    </button>
                   </div>
 
                   <!-- Details Body -->
                   <div class="p-4 sm:p-5 space-y-2 text-left">
-                    
+
                     <!-- Title & Location -->
                     <div>
                       <h3 class="font-serif font-bold text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition line-clamp-1">
@@ -372,7 +399,7 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW (হোটেল পেজের সাথে ১০০% মিলবে) -->
+                    <!-- REAL REVIEW ROW -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         {reviewScore && (
@@ -479,7 +506,7 @@ const masterSchema = {
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
       <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
+
           <!-- Left: Area Cover Image -->
           <div class="lg:col-span-4 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
             {aboutImage && (
@@ -500,9 +527,9 @@ const masterSchema = {
             )}
           </div>
 
-          <!-- Right: 4 Highlights / USPs (All Clean SVGs) -->
+          <!-- Right: 4 Highlights / USPs -->
           <div class="lg:col-span-3 space-y-4">
-            
+
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -563,7 +590,7 @@ const masterSchema = {
     </section>
 
 
-    <!-- ================= 4. LOCATION FAQS ACCORDION (SEO SUPER-POWER) ================= -->
+    <!-- ================= 4. LOCATION FAQS ACCORDION ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
         <div class="border-b border-slate-200 pb-4 mb-6">
