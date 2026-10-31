@@ -18,14 +18,14 @@ const description = (data.description || data.seo_description || "").trim();
 const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const heroImage = data.hero_image || data.image || "";
 
-// ২. সেফ হোটেল লোডার (যাতে ক্লাউডফ্লেয়ার বিল্ড কখনো ক্র্যাশ না করে)
+// ২. সেফ হোটেল লোডার (h.data এবং h.frontmatter উভয় থেকেই ডাটা ব্যাকআপ রাখবে)
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
   if (Array.isArray(hotelCol)) {
     allHotels = hotelCol.map((h: any) => ({
       slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
-      data: h.data || {}
+      data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
     }));
   }
 } catch (err) {
@@ -43,7 +43,7 @@ const manualSlugs = Array.isArray(data.selected_hotels)
   : [];
 const matchKeyword = String(data.filter_keyword || cleanSlug).replace(/-/g, ' ').toLowerCase().trim();
 
-// শুধুমাত্র ফিল্টারের সাথে ম্যাচ করা আসল হোটেলসমূহ
+// ফিল্টারের সাথে ম্যাচ করা হোটেল
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
   const hTitle = String(h.data?.title || '').toLowerCase();
@@ -79,27 +79,43 @@ function formatPriceDisplay(rawPrice: any) {
   return base;
 }
 
-// ৪. মার্কডাউন থেকে আসল রিভিউ ও রেটিং বের করার লজিক
+// ৪. আল্ট্রা-স্মার্ট রিভিউ এক্সট্রাক্টর (সব ধরনের ফিল্ড নেম চেক করবে)
 function getReviewData(hd: any) {
-  const reviewsList = Array.isArray(hd.reviews) ? hd.reviews : [];
-
+  // সম্ভাব্য সব রিভিউ কাউন্ট ফিল্ড চেক
+  const countKeys = ['reviewsCount', 'reviews_count', 'reviewCount', 'review_count', 'total_reviews', 'totalReviews'];
   let count = "";
-  if (hd.reviewsCount && String(hd.reviewsCount).trim() !== "") {
-    count = String(hd.reviewsCount).trim();
-  } else if (reviewsList.length > 0) {
-    count = String(reviewsList.length);
+  for (const k of countKeys) {
+    if (hd[k] !== undefined && hd[k] !== null && String(hd[k]).trim() !== "") {
+      count = String(hd[k]).trim();
+      break;
+    }
   }
 
+  // সম্ভাব্য সব রেটিং ফিল্ড চেক
+  const ratingKeys = ['rating', 'ratings', 'score', 'review_score', 'user_rating', 'star_rating', 'avg_rating'];
   let score = "";
-  if (hd.rating && String(hd.rating).trim() !== "") {
-    score = String(hd.rating).trim();
-  } else if (reviewsList.length > 0) {
-    const validScores = reviewsList
-      .map((r: any) => Number(r.rating || r.score || r.stars))
-      .filter((n: number) => !isNaN(n) && n > 0);
-    if (validScores.length > 0) {
-      score = (validScores.reduce((a: number, b: number) => a + b, 0) / validScores.length).toFixed(1);
+  for (const k of ratingKeys) {
+    if (hd[k] !== undefined && hd[k] !== null && String(hd[k]).trim() !== "") {
+      score = String(hd[k]).trim();
+      break;
     }
+  }
+
+  // যদি সরাসরি reviews অ্যারে বা অবজেক্ট থাকে
+  const reviews = hd.reviews;
+  if (Array.isArray(reviews) && reviews.length > 0) {
+    if (!count) count = String(reviews.length);
+    if (!score) {
+      const validScores = reviews
+        .map((r: any) => typeof r === 'object' ? Number(r.rating || r.score || r.stars || r.rate) : Number(r))
+        .filter((n: number) => !isNaN(n) && n > 0);
+      if (validScores.length > 0) {
+        score = (validScores.reduce((a: number, b: number) => a + b, 0) / validScores.length).toFixed(1);
+      }
+    }
+  } else if (reviews && typeof reviews === 'object' && !Array.isArray(reviews)) {
+    if (!count) count = String(reviews.count || reviews.total || '');
+    if (!score) score = String(reviews.rating || reviews.score || reviews.average || '');
   }
 
   return {
@@ -116,7 +132,7 @@ const aboutText = data.about_text || description;
 const siteOrigin = Astro.site ? Astro.site.origin : "";
 const canonicalUrl = siteOrigin ? `${siteOrigin}/${cleanSlug}` : `/${cleanSlug}`;
 
-// এসইও স্কিমা (সরাসরি রুট লিংকে আপডেট করা)
+// এসইও স্কিমা
 const masterSchema = {
   "@context": "https://schema.org",
   "@graph": [
@@ -142,7 +158,7 @@ const masterSchema = {
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
     
-    <!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
+    <!-- ================= 1. HERO BANNER WITH SEARCH ================= -->
     <header class="relative bg-slate-950 text-white min-h-[460px] flex items-center pb-20 pt-14 px-4 sm:px-6 lg:px-8">
       {heroImage && (
         <img 
@@ -177,7 +193,7 @@ const masterSchema = {
           </p>
         )}
 
-        <!-- Feature Badges Row (All SVG Icons & Left-aligned) -->
+        <!-- Feature Badges Row -->
         <div class="flex flex-wrap items-center justify-start gap-4 sm:gap-7 pt-3 text-xs sm:text-sm text-slate-200">
           
           <span class="flex items-center gap-1.5 font-medium">
@@ -272,8 +288,6 @@ const masterSchema = {
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
-            
-            // রুট ডোমেন অনুযায়ী লিংক (যেমন: /amari-dhaka)
             const hotelUrl = `/${h.slug}`;
             const review = getReviewData(hd);
 
@@ -332,7 +346,7 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW -->
+                    <!-- ================= REAL REVIEW ROW ================= -->
                     {review.hasData ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         {review.score && (
@@ -411,7 +425,7 @@ const masterSchema = {
                   </div>
                 </div>
 
-                <!-- Price & Details CTA Button (সরাসরি রুট লিংকে আপডেট করা) -->
+                <!-- Price & Details CTA Button -->
                 <div class="px-4 sm:px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
                   {price ? (
                     <div>
@@ -437,7 +451,7 @@ const masterSchema = {
     </section>
 
 
-    <!-- ================= 3. "WHY STAY IN..." (ABOUT AREA) SECTION ================= -->
+    <!-- ================= 3. "WHY STAY IN..." SECTION ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
       <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -462,10 +476,9 @@ const masterSchema = {
             )}
           </div>
 
-          <!-- Right: 4 Highlights / USPs (All Clean SVGs) -->
+          <!-- Right: 4 Highlights / USPs -->
           <div class="lg:col-span-3 space-y-4">
             
-            <!-- Prime Location -->
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -479,7 +492,6 @@ const masterSchema = {
               </div>
             </div>
 
-            <!-- Top-Class Amenities -->
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -492,7 +504,6 @@ const masterSchema = {
               </div>
             </div>
 
-            <!-- Safe & Secure -->
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -506,7 +517,6 @@ const masterSchema = {
               </div>
             </div>
 
-            <!-- Easy Transportation -->
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#0d3b23] flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
