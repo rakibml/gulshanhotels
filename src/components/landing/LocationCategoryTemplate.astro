@@ -95,17 +95,26 @@ function formatPriceDisplay(rawPrice: any) {
   return base;
 }
 
-// ৬. "Why Stay" সেকশন ডাটা
+// ৬. "Why Stay" এবং FAQs ডাটা
 const aboutImage = data.about_image || heroImage;
 const aboutText = data.about_text || description;
+const faqs = Array.isArray(data.faqs) ? data.faqs : [];
 
 const siteOrigin = Astro.site ? Astro.site.origin : "";
 const canonicalUrl = siteOrigin ? `${siteOrigin}/${cleanSlug}` : `/${cleanSlug}`;
 
-// এসইও স্কিমা
+// ৭. অল-ইন-ওয়ান গুগল এসইও স্কিমা (Breadcrumb + ItemList Carousel + FAQPage Rich Snippets)
 const masterSchema = {
   "@context": "https://schema.org",
   "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
+        { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle), "item": canonicalUrl }
+      ]
+    },
     {
       "@type": "ItemList",
       "@id": `${canonicalUrl}#itemlist`,
@@ -118,7 +127,19 @@ const masterSchema = {
         "name": toTitleCase(h.data?.title || ""),
         "url": `${siteOrigin}/${h.slug}`
       }))
-    }
+    },
+    ...(faqs.length > 0 ? [{
+      "@type": "FAQPage",
+      "@id": `${canonicalUrl}#faq`,
+      "mainEntity": faqs.map((f: any) => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answer
+        }
+      }))
+    }] : [])
   ]
 };
 ---
@@ -128,7 +149,7 @@ const masterSchema = {
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
     
-    <!-- ================= 1. HERO BANNER WITH SEARCH ================= -->
+    <!-- ================= 1. HERO BANNER WITH SEARCH (LEFT-ALIGNED) ================= -->
     <header class="relative bg-slate-950 text-white min-h-[460px] flex items-center pb-20 pt-14 px-4 sm:px-6 lg:px-8">
       {heroImage && (
         <img 
@@ -142,6 +163,7 @@ const masterSchema = {
 
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
         
+        <!-- Location Subtitle with Map Pin SVG -->
         <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-slate-300 font-medium tracking-wide">
           <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
@@ -150,16 +172,19 @@ const masterSchema = {
           <span>{locationSubtitle}</span>
         </div>
 
+        <!-- Heading -->
         <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
           {toTitleCase(pageTitle)}
         </h1>
 
+        <!-- Subtitle Description -->
         {description && (
           <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-light leading-relaxed">
             {description}
           </p>
         )}
 
+        <!-- Feature Badges Row (All Clean SVGs) -->
         <div class="flex flex-wrap items-center justify-start gap-4 sm:gap-7 pt-3 text-xs sm:text-sm text-slate-200">
           
           <span class="flex items-center gap-1.5 font-medium">
@@ -259,7 +284,7 @@ const masterSchema = {
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
 
-            // ================= হুবহু HotelReviews.astro এর ফিল্টারিং লজিক =================
+            // ================= হুবহু HotelReviews.astro ফিল্টারিং লজিক =================
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
 
@@ -279,17 +304,14 @@ const masterSchema = {
               return matchSlug || matchTitle;
             });
 
-            // লোকাল এবং সিএমএস রিভিউ মার্জ
             const hotelEmbeddedReviews = Array.isArray(hd.reviews) ? hd.reviews : [];
             const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-            // ফরম্যাটিং এবং কমেন্ট ভ্যালিডেশন (HotelReviews এর মতো)
             const validReviews = combinedRawReviews.map((rev: any) => ({
               rating: Number(rev.rating) || 5,
               comment: String(rev.comment || rev.review || rev.body || '').trim()
             })).filter(r => r.comment.length > 1);
 
-            // রিভিউ সংখ্যা ও গড় রেটিং হিসাব
             const reviewCount = validReviews.length;
             const reviewScore = reviewCount > 0 
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
@@ -350,7 +372,7 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- ================= REAL REVIEW ROW (হোটেল পেজের সাথে ১০০% মিলবে) ================= -->
+                    <!-- REAL REVIEW ROW (হোটেল পেজের সাথে ১০০% মিলবে) -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         {reviewScore && (
@@ -478,7 +500,7 @@ const masterSchema = {
             )}
           </div>
 
-          <!-- Right: 4 Highlights / USPs -->
+          <!-- Right: 4 Highlights / USPs (All Clean SVGs) -->
           <div class="lg:col-span-3 space-y-4">
             
             <div class="flex items-start gap-3">
@@ -540,7 +562,38 @@ const masterSchema = {
       </div>
     </section>
 
-    <!-- 4. Markdown Article Body -->
+
+    <!-- ================= 4. LOCATION FAQS ACCORDION (SEO SUPER-POWER) ================= -->
+    {faqs.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
+        <div class="border-b border-slate-200 pb-4 mb-6">
+          <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— FREQUENTLY ASKED QUESTIONS</span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">
+            Everything you need to know about stays in {toTitleCase(pageTitle)}
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Verified answers to common traveler queries</p>
+        </div>
+
+        <div class="space-y-3 max-w-4xl">
+          {faqs.map((f: any, i: number) => (
+            <details class="group bg-white rounded-2xl border border-slate-200/90 p-5 transition-all shadow-xs cursor-pointer" open={i === 0}>
+              <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] select-none">
+                <span>{f.question}</span>
+                <span class="w-6 h-6 rounded-full bg-slate-100 group-open:bg-emerald-50 text-slate-500 group-open:text-[#0d3b23] flex items-center justify-center shrink-0 transition-transform group-open:rotate-180">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </summary>
+              <p class="pt-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 mt-3 font-normal">
+                {f.answer}
+              </p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+
+    <!-- 5. Markdown Article Body (CMS থেকে আর্টিকেল লিখলে দেখাবে) -->
     {Content && (
       <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
         <article class="prose prose-slate max-w-none">
