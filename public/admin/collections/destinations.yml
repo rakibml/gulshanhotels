@@ -1,67 +1,88 @@
-name: "destinations"
-label: "Destinations (Area Guides)"
-label_singular: "Destination Page"
-folder: "src/content/destinations" # আপনার প্রজেক্টের কন্টেন্ট ফোল্ডার পাথ
-create: true
-slug: "{{slug}}"
-format: "yaml-frontmatter"
-editor:
-  preview: false
+- name: "destinations"
+  label: "Destinations (Area Guides)"
+  label_singular: "Destination Page"
+  folder: "src/content/destinations"
+  create: true
+  extension: "md"
+  format: "yaml-frontmatter"
+  slug: "{{slug}}"
+  summary: "{{title}}"
+  sortable_fields: ["title"]
+  editor:
+    preview: false
 
-fields:
-  - label: "Page Title"
-    name: "title"
-    widget: "string"
-    hint: "যেমন: Hotels in Gulshan 1 অথবা Hotels in Gulshan 2"
+  fields:
+    - label: "Page Title"
+      name: "title"
+      widget: "string"
+      hint: "যেমন: Hotels in Gulshan 1 অথবা Hotels in Gulshan 2"
 
-  - label: "Location Subtitle"
-    name: "location_subtitle"
-    widget: "string"
-    default: "Dhaka, Bangladesh"
-    hint: "হিরো ব্যানারে ম্যাপ পিনের পাশে যা দেখাবে"
+    - label: "Location Subtitle"
+      name: "location_subtitle"
+      widget: "string"
+      default: "Dhaka, Bangladesh"
+      required: false
+      hint: "হিরো ব্যানারে ম্যাপ পিনের পাশে যা দেখাবে"
 
-  - label: "Auto-Filter Keyword"
-    name: "filter_keyword"
-    widget: "string"
-    hint: "যেমন: gulshan 1 অথবা gulshan 2। এই কি-ওয়ার্ড দিয়ে আপনার হোটেলের লোকেশন অটোমেটিক ফিল্টার হবে।"
+    - label: "Auto-Filter Keyword"
+      name: "filter_keyword"
+      widget: "string"
+      required: false
+      hint: "যেমন: gulshan 1। এই কি-ওয়ার্ড দিয়ে হোটেলের লোকেশন বা ক্যাটাগরি অটোমেটিক ফিল্টার হবে। ফাঁকা রাখলে পেজের slug দিয়ে খুঁজবে।"
 
-  - label: "Hero Banner Image"
-    name: "hero_image"
-    widget: "image"
-    choose_url: true
-    hint: "হিরো সেকশনের বড় ব্যাকগ্রাউন্ড ছবি"
+    - label: "Hero Banner Image"
+      name: "hero_image"
+      widget: "image"
+      choose_url: true
+      required: false
+      hint: "হিরো সেকশনের বড় ব্যাকগ্রাউন্ড ছবি"
 
-  - label: "SEO / Short Description"
-    name: "description"
-    widget: "text"
-    hint: "হিরো ব্যানারে টাইটেলের নিচে এবং গুগল সার্চে দেখানোর ডেসক্রিপশন"
+    - label: "SEO / Short Description"
+      name: "description"
+      widget: "text"
+      hint: "হিরো ব্যানারে টাইটেলের নিচে এবং গুগল সার্চে দেখানোর ডেসক্রিপশন"
 
-  - label: "Manually Select Hotels (Optional)"
-    name: "selected_hotels"
-    widget: "relation"
-    collection: "hotels"
-    search_fields: ["title", "location"]
-    value_field: "{{slug}}"
-    display_fields: ["title"]
-    multiple: true
-    required: false
-    hint: "যদি নির্দিষ্ট কিছু হোটেল বাছতে চান তবে এখান থেকে সিলেক্ট করুন। ফাঁকা রাখলে কি-ওয়ার্ড দিয়ে অটোমেটিক আসবে।"
+    - label: "Manually Select Hotels (Optional)"
+      name: "selected_hotels"
+      widget: "relation"
+      collection: "hotels"
+      search_fields: ["title", "location"]
+      value_field: "{{slug}}"
+      display_fields: ["title"]
+      multiple: true
+      required: false
+      hint: "নির্দিষ্ট হোটেল বাছতে চাইলে এখান থেকে সিলেক্ট করুন। ফাঁকা রাখলে কি-ওয়ার্ড দিয়ে অটোমেটিক আসবে।"
 
-  - label: "About Section Image (Why Stay...)"
-    name: "about_image"
-    widget: "image"
-    choose_url: true
-    required: false
-    hint: "'Why Stay in...' সেকশনের বাঁ পাশের ছবি"
+    - label: "About Section Image (Why Stay...)"
+      name: "about_image"
+      widget: "image"
+      choose_url: true
+      required: false
+      hint: "'Why Stay in...' সেকশনের বাঁ পাশের ছবি। ফাঁকা রাখলে হিরো ছবি আসবে।"
 
-  - label: "About Section Text"
-    name: "about_text"
-    widget: "text"
-    required: false
-    hint: "'Why Stay in...' সেকশনের ডেসক্রিপশন প্যারাগ্রাফ"
+    - label: "About Section Text"
+      name: "about_text"
+      widget: "text"
+      required: false
+      hint: "'Why Stay in...' সেকশনের প্যারাগ্রাফ। ফাঁকা রাখলে SEO Description আসবে।"
 
-  - label: "Detailed Article Body"
-    name: "body"
-    widget: "markdown"
-    required: false
-    hint: "যদি পেজের নিচে এসইও-র জন্য আরও বড় কোনো আর্টিকেল বা কনটেন্ট লিখতে চান"
+    - label: "FAQs"
+      name: "faqs"
+      widget: "list"
+      required: false
+      summary: "{{fields.question}}"
+      hint: "সাধারণ প্রশ্ন-উত্তর। এগুলো পেজে দেখাবে এবং গুগলের FAQ রিচ স্নিপেটেও যাবে।"
+      fields:
+        - label: "Question"
+          name: "question"
+          widget: "string"
+        - label: "Answer"
+          name: "answer"
+          widget: "text"
+          hint: "সাধারণ লেখা লিখুন। HTML বা markdown দেবেন না।"
+
+    - label: "Detailed Article Body"
+      name: "body"
+      widget: "markdown"
+      required: false
+      hint: "পেজের নিচে এসইও-র জন্য বড় আর্টিকেল লিখতে চাইলে এখানে লিখুন"
