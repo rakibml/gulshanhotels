@@ -4,39 +4,79 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GulshanHotels Admin - Sveltia CMS</title>
-        <script>
+    <script>
       window.CMS_MANUAL_INIT = true;
     </script>
   </head>
   <body>
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <!--
+      TODO: Sveltia এর ভার্সন নম্বর বসিয়ে দিন, যেমন: @sveltia/cms@0.xx.x/dist/sveltia-cms.js
+      ভার্সন npmjs.com/package/@sveltia/cms পেজে পাবেন।
+      ভার্সন না দিলে নতুন আপডেটে হঠাৎ প্যানেল ভেঙে যেতে পারে।
+    -->
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- UNIVERSAL SMART AUTO-LOADER (PERMANENT SOLUTION) -->
+    <!-- UNIVERSAL SMART AUTO-LOADER -->
     <script>
+      // ---------- হেল্পার ফাংশন ----------
+
+      // field এর ভেতরের item এ name না থাকলে বানিয়ে দেয় (files collection এর ভেতরেও কাজ করে)
       function sanitizeSveltiaFields(fields) {
         if (!Array.isArray(fields)) return;
         fields.forEach(f => {
           if (f && typeof f === 'object') {
             if (f.field && typeof f.field === 'object' && !f.field.name) {
-              f.field.name = f.field.label 
-                ? f.field.label.toLowerCase().replace(/[^a-z0-9]/g, '_') 
+              f.field.name = f.field.label
+                ? f.field.label.toLowerCase().replace(/[^a-z0-9]/g, '_')
                 : (f.name ? f.name + '_item' : 'item');
             }
             if (Array.isArray(f.fields)) sanitizeSveltiaFields(f.fields);
             if (f.field && Array.isArray(f.field.fields)) sanitizeSveltiaFields(f.field.fields);
+            if (Array.isArray(f.types)) sanitizeSveltiaFields(f.types);
           }
         });
       }
 
+      // collection এর fields এবং files দুটোই sanitize করে
+      function sanitizeCollection(col) {
+        if (!col || typeof col !== 'object') return;
+        if (Array.isArray(col.fields)) sanitizeSveltiaFields(col.fields);
+        if (Array.isArray(col.files)) {
+          col.files.forEach(file => {
+            if (file && Array.isArray(file.fields)) sanitizeSveltiaFields(file.fields);
+          });
+        }
+      }
+
+      // ফাইল আনে। ফাইল না পেলে বা yaml ভুল হলে console এ কারণ দেখায়, কিন্তু সাইট ভাঙে না
+      async function loadYaml(url) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+            console.warn('[CMS Loader] ফাইল পাওয়া যায়নি (' + res.status + '):', url);
+            return null;
+          }
+          const text = await res.text();
+          return jsyaml.load(text);
+        } catch (e) {
+          console.warn('[CMS Loader] ফাইল পড়তে সমস্যা:', url, e);
+          return null;
+        }
+      }
+
       document.addEventListener('DOMContentLoaded', async () => {
         try {
+          // ০. মূল config.yml
           const mainRes = await fetch('/admin/config.yml');
+          if (!mainRes.ok) {
+            throw new Error('/admin/config.yml পাওয়া যায়নি (status ' + mainRes.status + ')');
+          }
           const mainText = await mainRes.text();
           const config = jsyaml.load(mainText) || {};
           config.collections = [];
 
-          // ১. হোটেলের ৬টি খণ্ডাংশ স্বয়ংক্রিয়ভাবে জোড়া লাগানো
+          // ১. হোটেলের ৬টি অংশ জোড়া লাগানো
           const hotelSectionFiles = [
             '/admin/collections/hotel/1-header.yml',
             '/admin/collections/hotel/2-about-rates.yml',
@@ -46,16 +86,14 @@
             '/admin/collections/hotel/6-faqs.yml'
           ];
 
-          let hotelFields = [];
+          const hotelFields = [];
           for (const fileUrl of hotelSectionFiles) {
-            try {
-              const res = await fetch(fileUrl);
-              if (res.ok) {
-                const text = await res.text();
-                const fieldsArr = jsyaml.load(text);
-                if (Array.isArray(fieldsArr)) hotelFields.push(...fieldsArr);
-              }
-            } catch (e) {}
+            const fieldsArr = await loadYaml(fileUrl);
+            if (Array.isArray(fieldsArr)) {
+              hotelFields.push(...fieldsArr);
+            } else if (fieldsArr !== null) {
+              console.warn('[CMS Loader] এই ফাইল একটি list হওয়া উচিত (- দিয়ে শুরু):', fileUrl);
+            }
           }
 
           if (hotelFields.length > 0) {
@@ -70,62 +108,59 @@
               summary: "{{title}} - Link: /{{slug}}",
               fields: hotelFields
             });
+          } else {
+            console.warn('[CMS Loader] হোটেলের কোনো field লোড হয়নি। উপরের warning গুলো দেখুন।');
           }
 
-          // ২. পপুলার হোটেলস হোমপেজ সেটিংস
-          try {
-            const resPop = await fetch('/admin/collections/popular-hotels.yml');
-            if (resPop.ok) {
-              const textPop = await resPop.text();
-              const popFields = jsyaml.load(textPop);
-              if (Array.isArray(popFields)) {
-                sanitizeSveltiaFields(popFields);
-                config.collections.push({
-                  name: "homepage",
-                  label: "🏠 Homepage Settings",
-                  files: [
-                    {
-                      name: "popular_hotels",
-                      label: "Popular Hotels Carousel Section",
-                      file: "src/content/homepage/popular-hotels.md",
-                      fields: popFields
-                    }
-                  ]
-                });
-              }
-            }
-          } catch (e) {}
+          // ২. হোমপেজ সেটিংস (পপুলার হোটেলস)
+          const popFields = await loadYaml('/admin/collections/popular-hotels.yml');
+          if (Array.isArray(popFields)) {
+            sanitizeSveltiaFields(popFields);
+            config.collections.push({
+              name: "homepage",
+              label: "🏠 Homepage Settings",
+              files: [
+                {
+                  name: "popular_hotels",
+                  label: "Popular Hotels Carousel Section",
+                  file: "src/content/homepage/popular-hotels.md",
+                  fields: popFields
+                }
+              ]
+            });
+          }
 
-          // ৩. ইউনিভার্সাল অটো-স্ক্যানার (সবগুলো কালেকশন অটোমেটিক হ্যান্ডেল করবে)
+          // ৩. বাকি সব collection অটো-স্ক্যান
           const allPossibleCollections = [
             'destinations.yml',
             'posts.yml',          // ব্লগ ও ট্রাভেল গাইড
-            'pages.yml',          // সাধারণ পেজসমূহ (About, Terms, Privacy)
+            'pages.yml',          // সাধারণ পেজ (About, Terms, Privacy)
             'guest-reviews.yml',  // রিভিউ অ্যাপ্রুভাল
             'subscribers.yml'     // নিউজলেটার সাবস্ক্রাইবার্স
           ];
 
           for (const colFile of allPossibleCollections) {
-            try {
-              const res = await fetch(`/admin/collections/${colFile}`);
-              if (res.ok) {
-                const text = await res.text();
-                const colData = jsyaml.load(text);
-                if (colData && (Array.isArray(colData.fields) || Array.isArray(colData.files))) {
-                  if (Array.isArray(colData.fields)) sanitizeSveltiaFields(colData.fields);
-                  config.collections.push(colData);
-                }
-              }
-            } catch (e) {
-              // ফাইল না থাকলে বা ভুল হলে চুপচাপ স্কিপ করবে, পুরো সাইট ক্র্যাশ করবে না
+            let colData = await loadYaml('/admin/collections/' + colFile);
+            if (!colData) continue;
+
+            // ফাইল যদি list হিসেবে লেখা থাকে (- name: ...), প্রথম item টা নেবে
+            if (Array.isArray(colData)) colData = colData[0];
+
+            if (colData && (Array.isArray(colData.fields) || Array.isArray(colData.files))) {
+              sanitizeCollection(colData);
+              config.collections.push(colData);
+            } else {
+              console.warn('[CMS Loader] এই ফাইলে fields বা files নেই, তাই স্কিপ হলো:', colFile);
             }
           }
 
-          // ৪. Sveltia CMS ইনিশিয়ালাইজ
+          // ৪. Sveltia CMS চালু
           if (window.CMS && typeof window.CMS.init === 'function') {
             window.CMS.init({ config });
           } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
             window.SveltiaCMS.init({ config });
+          } else {
+            console.error('[CMS Loader] Sveltia CMS লোড হয়নি। script লিংক বা ইন্টারনেট চেক করুন।');
           }
 
         } catch (e) {
