@@ -5,9 +5,9 @@ filter_keyword: gulshan
 hero_image: https://media.gulshanhotels.com/34884184.jpg
 description: Pearl Hotel in Dhaka offers 4-star comfort with air-conditioned rooms featuring private bathrooms, mini-bars, and free WiFi. Each room includes a seating area and modern amenities for a pleasant stay.
 selected_hotels:
-  - amari-dhaka
-  - the-midori-by-lakeshore
   - the-westin-dhaka
+  - the-midori-by-lakeshore
+  - amari-dhaka
   - lakeshore-hotel
 about_image: https://media.gulshanhotels.com/34884165.jpg
 about_text: |-
