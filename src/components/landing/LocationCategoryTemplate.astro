@@ -30,7 +30,7 @@ try {
   }
 } catch (err) {
   try {
-    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
+    const rawGlob = import.meta.glob(['/src/content/hotels/**/*.{md,mdx}', '../../content/hotels/**/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
@@ -38,7 +38,7 @@ try {
   } catch (e) {}
 }
 
-// ৩. আলাদা কালেকশন থেকে সব আসল রিভিউ লোড করা
+// ৩. সব রিভিউ লোডার (সাবফোল্ডার সহ সব লোড করবে)
 let allReviews: any[] = [];
 try {
   const revCol = await (getCollection as any)('reviews');
@@ -50,7 +50,7 @@ try {
   }
 } catch (e) {
   try {
-    const rawRevGlob = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
+    const rawRevGlob = import.meta.glob(['/src/content/reviews/**/*.{md,mdx}', '../../content/reviews/**/*.{md,mdx}'], { eager: true });
     allReviews = Object.entries(rawRevGlob).map(([filePath, item]: [string, any]) => ({
       slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
       data: item?.frontmatter || item?.data || {}
@@ -74,7 +74,16 @@ const displayHotels = allHotels.filter(h => {
   return hLoc.includes(matchKeyword) || hCat.includes(matchKeyword) || hTitle.includes(matchKeyword);
 });
 
-// ৫. টেক্সট ও ডাটা হেল্পার ফাংশন
+// ৫. স্মার্ট স্ট্রিং নরমালাইজার (অক্ষরের ছোটখাটো অমিল দূর করার জন্য)
+function normalizeName(str: any) {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .replace(/\b(the|hotel|resort|suites?|spa)\b/g, '') // 'The' বা 'Hotel' শব্দ থাকলে কেটে ক্লিন করবে
+    .replace(/[^a-z0-9]/g, '')                          // সব স্পেস, ড্যাশ, কমা বাদ দিয়ে পিওর টেক্সট করবে
+    .trim();
+}
+
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -260,24 +269,38 @@ const masterSchema = {
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => typeof a === 'object' ? a.name : a);
             const hotelUrl = `/${h.slug}`;
 
-            // ================= এই হোটেলের আসল রিভিউ খোঁজা =================
-            const currentSlug = String(h.slug || '').toLowerCase().trim();
-            const currentTitle = String(hd.title || '').toLowerCase().trim();
+            // ================= স্মার্ট ও নিখুঁত রিভিউ ম্যাচিং =================
+            // এই হোটেলের নাম ও স্লাগ নরমালাইজ করা
+            const currentTargets = [
+              normalizeName(h.slug),
+              normalizeName(hd.title),
+              normalizeName(hd.name)
+            ].filter(Boolean);
 
             const hotelReviews = allReviews.filter((r: any) => {
               const rd = r.data || r;
-              // যদি approved ফিল্ড থাকে তবে অনুমোদিত হতে হবে
-              if (rd.approved !== undefined && rd.approved !== null && rd.approved !== true && String(rd.approved) !== 'true') {
+
+              // শুধুমাত্র যদি স্পষ্টভাবে approved: false করা থাকে, তবেই বাদ যাবে (বাকি সব কাউন্ট হবে)
+              if (rd.approved === false || String(rd.approved).toLowerCase() === 'false') {
                 return false;
               }
-              const rSlug = String(rd.slug || r.slug || '').toLowerCase().trim();
-              const rHotel = String(rd.hotel || '').toLowerCase().trim();
 
-              return (rSlug && (rSlug === currentSlug || currentSlug.includes(rSlug) || rSlug.includes(currentSlug))) || 
-                     (rHotel && (rHotel === currentTitle || rHotel.replace(/-/g, ' ') === currentTitle.replace(/-/g, ' ')));
+              // রিভিউর সব ফিল্ড চেক করা (slug, hotel, hotel_slug ইত্যাদি)
+              const reviewTargets = [
+                normalizeName(rd.slug),
+                normalizeName(r.slug),
+                normalizeName(rd.hotel),
+                normalizeName(rd.hotel_slug),
+                normalizeName(rd.hotelSlug),
+                normalizeName(rd.hotel_name),
+                normalizeName(rd.property)
+              ].filter(Boolean);
+
+              // যেকোনো একটির সাথে ম্যাচ করলেই রিভিউটি কাউন্ট হবে
+              return reviewTargets.some((rt) => currentTargets.includes(rt));
             });
 
-            // রিভিউ কাউন্ট ও রেটিং বের করা
+            // মোট রিভিউ সংখ্যা
             let reviewCount = hotelReviews.length;
             let reviewScore = "";
 
@@ -288,7 +311,7 @@ const masterSchema = {
               }, 0);
               reviewScore = (totalRating / reviewCount).toFixed(1);
             } else {
-              // ফলব্যাক: যদি হোটেলের ফাইলে সরাসরি rating থাকে
+              // ফলব্যাক: যদি হোটেলের ফাইলে সরাসরি rating দেওয়া থাকে
               if (hd.reviewsCount) reviewCount = Number(hd.reviewsCount) || 0;
               if (hd.rating) reviewScore = String(hd.rating);
             }
@@ -348,7 +371,7 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- ================= REAL REVIEW ROW (আসল রিভিউ ফাইল থেকে আসা ডাটা) ================= -->
+                    <!-- ================= REAL REVIEW ROW (আসল রিভিউ সংখ্যা ও রেটিং) ================= -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         {reviewScore && (
