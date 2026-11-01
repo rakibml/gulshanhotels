@@ -1,81 +1,375 @@
 ---
-// src/components/Logo.astro
-// <Logo animate uid="hd" size={42} />  -> header (plays intro once per browser session)
-// <Logo uid="ft" size={48} />          -> footer (always static)
+// src/layouts/Layout.astro (Global Modern Layout with Important Pages Footer Column)
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+
 interface Props {
-  animate?: boolean;
-  uid?: string;      // must be unique per instance on the page (SVG gradient ids)
-  size?: number;     // icon height in px; text scales with it
-  subtitle?: boolean;
+  title: string;
+  description?: string;
+  image?: string;
 }
-const { animate = false, uid = 'gh', size = 44, subtitle = true } = Astro.props;
-const arch = "M13.6 77 V42 C13.6 23 24 14 42 14 H68 C75 14 80 14.2 82 16 C77 23 68 27 58 27 H44 C33 27 27.2 33 27.2 46 V78.5 Z";
-const wins = [
-  [40.3, 44.5, 4.5, 7], [48, 41.5, 4, 7], [40.3, 54.5, 4.5, 7],
-  [48, 51.5, 4, 7], [55.8, 51.5, 4, 7], [48, 62.5, 4, 7],
-  [70.3, 52, 3, 5.5], [70.3, 62, 3, 5.5],
-];
+
+const { 
+  title, 
+  description = "Discover, compare, and book verified luxury and business hotels in Gulshan, Banani, and Dhaka, Bangladesh.",
+  image = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const siteUrl = Astro.url.origin + currentPath;
 ---
 
-<span class:list={['gh-logo', { 'gh-anim': animate }]} style={`--s:${size}px`}>
-  <svg class="gh-mark" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id={`${uid}-r`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#f6454b" /><stop offset="1" stop-color="#d6212b" />
-      </linearGradient>
-      <linearGradient id={`${uid}-n`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#34478f" /><stop offset="1" stop-color="#1a2552" />
-      </linearGradient>
-    </defs>
-    <rect class="t" width="100" height="100" rx="22" fill={`url(#${uid}-r)`} />
-    <path class="ol" pathLength="1" d={arch} />
-    <path class="ar" d={arch} fill={`url(#${uid}-n)`} />
-    <g class="bd">
-      <path d="M35.7 78.5V42.4L54 34L66 40V78.5Z M67.5 40L76 43.5V78.5H67.5Z" fill={`url(#${uid}-n)`} />
-      <rect x="31" y="77.4" width="50" height="1.8" fill={`url(#${uid}-n)`} />
-      {wins.map(([x, y, w, h], i) => (
-        <rect class="w" x={x} y={y} width={w} height={h} style={`--i:${i}`} />
-      ))}
-    </g>
-    <circle class="dt" cx="85" cy="71" r="7" fill={`url(#${uid}-n)`} />
-  </svg>
-  <span class="gh-text">
-    <span class="gh-word">Gulshan<b>Hotels</b>.com</span>
-    {subtitle && <span class="gh-sub">Dhaka • Bangladesh</span>}
-  </span>
-</span>
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <script is:inline>
+      try { if (!sessionStorage.getItem('gh_intro')) { document.documentElement.classList.add('gh-intro'); sessionStorage.setItem('gh_intro','1'); } } catch(e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- BLOCK GOOGLE INDEXING DURING DEVELOPMENT -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
 
-<style is:global>
-  .gh-logo{display:inline-flex;align-items:center;gap:calc(var(--s)*.26);line-height:1;white-space:nowrap}
-  .gh-mark{width:var(--s);height:var(--s);flex:none;overflow:visible}
-  .gh-text{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
-  .gh-word{font-weight:800;font-size:calc(var(--s)*.5);letter-spacing:-.03em;color:#0f172a}
-  .gh-word b{color:#e8333a;font-weight:800}
-  .gh-sub{font-size:calc(var(--s)*.2);letter-spacing:.2em;font-weight:800;color:#475569;margin-top:calc(var(--s)*.12);text-transform:uppercase}
-  .gh-mark .w{fill:#e8333a}
-  .gh-mark .ol{fill:none;stroke:#34478f;stroke-width:1;stroke-dasharray:1;opacity:0}
-  .gh-mark .t,.gh-mark .ar,.gh-mark .bd,.gh-mark .dt{transform-box:fill-box}
-  .gh-mark .t{transform-origin:50% 50%}
-  .gh-mark .bd{transform-origin:50% 100%}
-  @media (max-width:420px){.gh-logo{--s:34px!important}}
+    <!-- PRIMARY SEO META TAGS -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={siteUrl} />
 
-  /* intro: only when <html class="gh-intro"> was set by the head script (first view of the session) */
-  .gh-intro .gh-anim .ol{animation:ghDraw 1.3s ease-in-out .1s both}
-  .gh-intro .gh-anim .ar{animation:ghFade .5s ease .8s both}
-  .gh-intro .gh-anim .bd{animation:ghRise .8s cubic-bezier(.16,1,.3,1) 1s both}
-  .gh-intro .gh-anim .w{animation:ghWin 1.2s ease calc(1.5s + var(--i)*.08s) both}
-  .gh-intro .gh-anim .t{animation:ghPop .7s cubic-bezier(.16,1,.3,1) 2s both}
-  .gh-intro .gh-anim .dt{animation:ghDrop .7s cubic-bezier(.3,1.6,.5,1) 2.8s both}
-  .gh-intro .gh-anim .gh-word{animation:ghWipe .9s cubic-bezier(.16,1,.3,1) 2.2s both}
-  .gh-intro .gh-anim .gh-sub{animation:ghFade .6s ease 3s both}
+    <!-- OPEN GRAPH / FACEBOOK / WHATSAPP PREVIEW -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
 
-  @keyframes ghDraw{0%{opacity:1;stroke-dashoffset:1}70%{opacity:1;stroke-dashoffset:0}100%{opacity:0;stroke-dashoffset:0}}
-  @keyframes ghFade{from{opacity:0}to{opacity:1}}
-  @keyframes ghRise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-  @keyframes ghWin{0%{fill:#fff}35%{fill:#ffd27a}100%{fill:#e8333a}}
-  @keyframes ghPop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
-  @keyframes ghDrop{from{opacity:0;transform:translateY(-40px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes ghWipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+    <!-- TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={siteUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+  </head>
+<body class="bg-white font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-800 selection:text-white">    
+    <!-- GLOBAL HEADER -->
+    <header id="main-header" class="bg-white/95 backdrop-blur-md text-slate-900 sticky top-0 z-50 border-b border-slate-200/90 shadow-2xs transition-transform duration-300">
+      <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 flex justify-between items-center">
+        
+        <!-- Logo -->
+        <a href="/" aria-label="GulshanHotels.com home">
+          <Logo animate uid="hd" size={42} />
+        </a>
 
-  @media (prefers-reduced-motion:reduce){.gh-intro .gh-anim *{animation:none!important}}
-</style>
+        <!-- Desktop Navigation Menu -->
+        <nav class="hidden lg:flex items-center space-x-7 text-xs font-black tracking-wider uppercase text-slate-800">
+          <a href="/" class={`transition pb-0.5 ${currentPath === '/' ? 'text-emerald-800 font-extrabold border-b-2 border-emerald-800' : 'hover:text-emerald-700'}`}>HOME</a>
+          <a href="/#hotels" class="hover:text-emerald-700 transition">HOTELS IN GULSHAN</a>
+          <a href="/#hotels" class="hover:text-emerald-700 transition">HOTEL DEALS</a>
+          <a href="/about" class={`transition pb-0.5 ${currentPath === '/about' || currentPath === '/about/' ? 'text-emerald-800 font-extrabold border-b-2 border-emerald-800' : 'hover:text-emerald-700'}`}>ABOUT US</a>
+          <a href="/live-prices" class="hover:text-emerald-700 transition">LIVE PRICES</a>
+        </nav>
+
+        <!-- Right Options & List Hotel CTA -->
+        <div class="flex items-center space-x-3">
+          
+          <!-- Wishlist Heart Button -->
+          <button id="wishlist-btn" aria-label="View Saved Wishlist" class="relative text-slate-700 hover:text-rose-600 transition p-2 rounded-full hover:bg-slate-100 focus:outline-none cursor-pointer">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            <span id="wishlist-count" class="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+          </button>
+
+          <!-- List Hotel Button -->
+          <a href="/admin/" class="hidden sm:inline-flex bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[11px] uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-sm transition">
+            List Your Hotel ➔
+          </a>
+
+          <!-- Mobile Hamburger -->
+          <button id="mobile-menu-btn" aria-label="Toggle Mobile Menu" class="lg:hidden text-slate-800 hover:text-emerald-800 p-2 rounded-lg focus:outline-none cursor-pointer">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Menu Drawer -->
+      <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-200 px-6 py-5 space-y-3 font-black text-xs uppercase tracking-wider text-slate-800 text-left">
+        <a href="/" class="block text-emerald-800 py-1">HOME</a>
+        <a href="/#hotels" class="block py-1 hover:text-emerald-800">HOTELS IN GULSHAN</a>
+        <a href="/#hotels" class="block py-1 hover:text-emerald-800">HOTEL DEALS</a>
+        <a href="/about" class="block py-1 hover:text-emerald-800">ABOUT US</a>
+        <a href="/admin/" class="block py-1 text-emerald-700 font-extrabold">LIST YOUR HOTEL ➔</a>
+      </div>
+    </header>
+
+    <!-- INTERACTIVE WISHLIST MODAL DRAWER -->
+    <div id="wishlist-modal" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden transition-opacity">
+      <div class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-slate-200 p-6 shadow-2xl overflow-y-auto flex flex-col justify-between text-slate-900 text-left">
+        <div>
+          <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-black text-[#0d3b23] uppercase tracking-wider flex items-center space-x-2">
+              <svg class="w-5 h-5 text-rose-500 fill-rose-500" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <span>Saved Favorites</span>
+            </h3>
+            <button id="close-wishlist" aria-label="Close Favorites" class="text-slate-400 hover:text-slate-900 p-1 text-2xl font-bold cursor-pointer">&times;</button>
+          </div>
+
+          <div id="wishlist-items" class="py-6 space-y-4 text-xs text-slate-600">
+            <p class="text-center text-slate-500 py-8">No saved hotels yet. Click the heart icon on any hotel card to add it to your favorites!</p>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4">
+          <a href="/#hotels" class="block w-full bg-[#0d3b23] hover:bg-emerald-900 text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl text-center transition shadow-md">
+            Explore Gulshan Hotels
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE MAIN CONTENT -->
+    <div class="flex-grow">
+      <slot />
+    </div>
+
+    <!-- GLOBAL MODERN FOOTER (CLEAN LIGHT THEME WITH IMPORTANT PAGES COLUMN) -->
+<footer class="w-full bg-white text-slate-900 pt-2 pb-8 text-center sm:text-left text-xs sm:text-sm">
+<div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+        
+        <!-- ================= NEWSLETTER BANNER CONTAINER ================= -->
+<div class="bg-[#0d3b23] p-7 sm:p-10 rounded-3xl border border-emerald-800/80 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left text-white">
+  
+  <!-- Left Side: Copy -->
+  <div class="space-y-2">
+    <div class="flex items-center justify-center md:justify-start gap-2 text-emerald-300">
+      <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      </svg>
+      <span class="text-[11px] font-black uppercase tracking-[0.2em]">VIP Travel Dispatch</span>
+    </div>
+
+    <h3 class="text-2xl sm:text-3xl font-black text-white font-serif tracking-tight">
+      Get Exclusive Deals & Updates
+    </h3>
+
+    <p class="text-xs sm:text-sm text-emerald-100/85 max-w-md leading-relaxed font-normal">
+      Subscribe to receive secret price drops, embassy stay alerts, and diplomatic hotel offers in Gulshan.
+    </p>
+  </div>
+
+  <!-- Right Side: Form -->
+  <div class="w-full md:w-auto">
+    <form id="newsletterForm" class="flex flex-col sm:flex-row gap-2.5">
+      <input 
+        type="email" 
+        id="newsletterEmail"
+        required
+        placeholder="Enter your email address..." 
+        class="bg-black/25 border border-white/20 text-white placeholder-emerald-100/50 px-5 py-3.5 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-white w-full sm:w-80 transition" 
+      />
+      
+      <button 
+        type="submit" 
+        id="newsletterBtn" 
+        class="bg-white hover:bg-emerald-50 text-slate-950 font-black px-7 py-3.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer shrink-0 active:scale-95"
+      >
+        Subscribe
+      </button>
+    </form>
+
+    <!-- Success Message with Clean SVG (No Emojis / Symbols) -->
+    <div id="newsletterSuccess" class="hidden text-emerald-200 font-bold text-xs sm:text-sm bg-black/30 p-3.5 rounded-xl border border-emerald-400/40 text-center mt-2.5 flex items-center justify-center gap-2">
+      <svg class="w-4 h-4 text-emerald-400 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>Thank you! You have been subscribed to exclusive Gulshan hotel deals.</span>
+    </div>
+  </div>
+
+</div>
+
+        <!-- 4-Column Modern SEO Footer Links -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center sm:text-left pt-2">
+          
+          <!-- Col 1: Brand -->
+          <div class="space-y-3">
+            <a href="/" aria-label="GulshanHotels.com home" class="inline-block">
+              <Logo uid="ft" size={48} />
+            </a>
+            <p class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium pt-1">
+              Your trusted portal to discover, compare, and book the finest luxury, boutique, and business hotels in Gulshan, Banani, and Baridhara, Dhaka.
+            </p>
+          </div>
+
+          <!-- Col 2: SEO Keyword Locations -->
+          <div class="space-y-3">
+            <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Popular Locations</h4>
+            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels in Gulshan 1</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels in Gulshan 2</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels near US Embassy</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels near IVAC Visa Center</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels in Banani & Baridhara</a></li>
+            </ul>
+          </div>
+
+          <!-- Col 3: Categories -->
+          <div class="space-y-3">
+            <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Top Categories</h4>
+            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">5-Star Luxury Hotels</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Boutique Stays</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Executive Business Accommodations</a></li>
+              <li><a href="/#hotels" class="hover:text-emerald-800 transition">Diplomatic Serviced Apartments</a></li>
+            </ul>
+          </div>
+
+          <!-- Col 4: Important Pages -->
+          <div class="space-y-3">
+            <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Important Pages</h4>
+            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
+              <li><a href="/about" class="hover:text-emerald-800 transition">About Us</a></li>
+              <li><a href="/about" class="hover:text-emerald-800 transition">Contact Us</a></li>
+              <li><a href="/sitemap-index.xml" class="hover:text-emerald-800 transition">Sitemap</a></li>
+              <li><a href="/privacy" class="hover:text-emerald-800 transition">Privacy Policy</a></li>
+              <li><a href="/disclaimer" class="hover:text-emerald-800 transition">Disclaimer</a></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Copyright Bar -->
+        <div class="pt-8 border-t border-slate-200 text-center text-slate-800 text-xs sm:text-sm font-bold">
+          <p>© 2026 GulshanHotels.com. All Rights Reserved.</p>
+        </div>
+
+      </div>
+    </footer>
+
+    <!-- CLIENT SCRIPTS -->
+    <script is:inline>
+      const initLayoutScript = () => {
+        let lastScrollY = window.scrollY;
+        const header = document.getElementById('main-header');
+
+        window.addEventListener('scroll', () => {
+          if (!header) return;
+          const currentScrollY = window.scrollY;
+
+          if (currentScrollY > lastScrollY && currentScrollY > 80) {
+            header.classList.add('-translate-y-full');
+          } else {
+            header.classList.remove('-translate-y-full');
+          }
+          lastScrollY = currentScrollY;
+        });
+
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        if (btn && menu) {
+          btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+          });
+        }
+
+        // WISHLIST REALTIME LOCALSTORAGE LOGIC
+        const wishlistBtn = document.getElementById('wishlist-btn');
+        const wishlistModal = document.getElementById('wishlist-modal');
+        const closeWishlist = document.getElementById('close-wishlist');
+        const wishlistCountEl = document.getElementById('wishlist-count');
+        const wishlistItemsEl = document.getElementById('wishlist-items');
+
+        function updateWishlistUI() {
+          let list = [];
+          try {
+            list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
+          } catch (e) {
+            list = [];
+          }
+
+          if (wishlistCountEl) {
+            if (list.length > 0) {
+              wishlistCountEl.textContent = list.length.toString();
+              wishlistCountEl.classList.remove('hidden');
+            } else {
+              wishlistCountEl.classList.add('hidden');
+            }
+          }
+
+          if (wishlistItemsEl) {
+            if (list.length > 0) {
+              wishlistItemsEl.innerHTML = list.map((item, idx) => `
+                <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div class="flex items-center gap-3">
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=120&q=80'}" alt="${item.title}" class="w-12 h-12 object-cover rounded-xl" />
+                    <div>
+                      <h4 class="font-bold text-slate-900 text-xs">${item.title || 'Hotel'}</h4>
+                      <span class="text-[10px] font-bold text-emerald-800">${item.price || 'Check Rates'}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <a href="${item.url || '#'}" class="bg-[#0d3b23] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">View</a>
+                    <button class="remove-wishlist-item text-slate-400 hover:text-rose-600 font-bold text-base px-1" data-index="${idx}">&times;</button>
+                  </div>
+                </div>
+              `).join('');
+
+              wishlistItemsEl.querySelectorAll('.remove-wishlist-item').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                  const idx = parseInt(btn.getAttribute('data-index') || '0', 10);
+                  list.splice(idx, 1);
+                  localStorage.setItem('gh_wishlist', JSON.stringify(list));
+                  updateWishlistUI();
+                });
+              });
+            } else {
+              wishlistItemsEl.innerHTML = `<p class="text-center text-slate-500 py-8">No saved hotels yet. Click the heart icon on any hotel card to add it to your favorites!</p>`;
+            }
+          }
+        }
+
+        if (wishlistBtn && wishlistModal) {
+          wishlistBtn.addEventListener('click', () => {
+            updateWishlistUI();
+            wishlistModal.classList.remove('hidden');
+          });
+        }
+
+        if (closeWishlist && wishlistModal) {
+          closeWishlist.addEventListener('click', () => {
+            wishlistModal.classList.add('hidden');
+          });
+        }
+
+        // Newsletter form interactivity
+        const newsForm = document.getElementById('newsletterForm');
+        const newsSuccess = document.getElementById('newsletterSuccess');
+        if (newsForm && newsSuccess) {
+          newsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('newsletterEmail')?.value || '';
+            
+            try {
+              await fetch('https://gatlin.rmollah394.workers.dev/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+              });
+            } catch (err) {}
+
+            newsForm.classList.add('hidden');
+            newsSuccess.classList.remove('hidden');
+          });
+        }
+
+        updateWishlistUI();
+      };
+
+      document.addEventListener('DOMContentLoaded', initLayoutScript);
+      document.addEventListener('astro:page-load', initLayoutScript);
+    </script>
+  </body>
+</html>
