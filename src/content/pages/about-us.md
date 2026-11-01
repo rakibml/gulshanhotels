@@ -4,7 +4,7 @@ slug: about
 last_updated: October 2026
 badge: ''
 description: ''
-hero_image: https://media.gulshanhotels.com/34884184.jpg
+hero_image: ''
 stats: []
 features: []
 faqs: []
@@ -12,7 +12,7 @@ show_cta: false
 date: Oct 18, 2026
 ---
 
-**Gatlinburg is the gateway community for Great Smoky Mountains National Park, the most visited** national park in America. With three park entrances right in town, Gatlinburg serves as a basecamp for many of the 14 million park visitors each year.  For more than 7 decades, the little mountain town of
+**Gatlinburg is the** [**gateway** ](https://gulshanhotels.com/about/)**community for Great Smoky Mountains National Park, the most visited** national park in America. With three park entrances right in town, Gatlinburg serves as a basecamp for many of the 14 million park visitors each year.  For more than 7 decades, the little mountain town of
 
 ![](https://media.gulshanhotels.com/34884184.jpg)
 
