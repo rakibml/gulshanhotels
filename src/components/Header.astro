@@ -2,97 +2,77 @@
 // src/components/Header.astro
 import Logo from './Logo.astro';
 
-interface Props { currentPath: string }
-const { currentPath } = Astro.props;
-const p = currentPath.replace(/\/$/, '') || '/';
+interface Props {
+  currentPath?: string;
+}
 
-const links = [
-  { href: '/', label: 'Home', active: p === '/' },
-  { href: '/#hotels', label: 'Hotels in Gulshan', active: false },
-  { href: '/#hotels', label: 'Hotel Deals', active: false },
-  { href: '/about', label: 'About Us', active: p === '/about' },
-  { href: '/live-prices', label: 'Live Prices', active: p === '/live-prices', live: true },
-];
-const base = 'relative inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[13.5px] font-semibold transition-colors duration-200';
-const on = 'bg-emerald-50 text-emerald-800';
-const off = 'text-slate-600 hover:bg-slate-100 hover:text-slate-900';
+const { currentPath = '/' } = Astro.props;
 ---
 
-<!-- GLOBAL HEADER -->
-<header id="main-header" class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl transition-[transform,box-shadow] duration-300">
-  <div class="mx-auto grid max-w-[1550px] grid-cols-[1fr_auto] items-center gap-4 px-4 py-3 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:px-12">
+<header id="main-header" class="fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-in-out px-4 sm:px-8 pt-3 pb-2">
+  <!-- Micro Top Pill (Quick Zones indicator) -->
+  <div class="max-w-[1440px] mx-auto hidden lg:flex items-center justify-between text-[11px] font-medium text-stone-500 px-4 pb-2">
+    <div class="flex items-center gap-4">
+      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Diplomatic Zone Hotel Index</span>
+      <span>•</span>
+      <span>Gulshan 1 & 2 • Banani • Baridhara</span>
+    </div>
+    <div class="flex items-center gap-3 text-stone-600">
+      <a href="/#hotels" class="hover:text-[#071910] transition">US Embassy Area Stays</a>
+      <span>/</span>
+      <a href="/about" class="hover:text-[#071910] transition">Concierge Support</a>
+    </div>
+  </div>
 
+  <!-- Floating Island Navbar -->
+  <div class="max-w-[1440px] mx-auto bg-white/90 backdrop-blur-md border border-stone-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-2xl px-5 py-3 flex items-center justify-between">
+    
     <!-- Logo -->
-    <a href="/" aria-label="GulshanHotels.com home" class="justify-self-start rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700">
-      <Logo animate uid="hd" size={44} />
+    <a href="/" aria-label="GulshanHotels Home" class="flex items-center">
+      <Logo uid="hd" size={38} />
     </a>
 
-    <!-- Desktop navigation (truly centred) -->
-    <nav aria-label="Main" class="hidden items-center gap-1 lg:flex">
-      {links.map((l) => (
-        <a href={l.href} aria-current={l.active ? 'page' : undefined} class={`${base} ${l.active ? on : off}`}>
-          {l.live && (
-            <span class="relative flex h-2 w-2" aria-hidden="true">
-              <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
-              <span class="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
-            </span>
-          )}
-          {l.label}
-        </a>
-      ))}
+    <!-- Center Nav links -->
+    <nav class="hidden md:flex items-center gap-7 text-xs font-bold text-stone-700 tracking-wide uppercase">
+      <a href="/#hotels" class="hover:text-emerald-800 transition">Hotels</a>
+      <a href="/#hotels" class="hover:text-emerald-800 transition">Gulshan 1</a>
+      <a href="/#hotels" class="hover:text-emerald-800 transition">Gulshan 2</a>
+      <a href="/#hotels" class="hover:text-emerald-800 transition">Banani</a>
+      <a href="/about" class="hover:text-emerald-800 transition">About</a>
     </nav>
 
-    <!-- Actions -->
-    <div class="flex items-center justify-self-end gap-2 sm:gap-3">
-
-      <!-- Wishlist -->
-      <button id="wishlist-btn" aria-label="View saved wishlist" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-        <span id="wishlist-count" class="absolute -right-1 -top-1 hidden [&:not(.hidden)]:flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white ring-2 ring-white">0</span>
+    <!-- Right Actions: Wishlist + CTA -->
+    <div class="flex items-center gap-3">
+      <!-- Shortlist Button -->
+      <button 
+        id="wishlist-btn" 
+        class="relative p-2.5 rounded-xl hover:bg-stone-100 text-stone-700 transition cursor-pointer"
+        aria-label="View Favorites"
+      >
+        <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <span id="wishlist-count" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
       </button>
 
-      <span class="hidden h-6 w-px bg-slate-200 sm:block" aria-hidden="true"></span>
-
-      <!-- List your hotel -->
-      <a href="/admin/" class="group hidden items-center gap-2 rounded-full bg-gradient-to-b from-[#126138] to-[#0d3b23] px-5 py-2.5 text-[13px] font-bold text-white shadow-sm ring-1 ring-inset ring-white/10 transition duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-emerald-900/25 sm:inline-flex">
-        List your hotel
-        <svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <!-- Explore Button -->
+      <a href="/#hotels" class="hidden sm:inline-block bg-[#071910] hover:bg-emerald-900 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl transition shadow-sm active:scale-95">
+        Explore Stays
       </a>
 
-      <!-- Mobile hamburger -->
-      <button id="mobile-menu-btn" aria-label="Toggle mobile menu" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-slate-200 text-slate-800 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 lg:hidden">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      <!-- Mobile Menu Toggle Button -->
+      <button id="mobile-menu-btn" class="md:hidden p-2 text-stone-800" aria-label="Open Navigation">
+        <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
     </div>
   </div>
 
-  <!-- Mobile menu drawer -->
-  <div id="mobile-menu" class="hidden border-t border-slate-100 bg-white px-4 pb-5 pt-3 lg:hidden">
-    <nav aria-label="Mobile" class="flex flex-col gap-1">
-      {links.map((l) => (
-        <a href={l.href} aria-current={l.active ? 'page' : undefined} class={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${l.active ? on : 'text-slate-700 hover:bg-slate-50'}`}>
-          {l.live && <span class="h-2 w-2 rounded-full bg-rose-500" aria-hidden="true"></span>}
-          {l.label}
-        </a>
-      ))}
-    </nav>
-    <a href="/admin/" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d3b23] px-5 py-3 text-sm font-bold text-white">
-      List your hotel
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
+  <!-- Mobile Dropdown -->
+  <div id="mobile-menu" class="hidden md:hidden max-w-[1440px] mx-auto mt-2 bg-white border border-stone-200 rounded-2xl p-5 shadow-xl space-y-3 text-xs font-bold uppercase tracking-wider text-stone-800">
+    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">All Gulshan Hotels</a>
+    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Gulshan 1 Circle</a>
+    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Gulshan 2 Diplomatic</a>
+    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Banani 11 Luxury</a>
+    <a href="/about" class="block py-2 hover:text-emerald-800">About & Contact</a>
   </div>
 </header>
-
-<style>
-  #main-header.is-scrolled { box-shadow: 0 10px 30px -14px rgba(15, 23, 42, .22); background: rgba(255, 255, 255, .94); }
-</style>
-
-<script is:inline>
-  (function () {
-    var h = document.getElementById('main-header');
-    if (!h) return;
-    var f = function () { h.classList.toggle('is-scrolled', window.scrollY > 8); };
-    f();
-    window.addEventListener('scroll', f, { passive: true });
-  })();
-</script>
