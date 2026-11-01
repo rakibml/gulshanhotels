@@ -7,72 +7,101 @@ interface Props {
 }
 
 const { currentPath = '/' } = Astro.props;
+
+const navLinks = [
+  { name: 'Hotels', href: '/#hotels' },
+  { name: 'Gulshan 1', href: '/#hotels' },
+  { name: 'Gulshan 2', href: '/#hotels' },
+  { name: 'Banani', href: '/#hotels' },
+  { name: 'About', href: '/about' },
+];
 ---
 
-<header id="main-header" class="fixed top-0 left-0 right-0 z-40 transition-transform duration-300 ease-in-out px-4 sm:px-8 pt-3 pb-2">
-  <!-- Micro Top Pill (Quick Zones indicator) -->
-  <div class="max-w-[1440px] mx-auto hidden lg:flex items-center justify-between text-[11px] font-medium text-stone-500 px-4 pb-2">
-    <div class="flex items-center gap-4">
-      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Diplomatic Zone Hotel Index</span>
-      <span>•</span>
-      <span>Gulshan 1 & 2 • Banani • Baridhara</span>
-    </div>
-    <div class="flex items-center gap-3 text-stone-600">
-      <a href="/#hotels" class="hover:text-[#071910] transition">US Embassy Area Stays</a>
-      <span>/</span>
-      <a href="/about" class="hover:text-[#071910] transition">Concierge Support</a>
-    </div>
-  </div>
-
-  <!-- Floating Island Navbar -->
-  <div class="max-w-[1440px] mx-auto bg-white/90 backdrop-blur-md border border-stone-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-2xl px-5 py-3 flex items-center justify-between">
+<!-- সম্পূর্ণ ওপরে লাগানো ফুল-উইডথ হেডার (কোনো ফাঁকা গ্যাপ নেই) -->
+<header 
+  id="main-header" 
+  class="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm transition-transform duration-300"
+>
+  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center justify-between">
     
-    <!-- Logo -->
-    <a href="/" aria-label="GulshanHotels Home" class="flex items-center">
-      <Logo uid="hd" size={38} />
+    <!-- ১. ব্র্যান্ড লোগো -->
+    <a href="/" aria-label="GulshanHotels Home" class="flex items-center shrink-0">
+      <Logo uid="hd" size={42} />
     </a>
 
-    <!-- Center Nav links -->
-    <nav class="hidden md:flex items-center gap-7 text-xs font-bold text-stone-700 tracking-wide uppercase">
-      <a href="/#hotels" class="hover:text-emerald-800 transition">Hotels</a>
-      <a href="/#hotels" class="hover:text-emerald-800 transition">Gulshan 1</a>
-      <a href="/#hotels" class="hover:text-emerald-800 transition">Gulshan 2</a>
-      <a href="/#hotels" class="hover:text-emerald-800 transition">Banani</a>
-      <a href="/about" class="hover:text-emerald-800 transition">About</a>
+    <!-- ২. ক্লিন ডেস্কটপ মেনু -->
+    <nav class="hidden md:flex items-center gap-8 lg:gap-10 text-[13px] font-bold text-slate-800 tracking-wider uppercase">
+      {navLinks.map((link) => (
+        <a 
+          href={link.href} 
+          class="hover:text-[#0d3b23] transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-[2px] after:bg-[#0d3b23] after:transition-all"
+        >
+          {link.name}
+        </a>
+      ))}
     </nav>
 
-    <!-- Right Actions: Wishlist + CTA -->
-    <div class="flex items-center gap-3">
-      <!-- Shortlist Button -->
+    <!-- ৩. উইশলিস্ট ও অ্যাকশন বাটন -->
+    <div class="flex items-center gap-3 sm:gap-4">
+      
+      <!-- উইশলিস্ট বাটন -->
       <button 
         id="wishlist-btn" 
-        class="relative p-2.5 rounded-xl hover:bg-stone-100 text-stone-700 transition cursor-pointer"
-        aria-label="View Favorites"
+        type="button"
+        aria-label="View Saved Hotels"
+        class="relative p-2.5 rounded-full hover:bg-slate-100 text-slate-700 transition cursor-pointer"
       >
-        <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        <svg class="w-5 h-5 text-rose-500 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
         </svg>
-        <span id="wishlist-count" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        <span 
+          id="wishlist-count" 
+          class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm"
+        >
+          0
+        </span>
       </button>
 
-      <!-- Explore Button -->
-      <a href="/#hotels" class="hidden sm:inline-block bg-[#071910] hover:bg-emerald-900 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl transition shadow-sm active:scale-95">
+      <!-- মূল CTA বাটন -->
+      <a 
+        href="/#hotels" 
+        class="hidden sm:inline-flex items-center justify-center bg-[#071910] hover:bg-emerald-950 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition shadow-sm active:scale-95"
+      >
         Explore Stays
       </a>
 
-      <!-- Mobile Menu Toggle Button -->
-      <button id="mobile-menu-btn" class="md:hidden p-2 text-stone-800" aria-label="Open Navigation">
-        <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <!-- মোবাইল মেনু টগল বাটন -->
+      <button 
+        id="mobile-menu-btn" 
+        type="button"
+        aria-label="Toggle Menu"
+        class="md:hidden p-2 text-slate-800 hover:text-black rounded-lg"
+      >
+        <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
       </button>
+
     </div>
   </div>
 
-  <!-- Mobile Dropdown -->
-  <div id="mobile-menu" class="hidden md:hidden max-w-[1440px] mx-auto mt-2 bg-white border border-stone-200 rounded-2xl p-5 shadow-xl space-y-3 text-xs font-bold uppercase tracking-wider text-stone-800">
-    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">All Gulshan Hotels</a>
-    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Gulshan 1 Circle</a>
-    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Gulshan 2 Diplomatic</a>
-    <a href="/#hotels" class="block py-2 border-b border-stone-100 hover:text-emerald-800">Banani 11 Luxury</a>
-    <a href="/about" class="block py-2 hover:text-emerald-800">About & Contact</a>
+  <!-- ৪. মোবাইল ড্রপডাউন মেনু -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-6 py-5 space-y-3 shadow-xl">
+    {navLinks.map((link) => (
+      <a 
+        href={link.href} 
+        class="block text-xs font-bold uppercase tracking-wider text-slate-800 hover:text-[#0d3b23] py-2 border-b border-slate-100 last:border-none"
+      >
+        {link.name}
+      </a>
+    ))}
+    <div class="pt-2">
+      <a 
+        href="/#hotels" 
+        class="block w-full text-center bg-[#071910] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl"
+      >
+        Explore Stays
+      </a>
+    </div>
   </div>
 </header>
