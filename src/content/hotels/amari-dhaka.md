@@ -25,7 +25,7 @@ popular: true
 sponsored: false
 spotlight_desc: ''
 about_notice: ''
-price: $150/ night
+price: $150
 policies:
   - label: Check-in
     value: Available 24 hours
