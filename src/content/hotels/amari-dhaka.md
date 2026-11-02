@@ -34,64 +34,20 @@ policies:
     value: Available 24 hours
     custom_svg: ''
   - label: Age restriction
-    value: The minimum age for check-in is 18
+    value: minimum age for check-in is 18
     custom_svg: ''
   - label: Pets
     value: Pets are not allowed.
     custom_svg: ''
 booking_channels:
-  - provider_name: amari dhaka
-    price: ''
+  - provider_name: Amari dhaka
+    price: $150
     show_price: true
     button_text: Book Now ➔
     button_url: https://www.amari.com/dhaka
     badge: Official Site
     icon_preset: direct
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 400 150" width="100%" height="100%">
-          <defs>
-              <!-- Gradients for the vibrant Amari wave/petals -->
-              <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#00A0E9" />
-                  <stop offset="100%" stop-color="#005691" />
-              </linearGradient>
-              <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#F39200" />
-                  <stop offset="100%" stop-color="#D15B00" />
-              </linearGradient>
-              <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#E60012" />
-                  <stop offset="100%" stop-color="#99000F" />
-              </linearGradient>
-              <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#69BD45" />
-                  <stop offset="100%" stop-color="#226622" />
-              </linearGradient>
-          </defs>
-
-          <g transform="translate(10, 15)">
-              <!-- Stylized Amari Multi-colored Emblem -->
-              <g id="logo-emblem" transform="translate(0, 15)">
-                  <!-- Blue Ribbon -->
-                  <path d="M25,60 C15,30 40,10 60,25 C50,45 40,55 25,60 Z" fill="url(#blueGrad)" opacity="0.95"/>
-                  <!-- Orange Ribbon -->
-                  <path d="M40,20 C65,5 85,30 70,55 C55,45 45,35 40,20 Z" fill="url(#orangeGrad)" opacity="0.95"/>
-                  <!-- Red Ribbon -->
-                  <path d="M75,30 C95,50 70,80 50,65 C60,50 70,40 75,30 Z" fill="url(#redGrad)" opacity="0.95"/>
-                  <!-- Green Ribbon -->
-                  <path d="M55,70 C30,80 15,55 30,35 C40,50 45,60 55,70 Z" fill="url(#greenGrad)" opacity="0.95"/>
-              </g>
-
-              <!-- Brand Typography -->
-              <g id="logo-text" transform="translate(110, 65)">
-                  <!-- "amari" in a clean, modern, lowercase sans-serif style -->
-                  <text x="0" y="0" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="44" font-weight="300" fill="#1A1A1A" letter-spacing="1">amari</text>
-                  
-                  <!-- "DHAKA" sub-text -->
-                  <text x="3" y="24" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#717073" letter-spacing="6.5">DHAKA</text>
-              </g>
-          </g>
-      </svg>
+    custom_svg: ''
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
 phone: +880 2 5505 9620
