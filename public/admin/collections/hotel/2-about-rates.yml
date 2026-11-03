@@ -92,39 +92,118 @@
   required: false
 
 # ==============================================================================
-# 3. HOTEL POLICIES & HOUSE RULES (NOW A SEPARATE DEDICATED SECTION)
+# 3. HOTEL POLICIES & HOUSE RULES (PROFESSIONAL NO-EMOJI PATTERN)
 # ==============================================================================
 - label: "3. HOTEL POLICIES & HOUSE RULES"
   name: "policies_notice"
   widget: "instructions"
-  description: "Controls check-in/out times, children & extra beds, age restrictions, pet rules, and house guidelines."
+  description: "Configure Booking.com style policies: Check-in/out, Child & Bed tables, and Payment method logos."
   required: false
 
-- label: "Enable Hotel Policies Section on Website?"
+- label: "Enable Hotel Policies Section?"
   name: "enable_policies"
   widget: "boolean"
   default: true
   required: false
 
-- label: "Hotel Policies List (Full Drag-and-Drop Admin Control)"
-  name: "policies"
+- label: "Check-in Schedule"
+  name: "check_in"
+  widget: "string"
+  default: "Available 24 hours"
+  hint: "e.g. 'From 14:00 to 00:00' or 'Available 24 hours'"
+
+- label: "Check-out Schedule"
+  name: "check_out"
+  widget: "string"
+  default: "Available 24 hours"
+  hint: "e.g. 'From 06:00 to 12:00' or 'Available 24 hours'"
+
+- label: "Cancellation / Prepayment Policy (Supports Markdown Links)"
+  name: "cancellation_policy"
+  widget: "markdown"
+  default: "Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection."
+  hint: "You can write links here like [conditions](#rates-card)."
+
+# --- CHILDREN & BEDS STRUCTURED BOOKING.COM WIDGET ---
+- label: "Child Policies General Rules"
+  name: "child_policy_text"
+  widget: "text"
+  default: |
+    Children of all ages are welcome.
+    Children 9 and above will be charged as adults at this property.
+    To see correct prices and occupancy info, add the number and ages of children in your group to your search.
+  hint: "General text about children staying at the property."
+
+- label: "Cribs & Extra Beds Table (Structured List)"
+  name: "extra_beds"
+  widget: "list"
+  required: false
+  summary: "{{fields.age}}: {{fields.type}} ({{fields.price}})"
+  hint: "Click '+ Add' to add crib/bed age tiers (renders the exact Booking.com bordered table)!"
+  fields:
+    - label: "Age Tier / Range"
+      name: "age"
+      widget: "string"
+      default: "1 - 6 years"
+      hint: "e.g. '1 - 6 years' or '12+ years' or '0 - 2 years'"
+
+    - label: "Bed Type"
+      name: "type"
+      widget: "string"
+      default: "Crib upon request"
+      hint: "e.g. 'Crib upon request' or 'Extra bed upon request'"
+
+    - label: "Price / Charge"
+      name: "price"
+      widget: "string"
+      default: "Free"
+      hint: "e.g. 'Free' or 'US$25 per person, per night' or '৳ 2,500'"
+
+- label: "Cribs & Extra Beds Disclaimer Notes"
+  name: "extra_beds_notes"
+  widget: "text"
+  default: |
+    Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.
+    The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.
+    All cribs and extra beds are subject to availability.
+  hint: "Disclaimer text below the crib table."
+
+- label: "Minimum Check-in Age"
+  name: "age_restriction"
+  widget: "string"
+  default: "The minimum age for check-in is 18"
+
+- label: "Pets Policy"
+  name: "pets_policy"
+  widget: "string"
+  default: "Pets are not allowed."
+
+# --- PAYMENT METHOD LOGOS (MULTI-SELECT WITHOUT EMOJIS) ---
+- label: "Accepted Payment Methods (Auto Displays Official Vector Logos)"
+  name: "payment_methods"
+  widget: "select"
+  multiple: true
+  default: ["amex", "visa", "mastercard", "unionpay", "cash"]
+  options:
+    - { label: "American Express (Amex)", value: "amex" }
+    - { label: "Visa", value: "visa" }
+    - { label: "MasterCard", value: "mastercard" }
+    - { label: "UnionPay", value: "unionpay" }
+    - { label: "Cash on Arrival", value: "cash" }
+    - { label: "bKash", value: "bkash" }
+    - { label: "Nagad", value: "nagad" }
+
+# --- ADDITIONAL CUSTOM POLICIES ---
+- label: "Other Custom Policies (Optional)"
+  name: "custom_policies"
   widget: "list"
   required: false
   summary: "{{fields.label}}: {{fields.value}}"
-  hint: "Click '+ Add' to add any policy! Drag and drop to reorder."
   fields:
-    - label: "Policy Title / Name"
+    - label: "Policy Title"
       name: "label"
       widget: "string"
-      hint: "e.g. Check-In, Check-Out, Children & Beds, Age Restriction, Pets, Cancellation, Couple Policy"
-
-    - label: "Policy Detail / Value (Supports Large Paragraphs & Line Breaks)"
+      hint: "e.g. Couple Policy, Smoking Policy, Quiet Hours"
+    - label: "Policy Details"
       name: "value"
-      widget: "text" # <--- 'text' widget হওয়ায় যত বড় লেখাই হোক প্যারাগ্রাফ সহ লেখা যাবে
-      hint: "Write the policy details here. You can write multiple lines, paragraphs, and bullet points."
-
-    - label: "Custom SVG Icon Code (Optional)"
-      name: "custom_svg"
       widget: "text"
-      required: false
-      hint: "Paste raw <svg>...</svg> code here for unique icons! (Leave blank to use smart auto-detected icons)"
