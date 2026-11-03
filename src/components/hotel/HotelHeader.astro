@@ -117,76 +117,135 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
   </>
 )}
 
-<!-- 1ST COMPONENT: HOTEL HERO BANNER (PURE WHITE BACKGROUND) -->
-<section class="bg-white text-slate-900 pt-6 pb-10 px-4 sm:px-6 lg:px-10 max-w-[1680px] mx-auto border-b border-slate-200">
-  <div class="space-y-6">
-
-    <!-- TOP HEADER & TITLE AREA -->
-    <div class="text-center max-w-4xl mx-auto space-y-3">
-
-      <!-- Breadcrumbs Navigation -->
-      <nav aria-label="Breadcrumb" class="flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
-        <a href="/" class="hover:text-emerald-700 transition">Home</a>
-        <span>›</span>
-        <a href="/#hotels" class="hover:text-emerald-700 transition">Hotels</a>
-        <span>›</span>
-        <span class="text-slate-800 font-bold" aria-current="page">{hotelTitle}</span>
-      </nav>
-
-      <!-- Category Pill Badge -->
-      {hotelCategory && (
-        <div>
-          <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block">
-            {hotelCategory}
-          </span>
+<!-- TOP HEADER & DEAL BAR (TRIPADVISOR PATTERN) -->
+    <div class="max-w-6xl mx-auto space-y-3 pb-2">
+      
+      <!-- ROW 1: TITLE & HEADER ACTIONS -->
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Hotel Title with Verified Rosette Badge -->
+        <div class="flex items-center gap-2">
+          <h1 class="font-sans text-2xl sm:text-3xl lg:text-[34px] font-black text-[#002b11] tracking-tight leading-tight">
+            {hotelTitle}
+          </h1>
+          {isVerified && (
+            <span class="inline-flex items-center justify-center text-[#002b11] shrink-0" title="Verified Hotel">
+              <!-- Verified Rosette Icon -->
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.4 2.1 3.2-.4 1.2 3 2.9 1.4-.7 3.1 1.9 2.5-1.9 2.5.7 3.1-2.9 1.4-1.2 3-3.2-.4L12 22l-2.4-2.1-3.2.4-1.2-3-2.9-1.4.7-3.1-1.9-2.5 1.9-2.5-.7-3.1 2.9-1.4 1.2-3 3.2.4L12 2z"/>
+                <path d="M9.5 12l2 2 4.5-4.5" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          )}
         </div>
-      )}
 
-      <!-- PRIMARY SEO HEADING (H1) -->
-      <h1 class={titleCssClass}>
-        {hotelTitle}
-      </h1>
+        <!-- Right Side: Saved & Review Buttons -->
+        <div class="flex items-center gap-4 sm:gap-5">
+          <!-- Saved Button -->
+          <button
+            type="button"
+            id="headerSaveBtn"
+            class="flex items-center gap-1.5 text-slate-900 hover:text-emerald-800 transition cursor-pointer select-none"
+          >
+            <!-- Red Heart Icon -->
+            <svg class="w-4 h-4 fill-red-600 text-red-600 shrink-0" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span class="text-xs sm:text-sm font-bold underline underline-offset-4">Saved</span>
+          </button>
 
-      <!-- Location Line with Interactive Map Link -->
-      {hotelLocation && (
-        <p class="text-xs sm:text-sm text-slate-600 font-medium flex flex-wrap items-center justify-center gap-2">
-          <span class="flex items-center gap-1">
-            <svg class="w-4 h-4 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            <span>{hotelLocation}</span>
-          </span>
-          <a href="#location-map" class="text-emerald-800 font-black hover:underline inline-flex items-center gap-0.5">
-            <span>View in a map</span>
-            <span>➔</span>
+          <!-- Review Pill Button -->
+          <a
+            href="#reviews"
+            class="border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm px-4 py-1.5 rounded-full flex items-center gap-1.5 transition active:scale-95"
+          >
+            <!-- Pencil Icon -->
+            <svg class="w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <span>Review</span>
           </a>
-        </p>
-      )}
-
-      <!-- Short Tagline Description -->
-      {hotelDescription && (
-        <p class="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
-          {hotelDescription}
-        </p>
-      )}
-
-      <!-- Action Buttons -->
-      {(showViewPrices || showOfficialSite) && (
-        <div class="flex items-center justify-center gap-3 pt-3">
-          {showViewPrices && (
-            <a href="#rates-card" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs sm:text-sm uppercase tracking-wider px-7 py-3 rounded-2xl shadow-lg transition hover:scale-105">
-              View Prices ➔
-            </a>
-          )}
-
-          {showOfficialSite && (
-            <a href={officialSite} target="_blank" rel="noopener noreferrer" class="bg-white hover:bg-slate-50 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-2xl transition border border-slate-300 hover:scale-105 flex items-center gap-1.5 shadow-sm">
-              <span>Official Website</span>
-              <span>↗</span>
-            </a>
-          )}
         </div>
-      )}
+      </div>
+
+      <!-- ROW 2: RATINGS/LOCATION (LEFT) & PRICE/VIEW DEAL (RIGHT) -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-1">
+        
+        <!-- Left Side: Ratings & View Location -->
+        <div class="space-y-1.5">
+          <!-- Rating Line -->
+          <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+            <span class="font-bold text-slate-900">{hotelRating}</span>
+
+            <!-- Tripadvisor 5 Green Bubbles (Dynamic Full / Half / Empty) -->
+            <div class="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => {
+                const diff = hotelRatingNum - i;
+                if (diff >= 0.75) {
+                  return <span class="w-3.5 h-3.5 rounded-full bg-[#00852f] shrink-0 inline-block" />;
+                } else if (diff >= 0.25) {
+                  return (
+                    <span class="relative w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] overflow-hidden shrink-0 inline-block bg-white">
+                      <span class="absolute inset-y-0 left-0 w-1/2 bg-[#00852f]" />
+                    </span>
+                  );
+                } else {
+                  return <span class="w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] shrink-0 inline-block bg-white" />;
+                }
+              })}
+            </div>
+
+            <!-- Review Count -->
+            <a href="#reviews" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800">
+              ({reviewsCount} reviews)
+            </a>
+
+            <!-- Ranking -->
+            {hotelRanking && (
+              <a href="#ranking" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800">
+                {hotelRanking}
+              </a>
+            )}
+          </div>
+
+          <!-- Location Pin Line -->
+          <div class="flex items-center gap-1.5 text-xs sm:text-sm">
+            <!-- Pin Icon -->
+            <svg class="w-4 h-4 text-[#002b11] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <a href={locationMapUrl} class="text-slate-900 font-semibold underline underline-offset-2 hover:text-emerald-800">
+              View location
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Side: Price & View Deal Button -->
+        <div class="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+          <!-- Price and Provider -->
+          <div class="text-right">
+            <div class="text-2xl sm:text-3xl font-black text-[#002b11] leading-none tracking-tight">
+              {formattedPrice}
+            </div>
+            <div class="text-[11px] sm:text-xs font-bold text-slate-800 mt-1">
+              {dealProvider}
+            </div>
+          </div>
+
+          <!-- View Deal CTA Button -->
+          <a
+            href={dealUrl}
+            class="bg-[#00eb5b] hover:bg-[#00d050] text-[#002b11] font-black text-sm sm:text-base px-6 py-2.5 rounded-full shadow-sm hover:shadow transition-transform hover:scale-105 active:scale-95 inline-flex items-center justify-center cursor-pointer select-none"
+          >
+            View deal
+          </a>
+        </div>
+
+      </div>
 
     </div>
+    
 
    <!-- RESPONSIVE HERO GALLERY (COLLAGE PATTERN) -->
     {totalPhotos > 0 && (
