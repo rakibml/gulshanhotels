@@ -299,7 +299,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
   </div>
 
-  <!-- ================= PART 2: BOOKING.COM STYLE HOUSE RULES & POLICIES ================= -->
+  <!-- ================= PART 2: BOOKING.COM STYLE ROW-BY-ROW HOUSE RULES ================= -->
   {policiesList.length > 0 && (
     <div class="mt-14 pt-10 border-t border-slate-200 text-left space-y-6">
       
@@ -316,41 +316,50 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         </p>
       </div>
 
-      <!-- VIP Highlight Banner: Check-In & Check-Out Timeline -->
-      {(checkInPolicy || checkOutPolicy) && (
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-emerald-50/50 border border-emerald-200/90 rounded-3xl p-5 sm:p-6 shadow-xs">
-          {checkInPolicy && (
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+      <!-- Unified Booking.com Style House Rules Container -->
+      <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs divide-y divide-slate-100">
+        
+        <!-- 1. Check-In Row -->
+        {checkInPolicy && (
+          <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+            <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
                 <Fragment set:html={getPolicyIcon('check-in')} />
               </div>
-              <div>
-                <span class="text-xs font-black uppercase tracking-wider text-emerald-800 block">Check-in Schedule</span>
-                <span class="text-base sm:text-lg font-black text-slate-900 block mt-0.5">{checkInPolicy.value}</span>
-              </div>
+              <span class="font-sans font-black text-slate-900 text-sm sm:text-base">Check-in</span>
             </div>
-          )}
+            <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed">
+              <span class="font-bold text-slate-900 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block mb-1">
+                {checkInPolicy.value}
+              </span>
+              <p class="text-slate-500 text-xs mt-1">Guests are required to show a photo identification upon check-in.</p>
+            </div>
+          </div>
+        )}
 
-          {checkOutPolicy && (
-            <div class="flex items-center gap-4 sm:border-l sm:border-emerald-200 sm:pl-6">
-              <div class="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+        <!-- 2. Check-Out Row -->
+        {checkOutPolicy && (
+          <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+            <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
                 <Fragment set:html={getPolicyIcon('check-out')} />
               </div>
-              <div>
-                <span class="text-xs font-black uppercase tracking-wider text-emerald-800 block">Check-out Schedule</span>
-                <span class="text-base sm:text-lg font-black text-slate-900 block mt-0.5">{checkOutPolicy.value}</span>
-              </div>
+              <span class="font-sans font-black text-slate-900 text-sm sm:text-base">Check-out</span>
             </div>
-          )}
-        </div>
-      )}
+            <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed">
+              <span class="font-bold text-slate-900 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
+                {checkOutPolicy.value}
+              </span>
+            </div>
+          </div>
+        )}
 
-      <!-- Full-Width Policy Cards Grid (No truncated dots, spacious and clean) -->
-      {otherPolicies.length > 0 && (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {otherPolicies.map((item) => (
-            <div class="bg-slate-50/70 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 hover:bg-white hover:shadow-sm transition">
-              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+        <!-- 3. Dynamic Policies List (Handles short & very long texts elegantly) -->
+        {otherPolicies.map((item) => (
+          <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+            <!-- Left Label & Icon -->
+            <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
                 {item.custom_svg ? (
                   <div class="w-5 h-5 flex items-center justify-center shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-[#0d3b23]">
                     <Fragment set:html={item.custom_svg} />
@@ -359,25 +368,24 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                   <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
                 )}
               </div>
-              
-              <div class="min-w-0">
-                <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
-                  {item.label}
-                </span>
-                <span class="font-bold text-slate-900 text-xs sm:text-sm block mt-1 leading-snug">
-                  {item.value}
-                </span>
-              </div>
+              <span class="font-sans font-black text-slate-900 text-sm sm:text-base capitalize">
+                {item.label}
+              </span>
             </div>
-          ))}
-        </div>
-      )}
+
+            <!-- Right Content (Clean regular text, well spaced) -->
+            <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed font-normal whitespace-pre-line">
+              {item.value}
+            </div>
+          </div>
+        ))}
+
+      </div>
 
     </div>
   )}
 
-</section>
-
+      
 <!-- HIDDEN SCRIPT FOR PRESET SVGS -->
 <script type="application/json" id="preset-svgs-data" set:html={JSON.stringify(presetSvgs)}></script>
 
