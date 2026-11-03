@@ -188,107 +188,87 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
 
     </div>
 
-    <!-- RESPONSIVE HERO GALLERY -->
+   <!-- RESPONSIVE HERO GALLERY (COLLAGE PATTERN) -->
     {totalPhotos > 0 && (
-      <div class="max-w-5xl mx-auto space-y-3 pt-2">
+      <div class="max-w-6xl mx-auto pt-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-1 h-[280px] xs:h-[340px] sm:h-[400px] md:h-[450px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm bg-slate-100">
+          
+          <!-- 1. LEFT MAIN LARGE IMAGE (Spans 2 cols on desktop) -->
+          <div 
+            class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos >= 2 ? 'md:col-span-2' : 'md:col-span-3'}`}
+            data-gallery-trigger="0"
+          >
+            <img
+              id="heroMainViewImg"
+              src={heroDesktopUrls[0]}
+              srcset={`${heroMobileUrls[0]} 640w, ${heroDesktopUrls[0]} 1200w`}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 850px"
+              width="850"
+              height="480"
+              alt={hotelTitle}
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
 
-        <!-- 1. MAIN HERO COVER PHOTO -->
-        <div class="relative w-full h-[280px] xs:h-[320px] sm:h-[420px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-md group border border-slate-200 bg-slate-900">
-          <img
-            id="heroMainViewImg"
-            src={heroDesktopUrls[0]}
-            srcset={`${heroMobileUrls[0]} 640w, ${heroDesktopUrls[0]} 1200w`}
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            width="1200"
-            height="480"
-            alt={hotelTitle}
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-            class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 cursor-pointer"
-          />
+            <!-- Photo Count Pill Badge (Bottom-Right of Main Image) -->
+            <button
+              type="button"
+              id="heroGalleryBadgeBtn"
+              aria-label={`View all ${totalPhotos} photos`}
+              class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#062c19]/90 hover:bg-[#062c19] text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition hover:scale-105 z-10 cursor-pointer"
+            >
+              <!-- Photo Gallery Icon -->
+              <svg class="w-4 h-4 fill-none stroke-currentColor stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              <span class="text-xs sm:text-sm font-bold tracking-wide">{totalPhotos}</span>
+            </button>
+          </div>
 
-          <!-- Left/Right Arrow Navigation -->
-          {totalPhotos > 1 && (
-            <>
-              <button
-                type="button"
-                id="heroPrevImgBtn"
-                aria-label="Previous Image"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
+          <!-- 2. RIGHT SIDE: 2 STACKED IMAGES -->
+          {totalPhotos >= 2 && (
+            <div class="hidden md:grid grid-rows-2 gap-1 h-full">
+              <!-- Top-Right Image -->
+              <div 
+                class="relative h-full overflow-hidden group cursor-pointer"
+                data-gallery-trigger="1"
               >
-                ❮
-              </button>
-              <button
-                type="button"
-                id="heroNextImgBtn"
-                aria-label="Next Image"
-                class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition active:scale-95 text-base sm:text-lg font-bold cursor-pointer z-10"
-              >
-                ❯
-              </button>
-            </>
+                <img
+                  src={heroDesktopUrls[1]}
+                  alt={`${hotelTitle} Photo 2`}
+                  width="400"
+                  height="240"
+                  loading="eager"
+                  decoding="async"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+
+              <!-- Bottom-Right Image -->
+              {totalPhotos >= 3 && (
+                <div 
+                  class="relative h-full overflow-hidden group cursor-pointer"
+                  data-gallery-trigger="2"
+                >
+                  <img
+                    src={heroDesktopUrls[2]}
+                    alt={`${hotelTitle} Photo 3`}
+                    width="400"
+                    height="240"
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+            </div>
           )}
 
-          <!-- Photo Counter Badge -->
-          <div class="absolute bottom-3 right-3 bg-slate-950/85 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20 select-none">
-            <span id="heroCurrentIdx">1</span> / <span>{totalPhotos}</span>
-          </div>
         </div>
-
-        <!-- 2. THUMBNAILS ROW -->
-        {thumbUrls.length > 1 && (
-          <div class={`grid gap-2 sm:gap-3 ${gridColsClass}`}>
-            {thumbUrls.slice(0, 4).map((img: string, idx: number) => (
-              <button
-                type="button"
-                aria-label={`View photo ${idx + 1}`}
-                class={`hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 transition cursor-pointer shrink-0 group ${idx === 0 ? 'border-emerald-600' : 'border-slate-200 hover:border-slate-300'}`}
-                data-index={idx}
-              >
-                <img
-                  src={img}
-                  alt={`${hotelTitle} Thumbnail ${idx + 1}`}
-                  width="200"
-                  height="120"
-                  loading="lazy"
-                  decoding="async"
-                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                />
-              </button>
-            ))}
-
-            <!-- 5th Thumbnail with 'More Photos' Pop-up Badge if needed -->
-            {thumbUrls[4] && (
-              <button
-                type="button"
-                id="triggerFifthThumbBtn"
-                aria-label={remainingPhotos > 0 ? `View all ${totalPhotos} photos` : `View photo 5`}
-                class="hero-thumb-btn h-16 sm:h-20 lg:h-24 rounded-xl sm:rounded-2xl overflow-hidden relative border-2 border-slate-200 hover:border-emerald-600 transition cursor-pointer shrink-0 group text-white"
-                data-index="4"
-              >
-                <img
-                  src={thumbUrls[4]}
-                  alt="Gallery Thumbnail 5"
-                  width="200"
-                  height="120"
-                  loading="lazy"
-                  decoding="async"
-                  class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                />
-                {remainingPhotos > 0 ? (
-                  <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-1 text-center">
-                    <span class="text-xs sm:text-base font-black text-white">+{remainingPhotos}</span>
-                    <span class="text-[9px] sm:text-[11px] font-bold text-slate-300">Photos</span>
-                  </div>
-                ) : (
-                  <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition"></div>
-                )}
-              </button>
-            )}
-          </div>
-        )}
-
       </div>
     )}
 
@@ -368,18 +348,14 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
     abortCtrl = new AbortController();
     const { signal } = abortCtrl;
 
-    const mainImg = document.getElementById('heroMainViewImg') as HTMLImageElement | null;
-    const prevBtn = document.getElementById('heroPrevImgBtn');
-    const nextBtn = document.getElementById('heroNextImgBtn');
-    const currentIdxSpan = document.getElementById('heroCurrentIdx');
-    const thumbBtns = document.querySelectorAll('.hero-thumb-btn');
-
     const modal = document.getElementById('heroLightboxModal');
     const closeModalBtn = document.getElementById('closeHeroLightboxBtn');
     const modalImg = document.getElementById('lightboxModalImg') as HTMLImageElement | null;
     const modalIdxSpan = document.getElementById('lightboxModalIdx');
     const modalPrevBtn = document.getElementById('lightboxPrevBtn');
     const modalNextBtn = document.getElementById('lightboxNextBtn');
+    const galleryTriggers = document.querySelectorAll('[data-gallery-trigger]');
+    const badgeBtn = document.getElementById('heroGalleryBadgeBtn');
 
     const galleryScript = document.getElementById('hotel-gallery-data');
     let gallery = { mobile: [] as string[], desktop: [] as string[], lightbox: [] as string[] };
@@ -389,7 +365,7 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
       gallery = { mobile: [], desktop: [], lightbox: [] };
     }
 
-    const count = gallery.desktop?.length || 0;
+    const count = gallery.lightbox?.length || 0;
     if (count === 0) return;
 
     let activeIdx = 0;
@@ -398,32 +374,11 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
       document.body.style.overflow = disable ? 'hidden' : '';
     }
 
-    function updateMainImage(idx: number) {
-      if (!mainImg) return;
-      activeIdx = (idx + count) % count;
-      
-      mainImg.src = gallery.desktop[activeIdx];
-      mainImg.srcset = `${gallery.mobile[activeIdx]} 640w, ${gallery.desktop[activeIdx]} 1200w`;
-      
-      if (currentIdxSpan) currentIdxSpan.textContent = (activeIdx + 1).toString();
-
-      thumbBtns.forEach((btn, i) => {
-        if (i === activeIdx) {
-          btn.classList.add('border-emerald-600');
-          btn.classList.remove('border-slate-200');
-        } else {
-          btn.classList.add('border-slate-200');
-          btn.classList.remove('border-emerald-600');
-        }
-      });
-    }
-
     function updateModalImage(idx: number) {
       if (!modalImg) return;
       activeIdx = (idx + count) % count;
       modalImg.src = gallery.lightbox[activeIdx];
       if (modalIdxSpan) modalIdxSpan.textContent = (activeIdx + 1).toString();
-      updateMainImage(activeIdx);
     }
 
     function hideLightboxDOM() {
@@ -433,10 +388,9 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
       toggleBodyScroll(false);
     }
 
-    function openLightbox(startIdx?: number) {
+    function openLightbox(startIdx: number = 0) {
       if (!modal) return;
-      const idxToOpen = startIdx !== undefined ? startIdx : activeIdx;
-      updateModalImage(idxToOpen);
+      updateModalImage(startIdx);
       
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -475,26 +429,19 @@ const siteUrl = Astro.site ? Astro.site.origin : (Astro.url ? Astro.url.origin :
       openLightbox(0);
     }
 
-    prevBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      updateMainImage(activeIdx - 1);
-    });
-
-    nextBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      updateMainImage(activeIdx + 1);
-    });
-
-    thumbBtns.forEach((btn, i) => {
-      btn.addEventListener('click', () => {
-        updateMainImage(i);
-        if (i === 4 && count > 5) {
-          openLightbox(4);
-        }
+    // Bind click events to collage items
+    galleryTriggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const idx = parseInt(trigger.getAttribute('data-gallery-trigger') || '0', 10);
+        openLightbox(idx);
       });
     });
 
-    mainImg?.addEventListener('click', () => openLightbox(activeIdx));
+    badgeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(0);
+    });
+
     closeModalBtn?.addEventListener('click', closeLightboxByUI);
 
     modal?.addEventListener('click', (e) => {
