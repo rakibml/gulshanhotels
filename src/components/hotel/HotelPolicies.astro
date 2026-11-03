@@ -1,0 +1,162 @@
+---
+// src/components/hotel/HotelPolicies.astro (Booking.com Style Row-by-Row House Rules)
+interface Props {
+  hotel: any;
+}
+
+const { hotel } = Astro.props;
+const data = hotel?.data || {};
+const hotelTitle = data.title || data.name || "Hotel Details";
+
+// ================= DYNAMIC POLICIES WITH SMART DETECTION =================
+interface PolicyItem {
+  label: string;
+  value: string;
+  custom_svg?: string;
+}
+
+let policiesList: PolicyItem[] = [];
+
+if (Array.isArray(data.policies) && data.policies.length > 0) {
+  policiesList = data.policies
+    .filter((p: any) => p && p.label && p.value)
+    .map((p: any) => ({
+      label: String(p.label).trim(),
+      value: String(p.value).trim(),
+      custom_svg: p.custom_svg || p.svg || ""
+    }));
+} else {
+  if (data.checkIn || data.check_in) policiesList.push({ label: 'Check-In', value: String(data.checkIn || data.check_in) });
+  if (data.checkOut || data.check_out) policiesList.push({ label: 'Check-Out', value: String(data.checkOut || data.check_out) });
+  if (data.childrenBeds || data.children_beds) policiesList.push({ label: 'Children & Beds', value: String(data.childrenBeds || data.children_beds) });
+  if (data.ageRestriction || data.age_restriction) policiesList.push({ label: 'Age Restriction', value: String(data.ageRestriction || data.age_restriction) });
+  if (data.cancellation) policiesList.push({ label: 'Cancellation', value: String(data.cancellation) });
+  if (data.petsPolicy || data.pets) policiesList.push({ label: 'Pets Policy', value: String(data.petsPolicy || data.pets) });
+  if (data.paymentMethods || data.payment) policiesList.push({ label: 'Payment Options', value: String(data.paymentMethods || data.payment) });
+  if (data.powerBackup || data.power_backup) policiesList.push({ label: 'Power Backup', value: String(data.powerBackup || data.power_backup) });
+  if (data.smokingPolicy || data.smoking) policiesList.push({ label: 'Smoking Policy', value: String(data.smokingPolicy || data.smoking) });
+  if (data.couplePolicy || data.couple_policy) policiesList.push({ label: 'Couple Policy', value: String(data.couplePolicy || data.couple_policy) });
+}
+
+// Separate Check-In & Check-Out for top prominence
+const checkInPolicy = policiesList.find(p => p.label.toLowerCase().includes('check-in') || p.label.toLowerCase().includes('arrival'));
+const checkOutPolicy = policiesList.find(p => p.label.toLowerCase().includes('check-out') || p.label.toLowerCase().includes('departure'));
+const otherPolicies = policiesList.filter(p => p !== checkInPolicy && p !== checkOutPolicy);
+
+const getPolicyIcon = (label: string) => {
+  const l = label.toLowerCase();
+  if (l.includes('check-in') || l.includes('arrival') || l.includes('time')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
+  }
+  if (l.includes('check-out') || l.includes('departure')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>`;
+  }
+  if (l.includes('child') || l.includes('bed') || l.includes('crib')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 7h-8v6H3V5H1v15h2v-3h18v3h2v-9a4 4 0 0 0-4-4zm1 8h-6v-4h6a2 2 0 0 1 2 2v2zm-13-4a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>`;
+  }
+  if (l.includes('age') || l.includes('adult') || l.includes('restriction')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+  }
+  if (l.includes('power') || l.includes('generator') || l.includes('backup')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
+  }
+  if (l.includes('smoke') || l.includes('smoking')) {
+    return `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>`;
+  }
+  if (l.includes('couple') || l.includes('marriage') || l.includes('guest') || l.includes('id')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`;
+  }
+  if (l.includes('pay') || l.includes('bkash') || l.includes('card') || l.includes('cash')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
+  }
+  if (l.includes('cancel') || l.includes('refund')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+  }
+  if (l.includes('pet') || l.includes('dog') || l.includes('animal')) {
+    return `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M4.5 11c1.38 0 2.5-1.12 2.5-2.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11zm15 0c1.38 0 2.5-1.12 2.5-2.5S20.88 6 19.5 6 17 7.12 17 8.5s1.12 2.5 2.5 2.5zm-6.5-3c1.38 0 2.5-1.12 2.5-2.5S14.38 3 13 3s-2.5 1.12-2.5 2.5S11.62 8 13 8zm-5 0c1.38 0 2.5-1.12 2.5-2.5S9.38 3 8 3 5.5 4.12 5.5 5.5 6.62 8 8 8zm4 3.5c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5zM12 18.5c-1.38 0-2.5-1.12-2.5-2.5h5c0 1.38-1.12 2.5-2.5 2.5z"/></svg>`;
+  }
+  return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+};
+---
+
+{policiesList.length > 0 && (
+  <section id="hotel-policies" class="bg-white py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16 text-left space-y-6">
+    
+    <!-- Section Header -->
+    <div class="space-y-1">
+      <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
+        Good to Know
+      </span>
+      <h2 class="font-sans text-2xl sm:text-3xl font-black text-[#002b11] tracking-tight">
+        Hotel Policies & House Rules
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 font-medium">
+        Key guidelines and stay requirements for guests at <strong class="text-slate-800 font-bold">{hotelTitle}</strong>
+      </p>
+    </div>
+
+    <!-- Booking.com Style Unified Row-by-Row Box -->
+    <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs divide-y divide-slate-100">
+      
+      <!-- Check-In Row -->
+      {checkInPolicy && (
+        <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+              <Fragment set:html={getPolicyIcon('check-in')} />
+            </div>
+            <span class="font-sans font-black text-slate-900 text-sm sm:text-base">Check-in</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed">
+            <span class="font-bold text-slate-900 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block mb-1">
+              {checkInPolicy.value}
+            </span>
+            <p class="text-slate-500 text-xs mt-1">Guests are required to show a photo identification upon check-in.</p>
+          </div>
+        </div>
+      )}
+
+      <!-- Check-Out Row -->
+      {checkOutPolicy && (
+        <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+              <Fragment set:html={getPolicyIcon('check-out')} />
+            </div>
+            <span class="font-sans font-black text-slate-900 text-sm sm:text-base">Check-out</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed">
+            <span class="font-bold text-slate-900 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
+              {checkOutPolicy.value}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <!-- Other Policies (Children & Beds, Pets, Age, etc.) -->
+      {otherPolicies.map((item) => (
+        <div class="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/60 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+              {item.custom_svg ? (
+                <div class="w-5 h-5 flex items-center justify-center shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-[#0d3b23]">
+                  <Fragment set:html={item.custom_svg} />
+                </div>
+              ) : (
+                <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
+              )}
+            </div>
+            <span class="font-sans font-black text-slate-900 text-sm sm:text-base capitalize">
+              {item.label}
+            </span>
+          </div>
+
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 text-xs sm:text-sm leading-relaxed font-normal whitespace-pre-line">
+            {item.value}
+          </div>
+        </div>
+      ))}
+
+    </div>
+  </section>
+)}
