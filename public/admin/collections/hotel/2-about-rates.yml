@@ -1,39 +1,24 @@
+# ==============================================================================
+# 2. ABOUT HOTEL & LIVE RATES (RESERVATIONS & BOOKING CHANNELS)
+# ==============================================================================
 - label: "2. ABOUT HOTEL & LIVE RATES"
   name: "about_notice"
   widget: "instructions"
-  description: "Controls overview description, starting price, hotel policies, and custom booking channels."
+  description: "Controls overview description, starting price, and live booking channels (Agoda, Booking, Direct, etc.)."
   required: false
+
+# --- Overview Text ---
+- label: "Hotel Description / About Overview"
+  name: "body"
+  widget: "markdown"
+  hint: "Write the detailed description and overview of the hotel."
 
 - label: "Starting Price Text (e.g. $120 / night or ৳ 18,500)"
   name: "price"
   widget: "string"
   default: "৳ 18,500 / night"
 
-# --- 100% DYNAMIC HOTEL POLICIES LIST (WITH CUSTOM SVG SUPPORT) ---
-- label: "Hotel Policies & Essential Info (Add Any Custom Policy)"
-  name: "policies"
-  widget: "list"
-  required: false
-  summary: "{{fields.label}}: {{fields.value}}"
-  hint: "Click '+ Add' to add any policy! You can also paste raw SVG code for custom icons (Reception, Voltage, etc.)."
-  fields:
-    - label: "Policy Title / Name"
-      name: "label"
-      widget: "string"
-      hint: "e.g. Check-In, Check-Out, Reception Open Until, Room Voltage, Couple Policy, Cancellation"
-
-    - label: "Policy Detail / Value"
-      name: "value"
-      widget: "string"
-      hint: "e.g. '02:00 PM', '12:00 AM', '220V', 'Allowed with valid NID', 'Free Cancellation'"
-
-    - label: "Custom SVG Icon Code (Optional)"
-      name: "custom_svg"
-      widget: "text"
-      required: false
-      hint: "Paste raw <svg>...</svg> code here for unique icons! (Leave blank to use smart auto-detected icons)"
-
-# --- 100% CUSTOM BOOKING CHANNELS LIST (DRAG & DROP SERIAL IN SVELTIA CMS) ---
+# --- 100% CUSTOM BOOKING CHANNELS LIST (DRAG & DROP SERIAL) ---
 - label: "Booking Channels List (Full Admin Control & Drag-and-Drop Order)"
   name: "booking_channels"
   widget: "list"
@@ -90,7 +75,7 @@
       required: false
       hint: "Paste raw <svg>...</svg> code here to display any custom brand logo!"
 
-# --- Reservation Contacts ---
+# --- Direct Contacts ---
 - label: "Official Hotel Website Link (Optional)"
   name: "officialSite"
   widget: "string"
@@ -106,7 +91,40 @@
   widget: "string"
   required: false
 
-# --- Overview Text ---
-- label: "Hotel Description / About"
-  name: "body"
-  widget: "markdown"
+# ==============================================================================
+# 3. HOTEL POLICIES & HOUSE RULES (NOW A SEPARATE DEDICATED SECTION)
+# ==============================================================================
+- label: "3. HOTEL POLICIES & HOUSE RULES"
+  name: "policies_notice"
+  widget: "instructions"
+  description: "Controls check-in/out times, children & extra beds, age restrictions, pet rules, and house guidelines."
+  required: false
+
+- label: "Enable Hotel Policies Section on Website?"
+  name: "enable_policies"
+  widget: "boolean"
+  default: true
+  required: false
+
+- label: "Hotel Policies List (Full Drag-and-Drop Admin Control)"
+  name: "policies"
+  widget: "list"
+  required: false
+  summary: "{{fields.label}}: {{fields.value}}"
+  hint: "Click '+ Add' to add any policy! Drag and drop to reorder."
+  fields:
+    - label: "Policy Title / Name"
+      name: "label"
+      widget: "string"
+      hint: "e.g. Check-In, Check-Out, Children & Beds, Age Restriction, Pets, Cancellation, Couple Policy"
+
+    - label: "Policy Detail / Value (Supports Large Paragraphs & Line Breaks)"
+      name: "value"
+      widget: "text" # <--- 'text' widget হওয়ায় যত বড় লেখাই হোক প্যারাগ্রাফ সহ লেখা যাবে
+      hint: "Write the policy details here. You can write multiple lines, paragraphs, and bullet points."
+
+    - label: "Custom SVG Icon Code (Optional)"
+      name: "custom_svg"
+      widget: "text"
+      required: false
+      hint: "Paste raw <svg>...</svg> code here for unique icons! (Leave blank to use smart auto-detected icons)"
