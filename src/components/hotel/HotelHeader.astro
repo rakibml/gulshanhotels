@@ -230,18 +230,17 @@ const galleryPayload = {
     <span>Review</span>
   </button>
 
-  <!-- Save Button -->
+  <!-- Save Button (Mobile) -->
   <button
     type="button"
-    data-hotel-slug={hotelSlug}
-    class="header-save-hotel-btn flex items-center gap-1 text-slate-900 hover:text-emerald-800 cursor-pointer select-none text-[11px] font-bold"
+    class="header-save-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
+    data-hotel-id={hotelSlug || hotelTitle}
   >
-    <svg class="header-heart-icon w-3.5 h-3.5 fill-red-600 text-red-600 shrink-0" viewBox="0 0 24 24">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    <svg class="heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
     </svg>
-    <span class="header-save-text underline underline-offset-2">Save</span>
+    <span class="save-label underline underline-offset-2">Save</span>
   </button>
-</div>
 
             <!-- Ranking -->
             {hotelRanking && (
@@ -550,42 +549,57 @@ const galleryPayload = {
     modalPrevBtn?.addEventListener('click', () => updateModalImage(activeIdx - 1));
     modalNextBtn?.addEventListener('click', () => updateModalImage(activeIdx + 1));
 
-    // 2. Saved Hotel (Mobile + Desktop Sync)
-    const saveBtns = document.querySelectorAll('.header-save-hotel-btn, #headerSaveHotelBtn');
-    if (saveBtns.length > 0 && hotelSlug) {
-      const savedHotels: string[] = JSON.parse(localStorage.getItem('saved_hotels') || '[]');
-      let isSaved = savedHotels.includes(hotelSlug);
+    // 2. Saved Hotel (Mobile + Desktop Sync & Safe Toggle)
+    const saveBtns = document.querySelectorAll('.header-save-btn, #headerSaveHotelBtn');
+    if (saveBtns.length > 0) {
+      const hotelId = saveBtns[0].getAttribute('data-hotel-id') || 'hotel';
 
-      function updateSaveUI(saved: boolean) {
+      function getSavedList(): string[] {
+        try {
+          return JSON.parse(localStorage.getItem('saved_hotels') || '[]');
+        } catch {
+          return [];
+        }
+      }
+
+      function updateSaveUI() {
+        const savedList = getSavedList();
+        const isSaved = savedList.includes(hotelId);
+
         saveBtns.forEach(btn => {
-          const heartIcon = btn.querySelector('svg');
-          const saveText = btn.querySelector('span');
-          if (saved) {
-            heartIcon?.classList.add('fill-red-600', 'text-red-600');
-            heartIcon?.classList.remove('fill-none', 'stroke-slate-900');
-            if (saveText) saveText.textContent = 'Saved';
+          const heart = btn.querySelector('svg');
+          const label = btn.querySelector('.save-label') || btn.querySelector('span');
+
+          if (isSaved) {
+            heart?.classList.add('fill-red-600', 'stroke-red-600');
+            heart?.classList.remove('fill-none', 'stroke-slate-900');
+            if (label) label.textContent = 'Saved';
           } else {
-            heartIcon?.classList.remove('fill-red-600', 'text-red-600');
-            heartIcon?.classList.add('fill-none', 'stroke-slate-900');
-            if (saveText) saveText.textContent = 'Save';
+            heart?.classList.remove('fill-red-600', 'stroke-red-600');
+            heart?.classList.add('fill-none', 'stroke-slate-900');
+            if (label) label.textContent = 'Save';
           }
         });
       }
 
-      updateSaveUI(isSaved);
+      // পেজ লোড হলে আগের স্টেট চেক করবে
+      updateSaveUI();
 
+      // ক্লিকে টগল হবে
       saveBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          let currentList: string[] = JSON.parse(localStorage.getItem('saved_hotels') || '[]');
-          if (currentList.includes(hotelSlug)) {
-            currentList = currentList.filter(s => s !== hotelSlug);
-            isSaved = false;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          let savedList = getSavedList();
+          if (savedList.includes(hotelId)) {
+            savedList = savedList.filter(id => id !== hotelId);
           } else {
-            currentList.push(hotelSlug);
-            isSaved = true;
+            savedList.push(hotelId);
           }
-          localStorage.setItem('saved_hotels', JSON.stringify(currentList));
-          updateSaveUI(isSaved);
+
+          localStorage.setItem('saved_hotels', JSON.stringify(savedList));
+          updateSaveUI();
         });
       });
     }
