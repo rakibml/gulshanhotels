@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelSubNav.astro (Sticky Anchor Jump Navigation for Google Sitelinks & ScrollSpy)
+// src/components/hotel/HotelSubNav.astro (Aligned to max-w-6xl, Clean Modern Typography & Smooth ScrollSpy)
 interface Props {
   hotel: any;
 }
@@ -19,54 +19,69 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
   aria-label="Hotel Section Jump Navigation"
   class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all duration-300"
 >
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between h-12 text-xs font-bold text-slate-600">
+  <!-- কন্টেইনার উইডথ max-w-6xl করে হেডারের ছবির সাথে একদম সমান্তরাল করা হলো -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-13 text-xs sm:text-[13px] font-semibold text-slate-600">
     
     <!-- Left Jump Links with Horizontal Scroll on Mobile -->
     <div
       id="subNavLinksContainer"
-      class="flex items-center gap-6 sm:gap-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-1"
+      class="flex items-center gap-5 sm:gap-7 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden h-full py-0"
     >
-      <!-- Hotel Name on Large Screen -->
-      <span class="font-serif font-black text-slate-900 text-sm hidden lg:inline-block truncate max-w-[220px] border-r border-slate-200 pr-6 shrink-0 select-none">
+      <!-- Modern Sans-Serif Hotel Title (Aligned with Header Font) -->
+      <span class="font-sans font-black text-[#002b11] text-xs sm:text-sm hidden lg:inline-block truncate max-w-[210px] border-r border-slate-200 pr-5 shrink-0 select-none tracking-tight">
         {hotelTitle}
       </span>
 
-    <!-- Jump Anchors -->
-      <a href="#about-and-rates" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+      <!-- Jump Anchors (Sleek Airbnb/Booking Tab Style) -->
+      <a 
+        href="#about-and-rates" 
+        class="subnav-link h-full inline-flex items-center text-emerald-900 border-b-[2.5px] border-emerald-800 font-bold hover:text-emerald-800 transition-colors shrink-0"
+      >
         Overview
       </a>
 
-      <!-- Amenities & Rooms Combined Anchor -->
-      <a href="#amenities-and-rooms" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+      <a 
+        href="#amenities-and-rooms" 
+        class="subnav-link h-full inline-flex items-center text-slate-600 border-b-[2.5px] border-transparent font-medium hover:text-emerald-800 transition-colors shrink-0"
+      >
         Amenities & Rooms
       </a>
 
-      <a href="#location-map" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+      <a 
+        href="#location-map" 
+        class="subnav-link h-full inline-flex items-center text-slate-600 border-b-[2.5px] border-transparent font-medium hover:text-emerald-800 transition-colors shrink-0"
+      >
         Location
       </a>
 
       {hasReviews && (
-        <a href="#guest-reviews" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        <a 
+          href="#guest-reviews" 
+          class="subnav-link h-full inline-flex items-center text-slate-600 border-b-[2.5px] border-transparent font-medium hover:text-emerald-800 transition-colors shrink-0"
+        >
           Reviews
         </a>
       )}
 
       {hasFaqs && (
-        <a href="#faqs" class="subnav-link text-slate-600 hover:text-emerald-800 transition-colors py-3 border-b-2 border-transparent shrink-0">
+        <a 
+          href="#faqs" 
+          class="subnav-link h-full inline-flex items-center text-slate-600 border-b-[2.5px] border-transparent font-medium hover:text-emerald-800 transition-colors shrink-0"
+        >
           FAQs
         </a>
       )}
     </div>
 
-    <!-- Right Quick Action Button (Desktop & Tablet) -->
+    <!-- Right Quick Action Button (Matches Brand Dark Green Pill) -->
     {showRates && (
       <div class="shrink-0 pl-4 hidden sm:block">
         <a
           href="#rates-card"
-          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-[11px] uppercase tracking-wider px-4 py-2 rounded-xl shadow-xs transition hover:scale-105 inline-flex items-center gap-1"
+          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-full shadow-xs transition hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
         >
           <span>View Prices</span>
-          <span>➔</span>
+          <span class="text-sm">➔</span>
         </a>
       </div>
     )}
@@ -86,7 +101,6 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
     const container = document.getElementById('subNavLinksContainer');
     if (!links.length) return;
 
-    // Map each link to its target section element
     const linkMap: { link: HTMLAnchorElement; section: HTMLElement }[] = [];
     links.forEach((link) => {
       const targetId = link.getAttribute('href');
@@ -102,14 +116,13 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
 
     function setActiveLink(activeLink: HTMLAnchorElement) {
       links.forEach((l) => {
-        l.classList.remove('text-emerald-800', 'border-emerald-700', 'font-black');
-        l.classList.add('text-slate-600', 'border-transparent');
+        l.classList.remove('text-emerald-900', 'border-emerald-800', 'font-bold');
+        l.classList.add('text-slate-600', 'border-transparent', 'font-medium');
       });
 
-      activeLink.classList.remove('text-slate-600', 'border-transparent');
-      activeLink.classList.add('text-emerald-800', 'border-emerald-700', 'font-black');
+      activeLink.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
+      activeLink.classList.add('text-emerald-900', 'border-emerald-800', 'font-bold');
 
-      // On mobile, auto-scroll horizontal bar so active tab is always visible
       if (container) {
         const linkRect = activeLink.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
@@ -119,13 +132,10 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
       }
     }
 
-    // High performance IntersectionObserver for section detection
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find visible sections
         const visibleEntries = entries.filter((e) => e.isIntersecting);
         if (visibleEntries.length > 0) {
-          // Sort to find the one closest to the top of viewport
           const topEntry = visibleEntries.reduce((prev, curr) =>
             Math.abs(curr.boundingClientRect.top - 60) < Math.abs(prev.boundingClientRect.top - 60) ? curr : prev
           );
@@ -144,7 +154,6 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
 
     linkMap.forEach(({ section }) => observer.observe(section));
 
-    // Cleanup observer on View Transitions
     subNavAbortCtrl.signal.addEventListener('abort', () => {
       observer.disconnect();
     });
