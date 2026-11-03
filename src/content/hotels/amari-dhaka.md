@@ -39,6 +39,9 @@ policies:
   - label: Pets
     value: Pets are not allowed.
     custom_svg: ''
+  - label: Children & Beds
+    value: Child policies Children of all ages are welcome.  Children 9 and above will be charged as adults at this property.  To see correct prices and occupancy info, add the number and ages of children in your group to your search.  Crib and extra bed policies 1 - 6 years Crib upon request Free 12+ years Extra bed upon request US$25 per person, per night Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.  The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.  All cribs and extra beds are subject to availability.
+    custom_svg: ''
 booking_channels:
   - provider_name: Amari dhaka
     price: $150
