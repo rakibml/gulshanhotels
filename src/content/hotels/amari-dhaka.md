@@ -26,22 +26,6 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 price: $150
-policies:
-  - label: Check-in
-    value: Available 24 hours
-    custom_svg: ''
-  - label: Check-out
-    value: Available 24 hours
-    custom_svg: ''
-  - label: Age restriction
-    value: minimum age for check-in is 18
-    custom_svg: ''
-  - label: Pets
-    value: Pets are not allowed.
-    custom_svg: ''
-  - label: Children & Beds
-    value: Child policies Children
-    custom_svg: ''
 booking_channels:
   - provider_name: Amari dhaka
     price: $150
@@ -54,6 +38,39 @@ booking_channels:
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
 phone: +880 2 5505 9620
+policies_notice: ''
+enable_policies: true
+check_in: Available 24 hours
+check_out: Available 24 hours
+cancellation_policy: Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection.
+child_policy_text: |-
+  Children of all ages are welcome.
+
+  Children 9 and above will be charged as adults at this property.
+
+  To see correct prices and occupancy info, add the number and ages of children in your group to your search.
+extra_beds:
+  - age: 1 - 6 years
+    type: Crib upon request
+    price: Free
+  - age: 12+ years
+    type: Extra bed upon request
+    price: US$25 per person, per night
+extra_beds_notes: |-
+  Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.
+
+  The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.
+
+  All cribs and extra beds are subject to availability.
+age_restriction: The minimum age for check-in is 18
+pets_policy: Pets are not allowed.
+payment_methods:
+  - amex
+  - visa
+  - mastercard
+  - unionpay
+  - cash
+custom_policies: []
 amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
@@ -140,6 +157,22 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
+policies:
+  - custom_svg: ''
+    label: Check-in
+    value: Available 24 hours
+  - custom_svg: ''
+    label: Check-out
+    value: Available 24 hours
+  - custom_svg: ''
+    label: Age restriction
+    value: minimum age for check-in is 18
+  - custom_svg: ''
+    label: Pets
+    value: Pets are not allowed.
+  - custom_svg: ''
+    label: Children & Beds
+    value: Child policies Children
 ---
 
 Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka.
