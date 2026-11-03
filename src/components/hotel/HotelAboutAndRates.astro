@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelAboutAndRates.astro (Dynamic Policies, Pure White & Zero-Freeze Rate API)
+// src/components/hotel/HotelAboutAndRates.astro (Booking.com Style Split & Full-Width House Rules, Aligned to max-w-6xl)
 interface Props {
   hotel: any;
 }
@@ -11,7 +11,7 @@ const hotelTitle = data.title || data.name || "Hotel Details";
 const hotelPrice = data.price || "$120 / night";
 const hotelCategory = data.category || "Luxury Hotel";
 
-// ================= 100% DYNAMIC POLICIES WITH CUSTOM SVG SUPPORT =================
+// ================= 1. DYNAMIC POLICIES WITH SMART DETECTION =================
 interface PolicyItem {
   label: string;
   value: string;
@@ -20,7 +20,6 @@ interface PolicyItem {
 
 let policiesList: PolicyItem[] = [];
 
-// ১. মার্কডাউনে যদি policies: [...] অ্যারে দেওয়া থাকে
 if (Array.isArray(data.policies) && data.policies.length > 0) {
   policiesList = data.policies
     .filter((p: any) => p && p.label && p.value)
@@ -30,64 +29,61 @@ if (Array.isArray(data.policies) && data.policies.length > 0) {
       custom_svg: p.custom_svg || p.svg || ""
     }));
 } else {
-  // ২. ফিল্ড ভিত্তিক ফলব্যাক
   if (data.checkIn || data.check_in) policiesList.push({ label: 'Check-In', value: String(data.checkIn || data.check_in) });
   if (data.checkOut || data.check_out) policiesList.push({ label: 'Check-Out', value: String(data.checkOut || data.check_out) });
-  if (data.powerBackup || data.power_backup) policiesList.push({ label: 'Power Backup', value: String(data.powerBackup || data.power_backup) });
-  if (data.smokingPolicy || data.smoking) policiesList.push({ label: 'Smoking', value: String(data.smokingPolicy || data.smoking) });
-  if (data.couplePolicy || data.couple_policy) policiesList.push({ label: 'Couple Policy', value: String(data.couplePolicy || data.couple_policy) });
-  if (data.paymentMethods || data.payment) policiesList.push({ label: 'Payment', value: String(data.paymentMethods || data.payment) });
+  if (data.ageRestriction || data.age_restriction) policiesList.push({ label: 'Age Restriction', value: String(data.ageRestriction || data.age_restriction) });
   if (data.cancellation) policiesList.push({ label: 'Cancellation', value: String(data.cancellation) });
+  if (data.powerBackup || data.power_backup) policiesList.push({ label: 'Power Backup', value: String(data.powerBackup || data.power_backup) });
+  if (data.smokingPolicy || data.smoking) policiesList.push({ label: 'Smoking Policy', value: String(data.smokingPolicy || data.smoking) });
+  if (data.couplePolicy || data.couple_policy) policiesList.push({ label: 'Couple Policy', value: String(data.couplePolicy || data.couple_policy) });
+  if (data.paymentMethods || data.payment) policiesList.push({ label: 'Payment Options', value: String(data.paymentMethods || data.payment) });
+  if (data.petsPolicy || data.pets) policiesList.push({ label: 'Pets Policy', value: String(data.petsPolicy || data.pets) });
 }
 
-// স্মার্ট অটোমেটিক আইকন ডিটেক্টর
+// Separate Check-In & Check-Out for Booking.com timeline header
+const checkInPolicy = policiesList.find(p => p.label.toLowerCase().includes('check-in') || p.label.toLowerCase().includes('arrival'));
+const checkOutPolicy = policiesList.find(p => p.label.toLowerCase().includes('check-out') || p.label.toLowerCase().includes('departure'));
+const otherPolicies = policiesList.filter(p => p !== checkInPolicy && p !== checkOutPolicy);
+
 const getPolicyIcon = (label: string) => {
   const l = label.toLowerCase();
   if (l.includes('check-in') || l.includes('arrival') || l.includes('time')) {
-    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
   }
   if (l.includes('check-out') || l.includes('departure')) {
-    return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7h-3v3H9v-3H6v-2h3V7h2v3h3z"/></svg>`;
   }
-  if (l.includes('reception') || l.includes('front desk') || l.includes('desk') || l.includes('open until')) {
-    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v1.07A7.002 7.002 0 0 1 19 11v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-1a7.002 7.002 0 0 1 6-6.93V3a1 1 0 0 1 1-1zm-7 13h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z"/></svg>`;
-  }
-  if (l.includes('voltage') || l.includes('plug') || l.includes('socket') || l.includes('220')) {
-    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M16 7V3h-2v4h-4V3H8v4a6 6 0 0 0 5 5.91V19h-2v2h6v-2h-2v-6.09A6 6 0 0 0 16 7z"/></svg>`;
+  if (l.includes('age') || l.includes('adult') || l.includes('child')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
   }
   if (l.includes('power') || l.includes('generator') || l.includes('electricity') || l.includes('backup')) {
-    return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
   }
   if (l.includes('smoke') || l.includes('smoking')) {
-    return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M14.5 9H18c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5h-3.5V9zM2 10h11.5v3H2v-3zm18 0c.28 0 .5.22.5.5v2c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-2c0-.28.22-.5.5-.5z"/></svg>`;
   }
-  if (l.includes('couple') || l.includes('guest') || l.includes('id') || l.includes('marriage')) {
-    return `<svg class="w-4 h-4 fill-slate-800" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`;
+  if (l.includes('couple') || l.includes('marriage') || l.includes('guest') || l.includes('id')) {
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>`;
   }
   if (l.includes('pay') || l.includes('bkash') || l.includes('card') || l.includes('cash')) {
-    return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
   }
   if (l.includes('cancel') || l.includes('refund')) {
-    return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
   }
   if (l.includes('pet') || l.includes('dog') || l.includes('animal')) {
-    return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M4.5 11c1.38 0 2.5-1.12 2.5-2.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11zm15 0c1.38 0 2.5-1.12 2.5-2.5S20.88 6 19.5 6 17 7.12 17 8.5s1.12 2.5 2.5 2.5zm-6.5-3c1.38 0 2.5-1.12 2.5-2.5S14.38 3 13 3s-2.5 1.12-2.5 2.5S11.62 8 13 8zm-5 0c1.38 0 2.5-1.12 2.5-2.5S9.38 3 8 3 5.5 4.12 5.5 5.5 6.62 8 8 8zm4 3.5c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5zM12 18.5c-1.38 0-2.5-1.12-2.5-2.5h5c0 1.38-1.12 2.5-2.5 2.5z"/></svg>`;
+    return `<svg class="w-5 h-5 fill-slate-700" viewBox="0 0 24 24"><path d="M4.5 11c1.38 0 2.5-1.12 2.5-2.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11zm15 0c1.38 0 2.5-1.12 2.5-2.5S20.88 6 19.5 6 17 7.12 17 8.5s1.12 2.5 2.5 2.5zm-6.5-3c1.38 0 2.5-1.12 2.5-2.5S14.38 3 13 3s-2.5 1.12-2.5 2.5S11.62 8 13 8zm-5 0c1.38 0 2.5-1.12 2.5-2.5S9.38 3 8 3 5.5 4.12 5.5 5.5 6.62 8 8 8zm4 3.5c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5zM12 18.5c-1.38 0-2.5-1.12-2.5-2.5h5c0 1.38-1.12 2.5-2.5 2.5z"/></svg>`;
   }
-  if (l.includes('wifi') || l.includes('internet')) {
-    return `<svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 8.8C5.46 6.81 8.58 5.7 12 5.7c3.42 0 6.54 1.11 9 3.1l1.8-2.2C19.79 4.34 16.05 3 12 3zm0 5c-2.92 0-5.61.96-7.8 2.58l1.8 2.22C7.62 11.53 9.71 10.7 12 10.7c2.29 0 4.38.83 6 2.1l1.8-2.22C17.61 8.96 14.92 8 12 8zm0 5c-1.87 0-3.58.62-4.98 1.67L12 21l4.98-6.33C15.58 13.62 13.87 13 12 13z"/></svg>`;
-  }
-  return `<svg class="w-4 h-4 fill-slate-700" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+  return `<svg class="w-5 h-5 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
 };
 
-// Reservation Channels from CMS
+// ================= 2. CHANNELS & PRESETS =================
 const whatsapp = data.whatsapp || "";
 const phone = data.phone || "";
 const cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
 const cleanPhone = phone.replace(/[^0-9+]/g, '');
-
 const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 
-// Vector Brand SVG Badges
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-8 h-8 rounded-xl bg-[#1d3557] text-white font-black text-[10px] flex items-center justify-center shrink-0 shadow-xs tracking-tighter"><span class="text-rose-400 font-serif italic text-xs">a</span>goda</div>`,
   booking: `<div class="w-8 h-8 rounded-xl bg-[#003580] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">B.</div>`,
@@ -120,85 +116,74 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 }
 ---
 
-<!-- ABOUT HOTEL & LIVE RATE COMPARISON (PURE WHITE BACKGROUND & SCROLL-MT ALIGNED) -->
-<section id="about-and-rates" class="bg-white py-12 px-4 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+<!-- ABOUT HOTEL & LIVE RATE COMPARISON (ALIGNED WITH HEADER max-w-6xl) -->
+<section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
+  
+  <!-- ================= PART 1: TOP 2-COLUMN (ABOUT & STICKY RATES CARD) ================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
     
-    <!-- LEFT COLUMN -->
-    <div class="lg:col-span-7 space-y-8 text-left">
-      <div class="space-y-4">
-        <h2 class="text-2xl sm:text-4xl font-black font-serif text-slate-900">
+    <!-- LEFT COLUMN: ABOUT HOTEL -->
+    <div class="lg:col-span-7 space-y-5 text-left">
+      <div>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block mb-3">
+          Property Overview
+        </span>
+        <h2 class="font-sans text-2xl sm:text-3xl lg:text-4xl font-black text-[#002b11] tracking-tight leading-tight">
           About {hotelTitle}
         </h2>
-
-        <div id="overview-wrapper" class="relative">
-          <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
-            {hotel?.body ? <Fragment set:html={hotel.body} /> : (
-              <p>
-                Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <button 
-          type="button"
-          id="toggleOverviewBtn" 
-          class="hidden mt-2 text-xs sm:text-sm font-black text-emerald-800 hover:text-emerald-900 transition items-center gap-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs inline-flex z-10 relative select-none"
-        >
-          <span id="readMoreText">Read More ➔</span>
-        </button>
       </div>
 
-      <!-- ================= DYNAMIC POLICIES ================= -->
-      {policiesList.length > 0 && (
-        <div class="pt-6 border-t border-slate-200 space-y-4 text-left">
-          <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">
-            Hotel Policies & Essential Info
-          </h3>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
-            {policiesList.map((item) => (
-              <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition">
-                <div class="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
-                  {item.custom_svg ? (
-                    <div class="w-4 h-4 flex items-center justify-center shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-slate-800">
-                      <Fragment set:html={item.custom_svg} />
-                    </div>
-                  ) : (
-                    <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
-                  )}
-                </div>
-                <div class="min-w-0">
-                  <span class="text-slate-500 text-[11px] block font-extrabold uppercase truncate">
-                    {item.label}
-                  </span>
-                  <span class="font-black text-slate-900 block truncate" title={item.value}>
-                    {item.value}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+      <!-- Overview Text with Gradient Fade -->
+      <div id="overview-wrapper" class="relative">
+        <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-sm md:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+          {hotel?.body ? <Fragment set:html={hotel.body} /> : (
+            <p>
+              Located in the heart of Gulshan 2, {hotelTitle} offers executive 5-star lodging with world-class hospitality, high-speed Wi-Fi, fine dining restaurants, and diplomatic security.
+            </p>
+          )}
         </div>
-      )}
+      </div>
 
+      <button 
+        type="button"
+        id="toggleOverviewBtn" 
+        class="hidden text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition items-center gap-1.5 cursor-pointer bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs inline-flex select-none"
+      >
+        <span id="readMoreText">Read More ➔</span>
+      </button>
+
+      <!-- Key Property Highlights Pill Bar -->
+      <div class="pt-4 grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs font-bold text-slate-700">
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+          <span class="text-emerald-700">✓</span>
+          <span>Verified Luxury Stay</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+          <span class="text-emerald-700">✓</span>
+          <span>Diplomatic Zone</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl">
+          <span class="text-emerald-700">✓</span>
+          <span>Free High-Speed Wi-Fi</span>
+        </div>
+      </div>
     </div>
 
-    <!-- RIGHT COLUMN (BOOKING & RATES CARD) -->
-    <div class="lg:col-span-5">
-      <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-5 min-h-[380px] scroll-mt-20 sm:scroll-mt-24">
+    <!-- RIGHT COLUMN: STICKY BOOKING & RATES CARD -->
+    <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
+      <div id="rates-card" class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-lg space-y-4 text-left scroll-mt-20">
         
-        <!-- CARD HEADER WITH STARTING PRICE -->
-        <div class="space-y-3 text-left border-b border-slate-100 pb-4">
-          <h3 class="text-xl sm:text-2xl font-black font-serif text-slate-900">
+        <!-- Card Header -->
+        <div class="space-y-3 border-b border-slate-100 pb-4">
+          <h3 class="font-sans text-xl sm:text-2xl font-black text-[#002b11] tracking-tight">
             Where can you book this hotel?
           </h3>
           
+          <!-- Starting Price Box -->
           <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
             <div>
               <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Starting From</span>
-              <span id="cardStartingPriceDisplay" class="text-xl sm:text-2xl font-black text-emerald-950 block leading-tight">
+              <span id="cardStartingPriceDisplay" class="text-2xl sm:text-3xl font-black text-[#002b11] block leading-none mt-0.5">
                 {hotelPrice}
               </span>
             </div>
@@ -210,39 +195,39 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
         </div>
 
-        <!-- Static Direct Channels (WhatsApp & Phone) -->
+        <!-- Direct Reservation Channels (WhatsApp & Phone) -->
         {(whatsapp || phone) && (
-          <div id="staticReservationChannels" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left pb-1">
+          <div id="staticReservationChannels" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pb-1">
             {whatsapp && (
               <a 
                 href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="flex items-center gap-2.5 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 transition text-emerald-900 font-black text-xs"
+                class="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200 transition text-emerald-950 font-bold text-xs"
               >
-                <div class="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
+                <div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg>
                 </div>
-                <span>WhatsApp Booking</span>
+                <span class="truncate">WhatsApp Booking</span>
               </a>
             )}
 
             {phone && (
               <a 
                 href={`tel:${cleanPhone}`} 
-                class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-slate-900 font-black text-xs"
+                class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-slate-900 font-bold text-xs"
               >
-                <div class="w-8 h-8 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                <div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                 </div>
-                <span>Call Hotel Direct</span>
+                <span class="truncate">Call Hotel Direct</span>
               </a>
             )}
           </div>
         )}
 
-        <!-- 100% CMS CONTROLLED BOOKING CHANNELS LIST -->
-        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-3 min-h-[140px]">
+        <!-- Booking Channels List -->
+        <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="space-y-2.5 min-h-[120px]">
           {customChannels.length > 0 ? (
             customChannels.map((item: any) => {
               const pName = item.provider_name || "Booking Partner";
@@ -253,32 +238,30 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
               const badgeText = item.badge || "";
               const customSvg = item.custom_svg || "";
               const iconPreset = item.icon_preset || "direct";
-
               const finalUrl = sanitizeLink(rawUrl, iconPreset, pName, hotelTitle);
 
               return (
-                <div class="relative pt-2">
+                <div class="relative pt-1.5">
                   {badgeText && (
-                    <span class="absolute -top-1.5 left-4 z-10 bg-indigo-900 text-indigo-100 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-indigo-700 shadow-xs">
+                    <span class="absolute -top-1 left-3 z-10 bg-[#002b11] text-emerald-200 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-800 shadow-xs">
                       {badgeText}
                     </span>
                   )}
-                  <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-slate-100/80 transition">
-                    <div class="flex items-center gap-3">
+                  <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 transition">
+                    <div class="flex items-center gap-2.5 min-w-0">
                       {customSvg ? (
-                        <div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
+                        <div class="w-7 h-7 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
                           <Fragment set:html={customSvg} />
                         </div>
                       ) : (
                         <Fragment set:html={presetSvgs[iconPreset] || presetSvgs.direct} />
                       )}
-                      
-                      <span class="text-xs sm:text-sm font-bold text-slate-900">{pName}</span>
+                      <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">{pName}</span>
                     </div>
 
-                    <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
                       {showPriceTag && pPrice && (
-                        <span class="text-sm sm:text-base font-black text-slate-900">
+                        <span class="text-sm font-black text-slate-900">
                           {pPrice.startsWith('$') || pPrice.startsWith('৳') ? pPrice : '$' + pPrice}
                         </span>
                       )}
@@ -286,7 +269,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                         href={finalUrl} 
                         target={finalUrl.startsWith('http') ? "_blank" : "_self"} 
                         rel="noopener noreferrer" 
-                        class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-xs shrink-0"
+                        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-4 py-2 rounded-full transition shadow-xs hover:scale-105 active:scale-95 inline-flex items-center gap-1"
                       >
                         {btnText}
                       </a>
@@ -296,18 +279,18 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
               );
             })
           ) : (
-            <div id="ratesFallbackLoader" class="text-center py-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div id="ratesFallbackLoader" class="text-center py-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <span class="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
               <p class="text-xs font-bold text-slate-600">Checking latest verified room rates...</p>
             </div>
           )}
         </div>
 
-        <!-- Price Disclaimer -->
-        <div class="bg-amber-50 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-2.5 text-[11px] text-amber-900 font-bold shadow-xs text-left">
+        <!-- Disclaimer -->
+        <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-start gap-2 text-[11px] text-amber-950 font-medium">
           <svg class="w-4 h-4 fill-amber-700 shrink-0 mt-0.5" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-          <p class="leading-relaxed font-semibold text-slate-700">
-            Rates vary by travel dates, occupancy & room type. Click <strong class="text-amber-950 font-black">'Book Now'</strong> to see exact checkout prices for your dates.
+          <p class="leading-relaxed text-slate-700">
+            Rates depend on travel dates & room type. Click <strong class="text-slate-900 font-bold">'Book Now'</strong> for exact checkout prices.
           </p>
         </div>
 
@@ -315,9 +298,87 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     </div>
 
   </div>
+
+  <!-- ================= PART 2: BOOKING.COM STYLE HOUSE RULES & POLICIES ================= -->
+  {policiesList.length > 0 && (
+    <div class="mt-14 pt-10 border-t border-slate-200 text-left space-y-6">
+      
+      <!-- Section Header -->
+      <div class="space-y-1">
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
+          Good to Know
+        </span>
+        <h3 class="font-sans text-2xl sm:text-3xl font-black text-[#002b11] tracking-tight">
+          Hotel Policies & House Rules
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">
+          Key guidelines and stay requirements for guests at <strong class="text-slate-800 font-bold">{hotelTitle}</strong>
+        </p>
+      </div>
+
+      <!-- VIP Highlight Banner: Check-In & Check-Out Timeline -->
+      {(checkInPolicy || checkOutPolicy) && (
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-emerald-50/50 border border-emerald-200/90 rounded-3xl p-5 sm:p-6 shadow-xs">
+          {checkInPolicy && (
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+                <Fragment set:html={getPolicyIcon('check-in')} />
+              </div>
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-800 block">Check-in Schedule</span>
+                <span class="text-base sm:text-lg font-black text-slate-900 block mt-0.5">{checkInPolicy.value}</span>
+              </div>
+            </div>
+          )}
+
+          {checkOutPolicy && (
+            <div class="flex items-center gap-4 sm:border-l sm:border-emerald-200 sm:pl-6">
+              <div class="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center shrink-0 shadow-xs">
+                <Fragment set:html={getPolicyIcon('check-out')} />
+              </div>
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-800 block">Check-out Schedule</span>
+                <span class="text-base sm:text-lg font-black text-slate-900 block mt-0.5">{checkOutPolicy.value}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <!-- Full-Width Policy Cards Grid (No truncated dots, spacious and clean) -->
+      {otherPolicies.length > 0 && (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {otherPolicies.map((item) => (
+            <div class="bg-slate-50/70 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 hover:bg-white hover:shadow-sm transition">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                {item.custom_svg ? (
+                  <div class="w-5 h-5 flex items-center justify-center shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-[#0d3b23]">
+                    <Fragment set:html={item.custom_svg} />
+                  </div>
+                ) : (
+                  <span set:html={getPolicyIcon(item.label)} class="inline-flex shrink-0"></span>
+                )}
+              </div>
+              
+              <div class="min-w-0">
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                  {item.label}
+                </span>
+                <span class="font-bold text-slate-900 text-xs sm:text-sm block mt-1 leading-snug">
+                  {item.value}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+    </div>
+  )}
+
 </section>
 
-<!-- HIDDEN SCRIPT FOR PRESET SVGS TO PREVENT DUPLICATION -->
+<!-- HIDDEN SCRIPT FOR PRESET SVGS -->
 <script type="application/json" id="preset-svgs-data" set:html={JSON.stringify(presetSvgs)}></script>
 
 <!-- CLIENT SCRIPT -->
@@ -333,7 +394,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
     const loaderEl = document.getElementById('ratesFallbackLoader');
 
-    // Parse SVG presets
     const svgScript = document.getElementById('preset-svgs-data');
     let presetSvgs: Record<string, string> = {};
     try {
@@ -342,13 +402,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
       presetSvgs = {};
     }
 
-    // 1. Fetch live rates with timeout & graceful fallback
     if (ratesContainer && !ratesContainer.dataset.fetched && loaderEl) {
       ratesContainer.dataset.fetched = 'true';
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
-      // 4-second timeout to prevent infinite spinner
       const timeoutId = setTimeout(() => {
         showFallbackDirectBooking();
       }, 4000);
@@ -371,16 +429,16 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             if (dealsList.length > 0) {
               ratesContainer.innerHTML = dealsList.map((item: any) => {
                 const badgeHtml = item.badge 
-                  ? `<span class="absolute -top-1.5 left-4 z-10 bg-indigo-900 text-indigo-100 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-indigo-700 shadow-xs">${item.badge}</span>` 
+                  ? `<span class="absolute -top-1 left-3 z-10 bg-[#002b11] text-emerald-200 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-800 shadow-xs">${item.badge}</span>` 
                   : '';
                 
                 let iconHtml = presetSvgs[item.icon_preset] || presetSvgs.direct || '';
                 if (item.custom_svg) {
-                  iconHtml = `<div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
+                  iconHtml = `<div class="w-7 h-7 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
                 }
 
                 const priceDisplay = (item.showPrice !== false && item.price) 
-                  ? `<span class="text-sm sm:text-base font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` 
+                  ? `<span class="text-sm font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` 
                   : '';
 
                 let finalUrl = item.button_url || '#';
@@ -399,16 +457,16 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                 }
 
                 return `
-                  <div class="relative pt-2">
+                  <div class="relative pt-1.5">
                     ${badgeHtml}
-                    <div class="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-slate-100/80 transition">
-                      <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 transition">
+                      <div class="flex items-center gap-2.5 min-w-0">
                         ${iconHtml}
-                        <span class="text-xs sm:text-sm font-bold text-slate-900">${item.provider_name || 'Booking Partner'}</span>
+                        <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${item.provider_name || 'Booking Partner'}</span>
                       </div>
-                      <div class="flex items-center gap-3 sm:gap-4">
+                      <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
                         ${priceDisplay}
-                        <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#e52429] hover:bg-[#c91d22] text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-xs shrink-0">
+                        <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-xs px-4 py-2 rounded-full transition shadow-xs hover:scale-105 active:scale-95 inline-flex items-center gap-1">
                           ${item.button_text || 'Book Now ➔'}
                         </a>
                       </div>
@@ -434,9 +492,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     function showFallbackDirectBooking() {
       if (!ratesContainer || !ratesContainer.querySelector('#ratesFallbackLoader')) return;
       ratesContainer.innerHTML = `
-        <div class="text-left p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl space-y-2">
+        <div class="text-left p-3.5 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl space-y-1.5">
           <p class="text-xs font-bold text-emerald-950">
-            For best rate guarantee & immediate reservation confirmation, please contact the hotel reception directly via WhatsApp or Phone above.
+            For best rate guarantee & immediate confirmation, please contact the hotel directly via WhatsApp or Phone above.
           </p>
         </div>
       `;
@@ -464,12 +522,10 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     const toggleBtnText = document.getElementById('readMoreText');
 
     if (textEl && toggleBtn && wrapperEl) {
-      // Check rendered height instead of arbitrary word count
-      const isLongText = textEl.scrollHeight > 240;
+      const isLongText = textEl.scrollHeight > 220;
 
       if (isLongText) {
-        textEl.classList.add('max-h-[200px]', 'overflow-hidden');
-        // Pure White fade gradient
+        textEl.classList.add('max-h-[190px]', 'overflow-hidden');
         wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
         
         toggleBtn.classList.remove('hidden');
@@ -478,11 +534,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         toggleBtn.onclick = () => {
           isExpanded = !isExpanded;
           if (isExpanded) {
-            textEl.classList.remove('max-h-[200px]', 'overflow-hidden');
+            textEl.classList.remove('max-h-[190px]', 'overflow-hidden');
             wrapperEl.classList.remove('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
             if (toggleBtnText) toggleBtnText.textContent = 'Show Less ↩';
           } else {
-            textEl.classList.add('max-h-[200px]', 'overflow-hidden');
+            textEl.classList.add('max-h-[190px]', 'overflow-hidden');
             wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-16', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
             if (toggleBtnText) toggleBtnText.textContent = 'Read More ➔';
             wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
