@@ -1,6 +1,6 @@
 ---
 header_notice: ''
-title: Amari Dhaka
+title: Amari Dhaka Bangladesh
 title_style: style_5
 category: 5-Star Luxury Stay
 location: 47, Road No 41, Gulshan-2, Dhaka City, Dhaka Division, Bangladesh 1212
