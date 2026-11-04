@@ -7,7 +7,7 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// Pure Dynamic Data (No Fake Fallbacks)
+// Pure Dynamic Data from CMS (No Fake Fallbacks)
 const hotelTitle = (data.title || data.name || "").trim();
 const hotelPrice = (data.price || "").trim();
 const hotelCategory = (data.category || "").trim();
@@ -25,10 +25,9 @@ const customChannels = Array.isArray(data.booking_channels) ? data.booking_chann
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
   booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
+  tripadvisor: `<div class="w-7 h-7 rounded-lg bg-[#00af87] text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4.5-9a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm9 0a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg></div>`,
   expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
-  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-emerald-800" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
-  whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/></svg></div>`,
-  phone: `<div class="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0"><svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`
+  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#0d3b23] flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`
 };
 
 function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = "", hName: string = "") {
@@ -58,7 +57,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-6xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
     
-    <!-- LEFT COLUMN: ABOUT HOTEL (100% PURE CMS DATA) -->
+    <!-- ================= LEFT COLUMN: ABOUT HOTEL (100% PURE CMS DATA) ================= -->
     <div class="lg:col-span-7 space-y-4 text-left">
       
       <div class="space-y-2">
@@ -83,7 +82,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         )}
       </div>
 
-      <!-- Real CMS Body/Description Only -->
+      <!-- Real CMS Body / Description Only -->
       {(hotel?.body || data.description) && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
           <div id="overview-wrapper" class="relative">
@@ -111,14 +110,14 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
     </div>
 
-    <!-- RIGHT COLUMN: CURVED RATES & DEALS CARD (EXACT SCREENSHOT PATTERN) -->
+    <!-- ================= RIGHT COLUMN: CURVED RATES CARD ================= -->
     <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
       <div id="rates-card" class="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden text-left scroll-mt-20">
         
         <!-- 1. Curved Dark Green Header -->
         <div class="bg-[#0d3b23] text-white p-5 sm:p-6 pb-7 rounded-b-[2.5rem] shadow-sm relative">
           <div class="flex items-start gap-3">
-            <!-- Ticket/Tag Icon -->
+            <!-- Ticket / Tag SVG Icon -->
             <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
               <svg class="w-5 h-5 text-white stroke-current fill-none stroke-2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
@@ -129,7 +128,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                 Room Rates & Deals
               </h3>
               <p class="text-xs text-emerald-100/90 font-medium mt-1">
-                Best rates for your stay in {hotelLocation || "Dhaka"}
+                {hotelLocation ? `Best rates for your stay in ${hotelLocation}` : "Best available booking rates"}
               </p>
             </div>
           </div>
@@ -144,7 +143,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
               <span id="cardStartingPriceDisplay" class="text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
                 {hotelPrice || "Check Rates"}
               </span>
-              {hotelPrice && <span class="text-xs text-slate-500 font-semibold">per night</span>}
+              {hotelPrice && !hotelPrice.toLowerCase().includes('night') && (
+                <span class="text-xs text-slate-500 font-semibold">per night</span>
+              )}
             </div>
 
             <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
@@ -155,7 +156,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </span>
           </div>
 
-          <!-- Dynamic Booking Channels (TripAdvisor / Official Rows) -->
+          <!-- Dynamic Booking Channels (Clean Divider Rows) -->
           <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="divide-y divide-slate-100 min-h-[90px]">
             {customChannels.length > 0 ? (
               customChannels.map((item: any) => {
@@ -210,7 +211,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             )}
           </div>
 
-          <!-- Direct Hotel Reservation Section (Call Hotel Button) -->
+          <!-- Direct Hotel Reservation Section (Call Hotel / WhatsApp) -->
           {(phone || whatsapp) && (
             <div id="staticReservationChannels" class="pt-4 border-t border-slate-100 text-center space-y-3">
               <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-2">
@@ -255,6 +256,8 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
       </div>
     </div>
+
+  </div>
 </section>
 
 <!-- HIDDEN SCRIPT FOR PRESET SVGS -->
@@ -307,17 +310,13 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
             if (dealsList.length > 0) {
               ratesContainer.innerHTML = dealsList.map((item: any) => {
-                const badgeHtml = item.badge 
-                  ? `<span class="absolute -top-1 left-3 z-10 bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">${item.badge}</span>` 
-                  : '';
-                
                 let iconHtml = presetSvgs[item.icon_preset] || presetSvgs.direct || '';
                 if (item.custom_svg) {
-                  iconHtml = `<div class="w-7 h-7 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
+                  iconHtml = `<div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
                 }
 
                 const priceDisplay = (item.showPrice !== false && item.price) 
-                  ? `<span class="text-sm font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` 
+                  ? `<span class="text-base font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` 
                   : '';
 
                 let finalUrl = item.button_url || '#';
@@ -335,23 +334,21 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                   }
                 }
 
-                const actionText = item.button_text || 'View Deal';
+                const actionText = item.button_text || 'Book Now';
 
                 return `
-                  <div class="relative pt-1">
-                    ${badgeHtml}
-                    <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-slate-100/80 transition">
-                      <div class="flex items-center gap-2.5 min-w-0">
-                        ${iconHtml}
-                        <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${item.provider_name || 'Booking Partner'}</span>
-                      </div>
-                      <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
-                        ${priceDisplay}
-                        <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-2xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
-                          <span>${actionText}</span>
-                          <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </a>
-                      </div>
+                  <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
+                    <div class="flex items-center gap-3 min-w-0">
+                      ${iconHtml}
+                      <span class="text-sm font-bold text-slate-900 truncate">${item.provider_name || 'Booking Partner'}</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                      ${priceDisplay}
+                      <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-2xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
+                        <span>${actionText}</span>
+                        <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                      </a>
                     </div>
                   </div>
                 `;
@@ -374,13 +371,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     function showFallbackDirectBooking() {
       if (!ratesContainer || !ratesContainer.querySelector('#ratesFallbackLoader')) return;
       ratesContainer.innerHTML = `
-        <div class="text-left p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-          <p class="text-xs font-bold text-slate-800">
-            Direct Reservation
-          </p>
-          <p class="text-[11px] text-slate-500">
-            For best rate guarantee, please contact the hotel directly via WhatsApp or phone.
-          </p>
+        <div class="text-center p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+          <p class="text-xs font-bold text-slate-800">Direct Reservation Available</p>
+          <p class="text-[11px] text-slate-500">Contact the hotel reception directly via phone or WhatsApp above.</p>
         </div>
       `;
     }
