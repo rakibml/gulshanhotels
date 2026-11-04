@@ -7,21 +7,25 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// Pure Dynamic Data from CMS (No Fake Fallbacks)
+// Pure Dynamic Data from CMS
 const hotelTitle = (data.title || data.name || "").trim();
 const hotelPrice = (data.price || "").trim();
 const hotelCategory = (data.category || "").trim();
 const hotelLocation = (data.location || "").trim();
 
-// Direct Reservation Contacts from CMS
+// Direct Reservation Contacts from CMS with BD Country Code Auto-fix
 const whatsapp = data.whatsapp || "";
 const phone = data.phone || "";
-const cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
+
+let cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
+if (cleanWhatsapp.startsWith('01')) {
+  cleanWhatsapp = '88' + cleanWhatsapp;
+}
 const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
 const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 
-// 100% Pure Vector Brand SVGs (No Emojis / No Stickers)
+// Vector Brand SVGs
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
   booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
@@ -57,9 +61,8 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
     
-    <!-- ================= LEFT COLUMN: ABOUT HOTEL (100% PURE CMS DATA) ================= -->
+    <!-- LEFT COLUMN: ABOUT HOTEL -->
     <div class="lg:col-span-7 space-y-4 text-left">
-      
       <div class="space-y-2">
         {hotelCategory && (
           <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-wider text-emerald-800">
@@ -82,7 +85,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         )}
       </div>
 
-      <!-- Real CMS Body / Description Only -->
+      <!-- Real CMS Body / Description -->
       {(hotel?.body || data.description) && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
           <div id="overview-wrapper" class="relative">
@@ -101,23 +104,21 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             class="hidden text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition inline-flex items-center gap-1 cursor-pointer select-none pt-1"
           >
             <span id="readMoreText">Read more</span>
-            <svg class="w-3.5 h-3.5 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg id="readMoreIcon" class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
         </div>
       )}
-
     </div>
 
-    <!-- ================= RIGHT COLUMN: CURVED RATES CARD ================= -->
+    <!-- RIGHT COLUMN: CURVED RATES CARD -->
     <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
       <div id="rates-card" class="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden text-left scroll-mt-20">
         
-        <!-- 1. Curved Dark Green Header -->
+        <!-- Header -->
         <div class="bg-[#0d3b23] text-white p-5 sm:p-6 pb-7 rounded-b-[2.5rem] shadow-sm relative">
           <div class="flex items-start gap-3">
-            <!-- Ticket / Tag SVG Icon -->
             <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
               <svg class="w-5 h-5 text-white stroke-current fill-none stroke-2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
@@ -134,10 +135,8 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
         </div>
 
-        <!-- 2. Card Content Body -->
+        <!-- Body -->
         <div class="p-5 sm:p-6 space-y-4 pt-4">
-          
-          <!-- Starting Price Strip -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div class="flex items-baseline gap-1.5">
               <span id="cardStartingPriceDisplay" class="text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
@@ -148,7 +147,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
               )}
             </div>
 
-            <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
+            <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
               <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
@@ -156,7 +155,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </span>
           </div>
 
-          <!-- Dynamic Booking Channels (Clean Divider Rows) -->
+          <!-- Dynamic Booking Channels -->
           <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="divide-y divide-slate-100 min-h-[90px]">
             {customChannels.length > 0 ? (
               customChannels.map((item: any) => {
@@ -192,7 +191,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                         href={finalUrl} 
                         target={finalUrl.startsWith('http') ? "_blank" : "_self"} 
                         rel="noopener noreferrer" 
-                        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-2xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
+                        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
                       >
                         <span>{btnText}</span>
                         <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
@@ -211,7 +210,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             )}
           </div>
 
-          <!-- Direct Hotel Reservation Section (Call Hotel / WhatsApp) -->
+          <!-- Direct Hotel Reservation (Handles Phone, WhatsApp, or Both) -->
           {(phone || whatsapp) && (
             <div id="staticReservationChannels" class="pt-4 border-t border-slate-100 text-center space-y-3">
               <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-2">
@@ -221,30 +220,34 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                 <span>Direct Hotel Reservation</span>
               </div>
 
-              {phone ? (
-                <a 
-                  href={`tel:${cleanPhone}`} 
-                  class="w-full border-2 border-[#0d3b23] bg-white text-[#0d3b23] hover:bg-[#0d3b23] hover:text-white font-black text-sm sm:text-base py-3 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-2xs"
-                >
-                  <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                    <path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                  </svg>
-                  <span>Call Hotel</span>
-                </a>
-              ) : whatsapp && (
-                <a 
-                  href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="w-full border-2 border-[#25D366] bg-white text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-sm sm:text-base py-3 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-2xs"
-                >
-                  <span>Chat on WhatsApp</span>
-                </a>
-              )}
+              <div class={`grid gap-2 ${phone && whatsapp ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                {phone && (
+                  <a 
+                    href={`tel:${cleanPhone}`} 
+                    class="w-full border-2 border-[#0d3b23] bg-white text-[#0d3b23] hover:bg-[#0d3b23] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                      <path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                    <span>Call Hotel</span>
+                  </a>
+                )}
+
+                {whatsapp && (
+                  <a 
+                    href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="w-full border-2 border-[#25D366] bg-[#25D366]/10 text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>WhatsApp</span>
+                  </a>
+                )}
+              </div>
             </div>
           )}
 
-          <!-- Minimalist Trust Footnote -->
+          <!-- Trust Footnote -->
           <div class="pt-1 text-center flex items-center justify-center gap-1.5 text-xs text-slate-600 font-medium">
             <svg class="w-4 h-4 text-emerald-800 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -253,7 +256,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
 
         </div>
-
       </div>
     </div>
 
@@ -268,6 +270,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
   let aboutAbortCtrl: AbortController | null = null;
 
   async function initHotelAboutSection() {
+    // 1. Overview Truncator setup independently (Won't get reset by fetch)
+    applyLinkAttributes();
+    setupOverviewTruncator();
+
+    // 2. Fetch Rates Logic
     if (aboutAbortCtrl) aboutAbortCtrl.abort();
     aboutAbortCtrl = new AbortController();
     const { signal } = aboutAbortCtrl;
@@ -289,9 +296,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
+      // Proper timeout with AbortController
       const timeoutId = setTimeout(() => {
+        aboutAbortCtrl?.abort();
         showFallbackDirectBooking();
-      }, 4000);
+      }, 4500);
 
       try {
         const res = await fetch(kvApiUrl, { signal });
@@ -324,7 +333,8 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
                 if (item.icon_preset === 'whatsapp' || providerLower.includes('whatsapp')) {
                   if (!finalUrl.startsWith('http')) {
-                    const cleanWa = finalUrl.replace(/[^0-9]/g, '');
+                    let cleanWa = finalUrl.replace(/[^0-9]/g, '');
+                    if (cleanWa.startsWith('01')) cleanWa = '88' + cleanWa;
                     finalUrl = cleanWa ? `https://wa.me/${cleanWa}?text=${encodeURIComponent('Hi! I want to book a stay at ' + hotelName)}` : '#';
                   }
                 } else if (item.icon_preset === 'phone' || providerLower.includes('call')) {
@@ -345,7 +355,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
                     <div class="flex items-center gap-3 shrink-0">
                       ${priceDisplay}
-                      <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-2xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
+                      <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
                         <span>${actionText}</span>
                         <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                       </a>
@@ -353,9 +363,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                   </div>
                 `;
               }).join('');
-              
-              applyLinkAttributes();
-              setupOverviewTruncator();
               return;
             }
           }
@@ -377,9 +384,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         </div>
       `;
     }
-
-    applyLinkAttributes();
-    setupOverviewTruncator();
   }
 
   function applyLinkAttributes() {
@@ -398,30 +402,39 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     const wrapperEl = document.getElementById('overview-wrapper');
     const toggleBtn = document.getElementById('toggleOverviewBtn');
     const toggleBtnText = document.getElementById('readMoreText');
+    const toggleBtnIcon = document.getElementById('readMoreIcon');
 
     if (textEl && toggleBtn && wrapperEl) {
-      const isLongText = textEl.scrollHeight > 200;
+      // Avoid re-binding listener if already setup
+      if (toggleBtn.dataset.bound === 'true') return;
+
+      const isLongText = textEl.scrollHeight > 220;
 
       if (isLongText) {
         textEl.classList.add('max-h-[180px]', 'overflow-hidden');
         wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
         
         toggleBtn.classList.remove('hidden');
-        let isExpanded = false;
+        toggleBtn.dataset.bound = 'true';
 
-        toggleBtn.onclick = () => {
-          isExpanded = !isExpanded;
-          if (isExpanded) {
+        toggleBtn.addEventListener('click', () => {
+          const isExpanded = textEl.dataset.expanded === 'true';
+
+          if (!isExpanded) {
             textEl.classList.remove('max-h-[180px]', 'overflow-hidden');
             wrapperEl.classList.remove('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
             if (toggleBtnText) toggleBtnText.textContent = 'Show less';
+            if (toggleBtnIcon) toggleBtnIcon.classList.add('rotate-180');
+            textEl.dataset.expanded = 'true';
           } else {
             textEl.classList.add('max-h-[180px]', 'overflow-hidden');
             wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
             if (toggleBtnText) toggleBtnText.textContent = 'Read more';
+            if (toggleBtnIcon) toggleBtnIcon.classList.remove('rotate-180');
+            textEl.dataset.expanded = 'false';
             wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
-        };
+        });
       } else {
         toggleBtn.classList.add('hidden');
       }
