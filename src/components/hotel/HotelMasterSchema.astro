@@ -1,5 +1,6 @@
 ---
-// src/components/hotel/HotelMasterSchema.astro (100% Zero-Error Strictly Cleaned Schema)
+// src/components/hotel/HotelMasterSchema.astro
+// নিয়ম: কোনো বানানো/ডিফল্ট ডাটা নেই। CMS-এ যা আছে শুধু তাই স্কিমায় যাবে।
 interface Props {
   hotel: any;
 }
@@ -7,282 +8,303 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ১. বেসিক ডাটা ক্লিনআপ
-const hotelTitle = (data.title || data.name || "Hotel Details").trim();
-const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
-const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+// ================= সেটিংস (দরকার হলে শুধু এখানে বদলাও) =================
+const SITE_ORIGIN = "https://gulshanhotels.com";
+// হোটেল লিস্টের আসল পেজ থাকলে এখানে পাথ দাও, যেমন "/hotels"। না থাকলে খালি রাখো
+const HOTELS_LIST_PATH = "";
 
-function cleanAboutText(raw: string) {
-  if (!raw) return "";
-  return raw
-    .replace(/<[^>]*>?/gm, '')
-    .replace(/[#*`_~]/g, '')
-    .replace(/"/g, "'")
-    .replace(/\s+/g, ' ')
+// ================= হেল্পার =================
+const str = (v: any): string => (v === null || v === undefined ? "" : String(v).trim());
+
+function cleanText(raw: any): string {
+  return str(raw)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/[*`_~]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
-const rawAboutText = hotel?.body || data.about || data.overview || data.description || "";
-const cleanAbout = cleanAboutText(rawAboutText);
-const hotelDescription = cleanAbout.length > 300 
-  ? cleanAbout.substring(0, 300).trim() + "..." 
-  : (cleanAbout || `${hotelTitle} is a verified luxury accommodation in Gulshan, Dhaka.`);
-
-const hotelLocation = data.address || data.location || "Gulshan, Dhaka 1212, Bangladesh";
-const hotelPrice = data.price ? String(data.price).trim() : "$$$";
-const rawOfficialSite = (data.officialSite || data.official_site_url || "").trim();
-const hotelPhone = data.phone || data.telephone || data.contact_phone || "";
-
-const siteOrigin = "https://gulshanhotels.com";
-const canonicalUrl = `${siteOrigin}/${hotelSlug}`;
-
-const isValidSameAs = rawOfficialSite && 
-  !rawOfficialSite.includes('youtube.com/watch') && 
-  !rawOfficialSite.includes('youtu.be/');
-
-// ২. ছবির অ্যাবসোলিউট ইউআরএল
-function toAbsoluteImageUrl(url: string) {
-  if (!url) return "";
-  const clean = url.trim();
-  if (clean.includes('example-test.site')) return "";
-  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
-  return `${siteOrigin}${clean.startsWith('/') ? '' : '/'}${clean}`;
+function truncate(text: string, max = 300): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-const rawGallery: string[] = (Array.isArray(data.gallery) && data.gallery.length > 0 
-  ? data.gallery.filter(Boolean)
-  : (data.image ? [data.image] : [])
-)
-  .map(toAbsoluteImageUrl)
-  .filter(Boolean);
-
-// ৩. রিভিউ ডাটা লোডার
-let allReviewsList: any[] = [];
-try {
-  const globReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
-  allReviewsList = Object.values(globReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
-} catch (e) {
-  allReviewsList = [];
+function toAbsoluteImageUrl(url: any): string {
+  const clean = str(typeof url === "string" ? url : url?.src || url?.url);
+  if (!clean) return "";
+  if (clean.includes("example-test.site")) return "";
+  if (/^https?:\/\//i.test(clean)) return clean;
+  return `${SITE_ORIGIN}${clean.startsWith("/") ? "" : "/"}${clean}`;
 }
+
+function toIsoDate(dStr: any): string | null {
+  const raw = str(dStr);
+  if (!raw || raw === "Recent" || raw === "Recent Stay") return null;
+  const parsed = new Date(raw.replace(" at ", " "));
+  if (!isNaN(parsed.getTime()) && parsed.getTime() <= Date.now()) {
+    return parsed.toISOString().split("T")[0];
+  }
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : null;
+}
+
+// "2:00 PM" বা "14:00" দুটোই বোঝে, ফল সবসময় 24 ঘণ্টা ("14:00")। না বুঝলে খালি
+function formatTime(tStr: any): string {
+  const m = str(tStr).match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+  if (!m) return "";
+  let h = Number(m[1]);
+  const min = Number(m[2] || 0);
+  const ap = (m[3] || "").toLowerCase();
+  if (ap === "pm" && h < 12) h += 12;
+  if (ap === "am" && h === 12) h = 0;
+  if (h > 23 || min > 59) return "";
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+}
+
+// ================= ১. বেসিক ডাটা =================
+const hotelTitle = str(data.title || data.name);
+const rawSlug = str(data.slug || hotel?.slug || hotel?.id);
+const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
+
+// পেজের আসল URL থেকে canonical, তাই ভুল হওয়ার সুযোগ নেই
+const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).href;
+
+const hotelDescription = truncate(
+  cleanText(hotel?.body || data.about || data.overview || data.description)
+);
+
+const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
+const hotelPrice = str(data.price).slice(0, 100);
+
+const rawOfficialSite = str(data.officialSite || data.official_site_url);
+const isValidSameAs =
+  /^https?:\/\//i.test(rawOfficialSite) &&
+  !rawOfficialSite.includes("youtube.com/watch") &&
+  !rawOfficialSite.includes("youtu.be/");
+
+// ================= ২. ছবি =================
+const rawGalleryItems: any[] =
+  Array.isArray(data.gallery) && data.gallery.length > 0
+    ? data.gallery.filter(Boolean)
+    : data.image
+      ? [data.image]
+      : [];
+const images = Array.from(new Set(rawGalleryItems.map(toAbsoluteImageUrl).filter(Boolean))).slice(0, 10);
+
+// ================= ৩. রিভিউ (শুধু সত্যিকারের ও সম্পূর্ণ রিভিউ) =================
+const globReviews = import.meta.glob("/src/content/reviews/*.{md,mdx}", { eager: true });
+const allReviewsList: any[] = Object.values(globReviews).map(
+  (item: any) => item?.frontmatter || item?.data || item || {}
+);
 
 const searchTitle = hotelTitle.toLowerCase();
-const searchSlug = hotelSlug.toLowerCase();
+const searchSlug = hotelSlug;
 
 const approvedReviews = allReviewsList.filter((item: any) => {
   if (!item) return false;
-  const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+  const isApproved = item.approved === true || str(item.approved).toLowerCase() === "true";
   if (!isApproved) return false;
 
-  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
+  const rSlug = str(item.slug || item.hotelSlug || item.hotel_slug).replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
+  const rId = str(item.id).replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
+  const rHotel = str(item.hotel || item.hotelTitle || item.hotel_name).toLowerCase();
 
-  return (searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug)) ||
-         (searchTitle !== "" && rHotel === searchTitle);
+  return (
+    (searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug)) ||
+    (searchTitle !== "" && rHotel === searchTitle)
+  );
 });
 
 const embeddedRevs = Array.isArray(data.reviews) ? data.reviews : [];
-const totalRealReviews = [...approvedReviews, ...embeddedRevs];
 
-function toIsoDate(dStr: any) {
-  if (!dStr || dStr === 'Recent' || dStr === 'Recent Stay') return null;
-  const cleanStr = String(dStr).replace(' at ', ' ').trim();
-  const parsed = new Date(cleanStr);
-  if (!isNaN(parsed.getTime())) {
-    return parsed.toISOString().split('T')[0];
+// রেটিং (১-৫) আর লেখা না থাকলে রিভিউ বাদ। একই রিভিউ দুইবার গুনবে না
+const seenReviews = new Set<string>();
+const validReviews = [...approvedReviews, ...embeddedRevs]
+  .map((r: any) => ({
+    author: str(r?.name || r?.author) || "Guest",
+    body: cleanText(r?.comment || r?.review),
+    rating: Number(r?.rating),
+    date: toIsoDate(r?.date),
+  }))
+  .filter((r) => Number.isFinite(r.rating) && r.rating >= 1 && r.rating <= 5 && r.body)
+  .filter((r) => {
+    const key = `${r.author}|${r.date}|${r.body}`;
+    if (seenReviews.has(key)) return false;
+    seenReviews.add(key);
+    return true;
+  });
+
+const reviewCount = validReviews.length;
+const ratingValue =
+  reviewCount > 0
+    ? Number((validReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1))
+    : null;
+
+// ================= ৪. অ্যামেনিটিস (শুধু টেক্সট নাম) =================
+function extractName(item: any): string {
+  if (typeof item === "string") return item.trim();
+  if (item && typeof item === "object") {
+    const n = item.name || item.title || item.label;
+    return typeof n === "string" ? n.trim() : "";
   }
-  const match = String(dStr).match(/^(\d{4}-\d{2}-\d{2})/);
-  if (match) return match[1];
-  return null;
+  return "";
 }
 
-const defaultDate = new Date().toISOString().split('T')[0];
-
-const reviewCount = totalRealReviews.length;
-const ratingValue = reviewCount > 0 
-  ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / reviewCount).toFixed(1)
-  : (data.rating ? Number(data.rating).toFixed(1) : null);
-
-// ৪. অ্যামেনিটিস থেকে শুধুই আসল স্ট্রিং নাম ফিল্টার (BUG FIXED 🎯)
-const rawAmenities = Array.isArray(data.amenities) ? data.amenities : [];
-const rawCategorized = Array.isArray(data.categorized_amenities) ? data.categorized_amenities : [];
-
-const cleanAmenitiesNames: string[] = [];
-
-// সাধারণ তালিকা থেকে নাম এক্সট্র্যাক্ট করা (SVG ও আইকন সম্পূর্ণ বাদ)
-rawAmenities.forEach((item: any) => {
-  if (typeof item === 'string' && item.trim()) {
-    cleanAmenitiesNames.push(item.trim());
-  } else if (item && typeof item === 'object') {
-    const n = item.name || item.title || item.label;
-    if (typeof n === 'string' && n.trim()) {
-      cleanAmenitiesNames.push(n.trim());
-    }
-  }
+const amenityNames: string[] = [];
+(Array.isArray(data.amenities) ? data.amenities : []).forEach((item: any) => {
+  const n = extractName(item);
+  if (n) amenityNames.push(n);
 });
-
-// ক্যাটাগরি তালিকা থেকেও নাম এক্সট্র্যাক্ট করা
-rawCategorized.forEach((cat: any) => {
+(Array.isArray(data.categorized_amenities) ? data.categorized_amenities : []).forEach((cat: any) => {
   if (Array.isArray(cat?.items)) {
     cat.items.forEach((sub: any) => {
-      if (typeof sub === 'string' && sub.trim()) {
-        cleanAmenitiesNames.push(sub.trim());
-      } else if (sub && typeof sub === 'object') {
-        const n = sub.name || sub.title || sub.label;
-        if (typeof n === 'string' && n.trim()) {
-          cleanAmenitiesNames.push(n.trim());
-        }
-      }
+      const n = extractName(sub);
+      if (n) amenityNames.push(n);
     });
   }
 });
+const uniqueAmenities = Array.from(new Set(amenityNames));
 
-const uniqueAmenities = Array.from(new Set(cleanAmenitiesNames));
+// ================= ৫. রুম, সময়, FAQ, জিপিএস =================
+const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
+  .map((room: any) => ({
+    name: str(typeof room === "string" ? room : room?.name),
+    price: typeof room === "object" ? str(room?.price) : "",
+  }))
+  .filter((r: any) => r.name);
 
-// ৫. রুম টাইপ
-const roomsList = Array.isArray(data.rooms) ? data.rooms : [];
+const checkIn = formatTime(data.checkIn || data.check_in);
+const checkOut = formatTime(data.checkOut || data.check_out);
 
-// ৬. পলিসি
-function formatTime(tStr: string) {
-  if (!tStr) return "";
-  const clean = tStr.replace(/[^0-9:]/g, '');
-  return clean.length >= 4 ? clean : "";
-}
-const checkIn = formatTime(data.checkIn || data.check_in || "");
-const checkOut = formatTime(data.checkOut || data.check_out || "");
+const cleanFaqs = (Array.isArray(data.faqs) ? data.faqs : [])
+  .map((faq: any) => ({
+    question: cleanText(typeof faq === "string" ? faq : faq?.question),
+    answer: typeof faq === "object" ? cleanText(faq?.answer) : "",
+  }))
+  .filter((f: any) => f.question && f.answer);
 
-// ৭. এফএকিউ
-const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
-const cleanFaqs = rawFaqs.map((faq: any) => ({
-  question: typeof faq === 'string' ? faq : (faq?.question || ''),
-  answer: typeof faq === 'object' ? String(faq?.answer || '').replace(/<[^>]*>?/gm, '').trim() : ''
-})).filter((f: any) => f.question && f.answer);
+const latNum = Number(data.latitude ?? data.lat ?? data.geo?.lat);
+const lngNum = Number(data.longitude ?? data.lng ?? data.geo?.lng);
+const hasGeo =
+  Number.isFinite(latNum) && Number.isFinite(lngNum) &&
+  Math.abs(latNum) <= 90 && Math.abs(lngNum) <= 180 &&
+  !(latNum === 0 && lngNum === 0);
 
-// ৮. জিপিএস
-const lat = data.latitude || data.lat || data.geo?.lat;
-const lng = data.longitude || data.lng || data.geo?.lng;
-
-// ================= 100% STRICT SCHEMA.ORG KNOWLEDGE GRAPH =================
-const masterGraph: any = {
-  "@context": "https://schema.org",
-  "@graph": [
-    // 1. BreadcrumbList (Clean, 0 errors)
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}#breadcrumb`,
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": `${siteOrigin}/`
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Hotels in Gulshan",
-          "item": `${siteOrigin}/#hotels`
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": hotelTitle
-        }
-      ]
-    },
-
-    // 2. Hotel Entity (Strictly Structured)
-    {
-      "@type": "Hotel",
-      "@id": `${canonicalUrl}#hotel`,
-      "name": hotelTitle,
-      "url": canonicalUrl,
-      "description": hotelDescription,
-
-      ...(rawGallery.length > 0 ? { "image": rawGallery } : {}),
-      ...(hotelPhone ? { "telephone": hotelPhone } : {}),
-      ...(hotelPrice ? { "priceRange": hotelPrice } : {}),
-      ...(checkIn ? { "checkinTime": checkIn } : {}),
-      ...(checkOut ? { "checkoutTime": checkOut } : {}),
-      ...(isValidSameAs ? { "sameAs": [rawOfficialSite] } : {}),
-
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": hotelLocation,
-        "addressLocality": "Gulshan",
-        "addressRegion": "Dhaka",
-        "postalCode": "1212",
-        "addressCountry": "BD"
-      },
-
-      ...(lat && lng ? {
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": Number(lat),
-          "longitude": Number(lng)
-        }
-      } : {}),
-
-      ...(ratingValue && reviewCount > 0 ? {
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": ratingValue,
-          "reviewCount": reviewCount,
-          "bestRating": "5",
-          "worstRating": "1"
-        },
-        "review": totalRealReviews.slice(0, 5).map((rev: any) => ({
-          "@type": "Review",
-         
-          "author": {
-            "@type": "Person",
-            "name": String(rev.name || rev.author || "Verified Guest")
-          },
-          "datePublished": toIsoDate(rev.date) || defaultDate,
-          "reviewBody": String(rev.comment || rev.review || '').replace(/"/g, "'").trim(),
-          "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": Number(rev.rating) || 5,
-            "bestRating": "5",
-            "worstRating": "1"
-          }
-        }))
-      } : {}),
-
-      // খাঁটি টেক্সট নামের LocationFeatureSpecification
-      ...(uniqueAmenities.length > 0 ? {
-        "amenityFeature": uniqueAmenities.map((amenityName: string) => ({
-          "@type": "LocationFeatureSpecification",
-          "name": String(amenityName),
-          "value": "Yes"
-        }))
-      } : {}),
-
-      ...(roomsList.length > 0 ? {
-        "containsPlace": roomsList.map((room: any) => ({
-          "@type": "HotelRoom",
-          "name": String(typeof room === 'string' ? room : (room?.name || "Room")),
-          ...(room?.price ? { "description": `Starting from ${room.price}` } : {})
-        }))
-      } : {})
-    },
-
-    // 3. FAQPage
-    ...(cleanFaqs.length > 0 ? [{
-      "@type": "FAQPage",
-      "@id": `${canonicalUrl}#faq`,
-      "mainEntity": cleanFaqs.map((faq: any) => ({
-        "@type": "Question",
-        "name": faq.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answer
-        }
-      }))
-    }] : [])
-  ]
+// ================= ৬. স্কিমা তৈরি =================
+const hotelNode: any = {
+  "@type": "Hotel",
+  "@id": `${pageUrl}#hotel`,
+  name: hotelTitle,
+  url: pageUrl,
 };
+
+if (hotelDescription) hotelNode.description = hotelDescription;
+if (images.length > 0) hotelNode.image = images;
+if (hotelPhone) hotelNode.telephone = hotelPhone;
+if (hotelPrice) hotelNode.priceRange = hotelPrice;
+if (checkIn) hotelNode.checkinTime = checkIn;
+if (checkOut) hotelNode.checkoutTime = checkOut;
+if (isValidSameAs) hotelNode.sameAs = [rawOfficialSite];
+
+// ঠিকানা: শুধু CMS-এ যা আছে। কিছু না থাকলে address বাদ
+const streetAddress = str(data.address || data.location);
+const locality = str(data.locality || data.area || data.city);
+const region = str(data.region || data.state);
+const postalCode = str(data.postal_code || data.postalCode || data.zip);
+if (streetAddress || locality || region || postalCode) {
+  const address: any = { "@type": "PostalAddress", addressCountry: "BD" };
+  if (streetAddress) address.streetAddress = streetAddress;
+  if (locality) address.addressLocality = locality;
+  if (region) address.addressRegion = region;
+  if (postalCode) address.postalCode = postalCode;
+  hotelNode.address = address;
+}
+
+if (hasGeo) {
+  hotelNode.geo = { "@type": "GeoCoordinates", latitude: latNum, longitude: lngNum };
+}
+
+if (reviewCount > 0 && ratingValue !== null) {
+  hotelNode.aggregateRating = {
+    "@type": "AggregateRating",
+    ratingValue,
+    reviewCount,
+    bestRating: 5,
+    worstRating: 1,
+  };
+  hotelNode.review = validReviews.slice(0, 5).map((r) => {
+    const review: any = {
+      "@type": "Review",
+      author: { "@type": "Person", name: r.author },
+      reviewBody: r.body,
+      reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+    };
+    if (r.date) review.datePublished = r.date;
+    return review;
+  });
+}
+
+if (uniqueAmenities.length > 0) {
+  hotelNode.amenityFeature = uniqueAmenities.map((name) => ({
+    "@type": "LocationFeatureSpecification",
+    name,
+    value: true,
+  }));
+}
+
+if (roomsList.length > 0) {
+  hotelNode.containsPlace = roomsList.map((room: any) => ({
+    "@type": "HotelRoom",
+    name: room.name,
+    ...(room.price ? { description: `Starting from ${room.price}` } : {}),
+  }));
+}
+
+// ব্রেডক্রাম্ব: আসল লিস্ট পেজ না থাকলে মাঝের ধাপ বাদ
+const crumbs: { name: string; item: string }[] = [{ name: "Home", item: `${SITE_ORIGIN}/` }];
+if (HOTELS_LIST_PATH) {
+  crumbs.push({ name: "Hotels in Gulshan", item: `${SITE_ORIGIN}${HOTELS_LIST_PATH}` });
+}
+crumbs.push({ name: hotelTitle, item: pageUrl });
+
+const graph: any[] = [
+  {
+    "@type": "BreadcrumbList",
+    "@id": `${pageUrl}#breadcrumb`,
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  },
+  hotelNode,
+];
+
+if (cleanFaqs.length > 0) {
+  graph.push({
+    "@type": "FAQPage",
+    "@id": `${pageUrl}#faq`,
+    mainEntity: cleanFaqs.map((faq: any) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  });
+}
+
+// হোটেলের নাম না থাকলে কোনো স্কিমাই যাবে না (ভুয়া নামের চেয়ে ভালো)
+// '<' এস্কেপ করা হয়েছে, তাই লেখায় </script> থাকলেও স্কিমা ভাঙবে না
+const jsonLd = hotelTitle
+  ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")
+  : "";
 ---
 
-<!-- STRICT VALIDATED JSON-LD SCHEMA -->
-<script type="application/ld+json" set:html={JSON.stringify(masterGraph)} />
+{jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
