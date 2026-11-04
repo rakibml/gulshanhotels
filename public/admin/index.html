@@ -7,21 +7,77 @@
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
+
+    <!-- ADMIN PANEL CUSTOM STYLING (জগাখিচুড়ি দূর করার জন্য প্রিমিয়াম ডিজাইন) -->
+    <style>
+      /* সেকশন হেডার ব্যানার স্টাইল */
+      .sveltia-section-banner {
+        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%) !important;
+        border: 1px solid #10b981 !important;
+        border-left: 6px solid #34d399 !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
+        margin: 36px 0 16px 0 !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .sveltia-section-title {
+        font-size: 15px !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        letter-spacing: 0.6px !important;
+        text-transform: uppercase !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .sveltia-section-desc {
+        font-size: 12px !important;
+        color: #a7f3d0 !important;
+        margin-top: 6px !important;
+        line-height: 1.4 !important;
+        font-weight: 400 !important;
+      }
+
+      /* ইনপুট ফিল্ডগুলোর মাঝে পরিষ্কার ডিভাইডার ও স্পেসিং */
+      [data-field-type="instructions"] {
+        margin-top: 25px !important;
+      }
+      [data-field-type="instructions"] label {
+        display: none !important; /* ডিফল্ট লেবেল হাইড করে ব্যানার বড় করা */
+      }
+    </style>
   </head>
   <body>
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
-    <!--
-      TODO: Sveltia এর ভার্সন নম্বর বসিয়ে দিন, যেমন: @sveltia/cms@0.xx.x/dist/sveltia-cms.js
-      ভার্সন npmjs.com/package/@sveltia/cms পেজে পাবেন।
-      ভার্সন না দিলে নতুন আপডেটে হঠাৎ প্যানেল ভেঙে যেতে পারে।
-    -->
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- UNIVERSAL SMART AUTO-LOADER -->
+    <!-- UNIVERSAL SMART AUTO-LOADER WITH SECTION HEADERS -->
     <script>
-      // ---------- হেল্পার ফাংশন ----------
+      // ১. কাস্টম instructions ব্যানার উইজেট রেজিস্টার (Sveltia CMS)
+      function registerInstructionWidget() {
+        const cms = window.CMS || window.SveltiaCMS;
+        if (!cms || typeof cms.registerWidget !== 'function') return;
 
-      // field এর ভেতরের item এ name না থাকলে বানিয়ে দেয় (files collection এর ভেতরেও কাজ করে)
+        cms.registerWidget(
+          'instructions',
+          window.createClass({
+            render() {
+              const field = this.props.field;
+              const label = (field && typeof field.get === 'function' ? field.get('label') : field?.label) || 'Section';
+              const desc = (field && typeof field.get === 'function' ? (field.get('description') || field.get('hint')) : (field?.description || field?.hint)) || '';
+
+              return window.h('div', { className: 'sveltia-section-banner' },
+                window.h('div', { className: 'sveltia-section-title' }, label),
+                desc ? window.h('div', { className: 'sveltia-section-desc' }, desc) : null
+              );
+            }
+          })
+        );
+      }
+
+      // ২. হেল্পার ফাংশনসমূহ
       function sanitizeSveltiaFields(fields) {
         if (!Array.isArray(fields)) return;
         fields.forEach(f => {
@@ -38,7 +94,6 @@
         });
       }
 
-      // collection এর fields এবং files দুটোই sanitize করে
       function sanitizeCollection(col) {
         if (!col || typeof col !== 'object') return;
         if (Array.isArray(col.fields)) sanitizeSveltiaFields(col.fields);
@@ -49,7 +104,6 @@
         }
       }
 
-      // ফাইল আনে। ফাইল না পেলে বা yaml ভুল হলে console এ কারণ দেখায়, কিন্তু সাইট ভাঙে না
       async function loadYaml(url) {
         try {
           const res = await fetch(url);
@@ -67,6 +121,9 @@
 
       document.addEventListener('DOMContentLoaded', async () => {
         try {
+          // কাস্টম ব্যানার উইজেট রেজিস্টার করা
+          registerInstructionWidget();
+
           // ০. মূল config.yml
           const mainRes = await fetch('/admin/config.yml');
           if (!mainRes.ok) {
@@ -76,23 +133,62 @@
           const config = jsyaml.load(mainText) || {};
           config.collections = [];
 
-          // ১. হোটেলের ৬টি অংশ জোড়া লাগানো
-          const hotelSectionFiles = [
-            '/admin/collections/hotel/1-header.yml',
-            '/admin/collections/hotel/2-about-rates.yml',
-            '/admin/collections/hotel/3-amenities-rooms.yml',
-            '/admin/collections/hotel/4-location-map.yml',
-            '/admin/collections/hotel/5-reviews.yml',
-            '/admin/collections/hotel/6-faqs.yml'
+          // ১. হোটেলের ৬টি সেকশনের সংজ্ঞা (টাইটেল ও ডেসক্রিপশনসহ)
+          const hotelSections = [
+            {
+              url: '/admin/collections/hotel/1-header.yml',
+              title: '🏨 1. HERO & HEADER SECTION',
+              desc: 'Hotel Title, Location Address, Tagline, Cover Image & Photo Gallery'
+            },
+            {
+              url: '/admin/collections/hotel/2-about-rates.yml',
+              title: '🏷️ 2. ABOUT HOTEL & LIVE RATES',
+              desc: 'Overview Description, Starting Price, Live Booking Channels & WhatsApp/Phone'
+            },
+            {
+              url: '/admin/collections/hotel/3-amenities-rooms.yml',
+              title: '🛏️ 3. AMENITIES & ROOM TYPES',
+              desc: 'Hotel Amenities, Featured Highlights, Room Categories & Capacities'
+            },
+            {
+              url: '/admin/collections/hotel/4-location-map.yml',
+              title: '📍 4. LOCATION & SURROUNDINGS',
+              desc: 'Google Maps Embed, Nearby Attractions, Airport Distances & Transportation'
+            },
+            {
+              url: '/admin/collections/hotel/5-reviews.yml',
+              title: '⭐ 5. GUEST REVIEWS & RATINGS',
+              desc: 'Overall Review Score, Cleanliness/Location Breakdown & Verified Reviews'
+            },
+            {
+              url: '/admin/collections/hotel/6-faqs.yml',
+              title: '📋 6. POLICIES & FAQS',
+              desc: 'Check-in/out Rules, Extra Bed Policies, Accepted Payments & FAQs'
+            }
           ];
 
           const hotelFields = [];
-          for (const fileUrl of hotelSectionFiles) {
-            const fieldsArr = await loadYaml(fileUrl);
-            if (Array.isArray(fieldsArr)) {
+
+          for (let i = 0; i < hotelSections.length; i++) {
+            const sec = hotelSections[i];
+            const fieldsArr = await loadYaml(sec.url);
+
+            if (Array.isArray(fieldsArr) && fieldsArr.length > 0) {
+              // সেকশনের শুরুতে কোনো ব্যানার না থাকলে অটোমেটিক যোগ হবে
+              const firstField = fieldsArr[0];
+              const alreadyHasBanner = firstField && (firstField.widget === 'instructions' || (firstField.name && firstField.name.includes('notice')));
+
+              if (!alreadyHasBanner) {
+                hotelFields.push({
+                  label: sec.title,
+                  name: `sec_banner_${i + 1}`,
+                  widget: "instructions",
+                  description: sec.desc,
+                  required: false
+                });
+              }
+
               hotelFields.push(...fieldsArr);
-            } else if (fieldsArr !== null) {
-              console.warn('[CMS Loader] এই ফাইল একটি list হওয়া উচিত (- দিয়ে শুরু):', fileUrl);
             }
           }
 
@@ -108,11 +204,9 @@
               summary: "{{title}} - Link: /{{slug}}",
               fields: hotelFields
             });
-          } else {
-            console.warn('[CMS Loader] হোটেলের কোনো field লোড হয়নি। উপরের warning গুলো দেখুন।');
           }
 
-          // ২. হোমপেজ সেটিংস (পপুলার হোটেলস)
+          // ২. হোমপেজ সেটিংস
           const popFields = await loadYaml('/admin/collections/popular-hotels.yml');
           if (Array.isArray(popFields)) {
             sanitizeSveltiaFields(popFields);
@@ -133,34 +227,29 @@
           // ৩. বাকি সব collection অটো-স্ক্যান
           const allPossibleCollections = [
             'destinations.yml',
-            'posts.yml',          // ব্লগ ও ট্রাভেল গাইড
-            'pages.yml',          // সাধারণ পেজ (About, Terms, Privacy)
-            'guest-reviews.yml',  // রিভিউ অ্যাপ্রুভাল
-            'subscribers.yml'     // নিউজলেটার সাবস্ক্রাইবার্স
+            'posts.yml',
+            'pages.yml',
+            'guest-reviews.yml',
+            'subscribers.yml'
           ];
 
           for (const colFile of allPossibleCollections) {
             let colData = await loadYaml('/admin/collections/' + colFile);
             if (!colData) continue;
-
-            // ফাইল যদি list হিসেবে লেখা থাকে (- name: ...), প্রথম item টা নেবে
             if (Array.isArray(colData)) colData = colData[0];
 
             if (colData && (Array.isArray(colData.fields) || Array.isArray(colData.files))) {
               sanitizeCollection(colData);
               config.collections.push(colData);
-            } else {
-              console.warn('[CMS Loader] এই ফাইলে fields বা files নেই, তাই স্কিপ হলো:', colFile);
             }
           }
 
-          // ৪. Sveltia CMS চালু
-          if (window.CMS && typeof window.CMS.init === 'function') {
-            window.CMS.init({ config });
-          } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
-            window.SveltiaCMS.init({ config });
+          // ৪. Sveltia CMS ইনিশিয়ালাইজ
+          const cms = window.CMS || window.SveltiaCMS;
+          if (cms && typeof cms.init === 'function') {
+            cms.init({ config });
           } else {
-            console.error('[CMS Loader] Sveltia CMS লোড হয়নি। script লিংক বা ইন্টারনেট চেক করুন।');
+            console.error('[CMS Loader] Sveltia CMS লোড হয়নি।');
           }
 
         } catch (e) {
