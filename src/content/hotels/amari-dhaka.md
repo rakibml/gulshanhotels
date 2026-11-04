@@ -35,6 +35,14 @@ booking_channels:
     badge: Official Site
     icon_preset: direct
     custom_svg: ''
+  - provider_name: Amari dhaka
+    price: $150
+    show_price: true
+    button_text: Book Now ➔
+    button_url: https://www.amari.com/dhaka
+    badge: Official Site
+    icon_preset: direct
+    custom_svg: ''
   - provider_name: TripAdvisory
     price: $101
     show_price: true
