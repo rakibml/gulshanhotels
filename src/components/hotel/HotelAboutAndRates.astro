@@ -7,7 +7,7 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// Pure Dynamic Data from CMS
+// Pure Dynamic Data from CMS (No Fake Fallbacks)
 const hotelTitle = (data.title || data.name || "").trim();
 const hotelPrice = (data.price || "").trim();
 const hotelCategory = (data.category || "").trim();
@@ -25,7 +25,7 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
 const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 
-// Vector Brand SVGs
+// 100% Pure Vector Brand SVGs (No Emojis / No Stickers)
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
   booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
@@ -61,8 +61,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
     
-    <!-- LEFT COLUMN: ABOUT HOTEL -->
+    <!-- ================= LEFT COLUMN: ABOUT HOTEL (100% PURE CMS DATA) ================= -->
     <div class="lg:col-span-7 space-y-4 text-left">
+      
       <div class="space-y-2">
         {hotelCategory && (
           <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-wider text-emerald-800">
@@ -85,7 +86,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
         )}
       </div>
 
-      <!-- Real CMS Body / Description -->
+      <!-- Real CMS Body / Description Only -->
       {(hotel?.body || data.description) && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
           <div id="overview-wrapper" class="relative">
@@ -110,9 +111,14 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </button>
         </div>
       )}
+
     </div>
 
-    <!-- 1. Curved Dark Green Header (Wave Design matching image) -->
+    <!-- ================= RIGHT COLUMN: CURVED RATES CARD ================= -->
+    <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
+      <div id="rates-card" class="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden text-left scroll-mt-20">
+        
+        <!-- 1. Curved Dark Green Header (Wave Design matching image) -->
         <div class="relative bg-gradient-to-r from-[#0a522c] to-[#043319] text-white p-5 sm:p-6 pb-10 sm:pb-12 overflow-hidden">
           <div class="flex items-center gap-3 relative z-10">
             <!-- Sleek Tag Icon (বক্স ছাড়া ক্লিন স্ট্যান্ডঅ্যালোন আইকন) -->
@@ -140,8 +146,10 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
         </div>
 
-        <!-- Body -->
-        <div class="p-5 sm:p-6 space-y-4 pt-4">
+        <!-- 2. Card Content Body -->
+        <div class="p-5 sm:p-6 space-y-4 pt-2">
+          
+          <!-- Starting Price Strip -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div class="flex items-baseline gap-1.5">
               <span id="cardStartingPriceDisplay" class="text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
@@ -160,7 +168,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </span>
           </div>
 
-          <!-- Dynamic Booking Channels -->
+          <!-- Dynamic Booking Channels (Clean Divider Rows) -->
           <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="divide-y divide-slate-100 min-h-[90px]">
             {customChannels.length > 0 ? (
               customChannels.map((item: any) => {
@@ -215,7 +223,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             )}
           </div>
 
-          <!-- Direct Hotel Reservation (Handles Phone, WhatsApp, or Both) -->
+          <!-- Direct Hotel Reservation Section (Handles Phone, WhatsApp, or Both) -->
           {(phone || whatsapp) && (
             <div id="staticReservationChannels" class="pt-4 border-t border-slate-100 text-center space-y-3">
               <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-2">
@@ -252,7 +260,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </div>
           )}
 
-          <!-- Trust Footnote -->
+          <!-- Minimalist Trust Footnote -->
           <div class="pt-1 text-center flex items-center justify-center gap-1.5 text-xs text-slate-600 font-medium">
             <svg class="w-4 h-4 text-emerald-800 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -261,6 +269,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           </div>
 
         </div>
+
       </div>
     </div>
 
@@ -275,11 +284,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
   let aboutAbortCtrl: AbortController | null = null;
 
   async function initHotelAboutSection() {
-    // 1. Overview Truncator setup independently (Won't get reset by fetch)
+    // 1. Overview Truncator setup independently (Won't get reset by rates fetch)
     applyLinkAttributes();
     setupOverviewTruncator();
 
-    // 2. Fetch Rates Logic
+    // 2. Fetch Rates Logic with AbortController
     if (aboutAbortCtrl) aboutAbortCtrl.abort();
     aboutAbortCtrl = new AbortController();
     const { signal } = aboutAbortCtrl;
@@ -301,7 +310,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
-      // Proper timeout with AbortController
       const timeoutId = setTimeout(() => {
         aboutAbortCtrl?.abort();
         showFallbackDirectBooking();
@@ -410,7 +418,6 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     const toggleBtnIcon = document.getElementById('readMoreIcon');
 
     if (textEl && toggleBtn && wrapperEl) {
-      // Avoid re-binding listener if already setup
       if (toggleBtn.dataset.bound === 'true') return;
 
       const isLongText = textEl.scrollHeight > 220;
