@@ -7,15 +7,17 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// Pure Dynamic Data from CMS (No Fake Fallbacks)
-const hotelTitle = (data.title || data.name || "").trim();
-const hotelPrice = (data.price || "").trim();
-const hotelCategory = (data.category || "").trim();
-const hotelLocation = (data.location || "").trim();
+// দাম লেখার আগে যে চিহ্ন বসবে (শুধু এখানে বদলালেই সব জায়গায় বদলাবে)
+const CURRENCY = '৳';
 
-// Direct Reservation Contacts from CMS with BD Country Code Auto-fix
-const whatsapp = data.whatsapp || "";
-const phone = data.phone || "";
+// সব ডাটা String বানিয়ে নেওয়া হয়েছে, তাই CMS-এ সংখ্যা দিলেও build ভাঙবে না
+const hotelTitle = String(data.title || data.name || "").trim();
+const hotelPrice = String(data.price || "").trim();
+const hotelCategory = String(data.category || "").trim();
+const hotelLocation = String(data.location || "").trim();
+
+const whatsapp = String(data.whatsapp || "");
+const phone = String(data.phone || "");
 
 let cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
 if (cleanWhatsapp.startsWith('01')) {
@@ -25,19 +27,31 @@ const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
 const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 
+function formatPrice(p: any) {
+  const s = String(p || "").trim();
+  if (!s) return "";
+  return s.startsWith('$') || s.startsWith('৳') ? s : CURRENCY + s;
+}
+
 // 100% Pure Vector Brand SVGs (No Emojis / No Stickers)
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
   booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
-  tripadvisor: `<div class="w-7 h-7 rounded-lg bg-[#00af87] text-white flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4.5-9a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm9 0a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg></div>`,
-  expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
-  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#0d3b23] flex items-center justify-center shrink-0"><svg class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`
+  tripadvisor: `<div class="w-7 h-7 rounded-lg bg-[#00af87] text-white flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4.5-9a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm9 0a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg></div>`,
+  expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
+  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#0d3b23] flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`
 };
 
-function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = "", hName: string = "") {
-  if (!rawUrl) return "#";
-  let url = rawUrl.trim();
-  const lowerName = pName.toLowerCase();
+// শুধু নিরাপদ লিংক চলবে (javascript: ইত্যাদি বন্ধ)
+function safeUrl(u: string) {
+  const v = String(u || "").trim();
+  return /^(https?:|tel:|mailto:)/i.test(v) ? v : "#";
+}
+
+function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "", hName: string = "") {
+  const url = String(rawUrl || "").trim();
+  if (!url) return "#";
+  const lowerName = String(pName).toLowerCase();
 
   if (preset === 'whatsapp' || lowerName.includes('whatsapp') || preset === 'phone' || lowerName.includes('call') || /^[0-9+\s\-()]+$/.test(url)) {
     if (preset === 'phone' || lowerName.includes('call')) {
@@ -49,35 +63,37 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     return `https://wa.me/${digits}?text=${encodeURIComponent('Hi! I want to book a room at ' + hName)}`;
   }
 
-  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
-    return `https://${url}`;
+  if (!/^(https?:|tel:|mailto:)/i.test(url)) {
+    return safeUrl(`https://${url}`);
   }
 
-  return url;
+  return safeUrl(url);
 }
+
+const hasChannels = customChannels.length > 0;
 ---
 
 <!-- ABOUT HOTEL & LIVE RATE COMPARISON -->
 <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-    
+
     <!-- ================= LEFT COLUMN: ABOUT HOTEL (100% PURE CMS DATA) ================= -->
     <div class="lg:col-span-7 space-y-4 text-left">
-      
+
       <div class="space-y-2">
         {hotelCategory && (
           <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-wider text-emerald-800">
             {hotelCategory}
           </span>
         )}
-        
+
         <h2 class="font-sans text-2xl sm:text-3xl lg:text-[32px] font-black text-[#002b11] tracking-tight leading-tight">
           About {hotelTitle}
         </h2>
 
         {hotelLocation && (
           <p class="text-xs sm:text-sm text-slate-600 font-medium flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-emerald-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg aria-hidden="true" class="w-4 h-4 text-emerald-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
               <circle cx="12" cy="11" r="3"/>
             </svg>
@@ -89,8 +105,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
       <!-- Real CMS Body / Description Only -->
       {(hotel?.body || data.description) && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
-          <div id="overview-wrapper" class="relative">
-            <div id="overview-text" class="prose prose-slate max-w-none text-xs sm:text-sm md:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
+          <!-- শুরু থেকেই ছোট করে রাখা (CSS), যাতে পেজ লোডে লাফ না দেয়। JS দরকার না হলে খুলে দেবে -->
+          <div id="overview-wrapper" class="relative after:absolute after:bottom-0 after:inset-x-0 after:h-14 after:bg-gradient-to-t after:from-white after:to-transparent after:pointer-events-none">
+            <div id="overview-text" class="max-h-[180px] overflow-hidden prose prose-slate max-w-none text-xs sm:text-sm md:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300">
               {hotel?.body ? (
                 <Fragment set:html={hotel.body} />
               ) : (
@@ -99,13 +116,15 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </div>
           </div>
 
-          <button 
+          <button
             type="button"
-            id="toggleOverviewBtn" 
+            id="toggleOverviewBtn"
+            aria-expanded="false"
+            aria-controls="overview-text"
             class="hidden text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition inline-flex items-center gap-1 cursor-pointer select-none pt-1"
           >
             <span id="readMoreText">Read more</span>
-            <svg id="readMoreIcon" class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg aria-hidden="true" id="readMoreIcon" class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
@@ -117,17 +136,16 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     <!-- ================= RIGHT COLUMN: CURVED RATES CARD ================= -->
     <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
       <div id="rates-card" class="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden text-left scroll-mt-20">
-        
-        <!-- 1. Curved Dark Green Header (Wave Design matching image) -->
+
+        <!-- 1. Curved Dark Green Header -->
         <div class="relative bg-gradient-to-r from-[#0a522c] to-[#043319] text-white p-5 sm:p-6 pb-10 sm:pb-12 overflow-hidden">
           <div class="flex items-center gap-3 relative z-10">
-            <!-- Sleek Tag Icon (বক্স ছাড়া ক্লিন স্ট্যান্ডঅ্যালোন আইকন) -->
-            <svg class="w-8 h-8 text-white shrink-0 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg aria-hidden="true" class="w-8 h-8 text-white shrink-0 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
               <line x1="7" y1="7" x2="7.01" y2="7"/>
               <line x1="10" y1="13" x2="12" y2="15" stroke-width="1.8"/>
             </svg>
-            
+
             <div>
               <h3 class="font-sans text-xl sm:text-[22px] font-bold tracking-tight text-white leading-tight">
                 Room Rates & Deals
@@ -138,9 +156,9 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
             </div>
           </div>
 
-          <!-- নিচের মসৃণ অ্যাসিম্যাট্রিক ওয়েভ কার্ভ (ছবি অনুযায়ী হুবহু শেপ) -->
+          <!-- নিচের ওয়েভ কার্ভ -->
           <div class="absolute -bottom-px left-0 right-0 w-full overflow-hidden leading-none pointer-events-none">
-            <svg viewBox="0 0 500 60" preserveAspectRatio="none" class="w-full h-6 sm:h-8 fill-white block">
+            <svg aria-hidden="true" viewBox="0 0 500 60" preserveAspectRatio="none" class="w-full h-6 sm:h-8 fill-white block">
               <path d="M 0,30 Q 220,60 500,0 L 500,60 L 0,60 Z" />
             </svg>
           </div>
@@ -148,7 +166,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
         <!-- 2. Card Content Body -->
         <div class="p-5 sm:p-6 space-y-4 pt-2">
-          
+
           <!-- Starting Price Strip -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div class="flex items-baseline gap-1.5">
@@ -160,26 +178,28 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
               )}
             </div>
 
-            <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-              <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <!-- Verified Partners: শুধু চ্যানেল থাকলে দেখাবে। API থেকে রেট এলে JS দেখাবে -->
+            <span id="verifiedBadge" class={`${hasChannels ? 'inline-flex' : 'hidden'} items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-sm`}>
+              <svg aria-hidden="true" class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
               <span>Verified Partners</span>
             </span>
           </div>
 
-          <!-- Dynamic Booking Channels (Clean Divider Rows) -->
-          <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} class="divide-y divide-slate-100 min-h-[90px]">
-            {customChannels.length > 0 ? (
+          <!-- Dynamic Booking Channels -->
+          <div id="aboutRatesTableContainer" data-hotel-title={hotelTitle} data-currency={CURRENCY} class="divide-y divide-slate-100 min-h-[150px]">
+            {hasChannels ? (
               customChannels.map((item: any) => {
-                const pName = item.provider_name || "Booking Partner";
-                const pPrice = item.price || "";
+                const pName = String(item.provider_name || "Booking Partner");
+                const pPrice = formatPrice(item.price);
                 const showPriceTag = item.show_price !== false;
-                const btnText = item.button_text || "Book Now";
+                const btnText = String(item.button_text || "Book Now");
                 const rawUrl = item.button_url || "#";
-                const customSvg = item.custom_svg || "";
-                const iconPreset = item.icon_preset || "direct";
+                const customSvg = String(item.custom_svg || "");
+                const iconPreset = String(item.icon_preset || "direct");
                 const finalUrl = sanitizeLink(rawUrl, iconPreset, pName, hotelTitle);
+                const isExternal = finalUrl.startsWith('http');
 
                 return (
                   <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
@@ -196,18 +216,16 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
                     <div class="flex items-center gap-3 shrink-0">
                       {showPriceTag && pPrice && (
-                        <span class="text-base font-black text-slate-900">
-                          {pPrice.startsWith('$') || pPrice.startsWith('৳') ? pPrice : '$' + pPrice}
-                        </span>
+                        <span class="text-base font-black text-slate-900">{pPrice}</span>
                       )}
-                      <a 
-                        href={finalUrl} 
-                        target={finalUrl.startsWith('http') ? "_blank" : "_self"} 
-                        rel="noopener noreferrer" 
+                      <a
+                        href={finalUrl}
+                        target={isExternal ? "_blank" : "_self"}
+                        rel={isExternal ? "sponsored nofollow noopener" : undefined}
                         class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
                       >
                         <span>{btnText}</span>
-                        <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                         </svg>
                       </a>
@@ -216,18 +234,18 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                 );
               })
             ) : (
-              <div id="ratesFallbackLoader" class="text-center py-5 space-y-2">
-                <span class="inline-block w-4 h-4 border-2 border-[#0d3b23] border-t-transparent rounded-full animate-spin"></span>
-                <p class="text-xs font-semibold text-slate-500">Checking room rates...</p>
+              <!-- লেখা সরানো হয়েছে (Google পাতলা কনটেন্ট দেখবে না)। শুধু স্পিনার -->
+              <div id="ratesFallbackLoader" class="flex items-center justify-center py-10" role="status" aria-label="Loading room rates">
+                <span class="inline-block w-5 h-5 border-2 border-[#0d3b23] border-t-transparent rounded-full animate-spin"></span>
               </div>
             )}
           </div>
 
-          <!-- Direct Hotel Reservation Section (Handles Phone, WhatsApp, or Both) -->
+          <!-- Direct Hotel Reservation Section -->
           {(phone || whatsapp) && (
             <div id="staticReservationChannels" class="pt-4 border-t border-slate-100 text-center space-y-3">
               <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-2">
-                <svg class="w-4 h-4 text-[#0d3b23] shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-4 h-4 text-[#0d3b23] shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
                 <span>Direct Hotel Reservation</span>
@@ -235,11 +253,11 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
               <div class={`grid gap-2 ${phone && whatsapp ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
                 {phone && (
-                  <a 
-                    href={`tel:${cleanPhone}`} 
+                  <a
+                    href={`tel:${cleanPhone}`}
                     class="w-full border-2 border-[#0d3b23] bg-white text-[#0d3b23] hover:bg-[#0d3b23] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
                   >
-                    <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
                       <path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                     </svg>
                     <span>Call Hotel</span>
@@ -247,10 +265,10 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                 )}
 
                 {whatsapp && (
-                  <a 
-                    href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelTitle)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="w-full border-2 border-[#25D366] bg-[#25D366]/10 text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
                   >
                     <span>WhatsApp</span>
@@ -262,7 +280,7 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 
           <!-- Minimalist Trust Footnote -->
           <div class="pt-1 text-center flex items-center justify-center gap-1.5 text-xs text-slate-600 font-medium">
-            <svg class="w-4 h-4 text-emerald-800 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg aria-hidden="true" class="w-4 h-4 text-emerald-800 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
             <span>Direct reservation & verified rates</span>
@@ -283,31 +301,59 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
 <script>
   let aboutAbortCtrl: AbortController | null = null;
 
+  // ---------- নিরাপত্তার ছোট হেল্পার ----------
+  function esc(s: any): string {
+    const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return String(s ?? '').replace(/[&<>"']/g, (c) => map[c]);
+  }
+
+  function safeUrl(u: string): string {
+    const v = String(u || '').trim();
+    return /^(https?:|tel:|mailto:)/i.test(v) ? v : '#';
+  }
+
+  // সহজ SVG ক্লিনার: script, on...= এবং javascript: সরায়
+  function cleanSvg(svg: any): string {
+    return String(svg || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+      .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+      .replace(/javascript:/gi, '');
+  }
+
+  function formatPrice(p: any, currency: string): string {
+    const s = String(p || '').trim();
+    if (!s) return '';
+    return s.startsWith('$') || s.startsWith('৳') ? s : currency + s;
+  }
+
+  // ---------- মূল ফাংশন ----------
   async function initHotelAboutSection() {
-    // 1. Overview Truncator setup independently (Won't get reset by rates fetch)
+    // ১. "Read more" আলাদাভাবে (রেট ফেচের সাথে সম্পর্ক নেই)
     applyLinkAttributes();
     setupOverviewTruncator();
 
-    // 2. Fetch Rates Logic with AbortController
-    if (aboutAbortCtrl) aboutAbortCtrl.abort();
-    aboutAbortCtrl = new AbortController();
-    const { signal } = aboutAbortCtrl;
-
+    // ২. রেট ফেচ। দুইবার চললেও সমস্যা নেই, কারণ dataset.fetched গার্ড আছে
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
     const loaderEl = document.getElementById('ratesFallbackLoader');
+    const badgeEl = document.getElementById('verifiedBadge');
 
-    const svgScript = document.getElementById('preset-svgs-data');
     let presetSvgs: Record<string, string> = {};
     try {
-      presetSvgs = JSON.parse(svgScript?.textContent || '{}');
+      presetSvgs = JSON.parse(document.getElementById('preset-svgs-data')?.textContent || '{}');
     } catch {
       presetSvgs = {};
     }
 
     if (ratesContainer && !ratesContainer.dataset.fetched && loaderEl) {
       ratesContainer.dataset.fetched = 'true';
+
+      aboutAbortCtrl = new AbortController();
+      const { signal } = aboutAbortCtrl;
+
       const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
+      const currency = ratesContainer.getAttribute('data-currency') || '৳';
       const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName)}`;
 
       const timeoutId = setTimeout(() => {
@@ -323,26 +369,29 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
           const json = await res.json();
           if (json && json.success && json.rates) {
             const rates = json.rates;
-            
+
             if (rates.startingPrice && startingPriceEl) {
-              startingPriceEl.textContent = rates.startingPrice;
+              startingPriceEl.textContent = String(rates.startingPrice);
             }
 
             const dealsList = Array.isArray(rates.channelsList) ? rates.channelsList : [];
 
             if (dealsList.length > 0) {
               ratesContainer.innerHTML = dealsList.map((item: any) => {
+                const providerName = String(item.provider_name || 'Booking Partner');
+                const providerLower = providerName.toLowerCase();
+
                 let iconHtml = presetSvgs[item.icon_preset] || presetSvgs.direct || '';
                 if (item.custom_svg) {
-                  iconHtml = `<div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${item.custom_svg}</div>`;
+                  iconHtml = `<div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">${cleanSvg(item.custom_svg)}</div>`;
                 }
 
-                const priceDisplay = (item.showPrice !== false && item.price) 
-                  ? `<span class="text-base font-black text-slate-900">${item.price.startsWith('$') || item.price.startsWith('৳') ? item.price : '$' + item.price}</span>` 
+                const formatted = formatPrice(item.price, currency);
+                const priceDisplay = (item.showPrice !== false && formatted)
+                  ? `<span class="text-base font-black text-slate-900">${esc(formatted)}</span>`
                   : '';
 
-                let finalUrl = item.button_url || '#';
-                const providerLower = (item.provider_name || '').toLowerCase();
+                let finalUrl = String(item.button_url || '#').trim();
 
                 if (item.icon_preset === 'whatsapp' || providerLower.includes('whatsapp')) {
                   if (!finalUrl.startsWith('http')) {
@@ -357,31 +406,41 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
                   }
                 }
 
-                const actionText = item.button_text || 'Book Now';
+                finalUrl = safeUrl(finalUrl);
+                const isExternal = finalUrl.startsWith('http');
+                const relAttr = isExternal ? 'rel="sponsored nofollow noopener"' : '';
+                const actionText = esc(item.button_text || 'Book Now');
 
                 return `
                   <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
                     <div class="flex items-center gap-3 min-w-0">
                       ${iconHtml}
-                      <span class="text-sm font-bold text-slate-900 truncate">${item.provider_name || 'Booking Partner'}</span>
+                      <span class="text-sm font-bold text-slate-900 truncate">${esc(providerName)}</span>
                     </div>
 
                     <div class="flex items-center gap-3 shrink-0">
                       ${priceDisplay}
-                      <a href="${finalUrl}" target="${finalUrl.startsWith('http') ? '_blank' : '_self'}" rel="noopener noreferrer" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
+                      <a href="${esc(finalUrl)}" target="${isExternal ? '_blank' : '_self'}" ${relAttr} class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
                         <span>${actionText}</span>
-                        <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                       </a>
                     </div>
                   </div>
                 `;
               }).join('');
+
+              // সত্যিকারের রেট এসেছে, তাই এখন ব্যাজ দেখাও
+              if (badgeEl) {
+                badgeEl.classList.remove('hidden');
+                badgeEl.classList.add('inline-flex');
+              }
               return;
             }
           }
         }
         showFallbackDirectBooking();
       } catch (e: any) {
+        clearTimeout(timeoutId);
         if (e.name !== 'AbortError') {
           showFallbackDirectBooking();
         }
@@ -410,6 +469,8 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     });
   }
 
+  const FADE_CLASSES = ['after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none'];
+
   function setupOverviewTruncator() {
     const textEl = document.getElementById('overview-text');
     const wrapperEl = document.getElementById('overview-wrapper');
@@ -417,42 +478,50 @@ function sanitizeLink(rawUrl: string = "", preset: string = "", pName: string = 
     const toggleBtnText = document.getElementById('readMoreText');
     const toggleBtnIcon = document.getElementById('readMoreIcon');
 
-    if (textEl && toggleBtn && wrapperEl) {
-      if (toggleBtn.dataset.bound === 'true') return;
+    if (!textEl || !toggleBtn || !wrapperEl) return;
+    if (toggleBtn.dataset.bound === 'true') return;
+    toggleBtn.dataset.bound = 'true';
 
-      const isLongText = textEl.scrollHeight > 220;
+    // HTML-এ আগে থেকেই ছোট করা আছে। লেখা ছোট হলে এখন খুলে দিচ্ছি
+    const isLongText = textEl.scrollHeight > 200;
 
-      if (isLongText) {
-        textEl.classList.add('max-h-[180px]', 'overflow-hidden');
-        wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
-        
-        toggleBtn.classList.remove('hidden');
-        toggleBtn.dataset.bound = 'true';
-
-        toggleBtn.addEventListener('click', () => {
-          const isExpanded = textEl.dataset.expanded === 'true';
-
-          if (!isExpanded) {
-            textEl.classList.remove('max-h-[180px]', 'overflow-hidden');
-            wrapperEl.classList.remove('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
-            if (toggleBtnText) toggleBtnText.textContent = 'Show less';
-            if (toggleBtnIcon) toggleBtnIcon.classList.add('rotate-180');
-            textEl.dataset.expanded = 'true';
-          } else {
-            textEl.classList.add('max-h-[180px]', 'overflow-hidden');
-            wrapperEl.classList.add('after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none');
-            if (toggleBtnText) toggleBtnText.textContent = 'Read more';
-            if (toggleBtnIcon) toggleBtnIcon.classList.remove('rotate-180');
-            textEl.dataset.expanded = 'false';
-            wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        });
-      } else {
-        toggleBtn.classList.add('hidden');
-      }
+    if (!isLongText) {
+      textEl.classList.remove('max-h-[180px]', 'overflow-hidden');
+      wrapperEl.classList.remove(...FADE_CLASSES);
+      toggleBtn.classList.add('hidden');
+      return;
     }
+
+    toggleBtn.classList.remove('hidden');
+
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = textEl.dataset.expanded === 'true';
+
+      if (!isExpanded) {
+        textEl.classList.remove('max-h-[180px]', 'overflow-hidden');
+        wrapperEl.classList.remove(...FADE_CLASSES);
+        if (toggleBtnText) toggleBtnText.textContent = 'Show less';
+        if (toggleBtnIcon) toggleBtnIcon.classList.add('rotate-180');
+        textEl.dataset.expanded = 'true';
+        toggleBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        textEl.classList.add('max-h-[180px]', 'overflow-hidden');
+        wrapperEl.classList.add(...FADE_CLASSES);
+        if (toggleBtnText) toggleBtnText.textContent = 'Read more';
+        if (toggleBtnIcon) toggleBtnIcon.classList.remove('rotate-180');
+        textEl.dataset.expanded = 'false';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
   }
 
+  // অন্য পেজে চলে গেলে চলমান fetch বন্ধ করো
+  document.addEventListener('astro:before-swap', () => {
+    aboutAbortCtrl?.abort();
+  });
+
+  // দুটো ইভেন্ট রাখা নিরাপদ, কারণ ফাংশনটা এখন দুইবার চললেও ভাঙে না
   document.addEventListener('DOMContentLoaded', initHotelAboutSection);
   document.addEventListener('astro:page-load', initHotelAboutSection);
 </script>
