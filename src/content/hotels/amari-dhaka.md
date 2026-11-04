@@ -33,16 +33,38 @@ booking_channels:
     button_text: Book Now ➔
     button_url: https://www.amari.com/dhaka
     badge: Official Site
-    icon_preset: direct
-    custom_svg: ''
-  - provider_name: Amari dhaka
-    price: $150
-    show_price: true
-    button_text: Book Now ➔
-    button_url: https://www.amari.com/dhaka
-    badge: Official Site
-    icon_preset: direct
-    custom_svg: ''
+    icon_preset: ''
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
+          <defs>
+              <style>
+                  .amari-orange { fill: #F47920; }
+                  .dhaka-gray { fill: #58595B; letter-spacing: 0.35em; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 500; font-size: 14px; }
+                  .amari-font { font-family: 'Century Gothic', sans-serif; font-weight: bold; font-size: 52px; fill: #F47920; }
+              </style>
+          </defs>
+          
+          <!-- background container -->
+          <rect width="100%" height="100%" fill="none"/>
+          
+          <g transform="translate(0, 10)">
+              <!-- Emblem / Brand Symbol (Stylized Sun Wave Element) -->
+              <g transform="translate(200, 65) scale(0.9)">
+                  <!-- Outer delicate rings -->
+                  <circle cx="0" cy="0" r="32" fill="none" stroke="#F47920" stroke-width="2" stroke-dasharray="4 3"/>
+                  <!-- Inner stylized layered crest -->
+                  <path d="M 0,-24 C 12,-24 22,-14 22,-2 C 22,10 10,20 0,24 C -10,20 -22,10 -22,-2 C -22,-14 -12,-24 0,-24 Z" fill="none" stroke="#F47920" stroke-width="3"/>
+                  <path d="M 0,-14 C 7,-14 13,-8 13,-1 C 13,6 6,12 0,14 C -6,12 -13,6 -13,-1 C -13,-8 -7,-14 0,-14 Z" fill="#F47920" opacity="0.8"/>
+                  <circle cx="0" cy="-1" r="5" fill="#FFF"/>
+              </g>
+              
+              <!-- "amari" Text Group -->
+              <text x="200" y="155" text-anchor="middle" class="amari-font" letter-spacing="-0.03em">amari</text>
+              
+              <!-- "DHAKA" Subtext Group -->
+              <text x="203" y="185" text-anchor="middle" class="dhaka-gray">DHAKA</text>
+          </g>
+      </svg>
   - provider_name: TripAdvisory
     price: $101
     show_price: true
