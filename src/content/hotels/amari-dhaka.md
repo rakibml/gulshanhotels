@@ -35,6 +35,23 @@ booking_channels:
     badge: Official Site
     icon_preset: direct
     custom_svg: ''
+  - provider_name: TripAdvisory
+    price: $101
+    show_price: true
+    button_text: Book Now ➔
+    button_url: https://www.tripadvisor.com/Hotel_Review-g293936-d6985943-Reviews-Amari_Dhaka_Bangladesh-Dhaka_City_Dhaka_Division.html
+    badge: ''
+    icon_preset: ''
+    custom_svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#00AFEF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M19 12a3 3 0 1 0 3 -3c0 -1.861 -1.48 -3.111 -3 -4c-1.545 .924 -3 2.111 -3 4a3 3 0 0 0 3 3z" />
+        <path d="M5 12a3 3 0 1 0 -3 -3c0 1.889 1.455 3.076 3 4c1.52 -.924 3 -2.111 3 -4a3 3 0 0 0 -3 3z" />
+        <path d="M12 14a3 3 0 1 0 3 -3c0 -1.889 -1.455 -3.076 -3 -4c-1.52 .924 -3 2.111 -3 4a3 3 0 0 0 3 3z" />
+        <path d="M12 5l-1.5 2h3l-1.5 -2z" />
+        <path d="M12 17v2a1 1 0 0 0 1 1h2" />
+        <path d="M12 17v2a1 1 0 0 1 -1 1h-2" />
+      </svg>
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
 phone: +880 2 5505 9620
