@@ -8,9 +8,9 @@
       window.CMS_MANUAL_INIT = true;
     </script>
 
-    <!-- ADMIN PANEL CUSTOM STYLING (জগাখিচুড়ি দূর করার জন্য প্রিমিয়াম ডিজাইন) -->
+    <!-- ADMIN PANEL CUSTOM STYLING & LEFT SIDEBAR NAVIGATION -->
     <style>
-      /* সেকশন হেডার ব্যানার স্টাইল */
+      /* ১. সেকশন হেডার ব্যানার স্টাইল */
       .sveltia-section-banner {
         background: linear-gradient(135deg, #064e3b 0%, #022c22 100%) !important;
         border: 1px solid #10b981 !important;
@@ -21,6 +21,8 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
         width: 100% !important;
         box-sizing: border-box !important;
+        scroll-margin-top: 80px !important; /* হেডার যেন ব্যানারের ওপর না উঠে */
+        transition: all 0.3s ease !important;
       }
       .sveltia-section-title {
         font-size: 15px !important;
@@ -40,20 +42,106 @@
         font-weight: 400 !important;
       }
 
-      /* ইনপুট ফিল্ডগুলোর মাঝে পরিষ্কার ডিভাইডার ও স্পেসিং */
-      [data-field-type="instructions"] {
-        margin-top: 25px !important;
+      /* সেকশন জাম্প করার সময় পালস গ্লো ইফেক্ট */
+      @keyframes sectionPulse {
+        0% { box-shadow: 0 0 0px #10b981; transform: scale(1); }
+        50% { box-shadow: 0 0 25px #10b981; transform: scale(1.015); border-color: #34d399; }
+        100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45); transform: scale(1); }
       }
+      .section-targeted {
+        animation: sectionPulse 0.8s ease-in-out !important;
+      }
+
       [data-field-type="instructions"] label {
-        display: none !important; /* ডিফল্ট লেবেল হাইড করে ব্যানার বড় করা */
+        display: none !important;
+      }
+
+      /* ২. বামপাশের ফ্লোটিং কুইক নেভিগেশন বার (ছবিতে লাল দাগ দেওয়া জায়গা) */
+      #cms-quick-nav {
+        position: fixed;
+        top: 75px;
+        left: 20px;
+        width: 220px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 14px 10px;
+        z-index: 99999;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        display: none; /* ডিফল্ট হাইড, এডিট পেজে এলে JS শো করাবে */
+        animation: fadeInNav 0.25s ease-out;
+      }
+
+      @keyframes fadeInNav {
+        from { opacity: 0; transform: translateX(-15px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
+      .quick-nav-header {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #34d399;
+        letter-spacing: 0.8px;
+        padding: 0 8px 10px 8px;
+        border-b: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .quick-nav-btn {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: none;
+        color: #cbd5e1;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 8px 10px;
+        margin-bottom: 4px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .quick-nav-btn:hover {
+        background: rgba(16, 185, 129, 0.15);
+        color: #ffffff;
+        transform: translateX(4px);
+      }
+
+      .quick-nav-btn:active {
+        transform: scale(0.97);
+      }
+
+      /* স্ক্রিন ছোট হলে বা মোবাইলে ফর্ম না ঢেকে স্বয়ংক্রিয়ভাবে হাইড হবে */
+      @media (max-width: 1200px) {
+        #cms-quick-nav {
+          display: none !important;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Floating Left Navigation Bar Container -->
+    <div id="cms-quick-nav">
+      <div class="quick-nav-header">
+        <span>⚡ Quick Sections</span>
+        <span style="font-size: 9px; opacity: 0.7;">Jump to</span>
+      </div>
+      <div id="quick-nav-links"></div>
+    </div>
+
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- UNIVERSAL SMART AUTO-LOADER WITH SECTION HEADERS -->
+    <!-- UNIVERSAL SMART AUTO-LOADER & SIDEBAR NAV SCRIPT -->
     <script>
       // ১. কাস্টম instructions ব্যানার উইজেট রেজিস্টার (Sveltia CMS)
       function registerInstructionWidget() {
@@ -119,10 +207,66 @@
         }
       }
 
+      // ৩. ফ্লোটিং নেভবার অটোমেটিক কন্ট্রোল (DOM Watcher)
+      function setupFloatingNavObserver() {
+        const navContainer = document.getElementById('cms-quick-nav');
+        const linksContainer = document.getElementById('quick-nav-links');
+
+        const observer = new MutationObserver(() => {
+          const banners = document.querySelectorAll('.sveltia-section-banner');
+
+          // এডিট পেজে ব্যানার পাওয়া গেলে মেনু তৈরি করো
+          if (banners.length > 0) {
+            navContainer.style.display = 'block';
+
+            // যদি ইতিমধ্যে বাটন তৈরি হয়ে থাকে তবে বারবার বানাবে না
+            if (linksContainer.children.length === banners.length) return;
+
+            linksContainer.innerHTML = '';
+
+            banners.forEach((banner, index) => {
+              // ইউনিক আইডি বসাও
+              if (!banner.id) {
+                banner.id = 'sec-anchor-' + (index + 1);
+              }
+
+              const titleEl = banner.querySelector('.sveltia-section-title');
+              let rawTitle = titleEl ? titleEl.textContent.trim() : ('Section ' + (index + 1));
+              
+              // ছোট টাইটেল বানানো
+              const shortTitle = rawTitle.replace(/\d+\.\s*/, '').slice(0, 18);
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'quick-nav-btn';
+              btn.innerHTML = `<span>${index + 1}.</span> <span>${shortTitle}</span>`;
+
+              btn.onclick = (e) => {
+                e.preventDefault();
+                banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // টার্গেট সেকশনে গ্লো অ্যানিমেশন দেওয়া
+                banner.classList.remove('section-targeted');
+                void banner.offsetWidth; // trigger reflow
+                banner.classList.add('section-targeted');
+              };
+
+              linksContainer.appendChild(btn);
+            });
+          } else {
+            // লিস্ট পেজে বা লগইনে থাকলে নেভবার হাইড রাখো
+            navContainer.style.display = 'none';
+            linksContainer.innerHTML = '';
+          }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+
       document.addEventListener('DOMContentLoaded', async () => {
         try {
-          // কাস্টম ব্যানার উইজেট রেজিস্টার করা
           registerInstructionWidget();
+          setupFloatingNavObserver();
 
           // ০. মূল config.yml
           const mainRes = await fetch('/admin/config.yml');
@@ -133,7 +277,7 @@
           const config = jsyaml.load(mainText) || {};
           config.collections = [];
 
-          // ১. হোটেলের ৬টি সেকশনের সংজ্ঞা (টাইটেল ও ডেসক্রিপশনসহ)
+          // ১. হোটেলের ৬টি সেকশনের সংজ্ঞা
           const hotelSections = [
             {
               url: '/admin/collections/hotel/1-header.yml',
@@ -174,7 +318,6 @@
             const fieldsArr = await loadYaml(sec.url);
 
             if (Array.isArray(fieldsArr) && fieldsArr.length > 0) {
-              // সেকশনের শুরুতে কোনো ব্যানার না থাকলে অটোমেটিক যোগ হবে
               const firstField = fieldsArr[0];
               const alreadyHasBanner = firstField && (firstField.widget === 'instructions' || (firstField.name && firstField.name.includes('notice')));
 
@@ -244,7 +387,7 @@
             }
           }
 
-          // ৪. Sveltia CMS ইনিশিয়ালাইজ
+          // ৪. Sveltia CMS চালু
           const cms = window.CMS || window.SveltiaCMS;
           if (cms && typeof cms.init === 'function') {
             cms.init({ config });
