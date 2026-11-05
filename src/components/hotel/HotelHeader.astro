@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (100% Dynamic, TripAdvisor Layout + Responsive Collage Gallery)
+// src/components/hotel/HotelHeader.astro (100% Dynamic, Google-Safe, Zero Fake Data & Responsive Gallery)
 interface Props {
   hotel: any;
 }
@@ -8,8 +8,8 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 // ================= 1. HOTEL BASIC INFO & CLEAN SLUG =================
-const hotelTitle = (data.title || data.name || "Hotel Details").trim();
-const hotelLocation = data.location || "Dhaka City";
+const hotelTitle = (data.title || data.name || "").trim();
+const hotelLocation = (data.location || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
@@ -17,7 +17,7 @@ const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 const isVerified = data.is_verified !== false;
 
-// ================= 2. DYNAMIC REVIEWS CALCULATION (Exact sync with HotelReviews.astro) =================
+// ================= 2. DYNAMIC REVIEWS CALCULATION (Google Safe - No Fake 4.7) =================
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -56,21 +56,20 @@ const combinedReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].filter(
 const reviewsCount = combinedReviews.length;
 const avgRatingNum = reviewsCount > 0 
   ? (combinedReviews.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0) / reviewsCount)
-  : (Number(data.rating) || 4.7);
-const avgRating = avgRatingNum.toFixed(1);
+  : (data.rating ? Number(data.rating) : 0);
+const avgRating = avgRatingNum > 0 ? avgRatingNum.toFixed(1) : "";
 
-const hotelRanking = data.ranking || data.ranking_text || ``;
+const hotelRanking = (data.ranking || data.ranking_text || "").trim();
 
-// ================= 3. DYNAMIC PRICING & DEALS (Exact sync with HotelAboutAndRates.astro) =================
+// ================= 3. DYNAMIC PRICING & DEALS (Zero Fake $110 Fallback) =================
 const customChannels = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 const topChannel = customChannels.length > 0 ? customChannels[0] : null;
 
-const rawPrice = String(topChannel?.price || data.price || "$110").trim();
-// Extract pure price without "/ night" for the bold TripAdvisor display
+const rawPrice = String(topChannel?.price || data.price || "").trim();
 const priceMatch = rawPrice.match(/([$৳€£]?\s*\d+[\d,]*)/);
-const displayPrice = priceMatch ? priceMatch[0] : (rawPrice || "$110");
+const displayPrice = priceMatch ? priceMatch[0] : rawPrice;
 
-const dealProvider = data.deal_provider || topChannel?.provider_name || "Booking.com";
+const dealProvider = data.deal_provider || topChannel?.provider_name || "";
 const rawDealUrl = topChannel?.button_url || data.deal_url || data.officialSite || "#rates-card";
 
 function sanitizeUrl(rawUrl: string = "") {
@@ -144,7 +143,6 @@ const galleryPayload = {
           </h1>
           {isVerified && (
             <span class="inline-flex items-center justify-center text-[#002b11] shrink-0" title="Verified Hotel Stay">
-              <!-- Verified Rosette Icon -->
               <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l2.4 2.1 3.2-.4 1.2 3 2.9 1.4-.7 3.1 1.9 2.5-1.9 2.5.7 3.1-2.9 1.4-1.2 3-3.2-.4L12 22l-2.4-2.1-3.2.4-1.2-3-2.9-1.4.7-3.1-1.9-2.5 1.9-2.5-.7-3.1 2.9-1.4 1.2-3 3.2.4L12 2z"/>
                 <path d="M9.5 12l2 2 4.5-4.5" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -155,26 +153,24 @@ const galleryPayload = {
 
         <!-- Right Side: Saved & Review Buttons -->
         <div class="hidden sm:flex items-center gap-4 sm:gap-5">
-          <!-- Saved Button (Interactive LocalStorage Toggle) -->
+          <!-- Saved Button -->
           <button
             type="button"
             id="headerSaveHotelBtn"
             data-hotel-slug={hotelSlug}
             class="flex items-center gap-1.5 text-slate-900 hover:text-emerald-800 transition cursor-pointer select-none"
           >
-            <!-- Red Heart Icon -->
             <svg id="headerHeartIcon" class="w-4 h-4 fill-red-600 text-red-600 shrink-0 transition-transform active:scale-125" viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
             <span id="headerSaveText" class="text-xs sm:text-sm font-bold underline underline-offset-4">Saved</span>
           </button>
 
-          <!-- Review Button (Triggers your existing writeReviewModal in HotelReviews.astro) -->
+          <!-- Review Button -->
           <button
             type="button"
             class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm px-4 py-1.5 rounded-full flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
           >
-            <!-- Pencil/Pen Icon -->
             <svg class="w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 20h9"/>
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -189,59 +185,64 @@ const galleryPayload = {
         
         <!-- Left Side: Ratings & View Location -->
         <div class="space-y-1.5 text-left">
-          <!-- Rating Line -->
+          <!-- Rating Line (Zero Fake Stars: Only renders if real reviews exist) -->
           <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-            <span class="font-bold text-slate-900">{avgRating}</span>
+            {reviewsCount > 0 && avgRating && (
+              <>
+                <span class="font-bold text-slate-900">{avgRating}</span>
 
-            <!-- Tripadvisor 5 Green Bubbles -->
-            <div class="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const diff = avgRatingNum - i;
-                if (diff >= 0.75) {
-                  return <span class="w-3.5 h-3.5 rounded-full bg-[#00852f] shrink-0 inline-block" />;
-                } else if (diff >= 0.25) {
-                  return (
-                    <span class="relative w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] overflow-hidden shrink-0 inline-block bg-white">
-                      <span class="absolute inset-y-0 left-0 w-1/2 bg-[#00852f]" />
-                    </span>
-                  );
-                } else {
-                  return <span class="w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] shrink-0 inline-block bg-white" />;
-                }
-              })}
-            </div>
+                <!-- Tripadvisor 5 Green Bubbles -->
+                <div class="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const diff = avgRatingNum - i;
+                    if (diff >= 0.75) {
+                      return <span class="w-3.5 h-3.5 rounded-full bg-[#00852f] shrink-0 inline-block" />;
+                    } else if (diff >= 0.25) {
+                      return (
+                        <span class="relative w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] overflow-hidden shrink-0 inline-block bg-white">
+                          <span class="absolute inset-y-0 left-0 w-1/2 bg-[#00852f]" />
+                        </span>
+                      );
+                    } else {
+                      return <span class="w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] shrink-0 inline-block bg-white" />;
+                    }
+                  })}
+                </div>
+              </>
+            )}
 
             <!-- Review Count -->
-<a href="#guest-reviews" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800 transition">
-  ({reviewsCount > 0 ? reviewsCount.toLocaleString() : 'No'} reviews)
-</a>
+            <a href="#guest-reviews" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800 transition">
+              ({reviewsCount > 0 ? `${reviewsCount.toLocaleString()} reviews` : 'No reviews yet'})
+            </a>
 
-<!-- শুধুমাত্র মোবাইলের জন্য: Review & Save বাটন -->
-<div class="flex sm:hidden items-center gap-2 ml-1">
-  <!-- Review Button -->
-  <button
-    type="button"
-    class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1 active:scale-95 cursor-pointer"
-  >
-    <svg class="w-3 h-3 stroke-slate-900 fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 20h9"/>
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-    </svg>
-    <span>Review</span>
-  </button>
+            <!-- শুধুমাত্র মোবাইলের জন্য: Review & Save বাটন -->
+            <div class="flex sm:hidden items-center gap-2 ml-1">
+              <!-- Review Button -->
+              <button
+                type="button"
+                class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1 active:scale-95 cursor-pointer"
+              >
+                <svg class="w-3 h-3 stroke-slate-900 fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span>Review</span>
+              </button>
 
-  <!-- Save Button (Mobile) -->
-  <button
-    type="button"
-    class="header-save-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
-    data-hotel-id={hotelSlug || hotelTitle}
-  >
-    <svg class="heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-    </svg>
-    <span class="save-label underline underline-offset-2">Save</span>
-  </button>
-</div>
+              <!-- Save Button (Mobile) -->
+              <button
+                type="button"
+                class="header-save-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
+                data-hotel-id={hotelSlug || hotelTitle}
+              >
+                <svg class="heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="save-label underline underline-offset-2">Save</span>
+              </button>
+            </div>
+
             <!-- Ranking -->
             {hotelRanking && (
               <a href="#about-and-rates" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800 transition">
@@ -251,16 +252,17 @@ const galleryPayload = {
           </div>
 
           <!-- Location Pin Line -->
-          <div class="flex items-center gap-1.5 text-xs sm:text-sm">
-            <!-- Pin Icon -->
-            <svg class="w-4 h-4 text-[#002b11] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <a href={locationMapUrl} class="text-slate-900 font-semibold underline underline-offset-2 hover:text-emerald-800 transition">
-              View location
-            </a>
-          </div>
+          {hotelLocation && (
+            <div class="flex items-center gap-1.5 text-xs sm:text-sm">
+              <svg class="w-4 h-4 text-[#002b11] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <a href={locationMapUrl} class="text-slate-900 font-semibold underline underline-offset-2 hover:text-emerald-800 transition">
+                View location
+              </a>
+            </div>
+          )}
         </div>
 
         <!-- Right Side: Live Price & View Deal Button -->
@@ -268,19 +270,21 @@ const galleryPayload = {
           <!-- Price and Provider -->
           <div class="text-right">
             <div id="headerStartingPriceDisplay" class="text-2xl sm:text-3xl font-black text-[#002b11] leading-none tracking-tight">
-              {displayPrice}
+              {displayPrice ? displayPrice : (dealUrl !== "#rates-card" ? "View Rates" : "")}
             </div>
-            <div id="headerProviderName" class="text-[11px] sm:text-xs font-bold text-slate-800 mt-1">
-              {dealProvider}
-            </div>
+            {dealProvider && (
+              <div id="headerProviderName" class="text-[11px] sm:text-xs font-bold text-slate-800 mt-1">
+                {dealProvider}
+              </div>
+            )}
           </div>
 
-          <!-- View Deal CTA Button -->
+          <!-- View Deal CTA Button (Google Link Spam Safe with nofollow) -->
           <a
             id="headerViewDealBtn"
             href={dealUrl}
             target={dealUrl.startsWith('http') ? "_blank" : "_self"}
-            rel={dealUrl.startsWith('http') ? "noopener noreferrer" : ""}
+            rel={dealUrl.startsWith('http') ? "noopener noreferrer nofollow" : ""}
             class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-black text-sm sm:text-base px-6 py-2.5 rounded-full shadow-sm hover:shadow transition-transform hover:scale-105 active:scale-95 inline-flex items-center justify-center cursor-pointer select-none"
           >
             View deal
@@ -322,7 +326,6 @@ const galleryPayload = {
               aria-label={`View all ${totalPhotos} photos`}
               class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#002b11]/90 hover:bg-[#002b11] text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition hover:scale-105 z-10 cursor-pointer"
             >
-              <!-- Photo Gallery Icon -->
               <svg class="w-4 h-4 fill-none stroke-currentColor stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
                 <circle cx="9" cy="9" r="2"/>
@@ -391,7 +394,7 @@ const galleryPayload = {
 >
   <div class="flex items-center justify-between max-w-7xl mx-auto w-full border-b border-slate-800 pb-4">
     <div>
-      <h3 class="text-base sm:text-lg font-black font-serif text-white">{hotelTitle}</h3>
+      <h3 class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle}</h3>
       <span class="text-xs text-slate-400">Photo Gallery</span>
     </div>
     <div class="flex items-center gap-4">
@@ -442,7 +445,7 @@ const galleryPayload = {
   </div>
 </div>
 
-<!-- CLIENT SCRIPT (GALLERY, SAVED STATE & LIVE RATES SYNC) -->
+<!-- CLIENT SCRIPT -->
 <script>
   let abortCtrl: AbortController | null = null;
 
@@ -549,10 +552,10 @@ const galleryPayload = {
     modalPrevBtn?.addEventListener('click', () => updateModalImage(activeIdx - 1));
     modalNextBtn?.addEventListener('click', () => updateModalImage(activeIdx + 1));
 
-    // 2. Saved Hotel (Mobile + Desktop Sync & Safe Toggle)
+    // 2. Saved Hotel (LocalStorage State Toggle)
     const saveBtns = document.querySelectorAll('.header-save-btn, #headerSaveHotelBtn');
     if (saveBtns.length > 0) {
-      const hotelId = saveBtns[0].getAttribute('data-hotel-id') || 'hotel';
+      const hotelId = saveBtns[0].getAttribute('data-hotel-id') || saveBtns[0].getAttribute('data-hotel-slug') || 'hotel';
 
       function getSavedList(): string[] {
         try {
@@ -568,7 +571,7 @@ const galleryPayload = {
 
         saveBtns.forEach(btn => {
           const heart = btn.querySelector('svg');
-          const label = btn.querySelector('.save-label') || btn.querySelector('span');
+          const label = btn.querySelector('.save-label') || btn.querySelector('#headerSaveText');
 
           if (isSaved) {
             heart?.classList.add('fill-red-600', 'stroke-red-600');
@@ -582,10 +585,8 @@ const galleryPayload = {
         });
       }
 
-      // পেজ লোড হলে আগের স্টেট চেক করবে
       updateSaveUI();
 
-      // ক্লিকে টগল হবে
       saveBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -631,7 +632,7 @@ const galleryPayload = {
               if (topDeal.button_url && headerDealBtn) {
                 headerDealBtn.href = topDeal.button_url;
                 headerDealBtn.target = "_blank";
-                headerDealBtn.rel = "noopener noreferrer";
+                headerDealBtn.rel = "noopener noreferrer nofollow";
               }
             }
           }
