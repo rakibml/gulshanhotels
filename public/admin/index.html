@@ -7,165 +7,21 @@
     <script>
       window.CMS_MANUAL_INIT = true;
     </script>
-
-    <!-- ADMIN PANEL CUSTOM STYLING & LEFT SIDEBAR NAVIGATION -->
-    <style>
-      /* ১. সেকশন হেডার ব্যানার স্টাইল */
-      .sveltia-section-banner {
-        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%) !important;
-        border: 1px solid #10b981 !important;
-        border-left: 6px solid #34d399 !important;
-        border-radius: 12px !important;
-        padding: 16px 20px !important;
-        margin: 36px 0 16px 0 !important;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        scroll-margin-top: 80px !important; /* হেডার যেন ব্যানারের ওপর না উঠে */
-        transition: all 0.3s ease !important;
-      }
-      .sveltia-section-title {
-        font-size: 15px !important;
-        font-weight: 800 !important;
-        color: #ffffff !important;
-        letter-spacing: 0.6px !important;
-        text-transform: uppercase !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-      }
-      .sveltia-section-desc {
-        font-size: 12px !important;
-        color: #a7f3d0 !important;
-        margin-top: 6px !important;
-        line-height: 1.4 !important;
-        font-weight: 400 !important;
-      }
-
-      /* সেকশন জাম্প করার সময় পালস গ্লো ইফেক্ট */
-      @keyframes sectionPulse {
-        0% { box-shadow: 0 0 0px #10b981; transform: scale(1); }
-        50% { box-shadow: 0 0 25px #10b981; transform: scale(1.015); border-color: #34d399; }
-        100% { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45); transform: scale(1); }
-      }
-      .section-targeted {
-        animation: sectionPulse 0.8s ease-in-out !important;
-      }
-
-      [data-field-type="instructions"] label {
-        display: none !important;
-      }
-
-      /* ২. বামপাশের ফ্লোটিং কুইক নেভিগেশন বার (ছবিতে লাল দাগ দেওয়া জায়গা) */
-      #cms-quick-nav {
-        position: fixed;
-        top: 75px;
-        left: 20px;
-        width: 220px;
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
-        border-radius: 16px;
-        padding: 14px 10px;
-        z-index: 99999;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-        display: none; /* ডিফল্ট হাইড, এডিট পেজে এলে JS শো করাবে */
-        animation: fadeInNav 0.25s ease-out;
-      }
-
-      @keyframes fadeInNav {
-        from { opacity: 0; transform: translateX(-15px); }
-        to { opacity: 1; transform: translateX(0); }
-      }
-
-      .quick-nav-header {
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        color: #34d399;
-        letter-spacing: 0.8px;
-        padding: 0 8px 10px 8px;
-        border-b: 1px solid rgba(255, 255, 255, 0.08);
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .quick-nav-btn {
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        color: #cbd5e1;
-        font-size: 12.5px;
-        font-weight: 600;
-        padding: 8px 10px;
-        margin-bottom: 4px;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-      }
-
-      .quick-nav-btn:hover {
-        background: rgba(16, 185, 129, 0.15);
-        color: #ffffff;
-        transform: translateX(4px);
-      }
-
-      .quick-nav-btn:active {
-        transform: scale(0.97);
-      }
-
-      /* স্ক্রিন ছোট হলে বা মোবাইলে ফর্ম না ঢেকে স্বয়ংক্রিয়ভাবে হাইড হবে */
-      @media (max-width: 1200px) {
-        #cms-quick-nav {
-          display: none !important;
-        }
-      }
-    </style>
   </head>
   <body>
-    <!-- Floating Left Navigation Bar Container -->
-    <div id="cms-quick-nav">
-      <div class="quick-nav-header">
-        <span>⚡ Quick Sections</span>
-        <span style="font-size: 9px; opacity: 0.7;">Jump to</span>
-      </div>
-      <div id="quick-nav-links"></div>
-    </div>
-
     <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <!--
+      TODO: Sveltia এর ভার্সন নম্বর বসিয়ে দিন, যেমন: @sveltia/cms@0.xx.x/dist/sveltia-cms.js
+      ভার্সন npmjs.com/package/@sveltia/cms পেজে পাবেন।
+      ভার্সন না দিলে নতুন আপডেটে হঠাৎ প্যানেল ভেঙে যেতে পারে।
+    -->
     <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
 
-    <!-- UNIVERSAL SMART AUTO-LOADER & SIDEBAR NAV SCRIPT -->
+    <!-- UNIVERSAL SMART AUTO-LOADER -->
     <script>
-      // ১. কাস্টম instructions ব্যানার উইজেট রেজিস্টার (Sveltia CMS)
-      function registerInstructionWidget() {
-        const cms = window.CMS || window.SveltiaCMS;
-        if (!cms || typeof cms.registerWidget !== 'function') return;
+      // ---------- হেল্পার ফাংশন ----------
 
-        cms.registerWidget(
-          'instructions',
-          window.createClass({
-            render() {
-              const field = this.props.field;
-              const label = (field && typeof field.get === 'function' ? field.get('label') : field?.label) || 'Section';
-              const desc = (field && typeof field.get === 'function' ? (field.get('description') || field.get('hint')) : (field?.description || field?.hint)) || '';
-
-              return window.h('div', { className: 'sveltia-section-banner' },
-                window.h('div', { className: 'sveltia-section-title' }, label),
-                desc ? window.h('div', { className: 'sveltia-section-desc' }, desc) : null
-              );
-            }
-          })
-        );
-      }
-
-      // ২. হেল্পার ফাংশনসমূহ
+      // field এর ভেতরের item এ name না থাকলে বানিয়ে দেয় (files collection এর ভেতরেও কাজ করে)
       function sanitizeSveltiaFields(fields) {
         if (!Array.isArray(fields)) return;
         fields.forEach(f => {
@@ -182,6 +38,7 @@
         });
       }
 
+      // collection এর fields এবং files দুটোই sanitize করে
       function sanitizeCollection(col) {
         if (!col || typeof col !== 'object') return;
         if (Array.isArray(col.fields)) sanitizeSveltiaFields(col.fields);
@@ -192,6 +49,7 @@
         }
       }
 
+      // ফাইল আনে। ফাইল না পেলে বা yaml ভুল হলে console এ কারণ দেখায়, কিন্তু সাইট ভাঙে না
       async function loadYaml(url) {
         try {
           const res = await fetch(url);
@@ -207,67 +65,8 @@
         }
       }
 
-      // ৩. ফ্লোটিং নেভবার অটোমেটিক কন্ট্রোল (DOM Watcher)
-      function setupFloatingNavObserver() {
-        const navContainer = document.getElementById('cms-quick-nav');
-        const linksContainer = document.getElementById('quick-nav-links');
-
-        const observer = new MutationObserver(() => {
-          const banners = document.querySelectorAll('.sveltia-section-banner');
-
-          // এডিট পেজে ব্যানার পাওয়া গেলে মেনু তৈরি করো
-          if (banners.length > 0) {
-            navContainer.style.display = 'block';
-
-            // যদি ইতিমধ্যে বাটন তৈরি হয়ে থাকে তবে বারবার বানাবে না
-            if (linksContainer.children.length === banners.length) return;
-
-            linksContainer.innerHTML = '';
-
-            banners.forEach((banner, index) => {
-              // ইউনিক আইডি বসাও
-              if (!banner.id) {
-                banner.id = 'sec-anchor-' + (index + 1);
-              }
-
-              const titleEl = banner.querySelector('.sveltia-section-title');
-              let rawTitle = titleEl ? titleEl.textContent.trim() : ('Section ' + (index + 1));
-              
-              // ছোট টাইটেল বানানো
-              const shortTitle = rawTitle.replace(/\d+\.\s*/, '').slice(0, 18);
-
-              const btn = document.createElement('button');
-              btn.type = 'button';
-              btn.className = 'quick-nav-btn';
-              btn.innerHTML = `<span>${index + 1}.</span> <span>${shortTitle}</span>`;
-
-              btn.onclick = (e) => {
-                e.preventDefault();
-                banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                // টার্গেট সেকশনে গ্লো অ্যানিমেশন দেওয়া
-                banner.classList.remove('section-targeted');
-                void banner.offsetWidth; // trigger reflow
-                banner.classList.add('section-targeted');
-              };
-
-              linksContainer.appendChild(btn);
-            });
-          } else {
-            // লিস্ট পেজে বা লগইনে থাকলে নেভবার হাইড রাখো
-            navContainer.style.display = 'none';
-            linksContainer.innerHTML = '';
-          }
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-      }
-
       document.addEventListener('DOMContentLoaded', async () => {
         try {
-          registerInstructionWidget();
-          setupFloatingNavObserver();
-
           // ০. মূল config.yml
           const mainRes = await fetch('/admin/config.yml');
           if (!mainRes.ok) {
@@ -277,61 +76,24 @@
           const config = jsyaml.load(mainText) || {};
           config.collections = [];
 
-          // ১. হোটেলের ৬টি সেকশনের সংজ্ঞা
-          const hotelSections = [
-            {
-              url: '/admin/collections/hotel/1-header.yml',
-              title: '🏨 1. HERO & HEADER SECTION',
-              desc: 'Hotel Title, Location Address, Tagline, Cover Image & Photo Gallery'
-            },
-            {
-              url: '/admin/collections/hotel/2-about-rates.yml',
-              title: '🏷️ 2. ABOUT HOTEL & LIVE RATES',
-              desc: 'Overview Description, Starting Price, Live Booking Channels & WhatsApp/Phone'
-            },
-            {
-              url: '/admin/collections/hotel/3-amenities-rooms.yml',
-              title: '🛏️ 3. AMENITIES & ROOM TYPES',
-              desc: 'Hotel Amenities, Featured Highlights, Room Categories & Capacities'
-            },
-            {
-              url: '/admin/collections/hotel/4-location-map.yml',
-              title: '📍 4. LOCATION & SURROUNDINGS',
-              desc: 'Google Maps Embed, Nearby Attractions, Airport Distances & Transportation'
-            },
-            {
-              url: '/admin/collections/hotel/5-reviews.yml',
-              title: '⭐ 5. GUEST REVIEWS & RATINGS',
-              desc: 'Overall Review Score, Cleanliness/Location Breakdown & Verified Reviews'
-            },
-            {
-              url: '/admin/collections/hotel/6-faqs.yml',
-              title: '📋 6. POLICIES & FAQS',
-              desc: 'Check-in/out Rules, Extra Bed Policies, Accepted Payments & FAQs'
-            }
+          // ১. হোটেলের ৬টি অংশ জোড়া লাগানো
+          const hotelSectionFiles = [
+            '/admin/collections/hotel/1-header.yml',
+            '/admin/collections/hotel/2-about-rates.yml',
+            '/admin/collections/hotel/3-amenities-rooms.yml',
+            '/admin/collections/hotel/4-location-map.yml',
+            '/admin/collections/hotel/7-HotelInsiderTips.yml',
+            '/admin/collections/hotel/5-reviews.yml',
+            '/admin/collections/hotel/6-faqs.yml'
           ];
 
           const hotelFields = [];
-
-          for (let i = 0; i < hotelSections.length; i++) {
-            const sec = hotelSections[i];
-            const fieldsArr = await loadYaml(sec.url);
-
-            if (Array.isArray(fieldsArr) && fieldsArr.length > 0) {
-              const firstField = fieldsArr[0];
-              const alreadyHasBanner = firstField && (firstField.widget === 'instructions' || (firstField.name && firstField.name.includes('notice')));
-
-              if (!alreadyHasBanner) {
-                hotelFields.push({
-                  label: sec.title,
-                  name: `sec_banner_${i + 1}`,
-                  widget: "instructions",
-                  description: sec.desc,
-                  required: false
-                });
-              }
-
+          for (const fileUrl of hotelSectionFiles) {
+            const fieldsArr = await loadYaml(fileUrl);
+            if (Array.isArray(fieldsArr)) {
               hotelFields.push(...fieldsArr);
+            } else if (fieldsArr !== null) {
+              console.warn('[CMS Loader] এই ফাইল একটি list হওয়া উচিত (- দিয়ে শুরু):', fileUrl);
             }
           }
 
@@ -347,9 +109,11 @@
               summary: "{{title}} - Link: /{{slug}}",
               fields: hotelFields
             });
+          } else {
+            console.warn('[CMS Loader] হোটেলের কোনো field লোড হয়নি। উপরের warning গুলো দেখুন।');
           }
 
-          // ২. হোমপেজ সেটিংস
+          // ২. হোমপেজ সেটিংস (পপুলার হোটেলস)
           const popFields = await loadYaml('/admin/collections/popular-hotels.yml');
           if (Array.isArray(popFields)) {
             sanitizeSveltiaFields(popFields);
@@ -370,29 +134,34 @@
           // ৩. বাকি সব collection অটো-স্ক্যান
           const allPossibleCollections = [
             'destinations.yml',
-            'posts.yml',
-            'pages.yml',
-            'guest-reviews.yml',
-            'subscribers.yml'
+            'posts.yml',          // ব্লগ ও ট্রাভেল গাইড
+            'pages.yml',          // সাধারণ পেজ (About, Terms, Privacy)
+            'guest-reviews.yml',  // রিভিউ অ্যাপ্রুভাল
+            'subscribers.yml'     // নিউজলেটার সাবস্ক্রাইবার্স
           ];
 
           for (const colFile of allPossibleCollections) {
             let colData = await loadYaml('/admin/collections/' + colFile);
             if (!colData) continue;
+
+            // ফাইল যদি list হিসেবে লেখা থাকে (- name: ...), প্রথম item টা নেবে
             if (Array.isArray(colData)) colData = colData[0];
 
             if (colData && (Array.isArray(colData.fields) || Array.isArray(colData.files))) {
               sanitizeCollection(colData);
               config.collections.push(colData);
+            } else {
+              console.warn('[CMS Loader] এই ফাইলে fields বা files নেই, তাই স্কিপ হলো:', colFile);
             }
           }
 
           // ৪. Sveltia CMS চালু
-          const cms = window.CMS || window.SveltiaCMS;
-          if (cms && typeof cms.init === 'function') {
-            cms.init({ config });
+          if (window.CMS && typeof window.CMS.init === 'function') {
+            window.CMS.init({ config });
+          } else if (window.SveltiaCMS && typeof window.SveltiaCMS.init === 'function') {
+            window.SveltiaCMS.init({ config });
           } else {
-            console.error('[CMS Loader] Sveltia CMS লোড হয়নি।');
+            console.error('[CMS Loader] Sveltia CMS লোড হয়নি। script লিংক বা ইন্টারনেট চেক করুন।');
           }
 
         } catch (e) {
