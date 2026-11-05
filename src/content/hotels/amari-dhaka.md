@@ -199,6 +199,11 @@ rooms:
 location_notice: ''
 map_query: ''
 nearby_places: []
+insider_tips:
+  - title: amari dhaka hotel inside
+    tip: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+    tag: ''
+    category: room
 reviews_notice: ''
 reviews: []
 faqs_notice: ''
