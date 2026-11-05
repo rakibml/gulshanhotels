@@ -7,7 +7,6 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ১. হোটেলের নাম ও নিখুঁত ক্লিন স্লাগ তৈরি
 const hotelTitle = (data.title || data.name || "Hotel Details").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
@@ -15,7 +14,6 @@ const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCa
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 
-// ২. ডাটা ফেচিং
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -31,7 +29,6 @@ try {
   rawReviewsList = [];
 }
 
-// ৩. STRICT EXACT MATCHING (APPROVED REVIEWS ONLY)
 const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
 
@@ -48,11 +45,9 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   return matchSlug || matchTitle;
 });
 
-// ৪. লোকাল এবং সিএমএস রিভিউ মার্জ
 const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
 const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
 
-// ৫. ফরম্যাটিং (Google Guidelines Compliant)
 const unformattedReviews = combinedRawReviews.map((rev: any) => ({
   name: String(rev.name || rev.author || 'Guest Reviewer').trim(),
   date: rev.date || 'Recent Stay',
@@ -62,7 +57,6 @@ const unformattedReviews = combinedRawReviews.map((rev: any) => ({
   comment: String(rev.comment || rev.review || rev.body || '').trim()
 })).filter(r => r.comment.length > 1);
 
-// ৬. তারিখ পার্সার হেল্পার
 const parseDateToTime = (dStr: any) => {
   if (!dStr || dStr === 'Recent Stay') return 0;
   const cleanStr = String(dStr).replace(' at ', ' ').trim();
@@ -70,12 +64,10 @@ const parseDateToTime = (dStr: any) => {
   return isNaN(time) ? 0 : time;
 };
 
-// ৭. NEWEST-TO-OLDEST SORTING
 const allReviews = unformattedReviews.sort((a, b) => {
   return parseDateToTime(b.date) - parseDateToTime(a.date);
 });
 
-// রেটিং ও কাউন্ট ক্যালকুলেশন (Google Safe: রিভিউ না থাকলে 0.0)
 const reviewsCount = allReviews.length;
 const avgRatingNum = reviewsCount > 0 
   ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount) 
