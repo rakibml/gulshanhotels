@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelPolicies.astro (100% Pure SVG Vector Badges & Booking.com Layout)
+// src/components/hotel/HotelPolicies.astro (100% Pure Dynamic CMS Data, Zero Fake Fallbacks, Pure Vector SVGs)
 interface Props {
   hotel: any;
 }
@@ -7,49 +7,60 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelTitle = (data.title || data.name || "").trim();
 const showPolicies = data.enable_policies !== false;
 
-// 1. Core Schedules
-const checkIn = data.check_in || data.checkIn || "Available 24 hours";
-const checkOut = data.check_out || data.checkOut || "Available 24 hours";
+// 1. Core Schedules (Pure CMS, No Fake "Available 24 hours")
+const checkIn = String(data.check_in || data.checkIn || "").trim();
+const checkOut = String(data.check_out || data.checkOut || "").trim();
 
 // 2. Cancellation
-const cancellationRaw = data.cancellation_policy || data.cancellation || "Cancellation and prepayment policies vary according to accommodation type. Please check what conditions apply to each option when making your selection.";
+const cancellationRaw = String(data.cancellation_policy || data.cancellation || "").trim();
 
 function parseMarkdownLinks(text: string) {
   if (!text) return "";
-  return text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 hover:underline font-semibold">$1</a>');
+  return text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">$1</a>');
 }
 const cancellationHtml = parseMarkdownLinks(cancellationRaw);
 
-// 3. Children & Beds
-const childPolicyText = data.child_policy_text || "Children of all ages are welcome.\nChildren 9 and above will be charged as adults at this property.\nTo see correct prices and occupancy info, add the number and ages of children in your group to your search.";
+// 3. Children & Beds (Only from CMS, Zero Fake $25 fallbacks)
+const childPolicyText = String(data.child_policy_text || "").trim();
 
-const extraBedsList: Array<{ age: string; type: string; price: string }> = Array.isArray(data.extra_beds) && data.extra_beds.length > 0
-  ? data.extra_beds
-  : [
-      { age: "1 - 6 years", type: "Crib upon request", price: "Free" },
-      { age: "12+ years", type: "Extra bed upon request", price: "US$25 per person, per night" }
-    ];
+const extraBedsList: Array<{ age: string; type: string; price: string }> = Array.isArray(data.extra_beds)
+  ? data.extra_beds.filter((b: any) => b && (b.age || b.type || b.price))
+  : [];
 
-const extraBedsNotes = data.extra_beds_notes || "Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.\nThe number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.\nAll cribs and extra beds are subject to availability.";
+const extraBedsNotes = String(data.extra_beds_notes || "").trim();
+const hasChildrenBeds = Boolean(childPolicyText || extraBedsList.length > 0 || extraBedsNotes);
 
-// 4. Age Restriction & Pets
-const ageRestriction = data.age_restriction || data.ageRestriction || "The minimum age for check-in is 18";
-const petsPolicy = data.pets_policy || data.petsPolicy || data.pets || "Pets are not allowed.";
+// 4. Age Restriction & Pets (Pure CMS)
+const ageRestriction = String(data.age_restriction || data.ageRestriction || "").trim();
+const petsPolicy = String(data.pets_policy || data.petsPolicy || data.pets || "").trim();
 
-// 5. Accepted Payment Methods
-const acceptedPayments: string[] = Array.isArray(data.payment_methods) && data.payment_methods.length > 0
-  ? data.payment_methods
-  : ["amex", "visa", "mastercard", "unionpay", "cash"];
+// 5. Accepted Payment Methods (Only selected from CMS)
+const acceptedPayments: string[] = Array.isArray(data.payment_methods)
+  ? data.payment_methods.filter(Boolean)
+  : [];
 
-// 6. Custom Extra Policies
-const customPolicies = Array.isArray(data.custom_policies) ? data.custom_policies : (Array.isArray(data.policies) ? data.policies : []);
+// 6. Custom Extra Policies (Pure CMS)
+const rawCustom = Array.isArray(data.custom_policies) ? data.custom_policies : (Array.isArray(data.policies) ? data.policies : []);
+const customPolicies = rawCustom.filter((item: any) => item && (item.label || item.value));
+
+// Verify if there is any real policy data to display
+const hasAnyPolicy = Boolean(
+  checkIn ||
+  checkOut ||
+  cancellationRaw ||
+  hasChildrenBeds ||
+  ageRestriction ||
+  petsPolicy ||
+  acceptedPayments.length > 0 ||
+  customPolicies.length > 0
+);
 ---
 
-{showPolicies && (
-  <section id="hotel-policies" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16 text-left">
+{showPolicies && hasAnyPolicy && (
+  <section id="hotel-policies" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-6xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16 text-left">
     
     <!-- Top Header -->
     <div class="flex items-center justify-between pb-6 border-b border-slate-100">
@@ -58,200 +69,235 @@ const customPolicies = Array.isArray(data.custom_policies) ? data.custom_policie
           Property policies
         </h2>
         <p class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-          {hotelTitle} takes special requests – add in the next step!
+          {hotelTitle ? `${hotelTitle} policies and stay guidelines` : "Hotel policies and stay guidelines"}
         </p>
       </div>
 
       <a 
         href="#rates-card" 
-        class="bg-[#0071c2] hover:bg-[#005999] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg transition shadow-xs hidden sm:inline-block"
+        class="bg-[#0071c2] hover:bg-[#005999] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg transition shadow-2xs hidden sm:inline-block"
       >
         See availability
       </a>
     </div>
 
     <!-- Booking.com Unified Policies Container -->
-    <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs divide-y divide-slate-200 mt-6 bg-white text-xs sm:text-sm">
+    <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs divide-y divide-slate-200 mt-6 bg-white text-xs sm:text-sm">
       
-      <!-- 1. CHECK-IN ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          <span>Check-in</span>
-        </div>
-        <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
-          {checkIn}
-        </div>
-      </div>
-
-      <!-- 2. CHECK-OUT ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          <span>Check-out</span>
-        </div>
-        <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
-          {checkOut}
-        </div>
-      </div>
-
-      <!-- 3. CANCELLATION / PREPAYMENT ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>Cancellation/ prepayment</span>
-        </div>
-        <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed" set:html={cancellationHtml}>
-        </div>
-      </div>
-
-      <!-- 4. CHILDREN & BEDS ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Children & Beds</span>
-        </div>
-        <div class="md:col-span-8 lg:col-span-9 space-y-4 text-slate-700 leading-relaxed">
-          
-          <div class="space-y-1.5 whitespace-pre-line">
-            <h4 class="font-bold text-slate-900 text-sm">Child policies</h4>
-            <p class="text-slate-700">{childPolicyText}</p>
+      <!-- 1. CHECK-IN ROW (Only if provided in CMS) -->
+      {checkIn && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+            <span>Check-in</span>
           </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
+            {checkIn}
+          </div>
+        </div>
+      )}
 
-          <!-- Structured Crib and Extra Bed Table -->
-          {extraBedsList.length > 0 && (
-            <div class="space-y-2 pt-1">
-              <h4 class="font-bold text-slate-900 text-sm">Crib and extra bed policies</h4>
-              
-              <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200 bg-white shadow-2xs">
-                {extraBedsList.map((tier) => (
-                  <div class="p-3.5 space-y-1.5">
-                    <span class="font-bold text-slate-900 text-xs block">{tier.age}</span>
-                    <div class="flex items-center justify-between text-xs sm:text-sm">
-                      <div class="flex items-center gap-2 text-slate-700">
-                        <!-- Crib/Bed SVG Icon -->
-                        <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M5 18v2m14-2v2M5 6v4m14-4v4"/></svg>
-                        <span>{tier.type}</span>
-                      </div>
-                      <span class={`font-bold ${tier.price.toLowerCase() === 'free' ? 'text-emerald-700 font-extrabold' : 'text-slate-800'}`}>
-                        {tier.price}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+      <!-- 2. CHECK-OUT ROW (Only if provided in CMS) -->
+      {checkOut && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Check-out</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
+            {checkOut}
+          </div>
+        </div>
+      )}
+
+      <!-- 3. CANCELLATION / PREPAYMENT ROW (Only if provided in CMS) -->
+      {cancellationRaw && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>Cancellation / Prepayment</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed" set:html={cancellationHtml}>
+          </div>
+        </div>
+      )}
+
+      <!-- 4. CHILDREN & BEDS ROW (Only if provided in CMS) -->
+      {hasChildrenBeds && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Children & Beds</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 space-y-4 text-slate-700 leading-relaxed">
+            
+            {childPolicyText && (
+              <div class="space-y-1.5 whitespace-pre-line">
+                <h4 class="font-bold text-slate-900 text-sm">Child policies</h4>
+                <p class="text-slate-700">{childPolicyText}</p>
               </div>
-            </div>
-          )}
+            )}
 
-          {extraBedsNotes && (
-            <p class="text-slate-600 text-xs whitespace-pre-line leading-relaxed pt-1">
-              {extraBedsNotes}
-            </p>
-          )}
+            <!-- Extra Beds Table (Only if admin added tiers in CMS) -->
+            {extraBedsList.length > 0 && (
+              <div class="space-y-2 pt-1">
+                <h4 class="font-bold text-slate-900 text-sm">Crib and extra bed policies</h4>
+                
+                <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200 bg-white shadow-2xs">
+                  {extraBedsList.map((tier) => (
+                    <div class="p-3.5 space-y-1.5">
+                      {tier.age && <span class="font-bold text-slate-900 text-xs block">{tier.age}</span>}
+                      <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center gap-2 text-slate-700">
+                          <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M5 18v2m14-2v2M5 6v4m14-4v4"/>
+                          </svg>
+                          <span>{tier.type}</span>
+                        </div>
+                        {tier.price && (
+                          <span class={`font-bold ${tier.price.toLowerCase().includes('free') ? 'text-emerald-700 font-extrabold' : 'text-slate-800'}`}>
+                            {tier.price}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-        </div>
-      </div>
+            {extraBedsNotes && (
+              <p class="text-slate-600 text-xs whitespace-pre-line leading-relaxed pt-1">
+                {extraBedsNotes}
+              </p>
+            )}
 
-      <!-- 5. AGE RESTRICTION ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>Age restriction</span>
+          </div>
         </div>
-        <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
-          {ageRestriction}
-        </div>
-      </div>
+      )}
 
-      <!-- 6. PETS ROW -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 4 5 2-2 4-3 4-5a4 4 0 0 0-4-4zm-6 8a3 3 0 0 0-3 3c0 1.5 1.5 2.5 3 4 1.5-1.5 3-2.5 3-4a3 3 0 0 0-3-3zm12 0a3 3 0 0 0-3 3c0 1.5 1.5 2.5 3 4 1.5-1.5 3-2.5 3-4a3 3 0 0 0-3-3z"/></svg>
-          <span>Pets</span>
+      <!-- 5. AGE RESTRICTION ROW (Only if provided in CMS) -->
+      {ageRestriction && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Age restriction</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
+            {ageRestriction}
+          </div>
         </div>
-        <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
-          {petsPolicy}
-        </div>
-      </div>
+      )}
 
-      <!-- 7. ACCEPTED PAYMENT METHODS (100% PURE VECTOR LOGOS) -->
-      <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
-        <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
-          <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          <span>Accepted payment methods</span>
+      <!-- 6. PETS ROW (Only if provided in CMS) -->
+      {petsPolicy && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 4 5 2-2 4-3 4-5a4 4 0 0 0-4-4zm-6 8a3 3 0 0 0-3 3c0 1.5 1.5 2.5 3 4 1.5-1.5 3-2.5 3-4a3 3 0 0 0-3-3zm12 0a3 3 0 0 0-3 3c0 1.5 1.5 2.5 3 4 1.5-1.5 3-2.5 3-4a3 3 0 0 0-3-3z"/>
+            </svg>
+            <span>Pets</span>
+          </div>
+          <div class="md:col-span-8 lg:col-span-9 text-slate-700 leading-relaxed">
+            {petsPolicy}
+          </div>
         </div>
-        
-        <!-- Authentic Vector Logos -->
-        <div class="md:col-span-8 lg:col-span-9 flex flex-wrap items-center gap-2.5 pt-0.5">
+      )}
+
+      <!-- 7. ACCEPTED PAYMENT METHODS (Only selected ones from CMS) -->
+      {acceptedPayments.length > 0 && (
+        <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
+          <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
+            <svg class="w-4 h-4 text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            <span>Accepted payment methods</span>
+          </div>
           
-          <!-- American Express (Official Amex Vector) -->
-          {acceptedPayments.includes("amex") && (
-            <div class="h-7 w-11 rounded bg-[#006FCF] flex items-center justify-center p-1 shadow-2xs shrink-0" title="American Express">
-              <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
-                <path d="M12 18.5L8.5 12h-3v8h2.3v-4.8l2.9 4.8h1.6l2.9-4.8V20h2.3v-8h-3L12 18.5zm8.5-6.5h-4.8v8h4.8c2.2 0 3.7-1.4 3.7-4s-1.5-4-3.7-4zm-.2 6.1h-2.3v-4.2h2.3c1.2 0 1.9.7 1.9 2.1s-.7 2.1-1.9 2.1zm8.2-6.1h-5.2v8h5.2v-1.9h-2.9v-1.3h2.6v-1.8h-2.6v-1.1h2.9V12zm6.7 4.2l2.3-4.2h-2.6l-1.3 2.5-1.3-2.5h-2.6l2.3 4.2-2.5 3.8h2.6l1.5-2.6 1.5 2.6h2.6l-2.5-3.8z" fill="#FFFFFF"/>
-              </svg>
-            </div>
-          )}
+          <div class="md:col-span-8 lg:col-span-9 flex flex-wrap items-center gap-2.5 pt-0.5">
+            {acceptedPayments.includes("amex") && (
+              <div class="h-7 w-11 rounded bg-[#006FCF] flex items-center justify-center p-1 shadow-2xs shrink-0" title="American Express">
+                <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
+                  <path d="M12 18.5L8.5 12h-3v8h2.3v-4.8l2.9 4.8h1.6l2.9-4.8V20h2.3v-8h-3L12 18.5zm8.5-6.5h-4.8v8h4.8c2.2 0 3.7-1.4 3.7-4s-1.5-4-3.7-4zm-.2 6.1h-2.3v-4.2h2.3c1.2 0 1.9.7 1.9 2.1s-.7 2.1-1.9 2.1zm8.2-6.1h-5.2v8h5.2v-1.9h-2.9v-1.3h2.6v-1.8h-2.6v-1.1h2.9V12zm6.7 4.2l2.3-4.2h-2.6l-1.3 2.5-1.3-2.5h-2.6l2.3 4.2-2.5 3.8h2.6l1.5-2.6 1.5 2.6h2.6l-2.5-3.8z" fill="#FFFFFF"/>
+                </svg>
+              </div>
+            )}
 
-          <!-- Visa (Official Visa Vector) -->
-          {acceptedPayments.includes("visa") && (
-            <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="Visa">
-              <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
-                <path d="M19.5 21H16.8L18.5 11H21.2L19.5 21ZM15.1 11L12.5 17.9L12.2 16.4C11.7 14.7 10.2 12.8 8.4 11.9L10.7 21H13.6L17.8 11H15.1ZM30.7 17.7C30.7 15.1 27.1 14.9 27.1 13.7C27.1 13.2 27.6 12.7 28.7 12.6C29.2 12.5 30.6 12.5 32.1 13.2L32.7 10.9C31.9 10.6 30.8 10.3 29.5 10.3C26.1 10.3 23.7 12.1 23.7 14.8C23.7 18.7 29.2 18.5 29.2 20.4C29.2 21 28.6 21.6 27.4 21.6C26 21.6 24.3 21 23.4 20.5L22.8 22.9C23.8 23.4 25.6 23.8 27.4 23.8C31 23.8 33.5 22 33.5 19.1C33.5 17.7 30.7 17.7 30.7 17.7ZM39.6 11H37.5C36.8 11 36.3 11.4 36 12L31.8 21H34.7L35.3 19.3H38.8L39.1 21H41.7L39.6 11ZM35.9 17.3L37.4 13.2L38.3 17.3H35.9Z" fill="#1434CB"/>
-              </svg>
-            </div>
-          )}
+            {acceptedPayments.includes("visa") && (
+              <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="Visa">
+                <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
+                  <path d="M19.5 21H16.8L18.5 11H21.2L19.5 21ZM15.1 11L12.5 17.9L12.2 16.4C11.7 14.7 10.2 12.8 8.4 11.9L10.7 21H13.6L17.8 11H15.1ZM30.7 17.7C30.7 15.1 27.1 14.9 27.1 13.7C27.1 13.2 27.6 12.7 28.7 12.6C29.2 12.5 30.6 12.5 32.1 13.2L32.7 10.9C31.9 10.6 30.8 10.3 29.5 10.3C26.1 10.3 23.7 12.1 23.7 14.8C23.7 18.7 29.2 18.5 29.2 20.4C29.2 21 28.6 21.6 27.4 21.6C26 21.6 24.3 21 23.4 20.5L22.8 22.9C23.8 23.4 25.6 23.8 27.4 23.8C31 23.8 33.5 22 33.5 19.1C33.5 17.7 30.7 17.7 30.7 17.7ZM39.6 11H37.5C36.8 11 36.3 11.4 36 12L31.8 21H34.7L35.3 19.3H38.8L39.1 21H41.7L39.6 11ZM35.9 17.3L37.4 13.2L38.3 17.3H35.9Z" fill="#1434CB"/>
+                </svg>
+              </div>
+            )}
 
-          <!-- MasterCard (Official Overlapping Circles Vector) -->
-          {acceptedPayments.includes("mastercard") && (
-            <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="Mastercard">
-              <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
-                <circle cx="19" cy="16" r="9" fill="#EB001B"/>
-                <circle cx="29" cy="16" r="9" fill="#F79E1B"/>
-                <path d="M24 9.8a8.96 8.96 0 0 1 3.4 6.2c0 2.4-1.3 4.6-3.4 6.2a8.96 8.96 0 0 1-3.4-6.2c0-2.4 1.3-4.6 3.4-6.2z" fill="#FF5F00"/>
-              </svg>
-            </div>
-          )}
+            {acceptedPayments.includes("mastercard") && (
+              <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="Mastercard">
+                <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
+                  <circle cx="19" cy="16" r="9" fill="#EB001B"/>
+                  <circle cx="29" cy="16" r="9" fill="#F79E1B"/>
+                  <path d="M24 9.8a8.96 8.96 0 0 1 3.4 6.2c0 2.4-1.3 4.6-3.4 6.2a8.96 8.96 0 0 1-3.4-6.2c0-2.4 1.3-4.6 3.4-6.2z" fill="#FF5F00"/>
+                </svg>
+              </div>
+            )}
 
-          <!-- UnionPay (Official Multi-card Vector) -->
-          {acceptedPayments.includes("unionpay") && (
-            <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="UnionPay">
-              <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
-                <rect x="10" y="8" width="8" height="16" rx="1.5" fill="#C8102E"/>
-                <rect x="17" y="8" width="8" height="16" rx="1.5" fill="#002F6C"/>
-                <rect x="24" y="8" width="8" height="16" rx="1.5" fill="#008075"/>
-                <text x="21" y="27" font-family="sans-serif" font-weight="900" font-size="6" fill="#002F6C" text-anchor="middle">UnionPay</text>
-              </svg>
-            </div>
-          )}
+            {acceptedPayments.includes("unionpay") && (
+              <div class="h-7 w-11 rounded border border-slate-200 bg-white flex items-center justify-center p-1 shadow-2xs shrink-0" title="UnionPay">
+                <svg viewBox="0 0 48 32" fill="none" class="w-full h-full">
+                  <rect x="10" y="8" width="8" height="16" rx="1.5" fill="#C8102E"/>
+                  <rect x="17" y="8" width="8" height="16" rx="1.5" fill="#002F6C"/>
+                  <rect x="24" y="8" width="8" height="16" rx="1.5" fill="#008075"/>
+                  <text x="21" y="27" font-family="sans-serif" font-weight="900" font-size="6" fill="#002F6C" text-anchor="middle">UnionPay</text>
+                </svg>
+              </div>
+            )}
 
-          <!-- Cash (Banknote Vector) -->
-          {acceptedPayments.includes("cash") && (
-            <div class="h-7 px-2.5 rounded border border-emerald-600 bg-[#00875a] text-white flex items-center justify-center gap-1.5 shadow-2xs shrink-0" title="Cash">
-              <svg class="w-3.5 h-3.5 stroke-white fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
-              <span class="text-[10px] font-black uppercase tracking-wider">Cash</span>
-            </div>
-          )}
+            {acceptedPayments.includes("cash") && (
+              <div class="h-7 px-2.5 rounded border border-emerald-600 bg-[#00875a] text-white flex items-center justify-center gap-1.5 shadow-2xs shrink-0" title="Cash">
+                <svg class="w-3.5 h-3.5 stroke-white fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
+                  <rect x="2" y="6" width="20" height="12" rx="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                </svg>
+                <span class="text-[10px] font-black uppercase tracking-wider">Cash</span>
+              </div>
+            )}
 
-          <!-- bKash (Official Bird Vector) -->
-          {acceptedPayments.includes("bkash") && (
-            <div class="h-7 px-2.5 rounded bg-[#E2136E] text-white flex items-center justify-center gap-1 shadow-2xs shrink-0" title="bKash">
-              <svg class="w-3 h-3 fill-white shrink-0" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              <span class="text-[10px] font-black tracking-wider">bKash</span>
-            </div>
-          )}
+            {acceptedPayments.includes("bkash") && (
+              <div class="h-7 px-2.5 rounded bg-[#E2136E] text-white flex items-center justify-center gap-1 shadow-2xs shrink-0" title="bKash">
+                <svg class="w-3 h-3 fill-white shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="text-[10px] font-black tracking-wider">bKash</span>
+              </div>
+            )}
 
-          <!-- Nagad (Official Vector Badge) -->
-          {acceptedPayments.includes("nagad") && (
-            <div class="h-7 px-2.5 rounded bg-[#F7931E] text-white flex items-center justify-center gap-1 shadow-2xs shrink-0" title="Nagad">
-              <span class="text-[10px] font-black tracking-wider">Nagad</span>
-            </div>
-          )}
-
+            {acceptedPayments.includes("nagad") && (
+              <div class="h-7 px-2.5 rounded bg-[#F7931E] text-white flex items-center justify-center gap-1 shadow-2xs shrink-0" title="Nagad">
+                <span class="text-[10px] font-black tracking-wider">Nagad</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <!-- 8. ANY EXTRA CUSTOM POLICIES -->
+      <!-- 8. ANY EXTRA CUSTOM POLICIES (Only if provided in CMS) -->
       {customPolicies.map((item: any) => (
         <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
           <div class="md:col-span-4 lg:col-span-3 font-bold text-slate-900 capitalize">
