@@ -1,17 +1,19 @@
 ---
-// src/components/hotel/HotelSubNav.astro (Aligned to max-w-7xl, Clean Modern Typography & Smooth ScrollSpy)
+// src/components/hotel/HotelSubNav.astro (Flicker-Free ScrollSpy, Accurate Dead-Link Prevention & WCAG A11y)
 interface Props {
   hotel: any;
 }
 
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
-const hotelTitle = data.title || data.name || "Hotel Details";
+const hotelTitle = String(data.title || data.name || "").trim();
 
 // Dynamic section controls from CMS
 const showRates = data.enable_view_prices !== false;
 const hasReviews = data.enable_reviews !== false;
-const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_faqs !== false;
+
+// শুধুমাত্র পেজে প্রকৃত FAQ ডেটা উপস্থিত থাকলেই FAQs ট্যাব দেখাবে (ডেড লিংক রোধ)
+const hasFaqs = Array.isArray(data.faqs) && data.faqs.length > 0;
 ---
 
 <nav
@@ -19,7 +21,6 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
   aria-label="Hotel Section Jump Navigation"
   class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all duration-300"
 >
-  <!-- কন্টেইনার উইডথ max-w-6xl করে হেডারের ছবির সাথে একদম সমান্তরাল করা হলো -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 flex items-center justify-between h-13 text-xs sm:text-[13px] font-semibold text-slate-600">
     
     <!-- Left Jump Links with Horizontal Scroll on Mobile -->
@@ -27,14 +28,17 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
       id="subNavLinksContainer"
       class="flex items-center gap-5 sm:gap-7 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden h-full py-0"
     >
-      <!-- Modern Sans-Serif Hotel Title (Aligned with Header Font) -->
-      <span class="font-sans font-black text-[#002b11] text-xs sm:text-sm hidden lg:inline-block truncate max-w-[210px] border-r border-slate-200 pr-5 shrink-0 select-none tracking-tight">
-        {hotelTitle}
-      </span>
+      <!-- Hotel Title on Desktop (Only shown if title exists) -->
+      {hotelTitle && (
+        <span class="font-sans font-black text-[#002b11] text-xs sm:text-sm hidden lg:inline-block truncate max-w-[210px] border-r border-slate-200 pr-5 shrink-0 select-none tracking-tight">
+          {hotelTitle}
+        </span>
+      )}
 
-      <!-- Jump Anchors (Sleek Airbnb/Booking Tab Style) -->
+      <!-- Jump Anchors with aria-current support -->
       <a 
         href="#about-and-rates" 
+        aria-current="true"
         class="subnav-link h-full inline-flex items-center text-emerald-900 border-b-[2.5px] border-emerald-800 font-bold hover:text-emerald-800 transition-colors shrink-0"
       >
         Overview
@@ -73,7 +77,7 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
       )}
     </div>
 
-    <!-- Right Quick Action Button (Matches Brand Dark Green Pill) -->
+    <!-- Right Quick Action Button -->
     {showRates && (
       <div class="shrink-0 pl-4 hidden sm:block">
         <a
@@ -81,7 +85,7 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
           class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-full shadow-xs transition hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
         >
           <span>View Prices</span>
-          <span class="text-sm">➔</span>
+          <span class="text-sm" aria-hidden="true">➔</span>
         </a>
       </div>
     )}
@@ -89,13 +93,14 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
   </div>
 </nav>
 
-<!-- CLIENT SCRIPT FOR SMOOTH SCROLLSPY & ACTIVE LINK HIGHLIGHTING -->
+<!-- CLIENT SCRIPT (FLICKER-FREE MAP-BASED SCROLLSPY) -->
 <script>
   let subNavAbortCtrl: AbortController | null = null;
 
   function initSubNavScrollSpy() {
     if (subNavAbortCtrl) subNavAbortCtrl.abort();
     subNavAbortCtrl = new AbortController();
+    const { signal } = subNavAbortCtrl;
 
     const links = document.querySelectorAll<HTMLAnchorElement>('.subnav-link');
     const container = document.getElementById('subNavLinksContainer');
@@ -118,10 +123,12 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
       links.forEach((l) => {
         l.classList.remove('text-emerald-900', 'border-emerald-800', 'font-bold');
         l.classList.add('text-slate-600', 'border-transparent', 'font-medium');
+        l.removeAttribute('aria-current');
       });
 
       activeLink.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
       activeLink.classList.add('text-emerald-900', 'border-emerald-800', 'font-bold');
+      activeLink.setAttribute('aria-current', 'true');
 
       if (container) {
         const linkRect = activeLink.getBoundingClientRect();
@@ -132,29 +139,54 @@ const hasFaqs = Array.isArray(data.faqs) ? data.faqs.length > 0 : data.enable_fa
       }
     }
 
+    // ট্যাবে ক্লিক করলে সাথে সাথে অ্যাক্টিভ হওয়া
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        setActiveLink(link);
+      }, { signal });
+    });
+
+    // দৃশ্যমান সেকশন ট্র্যাকিং ম্যাপ (লাফালাফি বন্ধ করার আধুনিক সমাধান)
+    const activeSectionsMap = new Map<HTMLElement, boolean>();
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntries = entries.filter((e) => e.isIntersecting);
-        if (visibleEntries.length > 0) {
-          const topEntry = visibleEntries.reduce((prev, curr) =>
-            Math.abs(curr.boundingClientRect.top - 60) < Math.abs(prev.boundingClientRect.top - 60) ? curr : prev
-          );
+        entries.forEach((e) => {
+          activeSectionsMap.set(e.target as HTMLElement, e.isIntersecting);
+        });
 
-          const matched = linkMap.find((item) => item.section === topEntry.target);
+        // স্ক্রিনে বর্তমান দৃশ্যমান সেকশনগুলোর মধ্যে ন্যাভবারের সবচেয়ে কাছেরটি বের করা
+        let closestSection: HTMLElement | null = null;
+        let minDistance = Infinity;
+
+        linkMap.forEach(({ section }) => {
+          if (activeSectionsMap.get(section)) {
+            const rect = section.getBoundingClientRect();
+            // ন্যাভবারের উচ্চতার সাপেক্ষে হিসাব
+            const dist = Math.abs(rect.top - 70);
+            if (dist < minDistance) {
+              minDistance = dist;
+              closestSection = section;
+            }
+          }
+        });
+
+        if (closestSection) {
+          const matched = linkMap.find((item) => item.section === closestSection);
           if (matched) {
             setActiveLink(matched.link);
           }
         }
       },
       {
-        rootMargin: '-60px 0px -70% 0px',
-        threshold: [0, 0.2, 0.5]
+        rootMargin: '-70px 0px -40% 0px',
+        threshold: [0, 0.2, 0.5, 0.8]
       }
     );
 
     linkMap.forEach(({ section }) => observer.observe(section));
 
-    subNavAbortCtrl.signal.addEventListener('abort', () => {
+    signal.addEventListener('abort', () => {
       observer.disconnect();
     });
   }
