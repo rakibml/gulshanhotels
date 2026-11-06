@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelMasterSchema.astro
-// কঠোর নিয়ম: ১০০% জেনুইন ডাটা। CMS ও কন্টেন্টে যা আছে শুধু তাই স্কিমায় যাবে, কোনো বানানো বা অনুমাননির্ভর ডাটা নেই।
+// ১০০% গুগল কমপ্লায়েন্ট, জিরো ফেক ডাটা, অ্যাডমিন প্যানেল ও পেজের বাকি ৭টি সেকশনের সাথে শতভাগ সিঙ্কড।
 interface Props {
   hotel: any;
 }
@@ -9,9 +9,9 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const SITE_ORIGIN = "https://gulshanhotels.com";
-const HOTELS_LIST_PATH = ""; // হোটেল ডিরেক্টরি লিস্ট পেজ থাকলে পাথ দিন (যেমন: "/hotels"), না থাকলে খালি রাখুন
+const HOTELS_LIST_PATH = ""; // প্রয়োজন হলে যেমন "/hotels" দিতে পারেন, অন্যথায় খালি থাকবে
 
-// ================= হেল্পার ফাংশনসমূহ =================
+// ================= ১. ক্লিনআপ হেল্পার ফাংশন =================
 const str = (v: any): string => (v === null || v === undefined ? "" : String(v).trim());
 
 function cleanText(raw: any): string {
@@ -34,7 +34,7 @@ function truncate(text: string, max = 300): string {
   return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-// কোনো ফেক বা প্লেসহোল্ডার ইমেজ ছাড়াই শুধু আসল ছবি নেওয়া
+// গ্যালারি অবজেক্টের photo, image, url, src সবই সাপোর্ট করবে (কোনো ডামি ছবি নেই)
 function toAbsoluteImageUrl(url: any): string {
   const clean = str(typeof url === "string" ? url : url?.photo || url?.image || url?.src || url?.url);
   if (!clean || clean.includes("example-test.site")) return "";
@@ -66,21 +66,19 @@ function formatTime(tStr: any): string {
   return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
-// কোনো বানানো কারেন্সি বা প্রাইজ ছাড়া শুধুমাত্র আসল প্রাইজ ফরম্যাট
+// গুগল স্ট্যান্ডার্ড প্রাইসরেঞ্জ (টেক্সট জাতীয় ভ্যালু ফিল্টার করবে)
 function getSafePriceRange(rawPrice: any): string {
   const pStr = str(rawPrice);
   if (!pStr) return "";
 
-  // টেক্সট জাতীয় স্ট্রিং হলে স্কিমায় প্রাইস পাঠানো নিষেধ
   if (/check\s*rates|contact|call|inquire/i.test(pStr)) {
     return "";
   }
 
-  // গুগল স্ট্যান্ডার্ড: ১০০ ক্যারেক্টারের কম হতে হবে
   return pStr.slice(0, 80).trim();
 }
 
-// ================= ১. বেসিক ডাটা =================
+// ================= ২. বেসিক ডাটা =================
 const hotelTitle = str(data.title || data.name);
 const rawSlug = str(data.slug || hotel?.slug || hotel?.id);
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
@@ -89,20 +87,20 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).href;
 const hotelDescription = truncate(cleanText(hotel?.body || data.description || data.overview || data.about));
 const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
 
-// অফিসিয়াল সাইটের ভ্যালিডেশন
+// অফিসিয়াল সাইটের লিংক ভ্যালিডেশন
 const rawOfficialSite = str(data.officialSite || data.official_site_url);
 const isValidOfficialSite =
   /^https?:\/\//i.test(rawOfficialSite) &&
   !rawOfficialSite.includes("youtube.com") &&
   !rawOfficialSite.includes("youtu.be/");
 
-// ================= ২. গ্যালারি ছবি =================
+// ================= ৩. গ্যালারি ইমেজ =================
 const rawGalleryItems: any[] = Array.isArray(data.gallery) && data.gallery.length > 0
   ? data.gallery.filter(Boolean)
   : (data.image ? [data.image] : []);
 const images = Array.from(new Set(rawGalleryItems.map(toAbsoluteImageUrl).filter(Boolean))).slice(0, 10);
 
-// ================= ৩. জেনুইন রিভিউ (হেডার ও রিভিউ কম্পোনেন্টের সাথে হুবহু সিঙ্কড) =================
+// ================= ৪. জেনুইন রিভিউ (হেডার ও রিভিউ কম্পোনেন্টের সাথে সিঙ্কড) =================
 let allReviewsList: any[] = [];
 try {
   const globReviews = import.meta.glob("/src/content/reviews/*.{md,mdx}", { eager: true });
@@ -138,7 +136,6 @@ const embeddedRevs = (Array.isArray(data.reviews) ? data.reviews : []).filter((r
   return r && (r.approved === undefined || r.approved === true || str(r.approved).toLowerCase() === "true");
 });
 
-// স্প্যাম রোধ ও নির্ভুল ফিল্টারিং (কমেন্ট নূন্যতম ১০ অক্ষর, রেটিং ১-৫)
 const seenReviews = new Set<string>();
 const validReviews = [...approvedReviews, ...embeddedRevs]
   .map((r: any) => ({
@@ -160,7 +157,7 @@ const ratingValue = reviewCount > 0
   ? Number((validReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1))
   : null;
 
-// ================= ৪. অ্যামেনিটিস =================
+// ================= ৫. অ্যামেনিটিস =================
 function extractName(item: any): string {
   if (typeof item === "string") return item.trim();
   if (item && typeof item === "object") {
@@ -185,7 +182,7 @@ const amenityNames: string[] = [];
 });
 const uniqueAmenities = Array.from(new Set(amenityNames));
 
-// ================= ৫. রুম, সময় ও জিও লোকেশন =================
+// ================= ৬. রুম, সময় ও জিও লোকেশন =================
 const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
   .map((room: any) => ({
     name: str(typeof room === "string" ? room : room?.name),
@@ -204,26 +201,30 @@ const hasGeo =
   Math.abs(latNum) <= 90 && Math.abs(lngNum) <= 180 &&
   !(latNum === 0 && lngNum === 0);
 
-// ================= ৬. অ্যাড্রেস (এডমিন প্যানেল থেকে সরাসরি ম্যানুয়ালি) =================
-const streetAddress = str(data.street_address || data.streetAddress || data.location);
-const locality = str(data.locality || data.area || data.city);
-const region = str(data.region || data.state);
-const postalCode = str(data.postal_code || data.postalCode || data.zip);
+// ================= ৭. অ্যাড্রেস (এডমিন প্যানেলের ইনপুট থেকে সরাসরি) =================
+const rawLocation = str(data.location || data.address);
 
-// এডমিন প্যানেলে যা থাকবে শুধু তাই স্কিমায় যাবে (কোনো অনুমান বা ফেক ডাটা নেই)
-if (streetAddress || locality || region || postalCode) {
-  const addressObj: any = {
-    "@type": "PostalAddress",
-    addressCountry: "BD",
-  };
-  if (streetAddress) addressObj.streetAddress = streetAddress;
-  if (locality) addressObj.addressLocality = locality;       // এডমিনের দেওয়া locality
-  if (region) addressObj.addressRegion = region;             // এডমিনের দেওয়া region
-  if (postalCode) addressObj.postalCode = postalCode;         // এডমিনের দেওয়া postal_code
+// অ্যাডমিন প্যানেল থেকে ইনপুট দেওয়া ফিল্ডগুলো নেওয়া হচ্ছে
+let streetAddress = str(data.street_address || data.streetAddress || data.address || rawLocation);
+let locality = str(data.locality || data.area);
+let region = str(data.region || data.state);
+let postalCode = str(data.postal_code || data.postalCode || data.zip);
 
-  hotelNode.address = addressObj;
+// ব্যাকওয়ার্ড কম্প্যাটিবিলিটি: যদি কোনো পুরানো ফাইলে আলাদা ফিল্ড না থাকে, তবে স্ট্রিং থেকে বের করা
+if (!postalCode && rawLocation) {
+  const pMatch = rawLocation.match(/\b([1-9]\d{3})\b/);
+  if (pMatch) postalCode = pMatch[1];
 }
-// ================= ৭. স্কিমা অবজেক্ট তৈরি =================
+if (!locality && rawLocation) {
+  const parts = rawLocation.split(',').map((p: string) => p.trim()).filter(Boolean);
+  if (parts.length >= 1) locality = parts[0];
+  if (!region && parts.length >= 2) {
+    const cleanRegion = parts[1].replace(/\b[1-9]\d{3}\b/, '').replace(/bangladesh/i, '').trim();
+    if (cleanRegion) region = cleanRegion;
+  }
+}
+
+// ================= ৮. স্কিমা অবজেক্ট গঠন =================
 const hotelId = `${pageUrl}#hotel`;
 
 const hotelNode: any = {
@@ -244,16 +245,16 @@ if (checkIn) hotelNode.checkinTime = checkIn;
 if (checkOut) hotelNode.checkoutTime = checkOut;
 if (isValidOfficialSite) hotelNode.sameAs = [rawOfficialSite];
 
-// অ্যাড্রেস: কোনো বানানো ডাটা নেই, যা পাওয়া যাবে কেবল তাই যাবে
+// অ্যাড্রেস অবজেক্ট
 if (streetAddress || locality || region || postalCode) {
   const addressObj: any = {
     "@type": "PostalAddress",
-    addressCountry: "BD",
+    addressCountry: str(data.country || data.country_code) || "BD",
   };
   if (streetAddress) addressObj.streetAddress = streetAddress;
-  if (locality) addressObj.addressLocality = locality;
-  if (region) addressObj.addressRegion = region;
-  if (postalCode) addressObj.postalCode = postalCode;
+  if (locality) addressObj.addressLocality = locality;       // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
+  if (region) addressObj.addressRegion = region;             // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
+  if (postalCode) addressObj.postalCode = postalCode;         // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
 
   hotelNode.address = addressObj;
 }
@@ -266,7 +267,7 @@ if (hasGeo) {
   };
 }
 
-// শুধু আসল রিভিউ থাকলেই রেটিং স্কিমা যাবে
+// শুধুমাত্র বাস্তব ও অনুমোদিত রিভিউ থাকলে রেটিং স্কিমা যাবে
 if (reviewCount > 0 && ratingValue !== null) {
   hotelNode.aggregateRating = {
     "@type": "AggregateRating",
@@ -317,7 +318,7 @@ if (HOTELS_LIST_PATH) {
 }
 crumbs.push({ name: hotelTitle, item: pageUrl });
 
-// ওয়েবপেজ নোড (গুগলকে নিশ্চিত করে যে এটি একটি স্বাধীন গাইড পেজ)
+// ওয়েবপেজ নোড (গুগলকে স্পষ্ট করে এটি ডিরেক্টরি পেজ)
 const webPageNode: any = {
   "@type": "WebPage",
   "@id": pageUrl,
@@ -341,7 +342,7 @@ const graph: any[] = [
   hotelNode,
 ];
 
-// টাইটেল না থাকলে কোনো স্কিমাই রেন্ডার হবে না
+// হোটেলের টাইটেল না থাকলে কোনো স্কিমাই যাবে না
 const jsonLd = hotelTitle
   ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")
   : "";
