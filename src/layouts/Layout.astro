@@ -1,5 +1,5 @@
 ---
-// src/layouts/Layout.astro (Global Modern Layout with Performance Preload & SEO)
+// src/layouts/Layout.astro (Global Modern Layout with Important Pages Footer Column)
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
 import Header from '../components/Header.astro';
@@ -8,14 +8,12 @@ interface Props {
   title: string;
   description?: string;
   image?: string;
-  preloadImage?: string; // 👈 ১. নতুন অপশনাল প্রপ (LCP স্পিড বুস্টের জন্য)
 }
 
 const { 
   title, 
   description = "Discover, compare, and book verified luxury and business hotels in Gulshan, Banani, and Dhaka, Bangladesh.",
-  image = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
-  preloadImage // 👈 ২. এখানে রিসিভ করা হলো
+  image = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
@@ -25,7 +23,6 @@ const siteUrl = Astro.url.origin + currentPath;
 <!doctype html>
 <html lang="en" class="scroll-smooth">
   <head>
-
     <meta charset="UTF-8" />
     <script is:inline>
       try { if (!sessionStorage.getItem('gh_intro')) { document.documentElement.classList.add('gh-intro'); sessionStorage.setItem('gh_intro','1'); } } catch(e) {}
@@ -33,20 +30,6 @@ const siteUrl = Astro.url.origin + currentPath;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- ইমেজ CDN-এর সাথে আগেই কানেকশন তৈরি (LCP লোড টাইম ২০০-৩০০ms কমাবে) -->
-    <link rel="preconnect" href="https://media.gulshanhotels.com" crossorigin>
-
-    <!-- ৩. নিরাপদ হিরো ইমেজ প্রিলোড (যদি প্রপ থাকে তবেই চলবে, অন্যথায় কোনো এরর দেবে না) -->
-    {preloadImage && (
-      <link 
-        rel="preload" 
-        as="image" 
-        href={preloadImage} 
-        fetchpriority="high" 
-      />
-    )}
-
     <!-- BLOCK GOOGLE INDEXING DURING DEVELOPMENT -->
     <meta name="robots" content="noindex, nofollow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
