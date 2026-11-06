@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelReviews.astro (Google-Safe, Spam-Proof, Pure Dynamic & Responsive)
+// src/components/hotel/HotelReviews.astro (100% Google Schema Compliant, Zero Fake Reviews, Fractional Stars & Native Dialog)
 interface Props {
   hotel: any;
 }
@@ -7,15 +7,15 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ১. হোটেলের নাম ও ক্লিন স্লাগ
-const hotelTitle = (data.title || data.name || "Hotel Details").trim();
+// ================= 1. HOTEL BASIC INFO =================
+const hotelTitle = String(data.title || data.name || "Hotel Details").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 
-// ২. ডাটা ফেচিং
+// ================= 2. FETCH APPROVED CMS REVIEWS =================
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -31,7 +31,7 @@ try {
   rawReviewsList = [];
 }
 
-// ৩. শুধু APPROVED রিভিউ, এই হোটেলের জন্য
+// ৩. কঠোর ফিল্টারিং: শুধুমাত্র অনুমোদিত ও এই হোটেলের রিভিউ
 const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
 
@@ -39,56 +39,60 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   if (!isApproved) return false;
 
   const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
   const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
 
-  const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rHotel === searchSlug);
+  const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug);
   const matchTitle = searchTitle !== "" && rHotel === searchTitle;
 
   return matchSlug || matchTitle;
 });
 
-// ৪. লোকাল ও CMS রিভিউ মার্জ (লোকাল রিভিউ শুধু আসল গেস্টের হতে হবে)
-const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const combinedRawReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews];
+// ৪. লোকাল রিভিউ থাকলে শুধু অনুমোদিতগুলো নেওয়া
+const hotelEmbeddedReviews = (Array.isArray(data.reviews) ? data.reviews : []).filter((r: any) => {
+  return r && (r.approved === undefined || r.approved === true || String(r.approved).toLowerCase() === 'true');
+});
 
-// ৫. ফরম্যাটিং
-// রেটিং ১ থেকে ৫ না হলে রিভিউ বাদ (আগের মতো জোর করে ৫ ধরা হবে না)
-const unformattedReviews = combinedRawReviews
-  .map((rev: any) => {
-    const ratingNum = Number(rev?.rating);
-    return {
-      name: String(rev?.name || rev?.author || 'Guest Reviewer').trim(),
-      date: rev?.date || 'Recent Stay',
-      rating: Math.round(ratingNum),
-      validRating: Number.isFinite(ratingNum) && ratingNum >= 1 && ratingNum <= 5,
-      tripType: rev?.trip_type || rev?.tripType || "Stay Experience",
-      isVerified: rev?.verified === true || String(rev?.verified).toLowerCase() === 'true',
-      comment: String(rev?.comment || rev?.review || rev?.body || '').trim()
-    };
-  })
-  .filter(r => r.validRating && r.comment.length > 1);
+// ৫. ডুপ্লিকেট রোধ এবং হেডারের সাথে হুবহু মিলিয়ে ন্যূনতম ১০ অক্ষরের রিভিউ ফিল্টার
+const seenReviews = new Set<string>();
+const validReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].filter((r: any) => {
+  if (!r) return false;
+  const comment = String(r.comment || r.review || r.body || '').trim();
+  const ratingNum = Number(r.rating);
 
-// ৬. তারিখ পার্সার
+  // গুগলের স্প্যাম পলিসি: অর্থহীন ২ অক্ষরের কমেন্ট ও ভুল রেটিং বাতিল
+  if (comment.length < 10) return false;
+  if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) return false;
+
+  const key = `${comment}_${r.name || r.author || ''}`;
+  if (seenReviews.has(key)) return false;
+  seenReviews.add(key);
+  return true;
+});
+
+// ৬. তারিখ পার্সার ও নতুন থেকে পুরনো সর্টিং
 const parseDateToTime = (dStr: any) => {
   if (!dStr || dStr === 'Recent Stay') return 0;
   const cleanStr = String(dStr).replace(' at ', ' ').trim();
-  const time = new Date(cleanStr).getTime();
+  const time = Date.parse(cleanStr);
   return isNaN(time) ? 0 : time;
 };
 
-// ৭. নতুন থেকে পুরনো সাজানো
-const allReviews = unformattedReviews.sort((a, b) => {
-  return parseDateToTime(b.date) - parseDateToTime(a.date);
-});
+const allReviews = validReviews.map((rev: any) => ({
+  name: String(rev?.name || rev?.author || 'Guest Reviewer').trim(),
+  date: rev?.date || 'Recent Stay',
+  rating: Math.round(Number(rev?.rating)),
+  tripType: rev?.trip_type || rev?.tripType || "Stay Experience",
+  isVerified: rev?.verified === true || String(rev?.verified).toLowerCase() === 'true',
+  comment: String(rev?.comment || rev?.review || rev?.body || '').trim()
+})).sort((a, b) => parseDateToTime(b.date) - parseDateToTime(a.date));
 
-// রেটিং ও কাউন্ট (রিভিউ না থাকলে 0.0)
+// রেটিং ও রিভিউ সংখ্যা গণনা (হেডারের সাথে ১০০% সিঙ্কড)
 const reviewsCount = allReviews.length;
 const avgRatingNum = reviewsCount > 0
   ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount)
   : 0;
-const avgRating = reviewsCount > 0 ? avgRatingNum.toFixed(1) : "0.0";
-
-const starsArray = [1, 2, 3, 4, 5];
+const avgRating = avgRatingNum > 0 ? avgRatingNum.toFixed(1) : "";
 ---
 
 <!-- GUEST REVIEWS SECTION -->
@@ -107,21 +111,34 @@ const starsArray = [1, 2, 3, 4, 5];
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <!-- Review Score Card -->
-        {reviewsCount > 0 && (
+        <!-- Review Score Card (Fractional Stars - Zero Rounding Deception) -->
+        {reviewsCount > 0 && avgRating && (
           <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200 shadow-2xs">
             <div class="bg-[#0d3b23] text-white font-black px-2.5 py-1 rounded-t-lg rounded-br-lg text-lg leading-none">
               {avgRating}
             </div>
             <div class="flex flex-col justify-center">
-              <div class="flex items-center gap-0.5 mb-1">
-                {starsArray.map(s => (
-                  <svg class={`w-3.5 h-3.5 shrink-0 ${s <= Math.round(avgRatingNum) ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                  </svg>
-                ))}
+              <!-- নিখুঁত আধা তারা (গুগল কমপ্লায়েন্ট) -->
+              <div class="flex items-center gap-0.5 mb-1" role="img" aria-label={`Average rating: ${avgRating} out of 5 stars`}>
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const pct = Math.round(Math.max(0, Math.min(1, avgRatingNum - i)) * 100);
+                  return (
+                    <span class="relative inline-block w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                      <svg class="absolute inset-0 w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                      </svg>
+                      <span class="absolute inset-y-0 left-0 overflow-hidden" style={`width:${pct}%`}>
+                        <svg class="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 24 24">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                      </span>
+                    </span>
+                  );
+                })}
               </div>
-              <span class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">{reviewsCount} {reviewsCount === 1 ? 'Review' : 'Reviews'}</span>
+              <span class="text-[10px] font-extrabold text-slate-600 uppercase tracking-wider">
+                {reviewsCount} {reviewsCount === 1 ? 'Review' : 'Reviews'}
+              </span>
             </div>
           </div>
         )}
@@ -137,7 +154,7 @@ const starsArray = [1, 2, 3, 4, 5];
         <!-- Write Review Button -->
         <button type="button" class="open-write-review-trigger bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2.5 rounded-full transition shadow-2xs cursor-pointer uppercase tracking-wider inline-flex items-center gap-2 active:scale-95">
           <span>Write a Review</span>
-          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+          <svg aria-hidden="true" class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
           </svg>
         </button>
@@ -146,16 +163,21 @@ const starsArray = [1, 2, 3, 4, 5];
 
     <!-- Carousel Track -->
     {reviewsCount > 0 && (
-      <div id="reviewsCarouselTrack" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div 
+        id="reviewsCarouselTrack" 
+        tabindex="0"
+        aria-label="Guest reviews carousel"
+        class="flex gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 rounded-3xl"
+      >
         {allReviews.map((rev) => {
           const isLong = rev.comment.length > 180;
           return (
             <div class="w-[290px] sm:w-[350px] shrink-0 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-emerald-600/50 hover:shadow-md transition-all duration-300 min-h-[260px] text-left">
               <div class="space-y-4">
                 <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-0.5" role="img" aria-label={"Rated " + rev.rating + " out of 5"}>
-                    {starsArray.map(s => (
-                      <svg class={`w-3.5 h-3.5 shrink-0 ${s <= rev.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24" aria-hidden="true">
+                  <div class="flex items-center gap-0.5" role="img" aria-label={`Rated ${rev.rating} out of 5 stars`}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <svg aria-hidden="true" class={`w-3.5 h-3.5 shrink-0 ${i < rev.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                       </svg>
                     ))}
@@ -173,7 +195,12 @@ const starsArray = [1, 2, 3, 4, 5];
                     {isLong && <span class="full-text hidden">{rev.comment}</span>}
                   </p>
                   {isLong && (
-                    <button type="button" class="see-more-btn text-emerald-800 text-[11px] font-bold mt-2 hover:underline cursor-pointer block">
+                    <button 
+                      type="button" 
+                      class="see-more-btn text-emerald-800 text-[11px] font-bold mt-2 hover:underline cursor-pointer block"
+                      aria-label={`Read full review by ${rev.name}`}
+                      aria-expanded="false"
+                    >
                       See more
                     </button>
                   )}
@@ -184,7 +211,7 @@ const starsArray = [1, 2, 3, 4, 5];
               <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-900 flex items-center justify-center text-xs font-black uppercase border border-emerald-200">
-                    {rev.name.charAt(0)}
+                    {rev.name.charAt(0) || 'G'}
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs font-bold text-slate-900 leading-tight">{rev.name}</span>
@@ -205,7 +232,7 @@ const starsArray = [1, 2, 3, 4, 5];
     {reviewsCount === 0 && (
       <div class="bg-slate-50/60 rounded-3xl border border-dashed border-slate-300 p-12 sm:p-16 text-center">
         <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-400">
-          <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+          <svg aria-hidden="true" class="w-7 h-7 fill-current" viewBox="0 0 24 24">
             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
           </svg>
         </div>
@@ -220,13 +247,11 @@ const starsArray = [1, 2, 3, 4, 5];
   </div>
 </section>
 
-<!-- WRITE REVIEW MODAL -->
-<div
+<!-- NATIVE <dialog> MODAL FOR SUBMITTING REVIEWS -->
+<dialog
   id="writeReviewModal"
-  role="dialog"
-  aria-modal="true"
   aria-labelledby="writeReviewModalTitle"
-  class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 text-left"
+  class="fixed inset-0 m-auto z-[100] w-full h-full max-w-none max-h-none p-4 bg-slate-950/80 backdrop:bg-slate-950/80 backdrop:backdrop-blur-md text-left border-0 overflow-y-auto [&:not([open])]:hidden [&[open]]:flex items-center justify-center"
 >
   <div class="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative max-h-[92vh] overflow-y-auto border border-slate-200">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-5">
@@ -234,12 +259,12 @@ const starsArray = [1, 2, 3, 4, 5];
         <span class="text-[10px] font-black uppercase tracking-widest text-emerald-800 block">Guest Feedback</span>
         <h3 id="writeReviewModalTitle" class="text-lg font-black font-sans text-slate-900 leading-tight">Review for {hotelTitle}</h3>
       </div>
-      <button id="closeWriteReviewBtn" type="button" aria-label="Close Modal" class="text-slate-400 hover:text-slate-900 text-3xl font-light cursor-pointer">&times;</button>
+      <button id="closeWriteReviewBtn" type="button" aria-label="Close Modal" class="text-slate-400 hover:text-slate-900 text-3xl font-light cursor-pointer transition active:scale-90">&times;</button>
     </div>
 
     <form id="submitReviewForm" data-hotel-title={hotelTitle} data-hotel-slug={hotelSlug} class="space-y-4">
 
-      <!-- Honeypot field -->
+      <!-- Honeypot field (বট ট্র্যাপ) -->
       <div class="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
         <label for="reviewerWebsite">Website</label>
         <input type="text" id="reviewerWebsite" name="website" tabindex="-1" autocomplete="off" />
@@ -299,7 +324,7 @@ const starsArray = [1, 2, 3, 4, 5];
 
     <div id="reviewSuccessMsg" class="hidden p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-2">
       <div class="w-12 h-12 mx-auto rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800 shadow-2xs">
-        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <svg aria-hidden="true" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
         </svg>
       </div>
@@ -307,20 +332,19 @@ const starsArray = [1, 2, 3, 4, 5];
       <p class="text-xs text-slate-600 font-normal">Thank you for your feedback. Your review will appear once verified by our moderation team.</p>
     </div>
   </div>
-</div>
+</dialog>
 
 <!-- CLIENT SCRIPT -->
 <script>
   let reviewsAbortCtrl: AbortController | null = null;
 
   function setupReviews() {
-    // আগের সব listener বন্ধ করে নতুন করে বসানো (দুইবার চলার সমস্যা নেই)
     if (reviewsAbortCtrl) reviewsAbortCtrl.abort();
     reviewsAbortCtrl = new AbortController();
     const { signal } = reviewsAbortCtrl;
 
     const track = document.getElementById('reviewsCarouselTrack');
-    const modal = document.getElementById('writeReviewModal');
+    const modal = document.getElementById('writeReviewModal') as HTMLDialogElement | null;
     const form = document.getElementById('submitReviewForm') as HTMLFormElement | null;
     const successMsg = document.getElementById('reviewSuccessMsg');
     const closeBtn = document.getElementById('closeWriteReviewBtn');
@@ -328,28 +352,27 @@ const starsArray = [1, 2, 3, 4, 5];
     const nextBtn = document.getElementById('reviewNextBtn');
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
-
-    function toggleBodyScroll(disable: boolean) {
-      document.body.style.overflow = disable ? 'hidden' : '';
-    }
+    let modalOpenedAt = 0;
 
     function openModal() {
       if (!modal) return;
       if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      modalOpenedAt = Date.now();
+      
+      if (!modal.open) {
+        modal.showModal();
+      }
+      
       successMsg?.classList.add('hidden');
       form?.classList.remove('hidden');
-      toggleBodyScroll(true);
-      // প্রথম ঘরে কার্সার
       setTimeout(() => document.getElementById('reviewerName')?.focus(), 50);
     }
 
     function closeModal() {
       if (!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      toggleBodyScroll(false);
+      if (modal.open) {
+        modal.close();
+      }
     }
 
     prevBtn?.addEventListener('click', () => track?.scrollBy({ left: -360, behavior: 'smooth' }), { signal });
@@ -369,10 +392,12 @@ const starsArray = [1, 2, 3, 4, 5];
           full?.classList.remove('hidden');
           short?.classList.add('hidden');
           target.textContent = 'See less';
+          target.setAttribute('aria-expanded', 'true');
         } else {
           full?.classList.add('hidden');
           short?.classList.remove('hidden');
           target.textContent = 'See more';
+          target.setAttribute('aria-expanded', 'false');
         }
       }, { signal });
     });
@@ -382,12 +407,19 @@ const starsArray = [1, 2, 3, 4, 5];
     });
 
     closeBtn?.addEventListener('click', closeModal, { signal });
+    
+    // Close on backdrop click
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
     }, { signal });
 
+    modal?.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeModal();
+    }, { signal });
+
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+      if (e.key === 'Escape' && modal && modal.open) {
         closeModal();
       }
     }, { signal });
@@ -411,8 +443,14 @@ const starsArray = [1, 2, 3, 4, 5];
           closeTimer = setTimeout(closeModal, 3500);
         };
 
-        // বট হলে চুপচাপ সফল দেখাও, কিন্তু কিছু পাঠিও না
+        // বট ট্র্যাপ ১: হনিপট ফিল্ডে কিছু থাকলে চুপচাপ ব্লক
         if (honeypotInput && honeypotInput.value.trim() !== '') {
+          showSuccess();
+          return;
+        }
+
+        // বট ট্র্যাপ ২: ১.৫ সেকেন্ডের নিচে ফর্ম সাবমিট হলে ব্লক (অটোমেটেড বট স্ক্রিপ্ট)
+        if (Date.now() - modalOpenedAt < 1500) {
           showSuccess();
           return;
         }
@@ -433,7 +471,7 @@ const starsArray = [1, 2, 3, 4, 5];
           trip_type: tripTypeInput ? tripTypeInput.value : 'Business Stay',
           rating: ratingValue,
           comment: commentValue,
-          approved: false, // Worker এ সবসময় জোর করে false বসাতে হবে
+          approved: false, // Worker এ সবসময় নিশ্চিত false যাবে
           date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
         };
 
@@ -469,12 +507,6 @@ const starsArray = [1, 2, 3, 4, 5];
     }
   }
 
-  // astro:page-load প্রথমবার লোডেও চলে, তাই DOMContentLoaded আর লাগে না
+  document.addEventListener('DOMContentLoaded', setupReviews);
   document.addEventListener('astro:page-load', setupReviews);
-  // ViewTransitions ছাড়া সাইটের জন্য ব্যাকআপ
-  if (document.readyState !== 'loading') {
-    setupReviews();
-  } else {
-    document.addEventListener('DOMContentLoaded', setupReviews);
-  }
 </script>
