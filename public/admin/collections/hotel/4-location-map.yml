@@ -1,24 +1,26 @@
-- label: "4. LOCATION, ADDRESS & MAP"
+# ==========================================
+# SECTION 4: LOCATION, ADDRESS & GOOGLE MAP
+# ==========================================
+
+- label: "4. LOCATION, PHYSICAL ADDRESS & GOOGLE MAP"
   name: "location_notice"
   widget: "instructions"
-  description: "Manage hotel physical address for Google Schema, map coordinates, and nearby landmarks."
+  description: "হোটেলের সঠিক শারীরিক ঠিকানা (Google Schema-র জন্য), GPS কোঅর্ডিনেট, গুগল ম্যাপ সার্চ কুয়েরি এবং আশেপাশের দর্শনীয় স্থানসমূহ এখান থেকে নিয়ন্ত্রণ করুন।"
   required: false
 
-# ১. রাস্তার সম্পূর্ণ ঠিকানা
+# ----------------- ১. ফিজিক্যাল অ্যাড্রেস (গুগল স্কিমার জন্য) -----------------
 - label: "Street Address (Road / Plot / Holding)"
   name: "street_address"
   widget: "string"
   required: false
-  hint: "যেমন: 'Plot 47, Road 41' বা 'Gulshan-2' (বিল্ডিং বা রাস্তার নম্বর)"
+  hint: "যেমন: 'Plot 47, Road 41' বা 'House 15, Block CWN-A' (রাস্তা বা হোল্ডিং নম্বর)"
 
-# ২. এলাকা / লোকালিটি (এটি দিলে Google Schema-র addressLocality ওয়ার্নিং চলে যাবে)
-- label: "Locality / Area (Required for Google Schema)"
+- label: "Locality / Neighborhood (Area)"
   name: "locality"
   widget: "string"
   required: false
-  hint: "যেমন: 'Gulshan', 'Banani', 'Uttara' (এটি Google Schema-র addressLocality তৈরি করবে)"
+  hint: "যেমন: 'Gulshan-2', 'Gulshan-1', 'Banani' (এটি গুগল স্কিমার addressLocality ওয়ার্নিং দূর করবে)"
 
-# ৩. সিটি / বিভাগ
 - label: "City / Region"
   name: "region"
   widget: "string"
@@ -26,44 +28,57 @@
   required: false
   hint: "যেমন: 'Dhaka', 'Chittagong'"
 
-# ৪. পোস্টাল কোড (এটি দিলে postalCode ওয়ার্নিং দূর হবে)
 - label: "Postal Code"
   name: "postal_code"
   widget: "string"
   required: false
-  hint: "যেমন: '1212', '1213' (৪ ডিজিটের পোস্ট কোড)"
+  hint: "যেমন: '1212', '1213' (গুগল স্কিমার postalCode ওয়ার্নিং দূর করবে)"
 
-# ৫. জিপিএস কোঅর্ডিনেট (ম্যাপ ও স্কিমার জন্য)
+- label: "Country Code"
+  name: "country"
+  widget: "string"
+  default: "BD"
+  required: false
+  hint: "ডিফল্ট: 'BD' (বাংলাদেশ)"
+
+# ----------------- ২. জিপিএস ও গুগল ম্যাপ সেটিংস -----------------
 - label: "GPS Latitude (Optional)"
   name: "latitude"
   widget: "string"
   required: false
-  hint: "যেমন: '23.7925'"
+  hint: "যেমন: '23.7925' (সঠিক ম্যাপ পিন এবং Schema geo-র জন্য)"
 
 - label: "GPS Longitude (Optional)"
   name: "longitude"
   widget: "string"
   required: false
-  hint: "যেমন: '90.4150'"
+  hint: "যেমন: '90.4150' (সঠিক ম্যাপ পিন এবং Schema geo-র জন্য)"
 
-# ৬. গুগল ম্যাপ কাস্টম কুয়েরি
 - label: "Custom Google Map Search Query (Optional)"
   name: "map_query"
   widget: "string"
   required: false
-  hint: "যেমন: 'The Westin Dhaka Gulshan 2'. খালি রাখলে উপরের ঠিকানা স্বয়ংক্রিয়ভাবে ব্যবহার হবে।"
+  hint: "যেমন: 'Amari Dhaka Gulshan-2'। খালি রাখলে স্বয়ংক্রিয়ভাবে হোটেলের নাম ও ঠিকানা দিয়ে ম্যাপ তৈরি হবে।"
 
-# ৭. আশেপাশের দর্শনীয় স্থান তালিকা
+- label: "Google Maps External Direct Link (Optional)"
+  name: "map_url"
+  widget: "string"
+  required: false
+  hint: "গুগল ম্যাপ অ্যাপের শেয়ার লিংক। হেডারের 'View location' বাটনে কাজ করবে। খালি রাখলে স্বয়ংক্রিয়ভাবে পেজের ম্যাপে স্ক্রল করবে।"
+
+# ----------------- ৩. আশেপাশের দর্শনীয় স্থান তালিকা -----------------
 - label: "Nearby Landmarks & Places List"
   name: "nearby_places"
   widget: "list"
   required: false
-  summary: "{{name}} ({{distance}})"
+  summary: "{{fields.name}} ({{fields.distance}})"
   fields:
-    - label: "Landmark / Place Name (e.g. US Embassy, IVAC Visa Center)"
+    - label: "Landmark / Place Name"
       name: "name"
       widget: "string"
+      hint: "যেমন: 'Gulshan Lake Park', 'US Embassy', 'Hazrat Shahjalal International Airport'"
 
-    - label: "Distance / Travel Time (e.g. 5 min walk or 10 min drive)"
+    - label: "Distance / Travel Time"
       name: "distance"
       widget: "string"
+      hint: "যেমন: '5 min walk', '10 min drive', '1.5 km'"
