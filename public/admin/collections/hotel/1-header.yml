@@ -1,76 +1,114 @@
 - label: "1. HOTEL HEADER & HERO BANNER"
   name: "header_notice"
   widget: "instructions"
-  description: "Controls hotel title, SEO meta, category, verified status, location & gallery photos."
+  description: "Controls hotel title, SEO metadata, verified status, ranking, location, starting price & gallery photos."
   required: false
 
+# ১. হোটেলের নাম (অবশ্যই পূরণ করতে হবে)
 - label: "Hotel Name / Title"
   name: "title"
   widget: "string"
+  required: true
+  hint: "Official hotel name (e.g. Amari Dhaka)"
 
+# খসড়া নিয়ন্ত্রণ (Draft Hotel)
+- label: "Save as Draft (Don't publish yet)?"
+  name: "draft"
+  widget: "boolean"
+  default: false
+  hint: "Toggle ON if the hotel information is incomplete. Drafts won't cause build errors."
+
+# ২. এসইও নিয়ন্ত্রণ (টাইটেল ও ডেসক্রিপশন কেটে যাওয়া রোধ)
 - label: "Custom SEO Meta Title (Max 60 Chars)"
   name: "seo_title"
   widget: "string"
   required: false
-  hint: "Optional. Leave blank to auto-generate: [Hotel Name]: 5-Star Hotel in [Area], Dhaka"
+  hint: "Recommended: [Hotel Name]: 5-Star Hotel in Gulshan 2 | Rates (Under 60 chars)"
 
-- label: "Custom SEO Meta Description (Max 155 Chars)"
+- label: "Custom SEO Meta Description (Max 150 Chars)"
   name: "seo_description"
   widget: "text"
   required: false
-  hint: "Describe rooms, rates & amenities within 150 characters to avoid Google truncation."
+  hint: "Keep it under 150 chars. Mention rooms, amenities and area without keyword stuffing."
 
+# ৩. ভেরিফায়েড ও র‍্যাংকিং কন্ট্রোল
 - label: "Is this Hotel Officially Verified?"
   name: "is_verified"
   widget: "boolean"
   default: false
-  hint: "Toggle ON only if official amenities and star-rating have been verified."
+  hint: "Toggle ON only if star-rating, trade license & physical address are verified."
 
-- label: "Category (e.g. 5-Star Luxury Stay)"
-  name: "category"
-  widget: "string"
-  default: "5-Star Luxury Stay"
-
-- label: "Area Ranking / Highlight (Optional)"
+- label: "Area Ranking / Highlight Tag (Optional)"
   name: "ranking"
   widget: "string"
   required: false
   hint: "e.g. #1 of 32 Luxury Stays in Gulshan 2"
 
-- label: "Short Location (e.g. Road 41, Gulshan 2, Dhaka)"
+- label: "Category"
+  name: "category"
+  widget: "string"
+  default: "5-Star Luxury Stay"
+
+# ৪. লোকেশন ও ম্যাপ
+- label: "Short Location Address"
   name: "location"
   widget: "string"
   default: "Gulshan 2, Dhaka, Bangladesh"
+  hint: "Keep it clean and short to avoid Google spam penalty."
 
-- label: "Google Map Link (Optional)"
+- label: "Google Map Embed / Link (Optional)"
   name: "map_url"
   widget: "string"
   required: false
   default: "#location-map"
 
+# ৫. স্টার্টিং প্রাইস (Wishlist-এর জন্য জরুরি)
+- label: "Starting Price Per Night"
+  name: "price"
+  widget: "string"
+  required: false
+  hint: "e.g. $150 or ৳16,500. Leave blank if rates should say 'Check rates'."
+
+# ৬. মূল কাভার ছবি ও Alt টেক্সট
 - label: "Cover Image (Main Hero Photo)"
   name: "image"
   widget: "image"
+  required: true
 
-- label: "Photo Gallery (Multiple Photos)"
+- label: "Cover Image Alt Text (SEO)"
+  name: "image_alt"
+  widget: "string"
+  required: false
+  hint: "Describe the image for Google Image Search (e.g. Amari Dhaka luxury exterior view)"
+
+# ৭. ফটো গ্যালারি (প্রতিটি ছবির সাথে আলাদা Alt Text)
+- label: "Photo Gallery"
   name: "gallery"
   widget: "list"
   required: false
-  field:
-    label: "Photo"
-    widget: "image"
+  summary: "{{fields.alt}} ({{fields.photo}})"
+  fields:
+    - label: "Photo File"
+      name: "photo"
+      widget: "image"
+    - label: "Photo Alt / Description (SEO)"
+      name: "alt"
+      widget: "string"
+      required: false
+      hint: "e.g. Deluxe King bedroom interior with floor-to-ceiling windows"
 
-- label: "Show in Popular Hotels Carousel on Homepage?"
+# ৮. হোমপেজ ডিসপ্লে অপশন
+- label: "Show in Popular Hotels on Homepage?"
   name: "popular"
   widget: "boolean"
   default: true
 
-- label: "Make this Hotel Sponsored / Spotlight on Homepage?"
+- label: "Spotlight / Sponsored Hotel on Homepage?"
   name: "sponsored"
   widget: "boolean"
   default: false
 
-- label: "Sponsored Spotlight Custom Tagline (Optional)"
+- label: "Spotlight Tagline (Optional)"
   name: "spotlight_desc"
   widget: "string"
   required: false
