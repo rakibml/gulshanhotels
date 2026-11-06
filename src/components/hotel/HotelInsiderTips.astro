@@ -1,36 +1,38 @@
 ---
 // src/components/hotel/HotelInsiderTips.astro (lite, no boxes)
-// No JS, no icons, no backgrounds. Show more uses native <details>.
+// No JS, no icons, no JSON-LD. "Show more" uses native <details>.
+// All tip text stays in the DOM (indexable, not cloaking).
 
 const data = Astro.props.hotel?.data ?? {};
-const hotelTitle = (data.title || data.name || "").trim();
 const clean = (v: unknown) => String(v ?? "").trim().replace(/\s{2,}/g, " ");
+
+const hotelTitle = clean(data.title || data.name);
 
 const raw = data.insider_tips ?? data.tips ?? [];
 const tips = (Array.isArray(raw) ? raw : [])
   .map((t: any) =>
     typeof t === "string"
       ? { title: "", tip: clean(t), tag: "" }
-      : { title: clean(t?.title), tip: clean(t?.tip || t?.description || t?.text), tag: clean(t?.tag || t?.category) }
+      : {
+          title: clean(t?.title),
+          tip: clean(t?.tip || t?.description || t?.text),
+          tag: clean(t?.tag || t?.category),
+        }
   )
-  .filter((t) => t.tip.length > 3);
+  // Very short strings ("OK", "Test") are not real tips
+  .filter((t) => t.tip.length >= 25);
 
-const MAX = 4; // phone-e choto rakhar jonno. Beshi dekhate chaile barao
+const MAX = 4; // keep short on phones; increase to show more upfront
 const shown = tips.slice(0, MAX);
 const more = tips.slice(MAX);
 
-const jsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: hotelTitle ? `Insider tips for ${hotelTitle}` : "Insider tips",
-  numberOfItems: tips.length,
-  itemListElement: tips.map((t, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    name: t.title || `Tip ${i + 1}`,
-    description: t.tip,
-  })),
-}).replace(/</g, "\\u003c");
+// Optional "last updated" (front-matter: tips_updated: 2026-11-06)
+const updatedRaw = data.tips_updated ?? data.last_updated;
+const updatedDate = updatedRaw ? new Date(updatedRaw) : null;
+const updatedLabel =
+  updatedDate && !isNaN(updatedDate.getTime())
+    ? updatedDate.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : "";
 
 const listClass = "grid md:grid-cols-2 md:gap-x-12 list-none p-0 m-0";
 const itemClass = "py-4 border-b border-slate-200";
@@ -42,13 +44,15 @@ const itemClass = "py-4 border-b border-slate-200";
     class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-0 scroll-mt-16 text-left text-slate-800"
     aria-labelledby="insider-tips-heading"
   >
-    <script type="application/ld+json" set:html={jsonLd} />
-
     <h2 id="insider-tips-heading" class="text-2xl sm:text-3xl font-black text-[#002b11]">
       Insider tips{hotelTitle && ` for ${hotelTitle}`}
     </h2>
 
-    <ul class={`${listClass} mt-4`}>
+    {updatedLabel && (
+      <p class="text-xs text-slate-500 font-medium mt-1">Updated: {updatedLabel}</p>
+    )}
+
+    <ul role="list" class={`${listClass} mt-4`}>
       {shown.map((t) => (
         <li class={itemClass}>
           {t.title && <p class="font-bold text-slate-900">{t.title}</p>}
@@ -63,7 +67,7 @@ const itemClass = "py-4 border-b border-slate-200";
         <summary class="cursor-pointer py-4 text-sm font-bold text-emerald-800">
           Show {more.length} more {more.length === 1 ? "tip" : "tips"}
         </summary>
-        <ul class={listClass}>
+        <ul role="list" class={listClass}>
           {more.map((t) => (
             <li class={itemClass}>
               {t.title && <p class="font-bold text-slate-900">{t.title}</p>}
