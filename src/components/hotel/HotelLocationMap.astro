@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelLocationMap.astro (100% Dynamic CMS Nearby Places, Smart Category Icons & Zero-Leak Google Map)
+// src/components/hotel/HotelLocationMap.astro (Accurate Map Pin, Smooth Mobile GPU, Get Directions CTA & WCAG A11y)
 interface Props {
   hotel: any;
 }
@@ -7,29 +7,39 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-const hotelTitle = data.title || data.name || "Hotel Details";
-const hotelLocation = data.location || "Gulshan 2, Dhaka, Bangladesh";
+const hotelTitle = String(data.title || data.name || "Hotel").trim();
+const hotelLocation = String(data.location || "Gulshan 2, Dhaka, Bangladesh").trim();
 
 // Fetch Dynamic Nearby Landmarks from CMS
-const allNearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : [];
+const allNearbyPlaces: any[] = Array.isArray(data.nearby_places) ? data.nearby_places : [];
 const showNearbyList = allNearbyPlaces.length > 0;
 
 // Top 5 Initially Visible & Remaining Hidden for Toggle
 const initialTop5 = allNearbyPlaces.slice(0, 5);
 const remainingPlaces = allNearbyPlaces.slice(5);
 
-// CMS Coordinates or Name Query for Accurate Map Pin
+// CMS Coordinates or Smart Query for Accurate Map Pin
 const lat = data.latitude || data.lat || data.geo?.lat;
 const lng = data.longitude || data.lng || data.geo?.lng;
-const mapSearchQuery = (lat && lng) 
-  ? `${lat},${lng}` 
-  : (data.map_query || `${hotelTitle} ${hotelLocation}`);
 
+// কোঅর্ডিনেট না থাকলে একটি ক্লিন স্মার্ট কুয়েরি যাতে পিন সঠিক জায়গায় পড়ে
+function getCleanMapQuery(): string {
+  if (lat && lng) return `${lat},${lng}`;
+  if (data.map_query) return String(data.map_query).trim();
+  
+  // বড় ঠিকানা থেকে শহর ও প্রধান অংশ নেওয়া
+  const locParts = hotelLocation.split(',').map((p: string) => p.trim());
+  const cleanLoc = locParts.length > 2 ? `${locParts[0]}, ${locParts[1]}` : hotelLocation;
+  return `${hotelTitle}, ${cleanLoc}`;
+}
+
+const mapSearchQuery = getCleanMapQuery();
 const googleMapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapSearchQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+const googleMapsAppUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapSearchQuery)}`;
 
 // Smart Auto-Icon Detector for Nearby Places
 const getPlaceIcon = (name: string) => {
-  const n = name.toLowerCase();
+  const n = String(name || '').toLowerCase();
   if (n.includes('airport') || n.includes('terminal') || n.includes('aviation')) {
     return `<svg aria-hidden="true" class="w-4 h-4 fill-emerald-700 shrink-0" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`;
   }
@@ -49,7 +59,7 @@ const getPlaceIcon = (name: string) => {
 };
 ---
 
-<!-- 5TH COMPONENT: EXPLORE THE AREA (max-w-7xl দিয়ে বাকি সেকশনের সমান প্রস্থ রাখা হয়েছে) -->
+<!-- 5TH COMPONENT: EXPLORE THE AREA -->
 <section id="location-map" class="bg-white py-12 px-4 sm:px-8 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
     
@@ -124,10 +134,10 @@ const getPlaceIcon = (name: string) => {
                 aria-expanded="false"
                 aria-controls="extraNearbyList"
                 data-count={remainingPlaces.length}
-                class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-50 hover:bg-emerald-100 px-4 py-2.5 rounded-xl border border-emerald-300 transition cursor-pointer flex items-center gap-1.5 shadow-xs select-none"
+                class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-50 hover:bg-emerald-100 px-4 py-2.5 rounded-xl border border-emerald-300 transition cursor-pointer flex items-center gap-1.5 shadow-xs select-none active:scale-95"
               >
                 <span id="toggleNearbyText">See All About This Area (+{remainingPlaces.length})</span>
-                <span id="toggleNearbyArrow">➔</span>
+                <span id="toggleNearbyArrow" aria-hidden="true">➔</span>
               </button>
             </div>
           )}
@@ -137,16 +147,43 @@ const getPlaceIcon = (name: string) => {
 
     </div>
 
-    <!-- RIGHT COLUMN: SPEED OPTIMIZED EMBEDDED GOOGLE MAP -->
+    <!-- RIGHT COLUMN: GOOGLE MAP WITH GET DIRECTIONS CTA -->
     <div class={showNearbyList ? "lg:col-span-7" : "lg:col-span-12 max-w-4xl mx-auto w-full"}>
-      <div class="rounded-3xl overflow-hidden border border-slate-200 shadow-md h-[300px] sm:h-[360px] lg:h-[400px] relative group bg-slate-100">
-        <iframe 
-          src={googleMapEmbedUrl}
-          class="w-full h-full border-0 contrast-[105%]" 
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          title={`${hotelTitle} Location Map`}
-        ></iframe>
+      <div class="rounded-3xl overflow-hidden border border-slate-200 shadow-md relative group bg-slate-100">
+        
+        <!-- Map Iframe (No contrast filter for smooth GPU scrolling) -->
+        <div class="h-[300px] sm:h-[360px] lg:h-[400px] w-full">
+          <iframe 
+            src={googleMapEmbedUrl}
+            class="w-full h-full border-0" 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title={`${hotelTitle} Location Map`}
+          ></iframe>
+        </div>
+
+        <!-- Practical UX CTA: Open in Google Maps Navigation App -->
+        <div class="p-3 bg-white border-t border-slate-100 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5 text-slate-600 truncate pr-2">
+            <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <circle cx="12" cy="11" r="3"/>
+            </svg>
+            <span class="truncate font-medium">{hotelLocation}</span>
+          </div>
+
+          <a 
+            href={googleMapsAppUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-[11px] px-3.5 py-1.5 rounded-full shrink-0 flex items-center gap-1 transition shadow-xs active:scale-95"
+            aria-label={`Get directions to ${hotelTitle} on Google Maps`}
+          >
+            <span>Get Directions</span>
+            <span aria-hidden="true">➔</span>
+          </a>
+        </div>
+
       </div>
     </div>
 
@@ -155,16 +192,19 @@ const getPlaceIcon = (name: string) => {
 
 <!-- CLIENT SCRIPT -->
 <script>
+  let mapAbortCtrl: AbortController | null = null;
+
   function initHotelLocationMap() {
+    if (mapAbortCtrl) mapAbortCtrl.abort();
+    mapAbortCtrl = new AbortController();
+    const { signal } = mapAbortCtrl;
+
     const toggleBtn = document.getElementById('toggleNearbyBtn');
     const extraList = document.getElementById('extraNearbyList');
     const toggleText = document.getElementById('toggleNearbyText');
     const toggleArrow = document.getElementById('toggleNearbyArrow');
 
     if (toggleBtn && extraList && toggleText && toggleArrow) {
-      if (toggleBtn.dataset.bound === 'true') return;
-      toggleBtn.dataset.bound = 'true';
-
       const extraCount = toggleBtn.getAttribute('data-count') || '';
 
       toggleBtn.addEventListener('click', () => {
@@ -180,7 +220,7 @@ const getPlaceIcon = (name: string) => {
           toggleArrow.textContent = '➔';
           toggleBtn.setAttribute('aria-expanded', 'false');
         }
-      });
+      }, { signal });
     }
   }
 
