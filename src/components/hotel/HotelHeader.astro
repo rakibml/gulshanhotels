@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (Native <dialog> Focus Trapping, Honest Fractional Stars & Zero Fake Data)
+// src/components/hotel/HotelHeader.astro (Bulletproof Dialog, Mobile Swipe, Cloudflare Optimized & Zero Fake Reviews)
 interface Props {
   hotel: any;
 }
@@ -7,22 +7,23 @@ interface Props {
 const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
-// ================= 1. HOTEL BASIC INFO & BUILD ASSERTION =================
+// ================= 1. HOTEL BASIC INFO & DRAFT-AWARE ASSERTION =================
 const hotelTitle = String(data.title || data.name || "").trim();
 const hotelLocation = String(data.location || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+const isDraft = data.draft === true || String(data.draft).toLowerCase() === 'true';
 
-// কোনো ফলব্যাক নাম নয়! টাইটেল না থাকলে বিল্ড সরাসরি আটকে যাবে
-if (!hotelTitle) {
-  throw new Error(`[HotelHeader] Hotel title is missing for slug: "${hotelSlug || 'unknown'}". Please define title in markdown frontmatter.`);
+// ড্রাফট না হলে এবং টাইটেল না থাকলে বিল্ড সরাসরি আটকে যাবে (ভুল পেজ লাইভ হওয়া রোধ)
+if (!hotelTitle && !isDraft) {
+  throw new Error(`[HotelHeader] Hotel title missing in slug: "${hotelSlug || 'unknown'}". Please define title in frontmatter.`);
 }
 
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 const isVerified = data.is_verified === true;
 
-// ================= 2. STRICT HONEST REVIEWS CALCULATION =================
+// ================= 2. 100% GENUINE GUEST REVIEWS (NO SELF-WRITTEN REVIEWS) =================
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -38,7 +39,9 @@ try {
   rawReviewsList = [];
 }
 
-const approvedCmsReviews = rawReviewsList.filter((item: any) => {
+// শুধুমাত্র অতিথিদের পাঠানো এবং অ্যাডমিনের যাচাইকৃত আসল রিভিউ
+const seenReviews = new Set<string>();
+const approvedReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
   const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
   if (!isApproved) return false;
@@ -50,38 +53,29 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   const matchSlug = searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug);
   const matchTitle = searchTitle !== "" && (rHotel === searchTitle);
 
-  return matchSlug || matchTitle;
-});
+  if (!matchSlug && !matchTitle) return false;
 
-const hotelEmbeddedReviews = (Array.isArray(data.reviews) ? data.reviews : []).filter((r: any) => {
-  return r && (r.approved === undefined || r.approved === true || String(r.approved).toLowerCase() === 'true');
-});
-
-// কঠোর ফিল্টারিং: ন্যূনতম ১০ অক্ষর, রেটিং ১-৫ এর মধ্যে এবং ডুপ্লিকেট বাদ
-const seenReviews = new Set<string>();
-const validReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].filter((r: any) => {
-  if (!r) return false;
-  const comment = String(r.comment || r.review || r.body || '').trim();
-  const rating = Number(r.rating);
+  const comment = String(item.comment || item.review || item.body || '').trim();
+  const rating = Number(item.rating);
   if (comment.length < 10) return false;
   if (isNaN(rating) || rating < 1 || rating > 5) return false;
 
-  const key = `${comment}_${r.name || r.author || ''}`;
+  const key = `${comment}_${item.name || item.author || ''}`;
   if (seenReviews.has(key)) return false;
   seenReviews.add(key);
   return true;
 });
 
-const reviewsCount = validReviews.length;
+const reviewsCount = approvedReviews.length;
 const avgRatingNum = reviewsCount > 0
-  ? validReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount
+  ? approvedReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount
   : 0;
 const avgRating = avgRatingNum > 0 ? avgRatingNum.toFixed(1) : "";
 
 const hotelRanking = String(data.ranking || data.ranking_text || "").trim();
 const locationMapUrl = data.map_url || "#location-map";
 
-// ================= 3. RESPONSIVE IMAGE ENGINE (Unsplash & Cloudflare CDN) =================
+// ================= 3. CLOUDFLARE RESILIENT RESPONSIVE IMAGES =================
 const coverImage = data.image ? String(data.image).trim() : "";
 const coverAlt = String(data.image_alt || `${hotelTitle} - Photo 1`).trim();
 
@@ -89,16 +83,16 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   if (!url) return '';
   const cleanUrl = url.trim();
   
-  // 1. Unsplash Optimization
+  // Unsplash fallback
   if (cleanUrl.includes('unsplash.com')) {
     const base = cleanUrl.split('?')[0];
     return `${base}?auto=format&fit=crop&w=${width}&q=${quality}&fm=webp`;
   }
   
-  // 2. Cloudflare Images / CDN Transformations Support
+  // Cloudflare Transformations with onerror=redirect (কোটা পার হলেও ছবি ভাঙবে না)
   if (cleanUrl.startsWith('https://media.gulshanhotels.com/')) {
     const path = cleanUrl.replace('https://media.gulshanhotels.com/', '');
-    return `https://media.gulshanhotels.com/cdn-cgi/image/width=${width},quality=${quality},format=auto/${path}`;
+    return `https://media.gulshanhotels.com/cdn-cgi/image/width=${width},quality=${quality},format=auto,onerror=redirect/${path}`;
   }
 
   return cleanUrl;
@@ -108,20 +102,22 @@ const rawGalleryData: any[] = (Array.isArray(data.gallery) && data.gallery.lengt
   ? data.gallery
   : (coverImage ? [{ photo: coverImage, alt: coverAlt }] : []);
 
-// কোনো কাল্পনিক অনুমান ছাড়া সৎ Alt Text
 const processedGallery = rawGalleryData.map((item: any, idx: number) => {
   const isObj = typeof item === 'object' && item !== null;
   const rawUrl = isObj ? (item.photo || item.image || item.url || '') : String(item);
   const altText = isObj && item.alt 
     ? String(item.alt).trim() 
-    : (idx === 0 && coverAlt ? coverAlt : `${hotelTitle} - Photo ${idx + 1}`);
+    : (idx === 0 && coverAlt ? coverAlt : `${hotelTitle || 'Hotel'} - Photo ${idx + 1}`);
+
+  const desktopUrl = getOptimizedImageUrl(rawUrl, 1200, 80);
 
   return {
     url: rawUrl,
     alt: altText,
     mobile: getOptimizedImageUrl(rawUrl, 640, 75),
-    desktop: getOptimizedImageUrl(rawUrl, 1200, 80),
-    lightbox: getOptimizedImageUrl(rawUrl, 1600, 85)
+    desktop: desktopUrl,
+    // Lightbox-এর জন্য আলাদা 1600 বাদ দিয়ে Desktop 1200 রি-ইউজ (ক্যাশ সেভ ও কোটা বাঁচানো)
+    lightbox: desktopUrl
   };
 }).filter(g => Boolean(g.url));
 
@@ -131,7 +127,7 @@ const galleryPayload = {
   photos: processedGallery.map(g => ({ src: g.lightbox, alt: g.alt }))
 };
 
-// ================= 4. WISHLIST PAYLOAD (NO FAKE PRICE) =================
+// ================= 4. WISHLIST PAYLOAD =================
 const rawPrice = data.price || data.starting_price;
 const hotelPrice = rawPrice 
   ? (String(rawPrice).trim().startsWith('$') || String(rawPrice).trim().startsWith('৳') ? String(rawPrice).trim() : `$${String(rawPrice).trim()}`)
@@ -145,6 +141,13 @@ const currentHotelWishlistData = {
   url: hotelSlug ? `/${hotelSlug}/` : "#"
 };
 ---
+
+<!-- পেছনের পেজ স্ক্রল হওয়া বন্ধ করতে আধুনিক CSS :has() -->
+<style is:global>
+  html:has(#heroLightboxModal[open]) {
+    overflow: hidden !important;
+  }
+</style>
 
 <!-- MAIN HOTEL HEADER & GALLERY SECTION -->
 <section class="bg-white text-slate-900 pt-6 pb-8 px-4 sm:px-6 lg:px-8 max-w-[1550px] mx-auto border-b border-slate-200">
@@ -205,17 +208,15 @@ const currentHotelWishlistData = {
             <>
               <span class="font-bold text-slate-900">{avgRating}</span>
 
-              <!-- ১. সৎ ও নিখুঁত ফ্র্যাকশনাল স্টার (আধা তারা সমস্যা পুরোপুরি ফিক্সড) -->
+              <!-- নির্ভুল ফ্র্যাকশনাল স্টার -->
               <div class="flex items-center gap-0.5" role="img" aria-label={`Rated ${avgRating} out of 5 stars`}>
                 {Array.from({ length: 5 }).map((_, i) => {
                   const pct = Math.round(Math.max(0, Math.min(1, avgRatingNum - i)) * 100);
                   return (
                     <span class="relative inline-block w-3.5 h-3.5 shrink-0" aria-hidden="true">
-                      <!-- পেছনের ছাই রঙের তারা -->
                       <svg class="absolute inset-0 w-3.5 h-3.5 fill-slate-200" viewBox="0 0 24 24">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                       </svg>
-                      <!-- সামনের সোনালী তারা (সঠিক পারসেন্টেজ অনুযায়ী কাটা) -->
                       <span class="absolute inset-y-0 left-0 overflow-hidden" style={`width:${pct}%`}>
                         <svg class="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 24 24">
                           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -290,7 +291,7 @@ const currentHotelWishlistData = {
       <div class="pt-2">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-1 h-[280px] sm:h-[400px] md:h-[450px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm bg-slate-100">
           
-          <!-- 1. MAIN LARGE IMAGE (No nested button conflict) -->
+          <!-- 1. MAIN LARGE IMAGE -->
           <div 
             class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos >= 2 ? 'md:col-span-2' : 'md:col-span-3'}`}
             data-gallery-trigger="0"
@@ -312,7 +313,7 @@ const currentHotelWishlistData = {
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
-            <!-- Visual Overlay Badge (pointer-events-none, screen reader gets count from parent label) -->
+            <!-- Visual Badge -->
             <div
               aria-hidden="true"
               class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#002b11]/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition group-hover:scale-105 pointer-events-none z-10"
@@ -326,10 +327,10 @@ const currentHotelWishlistData = {
             </div>
           </div>
 
-          <!-- 2. RIGHT SIDE: STACKED PHOTOS (Fixed row-span-2 when exactly 2 photos) -->
+          <!-- 2. RIGHT SIDE: STACKED PHOTOS -->
           {totalPhotos >= 2 && (
             <div class="hidden md:grid grid-rows-2 gap-1 h-full">
-              <!-- Photo 2 (Spans both rows if exactly 2 photos exist) -->
+              <!-- Photo 2 (Row-span-2 if exactly 2 photos) -->
               <div 
                 class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos === 2 ? 'row-span-2' : ''}`}
                 data-gallery-trigger="1"
@@ -348,7 +349,7 @@ const currentHotelWishlistData = {
                 />
               </div>
 
-              <!-- Photo 3 (Only rendered if 3 or more photos exist) -->
+              <!-- Photo 3 -->
               {totalPhotos >= 3 && (
                 <div 
                   class="relative h-full overflow-hidden group cursor-pointer"
@@ -382,7 +383,7 @@ const currentHotelWishlistData = {
 <script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(galleryPayload).replace(/</g, '\\u003c')} />
 <script type="application/json" id="hotel-wishlist-data" set:html={JSON.stringify(currentHotelWishlistData).replace(/</g, '\\u003c')} />
 
-<!-- ৩. NATIVE <dialog> MODAL (Built-in Focus Trapping, Escape & Focus Restoration) -->
+<!-- NATIVE <dialog> MODAL (Zero Heading Conflicts) -->
 <dialog
   id="heroLightboxModal"
   aria-label="Image Gallery Lightbox"
@@ -390,7 +391,8 @@ const currentHotelWishlistData = {
 >
   <div class="flex items-center justify-between max-w-7xl mx-auto w-full border-b border-slate-800 pb-4">
     <div>
-      <h2 class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle}</h2>
+      <!-- H2 বাদ দিয়ে clean p ট্যাগ যাতে পেজের হেডিং স্ট্রাকচার নষ্ট না হয় -->
+      <p class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle}</p>
       <span class="text-xs text-slate-400">Photo Gallery</span>
     </div>
     <div class="flex items-center gap-4">
@@ -408,14 +410,14 @@ const currentHotelWishlistData = {
     </div>
   </div>
 
-  <div class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center">
+  <div id="lightboxTouchArea" class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center touch-pan-y">
     <img
       id="lightboxModalImg"
       src={processedGallery[0]?.lightbox || coverImage}
       alt={processedGallery[0]?.alt || hotelTitle}
       loading="lazy"
       decoding="async"
-      class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200"
+      class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200 pointer-events-none"
     />
     
     {totalPhotos > 1 && (
@@ -450,7 +452,6 @@ const currentHotelWishlistData = {
     abortCtrl = new AbortController();
     const { signal } = abortCtrl;
 
-    // 1. Native <dialog> Gallery Logic
     const modal = document.getElementById('heroLightboxModal') as HTMLDialogElement | null;
     const closeModalBtn = document.getElementById('closeHeroLightboxBtn');
     const modalImg = document.getElementById('lightboxModalImg') as HTMLImageElement | null;
@@ -458,6 +459,7 @@ const currentHotelWishlistData = {
     const modalPrevBtn = document.getElementById('lightboxPrevBtn');
     const modalNextBtn = document.getElementById('lightboxNextBtn');
     const galleryTriggers = document.querySelectorAll('[data-gallery-trigger]');
+    const touchArea = document.getElementById('lightboxTouchArea');
 
     const galleryScript = document.getElementById('hotel-gallery-data');
     let galleryData = { photos: [] as { src: string; alt: string }[] };
@@ -493,7 +495,7 @@ const currentHotelWishlistData = {
       if (!modal || count === 0) return;
       updateModalImage(startIdx);
       if (!modal.open) {
-        modal.showModal(); // Native browser focus trap activated
+        modal.showModal();
       }
 
       if (window.location.hash !== '#gallery') {
@@ -522,7 +524,6 @@ const currentHotelWishlistData = {
       }
     }, { signal });
 
-    // Native dialog cancel event (fires on Esc key)
     modal?.addEventListener('cancel', (e) => {
       e.preventDefault();
       closeLightboxByUI();
@@ -533,6 +534,23 @@ const currentHotelWishlistData = {
       if (e.key === 'ArrowLeft') updateModalImage(activeIdx - 1);
       if (e.key === 'ArrowRight') updateModalImage(activeIdx + 1);
     }, { signal });
+
+    // ================= MOBILE TOUCH SWIPE SUPPORT =================
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    touchArea?.addEventListener('touchstart', (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true, signal });
+
+    touchArea?.addEventListener('touchend', (e: TouchEvent) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const swipeDistance = touchEndX - touchStartX;
+      if (Math.abs(swipeDistance) > 45) {
+        if (swipeDistance < 0) updateModalImage(activeIdx + 1); // সোয়াইপ লেফট -> পরের ছবি
+        else updateModalImage(activeIdx - 1); // সোয়াইপ রাইট -> আগের ছবি
+      }
+    }, { passive: true, signal });
 
     if (window.location.hash === '#gallery') {
       openLightbox(0);
@@ -554,7 +572,6 @@ const currentHotelWishlistData = {
 
     closeModalBtn?.addEventListener('click', closeLightboxByUI, { signal });
     
-    // Close on backdrop click
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeLightboxByUI();
     }, { signal });
@@ -562,7 +579,7 @@ const currentHotelWishlistData = {
     modalPrevBtn?.addEventListener('click', () => updateModalImage(activeIdx - 1), { signal });
     modalNextBtn?.addEventListener('click', () => updateModalImage(activeIdx + 1), { signal });
 
-    // ================= 2. BIDIRECTIONAL WISHLIST WITH ARIA-PRESSED =================
+    // ================= WISHLIST ENGINE =================
     const wishlistDataScript = document.getElementById('hotel-wishlist-data');
     let hotelInfo: any = null;
     try {
@@ -602,7 +619,6 @@ const currentHotelWishlistData = {
           }
         });
 
-        // Global Wishlist Count Header Update
         const globalCount = document.getElementById('wishlist-count');
         if (globalCount) {
           if (list.length > 0) {
@@ -616,7 +632,6 @@ const currentHotelWishlistData = {
 
       updateWishlistButtonUI();
 
-      // Listen to external wishlist events (e.g. item deleted from drawer)
       window.addEventListener('wishlist-updated', updateWishlistButtonUI, { signal });
 
       toggleBtns.forEach(btn => {
@@ -642,7 +657,6 @@ const currentHotelWishlistData = {
           localStorage.setItem('gh_wishlist', JSON.stringify(list));
           updateWishlistButtonUI();
 
-          // Dispatch event so global header and drawer update instantly
           window.dispatchEvent(new CustomEvent('wishlist-updated'));
         }, { signal });
       });
