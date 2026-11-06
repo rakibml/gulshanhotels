@@ -204,22 +204,25 @@ const hasGeo =
   Math.abs(latNum) <= 90 && Math.abs(lngNum) <= 180 &&
   !(latNum === 0 && lngNum === 0);
 
-// ================= ৬. অ্যাড্রেস ও ১০০% ডায়নামিক পোস্টাল কোড =================
-const streetAddress = str(data.address || data.location);
+// ================= ৬. অ্যাড্রেস (এডমিন প্যানেল থেকে সরাসরি ম্যানুয়ালি) =================
+const streetAddress = str(data.street_address || data.streetAddress || data.location);
 const locality = str(data.locality || data.area || data.city);
 const region = str(data.region || data.state);
+const postalCode = str(data.postal_code || data.postalCode || data.zip);
 
-// ১. প্রথমে CMS থেকে নেবে
-let postalCode = str(data.postal_code || data.postalCode || data.zip);
+// এডমিন প্যানেলে যা থাকবে শুধু তাই স্কিমায় যাবে (কোনো অনুমান বা ফেক ডাটা নেই)
+if (streetAddress || locality || region || postalCode) {
+  const addressObj: any = {
+    "@type": "PostalAddress",
+    addressCountry: "BD",
+  };
+  if (streetAddress) addressObj.streetAddress = streetAddress;
+  if (locality) addressObj.addressLocality = locality;       // এডমিনের দেওয়া locality
+  if (region) addressObj.addressRegion = region;             // এডমিনের দেওয়া region
+  if (postalCode) addressObj.postalCode = postalCode;         // এডমিনের দেওয়া postal_code
 
-// ২. CMS-এ আলাদা না থাকলে অ্যাড্রেসের ভেতর থাকা যেকোনো ৪ সংখ্যার পোস্টাল কোড খুঁজবে
-if (!postalCode && streetAddress) {
-  const match = streetAddress.match(/\b([1-9]\d{3})\b/);
-  if (match) {
-    postalCode = match[1];
-  }
+  hotelNode.address = addressObj;
 }
-
 // ================= ৭. স্কিমা অবজেক্ট তৈরি =================
 const hotelId = `${pageUrl}#hotel`;
 
