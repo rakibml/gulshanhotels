@@ -175,7 +175,7 @@ if (!metaDescription && hotelTitle) {
   metaDescription = `Book your stay at ${hotelTitle} in ${shortArea}. Explore room rates, photos, amenities, guest reviews, and direct reservation details.`;
 }
 
-// কাভার ইমেজ (কোনো আনস্প্ল্যাশ ফলব্যাক নয়)
+// কাভার ইমেজ (LCP Preload-এর জন্য আসল ছবি নির্বাচন)
 const rawImage = hotelData.image || (Array.isArray(hotelData.gallery) && hotelData.gallery.length > 0 
   ? (typeof hotelData.gallery[0] === 'object' ? hotelData.gallery[0]?.photo || hotelData.gallery[0]?.image : hotelData.gallery[0]) 
   : "");
@@ -191,7 +191,7 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
     title={pageTitle}
     description={metaDescription}
     image={hotelImage}
-    canonical={`https://gulshanhotels.com/${hotelSlug}/`}
+    preloadImage={rawImage || undefined}
   >
     <HotelMasterSchema hotel={hotel} />
     <HotelHeader hotel={hotel} />
