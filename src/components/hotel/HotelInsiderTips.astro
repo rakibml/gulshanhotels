@@ -1,242 +1,82 @@
 ---
-// src/components/hotel/HotelInsiderTips.astro
-// Zero fake data, pure SVG, Schema.org JSON-LD, accessible, show-more works
+// src/components/hotel/HotelInsiderTips.astro (lite)
+// No JS, no icons. Show more uses native <details>.
 
-interface RawTip {
-  title?: string;
-  tip?: string;
-  description?: string;
-  text?: string;
-  tag?: string;
-  category?: string;
-}
-
-interface HotelData {
-  title?: string;
-  name?: string;
-  enable_insider_tips?: boolean;
-  insider_tips?: RawTip[];
-  tips?: RawTip[];
-}
-
-interface TipItem {
-  title: string;
-  tip: string;
-  tag: string;
-  category: string;
-}
-
-interface Props {
-  hotel: {
-    data?: HotelData;
-  };
-}
-
-const { hotel } = Astro.props;
-const data: HotelData = hotel?.data || {};
-
+const data = Astro.props.hotel?.data ?? {};
 const hotelTitle = (data.title || data.name || "").trim();
-const showSection = data.enable_insider_tips !== false;
+const clean = (v: unknown) => String(v ?? "").trim().replace(/\s{2,}/g, " ");
 
-// ---------- CMS data ----------
-const rawTips: (RawTip | string)[] = Array.isArray(data.insider_tips)
-  ? data.insider_tips
-  : Array.isArray(data.tips)
-    ? data.tips
-    : [];
+const raw = data.insider_tips ?? data.tips ?? [];
+const tips = (Array.isArray(raw) ? raw : [])
+  .map((t: any) =>
+    typeof t === "string"
+      ? { title: "", tip: clean(t), tag: "" }
+      : { title: clean(t?.title), tip: clean(t?.tip || t?.description || t?.text), tag: clean(t?.tag || t?.category) }
+  )
+  .filter((t) => t.tip.length > 3);
 
-const clean = (v: unknown): string =>
-  String(v ?? "").trim().replace(/\s{2,}/g, " ");
+const MAX = 9;
+const shown = tips.slice(0, MAX);
+const more = tips.slice(MAX);
 
-const tipsList: TipItem[] = rawTips
-  .map((item): TipItem | null => {
-    if (typeof item === "string") {
-      return { title: "", tip: clean(item), tag: "", category: "" };
-    }
-    if (item && typeof item === "object") {
-      return {
-        title: clean(item.title),
-        tip: clean(item.tip || item.description || item.text),
-        tag: clean(item.tag),
-        category: clean(item.category).toLowerCase(),
-      };
-    }
-    return null;
-  })
-  .filter((item): item is TipItem => item !== null && item.tip.length > 3);
-
-const MAX_VISIBLE_TIPS = 9;
-const hasMoreTips = tipsList.length > MAX_VISIBLE_TIPS;
-const hiddenCount = tipsList.length - MAX_VISIBLE_TIPS;
-
-// ---------- Text that depends on hotel name ----------
-const headingFor = hotelTitle ? ` for ${hotelTitle}` : "";
-
-// ---------- JSON-LD (all tips, same as what the page shows) ----------
-const jsonLd = {
+const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: `Insider tips${headingFor}`,
-  description: hotelTitle
-    ? `Practical local advice and recommendations for guests staying at ${hotelTitle}`
-    : "Practical local advice and recommendations for guests",
-  numberOfItems: tipsList.length,
-  itemListElement: tipsList.map((item, idx) => ({
+  name: hotelTitle ? `Insider tips for ${hotelTitle}` : "Insider tips",
+  numberOfItems: tips.length,
+  itemListElement: tips.map((t, i) => ({
     "@type": "ListItem",
-    position: idx + 1,
-    name: item.title || `Tip ${idx + 1}`,
-    description: item.tip,
+    position: i + 1,
+    name: t.title || `Tip ${i + 1}`,
+    description: t.tip,
   })),
-};
+}).replace(/</g, "\\u003c");
 
-// "<" escaped so text inside a tip can never close the script tag
-const jsonLdString = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
-
-// ---------- Icons: built once ----------
-const svgWrap = (path: string) =>
-  `<svg aria-hidden="true" focusable="false" class="w-5 h-5 text-[#0d3b23]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">${path}</svg>`;
-
-const ICONS = {
-  room: svgWrap(
-    `<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M5 18v2m14-2v2M5 6v4m14-4v4"/>`
-  ),
-  location: svgWrap(
-    `<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/>`
-  ),
-  dining: svgWrap(
-    `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>`
-  ),
-  comfort: svgWrap(
-    `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`
-  ),
-  general: svgWrap(
-    `<path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>`
-  ),
-};
-
-// category first, tag as backup
-const getIcon = (category: string, tag: string): string => {
-  const c = `${category} ${tag}`.toLowerCase();
-
-  if (/room|view|bed/.test(c)) return ICONS.room;
-  if (/transit|airport|taxi|location/.test(c)) return ICONS.location;
-  if (/food|dining|breakfast|restaurant/.test(c)) return ICONS.dining;
-  if (/quiet|sleep|security/.test(c)) return ICONS.comfort;
-  return ICONS.general;
-};
+const listClass = "grid gap-4 md:grid-cols-2 lg:grid-cols-3 list-none p-0 m-0";
+const cardClass = "h-full rounded-2xl border border-slate-200 bg-slate-50 p-5";
 ---
 
-{showSection && tipsList.length > 0 && (
+{data.enable_insider_tips !== false && tips.length > 0 && (
   <section
     id="insider-tips"
-    class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16 text-left"
+    class="max-w-7xl mx-auto bg-white py-12 px-4 sm:px-6 lg:px-0 border-b border-slate-200 scroll-mt-16 text-left text-slate-800"
     aria-labelledby="insider-tips-heading"
   >
-    <script type="application/ld+json" set:html={jsonLdString} />
+    <script type="application/ld+json" set:html={jsonLd} />
 
-    <div class="space-y-6">
+    <h2 id="insider-tips-heading" class="text-2xl sm:text-3xl font-black text-[#002b11]">
+      Insider tips{hotelTitle && ` for ${hotelTitle}`}
+    </h2>
 
-      {/* Section header */}
-      <div class="space-y-1">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] sm:text-xs font-black uppercase tracking-wider text-emerald-800">
-          <svg aria-hidden="true" focusable="false" class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          <span>Local Expertise</span>
-        </span>
+    <ul class={`${listClass} mt-6`}>
+      {shown.map((t) => (
+        <li>
+          <article class={cardClass}>
+            {t.tag && <span class="text-xs font-bold uppercase text-emerald-800">{t.tag}</span>}
+            {t.title && <p class="font-black text-slate-900 mt-1">{t.title}</p>}
+            <p class="text-sm text-slate-600 leading-relaxed mt-2">{t.tip}</p>
+          </article>
+        </li>
+      ))}
+    </ul>
 
-        <h2
-          id="insider-tips-heading"
-          class="font-sans text-2xl sm:text-3xl font-black text-[#002b11] tracking-tight leading-tight"
-        >
-          Insider tips for your stay
-        </h2>
-        <p class="text-xs sm:text-sm text-slate-500 font-medium">
-          {hotelTitle ? (
-            <>
-              Helpful local advice and practical recommendations for guests visiting{" "}
-              <strong class="text-slate-800 font-bold">{hotelTitle}</strong>
-            </>
-          ) : (
-            "Helpful local advice and practical recommendations for guests"
-          )}
-        </p>
-      </div>
-
-      {/* Tips grid: real list, all tips rendered, extras hidden until button click */}
-      <ul
-        id="insider-tips-list"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 list-none p-0 m-0"
-      >
-        {tipsList.map((item, index) => (
-          <li
-            class:list={[
-              "flex",
-              { "hidden insider-tip-extra": index >= MAX_VISIBLE_TIPS },
-            ]}
-          >
-            <article class="w-full bg-slate-50/60 border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between hover:bg-white hover:border-emerald-600/40 hover:shadow-sm transition duration-200">
-              <div class="space-y-3">
-                {/* Top row: icon + tag */}
-                <div class="flex items-center justify-between gap-2">
-                  <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-                    <Fragment set:html={getIcon(item.category, item.tag)} />
-                  </div>
-
-                  {item.tag && (
-                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
-                      {item.tag}
-                    </span>
-                  )}
-                </div>
-
-                {item.title && (
-                  <p class="font-sans font-black text-slate-900 text-sm sm:text-base leading-snug">
-                    {item.title}
-                  </p>
-                )}
-
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                  {item.tip}
-                </p>
-              </div>
-            </article>
-          </li>
-        ))}
-      </ul>
-
-      {/* Show more */}
-      {hasMoreTips && (
-        <div class="text-center pt-2" id="insider-tips-more-wrap">
-          <button
-            type="button"
-            id="insider-tips-show-more"
-            class="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700 transition"
-            aria-expanded="false"
-            aria-controls="insider-tips-list"
-          >
-            <span>Show {hiddenCount} more {hiddenCount === 1 ? "tip" : "tips"}</span>
-            <svg aria-hidden="true" focusable="false" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-        </div>
-      )}
-    </div>
+    {more.length > 0 && (
+      <details class="mt-4">
+        <summary class="cursor-pointer text-center text-sm font-bold text-emerald-800">
+          Show {more.length} more {more.length === 1 ? "tip" : "tips"}
+        </summary>
+        <ul class={`${listClass} mt-4`}>
+          {more.map((t) => (
+            <li>
+              <article class={cardClass}>
+                {t.tag && <span class="text-xs font-bold uppercase text-emerald-800">{t.tag}</span>}
+                {t.title && <p class="font-black text-slate-900 mt-1">{t.title}</p>}
+                <p class="text-sm text-slate-600 leading-relaxed mt-2">{t.tip}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </details>
+    )}
   </section>
-)}
-
-{hasMoreTips && (
-  <script>
-    const btn = document.getElementById("insider-tips-show-more");
-    btn?.addEventListener("click", () => {
-      const extras = document.querySelectorAll<HTMLElement>(".insider-tip-extra");
-      extras.forEach((el) => el.classList.remove("hidden"));
-      btn.setAttribute("aria-expanded", "true");
-      document.getElementById("insider-tips-more-wrap")?.remove();
-      // keyboard users: move focus to the first newly shown tip
-      extras[0]?.querySelector("article")?.setAttribute("tabindex", "-1");
-      (extras[0]?.querySelector("article") as HTMLElement | null)?.focus();
-    });
-  </script>
 )}
