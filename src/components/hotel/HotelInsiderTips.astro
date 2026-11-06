@@ -1,6 +1,6 @@
 ---
-// src/components/hotel/HotelInsiderTips.astro (lite)
-// No JS, no icons. Show more uses native <details>.
+// src/components/hotel/HotelInsiderTips.astro (lite, no boxes)
+// No JS, no icons, no backgrounds. Show more uses native <details>.
 
 const data = Astro.props.hotel?.data ?? {};
 const hotelTitle = (data.title || data.name || "").trim();
@@ -15,7 +15,7 @@ const tips = (Array.isArray(raw) ? raw : [])
   )
   .filter((t) => t.tip.length > 3);
 
-const MAX = 9;
+const MAX = 4; // phone-e choto rakhar jonno. Beshi dekhate chaile barao
 const shown = tips.slice(0, MAX);
 const more = tips.slice(MAX);
 
@@ -32,14 +32,14 @@ const jsonLd = JSON.stringify({
   })),
 }).replace(/</g, "\\u003c");
 
-const listClass = "grid gap-4 md:grid-cols-2 lg:grid-cols-3 list-none p-0 m-0";
-const cardClass = "h-full rounded-2xl border border-slate-200 bg-slate-50 p-5";
+const listClass = "grid md:grid-cols-2 md:gap-x-12 list-none p-0 m-0";
+const itemClass = "py-4 border-b border-slate-200";
 ---
 
 {data.enable_insider_tips !== false && tips.length > 0 && (
   <section
     id="insider-tips"
-    class="max-w-7xl mx-auto bg-white py-12 px-4 sm:px-6 lg:px-0 border-b border-slate-200 scroll-mt-16 text-left text-slate-800"
+    class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-0 scroll-mt-16 text-left text-slate-800"
     aria-labelledby="insider-tips-heading"
   >
     <script type="application/ld+json" set:html={jsonLd} />
@@ -48,31 +48,27 @@ const cardClass = "h-full rounded-2xl border border-slate-200 bg-slate-50 p-5";
       Insider tips{hotelTitle && ` for ${hotelTitle}`}
     </h2>
 
-    <ul class={`${listClass} mt-6`}>
+    <ul class={`${listClass} mt-4`}>
       {shown.map((t) => (
-        <li>
-          <article class={cardClass}>
-            {t.tag && <span class="text-xs font-bold uppercase text-emerald-800">{t.tag}</span>}
-            {t.title && <p class="font-black text-slate-900 mt-1">{t.title}</p>}
-            <p class="text-sm text-slate-600 leading-relaxed mt-2">{t.tip}</p>
-          </article>
+        <li class={itemClass}>
+          {t.title && <p class="font-bold text-slate-900">{t.title}</p>}
+          <p class="text-sm text-slate-600 leading-relaxed mt-1">{t.tip}</p>
+          {t.tag && <p class="text-xs font-bold uppercase text-emerald-800 mt-2">{t.tag}</p>}
         </li>
       ))}
     </ul>
 
     {more.length > 0 && (
-      <details class="mt-4">
-        <summary class="cursor-pointer text-center text-sm font-bold text-emerald-800">
+      <details>
+        <summary class="cursor-pointer py-4 text-sm font-bold text-emerald-800">
           Show {more.length} more {more.length === 1 ? "tip" : "tips"}
         </summary>
-        <ul class={`${listClass} mt-4`}>
+        <ul class={listClass}>
           {more.map((t) => (
-            <li>
-              <article class={cardClass}>
-                {t.tag && <span class="text-xs font-bold uppercase text-emerald-800">{t.tag}</span>}
-                {t.title && <p class="font-black text-slate-900 mt-1">{t.title}</p>}
-                <p class="text-sm text-slate-600 leading-relaxed mt-2">{t.tip}</p>
-              </article>
+            <li class={itemClass}>
+              {t.title && <p class="font-bold text-slate-900">{t.title}</p>}
+              <p class="text-sm text-slate-600 leading-relaxed mt-1">{t.tip}</p>
+              {t.tag && <p class="text-xs font-bold uppercase text-emerald-800 mt-2">{t.tag}</p>}
             </li>
           ))}
         </ul>
