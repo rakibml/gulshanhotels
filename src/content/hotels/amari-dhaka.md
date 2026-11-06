@@ -1,26 +1,25 @@
 ---
 header_notice: ''
 title: Amari Dhaka Bangladesh
-title_style: style_5
-category: 5-Star Luxury Stay
-location: 47, Road No 41, Gulshan-2, Dhaka City, Dhaka Division, Bangladesh 1212
+draft: false
+seo_title: ''
 seo_description: ''
+is_verified: true
+ranking: ''
+category: 5-Star Luxury Stay
+location: Gulshan-2, Dhaka Bangladesh 1212
+map_url: '#location-map'
 image: https://media.gulshanhotels.com/533410075.jpg
+image_alt: amari dhaka hotel view
 gallery:
-  - https://media.gulshanhotels.com/amari-dhaka.webp
-  - https://media.gulshanhotels.com/deluxe_twin.webp
-  - https://media.gulshanhotels.com/deluxe_king.webp
-  - https://media.gulshanhotels.com/one-bedroom-1.webp
-  - https://media.gulshanhotels.com/junior-suite-lounge.webp
-  - https://media.gulshanhotels.com/hotel-lobby-1.webp
-  - https://media.gulshanhotels.com/amaridhaka3.webp
-  - https://media.gulshanhotels.com/34884165.jpg
-  - /images/hotels/34884185.jpg
-  - /images/hotels/533417791.jpg
-  - /images/hotels/533422530.jpg
-  - /images/hotels/533422557.jpg
-enable_view_prices: true
-enable_official_site: true
+  - photo: https://media.gulshanhotels.com/amari-dhaka.webp
+    alt: hotel view
+  - photo: https://media.gulshanhotels.com/34884184.jpg
+    alt: hotel room
+  - photo: https://media.gulshanhotels.com/34884165.jpg
+    alt: bathroom view
+  - photo: https://media.gulshanhotels.com/deluxe_twin.webp
+    alt: deluxe twin bed room
 popular: true
 sponsored: false
 spotlight_desc: ''
@@ -269,6 +268,8 @@ reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
 faqs: []
+enable_official_site: true
+enable_view_prices: true
 policies:
   - custom_svg: ''
     label: Check-in
@@ -285,6 +286,7 @@ policies:
   - custom_svg: ''
     label: Children & Beds
     value: Child policies Children
+title_style: style_5
 ---
 
 Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka.
