@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelHeader.astro (100% Dynamic, Fully Accessible & Wishlist-Synced Header)
+// src/components/hotel/HotelHeader.astro (100% Honest Data, Bulletproof Accessibility & Production Ready)
 interface Props {
   hotel: any;
 }
@@ -8,18 +8,16 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 // ================= 1. HOTEL BASIC INFO & CLEAN SLUG =================
-const hotelTitle = String(data.title || data.name || "Hotel").trim();
+const hotelTitle = String(data.title || data.name || "").trim();
 const hotelLocation = String(data.location || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
 const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
-
-// শুধুমাত্র অ্যাডমিন প্যানেল থেকে নিশ্চিত (true) করলেই ভেরিফায়েড ব্যাজ দেখাবে
 const isVerified = data.is_verified === true;
 
-// ================= 2. DYNAMIC REVIEWS CALCULATION =================
+// ================= 2. HONEST REVIEWS & RATING CALCULATION =================
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
@@ -50,23 +48,37 @@ const approvedCmsReviews = rawReviewsList.filter((item: any) => {
   return matchSlug || matchTitle;
 });
 
-const hotelEmbeddedReviews = Array.isArray(data.reviews) ? data.reviews : [];
-const combinedReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].filter(
-  (r: any) => String(r.comment || r.review || r.body || '').trim().length > 1
-);
+const hotelEmbeddedReviews = (Array.isArray(data.reviews) ? data.reviews : []).filter((r: any) => {
+  return r && (r.approved === undefined || r.approved === true || String(r.approved).toLowerCase() === 'true');
+});
 
-const reviewsCount = combinedReviews.length;
-const avgRatingNum = reviewsCount > 0 
-  ? (combinedReviews.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0) / reviewsCount)
-  : (data.rating ? Number(data.rating) : 0);
+// ডুপ্লিকেট রোধ ও ন্যূনতম ১০ অক্ষরের রিভিউ ফিল্টারিং (ফুলে যাওয়া রেটিং প্রতিরোধ)
+const seenReviews = new Set<string>();
+const validReviews = [...approvedCmsReviews, ...hotelEmbeddedReviews].filter((r: any) => {
+  if (!r) return false;
+  const comment = String(r.comment || r.review || r.body || '').trim();
+  const rating = Number(r.rating);
+  if (comment.length < 10) return false;
+  if (isNaN(rating) || rating < 1 || rating > 5) return false;
+
+  const key = `${comment}_${r.name || r.author || ''}`;
+  if (seenReviews.has(key)) return false;
+  seenReviews.add(key);
+  return true;
+});
+
+const reviewsCount = validReviews.length;
+const avgRatingNum = reviewsCount > 0
+  ? validReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount
+  : (data.rating && Number(data.rating) >= 1 && Number(data.rating) <= 5 ? Number(data.rating) : 0);
 const avgRating = avgRatingNum > 0 ? avgRatingNum.toFixed(1) : "";
 
 const hotelRanking = String(data.ranking || data.ranking_text || "").trim();
 const locationMapUrl = data.map_url || "#location-map";
 
-// ================= 3. GALLERY WITH DYNAMIC ALT TEXT & OPTIMIZATION =================
-const coverImage = data.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
-const coverAlt = String(data.image_alt || `${hotelTitle} - Main Exterior View`).trim();
+// ================= 3. HONEST GALLERY (NO FAKE STOCK PHOTOS) =================
+const coverImage = data.image ? String(data.image).trim() : "";
+const coverAlt = String(data.image_alt || (hotelTitle ? `${hotelTitle} - Photo 1` : "Hotel Exterior")).trim();
 
 function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   if (!url) return '';
@@ -79,19 +91,15 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
 
 const rawGalleryData: any[] = (Array.isArray(data.gallery) && data.gallery.length > 0)
   ? data.gallery
-  : [{ photo: coverImage, alt: coverAlt }];
+  : (coverImage ? [{ photo: coverImage, alt: coverAlt }] : []);
 
-// নতুন অবজেক্ট ফরম্যাট এবং পুরাতন স্ট্রিং ফরম্যাট দুটোই সাপোর্ট করবে
+// কোনো কাল্পনিক নাম ছাড়া আসল Alt Text
 const processedGallery = rawGalleryData.map((item: any, idx: number) => {
   const isObj = typeof item === 'object' && item !== null;
   const rawUrl = isObj ? (item.photo || item.image || item.url || '') : String(item);
-  
-  let fallbackAlt = `${hotelTitle} - Photo ${idx + 1}`;
-  if (idx === 0) fallbackAlt = coverAlt;
-  else if (idx === 1) fallbackAlt = `${hotelTitle} - Luxury Room View`;
-  else if (idx === 2) fallbackAlt = `${hotelTitle} - Facilities & Amenities`;
-
-  const altText = isObj && item.alt ? String(item.alt).trim() : fallbackAlt;
+  const altText = isObj && item.alt 
+    ? String(item.alt).trim() 
+    : (idx === 0 && coverAlt ? coverAlt : `${hotelTitle || 'Hotel'} - Photo ${idx + 1}`);
 
   return {
     url: rawUrl,
@@ -104,21 +112,22 @@ const processedGallery = rawGalleryData.map((item: any, idx: number) => {
 
 const totalPhotos = processedGallery.length;
 
-// ক্লায়েন্ট স্ক্রিপ্টে লাইটবক্সের জন্য ডাটা
 const galleryPayload = {
   photos: processedGallery.map(g => ({ src: g.lightbox, alt: g.alt }))
 };
 
-// ================= 4. WISHLIST DATA PAYLOAD =================
-const rawPrice = String(data.price || data.starting_price || "$150").trim();
-const hotelPrice = rawPrice.startsWith('$') || rawPrice.startsWith('৳') ? rawPrice : `$${rawPrice}`;
+// ================= 4. WISHLIST PAYLOAD (NO FAKE $150 PRICE) =================
+const rawPrice = data.price || data.starting_price;
+const hotelPrice = rawPrice 
+  ? (String(rawPrice).trim().startsWith('$') || String(rawPrice).trim().startsWith('৳') ? String(rawPrice).trim() : `$${String(rawPrice).trim()}`)
+  : "Check rates";
 
 const currentHotelWishlistData = {
-  title: hotelTitle,
+  title: hotelTitle || "Featured Hotel",
   slug: hotelSlug,
   price: hotelPrice,
-  image: processedGallery[0]?.mobile || coverImage,
-  url: `/${hotelSlug}/`
+  image: processedGallery[0]?.mobile || coverImage || "",
+  url: hotelSlug ? `/${hotelSlug}/` : "#"
 };
 ---
 
@@ -129,13 +138,19 @@ const currentHotelWishlistData = {
     <!-- ================= 1. HEADER INFO AREA ================= -->
     <div class="space-y-3 pb-2">
       
-      <!-- ROW 1: TITLE & HEADER ACTION BUTTONS -->
+      <!-- ROW 1: TITLE & ACTION BUTTONS -->
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <!-- Hotel Title with Optional Verified Badge -->
         <div class="flex items-center gap-2">
-          <h1 class="font-sans text-2xl sm:text-3xl lg:text-[34px] font-black text-[#002b11] tracking-tight leading-tight">
-            {hotelTitle}
-          </h1>
+          {hotelTitle ? (
+            <h1 class="font-sans text-2xl sm:text-3xl lg:text-[34px] font-black text-[#002b11] tracking-tight leading-tight">
+              {hotelTitle}
+            </h1>
+          ) : (
+            <h1 class="font-sans text-2xl sm:text-3xl lg:text-[34px] font-black text-[#002b11] tracking-tight leading-tight">
+              Hotel Details
+            </h1>
+          )}
+
           {isVerified && (
             <span class="inline-flex items-center justify-center text-[#002b11] shrink-0" title="Verified Hotel">
               <svg aria-hidden="true" class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -146,21 +161,21 @@ const currentHotelWishlistData = {
           )}
         </div>
 
-        <!-- Right Side: Desktop Saved & Review Buttons -->
+        <!-- Right Side: Desktop Action Buttons -->
         <div class="hidden sm:flex items-center gap-4 sm:gap-5">
-          <!-- Desktop Save Button (State handled cleanly via LocalStorage) -->
-          <button
-            type="button"
-            class="hotel-wishlist-toggle-btn flex items-center gap-1.5 text-slate-900 hover:text-emerald-800 transition cursor-pointer select-none"
-            aria-label="Save to Wishlist"
-          >
-            <svg class="wishlist-heart-icon w-4 h-4 fill-none stroke-slate-900 stroke-2 shrink-0 transition-all duration-200" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            <span class="wishlist-label-text text-xs sm:text-sm font-bold underline underline-offset-4">Save</span>
-          </button>
+          {hotelSlug && (
+            <button
+              type="button"
+              class="hotel-wishlist-toggle-btn flex items-center gap-1.5 text-slate-900 hover:text-emerald-800 transition cursor-pointer select-none"
+              aria-label="Save to Wishlist"
+            >
+              <svg class="wishlist-heart-icon w-4 h-4 fill-none stroke-slate-900 stroke-2 shrink-0 transition-all duration-200" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span class="wishlist-label-text text-xs sm:text-sm font-bold underline underline-offset-4">Save</span>
+            </button>
+          )}
 
-          <!-- Review Button -->
           <button
             type="button"
             class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm px-4 py-1.5 rounded-full flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
@@ -176,32 +191,24 @@ const currentHotelWishlistData = {
 
       <!-- ROW 2: RATINGS, REVIEWS & LOCATION -->
       <div class="space-y-1.5 text-left pt-1">
-        
-        <!-- Rating Line -->
         <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
           {reviewsCount > 0 && avgRating ? (
             <>
               <span class="font-bold text-slate-900">{avgRating}</span>
 
-              <!-- Green Rating Bubbles -->
-              <div class="flex items-center gap-1" aria-label={`Rating: ${avgRating} out of 5`}>
+              <!-- Genuine Rating Stars (Avoiding misleading TripAdvisor mimicry) -->
+              <div class="flex items-center gap-0.5" role="img" aria-label={`Rated ${avgRating} out of 5 stars`}>
                 {Array.from({ length: 5 }).map((_, i) => {
-                  const diff = avgRatingNum - i;
-                  if (diff >= 0.75) {
-                    return <span class="w-3.5 h-3.5 rounded-full bg-[#00852f] shrink-0 inline-block" />;
-                  } else if (diff >= 0.25) {
-                    return (
-                      <span class="relative w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] overflow-hidden shrink-0 inline-block bg-white">
-                        <span class="absolute inset-y-0 left-0 w-1/2 bg-[#00852f]" />
-                      </span>
-                    );
-                  } else {
-                    return <span class="w-3.5 h-3.5 rounded-full border-[1.5px] border-[#00852f] shrink-0 inline-block bg-white" />;
-                  }
+                  const filled = avgRatingNum >= i + 1;
+                  const half = !filled && avgRatingNum >= i + 0.5;
+                  return (
+                    <svg aria-hidden="true" class={`w-3.5 h-3.5 shrink-0 ${filled || half ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                  );
                 })}
               </div>
 
-              <!-- Review Count Link -->
               <a href="#guest-reviews" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800 transition">
                 ({reviewsCount.toLocaleString()} {reviewsCount === 1 ? 'review' : 'reviews'})
               </a>
@@ -212,7 +219,7 @@ const currentHotelWishlistData = {
             </a>
           )}
 
-          <!-- শুধুমাত্র মোবাইলের জন্য: Review & Save বাটন -->
+          <!-- Mobile Only Action Buttons -->
           <div class="flex sm:hidden items-center gap-2 ml-1">
             <button
               type="button"
@@ -225,20 +232,20 @@ const currentHotelWishlistData = {
               <span>Review</span>
             </button>
 
-            <!-- Mobile Save Button -->
-            <button
-              type="button"
-              class="hotel-wishlist-toggle-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
-              aria-label="Save to Wishlist"
-            >
-              <svg class="wishlist-heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              <span class="wishlist-label-text underline underline-offset-2">Save</span>
-            </button>
+            {hotelSlug && (
+              <button
+                type="button"
+                class="hotel-wishlist-toggle-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
+                aria-label="Save to Wishlist"
+              >
+                <svg class="wishlist-heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="wishlist-label-text underline underline-offset-2">Save</span>
+              </button>
+            )}
           </div>
 
-          <!-- Ranking -->
           {hotelRanking && (
             <a href="#about-and-rates" class="text-slate-800 font-medium underline underline-offset-2 hover:text-emerald-800 transition">
               {hotelRanking}
@@ -246,7 +253,6 @@ const currentHotelWishlistData = {
           )}
         </div>
 
-        <!-- Location Pin Line -->
         {hotelLocation && (
           <div class="flex items-center gap-1.5 text-xs sm:text-sm">
             <svg aria-hidden="true" class="w-4 h-4 text-[#002b11] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -267,17 +273,19 @@ const currentHotelWishlistData = {
       <div class="pt-2">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-1 h-[280px] sm:h-[400px] md:h-[450px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm bg-slate-100">
           
-          <!-- 1. MAIN LARGE IMAGE (Spans 2 cols on desktop) -->
+          <!-- 1. MAIN LARGE IMAGE (No button-in-button error, badge is pointer-events-none) -->
           <div 
             class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos >= 2 ? 'md:col-span-2' : 'md:col-span-3'}`}
             data-gallery-trigger="0"
             role="button"
             tabindex="0"
-            aria-label={`Open photo gallery, showing photo 1: ${processedGallery[0].alt}`}
+            aria-label={`Open photo gallery, photo 1: ${processedGallery[0].alt}`}
           >
             <img
               id="heroMainViewImg"
               src={processedGallery[0].desktop}
+              srcset={`${processedGallery[0].mobile} 640w, ${processedGallery[0].desktop} 1200w`}
+              sizes="(max-width: 768px) 100vw, 850px"
               width="850"
               height="480"
               alt={processedGallery[0].alt}
@@ -287,52 +295,50 @@ const currentHotelWishlistData = {
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
-            <!-- Dark Green Photo Count Pill Badge -->
-            <button
-              type="button"
-              id="heroGalleryBadgeBtn"
-              aria-label={`View all ${totalPhotos} photos`}
-              class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#002b11]/90 hover:bg-[#002b11] text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition hover:scale-105 z-10 cursor-pointer"
+            <!-- Photo Count Pill (Clean Overlay Badge, No nested button) -->
+            <div
+              aria-hidden="true"
+              class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#002b11]/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition group-hover:scale-105 pointer-events-none z-10"
             >
-              <svg aria-hidden="true" class="w-4 h-4 fill-none stroke-currentColor stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="w-4 h-4 fill-none stroke-currentColor stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
                 <circle cx="9" cy="9" r="2"/>
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
               </svg>
               <span class="text-xs sm:text-sm font-bold tracking-wide">{totalPhotos}</span>
-            </button>
+            </div>
           </div>
 
-          <!-- 2. RIGHT SIDE: 2 STACKED PHOTOS (Desktop Only) -->
+          <!-- 2. RIGHT SIDE: STACKED PHOTOS (Fixed row-span-2 when exactly 2 photos) -->
           {totalPhotos >= 2 && (
             <div class="hidden md:grid grid-rows-2 gap-1 h-full">
-              <!-- Top-Right Photo -->
+              <!-- Photo 2 (Fills entire column if exactly 2 photos exist) -->
               <div 
-                class="relative h-full overflow-hidden group cursor-pointer"
+                class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos === 2 ? 'row-span-2' : ''}`}
                 data-gallery-trigger="1"
                 role="button"
                 tabindex="0"
-                aria-label={`Open photo gallery, showing photo 2: ${processedGallery[1].alt}`}
+                aria-label={`Open photo gallery, photo 2: ${processedGallery[1].alt}`}
               >
                 <img
                   src={processedGallery[1].desktop}
                   alt={processedGallery[1].alt}
                   width="400"
-                  height="240"
-                  loading="eager"
+                  height={totalPhotos === 2 ? 480 : 240}
+                  loading="lazy"
                   decoding="async"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
 
-              <!-- Bottom-Right Photo -->
+              <!-- Photo 3 (Only if 3 or more photos exist) -->
               {totalPhotos >= 3 && (
                 <div 
                   class="relative h-full overflow-hidden group cursor-pointer"
                   data-gallery-trigger="2"
                   role="button"
                   tabindex="0"
-                  aria-label={`Open photo gallery, showing photo 3: ${processedGallery[2].alt}`}
+                  aria-label={`Open photo gallery, photo 3: ${processedGallery[2].alt}`}
                 >
                   <img
                     src={processedGallery[2].desktop}
@@ -355,9 +361,9 @@ const currentHotelWishlistData = {
   </div>
 </section>
 
-<!-- HIDDEN JSON PAYLOADS -->
-<script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(galleryPayload)} />
-<script type="application/json" id="hotel-wishlist-data" set:html={JSON.stringify(currentHotelWishlistData)} />
+<!-- HIDDEN SECURE JSON PAYLOADS (Escaped < to prevent script breaking) -->
+<script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(galleryPayload).replace(/</g, '\\u003c')} />
+<script type="application/json" id="hotel-wishlist-data" set:html={JSON.stringify(currentHotelWishlistData).replace(/</g, '\\u003c')} />
 
 <!-- FULL SCREEN PHOTO LIGHTBOX MODAL -->
 <div
@@ -369,7 +375,7 @@ const currentHotelWishlistData = {
 >
   <div class="flex items-center justify-between max-w-7xl mx-auto w-full border-b border-slate-800 pb-4">
     <div>
-      <h3 class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle}</h3>
+      <h3 class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle || 'Photo Gallery'}</h3>
       <span class="text-xs text-slate-400">Photo Gallery</span>
     </div>
     <div class="flex items-center gap-4">
@@ -391,7 +397,7 @@ const currentHotelWishlistData = {
     <img
       id="lightboxModalImg"
       src={processedGallery[0]?.lightbox || coverImage}
-      alt={processedGallery[0]?.alt || hotelTitle}
+      alt={processedGallery[0]?.alt || hotelTitle || 'Hotel Photo'}
       loading="lazy"
       decoding="async"
       class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200"
@@ -402,7 +408,7 @@ const currentHotelWishlistData = {
         <button
           type="button"
           id="lightboxPrevBtn"
-          aria-label="Previous Lightbox Photo"
+          aria-label="Previous Photo"
           class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition active:scale-95 cursor-pointer z-10"
         >
           ❮
@@ -410,7 +416,7 @@ const currentHotelWishlistData = {
         <button
           type="button"
           id="lightboxNextBtn"
-          aria-label="Next Lightbox Photo"
+          aria-label="Next Photo"
           class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white flex items-center justify-center text-lg font-bold shadow-xl transition active:scale-95 cursor-pointer z-10"
         >
           ❯
@@ -429,7 +435,7 @@ const currentHotelWishlistData = {
     abortCtrl = new AbortController();
     const { signal } = abortCtrl;
 
-    // 1. Gallery Lightbox Logic
+    // 1. Gallery Lightbox Logic (Focus Trapped & Safe History)
     const modal = document.getElementById('heroLightboxModal');
     const closeModalBtn = document.getElementById('closeHeroLightboxBtn');
     const modalImg = document.getElementById('lightboxModalImg') as HTMLImageElement | null;
@@ -437,7 +443,6 @@ const currentHotelWishlistData = {
     const modalPrevBtn = document.getElementById('lightboxPrevBtn');
     const modalNextBtn = document.getElementById('lightboxNextBtn');
     const galleryTriggers = document.querySelectorAll('[data-gallery-trigger]');
-    const badgeBtn = document.getElementById('heroGalleryBadgeBtn');
 
     const galleryScript = document.getElementById('hotel-gallery-data');
     let galleryData = { photos: [] as { src: string; alt: string }[] };
@@ -450,6 +455,8 @@ const currentHotelWishlistData = {
     const photosList = galleryData.photos || [];
     const count = photosList.length;
     let activeIdx = 0;
+    let pushedByUs = false;
+    let lastFocusedElement: HTMLElement | null = null;
 
     function toggleBodyScroll(disable: boolean) {
       document.body.style.overflow = disable ? 'hidden' : '';
@@ -469,24 +476,38 @@ const currentHotelWishlistData = {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       toggleBodyScroll(false);
+
+      // Return focus to the trigger element that opened the lightbox
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+      }
     }
 
     function openLightbox(startIdx: number = 0) {
       if (!modal || count === 0) return;
+      lastFocusedElement = document.activeElement as HTMLElement | null;
       updateModalImage(startIdx);
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       toggleBodyScroll(true);
 
+      // Move focus inside modal for keyboard accessibility
+      closeModalBtn?.focus();
+
       if (window.location.hash !== '#gallery') {
         history.pushState({ modalOpen: true }, '', '#gallery');
+        pushedByUs = true;
       }
     }
 
     function closeLightboxByUI() {
-      if (window.location.hash === '#gallery') {
+      if (pushedByUs) {
+        pushedByUs = false;
         history.back();
       } else {
+        if (window.location.hash === '#gallery') {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
         hideLightboxDOM();
       }
     }
@@ -510,7 +531,6 @@ const currentHotelWishlistData = {
       openLightbox(0);
     }
 
-    // Accessible Click & Keyboard triggers
     galleryTriggers.forEach((trigger) => {
       const openTrigger = () => {
         const idx = parseInt(trigger.getAttribute('data-gallery-trigger') || '0', 10);
@@ -525,11 +545,6 @@ const currentHotelWishlistData = {
       }, { signal });
     });
 
-    badgeBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openLightbox(0);
-    }, { signal });
-
     closeModalBtn?.addEventListener('click', closeLightboxByUI, { signal });
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeLightboxByUI();
@@ -538,7 +553,7 @@ const currentHotelWishlistData = {
     modalPrevBtn?.addEventListener('click', () => updateModalImage(activeIdx - 1), { signal });
     modalNextBtn?.addEventListener('click', () => updateModalImage(activeIdx + 1), { signal });
 
-    // ================= 2. UNIFIED WISHLIST LOGIC =================
+    // ================= 2. BIDIRECTIONAL WISHLIST LOGIC =================
     const wishlistDataScript = document.getElementById('hotel-wishlist-data');
     let hotelInfo: any = null;
     try {
@@ -567,17 +582,17 @@ const currentHotelWishlistData = {
           const label = btn.querySelector('.wishlist-label-text');
 
           if (isSaved) {
-            heart?.classList.add('fill-red-600', 'text-red-600');
+            heart?.classList.add('fill-red-600', 'stroke-red-600');
             heart?.classList.remove('fill-none', 'stroke-slate-900');
             if (label) label.textContent = 'Saved';
           } else {
-            heart?.classList.remove('fill-red-600', 'text-red-600');
+            heart?.classList.remove('fill-red-600', 'stroke-red-600');
             heart?.classList.add('fill-none', 'stroke-slate-900');
             if (label) label.textContent = 'Save';
           }
         });
 
-        // Global Wishlist Count Sync
+        // Global wishlist counter update
         const globalCount = document.getElementById('wishlist-count');
         if (globalCount) {
           if (list.length > 0) {
@@ -590,6 +605,9 @@ const currentHotelWishlistData = {
       }
 
       updateWishlistButtonUI();
+
+      // Listen to external wishlist updates (e.g. removed from drawer)
+      window.addEventListener('wishlist-updated', updateWishlistButtonUI, { signal });
 
       toggleBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -614,7 +632,7 @@ const currentHotelWishlistData = {
           localStorage.setItem('gh_wishlist', JSON.stringify(list));
           updateWishlistButtonUI();
 
-          // Dispatch event to inform Drawer and Global Header
+          // Dispatch event so drawer and other components sync instantly
           window.dispatchEvent(new CustomEvent('wishlist-updated'));
         }, { signal });
       });
