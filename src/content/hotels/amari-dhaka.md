@@ -196,6 +196,13 @@ rooms:
     badges: []
     checklist: []
 location_notice: ''
+street_address: 47, Road No 41, Gulshan-2
+locality: Gulshan-2
+region: Dhaka
+postal_code: '1212'
+country: BD
+latitude: ''
+longitude: ''
 map_query: ''
 nearby_places: []
 insider_tips:
