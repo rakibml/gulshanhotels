@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelMasterSchema.astro
-// 100% Google Schema Compliant, Zero Fake Data, Fully Synced with Header & Review Components
+// 100% Google Schema Compliant, Zero Fake Data, Synced Reviews & Safe Pricing
 interface Props {
   hotel: any;
 }
@@ -9,7 +9,7 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const SITE_ORIGIN = "https://gulshanhotels.com";
-const HOTELS_LIST_PATH = ""; // প্রয়োজন হলে যেমন "/hotels" দিতে পারেন
+const HOTELS_LIST_PATH = ""; // যেমন: "/hotels" (যদি থাকে)
 
 const str = (v: any): string => (v === null || v === undefined ? "" : String(v).trim());
 
@@ -33,7 +33,7 @@ function truncate(text: string, max = 300): string {
   return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-// ফিক্সড: photo, image, url, src সবগুলোই নিরাপদে সাপোর্ট করবে
+// ১. ফিক্সড ইমেজ হেল্পার (photo, image, url, src সবই সাপোর্ট করবে)
 function toAbsoluteImageUrl(url: any): string {
   const clean = str(typeof url === "string" ? url : url?.photo || url?.image || url?.src || url?.url);
   if (!clean || clean.includes("example-test.site")) return "";
@@ -65,7 +65,28 @@ function formatTime(tStr: any): string {
   return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
-// ================= ১. হোটেল বেসিক ইনফো =================
+// ২. গুগল-কমপ্লায়েন্ট নিরাপদ প্রাইসরেঞ্জ হেল্পার
+function getSafePriceRange(rawPrice: any, fallbackCurrency = "৳"): string {
+  const pStr = str(rawPrice);
+  if (!pStr) return "";
+
+  // "Check rates", "N/A" জাতীয় টেক্সট গুগলে পাঠানো নিষেধ
+  if (/check\s*rates|contact|call|inquire/i.test(pStr)) {
+    return "";
+  }
+
+  // ১০০ অক্ষরের নিচে রাখা (গুগল স্পেসিফিকেশন)
+  const clean = pStr.slice(0, 80).trim();
+
+  // কারেন্সি চিহ্ন নিশ্চিত করা
+  if (/^\d/.test(clean)) {
+    return `${fallbackCurrency}${clean}`;
+  }
+
+  return clean;
+}
+
+// ================= বেসিক ইনফো =================
 const hotelTitle = str(data.title || data.name);
 const rawSlug = str(data.slug || hotel?.slug || hotel?.id);
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
@@ -74,20 +95,20 @@ const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).href;
 const hotelDescription = truncate(cleanText(hotel?.body || data.description || data.overview || data.about));
 const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
 
-// অফিসিয়াল ওয়েবসাইট চেক (সিনট্যাক্স এরর ফিক্সড)
+// অফিসিয়াল সাইট ভ্যালিডেশন (সিনট্যাক্স এরর মুক্ত)
 const rawOfficialSite = str(data.officialSite || data.official_site_url);
 const isValidOfficialSite =
   /^https?:\/\//i.test(rawOfficialSite) &&
   !rawOfficialSite.includes("youtube.com") &&
   !rawOfficialSite.includes("youtu.be/");
 
-// ================= ২. গ্যালারি ইমেজ =================
+// ================= গ্যালারি ছবি =================
 const rawGalleryItems: any[] = Array.isArray(data.gallery) && data.gallery.length > 0
   ? data.gallery.filter(Boolean)
   : (data.image ? [data.image] : []);
 const images = Array.from(new Set(rawGalleryItems.map(toAbsoluteImageUrl).filter(Boolean))).slice(0, 10);
 
-// ================= ৩. রিভিউ প্রসেসিং (হেডার ও রিভিউ কম্পোনেন্টের সাথে ১০০% সিঙ্কড) =================
+// ================= রিভিউ (হেডার ও রিভিউ কম্পোনেন্টের সাথে পুরোপুরি সিঙ্কড) =================
 let allReviewsList: any[] = [];
 try {
   const globReviews = import.meta.glob("/src/content/reviews/*.{md,mdx}", { eager: true });
@@ -139,7 +160,7 @@ const ratingValue = reviewCount > 0
   ? Number((validReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1))
   : null;
 
-// ================= ৪. অ্যামেনিটিস =================
+// ================= অ্যামেনিটিস =================
 function extractName(item: any): string {
   if (typeof item === "string") return item.trim();
   if (item && typeof item === "object") {
@@ -164,13 +185,12 @@ const amenityNames: string[] = [];
 });
 const uniqueAmenities = Array.from(new Set(amenityNames));
 
-// ================= ৫. রুম, সময় ও জিও =================
+// ================= রুম ও জিও =================
 const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
   .map((room: any) => ({
     name: str(typeof room === "string" ? room : room?.name),
     price: typeof room === "object" ? str(room?.price) : "",
     bed: typeof room === "object" ? str(room?.bed) : "",
-    size: typeof room === "object" ? str(room?.size) : "",
   }))
   .filter((r: any) => r.name);
 
@@ -184,21 +204,24 @@ const hasGeo =
   Math.abs(latNum) <= 90 && Math.abs(lngNum) <= 180 &&
   !(latNum === 0 && lngNum === 0);
 
-// ================= ৬. স্কিমা গ্রাফ তৈরি (Google Compliant Entity Architecture) =================
+// ================= স্কিমা নোডস (পেনাল্টি প্রটেক্টেড) =================
 const hotelId = `${pageUrl}#hotel`;
 
 const hotelNode: any = {
   "@type": "Hotel",
   "@id": hotelId,
   name: hotelTitle,
-  // অফিসিয়াল সাইট থাকলে সেটিই হোটেলের url, অন্যথায় পোর্টালের পেজ
   url: isValidOfficialSite ? rawOfficialSite : pageUrl,
 };
 
 if (hotelDescription) hotelNode.description = hotelDescription;
 if (images.length > 0) hotelNode.image = images;
 if (hotelPhone) hotelNode.telephone = hotelPhone;
-if (data.price) hotelNode.priceRange = str(data.price);
+
+// নিরাপদ প্রাইসরেঞ্জ
+const safePriceRange = getSafePriceRange(data.price);
+if (safePriceRange) hotelNode.priceRange = safePriceRange;
+
 if (checkIn) hotelNode.checkinTime = checkIn;
 if (checkOut) hotelNode.checkoutTime = checkOut;
 if (isValidOfficialSite) hotelNode.sameAs = [rawOfficialSite];
@@ -228,7 +251,7 @@ if (hasGeo) {
   };
 }
 
-// থার্ড-পার্টি ডিরেক্টরি রিভিউ (গুগল পেনাল্টি-মুক্ত প্রোপার আর্কিটেকচার)
+// অ্যাগ্রিগেট রেটিং ও রিভিউ
 if (reviewCount > 0 && ratingValue !== null) {
   hotelNode.aggregateRating = {
     "@type": "AggregateRating",
@@ -279,7 +302,7 @@ if (HOTELS_LIST_PATH) {
 }
 crumbs.push({ name: hotelTitle, item: pageUrl });
 
-// ওয়েবপেজ নোড: যা গুগলকে বুঝিয়ে দেয় এটি হোটেলের অফিসিয়াল ওয়েবসাইট নয়, বরং একটি স্বাধীন গাইড/রিভিউ পেজ
+// ওয়েবপেজ নোড (গুগলকে স্পষ্ট করে যে এটি ডিরেক্টরি পেজ)
 const webPageNode: any = {
   "@type": "WebPage",
   "@id": pageUrl,
@@ -302,29 +325,6 @@ const graph: any[] = [
   webPageNode,
   hotelNode,
 ];
-
-// Note: পেজে দৃশ্যমান FAQ কম্পোনেন্ট না থাকলে FAQPage স্কিমা যুক্ত করা নিষেধ (গুগল পেনাল্টি পলিসি)।
-// ভবিষ্যতে দৃশ্যমান FAQ কম্পোনেন্ট যুক্ত করলে নিচের কোডটি আনকমেন্ট করতে পারেন:
-/*
-const cleanFaqs = (Array.isArray(data.faqs) ? data.faqs : [])
-  .map((faq: any) => ({
-    question: cleanText(typeof faq === "string" ? faq : faq?.question),
-    answer: typeof faq === "object" ? cleanText(faq?.answer) : "",
-  }))
-  .filter((f: any) => f.question && f.answer);
-
-if (cleanFaqs.length > 0) {
-  graph.push({
-    "@type": "FAQPage",
-    "@id": `${pageUrl}#faq`,
-    mainEntity: cleanFaqs.map((faq: any) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: { "@type": "Answer", text: faq.answer },
-    })),
-  });
-}
-*/
 
 const jsonLd = hotelTitle
   ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")
