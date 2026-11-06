@@ -1,5 +1,5 @@
 ---
-// src/pages/[slug].astro (PERMANENT LOCKED ROUTER — 100% BUILD-SAFE & 3-WAY ROUTING)
+// src/pages/[slug].astro (PERMANENT LOCKED ROUTER — 100% BUILD-SAFE, SEO-PERFECT & 3-WAY ROUTING)
 import Layout from '../layouts/Layout.astro';
 import HotelMasterSchema from '../components/hotel/HotelMasterSchema.astro';
 import LocationCategoryTemplate from '../components/landing/LocationCategoryTemplate.astro';
@@ -17,10 +17,14 @@ import PageView from '../components/PageView.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  // ১. হোটেল ডাটা লোডার
+  const isProd = import.meta.env.PROD;
+
+  // ১. হোটেল ডাটা লোডার (প্রোডাকশনে খসড়া/ড্রাফট ফিল্টার করা)
   let hotels: any[] = [];
   try { 
-    hotels = await getCollection('hotels'); 
+    hotels = await getCollection('hotels', ({ data }) => {
+      return isProd ? data?.draft !== true : true;
+    }); 
   } catch (e) {
     hotels = [];
   }
@@ -28,11 +32,13 @@ export async function getStaticPaths() {
   if (!hotels || hotels.length === 0) {
     try {
       const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
-      hotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
-        data: item.frontmatter || item.data || {},
-        body: item.compiledContent ? item.compiledContent() : ''
-      }));
+      hotels = Object.entries(rawGlob)
+        .map(([filePath, item]: [string, any]) => ({
+          id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+          data: item.frontmatter || item.data || {},
+          body: item.compiledContent ? item.compiledContent() : ''
+        }))
+        .filter((entry: any) => (isProd ? entry.data?.draft !== true : true));
     } catch (e) {
       hotels = [];
     }
@@ -50,7 +56,7 @@ export async function getStaticPaths() {
     }
   }
 
-  // ২. লোকেশন ও ক্যাটাগরি ক্লাস্টার ডাটা লোডার (SEO Landing Pages)
+  // ২. লোকেশন ও ক্যাটাগরি ক্লাস্টার ডাটা লোডার
   let destinations: any[] = [];
   try { 
     destinations = await getCollection('destinations'); 
@@ -122,23 +128,58 @@ export async function getStaticPaths() {
     }
   }
 
-  // একক রিটার্ন
   return [...hotelPaths, ...destinationPaths, ...pagePaths];
 }
 
 const { type = 'hotel', entry } = Astro.props;
 
-// হোটেল মেটাডাটা
+// ================= হোটেল মেটাডাটা ও ক্লিন এসইও ইঞ্জিন =================
 const hotel = type === 'hotel' ? entry : null;
 const hotelData = hotel?.data || {};
-const hotelTitle = hotelData.title || hotelData.name || "Hotel Details";
-const hotelCategory = hotelData.category || "Luxury Stay";
-const hotelLocation = hotelData.location || "Dhaka, Bangladesh";
-const hotelImage = hotelData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
+const hotelTitle = String(hotelData.title || hotelData.name || "").trim();
+const hotelCategory = String(hotelData.category || "Luxury Hotel").trim();
+const rawSlug = entry?.data?.slug || entry?.slug || entry?.id || "";
+const hotelSlug = String(rawSlug).split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase();
 
-const metaDescription = hotelData.seo_description 
-  || hotelData.description 
-  || `Book your stay at ${hotelTitle}, a verified ${hotelCategory} located in ${hotelLocation}.`;
+// লম্বা ঠিকানা থেকে শুধুমাত্র সংক্ষিপ্ত ও ক্লিন এলাকা বের করা (কীওয়ার্ড স্টাফিং রোধ)
+function getShortArea(loc: string): string {
+  const s = String(loc || "").toLowerCase();
+  if (s.includes('gulshan-2') || s.includes('gulshan 2')) return 'Gulshan 2, Dhaka';
+  if (s.includes('gulshan-1') || s.includes('gulshan 1')) return 'Gulshan 1, Dhaka';
+  if (s.includes('banani')) return 'Banani, Dhaka';
+  if (s.includes('baridhara')) return 'Baridhara, Dhaka';
+  if (s.includes('gulshan')) return 'Gulshan, Dhaka';
+  return 'Gulshan, Dhaka';
+}
+
+const shortArea = getShortArea(hotelData.location);
+
+// ১. গুগল ফ্রেন্ডলি টাইটেল (৫০-৬০ অক্ষরের মধ্যে রাখা)
+let pageTitle = hotelData.seo_title ? String(hotelData.seo_title).trim() : "";
+if (!pageTitle && hotelTitle) {
+  const candidate = `${hotelTitle}: ${hotelCategory} in ${shortArea} | Rates`;
+  if (candidate.length <= 60) {
+    pageTitle = candidate;
+  } else {
+    // বড় নামের হোটেলের জন্য স্মার্ট টাইটেল
+    pageTitle = `${hotelTitle} in ${shortArea} | Rates & Booking`;
+    if (pageTitle.length > 60) {
+      pageTitle = `${hotelTitle} (${shortArea.split(',')[0]}) | Rates`;
+    }
+  }
+}
+
+// ২. গুগল ফ্রেন্ডলি মেটা ডেসক্রিপশন (সর্বোচ্চ ১৫০ অক্ষরের মধ্যে রাখা)
+let metaDescription = hotelData.seo_description ? String(hotelData.seo_description).trim() : "";
+if (!metaDescription && hotelTitle) {
+  metaDescription = `Book your stay at ${hotelTitle} in ${shortArea}. Explore room rates, photos, amenities, guest reviews, and direct reservation details.`;
+}
+
+// কাভার ইমেজ (কোনো আনস্প্ল্যাশ ফলব্যাক নয়)
+const rawImage = hotelData.image || (Array.isArray(hotelData.gallery) && hotelData.gallery.length > 0 
+  ? (typeof hotelData.gallery[0] === 'object' ? hotelData.gallery[0]?.photo || hotelData.gallery[0]?.image : hotelData.gallery[0]) 
+  : "");
+const hotelImage = rawImage || "/images/hotel-placeholder.webp";
 ---
 
 {type === 'destination' ? (
@@ -147,9 +188,10 @@ const metaDescription = hotelData.seo_description
   <PageView entry={entry} />
 ) : (
   <Layout 
-    title={`${hotelTitle} — Verified ${hotelCategory} in ${hotelLocation}`}
+    title={pageTitle}
     description={metaDescription}
     image={hotelImage}
+    canonical={`https://gulshanhotels.com/${hotelSlug}/`}
   >
     <HotelMasterSchema hotel={hotel} />
     <HotelHeader hotel={hotel} />
@@ -159,7 +201,7 @@ const metaDescription = hotelData.seo_description
     <HotelLocationMap hotel={hotel} />
     <HotelPolicies hotel={hotel} />
     <HotelReviews hotel={hotel} />
-<HotelInsiderTips hotel={hotel} />
+    <HotelInsiderTips hotel={hotel} />
     <HotelFaqsSection hotel={hotel} />
     <HotelNearbyHotels currentHotel={hotel} />
   </Layout>
