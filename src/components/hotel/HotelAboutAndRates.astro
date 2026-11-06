@@ -1,8 +1,6 @@
 ---
 // src/components/hotel/HotelAboutAndRates.astro
-// Clean version: Google-policy friendly, same-currency lowest price, rendered markdown,
-// no custom SVG (XSS-safe), no dead links, disclosure included.
-// Requires Astro 5+ (uses `render` from 'astro:content').
+// Production-Ready: Robust Event Listeners, Resilient Body Fallback, Same-Currency Lowest Price, Secure SVGs & Disclosure
 import { render } from 'astro:content';
 
 interface Props {
@@ -31,19 +29,22 @@ const waMessage = 'Hi! I want to book a room at ' + hotelTitle;
 
 const customChannels: any[] = Array.isArray(data.booking_channels) ? data.booking_channels : [];
 
-// ================= 2. MARKDOWN BODY (rendered, not raw) =================
+// ================= 2. BULLETPROOF MARKDOWN RENDERING =================
 let Content: any = null;
-if (hotel?.body) {
+if (hotel && typeof hotel === 'object') {
   try {
-    ({ Content } = await render(hotel));
+    const rendered = await render(hotel);
+    Content = rendered?.Content || null;
   } catch {
     Content = null;
   }
 }
-const fallbackDescription = String(data.description || "");
+
+// Fallback: render() ব্যর্থ হলেও যেন hotel.body বা description হারিয়ে না যায়
+const fallbackDescription = String(data.description || hotel?.body || "").trim();
 const hasDescription = Boolean(Content || fallbackDescription);
 
-// ================= 3. PRICE & CURRENCY ENGINE (same-currency only) =================
+// ================= 3. PRICE & CURRENCY ENGINE =================
 function detectCurrency(v: any): string | null {
   const s = String(v || "");
   if (s.includes('$')) return '$';
@@ -96,15 +97,26 @@ function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "",
   return safeUrl(url);
 }
 
-// Normalize channels once; drop any channel with no working link
+// SSR Safe SVG Sanitizer
+function cleanSvgSSR(svg: string): string {
+  return String(svg || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '');
+}
+
+// Normalize channels & filter broken links
 const channels = customChannels
   .map((item: any) => {
     const providerName = String(item?.provider_name || "Booking Partner");
     const iconPreset = String(item?.icon_preset || "direct");
     const showPrice = item?.show_price !== false && item?.showPrice !== false;
+    const customSvg = item?.custom_svg ? cleanSvgSSR(item.custom_svg) : "";
     return {
       providerName,
       iconPreset,
+      customSvg,
       showPrice,
       rawPrice: item?.price,
       price: formatPrice(item?.price),
@@ -116,7 +128,7 @@ const channels = customChannels
 
 const hasChannels = channels.length > 0;
 
-// Lowest price: only same-currency, only prices that are actually shown
+// Lowest price engine (same-currency only)
 let lowestNumericPrice = Infinity;
 const baseNum = extractNumericPrice(rawBasePrice);
 if (baseNum !== null && baseNum > 0) lowestNumericPrice = baseNum;
@@ -133,9 +145,9 @@ channels.forEach((c) => {
 const displayStartingPrice =
   lowestNumericPrice !== Infinity
     ? `${mainCurrency}${lowestNumericPrice.toLocaleString('en-US')}`
-    : formatPrice(rawBasePrice) || "Check Rates";
+    : (formatPrice(rawBasePrice) || "Check Rates");
 
-// ================= 4. PRESET ICONS (static, safe; no user-supplied SVG) =================
+// ================= 4. PRESET ICONS =================
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
   booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
@@ -178,11 +190,11 @@ const presetSvgs: Record<string, string> = {
 
       {hasDescription && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
-          <!-- Full text is always in the DOM; CSS line-clamp only limits height (no cloaking, no layout shift) -->
+          <!-- Clean Progressive Overview Container -->
           <div id="overview-wrapper" class="relative">
             <div
               id="overview-text"
-              class="line-clamp-6 prose prose-slate max-w-none text-xs sm:text-sm md:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600"
+              class="max-h-[190px] overflow-hidden prose prose-slate max-w-none text-xs sm:text-sm md:text-base leading-relaxed text-slate-700 font-normal [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline hover:[&_a]:text-emerald-600 transition-all duration-300"
             >
               {Content ? <Content /> : <p class="whitespace-pre-line">{fallbackDescription}</p>}
             </div>
@@ -245,7 +257,7 @@ const presetSvgs: Record<string, string> = {
                 {displayStartingPrice}
               </span>
               {displayStartingPrice !== "Check Rates" && (
-                <span class="text-xs text-slate-500 font-semibold">per night, from</span>
+                <span class="text-xs text-slate-500 font-semibold">per night</span>
               )}
             </div>
 
@@ -272,7 +284,13 @@ const presetSvgs: Record<string, string> = {
                 return (
                   <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
                     <div class="flex items-center gap-3 min-w-0">
-                      <Fragment set:html={presetSvgs[c.iconPreset] || presetSvgs.direct} />
+                      {c.customSvg ? (
+                        <div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
+                          <Fragment set:html={c.customSvg} />
+                        </div>
+                      ) : (
+                        <Fragment set:html={presetSvgs[c.iconPreset] || presetSvgs.direct} />
+                      )}
                       <span class="text-sm font-bold text-slate-900 truncate">{c.providerName}</span>
                     </div>
 
@@ -333,6 +351,10 @@ const presetSvgs: Record<string, string> = {
                     rel="noopener noreferrer"
                     class="w-full border-2 border-[#25D366] bg-[#25D366]/10 text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
                   >
+                    <!-- Balanced WhatsApp Vector Icon -->
+                    <svg aria-hidden="true" class="w-4 h-4 fill-[#25D366] shrink-0" viewBox="0 0 24 24">
+                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.24-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.13.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.12-.22-.19-.47-.32"/>
+                    </svg>
                     <span>WhatsApp</span>
                   </a>
                 )}
@@ -340,7 +362,7 @@ const presetSvgs: Record<string, string> = {
             </div>
           )}
 
-          <!-- Affiliate / price disclosure -->
+          <!-- Google-Compliant Transparent Affiliate Disclosure -->
           <p class="pt-1 text-center text-[11px] leading-snug text-slate-500 font-medium">
             We may earn a commission when you book through partner links, at no extra cost to you.
             Prices may change and may exclude taxes or fees; please verify on the booking site.
@@ -385,7 +407,7 @@ const presetSvgs: Record<string, string> = {
 
     if (isPhone && !/^(https?:|tel:)/i.test(url)) {
       const p = url.replace(/[^0-9+]/g, '');
-      return p ? `tel:${p}` : '#';
+      return p ? `tel:${cleanP}` : '#';
     }
     if (isWa && !/^https?:/i.test(url)) {
       let d = url.replace(/[^0-9]/g, '');
@@ -440,7 +462,7 @@ const presetSvgs: Record<string, string> = {
 
     aboutAbortCtrl = new AbortController();
     const { signal } = aboutAbortCtrl;
-    const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
+    const kvApiUrl = `https://gatlin.rmollah394.workers.dev/api/prices?hotel=${encodeURIComponent(hotelName || hotelSlug)}`;
 
     const timeoutId = setTimeout(() => {
       aboutAbortCtrl?.abort();
@@ -522,7 +544,7 @@ const presetSvgs: Record<string, string> = {
 
   const FADE_CLASSES = ['after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none'];
 
-  // SSR already clamps with line-clamp-6 (no layout shift). JS only shows the button when text is actually clamped.
+  // Smooth & Accurate Read More Toggle
   function setupOverviewTruncator() {
     const textEl = document.getElementById('overview-text');
     const wrapperEl = document.getElementById('overview-wrapper');
@@ -534,41 +556,42 @@ const presetSvgs: Record<string, string> = {
     if (toggleBtn.dataset.bound === 'true') return;
     toggleBtn.dataset.bound = 'true';
 
-    if (textEl.scrollHeight <= textEl.clientHeight + 1) return; // short text, nothing to toggle
+    // লেখা ১৯০ পিক্সেলের বেশি হলে কেবল ফেইড ও বাটন দেখাও
+    if (textEl.scrollHeight > 210) {
+      wrapperEl.classList.add(...FADE_CLASSES);
+      toggleBtn.classList.remove('hidden');
+      toggleBtn.classList.add('inline-flex');
 
-    wrapperEl.classList.add(...FADE_CLASSES);
-    toggleBtn.classList.remove('hidden');
-    toggleBtn.classList.add('inline-flex');
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = textEl.dataset.expanded === 'true';
 
-    toggleBtn.addEventListener('click', () => {
-      const isExpanded = textEl.dataset.expanded === 'true';
-
-      if (!isExpanded) {
-        textEl.classList.remove('line-clamp-6');
-        wrapperEl.classList.remove(...FADE_CLASSES);
-        if (toggleBtnText) toggleBtnText.textContent = 'Show less';
-        if (toggleBtnIcon) toggleBtnIcon.classList.add('rotate-180');
-        textEl.dataset.expanded = 'true';
-        toggleBtn.setAttribute('aria-expanded', 'true');
-      } else {
-        textEl.classList.add('line-clamp-6');
-        wrapperEl.classList.add(...FADE_CLASSES);
-        if (toggleBtnText) toggleBtnText.textContent = 'Read more';
-        if (toggleBtnIcon) toggleBtnIcon.classList.remove('rotate-180');
-        textEl.dataset.expanded = 'false';
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    });
+        if (!isExpanded) {
+          textEl.classList.remove('max-h-[190px]', 'overflow-hidden');
+          wrapperEl.classList.remove(...FADE_CLASSES);
+          if (toggleBtnText) toggleBtnText.textContent = 'Show less';
+          if (toggleBtnIcon) toggleBtnIcon.classList.add('rotate-180');
+          textEl.dataset.expanded = 'true';
+          toggleBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          textEl.classList.add('max-h-[190px]', 'overflow-hidden');
+          wrapperEl.classList.add(...FADE_CLASSES);
+          if (toggleBtnText) toggleBtnText.textContent = 'Read more';
+          if (toggleBtnIcon) toggleBtnIcon.classList.remove('rotate-180');
+          textEl.dataset.expanded = 'false';
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          wrapperEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    } else {
+      textEl.classList.remove('max-h-[190px]', 'overflow-hidden');
+    }
   }
 
   document.addEventListener('astro:before-swap', () => {
     aboutAbortCtrl?.abort();
   });
 
+  // BOTH events ensure it works 100% on normal page loads AND ClientRouter transitions
+  document.addEventListener('DOMContentLoaded', initHotelAboutSection);
   document.addEventListener('astro:page-load', initHotelAboutSection);
-  // Fallback for pages without View Transitions (astro:page-load already covers normal loads in most setups)
-  if (document.readyState !== 'loading') {
-    // no-op: astro:page-load fires on initial load too
-  }
 </script>
