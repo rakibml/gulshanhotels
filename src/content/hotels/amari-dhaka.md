@@ -24,66 +24,11 @@ popular: true
 sponsored: false
 spotlight_desc: ''
 about_notice: ''
-price: $150
-booking_channels:
-  - provider_name: Amari dhaka
-    price: $150
-    show_price: true
-    button_text: Book Now ➔
-    button_url: https://www.amari.com/dhaka
-    badge: Official Site
-    icon_preset: ''
-    custom_svg: |-
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
-          <defs>
-              <style>
-                  .amari-orange { fill: #F47920; }
-                  .dhaka-gray { fill: #58595B; letter-spacing: 0.35em; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 500; font-size: 14px; }
-                  .amari-font { font-family: 'Century Gothic', sans-serif; font-weight: bold; font-size: 52px; fill: #F47920; }
-              </style>
-          </defs>
-          
-          <!-- background container -->
-          <rect width="100%" height="100%" fill="none"/>
-          
-          <g transform="translate(0, 10)">
-              <!-- Emblem / Brand Symbol (Stylized Sun Wave Element) -->
-              <g transform="translate(200, 65) scale(0.9)">
-                  <!-- Outer delicate rings -->
-                  <circle cx="0" cy="0" r="32" fill="none" stroke="#F47920" stroke-width="2" stroke-dasharray="4 3"/>
-                  <!-- Inner stylized layered crest -->
-                  <path d="M 0,-24 C 12,-24 22,-14 22,-2 C 22,10 10,20 0,24 C -10,20 -22,10 -22,-2 C -22,-14 -12,-24 0,-24 Z" fill="none" stroke="#F47920" stroke-width="3"/>
-                  <path d="M 0,-14 C 7,-14 13,-8 13,-1 C 13,6 6,12 0,14 C -6,12 -13,6 -13,-1 C -13,-8 -7,-14 0,-14 Z" fill="#F47920" opacity="0.8"/>
-                  <circle cx="0" cy="-1" r="5" fill="#FFF"/>
-              </g>
-              
-              <!-- "amari" Text Group -->
-              <text x="200" y="155" text-anchor="middle" class="amari-font" letter-spacing="-0.03em">amari</text>
-              
-              <!-- "DHAKA" Subtext Group -->
-              <text x="203" y="185" text-anchor="middle" class="dhaka-gray">DHAKA</text>
-          </g>
-      </svg>
-  - provider_name: TripAdvisory
-    price: $148
-    show_price: true
-    button_text: Book Now ➔
-    button_url: https://www.tripadvisor.com/Hotel_Review-g293936-d6985943-Reviews-Amari_Dhaka_Bangladesh-Dhaka_City_Dhaka_Division.html
-    badge: ''
-    icon_preset: ''
-    custom_svg: |-
-      <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#00AFEF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M19 12a3 3 0 1 0 3 -3c0 -1.861 -1.48 -3.111 -3 -4c-1.545 .924 -3 2.111 -3 4a3 3 0 0 0 3 3z" />
-        <path d="M5 12a3 3 0 1 0 -3 -3c0 1.889 1.455 3.076 3 4c1.52 -.924 3 -2.111 3 -4a3 3 0 0 0 -3 3z" />
-        <path d="M12 14a3 3 0 1 0 3 -3c0 -1.889 -1.455 -3.076 -3 -4c-1.52 .924 -3 2.111 -3 4a3 3 0 0 0 3 3z" />
-        <path d="M12 5l-1.5 2h3l-1.5 -2z" />
-        <path d="M12 17v2a1 1 0 0 0 1 1h2" />
-        <path d="M12 17v2a1 1 0 0 1 -1 1h-2" />
-      </svg>
+price: $160
+booking_channels: []
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
-phone: +880 2 5505 9620
+phone: ''
 policies_notice: ''
 enable_policies: true
 check_in: Available 24 hours
