@@ -5,7 +5,11 @@ import HotelMasterSchema from '../components/hotel/HotelMasterSchema.astro';
 import LocationCategoryTemplate from '../components/landing/LocationCategoryTemplate.astro';
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelSubNav from '../components/hotel/HotelSubNav.astro';
-import HotelAboutAndRates from '../components/hotel/HotelAboutAndRates.astro';
+
+// 🔥 আলাদা করা দুটি কম্পোনেন্ট ইমপোর্ট করা হলো 🔥
+import HotelAbout from '../components/hotel/HotelAbout.astro';
+import HotelRates from '../components/hotel/HotelRates.astro';
+
 import HotelAmenitiesAndRooms from '../components/hotel/HotelAmenitiesAndRooms.astro';
 import HotelLocationMap from '../components/hotel/HotelLocationMap.astro';
 import HotelPolicies from '../components/hotel/HotelPolicies.astro';
@@ -70,6 +74,8 @@ export async function getStaticPaths() {
       destinations = Object.entries(rawGlobDest).map(([filePath, item]: [string, any]) => ({
         id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
         data: item.frontmatter || item.data || {},
+        Content: item.default || item.Content || null,
+        body: item.compiledContent ? item.compiledContent() : ''
       }));
     } catch (e) {
       destinations = [];
@@ -133,6 +139,21 @@ export async function getStaticPaths() {
 
 const { type = 'hotel', entry } = Astro.props;
 
+// মার্কডাউন আর্টিকেল রেন্ডারার
+let Content: any = null;
+if (type === 'destination' || type === 'page') {
+  try {
+    if (typeof entry?.render === 'function') {
+      const rendered = await entry.render();
+      Content = rendered.Content;
+    } else if (entry?.Content) {
+      Content = entry.Content;
+    }
+  } catch (err) {
+    Content = null;
+  }
+}
+
 // ================= হোটেল মেটাডাটা ও ক্লিন এসইও ইঞ্জিন =================
 const hotel = type === 'hotel' ? entry : null;
 const hotelData = hotel?.data || {};
@@ -141,7 +162,6 @@ const hotelCategory = String(hotelData.category || "Luxury Hotel").trim();
 const rawSlug = entry?.data?.slug || entry?.slug || entry?.id || "";
 const hotelSlug = String(rawSlug).split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase();
 
-// লম্বা ঠিকানা থেকে শুধুমাত্র সংক্ষিপ্ত ও ক্লিন এলাকা বের করা (কীওয়ার্ড স্টাফিং রোধ)
 function getShortArea(loc: string): string {
   const s = String(loc || "").toLowerCase();
   if (s.includes('gulshan-2') || s.includes('gulshan 2')) return 'Gulshan 2, Dhaka';
@@ -154,14 +174,12 @@ function getShortArea(loc: string): string {
 
 const shortArea = getShortArea(hotelData.location);
 
-// ১. গুগল ফ্রেন্ডলি টাইটেল (৫০-৬০ অক্ষরের মধ্যে রাখা)
 let pageTitle = hotelData.seo_title ? String(hotelData.seo_title).trim() : "";
 if (!pageTitle && hotelTitle) {
   const candidate = `${hotelTitle}: ${hotelCategory} in ${shortArea} | Rates`;
   if (candidate.length <= 60) {
     pageTitle = candidate;
   } else {
-    // বড় নামের হোটেলের জন্য স্মার্ট টাইটেল
     pageTitle = `${hotelTitle} in ${shortArea} | Rates & Booking`;
     if (pageTitle.length > 60) {
       pageTitle = `${hotelTitle} (${shortArea.split(',')[0]}) | Rates`;
@@ -169,13 +187,11 @@ if (!pageTitle && hotelTitle) {
   }
 }
 
-// ২. গুগল ফ্রেন্ডলি মেটা ডেসক্রিপশন (সর্বোচ্চ ১৫০ অক্ষরের মধ্যে রাখা)
 let metaDescription = hotelData.seo_description ? String(hotelData.seo_description).trim() : "";
 if (!metaDescription && hotelTitle) {
   metaDescription = `Book your stay at ${hotelTitle} in ${shortArea}. Explore room rates, photos, amenities, guest reviews, and direct reservation details.`;
 }
 
-// কাভার ইমেজ (কোনো আনস্প্ল্যাশ ফলব্যাক নয়)
 const rawImage = hotelData.image || (Array.isArray(hotelData.gallery) && hotelData.gallery.length > 0 
   ? (typeof hotelData.gallery[0] === 'object' ? hotelData.gallery[0]?.photo || hotelData.gallery[0]?.image : hotelData.gallery[0]) 
   : "");
@@ -183,9 +199,9 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
 ---
 
 {type === 'destination' ? (
-  <LocationCategoryTemplate entry={entry} />
+  <LocationCategoryTemplate entry={entry} Content={Content} />
 ) : type === 'page' ? (
-  <PageView entry={entry} />
+  <PageView entry={entry} Content={Content} />
 ) : (
   <Layout 
     title={pageTitle}
@@ -196,7 +212,22 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
     <HotelMasterSchema hotel={hotel} />
     <HotelHeader hotel={hotel} />
     <HotelSubNav hotel={hotel} />
-    <HotelAboutAndRates hotel={hotel} />
+
+    <!-- 🔥 আলাদা করা HotelAbout (বামে) এবং HotelRates (ডানে) বসানো হলো 🔥 -->
+    <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        <!-- বামে: শুধুমাত্র About সেকশন -->
+        <div class="lg:col-span-7">
+          <HotelAbout hotel={hotel} />
+        </div>
+
+        <!-- ডানে: শুধুমাত্র Rates, ডেট পিকার ও Agoda Live Sync কার্ড -->
+        <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
+          <HotelRates hotel={hotel} />
+        </div>
+      </div>
+    </section>
+
     <HotelAmenitiesAndRooms hotel={hotel} />
     <HotelLocationMap hotel={hotel} />
     <HotelPolicies hotel={hotel} />
