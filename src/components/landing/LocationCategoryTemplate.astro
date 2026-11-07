@@ -1,5 +1,4 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Google-Safe & Schema Ready)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,20 +10,34 @@ interface Props {
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
 
-// ১. পেজের আসল মেটাডাটা
-const pageTitle = (data.title || "").trim();
-const locationSubtitle = data.location_subtitle || data.location || "";
-const description = (data.description || data.seo_description || "").trim();
-const cleanSlug = (entry?.slug || entry?.id || "").replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
-const heroImage = data.hero_image || data.image || "";
+// ১. সাইটের রুট ও ক্যানোনিক্যাল URL (শুধুমাত্র সাইট অরিজিন এখানে ডিফাইন করা)
+const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
 
-// ২. সব হোটেল ডাটা লোডার
+const rawSlug = entry?.slug || entry?.id || "";
+const cleanSlug = rawSlug
+  .replace(/\.(md|mdx)$/, '')
+  .split('/')
+  .pop()
+  ?.toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-') || "";
+
+const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
+
+// ২. মেটাডাটা (১০০% CMS ড্রাইভেন)
+const pageTitle = (data.title || "").trim();
+const locationSubtitle = data.location_subtitle || "";
+const description = (data.description || data.seo_description || "").trim();
+const heroImage = data.hero_image || data.image || "";
+const heroBadge = data.hero_badge || "";
+
+// ৩. সব হোটেল ডাটা লোডার (রুট সেফ)
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
   if (Array.isArray(hotelCol)) {
     allHotels = hotelCol.map((h: any) => ({
-      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
       data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
     }));
   }
@@ -32,13 +45,13 @@ try {
   try {
     const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
     allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
       data: item?.frontmatter || item?.data || {}
     }));
   } catch (e) {}
 }
 
-// ৩. সব রিভিউ ডাটা লোডার (রিয়েল রেটিং ও রিভিউ কাউন্টের জন্য)
+// ৪. রিয়েল রিভিউ ডাটা লোডার
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
@@ -64,39 +77,48 @@ for (const item of rawReviewsList) {
   }
 }
 
-// ৪. স্মার্ট কি-ওয়ার্ড এক্সট্র্যাক্টর
+// ৫. টেক্সট নরম্যালাইজার ও নিরাপদ ফিল্টারিং (হাইফেন ও স্পেস সমতা)
+const normalizeText = (val: any) =>
+  String(val || '')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const manualSlugs = Array.isArray(data.selected_hotels)
-  ? data.selected_hotels.map((s: string) => String(s).toLowerCase().trim())
+  ? data.selected_hotels
+      .map((s: any) => String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim())
+      .filter((s: string | undefined): s is string => Boolean(s && s.length > 0))
   : [];
 
-const cleanTargetKeyword = String(data.filter_keyword || cleanSlug)
-  .replace(/^hotels?-in-/i, '')
-  .replace(/^hotels?-near-/i, '')
+const rawKeyword = String(data.filter_keyword || cleanSlug)
+  .replace(/^(luxury|best|top|budget|cheap)-/i, '')
+  .replace(/^hotels?-(in|near)-/i, '')
   .replace(/^hotels?-/i, '')
-  .replace(/-hotels?$/i, '')
-  .replace(/-/g, ' ')
-  .toLowerCase()
-  .trim();
+  .replace(/-hotels?$/i, '');
+
+const normalizedKeyword = normalizeText(rawKeyword);
 
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
-  const hLoc = String(h.data?.location || h.data?.address || '').toLowerCase();
-  const hCat = String(h.data?.category || '').toLowerCase();
-  const hTitle = String(h.data?.title || h.data?.name || '').toLowerCase();
-
   if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  if (!cleanTargetKeyword) return true;
+  if (!normalizedKeyword) return true;
 
-  return hLoc.includes(cleanTargetKeyword) || hCat.includes(cleanTargetKeyword) || hTitle.includes(cleanTargetKeyword);
+  const hLoc = normalizeText(h.data?.location || h.data?.address);
+  const hCat = normalizeText(h.data?.category);
+  const hTitle = normalizeText(h.data?.title || h.data?.name);
+
+  return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
 });
 
-// ৫. টেক্সট ও ডাটা হেল্পার
+// ৬. হেল্পার ফাংশনসমূহ (কোনো জোরপূর্বক হার্ডকোডেড শব্দ নেই)
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
-function extractStarsNumber(category: string) {
+function extractStarsNumber(category: string, stars?: any) {
+  if (stars && !isNaN(Number(stars))) return String(stars);
   const match = String(category || '').match(/(\d+)\s*[-_ ]*star/i);
   return match ? match[1] : null;
 }
@@ -104,8 +126,7 @@ function extractStarsNumber(category: string) {
 function formatShortLocation(loc: string) {
   if (!loc) return "";
   const parts = loc.split(',').map(s => s.trim());
-  if (parts.length >= 2) return `${parts[1] || parts[0]}, Dhaka`;
-  return loc;
+  return parts.length >= 2 ? `${parts[0]}, ${parts[1]}` : loc;
 }
 
 function formatPriceDisplay(rawPrice: any) {
@@ -122,23 +143,32 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৬. আসল এরিয়া টেক্সট ও হাইলাইটস
+// ৭. CMS সেকশন কনফিগারেশন
+const hotelsTag = data.hotels_tag || "";
+const hotelsTitle = data.hotels_title || (pageTitle ? `Top ${toTitleCase(pageTitle)}` : "");
+const allHotelsText = data.all_hotels_link_text || "";
+const allHotelsUrl = data.all_hotels_link_url || "";
+
+const aboutTag = data.about_tag || "";
+const aboutTitle = data.about_title || (pageTitle ? `Why Stay in ${toTitleCase(pageTitle)}?` : "");
 const aboutImage = data.about_image || "";
 const aboutText = data.about_text || "";
-const areaHighlights = Array.isArray(data.area_highlights) ? data.area_highlights : [];
-const faqs = Array.isArray(data.faqs) ? data.faqs : [];
+const areaHighlights = Array.isArray(data.area_highlights) ? data.area_highlights.filter((h: any) => h && h.title) : [];
 
-const siteOrigin = "https://gulshanhotels.com";
-const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
+const faqBadge = data.faq_badge || "";
+const faqTitle = data.faq_title || (pageTitle ? `Frequently Asked Questions About ${toTitleCase(pageTitle)}` : "");
+const faqDescription = data.faq_description || "";
+const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
+const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৭. গুগল এসইও স্কিমা (১০০% ভ্যালিডেটেড ও এররমুক্ত)
+// ৮. গুগল কমপ্লায়েন্ট JSON-LD স্কিমা (কোনো ফেক রেটিং ছাড়া)
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
     "@id": `${canonicalUrl}#breadcrumb`,
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
-      { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle), "item": canonicalUrl }
+      { "@type": "ListItem", "position": 2, "name": toTitleCase(pageTitle) || "Destinations", "item": canonicalUrl }
     ]
   }
 ];
@@ -147,13 +177,13 @@ if (displayHotels.length > 0) {
   schemaGraph.push({
     "@type": "ItemList",
     "@id": `${canonicalUrl}#itemlist`,
-    "name": pageTitle,
+    "name": toTitleCase(pageTitle),
     ...(description ? { "description": description } : {}),
     "numberOfItems": displayHotels.length,
     "itemListElement": displayHotels.map((h, idx) => ({
       "@type": "ListItem",
       "position": idx + 1,
-      "name": toTitleCase(h.data?.title || ""),
+      "name": toTitleCase(h.data?.title || h.data?.name || `Hotel Stay`),
       "url": `${siteOrigin}/${h.slug}`
     }))
   });
@@ -174,17 +204,19 @@ if (faqs.length > 0) {
   });
 }
 
-const masterSchema = {
+const masterSchemaJson = JSON.stringify({
   "@context": "https://schema.org",
   "@graph": schemaGraph
-};
-
-// XSS-Safe Escaped JSON-LD String
-const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
+}).replace(/</g, "\\u003c");
 ---
 
-<Layout title={`${toTitleCase(pageTitle)} — Verified Stays & Guide`} description={description} image={heroImage}>
-  <!-- GOOGLE ITEMLIST & FAQ SCHEMA (SAFE & COMPLIANT) -->
+<Layout 
+  title={`${toTitleCase(pageTitle)}`} 
+  description={description} 
+  image={heroImage}
+  canonical={canonicalUrl}
+>
+  <!-- GOOGLE COMPLIANT STRUCTURED DATA -->
   <script type="application/ld+json" set:html={masterSchemaJson} />
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
@@ -202,8 +234,6 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
       <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40"></div>
 
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
-
-        <!-- Location Subtitle (Only if provided in CMS) -->
         {locationSubtitle && (
           <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-emerald-400 font-semibold tracking-wide">
             <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -213,31 +243,29 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
           </div>
         )}
 
-        <!-- Main Title -->
         <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
           {toTitleCase(pageTitle)}
         </h1>
 
-        <!-- Subtitle Description -->
         {description && (
           <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-normal leading-relaxed">
             {description}
           </p>
         )}
 
-        <!-- Real Stats Row -->
         <div class="flex flex-wrap items-center gap-4 pt-2 text-xs font-bold text-slate-200">
           <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-            {displayHotels.length} Verified {displayHotels.length === 1 ? 'Property' : 'Properties'}
+            {displayHotels.length} {displayHotels.length === 1 ? 'Property' : 'Properties'}
           </span>
-          <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-            Direct Local Rates
-          </span>
+          {heroBadge && (
+            <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
+              {heroBadge}
+            </span>
+          )}
         </div>
-
       </div>
 
-      <!-- Live On-Page Filter Bar (Accessibility Fixed with aria-label) -->
+      <!-- Live Filter Bar -->
       <div class="absolute -bottom-7 left-4 right-4 max-w-7xl mx-auto z-20 px-0 sm:px-6 lg:px-8">
         <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-200 max-w-3xl">
           <div class="pl-3 pr-2 text-slate-400">
@@ -249,8 +277,8 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
           <input
             type="text"
             id="onPageHotelFilterInput"
-            aria-label="Filter hotels on this page"
-            placeholder="Filter hotels listed below..."
+            aria-label="Filter hotels"
+            placeholder="Search properties on this page..."
             class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none font-medium"
           />
         </div>
@@ -259,34 +287,40 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
 
     <!-- ================= 2. FEATURED HOTELS SECTION ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-8">
-
-      <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
-        <div>
-          <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— CURATED ACCOMMODATIONS</span>
-          <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">Top {toTitleCase(pageTitle)}</h2>
+      {(hotelsTag || hotelsTitle || (allHotelsText && allHotelsUrl)) && (
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
+          <div>
+            {hotelsTag && (
+              <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— {hotelsTag}</span>
+            )}
+            {hotelsTitle && (
+              <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">{hotelsTitle}</h2>
+            )}
+          </div>
+          {allHotelsText && allHotelsUrl && (
+            <a href={allHotelsUrl} class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
+              <span>{allHotelsText}</span>
+              <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          )}
         </div>
-        <a href="/#hotels" class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
-          <span>All Gulshan Hotels</span>
-          <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
+      )}
 
       <!-- Hotels Grid -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
-            No hotels currently match this filter.
+            No accommodations match the selected criteria.
           </div>
         ) : (
           displayHotels.map((h) => {
             const hd = h.data || {};
-            const hotelTitle = (hd.title || hd.name || "Hotel Details").trim();
+            const hotelTitle = (hd.title || hd.name || "").trim();
             const hotelSlug = String(h.slug || "").trim();
             const hotelUrl = `/${hotelSlug}`;
 
-            const starCount = extractStarsNumber(hd.category);
-            const shortLoc = formatShortLocation(hd.location || "");
+            const starCount = extractStarsNumber(hd.category, hd.stars);
+            const shortLoc = formatShortLocation(hd.location || hd.address || "");
             const price = formatPriceDisplay(hd.price);
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             
@@ -322,8 +356,6 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                 data-location={shortLoc.toLowerCase()}
               >
                 <div>
-
-                  <!-- Hotel Cover Image -->
                   <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
                     {cardImage && (
                       <a href={hotelUrl} class="block w-full h-full">
@@ -336,8 +368,6 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                         />
                       </a>
                     )}
-
-                    <!-- Star Badge (Only if real stars exist in CMS) -->
                     {starCount && (
                       <div class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
                         <span>{starCount}</span>
@@ -348,10 +378,7 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                     )}
                   </div>
 
-                  <!-- Details Body -->
                   <div class="p-4 sm:p-5 space-y-2">
-
-                    <!-- Title & Location -->
                     <div>
                       <h3 class="font-serif font-bold text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition line-clamp-1">
                         <a href={hotelUrl}>{toTitleCase(hotelTitle)}</a>
@@ -367,7 +394,6 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW (100% Truthful - Zero Fake Stars) -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
@@ -382,11 +408,10 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                       </div>
                     ) : (
                       <div class="flex items-center gap-1 text-[11px] text-slate-400 pt-0.5">
-                        <span class="text-emerald-700 font-medium">Verified Property</span>
+                        <span class="text-emerald-700 font-medium">Verified Listing</span>
                       </div>
                     )}
 
-                    <!-- Amenities -->
                     {topAmenities.length > 0 && (
                       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-slate-600">
                         {topAmenities.map((item: string) => (
@@ -397,11 +422,9 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                         ))}
                       </div>
                     )}
-
                   </div>
                 </div>
 
-                <!-- Price & Details CTA Button -->
                 <div class="px-4 sm:px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
                   {price ? (
                     <div>
@@ -418,7 +441,6 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
                     <svg aria-hidden="true" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </a>
                 </div>
-
               </div>
             );
           })
@@ -426,82 +448,88 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
       </div>
     </section>
 
-    <!-- ================= 3. "WHY STAY IN..." (Only if real CMS content exists) ================= -->
+    <!-- ================= 3. ABOUT SECTION (H2 -> H3 Compliant) ================= -->
     {(aboutText || aboutImage || areaHighlights.length > 0) && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
         <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-
-            <!-- Left: Area Image -->
             {aboutImage && (
               <div class="lg:col-span-5 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
-                <img src={aboutImage} alt={pageTitle} class="w-full h-full object-cover" />
+                <img 
+                  src={aboutImage} 
+                  alt={aboutTitle || pageTitle} 
+                  loading="lazy" 
+                  decoding="async"
+                  class="w-full h-full object-cover" 
+                />
               </div>
             )}
 
-            <!-- Right: Real Text & Real Highlights -->
             <div class={aboutImage ? "lg:col-span-7 space-y-4" : "lg:col-span-12 space-y-4"}>
-              <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">ABOUT {pageTitle.toUpperCase()}</span>
-              <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
-                Why Stay in {toTitleCase(pageTitle)}?
-              </h2>
+              {aboutTag && (
+                <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">{aboutTag}</span>
+              )}
+              {aboutTitle && (
+                <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
+                  {aboutTitle}
+                </h2>
+              )}
               {aboutText && (
                 <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                   {aboutText}
                 </p>
               )}
 
-              <!-- Real Area Highlights -->
               {areaHighlights.length > 0 && (
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   {areaHighlights.map((hl: any) => (
                     <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                       <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
-                        <h4 class="text-xs font-bold text-slate-900">{hl.title}</h4>
-                        <p class="text-[11px] text-slate-500 mt-0.5">{hl.desc}</p>
+                        <h3 class="text-xs font-bold text-slate-900">{hl.title}</h3>
+                        {hl.desc && <p class="text-[11px] text-slate-500 mt-0.5">{hl.desc}</p>}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </section>
     )}
 
-    <!-- ================= 4. MINIMALIST 2-COLUMN FAQ ================= -->
+    <!-- ================= 4. FAQ SECTION (100% CMS Controlled) ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left">
-        
-        <!-- Header Section -->
         <div class="space-y-2 mb-8 sm:mb-10 text-left border-b border-slate-200 pb-6">
-          
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
-            <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-            </svg>
-            <span>Verified Traveler FAQs</span>
-          </div>
+          {faqBadge && (
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
+              <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>{faqBadge}</span>
+            </div>
+          )}
 
-          <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-            Frequently Asked Questions About {toTitleCase(pageTitle)}
-          </h2>
+          {faqTitle && (
+            <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              {faqTitle}
+            </h2>
+          )}
 
-          <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
-            Everything international travelers, diplomats, and business visitors need to know before booking in {toTitleCase(pageTitle)}.
-          </p>
+          {faqDescription && (
+            <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
+              {faqDescription}
+            </p>
+          )}
         </div>
 
-        <!-- 2-COLUMNS CLEAN ACCORDION GRID -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0 items-start">
           {faqs.map((f: any, i: number) => (
             <details class="group border-b border-slate-200 py-4 sm:py-5 transition-all text-left" open={i === 0}>
               <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] cursor-pointer select-none gap-4">
                 <span class="leading-snug pr-2 font-serif font-bold">{f.question}</span>
-                
                 <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors">
                   <span class="block group-open:hidden text-sm leading-none font-bold">+</span>
                   <span class="hidden group-open:block text-sm leading-none font-bold">−</span>
@@ -513,12 +541,11 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
             </details>
           ))}
         </div>
-
       </section>
     )}
 
-    <!-- 5. Markdown Body (Only if editorial article is written in CMS) -->
-    {Content && (
+    <!-- 5. Editorial Body -->
+    {(Content && (entry?.body?.trim() || data.body?.trim())) && (
       <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
         <article class="prose prose-slate max-w-none">
           <Content />
@@ -529,13 +556,13 @@ const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
   </div>
 </Layout>
 
-<!-- CLIENT SCRIPT (ON-PAGE INSTANT FILTER) -->
 <script is:inline>
   const initOnPageFilter = () => {
     const input = document.getElementById('onPageHotelFilterInput');
     const cards = document.querySelectorAll('.landing-hotel-card');
 
-    if (input && cards.length > 0) {
+    if (input && cards.length > 0 && !input.dataset.listenerAttached) {
+      input.dataset.listenerAttached = 'true';
       input.addEventListener('input', () => {
         const query = input.value.trim().toLowerCase();
         cards.forEach(card => {
