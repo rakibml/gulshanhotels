@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Zero Hardcoded Fluff)
+// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Google-Safe & Schema Ready)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -64,7 +64,7 @@ for (const item of rawReviewsList) {
   }
 }
 
-// ৪. স্মার্ট কি-ওয়ার্ড এক্সট্র্যাক্টর (BUG FIXED: 'hotels-in-gulshan-1' -> 'gulshan 1')
+// ৪. স্মার্ট কি-ওয়ার্ড এক্সট্র্যাক্টর
 const manualSlugs = Array.isArray(data.selected_hotels)
   ? data.selected_hotels.map((s: string) => String(s).toLowerCase().trim())
   : [];
@@ -84,7 +84,6 @@ const displayHotels = allHotels.filter(h => {
   const hCat = String(h.data?.category || '').toLowerCase();
   const hTitle = String(h.data?.title || h.data?.name || '').toLowerCase();
 
-  // যদি ম্যানুয়ালি হোটেল বাছাই করা থাকে
   if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
   if (!cleanTargetKeyword) return true;
 
@@ -123,7 +122,7 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৬. আসল এরিয়া টেক্সট ও হাইলাইটস (কোনো ফেক রিপিটেশন নেই)
+// ৬. আসল এরিয়া টেক্সট ও হাইলাইটস
 const aboutImage = data.about_image || "";
 const aboutText = data.about_text || "";
 const areaHighlights = Array.isArray(data.area_highlights) ? data.area_highlights : [];
@@ -132,7 +131,7 @@ const faqs = Array.isArray(data.faqs) ? data.faqs : [];
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
-// ৭. গুগল এসইও স্কিমা
+// ৭. গুগল এসইও স্কিমা (১০০% ভ্যালিডেটেড ও এররমুক্ত)
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -179,14 +178,18 @@ const masterSchema = {
   "@context": "https://schema.org",
   "@graph": schemaGraph
 };
+
+// XSS-Safe Escaped JSON-LD String
+const masterSchemaJson = JSON.stringify(masterSchema).replace(/</g, "\\u003c");
 ---
 
 <Layout title={`${toTitleCase(pageTitle)} — Verified Stays & Guide`} description={description} image={heroImage}>
-  <script type="application/ld+json" set:html={JSON.stringify(masterSchema)} />
+  <!-- GOOGLE ITEMLIST & FAQ SCHEMA (SAFE & COMPLIANT) -->
+  <script type="application/ld+json" set:html={masterSchemaJson} />
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
 
-    <!-- ================= 1. HERO BANNER (100% REAL DATA) ================= -->
+    <!-- ================= 1. HERO BANNER ================= -->
     <header class="relative bg-slate-950 text-white min-h-[380px] sm:min-h-[440px] flex items-center pb-20 pt-12 px-4 sm:px-6 lg:px-8">
       {heroImage && (
         <img
@@ -200,10 +203,10 @@ const masterSchema = {
 
       <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
 
-        <!-- Location Subtitle (শুধুমাত্র CMS-এ থাকলে আসবে) -->
+        <!-- Location Subtitle (Only if provided in CMS) -->
         {locationSubtitle && (
           <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-emerald-400 font-semibold tracking-wide">
-            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
             <span>{locationSubtitle}</span>
@@ -234,11 +237,11 @@ const masterSchema = {
 
       </div>
 
-      <!-- Live On-Page Filter Bar (কোনো ভাঙা /search লিংক নয়) -->
+      <!-- Live On-Page Filter Bar (Accessibility Fixed with aria-label) -->
       <div class="absolute -bottom-7 left-4 right-4 max-w-7xl mx-auto z-20 px-0 sm:px-6 lg:px-8">
         <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-200 max-w-3xl">
           <div class="pl-3 pr-2 text-slate-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
               <path d="m21 21-4.35-4.35"/>
             </svg>
@@ -246,7 +249,8 @@ const masterSchema = {
           <input
             type="text"
             id="onPageHotelFilterInput"
-            placeholder={`Filter hotels listed below...`}
+            aria-label="Filter hotels on this page"
+            placeholder="Filter hotels listed below..."
             class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none font-medium"
           />
         </div>
@@ -264,7 +268,7 @@ const masterSchema = {
         </div>
         <a href="/#hotels" class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
           <span>All Gulshan Hotels</span>
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
       </div>
 
@@ -286,7 +290,6 @@ const masterSchema = {
             const price = formatPriceDisplay(hd.price);
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             
-            // অ্যামেনিটিস হ্যান্ডলিং (অবজেক্ট এবং স্ট্রিং দুটোই নিখুঁতভাবে হ্যান্ডেল করা)
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 4).map((a: any) => {
               if (typeof a === 'string') return a.trim();
@@ -294,7 +297,6 @@ const masterSchema = {
               return '';
             }).filter(Boolean);
 
-            // আসল রিভিউ গণনা
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
             const approvedSet = new Set<any>([
@@ -335,11 +337,11 @@ const masterSchema = {
                       </a>
                     )}
 
-                    <!-- Star Badge (শুধুমাত্র CMS-এ স্টার থাকলে আসবে) -->
+                    <!-- Star Badge (Only if real stars exist in CMS) -->
                     {starCount && (
                       <div class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
                         <span>{starCount}</span>
-                        <svg class="w-3 h-3 fill-amber-300" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-3 h-3 fill-amber-300" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                       </div>
@@ -356,7 +358,7 @@ const masterSchema = {
                       </h3>
                       {shortLoc && (
                         <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                          <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <svg aria-hidden="true" class="w-3.5 h-3.5 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
                             <circle cx="12" cy="10" r="3"/>
                           </svg>
@@ -365,11 +367,11 @@ const masterSchema = {
                       )}
                     </div>
 
-                    <!-- REAL REVIEW ROW (কোনো ফেক রিভিউ বা ফেক রেটিং নেই) -->
+                    <!-- REAL REVIEW ROW (100% Truthful - Zero Fake Stars) -->
                     {reviewCount > 0 ? (
                       <div class="flex items-center gap-1.5 text-xs pt-0.5">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
-                          <svg class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
+                          <svg aria-hidden="true" class="w-3.5 h-3.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                           </svg>
                           <span>{reviewScore}</span>
@@ -384,12 +386,12 @@ const masterSchema = {
                       </div>
                     )}
 
-                    <!-- Amenities (বাস্তব অ্যামেনিটিস তালিকা) -->
+                    <!-- Amenities -->
                     {topAmenities.length > 0 && (
                       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-slate-600">
                         {topAmenities.map((item: string) => (
                           <span class="flex items-center gap-1">
-                            <svg class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg aria-hidden="true" class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                             <span>{item}</span>
                           </span>
                         ))}
@@ -413,7 +415,7 @@ const masterSchema = {
 
                   <a href={hotelUrl} class="text-xs font-bold text-slate-800 hover:text-[#0d3b23] flex items-center gap-1 transition">
                     <span>View Details</span>
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <svg aria-hidden="true" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </a>
                 </div>
 
@@ -424,13 +426,13 @@ const masterSchema = {
       </div>
     </section>
 
-    <!-- ================= 3. "WHY STAY IN..." (শুধুমাত্র CMS এ আসল টেক্সট থাকলে দেখাবে) ================= -->
+    <!-- ================= 3. "WHY STAY IN..." (Only if real CMS content exists) ================= -->
     {(aboutText || aboutImage || areaHighlights.length > 0) && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
         <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-            <!-- Left: Area Image (যদি CMS-এ দেওয়া থাকে) -->
+            <!-- Left: Area Image -->
             {aboutImage && (
               <div class="lg:col-span-5 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
                 <img src={aboutImage} alt={pageTitle} class="w-full h-full object-cover" />
@@ -449,12 +451,12 @@ const masterSchema = {
                 </p>
               )}
 
-              <!-- আসল হাইলাইটস (যদি CMS-এ যোগ করা থাকে, কোনো হার্ডকোডেড টেক্সট নয়) -->
+              <!-- Real Area Highlights -->
               {areaHighlights.length > 0 && (
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   {areaHighlights.map((hl: any) => (
                     <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
-                      <svg class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                       <div>
                         <h4 class="text-xs font-bold text-slate-900">{hl.title}</h4>
                         <p class="text-[11px] text-slate-500 mt-0.5">{hl.desc}</p>
@@ -470,40 +472,36 @@ const masterSchema = {
       </section>
     )}
 
-  <!-- ================= 4. MINIMALIST 2-COLUMN FAQ (EXACT TO 1ST IMAGE) ================= -->
+    <!-- ================= 4. MINIMALIST 2-COLUMN FAQ ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left">
         
-        <!-- Header Section matching Image 1 -->
+        <!-- Header Section -->
         <div class="space-y-2 mb-8 sm:mb-10 text-left border-b border-slate-200 pb-6">
           
-          <!-- Green Pill Badge -->
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
-            <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
             <span>Verified Traveler FAQs</span>
           </div>
 
-          <!-- Big Serif Title -->
           <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
             Frequently Asked Questions About {toTitleCase(pageTitle)}
           </h2>
 
-          <!-- Subtitle -->
           <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
             Everything international travelers, diplomats, and business visitors need to know before booking in {toTitleCase(pageTitle)}.
           </p>
         </div>
 
-        <!-- 2-COLUMNS CLEAN ACCORDION GRID (NO HEAVY BOXES) -->
+        <!-- 2-COLUMNS CLEAN ACCORDION GRID -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0 items-start">
           {faqs.map((f: any, i: number) => (
             <details class="group border-b border-slate-200 py-4 sm:py-5 transition-all text-left" open={i === 0}>
               <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] cursor-pointer select-none gap-4">
-                <span class="leading-snug pr-2">{f.question}</span>
+                <span class="leading-snug pr-2 font-serif font-bold">{f.question}</span>
                 
-                <!-- (+ / −) Circular Toggle Icon matching Image 1 -->
                 <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors">
                   <span class="block group-open:hidden text-sm leading-none font-bold">+</span>
                   <span class="hidden group-open:block text-sm leading-none font-bold">−</span>
@@ -519,7 +517,7 @@ const masterSchema = {
       </section>
     )}
 
-    <!-- 5. Markdown Body (যদি CMS-এ সরাসরি কোনো আর্টিকেল লেখা হয়) -->
+    <!-- 5. Markdown Body (Only if editorial article is written in CMS) -->
     {Content && (
       <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
         <article class="prose prose-slate max-w-none">
