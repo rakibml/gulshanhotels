@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (Compact Card + Live Map Layout)
+// src/components/landing/LocationCategoryTemplate.astro (Compact Card + Equal Height Map Layout)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -284,7 +284,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৩. কমপ্যাক্ট হোটেল কার্ড (বামে) + লাইভ ম্যাপ (ডানে) ================= -->
+    <!-- ================= ৩. কমপ্যাক্ট হোটেল কার্ড ও সমান উচ্চতার ছোট ম্যাপ ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
       
       <!-- হেডার ও সার্চবার -->
@@ -315,11 +315,11 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- ২-কলাম স্প্লিট: বামে ছোট হোটেল কার্ড + ডানে ম্যাপ -->
+      <!-- ২-কলাম স্প্লিট: বামে হোটেল কার্ড + ডানে সমান উচ্চতার কমপ্যাক্ট ম্যাপ -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        <!-- 🔥 বাম পাশ (৭ কলাম): আরও ছোট ও কমপ্যাক্ট হোটেল কার্ডসমূহ 🔥 -->
-        <div class="lg:col-span-7 space-y-5">
+        <!-- বাম পাশ (৭ কলাম): কমপ্যাক্ট হোটেল কার্ড -->
+        <div class="lg:col-span-7 space-y-4">
           <div id="landingHotelsGrid" class="space-y-4">
             {displayHotels.length === 0 ? (
               <div class="text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -368,7 +368,7 @@ const masterSchemaJson = JSON.stringify({
                     data-name={hotelTitle.toLowerCase()}
                     data-location={shortLoc.toLowerCase()}
                   >
-                    <!-- ইমেজ (উচ্চতা ও উইডথ ছোট করা হয়েছে) -->
+                    <!-- ইমেজ -->
                     <div class="w-full sm:w-56 md:w-60 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
                       {cardImage && (
                         <a href={hotelUrl} class="block w-full h-full">
@@ -392,7 +392,7 @@ const masterSchemaJson = JSON.stringify({
                       )}
                     </div>
 
-                    <!-- ছোট ও পরিপাটি ডিটেইলস -->
+                    <!-- ডিটেইলস -->
                     <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
                       
                       <div class="space-y-1.5">
@@ -480,12 +480,13 @@ const masterSchemaJson = JSON.stringify({
           </div>
         </div>
 
-        <!-- 🔥 ডান পাশ (৫ কলাম): আপনার চিহ্নিত লাল বক্সের স্থানে "MAP" 🔥 -->
+        <!-- 🔥 ডান পাশ (৫ কলাম): হুবহু হোটেল কার্ডের সমান ছোট ম্যাপ (উচ্চতা ২০৮px / sm:h-52) 🔥 -->
         <aside class="lg:col-span-5 lg:sticky lg:top-6">
-          <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+          <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs flex flex-col h-auto sm:h-52">
             
-            <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <!-- ম্যাপ হেডার -->
+            <div class="px-3.5 py-1.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
+              <span class="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
                 <span>📍</span>
                 <span>{toTitleCase(cleanTitleName)} Area Map</span>
               </span>
@@ -493,14 +494,14 @@ const masterSchemaJson = JSON.stringify({
                 href={`https://maps.google.com/?q=${mapQuery}`} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                class="text-[11px] font-bold text-emerald-800 hover:underline"
+                class="text-[10px] font-bold text-emerald-800 hover:underline"
               >
                 Open Full Map ↗
               </a>
             </div>
 
-            <!-- লাইভ ইন্টারেক্টিভ ম্যাপ ফ্রেম -->
-            <div class="relative w-full h-[280px] sm:h-[340px] bg-slate-100">
+            <!-- লাইভ ইন্টারেক্টিভ ম্যাপ ফ্রেম (বাকি অংশ পূরণ করে একদম সমান থাকবে) -->
+            <div class="relative w-full flex-1 min-h-[160px] bg-slate-100">
               <iframe
                 title={`Map of ${pageTitle}`}
                 width="100%"
