@@ -1,5 +1,5 @@
 ---
-// src/layouts/PageLayout.astro (Clean & Readable Standard Page Template)
+// src/layouts/PageLayout.astro (100% Google SEO, BreadcrumbList Schema & WCAG Accessible)
 import Layout from './Layout.astro';
 
 interface Props {
@@ -11,52 +11,90 @@ interface Props {
 const { 
   title, 
   description = "Official information, legal terms, and policies of GulshanHotels.com", 
-  date = "Oct 2026" 
+  date 
 } = Astro.props;
 
-// Google WebPage Schema
-const pageSchema = {
+// ডাবল ব্র্যান্ড নাম প্রতিরোধ (যেমন: Title — GulshanHotels.com — GulshanHotels.com হওয়া বন্ধ করবে)
+const cleanTitle = String(title || "").replace(/\s*[—|-]\s*GulshanHotels\.com$/i, '').trim();
+const fullTitle = `${cleanTitle} — GulshanHotels.com`;
+
+// ক্লিন ক্যানোনিকাল ইউআরএল (কোনো ট্র্যাকিং বা কোয়েরি প্যারাম থাকলে বাদ দেওয়া)
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
+
+// ১. গুগল কমপ্লায়েন্ট WebPage ও BreadcrumbList স্কিমা গ্রাফ
+const schemaGraph: any[] = [
+  {
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": `${Astro.url.origin}/`
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": cleanTitle,
+        "item": canonicalUrl
+      }
+    ]
+  },
+  {
+    "@type": "WebPage",
+    "@id": canonicalUrl,
+    "url": canonicalUrl,
+    "name": cleanTitle,
+    "description": description,
+    ...(date ? { "dateModified": date } : {})
+  }
+];
+
+// XSS-Safe JSON-LD
+const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": title,
-  "description": description,
-  "url": Astro.url.href
-};
+  "@graph": schemaGraph
+}).replace(/</g, '\\u003c');
 ---
 
-<Layout title={`${title} — GulshanHotels.com`} description={description}>
+<Layout title={fullTitle} description={description}>
   
-  <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+  <!-- GOOGLE STRUCTURED DATA -->
+  <script type="application/ld+json" set:html={jsonLd} />
 
   <main class="w-full bg-white text-slate-900 pt-8 pb-20">
     <div class="max-w-[760px] mx-auto px-4 sm:px-6 space-y-8 text-left">
       
-      <!-- BREADCRUMBS -->
-      <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+      <!-- BREADCRUMBS (WCAG & Google Accessible) -->
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
-        <span>/</span>
-        <span class="text-slate-800 truncate">{title}</span>
+        <span aria-hidden="true">/</span>
+        <span class="text-slate-800 truncate" aria-current="page">{cleanTitle}</span>
       </nav>
 
       <!-- PAGE HEADER -->
       <header class="space-y-3 border-b border-slate-100 pb-6">
         <h1 class="font-serif text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-tight">
-          {title}
+          {cleanTitle}
         </h1>
         {description && (
           <p class="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
             {description}
           </p>
         )}
-        <div class="text-[11px] font-semibold text-slate-400 pt-1">
-          Last Updated: <span class="text-slate-700">{date}</span>
-        </div>
+        <!-- তারিখ কেবল থাকলেই শো করবে (কোনো ফেক ডিফল্ট তারিখ নেই) -->
+        {date && (
+          <div class="text-[11px] font-semibold text-slate-400 pt-1">
+            Last Updated: <span class="text-slate-700">{date}</span>
+          </div>
+        )}
       </header>
 
-      <!-- PAGE CONTENT (18px Golden Ratio Typography) -->
-      <div class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline">
+      <!-- PAGE CONTENT (Semantic <article> Tag) -->
+      <article class="prose prose-slate max-w-none text-[17px] sm:text-[18px] leading-[1.8] font-normal text-slate-700 prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-p:mb-6 prose-a:text-emerald-800 prose-a:font-bold hover:prose-a:underline">
         <slot />
-      </div>
+      </article>
 
     </div>
   </main>
