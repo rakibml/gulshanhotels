@@ -1,5 +1,5 @@
 ---
-// src/components/RecentGuestReviews.astro (Ultra-Clean Guest Feedback - Full Names & Normal Styling)
+// src/components/RecentGuestReviews.astro (100% Genuine Reviews, Zero Rating Inflation & WCAG Accessible)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -12,10 +12,14 @@ const {
   subtitle = "Real ratings and experiences from verified travelers staying across Gulshan."
 } = Astro.props;
 
-// ১. হোটেল ডাটা লোডার
+const isProd = import.meta.env.PROD;
+
+// ১. ড্রাফট ফিল্টারসহ হোটেল লোডার (গুগলে ৪০৪ এরর বন্ধ)
 let allHotels: any[] = [];
 try {
-  const hotelCol = await getCollection('hotels');
+  const hotelCol = await getCollection('hotels', ({ data }) => {
+    return isProd ? data?.draft !== true : true;
+  });
   if (Array.isArray(hotelCol) && hotelCol.length > 0) {
     allHotels = hotelCol.map(h => ({
       id: h.id,
@@ -23,17 +27,23 @@ try {
       data: h.data || {}
     }));
   }
-} catch (e) {}
+} catch (e) {
+  allHotels = [];
+}
 
 if (allHotels.length === 0) {
   try {
     const rawGlobHotels = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.entries(rawGlobHotels).map(([filePath, item]: [string, any]) => ({
-      id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
-      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
-      data: item?.frontmatter || item?.data || {}
-    }));
-  } catch (e) {}
+    allHotels = Object.entries(rawGlobHotels)
+      .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
+      .map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
+        data: item?.frontmatter || item?.data || {}
+      }));
+  } catch (e) {
+    allHotels = [];
+  }
 }
 
 // ২. সব রিভিউ ডাটা লোডার
@@ -48,26 +58,34 @@ try {
   allReviews = [];
 }
 
-// ৩. হোটেলের লোকাল রিভিউ মার্জ
+// ৩. হোটেলের লোকাল রিভিউ মার্জ (সৎভাবে শুধু অনুমোদিত রিভিউ নেওয়া)
 allHotels.forEach((h: any) => {
   const hData = h.data || {};
   const embedded = Array.isArray(hData.reviews) ? hData.reviews : [];
   const hSlug = String(h.slug || hData.slug || h.id || '').toLowerCase();
+  
   embedded.forEach((rev: any) => {
-    allReviews.push({
-      ...rev,
-      hotel: rev.hotel || hData.title || hData.name || '',
-      slug: hSlug,
-      approved: true
-    });
+    // অনুমোদিত না হলে যোগ হবে না
+    if (rev && (rev.approved === undefined || rev.approved === true || String(rev.approved).toLowerCase() === 'true')) {
+      allReviews.push({
+        ...rev,
+        hotel: rev.hotel || hData.title || hData.name || '',
+        slug: hSlug,
+        approved: true
+      });
+    }
   });
 });
 
-// ৪. ফিল্টারিং
+// ৪. কড়া ফিল্টারিং (গুগল স্প্যাম রোধ: নূন্যতম ১০ অক্ষর এবং ১-৫ ভ্যালিড রেটিং)
 const approvedReviews = allReviews.filter((r: any) => {
   if (!r) return false;
   const isApproved = r.approved === true || String(r.approved).trim().toLowerCase() === 'true';
-  return isApproved && String(r.comment || r.review || r.body || '').trim().length > 1;
+  const comment = String(r.comment || r.review || r.body || '').trim();
+  const rating = Number(r.rating);
+  
+  // কোনো ভুয়া বা মিসিং রেটিং চলবে না
+  return isApproved && comment.length >= 10 && !isNaN(rating) && rating >= 1 && rating <= 5;
 });
 
 // ৫. তারিখ পার্সার হেল্পার
@@ -88,12 +106,12 @@ const parseReviewDateToTime = (rev: any) => {
   return 0;
 };
 
-// ৬. Newest-First সর্টিং (সর্বশেষ রিভিউ সবার আগে)
+// ৬. Newest-First সর্টিং (সর্বশেষ রিভিউ আগে)
 const sortedReviews = approvedReviews.sort((a, b) => {
   return parseReviewDateToTime(b) - parseReviewDateToTime(a);
 });
 
-// ৭. ডেটা এনরিচমেন্ট
+// ৭. ডেটা এনরিচমেন্ট এবং মিসিং হোটেলের রিভিউ বাদ দেওয়া
 const enrichedReviews = sortedReviews.map((rev: any) => {
   const rSlug = String(rev.slug || rev.hotelSlug || rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || '';
   const rHotel = String(rev.hotel || '').trim().toLowerCase();
@@ -104,20 +122,23 @@ const enrichedReviews = sortedReviews.map((rev: any) => {
     return (rSlug !== '' && hSlug === rSlug) || (rHotel !== '' && (hTitle === rHotel || hSlug === rHotel));
   });
 
-  const hData = matchedHotel?.data || {};
-  const hotelTitle = hData.title || hData.name || rev.hotel || "Gulshan Hotel";
-  const hotelSlug = String(matchedHotel?.slug || hData.slug || matchedHotel?.id || rSlug || '').toLowerCase();
+  // লাইভ হোটেলের অস্তিত্ব না থাকলে রিভিউ বাতিল
+  if (!matchedHotel) return null;
+
+  const hData = matchedHotel.data || {};
+  const hotelTitle = String(hData.title || hData.name || "").trim();
+  const hotelSlug = String(matchedHotel.slug || hData.slug || "").toLowerCase();
   const cleanDate = String(rev.date || 'Recent').replace(/\s+at\s+.*$/i, '').trim();
 
   return {
-    reviewerName: rev.name || rev.author || "Verified Guest",
+    reviewerName: String(rev.name || rev.author || "Guest Reviewer").trim(),
     date: cleanDate,
-    rating: Number(rev.rating) || 5,
+    rating: Math.round(Number(rev.rating)), // কোনো ভুয়া ৫ স্টার নয়, আসল রেটিং
     comment: String(rev.comment || rev.review || rev.body || '').trim(),
     hotelTitle,
     hotelSlug
   };
-}).slice(0, 4);
+}).filter((item): item is NonNullable<typeof item> => item !== null && item.hotelSlug !== "").slice(0, 4);
 
 const hasReviews = enrichedReviews.length > 0;
 const starsArray = [1, 2, 3, 4, 5];
@@ -125,11 +146,11 @@ const starsArray = [1, 2, 3, 4, 5];
 
 {hasReviews && (
   <section id="recent-reviews" class="w-full bg-white py-12 text-slate-900 border-b border-slate-200">
-    <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 space-y-6">
       
-      <!-- Section Header (Verified Stay Experiences বাদ দেওয়া হয়েছে) -->
+      <!-- Section Header -->
       <div class="space-y-1 text-left border-b border-slate-100 pb-4">
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-serif font-black text-slate-900 tracking-tight leading-tight">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight">
           {title}
         </h2>
         <p class="text-xs sm:text-sm text-slate-500 font-medium">
@@ -137,28 +158,29 @@ const starsArray = [1, 2, 3, 4, 5];
         </p>
       </div>
 
-      <!-- ULTRA-CLEAN 2-COLS MOBILE & 4-COLS DESKTOP GRID -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 text-left">
+      <!-- 2-COLS MOBILE & 4-COLS DESKTOP GRID -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
         {enrichedReviews.map((item) => (
-          <div class="group flex flex-col justify-between bg-slate-50/70 hover:bg-white rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-emerald-600/40 hover:shadow-lg transition-all duration-300 p-3.5 sm:p-5">
+          <div class="group flex flex-col justify-between bg-slate-50/80 hover:bg-white rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-emerald-600/40 hover:shadow-lg transition-all duration-300 p-4 sm:p-5">
             
             <div class="space-y-3">
               
-              <!-- ১. টপ বার: রেটিং স্টার এবং হোটেলের সম্পূর্ণ আসল নাম (কোনো ব্যাকগ্রাউন্ড ছাড়া) -->
+              <!-- ১. টপ বার: অ্যাক্সেসিবল স্টার রেটিং এবং হোটেলের ক্যানোনিকাল লিংক -->
               <div class="flex items-start justify-between gap-2">
-                <!-- গোল্ডেন ভেক্টর স্টার -->
-                <div class="flex items-center gap-0.5 shrink-0 pt-0.5">
+                <!-- স্ক্রিন রিডার ও গুগলের জন্য role="img" এবং aria-label যুক্ত -->
+                <div class="flex items-center gap-0.5 shrink-0 pt-0.5" role="img" aria-label={`Rated ${item.rating} out of 5 stars`}>
                   {starsArray.map(s => (
-                    <svg class={`w-3.5 h-3.5 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class={`w-3.5 h-3.5 shrink-0 ${s <= item.rating ? 'fill-amber-400' : 'fill-slate-200'}`} viewBox="0 0 24 24">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                     </svg>
                   ))}
                 </div>
 
-                <!-- হোটেলের সম্পূর্ণ নাম (কোনো ব্যাকগ্রাউন্ড বা বর্ডার নেই, ফুল নাম শো করবে) -->
+                <!-- ক্যানোনিকাল স্ল্যাশযুক্ত হোটেলের নাম -->
                 <a 
-                  href={`/${item.hotelSlug}`} 
-                  class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-800 hover:text-emerald-800 hover:underline transition-colors text-right leading-tight"
+                  href={`/${item.hotelSlug}/`} 
+                  class="text-xs font-black uppercase tracking-wider text-slate-800 hover:text-emerald-800 hover:underline transition-colors text-right leading-tight truncate max-w-[150px]"
+                  title={item.hotelTitle}
                 >
                   {item.hotelTitle}
                 </a>
@@ -171,7 +193,7 @@ const starsArray = [1, 2, 3, 4, 5];
 
             </div>
 
-            <!-- ৩. ফুটার: কাস্টমারের নাম, তারিখ এবং হোটেল লিংক -->
+            <!-- ৩. ফুটার: কাস্টমারের নাম, তারিখ এবং অ্যাক্সেসিবল হোটেল লিংক -->
             <div class="pt-3.5 mt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
               
               <div class="flex items-center gap-2 min-w-0">
@@ -182,19 +204,20 @@ const starsArray = [1, 2, 3, 4, 5];
                   <span class="text-xs font-bold text-slate-900 truncate block leading-tight">
                     {item.reviewerName}
                   </span>
-                  <span class="text-[10px] text-slate-400 font-medium block truncate mt-0.5">
+                  <span class="text-[11px] text-slate-500 font-medium block truncate mt-0.5">
                     {item.date}
                   </span>
                 </div>
               </div>
 
+              <!-- সঠিক ক্যানোনিকাল লিংক ও অ্যাক্সেসিবল বাটন -->
               <a 
-                href={`/${item.hotelSlug}`} 
-                class="shrink-0 text-emerald-800 font-black text-xs hover:underline flex items-center gap-0.5 pl-1"
-                aria-label={`View ${item.hotelTitle}`}
+                href={`/${item.hotelSlug}/`} 
+                class="shrink-0 text-emerald-800 font-black text-xs hover:underline flex items-center gap-1 pl-1"
+                aria-label={`View details of ${item.hotelTitle}`}
               >
-                <span class="hidden xs:inline">Hotel</span>
-                <span>➔</span>
+                <span>View</span>
+                <span aria-hidden="true">➔</span>
               </a>
 
             </div>
