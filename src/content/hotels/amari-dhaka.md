@@ -65,7 +65,7 @@ booking_channels:
           </g>
       </svg>
   - provider_name: TripAdvisory
-    price: $101
+    price: $148
     show_price: true
     button_text: Book Now ➔
     button_url: https://www.tripadvisor.com/Hotel_Review-g293936-d6985943-Reviews-Amari_Dhaka_Bangladesh-Dhaka_City_Dhaka_Division.html
