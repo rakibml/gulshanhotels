@@ -1,5 +1,5 @@
 ---
-// src/components/BrowsePropertyTypes.astro (100% Real CMS Property Counts, Booking.com Style & Zero Fake Data)
+// src/components/BrowsePropertyTypes.astro (100% RFC Valid URLs, Zero Fake Counts & CLS Safe)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -10,11 +10,15 @@ const {
   title = "Browse by Property Type in Gulshan"
 } = Astro.props;
 
-// ১. রিয়েল হোটেল ডাটা লোডার
+const isProd = import.meta.env.PROD;
+
+// ১. ড্রাফট ফিল্টারসহ রিয়েল হোটেল ডাটা লোডার (গুগল ভুয়া সংখ্যা রোধ)
 let allHotels: any[] = [];
 
 try {
-  const collection = await getCollection('hotels');
+  const collection = await getCollection('hotels', ({ data }) => {
+    return isProd ? data?.draft !== true : true;
+  });
   if (Array.isArray(collection) && collection.length > 0) {
     allHotels = collection;
   }
@@ -25,84 +29,89 @@ try {
 if (allHotels.length === 0) {
   try {
     const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.values(rawGlob).map((item: any) => ({
-      data: item?.frontmatter || item?.data || {}
-    }));
+    allHotels = Object.entries(rawGlob)
+      .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
+      .map(([_, item]: [string, any]) => ({
+        data: item?.frontmatter || item?.data || {}
+      }));
   } catch (e) {
     allHotels = [];
   }
 }
 
-// ২. আসল প্রপার্টি সংখ্যা গণনা (Zero Fake Data)
+// ২. খাঁটি প্রপার্টি সংখ্যা গণনা (১০০% আসল ও লাইভ ডাটা)
 const totalHotelsCount = allHotels.filter(h => {
   const cat = String(h.data?.category || "").toLowerCase();
-  const title = String(h.data?.title || h.data?.name || "").toLowerCase();
-  return !cat.includes('guest') && !title.includes('guest');
+  const titleStr = String(h.data?.title || h.data?.name || "").toLowerCase();
+  return !cat.includes('guest') && !titleStr.includes('guest');
 }).length;
 
 const totalGuestHousesCount = allHotels.filter(h => {
   const cat = String(h.data?.category || "").toLowerCase();
-  const title = String(h.data?.title || h.data?.name || "").toLowerCase();
-  return cat.includes('guest') || title.includes('guest');
+  const titleStr = String(h.data?.title || h.data?.name || "").toLowerCase();
+  return cat.includes('guest') || titleStr.includes('guest');
 }).length;
 
-// ৩. ডাইনামিক ক্যাটাগরি অবজেক্ট
+// ৩. ডাইনামিক ক্যাটাগরি অবজেক্ট (সঠিক ইউআরএল সিনট্যাক্স: হ্যাশের আগে কুয়েরি বসানো)
 const propertyTypes = [
   {
     title: "Hotels & Luxury Stays",
     count: totalHotelsCount > 0 ? `${totalHotelsCount} verified properties` : "Verified stays",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-    link: "/#hotels?type=hotel"
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=75&fm=webp",
+    link: "/?type=hotel#hotels"
   },
   {
     title: "Executive Guest Houses",
     count: totalGuestHousesCount > 0 ? `${totalGuestHousesCount} verified properties` : (totalHotelsCount > 0 ? "Available on request" : "Verified stays"),
-    image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=80",
-    link: "/#hotels?type=guest-house"
+    image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=600&q=75&fm=webp",
+    link: "/?type=guest-house#hotels"
   }
 ];
 ---
 
-<!-- BROWSE BY PROPERTY TYPE (CLEAN, 100% REAL DATA) -->
+<!-- BROWSE BY PROPERTY TYPE -->
 <section id="property-types" class="w-full bg-white pt-6 pb-12 text-slate-900 border-b border-slate-200">
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 space-y-6">
     
     <!-- Section Header -->
     <div class="text-left flex flex-col sm:flex-row sm:items-end justify-between gap-1">
       <div>
         <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Explore Gulshan Accommodations</span>
-        <h2 class="text-xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
+        <h2 class="text-2xl sm:text-3xl font-black font-sans text-[#002b11] tracking-tight">
           {title}
         </h2>
       </div>
-      <p class="text-xs text-slate-500 font-medium">Find the right stay suited for business, transit, or leisure</p>
+      <p class="text-xs sm:text-sm text-slate-500 font-medium">Find the right stay suited for business, transit, or leisure</p>
     </div>
 
-    <!-- BOOKING.COM STYLE 2-COLUMN MOBILE & 4-COLUMN DESKTOP GRID -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
+    <!-- BALANCED 2-COLUMN GRID (ডেস্কটপ ও মোবাইলে সিমেট্রিক) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-left">
       {propertyTypes.map((item) => (
         <a 
           href={item.link} 
+          aria-label={`Browse ${item.title}: ${item.count}`}
           class="group block w-full cursor-pointer focus:outline-none"
         >
-          <!-- 4:3 Aspect Ratio Thumbnail -->
-          <div class="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group-hover:border-emerald-600/50 shadow-xs group-hover:shadow-md transition-all duration-300">
+          <!-- 16:10 / 4:3 Aspect Ratio Thumbnail (CLS Protected) -->
+          <div class="relative aspect-[16/10] sm:aspect-[16/9] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 group-hover:border-emerald-600/50 shadow-2xs group-hover:shadow-md transition-all duration-300">
             <img 
               src={item.image} 
               alt={`${item.title} in Gulshan Dhaka`} 
+              width="600"
+              height="375"
               loading="lazy" 
               decoding="async" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
             />
-            <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+            <div class="absolute inset-0 bg-black/15 group-hover:bg-transparent transition-colors"></div>
           </div>
 
           <!-- Title and Real Count -->
-          <div class="pt-2.5 space-y-0.5">
-            <h3 class="font-bold text-slate-900 text-xs sm:text-base leading-tight group-hover:text-emerald-800 transition-colors line-clamp-1">
+          <div class="pt-3 space-y-0.5">
+            <h3 class="font-extrabold text-slate-900 text-sm sm:text-lg leading-tight group-hover:text-emerald-800 transition-colors line-clamp-1">
               {item.title}
             </h3>
-            <span class="text-[11px] sm:text-xs text-slate-500 font-medium block">
+            <span class="text-xs text-slate-500 font-medium block">
               {item.count}
             </span>
           </div>
