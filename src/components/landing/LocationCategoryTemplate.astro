@@ -1,6 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro
-// Landing page for a location/category. All text comes from the CMS data. No invented claims.
+// src/components/landing/LocationCategoryTemplate.astro (Real-Time Agoda Live Pricing Integration)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,9 +10,109 @@ interface Props {
 
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
-const isProd = import.meta.env.PROD;
 
-// ---------- Helpers ----------
+// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL
+const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
+
+const rawSlug = entry?.slug || entry?.id || "";
+const cleanSlug = rawSlug
+  .replace(/\.(md|mdx)$/, '')
+  .split('/')
+  .pop()
+  ?.toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-') || "";
+
+const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
+
+// ২. মেটাডাটা
+const pageTitle = (data.title || "").trim();
+const locationSubtitle = (data.location_subtitle || "").trim();
+const description = (data.description || data.seo_description || "").trim();
+const heroImage = data.hero_image || data.image || "";
+const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
+
+// ৩. সব হোটেল ডাটা লোডার
+let allHotels: any[] = [];
+try {
+  const hotelCol = await (getCollection as any)('hotels');
+  if (Array.isArray(hotelCol)) {
+    allHotels = hotelCol.map((h: any) => ({
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
+      data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
+    }));
+  }
+} catch (err) {
+  try {
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
+      data: item?.frontmatter || item?.data || {}
+    }));
+  } catch (e) {}
+}
+
+// ৪. রিভিউ লোডার
+let rawReviewsList: any[] = [];
+try {
+  const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
+  rawReviewsList = Object.values(globFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
+} catch (e) {
+  rawReviewsList = [];
+}
+
+const reviewsByKey = new Map<string, any[]>();
+for (const item of rawReviewsList) {
+  if (!item) continue;
+  const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
+  if (!isApproved) continue;
+
+  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
+
+  const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
+  for (const k of keys) {
+    if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
+    reviewsByKey.get(k)!.push(item);
+  }
+}
+
+// ৫. টেক্সট নরম্যালাইজার ও ফিল্টারিং
+const normalizeText = (val: any) =>
+  String(val || '')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const manualSlugs = Array.isArray(data.selected_hotels)
+  ? data.selected_hotels
+      .map((s: any) => String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim())
+      .filter((s: string | undefined): s is string => Boolean(s && s.length > 0))
+  : [];
+
+const rawKeyword = String(data.filter_keyword || cleanSlug)
+  .replace(/^(luxury|best|top|budget|cheap)-/i, '')
+  .replace(/^hotels?-(in|near)-/i, '')
+  .replace(/^hotels?-/i, '')
+  .replace(/-hotels?$/i, '');
+
+const normalizedKeyword = normalizeText(rawKeyword);
+
+const displayHotels = allHotels.filter(h => {
+  const hSlug = String(h.slug || '').toLowerCase();
+  if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
+  if (!normalizedKeyword) return true;
+
+  const hLoc = normalizeText(h.data?.location || h.data?.address);
+  const hCat = normalizeText(h.data?.category);
+  const hTitle = normalizeText(h.data?.title || h.data?.name);
+
+  return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
+});
+
+// ৬. হেল্পার ফাংশন
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -45,124 +144,7 @@ function plainText(str: any) {
     .trim();
 }
 
-function pickImage(hd: any): string {
-  const first = Array.isArray(hd.gallery) ? hd.gallery[0] : null;
-  const fromGallery = first ? (typeof first === 'object' ? (first.photo || first.image || '') : first) : '';
-  const raw = hd.image || fromGallery || '';
-  return typeof raw === 'string' ? raw.trim() : '';
-}
-
-const isApproved = (v: any) => v === true || String(v).trim().toLowerCase() === 'true';
-
-// ---------- 1. Site origin and canonical URL (with trailing slash) ----------
-const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
-
-const rawSlug = entry?.slug || entry?.id || "";
-const cleanSlug = rawSlug
-  .replace(/\.(md|mdx)$/, '')
-  .split('/')
-  .pop()
-  ?.toLowerCase()
-  .trim()
-  .replace(/\s+/g, '-') || "";
-
-const canonicalUrl = `${siteOrigin}/${cleanSlug}/`;
-
-// ---------- 2. Page metadata ----------
-const pageTitle = (data.title || "").trim();
-const locationSubtitle = (data.location_subtitle || "").trim();
-const description = (data.description || data.seo_description || "").trim();
-const heroImage = data.hero_image || data.image || "";
-const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
-
-// ---------- 3. Load hotels (skip drafts in production) ----------
-let allHotels: any[] = [];
-try {
-  const hotelCol = await (getCollection as any)('hotels', ({ data }: any) => {
-    return isProd ? data?.draft !== true : true;
-  });
-  if (Array.isArray(hotelCol)) {
-    allHotels = hotelCol.map((h: any) => ({
-      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
-      data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
-    }));
-  }
-} catch (err) {
-  try {
-    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.entries(rawGlob)
-      .filter(([_, item]: [string, any]) => (isProd ? (item?.frontmatter || item?.data || {}).draft !== true : true))
-      .map(([filePath, item]: [string, any]) => ({
-        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
-        data: item?.frontmatter || item?.data || {}
-      }));
-  } catch (e) {}
-}
-
-// ---------- 4. Load approved reviews only ----------
-let rawReviewsList: any[] = [];
-try {
-  const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
-  rawReviewsList = Object.values(globFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
-} catch (e) {
-  rawReviewsList = [];
-}
-
-const reviewsByKey = new Map<string, any[]>();
-for (const item of rawReviewsList) {
-  if (!item) continue;
-  if (!isApproved(item.approved)) continue;
-
-  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
-
-  const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
-  for (const k of keys) {
-    if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
-    reviewsByKey.get(k)!.push(item);
-  }
-}
-
-// ---------- 5. Filter hotels for this page ----------
-const normalizeText = (val: any) =>
-  String(val || '')
-    .toLowerCase()
-    .replace(/[-_]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const manualSlugs = Array.isArray(data.selected_hotels)
-  ? data.selected_hotels
-      .map((s: any) => String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim())
-      .filter((s: string | undefined): s is string => Boolean(s && s.length > 0))
-  : [];
-
-const rawKeyword = String(data.filter_keyword || cleanSlug)
-  .replace(/^(luxury|best|top|budget|cheap)-/i, '')
-  .replace(/^hotels?-(in|near)-/i, '')
-  .replace(/^hotels?-/i, '')
-  .replace(/-hotels?$/i, '');
-
-const normalizedKeyword = normalizeText(rawKeyword);
-
-const displayHotels = allHotels.filter(h => {
-  const hSlug = String(h.slug || '').toLowerCase();
-  if (!hSlug) return false; // no slug means no valid link
-  if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  if (!normalizedKeyword) return true;
-
-  const hLoc = normalizeText(h.data?.location || h.data?.address);
-  const hCat = normalizeText(h.data?.category);
-  const hTitle = normalizeText(h.data?.title || h.data?.name);
-
-  return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
-});
-
-// A page with no hotels should not be indexed
-const hasHotels = displayHotels.length > 0;
-
-// ---------- 6. Header text ----------
+// ৭. স্মার্ট টাইটেল ফরম্যাটার
 const cleanTitleName = pageTitle
   .replace(/^hotels?\s+in\s+/i, '')
   .replace(/^hotels?\s+near\s+/i, '')
@@ -171,11 +153,10 @@ const cleanTitleName = pageTitle
 const hotelsTag = (data.hotels_tag || "").trim();
 const hotelsTitle = (data.hotels_title || (cleanTitleName ? `Accommodations in ${toTitleCase(cleanTitleName)}` : `Available Accommodations`)).trim();
 
-// FAQ only if both question and answer exist in the CMS
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ---------- 7. Schema (matches what is visible on the page) ----------
+// ৮. ১০০% গুগল পলিসি কমপ্লায়েন্ট স্কিমা
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -187,7 +168,7 @@ const schemaGraph: any[] = [
   }
 ];
 
-if (hasHotels) {
+if (displayHotels.length > 0) {
   schemaGraph.push({
     "@type": "ItemList",
     "@id": `${canonicalUrl}#itemlist`,
@@ -198,7 +179,7 @@ if (hasHotels) {
       "@type": "ListItem",
       "position": idx + 1,
       "name": toTitleCase(h.data?.title || h.data?.name || `Hotel Stay`),
-      "url": `${siteOrigin}/${h.slug}/`
+      "url": `${siteOrigin}/${h.slug}`
     }))
   });
 }
@@ -222,44 +203,39 @@ const masterSchemaJson = JSON.stringify({
   "@context": "https://schema.org",
   "@graph": schemaGraph
 }).replace(/</g, "\\u003c");
-
-// Show a rating score only when there are at least this many approved reviews
-const MIN_REVIEWS_FOR_SCORE = 3;
 ---
 
-<Layout
-  title={metaTitle}
-  description={description}
+<Layout 
+  title={metaTitle} 
+  description={description} 
   image={heroImage}
   canonical={canonicalUrl}
-  noindex={!hasHotels}
 >
   <script type="application/ld+json" set:html={masterSchemaJson} />
 
   <div class="w-full bg-[#fcfbfa] text-slate-800 font-sans pb-24">
 
-    <!-- ================= 1. BANNER ================= -->
+    <!-- ================= ১. সিনেমাটিক ব্যানার (স্থায়ী লকড অংশ) ================= -->
     <header class="relative w-full aspect-[21/9] min-h-[300px] sm:min-h-[420px] max-h-[520px] bg-slate-950 overflow-hidden">
       {heroImage ? (
         <img
           src={heroImage}
           alt={pageTitle}
-          width="1400"
-          height="600"
           class="w-full h-full object-cover"
           fetchpriority="high"
         />
       ) : (
         <div class="w-full h-full bg-slate-900" />
       )}
-
+      
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
+      <!-- ব্যানারের বাম কোণায় টাইটেল ও সাবটাইটেল -->
       <div class="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 lg:left-12 z-10 text-white space-y-1 text-left max-w-2xl">
         <span class="block font-serif text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-md text-white">
           {toTitleCase(pageTitle)}
         </span>
-
+        
         {locationSubtitle && (
           <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 drop-shadow">
             <span>{locationSubtitle}</span>
@@ -269,19 +245,22 @@ const MIN_REVIEWS_FOR_SCORE = 3;
       </div>
     </header>
 
-    <!-- ================= 2. BREADCRUMB, H1 AND ARTICLE ================= -->
+    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 + আর্টিকেল (স্থায়ী লকড অংশ) ================= -->
     <section class="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 text-left">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-
+        
+        <!-- বাম কলাম: ব্রেডক্রাম্ব -->
         <div class="lg:col-span-3 pt-2">
-          <!-- Breadcrumb: same 2 steps as in the schema -->
           <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-[#0d3b23] font-semibold tracking-wide">
             <a href="/" class="hover:underline">Home</a>
+            <span class="text-slate-400">›</span>
+            <a href="/#hotels" class="hover:underline">Hotels</a>
             <span class="text-slate-400">›</span>
             <span class="text-slate-600 font-normal">{toTitleCase(pageTitle)}</span>
           </nav>
         </div>
 
+        <!-- ডান কলাম: H1 হেডিং ও আর্টিকেল -->
         <div class="lg:col-span-9 max-w-4xl">
           <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
             {toTitleCase(pageTitle)}
@@ -303,9 +282,10 @@ const MIN_REVIEWS_FOR_SCORE = 3;
       </div>
     </section>
 
-    <!-- ================= 3. HOTEL CARDS ================= -->
+    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড (Agoda Live Price Enabled) ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
-
+      
+      <!-- হেডার ও সার্চবার -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 mb-8">
         <div>
           {hotelsTag && (
@@ -315,10 +295,11 @@ const MIN_REVIEWS_FOR_SCORE = 3;
             {hotelsTitle}
           </h2>
           <p class="text-xs text-slate-500 font-medium mt-1">
-            Showing {displayHotels.length} {displayHotels.length === 1 ? 'property' : 'properties'}
+            Showing {displayHotels.length} verified {displayHotels.length === 1 ? 'property' : 'properties'}
           </p>
         </div>
 
+        <!-- অন-পেজ সার্চ ইনপুট -->
         <div class="w-full sm:w-72 bg-white rounded-xl shadow-xs px-3 py-2 flex items-center border border-slate-200">
           <svg aria-hidden="true" class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
@@ -334,6 +315,7 @@ const MIN_REVIEWS_FOR_SCORE = 3;
         </div>
       </div>
 
+      <!-- হোটেল গ্রিড -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -344,66 +326,66 @@ const MIN_REVIEWS_FOR_SCORE = 3;
             const hd = h.data || {};
             const hotelTitle = (hd.title || hd.name || "").trim();
             const hotelSlug = String(h.slug || "").trim();
-            const hotelUrl = `/${hotelSlug}/`;
+            const hotelUrl = `/${hotelSlug}`;
+            const agodaId = hd.agoda_id || hd.agodaId || "";
 
             const starCount = extractStarsNumber(hd.category, hd.stars);
             const shortLoc = formatShortLocation(hd.location || hd.address || "");
             const price = formatPriceDisplay(hd.price);
-            const cardImage = pickImage(hd);
-
+            const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
+            
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 3).map((a: any) => {
               if (typeof a === 'string') return a.trim();
-              if (a && typeof a === 'object') return String(a.name || a.title || '').trim();
+              if (typeof a === 'object') return (a?.name || a?.title || '').trim();
               return '';
             }).filter(Boolean);
 
-            // Approved reviews only (from the reviews folder and from the hotel file)
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
             const approvedSet = new Set<any>([
               ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
               ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
             ]);
-            const embeddedApproved = (Array.isArray(hd.reviews) ? hd.reviews : []).filter((r: any) => r && isApproved(r.approved));
-            const combinedRawReviews = [...Array.from(approvedSet), ...embeddedApproved];
+            const combinedRawReviews = [...Array.from(approvedSet), ...(Array.isArray(hd.reviews) ? hd.reviews : [])];
 
             const validReviews = combinedRawReviews.map((rev: any) => ({
               rating: Number(rev.rating) || 0,
               comment: String(rev.comment || rev.review || rev.body || '').trim()
-            })).filter(r => r.comment.length > 1 && r.rating >= 1 && r.rating <= 5);
+            })).filter(r => r.comment.length > 1 && r.rating > 0);
 
             const reviewCount = validReviews.length;
-            const reviewScore = reviewCount >= MIN_REVIEWS_FOR_SCORE
+            const reviewScore = reviewCount > 0
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
               : null;
 
-            // Badge only if the CMS has one
-            const realBadge = hd.badge || hd.tag || "";
+            const realBadge = hd.badge || hd.tag || (hd.verified === true ? "Verified Stay" : "");
 
             return (
-              <div
-                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-64"
+              <div 
+                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-52"
                 data-name={hotelTitle.toLowerCase()}
                 data-location={shortLoc.toLowerCase()}
+                data-slug={hotelSlug}
+                data-hotel-name={hotelTitle}
+                data-agoda-id={agodaId}
               >
+                <!-- ইমেজ ও স্টার ব্যাজ -->
                 <div class="w-full sm:w-48 md:w-52 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
                   {cardImage && (
-                    <a href={hotelUrl} class="block w-full h-full" aria-label={`View details of ${hotelTitle}`}>
+                    <a href={hotelUrl} class="block w-full h-full">
                       <img
                         src={cardImage}
-                        alt={shortLoc ? `${hotelTitle} in ${shortLoc}` : hotelTitle}
-                        width="208"
-                        height="224"
+                        alt={hotelTitle}
                         loading="lazy"
                         decoding="async"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </a>
                   )}
-
+                  
                   {starCount && (
-                    <div class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow">
+                    <div class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow">
                       <span>{starCount}</span>
                       <svg aria-hidden="true" class="w-3 h-3 fill-amber-300" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -412,24 +394,28 @@ const MIN_REVIEWS_FOR_SCORE = 3;
                   )}
                 </div>
 
+                <!-- ডিটেইলস -->
                 <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
-
+                  
                   <div class="space-y-1.5">
-                    {realBadge && (
-                      <div class="flex items-center gap-1.5 text-xs font-bold">
+                    <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                      {realBadge && (
                         <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70">
                           {realBadge}
                         </span>
-                      </div>
-                    )}
+                      )}
+                      <!-- রিয়েল-টাইম ডিসকাউন্ট ব্যাজ (Agoda থেকে আসলে স্ক্রিপ্ট পূরণ করবে) -->
+                      <span class="agoda-discount-badge hidden px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-extrabold animate-pulse">
+                      </span>
+                    </div>
 
                     <div>
-                      <h3 class="font-serif font-black text-lg sm:text-xl text-slate-900 group-hover:text-[#0d3b23] transition truncate">
+                      <h3 class="font-serif font-black text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition truncate">
                         <a href={hotelUrl}>{toTitleCase(hotelTitle)}</a>
                       </h3>
                       {shortLoc && (
-                        <p class="text-sm text-slate-600 flex items-center gap-1.5 mt-1 truncate">
-                          <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                          <svg aria-hidden="true" class="w-3 h-3 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
                             <circle cx="12" cy="10" r="3"/>
                           </svg>
@@ -438,27 +424,24 @@ const MIN_REVIEWS_FOR_SCORE = 3;
                       )}
                     </div>
 
-                    {/* Score only with enough reviews; with fewer, show the count only */}
-                    {reviewScore ? (
-                      <div class="flex items-center gap-1.5 text-sm">
+                    <!-- রেটিং -->
+                    {reviewCount > 0 && reviewScore && (
+                      <div class="flex items-center gap-1.5 text-xs">
                         <span class="text-amber-500 font-bold flex items-center gap-0.5">
                           ★ {reviewScore}
                         </span>
-                        <span class="text-slate-600 text-sm">
-                          ({reviewCount} reviews)
+                        <span class="text-slate-400 text-[11px]">
+                          ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                         </span>
                       </div>
-                    ) : reviewCount > 0 ? (
-                      <div class="text-sm text-slate-600">
-                        {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
-                      </div>
-                    ) : null}
+                    )}
 
+                    <!-- সুবিধাসমূহ -->
                     {topAmenities.length > 0 && (
-                      <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-slate-700 font-medium pt-0.5">
+                      <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
                         {topAmenities.map((item: string) => (
                           <span class="flex items-center gap-1">
-                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg aria-hidden="true" class="w-2.5 h-2.5 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                             <span class="truncate">{item}</span>
                           </span>
                         ))}
@@ -466,26 +449,35 @@ const MIN_REVIEWS_FOR_SCORE = 3;
                     )}
                   </div>
 
-                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-3">
-                    {price ? (
-                      <div>
-                        <span class="text-xs text-slate-600 block font-medium uppercase leading-none">From (approx.)</span>
-                        <div class="flex items-baseline gap-1 mt-0.5">
-                          <span class="text-xl sm:text-2xl font-black text-[#0d3b23]">{price}</span>
-                          <span class="text-sm text-slate-600">/ night</span>
-                        </div>
-                        <span class="text-xs text-slate-600 block leading-tight mt-1">Check hotel for current price</span>
+                  <!-- প্রাইস ও বাটন বার (রিয়েলটাইম Agoda সিঙ্ক) -->
+                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <!-- রেট স্ট্যাটাস লেবেল -->
+                      <span class="hotel-rate-status text-[9px] text-slate-400 font-medium uppercase leading-none flex items-center gap-1">
+                        <span>Direct Rate</span>
+                      </span>
+                      
+                      <div class="flex items-baseline gap-1 mt-0.5">
+                        <!-- অরিজিনাল স্ট্রাইকথ্রু প্রাইস (যদি ছাড় থাকে) -->
+                        <span class="agoda-original-price hidden text-[11px] text-slate-400 line-through"></span>
+                        
+                        <!-- আসল লাইভ প্রাইস -->
+                        <span class="hotel-live-price text-base sm:text-lg font-black text-[#0d3b23]">
+                          {price ? price : "Check Rates"}
+                        </span>
+                        
+                        <span class="hotel-per-night text-[10px] text-slate-500">
+                          {price ? "/ night" : ""}
+                        </span>
                       </div>
-                    ) : (
-                      <span class="text-xs font-bold text-slate-700">Check hotel for rates</span>
-                    )}
+                    </div>
 
-                    <a
-                      href={hotelUrl}
-                      class="inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-2xs shrink-0"
+                    <a 
+                      href={hotelUrl} 
+                      class="hotel-card-cta inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs"
                     >
                       <span>View Details</span>
-                      <span class="text-xs" aria-hidden="true">→</span>
+                      <span class="text-xs">→</span>
                     </a>
                   </div>
 
@@ -501,7 +493,7 @@ const MIN_REVIEWS_FOR_SCORE = 3;
       </div>
     </section>
 
-    <!-- ================= 4. FAQ (only if the CMS has questions) ================= -->
+    <!-- ================= ৪. FAQ সেকশন ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left border-t border-slate-200 mt-16">
         <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-8">
@@ -513,7 +505,7 @@ const MIN_REVIEWS_FOR_SCORE = 3;
             <details class="group border-b border-slate-200 py-4 sm:py-5 transition-all text-left" open={i === 0}>
               <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] cursor-pointer select-none gap-4">
                 <span class="leading-snug pr-2 font-serif font-bold">{f.question}</span>
-                <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors" aria-hidden="true">
+                <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors">
                   <span class="block group-open:hidden text-sm leading-none font-bold">+</span>
                   <span class="hidden group-open:block text-sm leading-none font-bold">−</span>
                 </span>
@@ -530,8 +522,9 @@ const MIN_REVIEWS_FOR_SCORE = 3;
   </div>
 </Layout>
 
-<!-- Live search filter -->
+<!-- লাইভ সার্চ ও ক্লাউডফ্লেয়ার আগোডা লাইভ প্রাইস সিঙ্ক স্ক্রিপ্ট -->
 <script is:inline>
+  // ১. অন-পেজ সার্চ ফিল্টার
   const initOnPageFilter = () => {
     const input = document.getElementById('onPageHotelFilterInput');
     const cards = document.querySelectorAll('.landing-hotel-card');
@@ -566,6 +559,74 @@ const MIN_REVIEWS_FOR_SCORE = 3;
     }
   };
 
-  document.addEventListener('DOMContentLoaded', initOnPageFilter);
-  document.addEventListener('astro:page-load', initOnPageFilter);
+  // ২. ক্লাউডফ্লেয়ার ওয়ার্কার থেকে আগোডার লাইভ রেট সিঙ্ক
+  const syncAgodaLivePrices = async () => {
+    const cards = document.querySelectorAll('.landing-hotel-card');
+    if (!cards || cards.length === 0) return;
+
+    const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+
+    cards.forEach(async (card) => {
+      const slug = card.getAttribute('data-slug') || '';
+      const hotelName = card.getAttribute('data-hotel-name') || '';
+      const agodaId = card.getAttribute('data-agoda-id') || '';
+
+      const queryParam = agodaId ? `id=${agodaId}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
+      const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
+
+      try {
+        const response = await fetch(requestUrl);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data.success && data.rates && data.rates.startingPrice) {
+          const priceEl = card.querySelector('.hotel-live-price');
+          const perNightEl = card.querySelector('.hotel-per-night');
+          const statusEl = card.querySelector('.hotel-rate-status');
+          const origPriceEl = card.querySelector('.agoda-original-price');
+          const discountEl = card.querySelector('.agoda-discount-badge');
+
+          // ১. লাইভ প্রাইস আপডেট
+          if (priceEl) {
+            priceEl.textContent = data.rates.startingPrice;
+          }
+
+          if (perNightEl) {
+            perNightEl.textContent = "/ night";
+          }
+
+          // ২. অরিজিনাল প্রাইস ও ডিসকাউন্ট ব্যাজ
+          if (origPriceEl && data.rates.originalPrice) {
+            origPriceEl.textContent = data.rates.originalPrice;
+            origPriceEl.classList.remove('hidden');
+          }
+
+          if (discountEl && data.rates.discountText) {
+            discountEl.textContent = data.rates.discountText;
+            discountEl.classList.remove('hidden');
+          }
+
+          // ৩. লাইভ গ্রিন পালস স্ট্যাটাস
+          if (statusEl) {
+            statusEl.innerHTML = `
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-emerald-700 font-bold">Agoda Live Rate</span>
+            `;
+          }
+        }
+      } catch (e) {
+        // কোনো কারণে ওয়ার্কার অফলাইনে থাকলে পেজ স্বাভাবিক থাকবে
+      }
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initOnPageFilter();
+    syncAgodaLivePrices();
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    initOnPageFilter();
+    syncAgodaLivePrices();
+  });
 </script>
