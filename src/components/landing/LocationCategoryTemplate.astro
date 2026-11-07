@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (Compact Card + Equal Height Map Layout)
+// src/components/landing/LocationCategoryTemplate.astro (Gatlinburg Style + 2-Column Hotel Grid)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -143,7 +143,7 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. স্মার্ট টাইটেল ও ম্যাপ কুয়েরি
+// ৭. স্মার্ট টাইটেল ফরম্যাটার
 const cleanTitleName = pageTitle
   .replace(/^hotels?\s+in\s+/i, '')
   .replace(/^hotels?\s+near\s+/i, '')
@@ -151,9 +151,6 @@ const cleanTitleName = pageTitle
 
 const hotelsTag = data.hotels_tag || "CURATED STAYS";
 const hotelsTitle = data.hotels_title || (cleanTitleName ? `Verified Stays in ${toTitleCase(cleanTitleName)}` : `Top Accommodations`);
-
-const mapQuery = encodeURIComponent(`${cleanTitleName || pageTitle}, Dhaka, Bangladesh`);
-const googleMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
 
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
@@ -284,7 +281,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৩. কমপ্যাক্ট হোটেল কার্ড ও সমান উচ্চতার ছোট ম্যাপ ================= -->
+    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড (ম্যাপ ছাড়া) ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
       
       <!-- হেডার ও সার্চবার -->
@@ -315,209 +312,165 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- ২-কলাম স্প্লিট: বামে হোটেল কার্ড + ডানে সমান উচ্চতার কমপ্যাক্ট ম্যাপ -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- বাম পাশ (৭ কলাম): কমপ্যাক্ট হোটেল কার্ড -->
-        <div class="lg:col-span-7 space-y-4">
-          <div id="landingHotelsGrid" class="space-y-4">
-            {displayHotels.length === 0 ? (
-              <div class="text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
-                No accommodations match the selected criteria.
-              </div>
-            ) : (
-              displayHotels.map((h) => {
-                const hd = h.data || {};
-                const hotelTitle = (hd.title || hd.name || "").trim();
-                const hotelSlug = String(h.slug || "").trim();
-                const hotelUrl = `/${hotelSlug}`;
-
-                const starCount = extractStarsNumber(hd.category, hd.stars);
-                const shortLoc = formatShortLocation(hd.location || hd.address || "");
-                const price = formatPriceDisplay(hd.price);
-                const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
-                
-                const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
-                const topAmenities = rawAmenities.slice(0, 3).map((a: any) => {
-                  if (typeof a === 'string') return a.trim();
-                  if (typeof a === 'object') return (a?.name || a?.title || '').trim();
-                  return '';
-                }).filter(Boolean);
-
-                const searchTitle = hotelTitle.toLowerCase();
-                const searchSlug = hotelSlug.toLowerCase();
-                const approvedSet = new Set<any>([
-                  ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
-                  ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
-                ]);
-                const combinedRawReviews = [...Array.from(approvedSet), ...(Array.isArray(hd.reviews) ? hd.reviews : [])];
-
-                const validReviews = combinedRawReviews.map((rev: any) => ({
-                  rating: Number(rev.rating) || 0,
-                  comment: String(rev.comment || rev.review || rev.body || '').trim()
-                })).filter(r => r.comment.length > 1 && r.rating > 0);
-
-                const reviewCount = validReviews.length;
-                const reviewScore = reviewCount > 0
-                  ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
-                  : (hd.rating ? Number(hd.rating).toFixed(1) : null);
-
-                return (
-                  <div 
-                    class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-52"
-                    data-name={hotelTitle.toLowerCase()}
-                    data-location={shortLoc.toLowerCase()}
-                  >
-                    <!-- ইমেজ -->
-                    <div class="w-full sm:w-56 md:w-60 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
-                      {cardImage && (
-                        <a href={hotelUrl} class="block w-full h-full">
-                          <img
-                            src={cardImage}
-                            alt={hotelTitle}
-                            loading="lazy"
-                            decoding="async"
-                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </a>
-                      )}
-                      
-                      {starCount && (
-                        <div class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow">
-                          <span>{starCount}</span>
-                          <svg aria-hidden="true" class="w-3 h-3 fill-amber-300" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-
-                    <!-- ডিটেইলস -->
-                    <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
-                      
-                      <div class="space-y-1.5">
-                        <div class="flex items-center gap-1.5 text-[9px] font-bold">
-                          <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70">
-                            Verified Property
-                          </span>
-                          <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                            Diplomatic Zone
-                          </span>
-                        </div>
-
-                        <div>
-                          <h3 class="font-serif font-black text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition truncate">
-                            <a href={hotelUrl}>{toTitleCase(hotelTitle)}</a>
-                          </h3>
-                          {shortLoc && (
-                            <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
-                              <svg aria-hidden="true" class="w-3 h-3 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
-                                <circle cx="12" cy="10" r="3"/>
-                              </svg>
-                              <span class="truncate">{shortLoc}</span>
-                            </p>
-                          )}
-                        </div>
-
-                        <!-- রেটিং -->
-                        {reviewCount > 0 ? (
-                          <div class="flex items-center gap-1.5 text-xs">
-                            <span class="text-amber-500 font-bold flex items-center gap-0.5">
-                              ★ {reviewScore}
-                            </span>
-                            <span class="text-slate-400 text-[11px]">
-                              ({reviewCount} reviews)
-                            </span>
-                          </div>
-                        ) : null}
-
-                        <!-- ৩টি প্রধান সুবিধা -->
-                        {topAmenities.length > 0 && (
-                          <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
-                            {topAmenities.map((item: string) => (
-                              <span class="flex items-center gap-1">
-                                <svg aria-hidden="true" class="w-2.5 h-2.5 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span class="truncate">{item}</span>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <!-- প্রাইস ও বাটন বার -->
-                      <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                        {price ? (
-                          <div>
-                            <span class="text-[9px] text-slate-400 block font-medium uppercase leading-none">From</span>
-                            <div class="flex items-baseline gap-1 mt-0.5">
-                              <span class="text-base sm:text-lg font-black text-[#0d3b23]">{price}</span>
-                              <span class="text-[10px] text-slate-500">/ night</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <span class="text-xs font-bold text-slate-700">Check Rates</span>
-                        )}
-
-                        <a 
-                          href={hotelUrl} 
-                          class="inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs"
-                        >
-                          <span>View Details</span>
-                          <span class="text-xs">→</span>
-                        </a>
-                      </div>
-
-                    </div>
-                  </div>
-                );
-              })
-            )}
+      <!-- 🔥 পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড 🔥 -->
+      <div id="landingHotelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {displayHotels.length === 0 ? (
+          <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
+            No accommodations match the selected criteria.
           </div>
+        ) : (
+          displayHotels.map((h) => {
+            const hd = h.data || {};
+            const hotelTitle = (hd.title || hd.name || "").trim();
+            const hotelSlug = String(h.slug || "").trim();
+            const hotelUrl = `/${hotelSlug}`;
 
-          <div id="filterEmptyState" class="hidden text-center py-10 text-slate-500 text-xs bg-white rounded-2xl border border-dashed border-slate-300">
-            No hotels match your search.
-          </div>
-        </div>
-
-        <!-- 🔥 ডান পাশ (৫ কলাম): হুবহু হোটেল কার্ডের সমান ছোট ম্যাপ (উচ্চতা ২০৮px / sm:h-52) 🔥 -->
-        <aside class="lg:col-span-5 lg:sticky lg:top-6">
-          <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs flex flex-col h-auto sm:h-52">
+            const starCount = extractStarsNumber(hd.category, hd.stars);
+            const shortLoc = formatShortLocation(hd.location || hd.address || "");
+            const price = formatPriceDisplay(hd.price);
+            const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             
-            <!-- ম্যাপ হেডার -->
-            <div class="px-3.5 py-1.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
-              <span class="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
-                <span>📍</span>
-                <span>{toTitleCase(cleanTitleName)} Area Map</span>
-              </span>
-              <a 
-                href={`https://maps.google.com/?q=${mapQuery}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="text-[10px] font-bold text-emerald-800 hover:underline"
+            const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
+            const topAmenities = rawAmenities.slice(0, 3).map((a: any) => {
+              if (typeof a === 'string') return a.trim();
+              if (typeof a === 'object') return (a?.name || a?.title || '').trim();
+              return '';
+            }).filter(Boolean);
+
+            const searchTitle = hotelTitle.toLowerCase();
+            const searchSlug = hotelSlug.toLowerCase();
+            const approvedSet = new Set<any>([
+              ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
+              ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
+            ]);
+            const combinedRawReviews = [...Array.from(approvedSet), ...(Array.isArray(hd.reviews) ? hd.reviews : [])];
+
+            const validReviews = combinedRawReviews.map((rev: any) => ({
+              rating: Number(rev.rating) || 0,
+              comment: String(rev.comment || rev.review || rev.body || '').trim()
+            })).filter(r => r.comment.length > 1 && r.rating > 0);
+
+            const reviewCount = validReviews.length;
+            const reviewScore = reviewCount > 0
+              ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
+              : (hd.rating ? Number(hd.rating).toFixed(1) : null);
+
+            return (
+              <div 
+                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-52"
+                data-name={hotelTitle.toLowerCase()}
+                data-location={shortLoc.toLowerCase()}
               >
-                Open Full Map ↗
-              </a>
-            </div>
+                <!-- ইমেজ -->
+                <div class="w-full sm:w-48 md:w-52 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
+                  {cardImage && (
+                    <a href={hotelUrl} class="block w-full h-full">
+                      <img
+                        src={cardImage}
+                        alt={hotelTitle}
+                        loading="lazy"
+                        decoding="async"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </a>
+                  )}
+                  
+                  {starCount && (
+                    <div class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow">
+                      <span>{starCount}</span>
+                      <svg aria-hidden="true" class="w-3 h-3 fill-amber-300" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
 
-            <!-- লাইভ ইন্টারেক্টিভ ম্যাপ ফ্রেম (বাকি অংশ পূরণ করে একদম সমান থাকবে) -->
-            <div class="relative w-full flex-1 min-h-[160px] bg-slate-100">
-              <iframe
-                title={`Map of ${pageTitle}`}
-                width="100%"
-                height="100%"
-                style="border:0;"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade"
-                src={googleMapUrl}
-                class="w-full h-full filter contrast-[1.02]"
-              ></iframe>
-            </div>
+                <!-- ডিটেইলস -->
+                <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
+                  
+                  <div class="space-y-1.5">
+                    <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                      <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70">
+                        Verified Property
+                      </span>
+                      <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        Diplomatic Zone
+                      </span>
+                    </div>
 
-          </div>
-        </aside>
+                    <div>
+                      <h3 class="font-serif font-black text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition truncate">
+                        <a href={hotelUrl}>{toTitleCase(hotelTitle)}</a>
+                      </h3>
+                      {shortLoc && (
+                        <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                          <svg aria-hidden="true" class="w-3 h-3 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          <span class="truncate">{shortLoc}</span>
+                        </p>
+                      )}
+                    </div>
 
+                    <!-- রেটিং -->
+                    {reviewCount > 0 ? (
+                      <div class="flex items-center gap-1.5 text-xs">
+                        <span class="text-amber-500 font-bold flex items-center gap-0.5">
+                          ★ {reviewScore}
+                        </span>
+                        <span class="text-slate-400 text-[11px]">
+                          ({reviewCount} reviews)
+                        </span>
+                      </div>
+                    ) : null}
+
+                    <!-- ৩টি প্রধান সুবিধা -->
+                    {topAmenities.length > 0 && (
+                      <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
+                        {topAmenities.map((item: string) => (
+                          <span class="flex items-center gap-1">
+                            <svg aria-hidden="true" class="w-2.5 h-2.5 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span class="truncate">{item}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <!-- প্রাইস ও বাটন বার -->
+                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    {price ? (
+                      <div>
+                        <span class="text-[9px] text-slate-400 block font-medium uppercase leading-none">From</span>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                          <span class="text-base sm:text-lg font-black text-[#0d3b23]">{price}</span>
+                          <span class="text-[10px] text-slate-500">/ night</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span class="text-xs font-bold text-slate-700">Check Rates</span>
+                    )}
+
+                    <a 
+                      href={hotelUrl} 
+                      class="inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs"
+                    >
+                      <span>View Details</span>
+                      <span class="text-xs">→</span>
+                    </a>
+                  </div>
+
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <!-- কোনো হোটেল না মিললে ফিল্টার স্টেট -->
+      <div id="filterEmptyState" class="hidden text-center py-10 text-slate-500 text-xs bg-white rounded-2xl border border-dashed border-slate-300">
+        No hotels match your search.
       </div>
     </section>
 
