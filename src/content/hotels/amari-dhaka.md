@@ -21,7 +21,7 @@ gallery:
   - photo: https://media.gulshanhotels.com/deluxe_twin.webp
     alt: deluxe twin bed room
 popular: true
-sponsored: false
+sponsored: true
 spotlight_desc: ''
 about_notice: ''
 price: $150
