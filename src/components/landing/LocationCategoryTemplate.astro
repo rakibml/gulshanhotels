@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (Gatlinburg Style + 2-Column Hotel Grid)
+// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Google-Safe & Zero Fake Data)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,7 +11,7 @@ interface Props {
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
 
-// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL
+// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL (শুধুমাত্র সাইটের নিজস্ব ডোমেন)
 const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
 
 const rawSlug = entry?.slug || entry?.id || "";
@@ -25,11 +25,14 @@ const cleanSlug = rawSlug
 
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
-// ২. মেটাডাটা
+// ২. মেটাডাটা (১০০% CMS ড্রাইভেন - কোনো ফেক ডাটা নেই)
 const pageTitle = (data.title || "").trim();
-const locationSubtitle = data.location_subtitle || "";
+const locationSubtitle = (data.location_subtitle || "").trim();
 const description = (data.description || data.seo_description || "").trim();
 const heroImage = data.hero_image || data.image || "";
+
+// CMS থেকে এসইও টাইটেল (যদি দেওয়া থাকে, নইলে টাইটেল অনুযায়ী হবে)
+const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
 
 // ৩. সব হোটেল ডাটা লোডার
 let allHotels: any[] = [];
@@ -51,7 +54,7 @@ try {
   } catch (e) {}
 }
 
-// ৪. রিভিউ ডাটা লোডার
+// ৪. শুধুমাত্র রিয়েল ও অ্যাপ্রুভড রিভিউ লোডার (কোনো ফেক রিভিউ নেই)
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
@@ -143,19 +146,20 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. স্মার্ট টাইটেল ফরম্যাটার
+// ৭. CMS হেডার কনফিগারেশন (কোনো জোরপূর্বক হার্ডকোডেড শব্দ নেই)
 const cleanTitleName = pageTitle
   .replace(/^hotels?\s+in\s+/i, '')
   .replace(/^hotels?\s+near\s+/i, '')
   .trim();
 
-const hotelsTag = data.hotels_tag || "CURATED STAYS";
-const hotelsTitle = data.hotels_title || (cleanTitleName ? `Verified Stays in ${toTitleCase(cleanTitleName)}` : `Top Accommodations`);
+const hotelsTag = (data.hotels_tag || "").trim();
+const hotelsTitle = (data.hotels_title || (cleanTitleName ? `Accommodations in ${toTitleCase(cleanTitleName)}` : `Available Accommodations`)).trim();
 
+// কেবলমাত্র প্রশ্ন ও উত্তর দুটোই CMS-এ লেখা থাকলে FAQ আসবে
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৮. গুগল কমপ্লায়েন্ট JSON-LD স্কিমা
+// ৮. ১০০% গুগল পলিসি কমপ্লায়েন্ট স্কিমা (কোনো ভুয়া AggregateRating নেই)
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -205,7 +209,7 @@ const masterSchemaJson = JSON.stringify({
 ---
 
 <Layout 
-  title={`${toTitleCase(pageTitle)} — Verified Hotels & Area Guide`} 
+  title={metaTitle} 
   description={description} 
   image={heroImage}
   canonical={canonicalUrl}
@@ -214,7 +218,7 @@ const masterSchemaJson = JSON.stringify({
 
   <div class="w-full bg-[#fcfbfa] text-slate-800 font-sans pb-24">
 
-    <!-- ================= ১. সিনেমাটিক ব্যানার (স্থায়ী লকড অংশ) ================= -->
+    <!-- ================= ১. সিনেমাটিক ব্যানার (লকড অংশ) ================= -->
     <header class="relative w-full aspect-[21/9] min-h-[300px] sm:min-h-[420px] max-h-[520px] bg-slate-950 overflow-hidden">
       {heroImage ? (
         <img
@@ -244,7 +248,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </header>
 
-    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 + আর্টিকেল (স্থায়ী লকড অংশ) ================= -->
+    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 + আর্টিকেল (লকড অংশ) ================= -->
     <section class="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 text-left">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
@@ -281,18 +285,20 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড (ম্যাপ ছাড়া) ================= -->
+    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
       
       <!-- হেডার ও সার্চবার -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 mb-8">
         <div>
-          <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23] block">— {hotelsTag}</span>
+          {hotelsTag && (
+            <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23] block mb-0.5">— {hotelsTag}</span>
+          )}
           <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">
             {hotelsTitle}
           </h2>
           <p class="text-xs text-slate-500 font-medium mt-1">
-            Showing {displayHotels.length} verified {displayHotels.length === 1 ? 'property' : 'properties'} in {toTitleCase(cleanTitleName)}
+            Showing {displayHotels.length} verified {displayHotels.length === 1 ? 'property' : 'properties'}
           </p>
         </div>
 
@@ -312,7 +318,7 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- 🔥 পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড 🔥 -->
+      <!-- পাশাপাশি ২টি করে কার্ডের গ্রিড (কোনো ফেক ট্যাগ ছাড়া) -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -330,6 +336,7 @@ const masterSchemaJson = JSON.stringify({
             const price = formatPriceDisplay(hd.price);
             const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
             
+            // রিয়েল সুবিধা (CMS থেকে)
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 3).map((a: any) => {
               if (typeof a === 'string') return a.trim();
@@ -337,6 +344,7 @@ const masterSchemaJson = JSON.stringify({
               return '';
             }).filter(Boolean);
 
+            // রিয়েল রিভিউ ডেটা ফিল্টার
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
             const approvedSet = new Set<any>([
@@ -353,7 +361,10 @@ const masterSchemaJson = JSON.stringify({
             const reviewCount = validReviews.length;
             const reviewScore = reviewCount > 0
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
-              : (hd.rating ? Number(hd.rating).toFixed(1) : null);
+              : null;
+
+            // আসল ব্যাজ (শুধুমাত্র CMS-এ থাকলে আসবে, কোনো ফেক ট্যাগ নেই)
+            const realBadge = hd.badge || hd.tag || (hd.verified === true ? "Verified Stay" : "");
 
             return (
               <div 
@@ -361,7 +372,7 @@ const masterSchemaJson = JSON.stringify({
                 data-name={hotelTitle.toLowerCase()}
                 data-location={shortLoc.toLowerCase()}
               >
-                <!-- ইমেজ -->
+                <!-- ইমেজ ও আসল স্টার -->
                 <div class="w-full sm:w-48 md:w-52 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
                   {cardImage && (
                     <a href={hotelUrl} class="block w-full h-full">
@@ -389,14 +400,13 @@ const masterSchemaJson = JSON.stringify({
                 <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
                   
                   <div class="space-y-1.5">
-                    <div class="flex items-center gap-1.5 text-[9px] font-bold">
-                      <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70">
-                        Verified Property
-                      </span>
-                      <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                        Diplomatic Zone
-                      </span>
-                    </div>
+                    {realBadge && (
+                      <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70">
+                          {realBadge}
+                        </span>
+                      </div>
+                    )}
 
                     <div>
                       <h3 class="font-serif font-black text-base sm:text-lg text-slate-900 group-hover:text-[#0d3b23] transition truncate">
@@ -413,19 +423,19 @@ const masterSchemaJson = JSON.stringify({
                       )}
                     </div>
 
-                    <!-- রেটিং -->
-                    {reviewCount > 0 ? (
+                    <!-- রিয়েল রিভিউ রেটিং (রিভিউ না থাকলে কোনো ফেক রেটিং দেখানো হবে না) -->
+                    {reviewCount > 0 && reviewScore && (
                       <div class="flex items-center gap-1.5 text-xs">
                         <span class="text-amber-500 font-bold flex items-center gap-0.5">
                           ★ {reviewScore}
                         </span>
                         <span class="text-slate-400 text-[11px]">
-                          ({reviewCount} reviews)
+                          ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                         </span>
                       </div>
-                    ) : null}
+                    )}
 
-                    <!-- ৩টি প্রধান সুবিধা -->
+                    <!-- আসল সুবিধাসমূহ -->
                     {topAmenities.length > 0 && (
                       <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
                         {topAmenities.map((item: string) => (
@@ -468,13 +478,12 @@ const masterSchemaJson = JSON.stringify({
         )}
       </div>
 
-      <!-- কোনো হোটেল না মিললে ফিল্টার স্টেট -->
       <div id="filterEmptyState" class="hidden text-center py-10 text-slate-500 text-xs bg-white rounded-2xl border border-dashed border-slate-300">
         No hotels match your search.
       </div>
     </section>
 
-    <!-- ================= ৪. FAQ সেকশন ================= -->
+    <!-- ================= ৪. FAQ সেকশন (শুধুমাত্র CMS-এ প্রশ্ন থাকলে দেখাবে) ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left border-t border-slate-200 mt-16">
         <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-8">
