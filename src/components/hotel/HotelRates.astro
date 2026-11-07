@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelRates.astro (Lightweight, Clean & Modern Rates Card)
+// src/components/hotel/HotelRates.astro (Ultra-Smooth, Zero-Lag Native Date Picker & Agoda Sync)
 interface Props {
   hotel: any;
 }
@@ -132,7 +132,7 @@ const presetSvgs: Record<string, string> = {
 <!-- ================= SLEEK & AIRY RATES CARD ================= -->
 <div id="rates-card" class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-6 text-left space-y-4">
 
-  <!-- ১. মেইন প্রাইস হেডার (একদম হালকা ও প্রিমিয়াম) -->
+  <!-- ১. প্রাইস হেডার -->
   <div class="flex items-start justify-between border-b border-slate-100 pb-4">
     <div>
       <span id="agodaLiveIndicator" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-0.5">
@@ -140,7 +140,7 @@ const presetSvgs: Record<string, string> = {
       </span>
       <div class="flex items-baseline gap-2">
         <span id="agodaOriginalPrice" class="hidden text-xs text-slate-400 line-through font-semibold"></span>
-        <span id="cardStartingPriceDisplay" class="hotel-live-price text-2xl sm:text-3xl font-black text-[#0d3b23] leading-none">
+        <span id="cardStartingPriceDisplay" class="hotel-live-price text-2xl sm:text-3xl font-black text-[#0d3b23] leading-none transition-opacity duration-200">
           {displayStartingPrice}
         </span>
         <span id="cardPerNightText" class="text-xs text-slate-500 font-medium">/ night</span>
@@ -157,23 +157,35 @@ const presetSvgs: Record<string, string> = {
     </div>
   </div>
 
-  <!-- ২. স্লিম ডেট সিলেক্টর (TripAdvisor Compact Pill) -->
+  <!-- ২. বাটার-স্মুথ ডেট সিলেক্টর (ল্যাগ-ফ্রি showPicker আর্কিটেকচার) -->
   <div class="space-y-1.5">
-    <div class="relative bg-slate-50 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl overflow-hidden transition-colors shadow-2xs">
+    <div class="relative bg-slate-50 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl overflow-hidden transition-all shadow-2xs">
       <div class="grid grid-cols-2 divide-x divide-slate-200">
         
-        <!-- Check-in -->
-        <div class="relative p-2.5 px-3 hover:bg-slate-100/70 transition cursor-pointer">
-          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400">Check-in</span>
-          <span id="checkInDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5">Loading...</span>
-          <input type="date" id="checkInInput" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" aria-label="Check-in date" />
+        <!-- Check-in Box (ক্লিক করলেই তাত্ক্ষণিক ক্যালেন্ডার ওপেন হবে) -->
+        <div id="checkInBox" class="relative p-2.5 px-3 hover:bg-emerald-50/40 active:bg-emerald-100/40 transition cursor-pointer select-none">
+          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400 pointer-events-none">Check-in</span>
+          <span id="checkInDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5 pointer-events-none">Loading...</span>
+          <input 
+            type="date" 
+            id="checkInInput" 
+            class="absolute inset-0 w-full h-full opacity-0 pointer-events-none" 
+            tabindex="-1"
+            aria-label="Check-in date" 
+          />
         </div>
 
-        <!-- Check-out -->
-        <div class="relative p-2.5 px-3 hover:bg-slate-100/70 transition cursor-pointer">
-          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400">Check-out</span>
-          <span id="checkOutDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5">Loading...</span>
-          <input type="date" id="checkOutInput" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" aria-label="Check-out date" />
+        <!-- Check-out Box -->
+        <div id="checkOutBox" class="relative p-2.5 px-3 hover:bg-emerald-50/40 active:bg-emerald-100/40 transition cursor-pointer select-none">
+          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400 pointer-events-none">Check-out</span>
+          <span id="checkOutDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5 pointer-events-none">Loading...</span>
+          <input 
+            type="date" 
+            id="checkOutInput" 
+            class="absolute inset-0 w-full h-full opacity-0 pointer-events-none" 
+            tabindex="-1"
+            aria-label="Check-out date" 
+          />
         </div>
 
       </div>
@@ -186,7 +198,7 @@ const presetSvgs: Record<string, string> = {
     </div>
   </div>
 
-  <!-- ৩. মেইন লাইভ বুকিং বাটন (One-Click Agoda CTA) -->
+  <!-- ৩. মেইন লাইভ বুকিং বাটন -->
   <div>
     <a
       id="agodaRowBtn"
@@ -202,14 +214,13 @@ const presetSvgs: Record<string, string> = {
     </a>
   </div>
 
-  <!-- ৪. সেকেন্ডারি বুকিং চ্যানেল ও ডিরেক্ট যোগাযোগ (যদি থাকে) -->
+  <!-- ৪. সেকেন্ডারি বুকিং চ্যানেল ও ডিরেক্ট যোগাযোগ -->
   {(channels.length > 0 || hasContact) && (
     <div class="pt-3 border-t border-slate-100 space-y-2">
       <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block text-center">
         Other Options
       </span>
 
-      <!-- কাস্টম পার্টনার চ্যানেলসমূহ -->
       <div
         id="aboutRatesTableContainer"
         data-hotel-title={hotelTitle}
@@ -241,7 +252,6 @@ const presetSvgs: Record<string, string> = {
         })}
       </div>
 
-      <!-- ডিরেক্ট কল ও হোয়াটসঅ্যাপ (স্লিম বাটন) -->
       {hasContact && (
         <div class={`grid gap-1.5 pt-1 ${cleanPhone && cleanWhatsapp ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {cleanPhone && (
@@ -267,23 +277,27 @@ const presetSvgs: Record<string, string> = {
     </div>
   )}
 
-  <!-- স্বচ্ছ গুগল এফিলিয়েট ডিসক্লোজার -->
   <p class="text-center text-[9px] leading-tight text-slate-400">
     Partner rates sync live. We may earn a commission at no extra cost to you.
   </p>
 
 </div>
 
-<!-- ================= CLIENT SCRIPT ================= -->
+<!-- ================= 100% LAG-FREE CLIENT SCRIPT ================= -->
 <script>
   let ratesAbortCtrl: AbortController | null = null;
+  // দ্রুততম রেসপন্সের জন্য ইন-মেমোরি ক্যাশ
+  const ratesMemoryCache = new Map<string, any>();
 
-  function getDhakaDate(offsetDays = 0) {
+  function getDhakaDateString(offsetDays = 0): string {
     const now = new Date();
     const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
     const dhakaTime = new Date(utcMillis + (6 * 3600000));
     dhakaTime.setDate(dhakaTime.getDate() + offsetDays);
-    return dhakaTime.toISOString().split("T")[0];
+    const y = dhakaTime.getFullYear();
+    const m = String(dhakaTime.getMonth() + 1).padStart(2, '0');
+    const d = String(dhakaTime.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   function formatDisplayDate(dateStr: string): string {
@@ -295,6 +309,22 @@ const presetSvgs: Record<string, string> = {
     return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
   }
 
+  function calculateNights(inStr: string, outStr: string): number {
+    const [y1, m1, d1] = inStr.split('-').map(Number);
+    const [y2, m2, d2] = outStr.split('-').map(Number);
+    const date1 = Date.UTC(y1, m1 - 1, d1);
+    const date2 = Date.UTC(y2, m2 - 1, d2);
+    const diff = Math.round((date2 - date1) / 86400000);
+    return diff > 0 ? diff : 1;
+  }
+
+  function addDays(dateStr: string, days: number): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d + days);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
   async function initHotelRatesCard() {
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
@@ -303,46 +333,100 @@ const presetSvgs: Record<string, string> = {
     const agodaDiscountEl = document.getElementById('agodaDiscountBadge');
     const agodaBtnEl = document.getElementById('agodaRowBtn') as HTMLAnchorElement | null;
 
+    const checkInBox = document.getElementById('checkInBox');
+    const checkOutBox = document.getElementById('checkOutBox');
     const checkInInput = document.getElementById('checkInInput') as HTMLInputElement | null;
     const checkOutInput = document.getElementById('checkOutInput') as HTMLInputElement | null;
     const checkInDisplay = document.getElementById('checkInDisplay');
     const checkOutDisplay = document.getElementById('checkOutDisplay');
     const nightsBadge = document.getElementById('stayNightsBadge');
 
-    const hotelSlug = (ratesContainer?.getAttribute('data-hotel-slug') || '').trim();
-    const hotelName = (ratesContainer?.getAttribute('data-hotel-title') || '').trim();
-    const agodaId = (ratesContainer?.getAttribute('data-agoda-id') || '').trim();
+    if (!ratesContainer || !checkInInput || !checkOutInput) return;
+
+    const hotelSlug = (ratesContainer.getAttribute('data-hotel-slug') || '').trim();
+    const hotelName = (ratesContainer.getAttribute('data-hotel-title') || '').trim();
+    const agodaId = (ratesContainer.getAttribute('data-agoda-id') || '').trim();
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
 
-    const today = getDhakaDate(0);
-    const tomorrow = getDhakaDate(1);
+    const today = getDhakaDateString(0);
+    const tomorrow = getDhakaDateString(1);
 
-    if (checkInInput && !checkInInput.value) {
+    if (!checkInInput.value) {
       checkInInput.value = today;
       checkInInput.min = today;
     }
-    if (checkOutInput && !checkOutInput.value) {
+    if (!checkOutInput.value) {
       checkOutInput.value = tomorrow;
       checkOutInput.min = tomorrow;
     }
 
-    function updateLabels() {
-      if (checkInInput && checkInDisplay) checkInDisplay.textContent = formatDisplayDate(checkInInput.value);
-      if (checkOutInput && checkOutDisplay) checkOutDisplay.textContent = formatDisplayDate(checkOutInput.value);
-      if (checkInInput && checkOutInput && nightsBadge) {
-        const d1 = new Date(checkInInput.value);
-        const d2 = new Date(checkOutInput.value);
-        const diffDays = Math.ceil((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
-        if (diffDays > 0) nightsBadge.textContent = `${diffDays} ${diffDays === 1 ? 'night' : 'nights'}`;
+    function updateLabelsFast() {
+      if (checkInDisplay && checkInInput) checkInDisplay.textContent = formatDisplayDate(checkInInput.value);
+      if (checkOutDisplay && checkOutInput) checkOutDisplay.textContent = formatDisplayDate(checkOutInput.value);
+      if (nightsBadge && checkInInput && checkOutInput) {
+        const nights = calculateNights(checkInInput.value, checkOutInput.value);
+        nightsBadge.textContent = `${nights} ${nights === 1 ? 'night' : 'nights'}`;
+      }
+    }
+
+    function applyRatesToUI(rates: any) {
+      const livePriceStr = rates?.startingPrice ? String(rates.startingPrice) : null;
+      if (startingPriceEl) {
+        if (livePriceStr) startingPriceEl.textContent = livePriceStr;
+        startingPriceEl.style.opacity = '1';
+      }
+
+      if (agodaOriginalPriceEl) {
+        if (rates?.originalPrice) {
+          agodaOriginalPriceEl.textContent = rates.originalPrice;
+          agodaOriginalPriceEl.classList.remove('hidden');
+        } else {
+          agodaOriginalPriceEl.classList.add('hidden');
+        }
+      }
+
+      if (agodaDiscountEl) {
+        if (rates?.discountText) {
+          agodaDiscountEl.textContent = rates.discountText;
+          agodaDiscountEl.classList.remove('hidden');
+        } else {
+          agodaDiscountEl.classList.add('hidden');
+        }
+      }
+
+      if (liveIndicatorEl) {
+        liveIndicatorEl.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-emerald-700 font-bold">Live Agoda Price</span>
+        `;
+      }
+
+      const agodaDeal = Array.isArray(rates?.channelsList) ? rates.channelsList[0] : null;
+      if (agodaBtnEl && agodaDeal?.button_url) {
+        agodaBtnEl.href = agodaDeal.button_url;
+      }
+
+      if (livePriceStr) {
+        document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
+          el.textContent = livePriceStr;
+        });
       }
     }
 
     async function fetchLiveRates(checkIn: string, checkOut: string) {
+      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}`;
+      
+      // মেমোরিতে থাকলে ০ মিলিসেকেন্ডে ইনস্ট্যান্ট লোড হবে!
+      if (ratesMemoryCache.has(cacheKey)) {
+        applyRatesToUI(ratesMemoryCache.get(cacheKey));
+        return;
+      }
+
       ratesAbortCtrl?.abort();
       ratesAbortCtrl = new AbortController();
       const { signal } = ratesAbortCtrl;
 
-      if (startingPriceEl) startingPriceEl.style.opacity = '0.35';
+      if (startingPriceEl) startingPriceEl.style.opacity = '0.4';
 
       const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
       const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
@@ -352,50 +436,8 @@ const presetSvgs: Record<string, string> = {
         if (res.ok) {
           const json = await res.json();
           if (json && json.success && json.rates) {
-            const rates = json.rates;
-            const livePriceStr = rates.startingPrice ? String(rates.startingPrice) : null;
-
-            if (startingPriceEl && livePriceStr) {
-              startingPriceEl.textContent = livePriceStr;
-              startingPriceEl.style.opacity = '1';
-            }
-
-            if (agodaOriginalPriceEl) {
-              if (rates.originalPrice) {
-                agodaOriginalPriceEl.textContent = rates.originalPrice;
-                agodaOriginalPriceEl.classList.remove('hidden');
-              } else {
-                agodaOriginalPriceEl.classList.add('hidden');
-              }
-            }
-
-            if (agodaDiscountEl) {
-              if (rates.discountText) {
-                agodaDiscountEl.textContent = rates.discountText;
-                agodaDiscountEl.classList.remove('hidden');
-              } else {
-                agodaDiscountEl.classList.add('hidden');
-              }
-            }
-
-            if (liveIndicatorEl) {
-              liveIndicatorEl.innerHTML = `
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-emerald-700 font-bold">Live Agoda Price</span>
-              `;
-            }
-
-            const agodaDeal = Array.isArray(rates.channelsList) ? rates.channelsList[0] : null;
-            if (agodaBtnEl && agodaDeal?.button_url) {
-              agodaBtnEl.href = agodaDeal.button_url;
-            }
-
-            // পেজের অন্যান্য লাইভ প্রাইস আপডেট
-            if (livePriceStr) {
-              document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
-                el.textContent = livePriceStr;
-              });
-            }
+            ratesMemoryCache.set(cacheKey, json.rates);
+            applyRatesToUI(json.rates);
           }
         }
       } catch (e: any) {
@@ -403,30 +445,63 @@ const presetSvgs: Record<string, string> = {
       }
     }
 
-    updateLabels();
-    fetchLiveRates(checkInInput?.value || today, checkOutInput?.value || tomorrow);
+    // প্রথম লোড
+    updateLabelsFast();
+    fetchLiveRates(checkInInput.value, checkOutInput.value);
 
+    // 🔥 showPicker() ইনস্ট্যান্ট ওপেন (ক্যালেন্ডার কোনো ল্যাগ ছাড়া সাথে সাথে খুলবে) 🔥
+    if (checkInBox && !checkInBox.dataset.bound) {
+      checkInBox.dataset.bound = 'true';
+      checkInBox.addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          if ('showPicker' in HTMLInputElement.prototype) {
+            checkInInput.showPicker();
+          } else {
+            checkInInput.focus();
+          }
+        } catch {
+          checkInInput.focus();
+        }
+      });
+    }
+
+    if (checkOutBox && !checkOutBox.dataset.bound) {
+      checkOutBox.dataset.bound = 'true';
+      checkOutBox.addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          if ('showPicker' in HTMLInputElement.prototype) {
+            checkOutInput.showPicker();
+          } else {
+            checkOutInput.focus();
+          }
+        } catch {
+          checkOutInput.focus();
+        }
+      });
+    }
+
+    // তারিখ বদলানোর ইভেন্ট হ্যান্ডলার
     if (checkInInput && !checkInInput.dataset.bound) {
       checkInInput.dataset.bound = 'true';
       checkInInput.addEventListener('change', () => {
         const newIn = checkInInput.value;
-        if (checkOutInput) {
-          const nextDay = new Date(newIn);
-          nextDay.setDate(nextDay.getDate() + 1);
-          const nextDayStr = nextDay.toISOString().split("T")[0];
-          checkOutInput.min = nextDayStr;
-          if (checkOutInput.value <= newIn) checkOutInput.value = nextDayStr;
+        const nextDayStr = addDays(newIn, 1);
+        checkOutInput.min = nextDayStr;
+        if (checkOutInput.value <= newIn) {
+          checkOutInput.value = nextDayStr;
         }
-        updateLabels();
-        fetchLiveRates(checkInInput.value, checkOutInput?.value || tomorrow);
+        updateLabelsFast();
+        fetchLiveRates(checkInInput.value, checkOutInput.value);
       });
     }
 
     if (checkOutInput && !checkOutInput.dataset.bound) {
       checkOutInput.dataset.bound = 'true';
       checkOutInput.addEventListener('change', () => {
-        updateLabels();
-        fetchLiveRates(checkInInput?.value || today, checkOutInput.value);
+        updateLabelsFast();
+        fetchLiveRates(checkInInput.value, checkOutInput.value);
       });
     }
   }
