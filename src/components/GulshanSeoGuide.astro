@@ -1,10 +1,11 @@
 ---
 // src/components/GulshanFaq.astro
+// 2-column FAQ grid. Page text and JSON-LD schema come from the same `faqs` list, so they always match.
 
 interface Props {
   title?: string;
   subtitle?: string;
-  renderSchema?: boolean;
+  renderSchema?: boolean; // set false if the page already has FAQ schema
 }
 
 const {
@@ -63,3 +64,84 @@ const faqSchema = {
 
 const jsonLdString = JSON.stringify(faqSchema).replace(/</g, "\\u003c");
 ---
+
+<!-- FAQ SCHEMA (matches the visible text above) -->
+{renderSchema && <script type="application/ld+json" set:html={jsonLdString} />}
+
+<section id="faq" class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-900 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16 text-left">
+  <div class="space-y-8">
+
+    <!-- Section Header -->
+    <div class="space-y-2 text-left">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 border border-emerald-200/80">
+        <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span>Traveler FAQs</span>
+      </div>
+
+      <h2 class="font-sans text-2xl sm:text-3xl lg:text-[32px] font-black text-[#002b11] tracking-tight leading-tight">
+        {title}
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
+        {subtitle}
+      </p>
+    </div>
+
+    <!-- 2-COLUMN ACCORDION GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-10 lg:gap-x-12 text-left items-start">
+
+      <!-- LEFT COLUMN -->
+      <div class="divide-y divide-slate-200 border-t border-b lg:border-b-0 border-slate-200">
+        {leftColumnFaqs.map((faq, index) => (
+          <details
+            class="group py-4 sm:py-5 transition-colors cursor-pointer"
+            open={index === 0}
+          >
+            <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-900 transition-colors select-none">
+              <span class="pr-4 font-sans font-bold tracking-tight leading-snug">{faq.question}</span>
+
+              <span class="w-6 h-6 shrink-0 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 group-hover:bg-[#0d3b23] group-hover:text-white transition-all text-xs font-bold" aria-hidden="true">
+                <span class="group-open:hidden">+</span>
+                <span class="hidden group-open:inline font-bold">−</span>
+              </span>
+            </summary>
+
+            <div class="pt-2.5 pr-6 text-xs sm:text-[13px] text-slate-600 font-normal leading-relaxed">
+              <p>{faq.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="divide-y divide-slate-200 border-t border-slate-200">
+        {rightColumnFaqs.map((faq) => (
+          <details class="group py-4 sm:py-5 transition-colors cursor-pointer">
+            <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-emerald-900 transition-colors select-none">
+              <span class="pr-4 font-sans font-bold tracking-tight leading-snug">{faq.question}</span>
+
+              <span class="w-6 h-6 shrink-0 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 group-hover:bg-[#0d3b23] group-hover:text-white transition-all text-xs font-bold" aria-hidden="true">
+                <span class="group-open:hidden">+</span>
+                <span class="hidden group-open:inline font-bold">−</span>
+              </span>
+            </summary>
+
+            <div class="pt-2.5 pr-6 text-xs sm:text-[13px] text-slate-600 font-normal leading-relaxed">
+              <p>{faq.answer}</p>
+            </div>
+          </details>
+        ))}
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- Hide default marker in Safari/Chrome -->
+<style>
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
