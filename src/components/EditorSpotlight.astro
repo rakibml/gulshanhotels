@@ -1,11 +1,12 @@
 ---
-// src/components/EditorSpotlight.astro (100% WCAG 2.1 AA Contrast, Zero Fake Data & Core Web Vitals Ready)
+// src/components/EditorSpotlight.astro
+// Shows one featured hotel. The "Sponsored" label appears ONLY if the hotel has `sponsored: true`.
 import { getCollection } from 'astro:content';
 
 const isProd = import.meta.env.PROD;
 let allHotels: any[] = [];
 
-// ১. ড্রাফট ফিল্টারসহ হোটেল ডাটা লোডার (গুগল ৪০৪ ক্রল এরর প্রতিরোধ)
+// 1. Load hotels (skip drafts in production)
 try {
   const collection = await getCollection('hotels', ({ data }) => {
     return isProd ? data?.draft !== true : true;
@@ -31,15 +32,16 @@ if (allHotels.length === 0) {
   }
 }
 
-// ২. স্পটলাইট হোটেল নির্বাচন
-const spotlightHotel = allHotels.find(h => 
-  h.data?.sponsored === true || 
-  h.data?.spotlight === true || 
-  h.data?.is_featured === true
-);
+// 2. Pick the spotlight hotel. A paid (sponsored) hotel comes first.
+const spotlightHotel =
+  allHotels.find(h => h.data?.sponsored === true) ||
+  allHotels.find(h => h.data?.spotlight === true || h.data?.is_featured === true);
 
-const hasSponsor = Boolean(spotlightHotel);
 const hData = spotlightHotel?.data || {};
+
+// Only true when the hotel is really marked as paid
+const isSponsored = hData.sponsored === true;
+
 const hotelTitle = String(hData.title || hData.name || "").trim();
 
 const rawSlug = String(hData.slug || spotlightHotel?.slug || spotlightHotel?.id || "");
@@ -47,17 +49,16 @@ const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCa
 
 const hotelLocation = String(hData.locality || hData.location || hData.address || "Gulshan, Dhaka").trim();
 
-// কোনো ফেক প্রাইজ নেই (সৎ ডাটা ইঞ্জিন)
+// Price: only show if the data has one
 const rawPrice = hData.price || hData.starting_price;
-const hotelPrice = rawPrice 
+const hotelPrice = rawPrice
   ? (String(rawPrice).startsWith('$') || String(rawPrice).startsWith('৳') ? String(rawPrice) : `$${String(rawPrice).trim()}`)
-  : "Check rates";
+  : "";
 
-// ৩. ইমেজ অবজেক্ট বাগ ফিক্সার (অবজেক্ট হলেও লিংক সঠিকভাবে বের করবে)
+// Image
 const firstGallery = Array.isArray(hData.gallery) ? hData.gallery[0] : null;
 const rawImage = hData.image || (firstGallery ? (typeof firstGallery === 'object' ? firstGallery.photo || firstGallery.image : firstGallery) : "");
 
-// ক্লাউডফ্লেয়ার থাম্বনেইল অপ্টিমাইজার
 function getOptimizedSpotlightImage(url: string) {
   if (!url) return "/images/hotel-placeholder.webp";
   const cleanUrl = url.trim();
@@ -74,40 +75,46 @@ function getOptimizedSpotlightImage(url: string) {
 
 const hotelImage = getOptimizedSpotlightImage(rawImage);
 
-const spotlightDesc = hData.spotlight_desc || hData.seo_description || hData.description || "Experience executive hospitality, refined suites, and world-class dining in the heart of Dhaka's diplomatic zone.";
+// Description: use only what the hotel's own data says. No invented default text.
+const spotlightDesc = String(hData.spotlight_desc || hData.seo_description || hData.description || "").trim();
 
+// Amenities: skip anything without a real name
 const rawAmenities = Array.isArray(hData.amenities) ? hData.amenities : [];
-const topFeatures = rawAmenities.slice(0, 3).map((a: any) => typeof a === 'string' ? a : (a?.name || 'Amenity'));
+const topFeatures = rawAmenities
+  .map((a: any) => (typeof a === 'string' ? a : a?.name))
+  .filter((name: any) => typeof name === 'string' && name.trim().length > 0)
+  .slice(0, 3);
+
+// Do not render if there is no title or no valid link
+const canRender = Boolean(spotlightHotel && hotelTitle && hotelSlug);
 ---
 
-{hasSponsor && hotelTitle && (
-  <section 
-    id="spotlight" 
+{canRender && (
+  <section
+    id="spotlight"
     class="w-full bg-white py-8 sm:py-10 text-slate-900 border-b border-slate-200"
     style="content-visibility: auto; contain-intrinsic-size: auto 340px;"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
-      
-      <!-- SPONSORED / SPOTLIGHT CARD CONTAINER -->
+
       <div class="bg-slate-50/90 rounded-3xl border border-slate-200/90 p-4 sm:p-6 lg:p-8 shadow-xs">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center text-left">
-          
-          <!-- 1. LEFT: HOTEL PHOTO (WITH DIMENSIONS & CLOUDFLARE CDN) -->
+
+          <!-- LEFT: PHOTO -->
           <div class="lg:col-span-5 relative group">
             <div class="relative w-full h-[230px] sm:h-[270px] lg:h-[300px] rounded-2xl overflow-hidden bg-slate-900 shadow-sm border border-slate-200">
-              <a href={`/${hotelSlug}/`} class="block w-full h-full" aria-label={`View ${hotelTitle} spotlight details`}>
-                <img 
-                  src={hotelImage} 
-                  alt={`${hotelTitle} Featured Spotlight`} 
-                  loading="lazy" 
-                  decoding="async" 
-                  width="600" 
-                  height="380" 
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+              <a href={`/${hotelSlug}/`} class="block w-full h-full" aria-label={`View details of ${hotelTitle}`}>
+                <img
+                  src={hotelImage}
+                  alt={`${hotelTitle} in ${hotelLocation}`}
+                  loading="lazy"
+                  decoding="async"
+                  width="600"
+                  height="380"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 />
               </a>
-              
-              <!-- Location Tag -->
+
               <div class="absolute bottom-3 left-3 z-10">
                 <span class="text-white text-[11px] font-bold bg-slate-950/85 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-1.5 shadow-sm">
                   <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-400 shrink-0" viewBox="0 0 24 24">
@@ -119,40 +126,37 @@ const topFeatures = rawAmenities.slice(0, 3).map((a: any) => typeof a === 'strin
             </div>
           </div>
 
-          <!-- 2. RIGHT: SPONSOR CONTENT DETAILS -->
+          <!-- RIGHT: DETAILS -->
           <div class="lg:col-span-7 space-y-3.5">
-            
+
             <div class="space-y-1.5">
-              <!-- Official Sponsored Badge (WCAG 4.5:1 Contrast Compliant) -->
+              <!-- Label: "Sponsored" only for paid hotels, otherwise "Featured" -->
               <div class="flex items-center gap-2">
                 <span class="bg-[#0d3b23] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-xs">
-                  <svg aria-hidden="true" class="w-2.5 h-2.5 fill-amber-400 shrink-0" viewBox="0 0 24 24">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                  </svg>
-                  <span>Featured Partner</span>
+                  <span>{isSponsored ? 'Sponsored' : 'Featured'}</span>
                 </span>
-                <!-- ফিক্সড কালার কনট্রাস্ট (WCAG AA 5.8:1 অনুপাত) -->
-                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600">Sponsored Spotlight</span>
+                {isSponsored && (
+                  <span class="text-[11px] font-bold tracking-wider text-slate-600">This is a paid placement</span>
+                )}
               </div>
-              
-              <!-- Dynamic Hotel Title (Semantic H2) -->
+
               <h2 class="font-sans text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
                 <a href={`/${hotelSlug}/`} class="hover:text-emerald-800 transition-colors">
                   {hotelTitle}
                 </a>
               </h2>
-              
+
               <p class="text-xs text-slate-600 font-semibold flex items-center gap-1">
                 <span>{hotelLocation}</span>
               </p>
             </div>
 
-            <!-- Dynamic Description -->
-            <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2">
-              {spotlightDesc}
-            </p>
+            {spotlightDesc && (
+              <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2">
+                {spotlightDesc}
+              </p>
+            )}
 
-            <!-- Dynamic Feature Chips -->
             {topFeatures.length > 0 && (
               <div class="flex flex-wrap gap-2 pt-0.5 text-xs font-bold text-slate-700">
                 {topFeatures.map((feat: string) => (
@@ -166,23 +170,24 @@ const topFeatures = rawAmenities.slice(0, 3).map((a: any) => typeof a === 'strin
               </div>
             )}
 
-            <!-- Price and Action Button (Descriptive Anchor Text) -->
             <div class="pt-3 border-t border-slate-200/90 flex items-center justify-between gap-4">
               <div>
-                {hotelPrice !== "Check rates" && (
-                  <span class="text-[11px] text-slate-600 font-medium block">Starting from</span>
+                {hotelPrice ? (
+                  <>
+                    <span class="text-[11px] text-slate-600 font-medium block">Approx. rate, check hotel for current price</span>
+                    <span class="text-xl sm:text-2xl font-black text-slate-900 leading-none">{hotelPrice} / night</span>
+                  </>
+                ) : (
+                  <span class="text-sm font-bold text-slate-700">Check the hotel for current rates</span>
                 )}
-                <span class="text-xl sm:text-2xl font-black text-slate-900 leading-none">
-                  {hotelPrice}{hotelPrice !== "Check rates" ? ' / night' : ''}
-                </span>
               </div>
 
-              <a 
-                href={`/${hotelSlug}/`} 
-                aria-label={`Explore ${hotelTitle} details, room rates and amenities`}
+              <a
+                href={`/${hotelSlug}/`}
+                aria-label={`View details of ${hotelTitle}`}
                 class="inline-flex items-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl transition-all duration-200 uppercase tracking-wider shrink-0 shadow-xs hover:scale-105 active:scale-95"
               >
-                <span>Explore Property</span>
+                <span>View Hotel</span>
                 <svg aria-hidden="true" class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                 </svg>
