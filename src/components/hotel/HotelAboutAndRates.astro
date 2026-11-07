@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelAboutAndRates.astro
-// Production-Ready: Robust Event Listeners, Resilient Body Fallback, Same-Currency Lowest Price, Secure SVGs & Disclosure
+// Production-Ready: Real-Time Agoda Sync, Universal Page Broadcaster & Google-Safe SEO
 import { render } from 'astro:content';
 
 interface Props {
@@ -16,6 +16,7 @@ const hotelCategory = String(data.category || "").trim();
 const hotelLocation = String(data.location || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+const agodaId = String(data.agoda_id || data.agodaId || "").trim();
 
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
@@ -40,7 +41,6 @@ if (hotel && typeof hotel === 'object') {
   }
 }
 
-// Fallback: render() ব্যর্থ হলেও যেন hotel.body বা description হারিয়ে না যায়
 const fallbackDescription = String(data.description || hotel?.body || "").trim();
 const hasDescription = Boolean(Content || fallbackDescription);
 
@@ -97,7 +97,6 @@ function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "",
   return safeUrl(url);
 }
 
-// SSR Safe SVG Sanitizer
 function cleanSvgSSR(svg: string): string {
   return String(svg || '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -106,7 +105,6 @@ function cleanSvgSSR(svg: string): string {
     .replace(/javascript:/gi, '');
 }
 
-// Normalize channels & filter broken links
 const channels = customChannels
   .map((item: any) => {
     const providerName = String(item?.provider_name || "Booking Partner");
@@ -128,7 +126,6 @@ const channels = customChannels
 
 const hasChannels = channels.length > 0;
 
-// Lowest price engine (same-currency only)
 let lowestNumericPrice = Infinity;
 const baseNum = extractNumericPrice(rawBasePrice);
 if (baseNum !== null && baseNum > 0) lowestNumericPrice = baseNum;
@@ -149,13 +146,13 @@ const displayStartingPrice =
 
 // ================= 4. PRESET ICONS =================
 const presetSvgs: Record<string, string> = {
-  agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight">agoda</div>`,
-  booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0">B.</div>`,
-  tripadvisor: `<div class="w-7 h-7 rounded-lg bg-[#00af87] text-white flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4.5-9a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm9 0a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg></div>`,
-  expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
-  whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white font-bold text-[10px] flex items-center justify-center shrink-0">WA</div>`,
-  phone: `<div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`,
-  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#0d3b23] flex items-center justify-center shrink-0"><svg aria-hidden="true" class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
+  agoda: `<div class="w-7 h-7 rounded-lg bg-[#1d3557] text-white font-bold text-[9px] flex items-center justify-center shrink-0 tracking-tight shadow-xs">agoda</div>`,
+  booking: `<div class="w-7 h-7 rounded-lg bg-[#003580] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">B.</div>`,
+  tripadvisor: `<div class="w-7 h-7 rounded-lg bg-[#00af87] text-white flex items-center justify-center shrink-0 shadow-xs"><svg aria-hidden="true" class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4.5-9a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm9 0a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg></div>`,
+  expedia: `<div class="w-7 h-7 rounded-lg bg-[#ffe600] flex items-center justify-center shrink-0 shadow-xs"><svg aria-hidden="true" class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`,
+  whatsapp: `<div class="w-7 h-7 rounded-lg bg-[#25D366] text-white font-bold text-[10px] flex items-center justify-center shrink-0 shadow-xs">WA</div>`,
+  phone: `<div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 shadow-xs"><svg aria-hidden="true" class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>`,
+  direct: `<div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#0d3b23] flex items-center justify-center shrink-0 shadow-xs"><svg aria-hidden="true" class="w-4 h-4 fill-[#0d3b23]" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm3 10H9v-1c0-1 2-1.9 3-1.9s3 .9 3 1.9v1z"/></svg></div>`,
 };
 ---
 
@@ -190,7 +187,6 @@ const presetSvgs: Record<string, string> = {
 
       {hasDescription && (
         <div class="border-t border-slate-100 pt-3 space-y-2">
-          <!-- Clean Progressive Overview Container -->
           <div id="overview-wrapper" class="relative">
             <div
               id="overview-text"
@@ -235,7 +231,7 @@ const presetSvgs: Record<string, string> = {
                 Room Rates &amp; Deals
               </h3>
               <p class="text-xs sm:text-sm text-emerald-100/90 font-medium mt-0.5">
-                Booking options &amp; partner offers
+                Real-time partner rates &amp; booking
               </p>
             </div>
           </div>
@@ -250,78 +246,114 @@ const presetSvgs: Record<string, string> = {
         <!-- Body -->
         <div class="p-5 sm:p-6 space-y-4 pt-2">
 
-          <!-- Starting price -->
+          <!-- Starting price with Live Agoda Pulse -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div class="flex items-baseline gap-1.5">
-              <span id="cardStartingPriceDisplay" class="text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
-                {displayStartingPrice}
+            <div class="flex flex-col">
+              <span id="agodaLiveIndicator" class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5 mb-0.5">
+                <span>Best Available Rate</span>
               </span>
-              {displayStartingPrice !== "Check Rates" && (
-                <span class="text-xs text-slate-500 font-semibold">per night</span>
-              )}
+
+              <div class="flex items-baseline gap-2">
+                <span id="agodaOriginalPrice" class="hidden text-sm sm:text-base text-slate-400 line-through font-semibold"></span>
+                <span id="cardStartingPriceDisplay" class="hotel-live-price text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
+                  {displayStartingPrice}
+                </span>
+                {displayStartingPrice !== "Check Rates" && (
+                  <span id="cardPerNightText" class="text-xs text-slate-500 font-semibold">per night</span>
+                )}
+              </div>
             </div>
 
-            <span id="verifiedBadge" class={`${hasChannels ? 'inline-flex' : 'hidden'} items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-sm`}>
+            <span id="verifiedBadge" class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/90 text-[#0d3b23] text-xs font-bold px-3 py-1 rounded-full shadow-xs">
               <svg aria-hidden="true" class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
               </svg>
-              <span>Booking Partners</span>
+              <span id="verifiedBadgeText">Verified Rates</span>
             </span>
           </div>
 
-          <!-- Booking channels -->
+          <!-- Booking channels (Static + Agoda Live Row) -->
           <div
             id="aboutRatesTableContainer"
             data-hotel-title={hotelTitle}
             data-hotel-slug={hotelSlug}
+            data-agoda-id={agodaId}
             data-currency={mainCurrency}
             data-has-contact={hasContact ? 'true' : 'false'}
-            class={`divide-y divide-slate-100 ${hasChannels ? '' : 'min-h-[150px]'}`}
+            class="divide-y divide-slate-100"
           >
-            {hasChannels ? (
-              channels.map((c) => {
-                const isExternal = c.url.startsWith('http');
-                return (
-                  <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
-                    <div class="flex items-center gap-3 min-w-0">
-                      {c.customSvg ? (
-                        <div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
-                          <Fragment set:html={c.customSvg} />
-                        </div>
-                      ) : (
-                        <Fragment set:html={presetSvgs[c.iconPreset] || presetSvgs.direct} />
-                      )}
-                      <span class="text-sm font-bold text-slate-900 truncate">{c.providerName}</span>
-                    </div>
+            <!-- আগোডার লাইভ চ্যানেল রো (স্ক্রিপ্ট স্বয়ংক্রিয়ভাবে আপডেট করবে) -->
+            <div id="agodaLiveChannelRow" class="hidden items-center justify-between py-3.5 first:pt-1 last:pb-1">
+              <div class="flex items-center gap-3 min-w-0">
+                <Fragment set:html={presetSvgs.agoda} />
+                <div class="flex flex-col min-w-0">
+                  <span class="text-sm font-bold text-slate-900 truncate">Agoda</span>
+                  <span id="agodaDiscountBadge" class="hidden text-[10px] text-rose-600 font-extrabold uppercase"></span>
+                </div>
+              </div>
 
-                    <div class="flex items-center gap-3 shrink-0">
-                      {c.showPrice && c.price && (
-                        <span class="text-base font-black text-slate-900">{c.price}</span>
-                      )}
-                      <a
-                        href={c.url}
-                        target={isExternal ? "_blank" : "_self"}
-                        rel={isExternal ? "sponsored nofollow noopener" : undefined}
-                        aria-label={`${c.buttonText}: ${hotelTitle} on ${c.providerName}`}
-                        class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
-                      >
-                        <span>{c.buttonText}</span>
-                        <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
-                      </a>
-                    </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span id="agodaRowPrice" class="text-base font-black text-slate-900"></span>
+                <a
+                  id="agodaRowBtn"
+                  href="#"
+                  target="_blank"
+                  rel="sponsored nofollow noopener"
+                  class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
+                >
+                  <span>Book Deal</span>
+                  <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- অন্যান্য স্ট্যাটিক চ্যানেলসমূহ (CMS থেকে) -->
+            {channels.map((c) => {
+              const isExternal = c.url.startsWith('http');
+              return (
+                <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
+                  <div class="flex items-center gap-3 min-w-0">
+                    {c.customSvg ? (
+                      <div class="w-8 h-8 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:max-w-full [&_svg]:max-h-full">
+                        <Fragment set:html={c.customSvg} />
+                      </div>
+                    ) : (
+                      <Fragment set:html={presetSvgs[c.iconPreset] || presetSvgs.direct} />
+                    )}
+                    <span class="text-sm font-bold text-slate-900 truncate">{c.providerName}</span>
                   </div>
-                );
-              })
-            ) : (
-              <div id="ratesFallbackLoader" class="flex items-center justify-center py-10" role="status" aria-label="Loading room rates">
+
+                  <div class="flex items-center gap-3 shrink-0">
+                    {c.showPrice && c.price && (
+                      <span class="text-base font-black text-slate-900">{c.price}</span>
+                    )}
+                    <a
+                      href={c.url}
+                      target={isExternal ? "_blank" : "_self"}
+                      rel={isExternal ? "sponsored nofollow noopener" : undefined}
+                      aria-label={`${c.buttonText}: ${hotelTitle} on ${c.providerName}`}
+                      class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-xs hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
+                    >
+                      <span>{c.buttonText}</span>
+                      <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+
+            {!hasChannels && (
+              <div id="ratesFallbackLoader" class="flex items-center justify-center py-8" role="status" aria-label="Loading room rates">
                 <span class="inline-block w-5 h-5 border-2 border-[#0d3b23] border-t-transparent rounded-full animate-spin"></span>
               </div>
             )}
           </div>
 
-          <!-- Direct reservation -->
+          <!-- Direct reservation (Phone / WhatsApp) -->
           {hasContact && (
             <div id="staticReservationChannels" class="pt-4 border-t border-slate-100 text-center space-y-3">
               <div class="text-xs font-bold text-slate-700 flex items-center justify-center gap-2">
@@ -335,7 +367,7 @@ const presetSvgs: Record<string, string> = {
                 {cleanPhone && (
                   <a
                     href={`tel:${cleanPhone}`}
-                    class="w-full border-2 border-[#0d3b23] bg-white text-[#0d3b23] hover:bg-[#0d3b23] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                    class="w-full border-2 border-[#0d3b23] bg-white text-[#0d3b23] hover:bg-[#0d3b23] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-xs"
                   >
                     <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
                       <path d="M6.62 10.79c1.44 2.83 2.62 4.2 5.45 5.64l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
@@ -349,9 +381,8 @@ const presetSvgs: Record<string, string> = {
                     href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(waMessage)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="w-full border-2 border-[#25D366] bg-[#25D366]/10 text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-sm"
+                    class="w-full border-2 border-[#25D366] bg-[#25D366]/10 text-[#0d3b23] hover:bg-[#25D366] hover:text-white font-black text-xs sm:text-sm py-2.5 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-xs"
                   >
-                    <!-- Balanced WhatsApp Vector Icon -->
                     <svg aria-hidden="true" class="w-4 h-4 fill-[#25D366] shrink-0" viewBox="0 0 24 24">
                       <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.24-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.13.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.12-.22-.19-.47-.32"/>
                     </svg>
@@ -362,7 +393,6 @@ const presetSvgs: Record<string, string> = {
             </div>
           )}
 
-          <!-- Google-Compliant Transparent Affiliate Disclosure -->
           <p class="pt-1 text-center text-[11px] leading-snug text-slate-500 font-medium">
             We may earn a commission when you book through partner links, at no extra cost to you.
             Prices may change and may exclude taxes or fees; please verify on the booking site.
@@ -375,49 +405,8 @@ const presetSvgs: Record<string, string> = {
   </div>
 </section>
 
-<!-- Preset icons for client-side rendering (safely escaped) -->
-<script type="application/json" id="preset-svgs-data" set:html={JSON.stringify(presetSvgs).replace(/</g, '\\u003c')}></script>
-
 <script>
   let aboutAbortCtrl: AbortController | null = null;
-
-  function esc(s: any): string {
-    const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-    return String(s ?? '').replace(/[&<>"']/g, (c) => map[c]);
-  }
-
-  function safeUrl(u: string): string {
-    const v = String(u || '').trim();
-    return /^(https?:|tel:|mailto:)/i.test(v) ? v : '#';
-  }
-
-  function formatPrice(p: any, currency: string): string {
-    const s = String(p || '').trim();
-    if (!s) return '';
-    return s.startsWith('$') || s.startsWith('৳') ? s : currency + s;
-  }
-
-  function resolveUrl(item: any, hotelName: string): string {
-    const providerLower = String(item.provider_name || '').toLowerCase();
-    let url = String(item.button_url || '').trim();
-    if (!url || url === '#') return '#';
-
-    const isPhone = item.icon_preset === 'phone' || providerLower.includes('call');
-    const isWa = item.icon_preset === 'whatsapp' || providerLower.includes('whatsapp');
-
-    if (isPhone && !/^(https?:|tel:)/i.test(url)) {
-      const p = url.replace(/[^0-9+]/g, '');
-      return p ? `tel:${cleanP}` : '#';
-    }
-    if (isWa && !/^https?:/i.test(url)) {
-      let d = url.replace(/[^0-9]/g, '');
-      if (!d) return '#';
-      if (d.startsWith('01')) d = '88' + d;
-      return `https://wa.me/${d}?text=${encodeURIComponent('Hi! I want to book a room at ' + hotelName)}`;
-    }
-    if (!/^(https?:|tel:|mailto:)/i.test(url)) url = 'https://' + url;
-    return safeUrl(url);
-  }
 
   async function initHotelAboutSection() {
     applyLinkAttributes();
@@ -426,108 +415,115 @@ const presetSvgs: Record<string, string> = {
     const ratesContainer = document.getElementById('aboutRatesTableContainer');
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
     const loaderEl = document.getElementById('ratesFallbackLoader');
-    const badgeEl = document.getElementById('verifiedBadge');
+    const perNightTextEl = document.getElementById('cardPerNightText');
+    const liveIndicatorEl = document.getElementById('agodaLiveIndicator');
+    const agodaOriginalPriceEl = document.getElementById('agodaOriginalPrice');
 
-    // Only fetch when SSR rendered no channels
-    if (!ratesContainer || ratesContainer.dataset.fetched || !loaderEl) return;
+    // Agoda Channel Row Elements
+    const agodaRow = document.getElementById('agodaLiveChannelRow');
+    const agodaPriceEl = document.getElementById('agodaRowPrice');
+    const agodaBtnEl = document.getElementById('agodaRowBtn') as HTMLAnchorElement | null;
+    const agodaDiscountEl = document.getElementById('agodaDiscountBadge');
+
+    if (!ratesContainer || ratesContainer.dataset.fetched === 'true') return;
     ratesContainer.dataset.fetched = 'true';
 
-    let presetSvgs: Record<string, string> = {};
-    try {
-      presetSvgs = JSON.parse(document.getElementById('preset-svgs-data')?.textContent || '{}');
-    } catch {
-      presetSvgs = {};
-    }
+    const hotelSlug = (ratesContainer.getAttribute('data-hotel-slug') || '').trim();
+    const hotelName = (ratesContainer.getAttribute('data-hotel-title') || '').trim();
+    const agodaId = (ratesContainer.getAttribute('data-agoda-id') || '').trim();
 
-    const hotelSlug = ratesContainer.getAttribute('data-hotel-slug') || '';
-    const hotelName = ratesContainer.getAttribute('data-hotel-title') || '';
-    const currency = ratesContainer.getAttribute('data-currency') || '৳';
-    const hasContact = ratesContainer.getAttribute('data-has-contact') === 'true';
-
-    function showFallback() {
-      if (!ratesContainer || !ratesContainer.querySelector('#ratesFallbackLoader')) return;
-      ratesContainer.classList.remove('min-h-[150px]');
-      ratesContainer.innerHTML = hasContact
-        ? `<div class="text-center p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
-             <p class="text-xs font-bold text-slate-800">Direct Reservation Available</p>
-             <p class="text-[11px] text-slate-500">Contact the hotel directly via phone or WhatsApp below.</p>
-           </div>`
-        : '';
-    }
-
-    if (!hotelSlug && !hotelName) {
-      showFallback();
-      return;
-    }
+    // ক্লাউডফ্লেয়ার ওয়ার্কার এন্ডপয়েন্ট
+    const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+    const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
+    const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
 
     aboutAbortCtrl = new AbortController();
     const { signal } = aboutAbortCtrl;
-const kvApiUrl = `https://gulshanhotels.rmollah394.workers.dev/?hotel=${encodeURIComponent(hotelName)}`;
+
     const timeoutId = setTimeout(() => {
       aboutAbortCtrl?.abort();
-      showFallback();
+      if (loaderEl) loaderEl.remove();
     }, 4500);
 
     try {
-      const res = await fetch(kvApiUrl, { signal });
+      const res = await fetch(apiUrl, { signal });
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const json = await res.json();
-        const rates = json && json.success ? json.rates : null;
-        const dealsList: any[] = rates && Array.isArray(rates.channelsList) ? rates.channelsList : [];
+        if (json && json.success && json.rates && json.rates.startingPrice) {
+          const rates = json.rates;
+          const livePriceStr = String(rates.startingPrice);
 
-        const rows = dealsList
-          .map((item) => ({ item, url: resolveUrl(item, hotelName) }))
-          .filter((r) => r.url !== '#');
-
-        if (rows.length > 0) {
-          if (rates.startingPrice && startingPriceEl) {
-            startingPriceEl.textContent = String(rates.startingPrice);
+          // ১. রেটস কার্ডের মেইন স্টার্টিং প্রাইস আপডেট
+          if (startingPriceEl) {
+            startingPriceEl.textContent = livePriceStr;
           }
 
-          ratesContainer.classList.remove('min-h-[150px]');
-          ratesContainer.innerHTML = rows.map(({ item, url }) => {
-            const providerName = String(item.provider_name || 'Booking Partner');
-            const iconHtml = presetSvgs[item.icon_preset] || presetSvgs.direct || '';
-            const formatted = formatPrice(item.price, currency);
-            const showPrice = item.show_price !== false && item.showPrice !== false;
-            const priceDisplay = showPrice && formatted
-              ? `<span class="text-base font-black text-slate-900">${esc(formatted)}</span>`
-              : '';
-            const isExternal = url.startsWith('http');
-            const relAttr = isExternal ? 'rel="sponsored nofollow noopener"' : '';
-            const actionText = esc(item.button_text || 'Book Now');
-            const aria = esc(`${item.button_text || 'Book Now'}: ${hotelName} on ${providerName}`);
+          if (perNightTextEl) {
+            perNightTextEl.classList.remove('hidden');
+          }
 
-            return `
-              <div class="flex items-center justify-between py-3.5 first:pt-1 last:pb-1">
-                <div class="flex items-center gap-3 min-w-0">
-                  ${iconHtml}
-                  <span class="text-sm font-bold text-slate-900 truncate">${esc(providerName)}</span>
-                </div>
-                <div class="flex items-center gap-3 shrink-0">
-                  ${priceDisplay}
-                  <a href="${esc(url)}" target="${isExternal ? '_blank' : '_self'}" ${relAttr} aria-label="${aria}" class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-bold text-xs px-5 py-2 rounded-full transition shadow-sm hover:scale-105 active:scale-95 inline-flex items-center gap-1.5">
-                    <span>${actionText}</span>
-                    <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-2 shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                  </a>
-                </div>
-              </div>
+          // ২. অরিজিনাল স্ট্রাইকথ্রু প্রাইস ও ডিসকাউন্ট
+          if (agodaOriginalPriceEl && rates.originalPrice) {
+            agodaOriginalPriceEl.textContent = rates.originalPrice;
+            agodaOriginalPriceEl.classList.remove('hidden');
+          }
+
+          // ৩. লাইভ গ্রিন পালস স্ট্যাটাস
+          if (liveIndicatorEl) {
+            liveIndicatorEl.innerHTML = `
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-emerald-700 font-bold">Agoda Live Rate</span>
             `;
-          }).join('');
-
-          if (badgeEl) {
-            badgeEl.classList.remove('hidden');
-            badgeEl.classList.add('inline-flex');
           }
+
+          // ৪. আগোডা চ্যানেল রো রেন্ডার করা
+          const agodaDeal = Array.isArray(rates.channelsList) ? rates.channelsList[0] : null;
+          if (agodaRow && agodaDeal) {
+            if (agodaPriceEl) agodaPriceEl.textContent = livePriceStr;
+            if (agodaBtnEl && agodaDeal.button_url) {
+              agodaBtnEl.href = agodaDeal.button_url;
+            }
+            if (agodaDiscountEl && rates.discountText) {
+              agodaDiscountEl.textContent = rates.discountText;
+              agodaDiscountEl.classList.remove('hidden');
+            }
+            agodaRow.classList.remove('hidden');
+            agodaRow.classList.add('flex');
+          }
+
+          // ৫. 🔥 পুরো পেজের অন্যান্য কম্পোনেন্টে লাইভ প্রাইস আপডেট করা 🔥
+          document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
+            el.textContent = livePriceStr;
+          });
+
+          // গ্লোবাল ইভেন্ট ফায়ার করা যাতে হেডার বা স্টিকি মোবাইল বার রিয়েলটাইমে পায়
+          window.dispatchEvent(
+            new CustomEvent('hotel:live-price-updated', {
+              detail: {
+                hotelSlug,
+                price: livePriceStr,
+                originalPrice: rates.originalPrice || null,
+                discount: rates.discountText || null,
+                bookingUrl: agodaDeal?.button_url || null,
+              },
+            })
+          );
+
+          // ব্রাউজারের সেশনে সেভ রাখা যাতে পুরো সাইটে লাইভ থাকে
+          try {
+            sessionStorage.setItem(`live_rate_${hotelSlug}`, JSON.stringify(rates));
+          } catch (e) {}
+
+          if (loaderEl) loaderEl.remove();
           return;
         }
       }
-      showFallback();
     } catch (e: any) {
       clearTimeout(timeoutId);
-      if (e.name !== 'AbortError') showFallback();
+    } finally {
+      if (loaderEl) loaderEl.remove();
     }
   }
 
@@ -543,7 +539,6 @@ const kvApiUrl = `https://gulshanhotels.rmollah394.workers.dev/?hotel=${encodeUR
 
   const FADE_CLASSES = ['after:absolute', 'after:bottom-0', 'after:inset-x-0', 'after:h-14', 'after:bg-gradient-to-t', 'after:from-white', 'after:to-transparent', 'after:pointer-events-none'];
 
-  // Smooth & Accurate Read More Toggle
   function setupOverviewTruncator() {
     const textEl = document.getElementById('overview-text');
     const wrapperEl = document.getElementById('overview-wrapper');
@@ -555,7 +550,6 @@ const kvApiUrl = `https://gulshanhotels.rmollah394.workers.dev/?hotel=${encodeUR
     if (toggleBtn.dataset.bound === 'true') return;
     toggleBtn.dataset.bound = 'true';
 
-    // লেখা ১৯০ পিক্সেলের বেশি হলে কেবল ফেইড ও বাটন দেখাও
     if (textEl.scrollHeight > 210) {
       wrapperEl.classList.add(...FADE_CLASSES);
       toggleBtn.classList.remove('hidden');
@@ -590,7 +584,6 @@ const kvApiUrl = `https://gulshanhotels.rmollah394.workers.dev/?hotel=${encodeUR
     aboutAbortCtrl?.abort();
   });
 
-  // BOTH events ensure it works 100% on normal page loads AND ClientRouter transitions
   document.addEventListener('DOMContentLoaded', initHotelAboutSection);
   document.addEventListener('astro:page-load', initHotelAboutSection);
 </script>
