@@ -1,5 +1,6 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (100% Pure CMS Data - Google-Safe & Zero Fake Data)
+// src/components/landing/LocationCategoryTemplate.astro
+// Landing page for a location/category. All text comes from the CMS data. No invented claims.
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -10,111 +11,9 @@ interface Props {
 
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
+const isProd = import.meta.env.PROD;
 
-// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL (শুধুমাত্র সাইটের নিজস্ব ডোমেন)
-const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
-
-const rawSlug = entry?.slug || entry?.id || "";
-const cleanSlug = rawSlug
-  .replace(/\.(md|mdx)$/, '')
-  .split('/')
-  .pop()
-  ?.toLowerCase()
-  .trim()
-  .replace(/\s+/g, '-') || "";
-
-const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
-
-// ২. মেটাডাটা (১০০% CMS ড্রাইভেন - কোনো ফেক ডাটা নেই)
-const pageTitle = (data.title || "").trim();
-const locationSubtitle = (data.location_subtitle || "").trim();
-const description = (data.description || data.seo_description || "").trim();
-const heroImage = data.hero_image || data.image || "";
-
-// CMS থেকে এসইও টাইটেল (যদি দেওয়া থাকে, নইলে টাইটেল অনুযায়ী হবে)
-const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
-
-// ৩. সব হোটেল ডাটা লোডার
-let allHotels: any[] = [];
-try {
-  const hotelCol = await (getCollection as any)('hotels');
-  if (Array.isArray(hotelCol)) {
-    allHotels = hotelCol.map((h: any) => ({
-      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
-      data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
-    }));
-  }
-} catch (err) {
-  try {
-    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
-      data: item?.frontmatter || item?.data || {}
-    }));
-  } catch (e) {}
-}
-
-// ৪. শুধুমাত্র রিয়েল ও অ্যাপ্রুভড রিভিউ লোডার (কোনো ফেক রিভিউ নেই)
-let rawReviewsList: any[] = [];
-try {
-  const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
-  rawReviewsList = Object.values(globFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
-} catch (e) {
-  rawReviewsList = [];
-}
-
-const reviewsByKey = new Map<string, any[]>();
-for (const item of rawReviewsList) {
-  if (!item) continue;
-  const isApproved = item.approved === true || String(item.approved).trim().toLowerCase() === 'true';
-  if (!isApproved) continue;
-
-  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
-
-  const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
-  for (const k of keys) {
-    if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
-    reviewsByKey.get(k)!.push(item);
-  }
-}
-
-// ৫. টেক্সট নরম্যালাইজার ও ফিল্টারিং
-const normalizeText = (val: any) =>
-  String(val || '')
-    .toLowerCase()
-    .replace(/[-_]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const manualSlugs = Array.isArray(data.selected_hotels)
-  ? data.selected_hotels
-      .map((s: any) => String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim())
-      .filter((s: string | undefined): s is string => Boolean(s && s.length > 0))
-  : [];
-
-const rawKeyword = String(data.filter_keyword || cleanSlug)
-  .replace(/^(luxury|best|top|budget|cheap)-/i, '')
-  .replace(/^hotels?-(in|near)-/i, '')
-  .replace(/^hotels?-/i, '')
-  .replace(/-hotels?$/i, '');
-
-const normalizedKeyword = normalizeText(rawKeyword);
-
-const displayHotels = allHotels.filter(h => {
-  const hSlug = String(h.slug || '').toLowerCase();
-  if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  if (!normalizedKeyword) return true;
-
-  const hLoc = normalizeText(h.data?.location || h.data?.address);
-  const hCat = normalizeText(h.data?.category);
-  const hTitle = normalizeText(h.data?.title || h.data?.name);
-
-  return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
-});
-
-// ৬. হেল্পার ফাংশনসমূহ
+// ---------- Helpers ----------
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -146,7 +45,124 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. CMS হেডার কনফিগারেশন (কোনো জোরপূর্বক হার্ডকোডেড শব্দ নেই)
+function pickImage(hd: any): string {
+  const first = Array.isArray(hd.gallery) ? hd.gallery[0] : null;
+  const fromGallery = first ? (typeof first === 'object' ? (first.photo || first.image || '') : first) : '';
+  const raw = hd.image || fromGallery || '';
+  return typeof raw === 'string' ? raw.trim() : '';
+}
+
+const isApproved = (v: any) => v === true || String(v).trim().toLowerCase() === 'true';
+
+// ---------- 1. Site origin and canonical URL (with trailing slash) ----------
+const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
+
+const rawSlug = entry?.slug || entry?.id || "";
+const cleanSlug = rawSlug
+  .replace(/\.(md|mdx)$/, '')
+  .split('/')
+  .pop()
+  ?.toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-') || "";
+
+const canonicalUrl = `${siteOrigin}/${cleanSlug}/`;
+
+// ---------- 2. Page metadata ----------
+const pageTitle = (data.title || "").trim();
+const locationSubtitle = (data.location_subtitle || "").trim();
+const description = (data.description || data.seo_description || "").trim();
+const heroImage = data.hero_image || data.image || "";
+const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
+
+// ---------- 3. Load hotels (skip drafts in production) ----------
+let allHotels: any[] = [];
+try {
+  const hotelCol = await (getCollection as any)('hotels', ({ data }: any) => {
+    return isProd ? data?.draft !== true : true;
+  });
+  if (Array.isArray(hotelCol)) {
+    allHotels = hotelCol.map((h: any) => ({
+      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
+      data: { ...(h.data || {}), ...((h as any).frontmatter || {}) }
+    }));
+  }
+} catch (err) {
+  try {
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.entries(rawGlob)
+      .filter(([_, item]: [string, any]) => (isProd ? (item?.frontmatter || item?.data || {}).draft !== true : true))
+      .map(([filePath, item]: [string, any]) => ({
+        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
+        data: item?.frontmatter || item?.data || {}
+      }));
+  } catch (e) {}
+}
+
+// ---------- 4. Load approved reviews only ----------
+let rawReviewsList: any[] = [];
+try {
+  const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
+  rawReviewsList = Object.values(globFiles).map((item: any) => item?.frontmatter || item?.data || item || {});
+} catch (e) {
+  rawReviewsList = [];
+}
+
+const reviewsByKey = new Map<string, any[]>();
+for (const item of rawReviewsList) {
+  if (!item) continue;
+  if (!isApproved(item.approved)) continue;
+
+  const rSlug = String(item.slug || item.hotelSlug || item.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rId = String(item.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
+  const rHotel = String(item.hotel || item.hotelTitle || item.hotel_name || '').trim().toLowerCase();
+
+  const keys = new Set([rSlug, rId, rHotel].filter(Boolean));
+  for (const k of keys) {
+    if (!reviewsByKey.has(k)) reviewsByKey.set(k, []);
+    reviewsByKey.get(k)!.push(item);
+  }
+}
+
+// ---------- 5. Filter hotels for this page ----------
+const normalizeText = (val: any) =>
+  String(val || '')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const manualSlugs = Array.isArray(data.selected_hotels)
+  ? data.selected_hotels
+      .map((s: any) => String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim())
+      .filter((s: string | undefined): s is string => Boolean(s && s.length > 0))
+  : [];
+
+const rawKeyword = String(data.filter_keyword || cleanSlug)
+  .replace(/^(luxury|best|top|budget|cheap)-/i, '')
+  .replace(/^hotels?-(in|near)-/i, '')
+  .replace(/^hotels?-/i, '')
+  .replace(/-hotels?$/i, '');
+
+const normalizedKeyword = normalizeText(rawKeyword);
+
+const displayHotels = allHotels.filter(h => {
+  const hSlug = String(h.slug || '').toLowerCase();
+  if (!hSlug) return false; // no slug means no valid link
+  if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
+  if (!normalizedKeyword) return true;
+
+  const hLoc = normalizeText(h.data?.location || h.data?.address);
+  const hCat = normalizeText(h.data?.category);
+  const hTitle = normalizeText(h.data?.title || h.data?.name);
+
+  return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
+});
+
+// A page with no hotels should not be indexed
+const hasHotels = displayHotels.length > 0;
+
+// ---------- 6. Header text ----------
 const cleanTitleName = pageTitle
   .replace(/^hotels?\s+in\s+/i, '')
   .replace(/^hotels?\s+near\s+/i, '')
@@ -155,11 +171,11 @@ const cleanTitleName = pageTitle
 const hotelsTag = (data.hotels_tag || "").trim();
 const hotelsTitle = (data.hotels_title || (cleanTitleName ? `Accommodations in ${toTitleCase(cleanTitleName)}` : `Available Accommodations`)).trim();
 
-// কেবলমাত্র প্রশ্ন ও উত্তর দুটোই CMS-এ লেখা থাকলে FAQ আসবে
+// FAQ only if both question and answer exist in the CMS
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৮. ১০০% গুগল পলিসি কমপ্লায়েন্ট স্কিমা (কোনো ভুয়া AggregateRating নেই)
+// ---------- 7. Schema (matches what is visible on the page) ----------
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -171,7 +187,7 @@ const schemaGraph: any[] = [
   }
 ];
 
-if (displayHotels.length > 0) {
+if (hasHotels) {
   schemaGraph.push({
     "@type": "ItemList",
     "@id": `${canonicalUrl}#itemlist`,
@@ -182,7 +198,7 @@ if (displayHotels.length > 0) {
       "@type": "ListItem",
       "position": idx + 1,
       "name": toTitleCase(h.data?.title || h.data?.name || `Hotel Stay`),
-      "url": `${siteOrigin}/${h.slug}`
+      "url": `${siteOrigin}/${h.slug}/`
     }))
   });
 }
@@ -206,39 +222,44 @@ const masterSchemaJson = JSON.stringify({
   "@context": "https://schema.org",
   "@graph": schemaGraph
 }).replace(/</g, "\\u003c");
+
+// Show a rating score only when there are at least this many approved reviews
+const MIN_REVIEWS_FOR_SCORE = 3;
 ---
 
-<Layout 
-  title={metaTitle} 
-  description={description} 
+<Layout
+  title={metaTitle}
+  description={description}
   image={heroImage}
   canonical={canonicalUrl}
+  noindex={!hasHotels}
 >
   <script type="application/ld+json" set:html={masterSchemaJson} />
 
   <div class="w-full bg-[#fcfbfa] text-slate-800 font-sans pb-24">
 
-    <!-- ================= ১. সিনেমাটিক ব্যানার (লকড অংশ) ================= -->
+    <!-- ================= 1. BANNER ================= -->
     <header class="relative w-full aspect-[21/9] min-h-[300px] sm:min-h-[420px] max-h-[520px] bg-slate-950 overflow-hidden">
       {heroImage ? (
         <img
           src={heroImage}
           alt={pageTitle}
+          width="1400"
+          height="600"
           class="w-full h-full object-cover"
           fetchpriority="high"
         />
       ) : (
         <div class="w-full h-full bg-slate-900" />
       )}
-      
+
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-      <!-- ব্যানারের বাম কোণায় টাইটেল ও সাবটাইটেল -->
       <div class="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 lg:left-12 z-10 text-white space-y-1 text-left max-w-2xl">
         <span class="block font-serif text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-md text-white">
           {toTitleCase(pageTitle)}
         </span>
-        
+
         {locationSubtitle && (
           <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 drop-shadow">
             <span>{locationSubtitle}</span>
@@ -248,22 +269,19 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </header>
 
-    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 + আর্টিকেল (লকড অংশ) ================= -->
+    <!-- ================= 2. BREADCRUMB, H1 AND ARTICLE ================= -->
     <section class="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 text-left">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        
-        <!-- বাম কলাম: ব্রেডক্রাম্ব -->
+
         <div class="lg:col-span-3 pt-2">
+          <!-- Breadcrumb: same 2 steps as in the schema -->
           <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-[#0d3b23] font-semibold tracking-wide">
             <a href="/" class="hover:underline">Home</a>
-            <span class="text-slate-400">›</span>
-            <a href="/#hotels" class="hover:underline">Hotels</a>
             <span class="text-slate-400">›</span>
             <span class="text-slate-600 font-normal">{toTitleCase(pageTitle)}</span>
           </nav>
         </div>
 
-        <!-- ডান কলাম: H1 হেডিং ও আর্টিকেল -->
         <div class="lg:col-span-9 max-w-4xl">
           <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
             {toTitleCase(pageTitle)}
@@ -285,10 +303,9 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড ================= -->
+    <!-- ================= 3. HOTEL CARDS ================= -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
-      
-      <!-- হেডার ও সার্চবার -->
+
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 mb-8">
         <div>
           {hotelsTag && (
@@ -298,11 +315,10 @@ const masterSchemaJson = JSON.stringify({
             {hotelsTitle}
           </h2>
           <p class="text-xs text-slate-500 font-medium mt-1">
-            Showing {displayHotels.length} verified {displayHotels.length === 1 ? 'property' : 'properties'}
+            Showing {displayHotels.length} {displayHotels.length === 1 ? 'property' : 'properties'}
           </p>
         </div>
 
-        <!-- অন-পেজ সার্চ ইনপুট -->
         <div class="w-full sm:w-72 bg-white rounded-xl shadow-xs px-3 py-2 flex items-center border border-slate-200">
           <svg aria-hidden="true" class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
@@ -318,7 +334,6 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- পাশাপাশি ২টি করে কার্ডের গ্রিড (কোনো ফেক ট্যাগ ছাড়া) -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -329,63 +344,64 @@ const masterSchemaJson = JSON.stringify({
             const hd = h.data || {};
             const hotelTitle = (hd.title || hd.name || "").trim();
             const hotelSlug = String(h.slug || "").trim();
-            const hotelUrl = `/${hotelSlug}`;
+            const hotelUrl = `/${hotelSlug}/`;
 
             const starCount = extractStarsNumber(hd.category, hd.stars);
             const shortLoc = formatShortLocation(hd.location || hd.address || "");
             const price = formatPriceDisplay(hd.price);
-            const cardImage = hd.image || (Array.isArray(hd.gallery) ? hd.gallery[0] : "");
-            
-            // রিয়েল সুবিধা (CMS থেকে)
+            const cardImage = pickImage(hd);
+
             const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
             const topAmenities = rawAmenities.slice(0, 3).map((a: any) => {
               if (typeof a === 'string') return a.trim();
-              if (typeof a === 'object') return (a?.name || a?.title || '').trim();
+              if (a && typeof a === 'object') return String(a.name || a.title || '').trim();
               return '';
             }).filter(Boolean);
 
-            // রিয়েল রিভিউ ডেটা ফিল্টার
+            // Approved reviews only (from the reviews folder and from the hotel file)
             const searchTitle = hotelTitle.toLowerCase();
             const searchSlug = hotelSlug.toLowerCase();
             const approvedSet = new Set<any>([
               ...(searchSlug ? (reviewsByKey.get(searchSlug) || []) : []),
               ...(searchTitle ? (reviewsByKey.get(searchTitle) || []) : [])
             ]);
-            const combinedRawReviews = [...Array.from(approvedSet), ...(Array.isArray(hd.reviews) ? hd.reviews : [])];
+            const embeddedApproved = (Array.isArray(hd.reviews) ? hd.reviews : []).filter((r: any) => r && isApproved(r.approved));
+            const combinedRawReviews = [...Array.from(approvedSet), ...embeddedApproved];
 
             const validReviews = combinedRawReviews.map((rev: any) => ({
               rating: Number(rev.rating) || 0,
               comment: String(rev.comment || rev.review || rev.body || '').trim()
-            })).filter(r => r.comment.length > 1 && r.rating > 0);
+            })).filter(r => r.comment.length > 1 && r.rating >= 1 && r.rating <= 5);
 
             const reviewCount = validReviews.length;
-            const reviewScore = reviewCount > 0
+            const reviewScore = reviewCount >= MIN_REVIEWS_FOR_SCORE
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
               : null;
 
-            // আসল ব্যাজ (শুধুমাত্র CMS-এ থাকলে আসবে, কোনো ফেক ট্যাগ নেই)
-            const realBadge = hd.badge || hd.tag || (hd.verified === true ? "Verified Stay" : "");
+            // Badge only if the CMS has one
+            const realBadge = hd.badge || hd.tag || "";
 
             return (
-              <div 
-                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-52"
+              <div
+                class="landing-hotel-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-700/40 transition-all duration-300 flex flex-col sm:flex-row group text-left h-auto sm:h-56"
                 data-name={hotelTitle.toLowerCase()}
                 data-location={shortLoc.toLowerCase()}
               >
-                <!-- ইমেজ ও আসল স্টার -->
                 <div class="w-full sm:w-48 md:w-52 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
                   {cardImage && (
-                    <a href={hotelUrl} class="block w-full h-full">
+                    <a href={hotelUrl} class="block w-full h-full" aria-label={`View details of ${hotelTitle}`}>
                       <img
                         src={cardImage}
-                        alt={hotelTitle}
+                        alt={shortLoc ? `${hotelTitle} in ${shortLoc}` : hotelTitle}
+                        width="208"
+                        height="224"
                         loading="lazy"
                         decoding="async"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </a>
                   )}
-                  
+
                   {starCount && (
                     <div class="absolute top-2.5 left-2.5 bg-[#0d3b23] text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow">
                       <span>{starCount}</span>
@@ -396,9 +412,8 @@ const masterSchemaJson = JSON.stringify({
                   )}
                 </div>
 
-                <!-- ডিটেইলস -->
                 <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
-                  
+
                   <div class="space-y-1.5">
                     {realBadge && (
                       <div class="flex items-center gap-1.5 text-[9px] font-bold">
@@ -423,19 +438,22 @@ const masterSchemaJson = JSON.stringify({
                       )}
                     </div>
 
-                    <!-- রিয়েল রিভিউ রেটিং (রিভিউ না থাকলে কোনো ফেক রেটিং দেখানো হবে না) -->
-                    {reviewCount > 0 && reviewScore && (
+                    {/* Score only with enough reviews; with fewer, show the count only */}
+                    {reviewScore ? (
                       <div class="flex items-center gap-1.5 text-xs">
                         <span class="text-amber-500 font-bold flex items-center gap-0.5">
                           ★ {reviewScore}
                         </span>
-                        <span class="text-slate-400 text-[11px]">
-                          ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                        <span class="text-slate-500 text-[11px]">
+                          ({reviewCount} reviews)
                         </span>
                       </div>
-                    )}
+                    ) : reviewCount > 0 ? (
+                      <div class="text-[11px] text-slate-500">
+                        {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}
+                      </div>
+                    ) : null}
 
-                    <!-- আসল সুবিধাসমূহ -->
                     {topAmenities.length > 0 && (
                       <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
                         {topAmenities.map((item: string) => (
@@ -448,26 +466,26 @@ const masterSchemaJson = JSON.stringify({
                     )}
                   </div>
 
-                  <!-- প্রাইস ও বাটন বার -->
-                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                  <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-3">
                     {price ? (
                       <div>
-                        <span class="text-[9px] text-slate-400 block font-medium uppercase leading-none">From</span>
+                        <span class="text-[9px] text-slate-500 block font-medium uppercase leading-none">From (approx.)</span>
                         <div class="flex items-baseline gap-1 mt-0.5">
                           <span class="text-base sm:text-lg font-black text-[#0d3b23]">{price}</span>
                           <span class="text-[10px] text-slate-500">/ night</span>
                         </div>
+                        <span class="text-[9px] text-slate-500 block leading-tight mt-0.5">Check hotel for current price</span>
                       </div>
                     ) : (
-                      <span class="text-xs font-bold text-slate-700">Check Rates</span>
+                      <span class="text-xs font-bold text-slate-700">Check hotel for rates</span>
                     )}
 
-                    <a 
-                      href={hotelUrl} 
-                      class="inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs"
+                    <a
+                      href={hotelUrl}
+                      class="inline-flex items-center justify-center gap-1 bg-[#0d3b23] hover:bg-[#134e30] text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs shrink-0"
                     >
                       <span>View Details</span>
-                      <span class="text-xs">→</span>
+                      <span class="text-xs" aria-hidden="true">→</span>
                     </a>
                   </div>
 
@@ -483,7 +501,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৪. FAQ সেকশন (শুধুমাত্র CMS-এ প্রশ্ন থাকলে দেখাবে) ================= -->
+    <!-- ================= 4. FAQ (only if the CMS has questions) ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left border-t border-slate-200 mt-16">
         <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-8">
@@ -495,7 +513,7 @@ const masterSchemaJson = JSON.stringify({
             <details class="group border-b border-slate-200 py-4 sm:py-5 transition-all text-left" open={i === 0}>
               <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] cursor-pointer select-none gap-4">
                 <span class="leading-snug pr-2 font-serif font-bold">{f.question}</span>
-                <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors">
+                <span class="w-6 h-6 rounded-full border border-slate-200 bg-slate-50 group-hover:border-emerald-600 group-hover:bg-emerald-50 text-slate-500 group-hover:text-[#0d3b23] flex items-center justify-center shrink-0 transition-colors" aria-hidden="true">
                   <span class="block group-open:hidden text-sm leading-none font-bold">+</span>
                   <span class="hidden group-open:block text-sm leading-none font-bold">−</span>
                 </span>
@@ -512,7 +530,7 @@ const masterSchemaJson = JSON.stringify({
   </div>
 </Layout>
 
-<!-- লাইভ সার্চ ফিল্টার স্ক্রিপ্ট -->
+<!-- Live search filter -->
 <script is:inline>
   const initOnPageFilter = () => {
     const input = document.getElementById('onPageHotelFilterInput');
