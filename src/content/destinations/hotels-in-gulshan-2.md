@@ -13,42 +13,7 @@ selected_hotels:
   - amari-dhaka-bangladesh
 hotels_tag: ''
 hotels_title: ''
-faqs:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
-  - question: About Gulshan 2
-    answer: |-
-      Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
-      Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
-      Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
+faqs: []
 about_image: https://media.gulshanhotels.com/amaridhaka.webp
 about_tag: ''
 about_text: |-
@@ -65,10 +30,8 @@ faq_title: ''
 hero_badge: ''
 ---
 
-## About Gulshan 2
-
 Gulshan 2 is one of the well-known areas in Dhaka, especially for business travellers and international visitors. The area is home to several offices, banks, restaurants, shopping places and foreign embassies. Gulshan Lake is also nearby, offering a pleasant place to walk and enjoy some fresh air away from the busy roads.
 
-Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1.
+_Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1._
 
-Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking:
+Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking
