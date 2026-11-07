@@ -12,16 +12,19 @@ fields:
     name: "title"
     widget: "string"
 
+  # ১. সুরক্ষিত স্লাগ ফিল্ড (ভুল স্পেস বা বড় হাতের অক্ষর প্রতিরোধক)
   - label: "URL Slug (যেমন: about, privacy-policy, disclaimer, terms)"
     name: "slug"
     widget: "string"
     hint: "ছোট হাতের অক্ষর ও হাইফেন ব্যবহার করবেন (যেমন: privacy-policy)।"
+    pattern: ['^[a-z0-9-]+$', "শুধুমাত্র ছোট হাতের ইংরেজি অক্ষর, সংখ্যা এবং হাইফেন (-) ব্যবহার করুন।"]
 
-  - label: "Effective Date / Last Updated (কার্যকর তারিখ)"
+  # ২. স্ট্যাটিক ডিফল্ট তারিখ মুক্ত (অ্যাডমিন প্রয়োজন অনুযায়ী লিখবে)
+  - label: "Effective Date / Last Updated (কার্যকর তারিখ - ঐচ্ছিক)"
     name: "last_updated"
     widget: "string"
-    default: "October 2026"
-    hint: "আইনি পেজ বা তথ্যের কার্যকারিতা বোঝাতে মাস ও বছর লিখুন (যেমন: October 2026)।"
+    required: false
+    hint: "আইনি পেজ বা তথ্যের কার্যকারিতা বোঝাতে মাস ও বছর লিখুন (যেমন: November 2026)।"
 
   - label: "Hero Badge Tag (ট্যাগ ব্যাজ - ঐচ্ছিক)"
     name: "badge"
@@ -34,13 +37,13 @@ fields:
     widget: "text"
     required: false
 
-  # ১. বড় কভার ছবি (Cloudflare R2-তে সরাসরি আপলোড হবে)
+  # ৩. বড় কভার ছবি (Cloudflare R2 / Media CDN)
   - label: "Featured Hero Banner Image (বড় কভার ফটো - ঐচ্ছিক)"
     name: "hero_image"
     widget: "image"
     required: false
 
-  # ২. ৪টি হাইলাইট সংখ্যা যোগ করার অপশন (About Us পেজের জন্য)
+  # ৪. ৪টি হাইলাইট সংখ্যা যোগ করার অপশন (About Us পেজের জন্য)
   - label: "📊 Key Stats Bar (৪টি হাইলাইট সংখ্যা - ঐচ্ছিক)"
     name: "stats"
     widget: "list"
@@ -51,7 +54,7 @@ fields:
       - { label: "Value (যেমন: 50+, 18-Min, 100%)", name: "value", widget: "string" }
       - { label: "Label (যেমন: Luxury Hotels, Airport Transit)", name: "label", widget: "string" }
 
-  # ৩. ফিচার ও ভ্যালু কার্ডসমূহ (আইকন গ্রিড)
+  # ৫. ফিচার ও ভ্যালু কার্ডসমূহ (আইকন গ্রিড)
   - label: "🛡️ Feature / Value Cards (ঐচ্ছিক)"
     name: "features"
     widget: "list"
@@ -62,13 +65,13 @@ fields:
       - { label: "Card Title (শিরোনাম)", name: "title", widget: "string" }
       - { label: "Card Description (বিবরণ)", name: "desc", widget: "text" }
 
-  # ৪. মূল লেখার প্যারাগ্রাফ
+  # ৬. মূল লেখার প্যারাগ্রাফ
   - label: "Page Content (মূল লেখা)"
     name: "body"
     widget: "markdown"
     required: false
 
-  # ৫. ইন-পেজ এফএকিউ ড্রপডাউন (ঐচ্ছিক)
+  # ৭. ইন-পেজ এফএকিউ ড্রপডাউন (ঐচ্ছিক)
   - label: "❓ Page FAQs (ঐচ্ছিক প্রশ্ন-উত্তর)"
     name: "faqs"
     widget: "list"
@@ -79,7 +82,7 @@ fields:
       - { label: "Question (প্রশ্ন)", name: "question", widget: "string" }
       - { label: "Answer (উত্তর)", name: "answer", widget: "text" }
 
-  # ৬. নিচের হোটেল বুকিং ব্যানার অন/অফ সুইচ
+  # ৮. নিচের হোটেল বুকিং ব্যানার অন/অফ সুইচ
   - label: "Show Bottom Hotel Booking CTA Banner?"
     name: "show_cta"
     widget: "boolean"
