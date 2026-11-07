@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelAboutAndRates.astro
-// Production-Ready: Real-Time Agoda Sync, Universal Page Broadcaster & Google-Safe SEO
+// Production-Ready: Real-Time Agoda Sync, Interactive Date Picker & Google-Safe SEO
 import { render } from 'astro:content';
 
 interface Props {
@@ -244,7 +244,41 @@ const presetSvgs: Record<string, string> = {
         </div>
 
         <!-- Body -->
-        <div class="p-5 sm:p-6 space-y-4 pt-2">
+        <div class="p-5 sm:p-6 space-y-4 pt-3">
+
+          <!-- 🔥 INTERACTIVE DATE PICKER BAR (ভিজিটর তারিখ বেছে রেট দেখতে পারবে) 🔥 -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 space-y-2">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+              <span class="flex items-center gap-1.5">
+                <svg aria-hidden="true" class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Select Your Stay Dates</span>
+              </span>
+              <span id="stayNightsBadge" class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-md text-[10px] font-black">
+                1 night
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="checkInInput" class="block text-[9px] font-bold text-slate-400 uppercase tracking-wide">Check-in</label>
+                <input 
+                  type="date" 
+                  id="checkInInput" 
+                  class="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 cursor-pointer shadow-2xs" 
+                />
+              </div>
+              <div>
+                <label for="checkOutInput" class="block text-[9px] font-bold text-slate-400 uppercase tracking-wide">Check-out</label>
+                <input 
+                  type="date" 
+                  id="checkOutInput" 
+                  class="w-full text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 cursor-pointer shadow-2xs" 
+                />
+              </div>
+            </div>
+          </div>
 
           <!-- Starting price with Live Agoda Pulse -->
           <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -255,7 +289,7 @@ const presetSvgs: Record<string, string> = {
 
               <div class="flex items-baseline gap-2">
                 <span id="agodaOriginalPrice" class="hidden text-sm sm:text-base text-slate-400 line-through font-semibold"></span>
-                <span id="cardStartingPriceDisplay" class="hotel-live-price text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none">
+                <span id="cardStartingPriceDisplay" class="hotel-live-price text-3xl sm:text-4xl font-black text-[#0d3b23] leading-none transition-opacity">
                   {displayStartingPrice}
                 </span>
                 {displayStartingPrice !== "Check Rates" && (
@@ -282,7 +316,7 @@ const presetSvgs: Record<string, string> = {
             data-has-contact={hasContact ? 'true' : 'false'}
             class="divide-y divide-slate-100"
           >
-            <!-- আগোডার লাইভ চ্যানেল রো (স্ক্রিপ্ট স্বয়ংক্রিয়ভাবে আপডেট করবে) -->
+            <!-- আগোডার লাইভ চ্যানেল রো -->
             <div id="agodaLiveChannelRow" class="hidden items-center justify-between py-3.5 first:pt-1 last:pb-1">
               <div class="flex items-center gap-3 min-w-0">
                 <Fragment set:html={presetSvgs.agoda} />
@@ -293,7 +327,7 @@ const presetSvgs: Record<string, string> = {
               </div>
 
               <div class="flex items-center gap-3 shrink-0">
-                <span id="agodaRowPrice" class="text-base font-black text-slate-900"></span>
+                <span id="agodaRowPrice" class="text-base font-black text-slate-900 transition-opacity"></span>
                 <a
                   id="agodaRowBtn"
                   href="#"
@@ -408,6 +442,15 @@ const presetSvgs: Record<string, string> = {
 <script>
   let aboutAbortCtrl: AbortController | null = null;
 
+  // ঢাকা টাইমজোন (UTC+6) অনুযায়ী নিখুঁত আজকের এবং আগামীকালের তারিখ
+  function getDhakaDate(offsetDays = 0) {
+    const now = new Date();
+    const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const dhakaTime = new Date(utcMillis + (6 * 3600000));
+    dhakaTime.setDate(dhakaTime.getDate() + offsetDays);
+    return dhakaTime.toISOString().split("T")[0];
+  }
+
   async function initHotelAboutSection() {
     applyLinkAttributes();
     setupOverviewTruncator();
@@ -419,111 +462,169 @@ const presetSvgs: Record<string, string> = {
     const liveIndicatorEl = document.getElementById('agodaLiveIndicator');
     const agodaOriginalPriceEl = document.getElementById('agodaOriginalPrice');
 
-    // Agoda Channel Row Elements
     const agodaRow = document.getElementById('agodaLiveChannelRow');
     const agodaPriceEl = document.getElementById('agodaRowPrice');
     const agodaBtnEl = document.getElementById('agodaRowBtn') as HTMLAnchorElement | null;
     const agodaDiscountEl = document.getElementById('agodaDiscountBadge');
 
-    if (!ratesContainer || ratesContainer.dataset.fetched === 'true') return;
-    ratesContainer.dataset.fetched = 'true';
+    // Date Picker Inputs
+    const checkInInput = document.getElementById('checkInInput') as HTMLInputElement | null;
+    const checkOutInput = document.getElementById('checkOutInput') as HTMLInputElement | null;
+    const nightsBadge = document.getElementById('stayNightsBadge');
+
+    if (!ratesContainer) return;
 
     const hotelSlug = (ratesContainer.getAttribute('data-hotel-slug') || '').trim();
     const hotelName = (ratesContainer.getAttribute('data-hotel-title') || '').trim();
     const agodaId = (ratesContainer.getAttribute('data-agoda-id') || '').trim();
-
-    // ক্লাউডফ্লেয়ার ওয়ার্কার এন্ডপয়েন্ট
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
-    const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
-    const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
 
-    aboutAbortCtrl = new AbortController();
-    const { signal } = aboutAbortCtrl;
+    // তারিখ ইনিশিয়ালাইজেশন
+    const today = getDhakaDate(0);
+    const tomorrow = getDhakaDate(1);
 
-    const timeoutId = setTimeout(() => {
-      aboutAbortCtrl?.abort();
-      if (loaderEl) loaderEl.remove();
-    }, 4500);
+    if (checkInInput && !checkInInput.value) {
+      checkInInput.value = today;
+      checkInInput.min = today;
+    }
+    if (checkOutInput && !checkOutInput.value) {
+      checkOutInput.value = tomorrow;
+      checkOutInput.min = tomorrow;
+    }
 
-    try {
-      const res = await fetch(apiUrl, { signal });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.success && json.rates && json.rates.startingPrice) {
-          const rates = json.rates;
-          const livePriceStr = String(rates.startingPrice);
-
-          // ১. রেটস কার্ডের মেইন স্টার্টিং প্রাইস আপডেট
-          if (startingPriceEl) {
-            startingPriceEl.textContent = livePriceStr;
-          }
-
-          if (perNightTextEl) {
-            perNightTextEl.classList.remove('hidden');
-          }
-
-          // ২. অরিজিনাল স্ট্রাইকথ্রু প্রাইস ও ডিসকাউন্ট
-          if (agodaOriginalPriceEl && rates.originalPrice) {
-            agodaOriginalPriceEl.textContent = rates.originalPrice;
-            agodaOriginalPriceEl.classList.remove('hidden');
-          }
-
-          // ৩. লাইভ গ্রিন পালস স্ট্যাটাস
-          if (liveIndicatorEl) {
-            liveIndicatorEl.innerHTML = `
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span class="text-emerald-700 font-bold">Agoda Live Rate</span>
-            `;
-          }
-
-          // ৪. আগোডা চ্যানেল রো রেন্ডার করা
-          const agodaDeal = Array.isArray(rates.channelsList) ? rates.channelsList[0] : null;
-          if (agodaRow && agodaDeal) {
-            if (agodaPriceEl) agodaPriceEl.textContent = livePriceStr;
-            if (agodaBtnEl && agodaDeal.button_url) {
-              agodaBtnEl.href = agodaDeal.button_url;
-            }
-            if (agodaDiscountEl && rates.discountText) {
-              agodaDiscountEl.textContent = rates.discountText;
-              agodaDiscountEl.classList.remove('hidden');
-            }
-            agodaRow.classList.remove('hidden');
-            agodaRow.classList.add('flex');
-          }
-
-          // ৫. 🔥 পুরো পেজের অন্যান্য কম্পোনেন্টে লাইভ প্রাইস আপডেট করা 🔥
-          document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
-            el.textContent = livePriceStr;
-          });
-
-          // গ্লোবাল ইভেন্ট ফায়ার করা যাতে হেডার বা স্টিকি মোবাইল বার রিয়েলটাইমে পায়
-          window.dispatchEvent(
-            new CustomEvent('hotel:live-price-updated', {
-              detail: {
-                hotelSlug,
-                price: livePriceStr,
-                originalPrice: rates.originalPrice || null,
-                discount: rates.discountText || null,
-                bookingUrl: agodaDeal?.button_url || null,
-              },
-            })
-          );
-
-          // ব্রাউজারের সেশনে সেভ রাখা যাতে পুরো সাইটে লাইভ থাকে
-          try {
-            sessionStorage.setItem(`live_rate_${hotelSlug}`, JSON.stringify(rates));
-          } catch (e) {}
-
-          if (loaderEl) loaderEl.remove();
-          return;
-        }
+    // রাত গণনা আপডেট হেল্পার
+    function updateNightsDisplay() {
+      if (!checkInInput || !checkOutInput || !nightsBadge) return;
+      const d1 = new Date(checkInInput.value);
+      const d2 = new Date(checkOutInput.value);
+      const diffTime = d2.getTime() - d1.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays > 0) {
+        nightsBadge.textContent = `${diffDays} ${diffDays === 1 ? 'night' : 'nights'}`;
       }
-    } catch (e: any) {
-      clearTimeout(timeoutId);
-    } finally {
-      if (loaderEl) loaderEl.remove();
+    }
+
+    // 🔥 লাইভ প্রাইস ফেচিং ফাংশন (সিলেক্টেড তারিখ অনুযায়ী) 🔥
+    async function fetchLiveRates(checkIn: string, checkOut: string) {
+      aboutAbortCtrl?.abort();
+      aboutAbortCtrl = new AbortController();
+      const { signal } = aboutAbortCtrl;
+
+      if (startingPriceEl) startingPriceEl.style.opacity = '0.4';
+      if (agodaPriceEl) agodaPriceEl.style.opacity = '0.4';
+
+      const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
+      const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
+
+      try {
+        const res = await fetch(apiUrl, { signal });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success && json.rates) {
+            const rates = json.rates;
+            const livePriceStr = rates.startingPrice ? String(rates.startingPrice) : null;
+
+            // ১. মেইন স্টার্টিং প্রাইস আপডেট
+            if (startingPriceEl) {
+              startingPriceEl.textContent = livePriceStr || "Check Rates";
+              startingPriceEl.style.opacity = '1';
+            }
+
+            if (perNightTextEl) {
+              if (livePriceStr) perNightTextEl.classList.remove('hidden');
+              else perNightTextEl.classList.add('hidden');
+            }
+
+            // ২. ছাড় ও অরিজিনাল প্রাইস
+            if (agodaOriginalPriceEl) {
+              if (rates.originalPrice) {
+                agodaOriginalPriceEl.textContent = rates.originalPrice;
+                agodaOriginalPriceEl.classList.remove('hidden');
+              } else {
+                agodaOriginalPriceEl.classList.add('hidden');
+              }
+            }
+
+            // ৩. লাইভ রেট ইন্ডিকেটর
+            if (liveIndicatorEl) {
+              liveIndicatorEl.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-emerald-700 font-bold">Agoda Live Rate</span>
+              `;
+            }
+
+            // ৪. আগোডা চ্যানেল রো আপডেট
+            const agodaDeal = Array.isArray(rates.channelsList) ? rates.channelsList[0] : null;
+            if (agodaRow && agodaDeal) {
+              if (agodaPriceEl) {
+                agodaPriceEl.textContent = livePriceStr || "Available";
+                agodaPriceEl.style.opacity = '1';
+              }
+              if (agodaBtnEl && agodaDeal.button_url) {
+                agodaBtnEl.href = agodaDeal.button_url; // ভিজিটরের সিলেক্ট করা তারিখসহ ডিরেক্ট বুকিং লিঙ্ক
+              }
+              if (agodaDiscountEl) {
+                if (rates.discountText) {
+                  agodaDiscountEl.textContent = rates.discountText;
+                  agodaDiscountEl.classList.remove('hidden');
+                } else {
+                  agodaDiscountEl.classList.add('hidden');
+                }
+              }
+              agodaRow.classList.remove('hidden');
+              agodaRow.classList.add('flex');
+            }
+
+            // ৫. পেজের বাকি অংশে লাইভ প্রাইস পাঠানো
+            if (livePriceStr) {
+              document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
+                el.textContent = livePriceStr;
+              });
+            }
+
+            if (loaderEl) loaderEl.remove();
+          }
+        }
+      } catch (e: any) {
+        if (startingPriceEl) startingPriceEl.style.opacity = '1';
+        if (agodaPriceEl) agodaPriceEl.style.opacity = '1';
+      } finally {
+        if (loaderEl) loaderEl.remove();
+      }
+    }
+
+    // প্রথমবার পেজ লোডের সময় আজকের রেট ফেচ
+    const currentIn = checkInInput?.value || today;
+    const currentOut = checkOutInput?.value || tomorrow;
+    updateNightsDisplay();
+    fetchLiveRates(currentIn, currentOut);
+
+    // 🔥 তারিখ পরিবর্তনের ইভেন্ট হ্যান্ডলার 🔥
+    if (checkInInput && !checkInInput.dataset.bound) {
+      checkInInput.dataset.bound = 'true';
+      checkInInput.addEventListener('change', () => {
+        const newIn = checkInInput.value;
+        if (checkOutInput) {
+          // চেক-আউট অবশ্যই চেক-ইনের পরের দিন হতে হবে
+          const nextDay = new Date(newIn);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const nextDayStr = nextDay.toISOString().split("T")[0];
+          checkOutInput.min = nextDayStr;
+          if (checkOutInput.value <= newIn) {
+            checkOutInput.value = nextDayStr;
+          }
+        }
+        updateNightsDisplay();
+        fetchLiveRates(checkInInput.value, checkOutInput?.value || tomorrow);
+      });
+    }
+
+    if (checkOutInput && !checkOutInput.dataset.bound) {
+      checkOutInput.dataset.bound = 'true';
+      checkOutInput.addEventListener('change', () => {
+        updateNightsDisplay();
+        fetchLiveRates(checkInInput?.value || today, checkOutInput.value);
+      });
     }
   }
 
