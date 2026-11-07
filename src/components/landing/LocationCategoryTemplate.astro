@@ -1,5 +1,5 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro
+// src/components/landing/LocationCategoryTemplate.astro (Gatlinburg-style SEO Pattern)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -25,14 +25,13 @@ const cleanSlug = rawSlug
 
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
-// ২. মেটাডাটা
+// ২. মেটাডাটা (১০০% CMS ড্রাইভেন)
 const pageTitle = (data.title || "").trim();
 const locationSubtitle = data.location_subtitle || "";
 const description = (data.description || data.seo_description || "").trim();
 const heroImage = data.hero_image || data.image || "";
-const heroBadge = data.hero_badge || "";
 
-// ৩. হোটেল ডাটা লোডার
+// ৩. সব হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -112,7 +111,7 @@ const displayHotels = allHotels.filter(h => {
   return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
 });
 
-// ৬. হেল্পার ফাংশন
+// ৬. হেল্পার ফাংশনসমূহ
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -144,25 +143,16 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. CMS ডাটা কনফিগারেশন
+// ৭. CMS থেকে আসা অন্যান্য সেকশন ডেটা
 const hotelsTag = data.hotels_tag || "";
-const hotelsTitle = data.hotels_title || (pageTitle ? `Top ${toTitleCase(pageTitle)}` : "");
+const hotelsTitle = data.hotels_title || (pageTitle ? `Available Hotels in ${toTitleCase(pageTitle)}` : "");
 const allHotelsText = data.all_hotels_link_text || "";
 const allHotelsUrl = data.all_hotels_link_url || "";
 
-const aboutTag = data.about_tag || "";
-const aboutTitle = data.about_title || (pageTitle ? `Why Stay in ${toTitleCase(pageTitle)}?` : "");
-const aboutImage = data.about_image || "";
-const aboutText = data.about_text || "";
-const areaHighlights = Array.isArray(data.area_highlights) ? data.area_highlights.filter((h: any) => h && h.title) : [];
-
-const faqBadge = data.faq_badge || "";
-const faqTitle = data.faq_title || (pageTitle ? `Frequently Asked Questions About ${toTitleCase(pageTitle)}` : "");
-const faqDescription = data.faq_description || "";
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৮. গুগল স্কিমা
+// ৮. গুগল কমপ্লায়েন্ট JSON-LD স্কিমা
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -212,99 +202,112 @@ const masterSchemaJson = JSON.stringify({
 ---
 
 <Layout 
-  title={`${toTitleCase(pageTitle)}`} 
+  title={`${toTitleCase(pageTitle)} — Verified Hotels & Area Guide`} 
   description={description} 
   image={heroImage}
   canonical={canonicalUrl}
 >
   <script type="application/ld+json" set:html={masterSchemaJson} />
 
-  <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
+  <div class="w-full bg-[#fcfbfa] text-slate-800 font-sans pb-20">
 
-    <!-- ================= 1. HERO BANNER ================= -->
-    <header class="relative bg-slate-950 text-white min-h-[380px] sm:min-h-[440px] flex items-center pb-20 pt-12 px-4 sm:px-6 lg:px-8">
-      {heroImage && (
+    <!-- ================= ১. সিনেমাটিক বড় ইমেজ ব্যানার (হুবহু স্ক্রিনশট ১-এর মতো) ================= -->
+    <header class="relative w-full aspect-[21/9] min-h-[300px] sm:min-h-[440px] max-h-[560px] bg-slate-950 overflow-hidden">
+      {heroImage ? (
         <img
           src={heroImage}
           alt={pageTitle}
-          class="absolute inset-0 w-full h-full object-cover opacity-45"
+          class="w-full h-full object-cover"
           fetchpriority="high"
         />
+      ) : (
+        <div class="w-full h-full bg-slate-900" />
       )}
-      <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40"></div>
+      
+      <!-- টেক্সটের রিড্যাবিলিটির জন্য নিচে ডার্ক গ্র্যাডিয়েন্ট -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-      <div class="relative z-10 max-w-7xl mx-auto w-full text-left space-y-4">
-        {locationSubtitle && (
-          <div class="flex items-center justify-start gap-1.5 text-xs sm:text-sm text-emerald-400 font-semibold tracking-wide">
-            <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
-            <span>{locationSubtitle}</span>
-          </div>
-        )}
-
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
+      <!-- ব্যানারের নিচের বাম কোণায় টাইটেল ও সাবটাইটেল -->
+      <div class="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 lg:left-14 z-10 text-white space-y-1 text-left max-w-3xl">
+        <span class="block font-serif text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-md text-white">
           {toTitleCase(pageTitle)}
-        </h1>
-
-        {description && (
-          <p class="max-w-2xl text-xs sm:text-base text-slate-300 font-normal leading-relaxed">
-            {description}
+        </span>
+        
+        {locationSubtitle && (
+          <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 drop-shadow">
+            <span>{locationSubtitle}</span>
+            <span class="text-amber-400 font-black text-base leading-none">›</span>
           </p>
         )}
-
-        <div class="flex flex-wrap items-center gap-4 pt-2 text-xs font-bold text-slate-200">
-          <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-            {displayHotels.length} {displayHotels.length === 1 ? 'Property' : 'Properties'}
-          </span>
-          {heroBadge && (
-            <span class="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
-              {heroBadge}
-            </span>
-          )}
-        </div>
       </div>
+    </header>
 
-      <div class="absolute -bottom-7 left-4 right-4 max-w-7xl mx-auto z-20 px-0 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-200 max-w-3xl">
-          <div class="pl-3 pr-2 text-slate-400">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          </div>
+    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 সহ ABOUT সেকশন (হুবহু স্ক্রিনশট ২-এর মতো) ================= -->
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 text-left">
+      
+      <!-- গুগল-ফ্রেন্ডলি ব্রেডক্রাম্ব -->
+      <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-2 text-xs sm:text-sm text-[#0d3b23] font-semibold tracking-wide">
+        <a href="/" class="hover:underline">Home</a>
+        <span class="text-slate-400">›</span>
+        <a href="/#hotels" class="hover:underline">Hotels</a>
+        <span class="text-slate-400">›</span>
+        <span class="text-slate-600 font-normal truncate">{toTitleCase(pageTitle)}</span>
+      </nav>
+
+      <!-- আসল H1 হেডিং (SEO এর জন্য সর্বোচ্চ গুরুত্বপূর্ণ) -->
+      <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
+        {toTitleCase(pageTitle)}
+      </h1>
+
+      <!-- CMS-এর শর্ট ডেসক্রিপশন / সারাংশ -->
+      {description && (
+        <div class="text-base sm:text-lg text-slate-700 font-normal leading-relaxed mb-6">
+          <p>{description}</p>
+        </div>
+      )}
+
+      <!-- CMS-এর "Detailed Article Body" (মার্কডাউন আর্টিকেল) -->
+      {Content && (
+        <div class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-a:text-emerald-800 mb-8 border-b border-slate-200/80 pb-10">
+          <Content />
+        </div>
+      )}
+    </section>
+
+    <!-- ================= ৩. হোটেলের তালিকা (হোটেল কার্ডস গ্রিড) ================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-8">
+      
+      <!-- হোটেলের সেকশন হেডার ও অন-পেজ সার্চ ফিল্টার -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 text-left">
+        <div>
+          {hotelsTag && (
+            <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23] block">— {hotelsTag}</span>
+          )}
+          <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">
+            {hotelsTitle}
+          </h2>
+          <p class="text-xs text-slate-500 font-medium mt-1">
+            Showing {displayHotels.length} verified {displayHotels.length === 1 ? 'property' : 'properties'}
+          </p>
+        </div>
+
+        <!-- লাইভ অন-পেজ সার্চ ইনপুট -->
+        <div class="w-full sm:w-72 bg-white rounded-xl shadow-xs px-3 py-2 flex items-center border border-slate-200">
+          <svg aria-hidden="true" class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
           <input
             type="text"
             id="onPageHotelFilterInput"
             aria-label="Filter hotels"
-            placeholder="Search properties on this page..."
-            class="w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none font-medium"
+            placeholder="Search hotels on this page..."
+            class="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none font-medium"
           />
         </div>
       </div>
-    </header>
 
-    <!-- ================= 2. FEATURED HOTELS SECTION ================= -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-8">
-      {(hotelsTag || hotelsTitle || (allHotelsText && allHotelsUrl)) && (
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 text-left">
-          <div>
-            {hotelsTag && (
-              <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">— {hotelsTag}</span>
-            )}
-            {hotelsTitle && (
-              <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 mt-0.5">{hotelsTitle}</h2>
-            )}
-          </div>
-          {allHotelsText && allHotelsUrl && (
-            <a href={allHotelsUrl} class="text-xs sm:text-sm font-bold text-[#0d3b23] hover:underline flex items-center gap-1 self-start sm:self-auto">
-              <span>{allHotelsText}</span>
-              <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          )}
-        </div>
-      )}
-
+      <!-- হোটেলের গ্রিড -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -446,84 +449,14 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= 3. ABOUT SECTION ================= -->
-    {(aboutText || aboutImage || areaHighlights.length > 0) && (
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
-        <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {aboutImage && (
-              <div class="lg:col-span-5 rounded-2xl overflow-hidden aspect-[4/3] bg-slate-100">
-                <img 
-                  src={aboutImage} 
-                  alt={aboutTitle || pageTitle} 
-                  loading="lazy" 
-                  decoding="async"
-                  class="w-full h-full object-cover" 
-                />
-              </div>
-            )}
-
-            <div class={aboutImage ? "lg:col-span-7 space-y-4" : "lg:col-span-12 space-y-4"}>
-              {aboutTag && (
-                <span class="text-[11px] font-bold tracking-widest uppercase text-[#0d3b23]">{aboutTag}</span>
-              )}
-              {aboutTitle && (
-                <h2 class="text-2xl sm:text-3xl font-serif font-black text-slate-900 leading-tight">
-                  {aboutTitle}
-                </h2>
-              )}
-              {aboutText && (
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                  {aboutText}
-                </p>
-              )}
-
-              {areaHighlights.length > 0 && (
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {areaHighlights.map((hl: any) => (
-                    <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
-                      <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                      <div>
-                        <h3 class="text-xs font-bold text-slate-900">{hl.title}</h3>
-                        {hl.desc && <p class="text-[11px] text-slate-500 mt-0.5">{hl.desc}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-    )}
-
-    <!-- ================= 4. FAQ SECTION ================= -->
+    <!-- ================= ৪. FAQ সেকশন (CMS থেকে প্রশ্ন থাকলে দেখাবে) ================= -->
     {faqs.length > 0 && (
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left">
-        <div class="space-y-2 mb-8 sm:mb-10 text-left border-b border-slate-200 pb-6">
-          {faqBadge && (
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
-              <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-              </svg>
-              <span>{faqBadge}</span>
-            </div>
-          )}
+      <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left border-t border-slate-200 mt-16">
+        <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-8">
+          Frequently Asked Questions
+        </h2>
 
-          {faqTitle && (
-            <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              {faqTitle}
-            </h2>
-          )}
-
-          {faqDescription && (
-            <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl leading-relaxed">
-              {faqDescription}
-            </p>
-          )}
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 items-start">
           {faqs.map((f: any, i: number) => (
             <details class="group border-b border-slate-200 py-4 sm:py-5 transition-all text-left" open={i === 0}>
               <summary class="flex justify-between items-center list-none font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#0d3b23] cursor-pointer select-none gap-4">
@@ -542,18 +475,10 @@ const masterSchemaJson = JSON.stringify({
       </section>
     )}
 
-    <!-- ================= 5. EDITORIAL ARTICLE BODY (100% BUILD SAFE) ================= -->
-    {Content && (
-      <section class="max-w-4xl mx-auto px-4 pt-16 pb-12 text-left">
-        <article class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-a:text-emerald-700">
-          <Content />
-        </article>
-      </section>
-    )}
-
   </div>
 </Layout>
 
+<!-- লাইভ সার্চ ফিল্টার স্ক্রিপ্ট -->
 <script is:inline>
   const initOnPageFilter = () => {
     const input = document.getElementById('onPageHotelFilterInput');
