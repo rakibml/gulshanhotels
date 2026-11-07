@@ -1,5 +1,5 @@
 ---
-// src/components/PopularHotels.astro (100% Core Web Vitals & PageSpeed 100 Optimized)
+// src/components/PopularHotels.astro (100% W3C Valid HTML, Zero Fake Data & Core Web Vitals Ready)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -14,24 +14,31 @@ const {
   featuredHotels = []
 } = Astro.props;
 
-// ১. Fetch Hotels
+const isProd = import.meta.env.PROD;
+
+// ১. ড্রাফট ফিল্টারসহ হোটেল ডাটা লোডার (গুগল ৪০৪ ক্রল এরর প্রতিরোধ)
 let allHotels: any[] = [];
 try {
-  const collectionHotels = await getCollection('hotels');
+  const collectionHotels = await getCollection('hotels', ({ data }) => {
+    return isProd ? data?.draft !== true : true;
+  });
+
   if (Array.isArray(collectionHotels) && collectionHotels.length > 0) {
     allHotels = collectionHotels;
   } else {
-    const rawGlob = import.meta.glob('../content/hotels/*.md', { eager: true });
-    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      slug: filePath.split('/').pop()?.replace('.md', ''),
-      data: item.frontmatter || {}
-    }));
+    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
+    allHotels = Object.entries(rawGlob)
+      .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
+      .map(([filePath, item]: [string, any]) => ({
+        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
+        data: item.frontmatter || item.data || {}
+      }));
   }
 } catch (e) {
   allHotels = [];
 }
 
-// ২. Sort Hotels
+// ২. হোটেল বাছাই ও সর্টিং
 let hotels: any[] = [];
 const selectedSlugs = Array.isArray(featuredHotels) 
   ? featuredHotels.map((item: any) => {
@@ -46,7 +53,7 @@ if (selectedSlugs.length > 0) {
   selectedSlugs.forEach(slugStr => {
     const cleanTarget = String(slugStr).trim().toLowerCase();
     const found = allHotels.find(h => {
-      const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.md$/, '').trim().toLowerCase();
+      const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').trim().toLowerCase();
       const hTitle = String(h.data?.title || h.data?.name || '').trim().toLowerCase();
       return hSlug === cleanTarget || hTitle === cleanTarget || cleanTarget.includes(hSlug) || cleanTarget.includes(hTitle);
     });
@@ -69,20 +76,18 @@ if (hotels.length === 0) {
   hotels = Array.from(uniqueHotelsMap.values());
 }
 
-// ৩. FETCH APPROVED-ONLY REVIEWS
+// ৩. আসল অনুমোদিত রিভিউ লোডার
 let allReviewsRaw: any[] = [];
 try {
-  const rawGlob = import.meta.glob('../content/reviews/*.md', { eager: true });
-  allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
-} catch (e) {}
-
-if (allReviewsRaw.length === 0) {
-  try {
-    const cmsReviews = await getCollection('reviews');
-    if (Array.isArray(cmsReviews)) {
-      allReviewsRaw = cmsReviews.map(r => r.data || {});
-    }
-  } catch (e) {}
+  const cmsReviews = await getCollection('reviews');
+  if (Array.isArray(cmsReviews) && cmsReviews.length > 0) {
+    allReviewsRaw = cmsReviews.map(r => r.data || {});
+  } else {
+    const rawGlob = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../content/reviews/*.{md,mdx}'], { eager: true });
+    allReviewsRaw = Object.values(rawGlob).map((item: any) => item.frontmatter || item.data || {});
+  }
+} catch (e) {
+  allReviewsRaw = [];
 }
 
 const approvedReviewsList = allReviewsRaw.filter(item => {
@@ -92,15 +97,30 @@ const approvedReviewsList = allReviewsRaw.filter(item => {
 
 const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const dotsArray = [0, 1, 2, 3, 4];
+
+// ক্লাউডফ্লেয়ার ইমেজ অপ্টিমাইজার
+function getCardImage(url: string) {
+  if (!url) return "/images/hotel-placeholder.webp";
+  const cleanUrl = url.trim();
+  if (cleanUrl.startsWith('https://media.gulshanhotels.com/')) {
+    const path = cleanUrl.replace('https://media.gulshanhotels.com/', '');
+    return `https://media.gulshanhotels.com/cdn-cgi/image/width=640,quality=75,format=auto,onerror=redirect/${path}`;
+  }
+  if (cleanUrl.includes('unsplash.com')) {
+    const base = cleanUrl.split('?')[0];
+    return `${base}?auto=format&fit=crop&w=640&q=75&fm=webp`;
+  }
+  return cleanUrl;
+}
 ---
 
-<!-- POPULAR HOTELS SECTION (CORE WEB VITALS OPTIMIZED WITH CONTENT-VISIBILITY) -->
+<!-- POPULAR HOTELS SECTION -->
 <section 
   id="hotels" 
   class="w-full bg-white pt-4 pb-12 text-slate-900"
-  style="content-visibility: auto; contain-intrinsic-size: 1px 450px;"
+  style="content-visibility: auto; contain-intrinsic-size: auto 500px;"
 >
-  <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 space-y-4">
     
     <!-- Section Header -->
     <div class="flex justify-between items-end gap-4 text-left">
@@ -129,31 +149,32 @@ const dotsArray = [0, 1, 2, 3, 4];
       
       <!-- Navigation Arrows -->
       {hotels.length > 3 && (
-        <button id="popPrevBtn" aria-label="Previous Hotels" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95 hidden">❮</button>
+        <button id="popPrevBtn" type="button" aria-label="Previous Hotels" class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95 shadow-md hidden">❮</button>
       )}
       {hotels.length > 3 && (
-        <button id="popNextBtn" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95">❯</button>
+        <button id="popNextBtn" type="button" aria-label="Next Hotels" class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-800 hover:bg-[#0d3b23] hover:text-white transition z-20 cursor-pointer flex items-center justify-center text-sm font-bold active:scale-95 shadow-md">❯</button>
       )}
 
       <!-- Track -->
       <div id="popularHotelsTrack" class="flex gap-5 overflow-x-auto scroll-smooth py-2 px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {hotels.map((hotelItem: any) => {
           const hData = hotelItem.data || {};
-          const hTitle = (hData.title || hData.name || "Hotel Details").trim();
-          const hSlug = (hData.slug || hotelItem.slug || hotelItem.id || "hotel").replace(/\.md$/, '').trim();
+          const hTitle = String(hData.title || hData.name || "Hotel Details").trim();
+          const rawSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
+          const hSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
           
-          let rawImg = hData.image || (Array.isArray(hData.gallery) ? hData.gallery[0] : "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=75");
-          if (rawImg.includes('unsplash.com') && !rawImg.includes('q=')) {
-            rawImg += '&q=75&auto=format';
-          }
-          const hImage = rawImg;
+          const rawImg = hData.image || (Array.isArray(hData.gallery) && hData.gallery[0] ? (typeof hData.gallery[0] === 'object' ? hData.gallery[0].photo || hData.gallery[0].image : hData.gallery[0]) : "");
+          const hImage = getCardImage(rawImg);
           
-          const rawPrice = String(hData.price || "120").replace(/[^0-9.]/g, '');
-          const priceNum = parseFloat(rawPrice) || 120;
-          const currencySymbol = String(hData.price || '').includes('৳') ? '৳' : '$';
-          const hLocation = hData.location || hData.category || "Gulshan 2, Dhaka";
+          // কোনো ফেক প্রাইজ নেই (সৎ ডাটা ইঞ্জিন)
+          const rawPrice = hData.price || hData.starting_price;
+          const displayPrice = rawPrice 
+            ? (String(rawPrice).startsWith('$') || String(rawPrice).startsWith('৳') ? String(rawPrice) : `$${String(rawPrice).trim()}`)
+            : "Check rates";
 
-          // ১. REVIEWS CALCULATION
+          const hLocation = String(hData.locality || hData.location || "").trim();
+
+          // রিভিউ ক্যালকুলেশন
           const normTitle = normalize(hTitle);
           const normSlug = normalize(hSlug);
 
@@ -170,77 +191,80 @@ const dotsArray = [0, 1, 2, 3, 4];
           const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
 
           return (
-            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group cursor-pointer">
+            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group">
               
-              <a href={`/${hSlug}`} class="block w-full">
-                <!-- Card Image Header (CLS & Speed Optimized) -->
-                <div class="relative w-full aspect-[16/10] sm:aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
+              <!-- ১. কার্ড ছবি ও উইশলিস্ট বাটন (W3C ভ্যালিড: বাটনকে লিংকের বাইরে রাখা হয়েছে) -->
+              <div class="relative w-full aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
+                <a href={`/${hSlug}/`} class="block w-full h-full" aria-label={`View details of ${hTitle}`}>
                   <img 
                     src={hImage} 
-                    alt={`${hTitle} Room Photo`} 
+                    alt={`${hTitle}${hLocation ? ` in ${hLocation}` : ''}`} 
                     loading="lazy" 
                     decoding="async" 
-                    fetchpriority="low"
                     width="320"
                     height="200"
-                    class="w-full h-full object-cover" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                   />
+                </a>
 
-                  <!-- Wishlist Heart Button -->
-                  <button 
-                    type="button"
-                    class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10"
-                    data-title={hTitle}
-                    data-image={hImage}
-                    data-url={`/${hSlug}`}
-                    data-price={`${currencySymbol}${priceNum}`}
-                    aria-label="Add to Wishlist"
-                  >
-                    <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                  </button>
-                </div>
+                <!-- উইশলিস্ট হার্ট বাটন (লিংকের বাইরে থাকায় কোনো ক্লিক কনফ্লিক্ট বা ইনভ্যালিড HTML নেই) -->
+                <button 
+                  type="button"
+                  class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10 shadow-sm transition active:scale-90"
+                  data-title={hTitle}
+                  data-image={hImage}
+                  data-url={`/${hSlug}/`}
+                  data-price={displayPrice}
+                  aria-label={`Save ${hTitle} to wishlist`}
+                >
+                  <svg aria-hidden="true" class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </button>
+              </div>
 
-                <!-- Card Body -->
-                <div class="pt-3 pb-1 px-0.5 space-y-1.5">
-                  
-                  <!-- Hotel Title (Auto Capitalized) -->
-                  <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors capitalize">
+              <!-- ২. কার্ড ডিটেইলস (ক্যানোনিকাল ট্রেইলিং স্ল্যাশসহ লিংক) -->
+              <div class="pt-3 pb-1 px-0.5 space-y-1.5">
+                
+                <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors">
+                  <a href={`/${hSlug}/`} class="hover:underline">
                     {hTitle}
-                  </h3>
+                  </a>
+                </h3>
 
-                  <!-- Location Line -->
+                {hLocation && (
                   <div class="flex items-center gap-1 text-xs text-slate-500 font-medium">
-                    <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
                     <span class="truncate">{hLocation}</span>
                   </div>
+                )}
 
-                  <!-- Verified Reviews Display -->
-                  {reviewsCount > 0 && avgRating ? (
-                    <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
-                      <span class="font-black text-slate-900 text-sm">{avgRating}</span>
-                      <div class="flex items-center space-x-0.5 text-[#00aa6c]">
-                        {dotsArray.map((i) => (
-                          <span key={i} class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-200'}`}></span>
-                        ))}
-                      </div>
-                      <span class="text-slate-400 font-normal">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
+                <!-- অ্যাক্সেসিবল রেটিং সার্কেল -->
+                {reviewsCount > 0 && avgRating ? (
+                  <div class="flex items-center gap-1.5 text-xs text-slate-600 font-bold pt-0.5">
+                    <span class="font-black text-slate-900 text-sm">{avgRating}</span>
+                    <div class="flex items-center space-x-0.5" role="img" aria-label={`Rated ${avgRating} out of 5 stars`}>
+                      {dotsArray.map((i) => (
+                        <span class={`w-2.5 h-2.5 rounded-full inline-block ${i < ratingVal ? 'bg-[#00aa6c]' : 'bg-slate-200'}`}></span>
+                      ))}
                     </div>
-                  ) : (
-                    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium pt-0.5">
-                      <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
-                    </div>
-                  )}
-
-                  <!-- Clean Price Line -->
-                  <div class="flex items-baseline gap-1.5 pt-1">
-                    <span class="text-xs text-slate-400 font-medium">from</span>
-                    <span class="text-lg font-black text-slate-900">{currencySymbol}{priceNum} / night</span>
+                    <span class="text-slate-500 font-medium text-[11px]">({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})</span>
                   </div>
+                ) : (
+                  <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium pt-0.5">
+                    <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">No reviews yet</span>
+                  </div>
+                )}
 
+                <!-- প্রাইজ ডিসপ্লে -->
+                <div class="flex items-baseline gap-1.5 pt-1">
+                  {displayPrice !== "Check rates" && (
+                    <span class="text-xs text-slate-500 font-medium">from</span>
+                  )}
+                  <span class="text-base sm:text-lg font-black text-slate-900">{displayPrice}{displayPrice !== "Check rates" ? ' / night' : ''}</span>
                 </div>
-              </a>
+
+              </div>
 
             </div>
           );
@@ -262,120 +286,126 @@ const dotsArray = [0, 1, 2, 3, 4];
   </div>
 </section>
 
-<!-- SCRIPT (PASSIVE 60FPS SCROLL & MEMORY-LEAK FREE) -->
+<!-- SCRIPT (PASSIVE, CLEAN & SIGNAL CONTROLLED) -->
 <script is:inline>
-  const initPopularHotelsSection = () => {
-    const track = document.getElementById('popularHotelsTrack');
-    const prevBtn = document.getElementById('popPrevBtn');
-    const nextBtn = document.getElementById('popNextBtn');
+  (() => {
+    let popAbortController = null;
 
-    if (!track || track.dataset.speedBound) return;
-    track.dataset.speedBound = 'true';
+    const initPopularHotelsSection = () => {
+      if (popAbortController) popAbortController.abort();
+      popAbortController = new AbortController();
+      const { signal } = popAbortController;
 
-    let isUpdating = false;
-    function updateArrows() {
-      if (isUpdating) return;
-      isUpdating = true;
+      const track = document.getElementById('popularHotelsTrack');
+      const prevBtn = document.getElementById('popPrevBtn');
+      const nextBtn = document.getElementById('popNextBtn');
 
-      requestAnimationFrame(() => {
-        if (!track || !prevBtn || !nextBtn) {
+      if (!track) return;
+
+      let isUpdating = false;
+      function updateArrows() {
+        if (isUpdating) return;
+        isUpdating = true;
+
+        requestAnimationFrame(() => {
+          if (!track || !prevBtn || !nextBtn) {
+            isUpdating = false;
+            return;
+          }
+
+          const scrollLeft = track.scrollLeft;
+          const maxScroll = track.scrollWidth - track.clientWidth - 5;
+
+          if (scrollLeft <= 5) {
+            prevBtn.classList.add('hidden');
+          } else {
+            prevBtn.classList.remove('hidden');
+          }
+
+          if (scrollLeft >= maxScroll) {
+            nextBtn.classList.add('hidden');
+          } else {
+            nextBtn.classList.remove('hidden');
+          }
+
           isUpdating = false;
-          return;
-        }
-
-        const scrollLeft = track.scrollLeft;
-        const maxScroll = track.scrollWidth - track.clientWidth - 5;
-
-        if (scrollLeft <= 5) {
-          prevBtn.classList.add('hidden');
-        } else {
-          prevBtn.classList.remove('hidden');
-        }
-
-        if (scrollLeft >= maxScroll) {
-          nextBtn.classList.add('hidden');
-        } else {
-          nextBtn.classList.remove('hidden');
-        }
-
-        isUpdating = false;
-      });
-    }
-
-    if (prevBtn && nextBtn) {
-      prevBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -320, behavior: 'smooth' });
-      });
-
-      nextBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 320, behavior: 'smooth' });
-      });
-
-      updateArrows();
-      // PASSIVE LISTENER: মোবাইল ও পিসিতে স্ক্রোল ল্যাগ বন্ধ
-      track.addEventListener('scroll', updateArrows, { passive: true });
-      window.addEventListener('resize', updateArrows, { passive: true });
-    }
-
-    // Wishlist Toggle
-    document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
-      const title = btn.getAttribute('data-title') || '';
-      let list = [];
-      try {
-        list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
-      } catch (err) { list = []; }
-
-      const isSaved = list.some(item => item.title === title);
-      const iconSvg = btn.querySelector('svg');
-      if (isSaved && iconSvg) {
-        iconSvg.setAttribute('fill', 'currentColor');
-        iconSvg.classList.add('text-rose-600');
-        iconSvg.classList.remove('text-slate-700');
+        });
       }
 
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+          track.scrollBy({ left: -320, behavior: 'smooth' });
+        }, { signal });
 
-        const image = btn.getAttribute('data-image') || '';
-        const url = btn.getAttribute('data-url') || '';
-        const price = btn.getAttribute('data-price') || '';
+        nextBtn.addEventListener('click', () => {
+          track.scrollBy({ left: 320, behavior: 'smooth' });
+        }, { signal });
 
-        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
+        updateArrows();
+        track.addEventListener('scroll', updateArrows, { passive: true, signal });
+        window.addEventListener('resize', updateArrows, { passive: true, signal });
+      }
 
-        const existingIndex = list.findIndex(item => item.title === title);
+      // Wishlist Toggle
+      document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
+        const title = btn.getAttribute('data-title') || '';
+        let list = [];
+        try {
+          list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
+        } catch (err) { list = []; }
 
-        if (existingIndex > -1) {
-          list.splice(existingIndex, 1);
-          if (iconSvg) {
-            iconSvg.setAttribute('fill', 'none');
-            iconSvg.classList.remove('text-rose-600');
-            iconSvg.classList.add('text-slate-700');
-          }
-        } else {
-          list.push({ title, image, url, price });
-          if (iconSvg) {
-            iconSvg.setAttribute('fill', 'currentColor');
-            iconSvg.classList.remove('text-slate-700');
-            iconSvg.classList.add('text-rose-600');
-          }
+        const isSaved = list.some(item => item.title === title);
+        const iconSvg = btn.querySelector('svg');
+        if (isSaved && iconSvg) {
+          iconSvg.setAttribute('fill', 'currentColor');
+          iconSvg.classList.add('text-rose-600');
+          iconSvg.classList.remove('text-slate-700');
         }
 
-        localStorage.setItem('gh_wishlist', JSON.stringify(list));
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
 
-        const countEl = document.getElementById('wishlist-count');
-        if (countEl) {
-          if (list.length > 0) {
-            countEl.textContent = list.length.toString();
-            countEl.classList.remove('hidden');
+          const image = btn.getAttribute('data-image') || '';
+          const url = btn.getAttribute('data-url') || '';
+          const price = btn.getAttribute('data-price') || '';
+
+          try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
+
+          const existingIndex = list.findIndex(item => item.title === title);
+
+          if (existingIndex > -1) {
+            list.splice(existingIndex, 1);
+            if (iconSvg) {
+              iconSvg.setAttribute('fill', 'none');
+              iconSvg.classList.remove('text-rose-600');
+              iconSvg.classList.add('text-slate-700');
+            }
           } else {
-            countEl.classList.add('hidden');
+            list.push({ title, image, url, price });
+            if (iconSvg) {
+              iconSvg.setAttribute('fill', 'currentColor');
+              iconSvg.classList.remove('text-slate-700');
+              iconSvg.classList.add('text-rose-600');
+            }
           }
-        }
-      });
-    });
-  };
 
-  document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
-  document.addEventListener('astro:page-load', initPopularHotelsSection);
+          localStorage.setItem('gh_wishlist', JSON.stringify(list));
+
+          const countEl = document.getElementById('wishlist-count');
+          if (countEl) {
+            if (list.length > 0) {
+              countEl.textContent = list.length.toString();
+              countEl.classList.remove('hidden');
+            } else {
+              countEl.classList.add('hidden');
+            }
+          }
+        }, { signal });
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
+    document.addEventListener('astro:page-load', initPopularHotelsSection);
+  })();
 </script>
