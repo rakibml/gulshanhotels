@@ -1,5 +1,6 @@
 ---
-// src/components/hotel/HotelNearbyHotels.astro (100% Real CMS Reviews & Ratings - Zero Fake Data & Cloudflare Build-Safe)
+// src/components/hotel/HotelNearbyHotels.astro
+// 100% Real CMS Data, Cloudflare Optimized & Google SEO Compliant
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -9,21 +10,36 @@ interface Props {
 const { currentHotel } = Astro.props;
 const currentData = currentHotel?.data || {};
 
-// বর্তমান হোটেলের ক্লিন স্লাগ বের করা
-const rawSlug = String(currentData.slug || currentHotel?.slug || currentHotel?.id || "");
-const currentCleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+// ---------- Helpers ----------
+const normalizeSlug = (value: any): string =>
+  String(value || '')
+    .replace(/\.(md|mdx)$/, '')
+    .split('/')
+    .pop()
+    ?.trim()
+    .toLowerCase() || '';
 
+const norm = (v: any): string => String(v || '').trim().toLowerCase();
+
+const currentCleanSlug = normalizeSlug(currentData.slug || currentHotel?.slug || currentHotel?.id);
+const currentCategory = norm(currentData.category);
+const currentLocality = norm(currentData.locality || currentData.location);
+
+const isProd = import.meta.env.PROD;
 let allHotels: any[] = [];
 let allReviewsList: any[] = [];
 
-// ১. হোটেল লোডার
+// 1. Hotel loader (production-e draft bad, jate Google-e 404 link na jay)
 try {
-  const cmsHotels = await getCollection('hotels');
+  const cmsHotels = await getCollection('hotels', ({ data }) => {
+    return isProd ? data?.draft !== true : true;
+  });
+
   if (cmsHotels && cmsHotels.length > 0) {
-    allHotels = cmsHotels.map(h => ({
+    allHotels = cmsHotels.map((h: any) => ({
       id: h.id,
-      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
-      data: h.data || {}
+      slug: normalizeSlug(h.slug || h.id),
+      data: h.data || {},
     }));
   }
 } catch (e) {
@@ -32,169 +48,252 @@ try {
 
 if (allHotels.length === 0) {
   try {
-    const rawGlob = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
-      id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
-      slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
-      data: item.frontmatter || item.data || {},
-    }));
+    const rawGlob = import.meta.glob(
+      ['/src/content/hotels/*.{md,mdx}', '../../content/hotels/*.{md,mdx}'],
+      { eager: true }
+    );
+    allHotels = Object.entries(rawGlob)
+      .map(([filePath, item]: [string, any]) => ({
+        id: normalizeSlug(filePath),
+        slug: normalizeSlug(filePath),
+        data: item.frontmatter || item.data || {},
+      }))
+      .filter((entry: any) => (isProd ? entry.data?.draft !== true : true));
   } catch (e) {
     allHotels = [];
   }
 }
 
-// ২. আসল রিভিউ ডাটা ফেচিং (রিয়েল রেটিং ও রিভিউ কাউন্টের জন্য)
+// 2. Review loader (collection age, na hole glob fallback)
 try {
-  const globReviews = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
-  allReviewsList = Object.values(globReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
+  const cmsReviews = await getCollection('reviews');
+  allReviewsList = cmsReviews.map((r: any) => ({ id: r.id, ...(r.data || {}) }));
 } catch (e) {
-  allReviewsList = [];
+  try {
+    const globReviews = import.meta.glob(
+      ['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'],
+      { eager: true }
+    );
+    allReviewsList = Object.entries(globReviews).map(([filePath, item]: [string, any]) => ({
+      id: normalizeSlug(filePath),
+      ...(item?.frontmatter || item?.data || {}),
+    }));
+  } catch (err) {
+    allReviewsList = [];
+  }
 }
 
-// ৩. বর্তমান হোটেল বাদে কাছাকাছি ৪টি হোটেল নির্বাচন (মোবাইলে ২x২ গ্রিডের জন্য ৪টি নিখুঁত)
+// 3. Similar hotel selection: same category (+2) ar same locality (+1) age
 const nearbyHotels = allHotels
-  .filter(h => {
-    const hSlug = String(h.data?.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
-    return hSlug !== "" && hSlug !== currentCleanSlug;
+  .map((h) => {
+    const hSlug = normalizeSlug(h.data?.slug || h.slug || h.id);
+    const score =
+      (currentCategory && norm(h.data?.category) === currentCategory ? 2 : 0) +
+      (currentLocality && norm(h.data?.locality || h.data?.location) === currentLocality ? 1 : 0);
+    return { ...h, hSlug, score };
   })
+  .filter((h) => h.hSlug !== '' && h.hSlug !== currentCleanSlug)
+  .sort((a, b) => b.score - a.score)
   .slice(0, 4);
+
+// Cloudflare image optimizer (mobile speed-er jonno)
+function getOptimizedThumbnail(url: any): string {
+  if (!url || typeof url !== 'string') return '/images/hotel-placeholder.webp';
+  const cleanUrl = url.trim();
+  if (!cleanUrl) return '/images/hotel-placeholder.webp';
+  if (cleanUrl.startsWith('https://media.gulshanhotels.com/')) {
+    const path = cleanUrl.replace('https://media.gulshanhotels.com/', '');
+    return `https://media.gulshanhotels.com/cdn-cgi/image/width=600,quality=75,format=auto,onerror=redirect/${path}`;
+  }
+  if (cleanUrl.includes('unsplash.com')) {
+    const base = cleanUrl.split('?')[0];
+    return `${base}?auto=format&fit=crop&w=600&q=75&fm=webp`;
+  }
+  return cleanUrl;
+}
+
+// Price formatter: currency na jene `$` dhore neya hoy na
+function formatPrice(data: any): string {
+  const raw = data.price || data.starting_price;
+  if (!raw) return 'Check rates';
+  const str = String(raw).trim();
+  if (/^[^\d\s]/.test(str)) return str; // already symbol/text diye shuru (e.g. $120, ৳5000)
+  const currency = String(data.currency || data.currency_symbol || '').trim();
+  return currency ? `${currency} ${str}` : 'Check rates';
+}
 ---
 
 {nearbyHotels.length > 0 && (
-  <section id="nearby-hotels" class="bg-white py-12 px-3 sm:px-8 lg:px-12 max-w-[1550px] mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
+  <section
+    id="nearby-hotels"
+    class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16"
+  >
     <div class="space-y-6">
-      
+
       <!-- Section Header -->
       <div class="border-b border-slate-200 pb-4 text-left flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div>
-          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Travellers also viewed</span>
-          <h2 class="text-xl sm:text-3xl font-black font-serif text-slate-900 tracking-tight">
-            Similar Hotels in Gulshan
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
+            Travellers also viewed
+          </span>
+          <h2 class="text-xl sm:text-3xl font-black font-sans text-[#002b11] tracking-tight">
+            More Hotels in Gulshan
           </h2>
         </div>
-        <p class="text-xs text-slate-500 font-medium">Verified stays and guest-favorite alternatives</p>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">Compare more stays before you book</p>
       </div>
 
-      <!-- TRIPADVISOR STYLE SIDE-BY-SIDE MOBILE GRID -->
-      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 text-left">
+      <!-- 4-HOTEL GRID -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-left">
         {nearbyHotels.map((h) => {
           const hData = h.data || {};
-          const hTitle = hData.title || hData.name || "Luxury Hotel";
-          const hCategory = hData.category || "Luxury Hotel";
-          const hLocation = hData.location || "Gulshan, Dhaka";
-          const hPrice = hData.price || "$120 / night";
-          const hImage = hData.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80";
-          const hSlug = String(hData.slug || h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
+          const hTitle = String(hData.title || hData.name || 'Hotel').trim();
+          const hCategory = hData.category || '';
+          const hLocation = String(hData.locality || hData.location || '').trim();
+          const hPrice = formatPrice(hData);
+          const hSlug = h.hSlug;
 
-          // REAL RATING & REVIEWS CALCULATION
-          const targetSlug = hSlug;
-          const targetTitle = hTitle.toLowerCase();
+          const firstGallery = Array.isArray(hData.gallery) ? hData.gallery[0] : null;
+          const rawImg =
+            hData.image ||
+            (firstGallery
+              ? typeof firstGallery === 'object'
+                ? firstGallery.photo || firstGallery.image
+                : firstGallery
+              : '');
+          const hImage = getOptimizedThumbnail(rawImg);
+
+          // Genuine review calculation
+          const targetTitle = norm(hTitle);
 
           const matchingReviews = allReviewsList.filter((rev: any) => {
             if (!rev) return false;
-            const isApproved = rev.approved === true || String(rev.approved).trim().toLowerCase() === 'true';
+            const isApproved = rev.approved === true || norm(rev.approved) === 'true';
             if (!isApproved) return false;
 
-            const rSlug = String(rev.slug || rev.hotelSlug || rev.hotel_slug || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-            const rId = String(rev.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.trim().toLowerCase() || "";
-            const rHotel = String(rev.hotel || rev.hotelTitle || rev.hotel_name || '').trim().toLowerCase();
+            const rSlug = normalizeSlug(rev.slug || rev.hotelSlug || rev.hotel_slug);
+            const rHotel = norm(rev.hotel || rev.hotelTitle || rev.hotel_name);
 
-            return (targetSlug !== "" && (rSlug === targetSlug || rId === targetSlug || rHotel === targetSlug)) ||
-                   (targetTitle !== "" && rHotel === targetTitle);
+            return (
+              (hSlug !== '' && (rSlug === hSlug || normalizeSlug(rev.hotel) === hSlug)) ||
+              (targetTitle !== '' && rHotel === targetTitle)
+            );
           });
 
           const embeddedRevs = Array.isArray(hData.reviews) ? hData.reviews : [];
-          const totalRealReviews = [...matchingReviews, ...embeddedRevs];
+
+          // Duplicate review dedupe (id thakle id diye)
+          const seen = new Set<string>();
+          const totalRealReviews = [...matchingReviews, ...embeddedRevs]
+            .filter((r: any) => r && Number(r.rating) >= 1 && Number(r.rating) <= 5)
+            .filter((r: any) => {
+              if (!r.id) return true;
+              const key = String(r.id);
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
 
           const realCount = totalRealReviews.length;
-          const realRatingNumber = realCount > 0 
-            ? (totalRealReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / realCount)
-            : (hData.rating ? Number(hData.rating) : null);
+          const realRatingNumber =
+            realCount > 0
+              ? totalRealReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / realCount
+              : hData.rating
+                ? Number(hData.rating)
+                : null;
 
           const realRatingDisplay = realRatingNumber ? realRatingNumber.toFixed(1) : null;
-          const hasRealReviews = realCount > 0 || Boolean(hData.rating);
-          const finalCountDisplay = realCount > 0 ? realCount : (hData.reviews_count || 0);
+          const finalCountDisplay = realCount > 0 ? realCount : Number(hData.reviews_count || 0);
 
           return (
-            <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group">
+            <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group">
               <div>
-                
-                <div class="h-32 xs:h-36 sm:h-48 w-full overflow-hidden relative bg-slate-900">
-                  <img 
-                    src={hImage} 
-                    alt={`${hTitle} - Similar Hotel in ${hLocation}`} 
-                    loading="lazy" 
-                    decoding="async" 
-                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+
+                <!-- CARD PHOTO -->
+                <div class="h-32 sm:h-48 w-full overflow-hidden relative bg-slate-900">
+                  <img
+                    src={hImage}
+                    alt={hLocation ? `${hTitle} in ${hLocation}` : hTitle}
+                    width="600"
+                    height="400"
+                    loading="lazy"
+                    decoding="async"
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
-                  
-                  <div class="absolute top-2 left-2 flex flex-col gap-1">
-                    <span class="bg-[#0d3b23] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md inline-block">
-                      Best Value
-                    </span>
-                  </div>
 
-                  <span class="hidden sm:inline-block absolute bottom-2 right-2 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-white/20">
-                    {hCategory}
-                  </span>
-                </div>
-
-                <div class="p-3 sm:p-5 space-y-1.5 sm:space-y-2.5">
-                  
-                  {hasRealReviews && realRatingNumber ? (
-                    <div class="flex items-center gap-1.5">
-                      <div class="flex items-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <span class={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full inline-block ${
-                            s <= Math.round(realRatingNumber) 
-                              ? 'bg-emerald-600' 
-                              : 'bg-emerald-600/25 border border-emerald-600/40'
-                          }`}></span>
-                        ))}
-                      </div>
-                      <span class="text-[10px] sm:text-xs font-black text-slate-800">{realRatingDisplay}</span>
-                      {finalCountDisplay > 0 && (
-                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-400">({finalCountDisplay})</span>
-                      )}
-                    </div>
-                  ) : (
-                    <div class="flex items-center gap-1">
-                      <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                        <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        <span>Verified Property</span>
+                  {hData.badge && (
+                    <div class="absolute top-2 left-2 flex flex-col gap-1">
+                      <span class="bg-[#0d3b23] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md inline-block">
+                        {hData.badge}
                       </span>
                     </div>
                   )}
 
+                  {hCategory && (
+                    <span class="hidden sm:inline-block absolute bottom-2 right-2 bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-white/20">
+                      {hCategory}
+                    </span>
+                  )}
+                </div>
+
+                <!-- CARD DETAILS -->
+                <div class="p-3 sm:p-5 space-y-1.5 sm:space-y-2.5">
+
+                  {realRatingNumber ? (
+                    <div class="flex items-center gap-1.5">
+                      <div
+                        class="flex items-center gap-0.5"
+                        role="img"
+                        aria-label={`Rated ${realRatingDisplay} out of 5`}
+                      >
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <span
+                            class={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full inline-block ${
+                              s <= Math.round(realRatingNumber)
+                                ? 'bg-emerald-600'
+                                : 'bg-emerald-600/25 border border-emerald-600/40'
+                            }`}
+                          ></span>
+                        ))}
+                      </div>
+                      <span class="text-[11px] sm:text-xs font-black text-slate-800">{realRatingDisplay}</span>
+                      {finalCountDisplay > 0 && (
+                        <span class="text-[10px] font-bold text-slate-500">({finalCountDisplay})</span>
+                      )}
+                    </div>
+                  ) : (
+                    <p class="text-[11px] font-medium text-slate-500">No reviews yet</p>
+                  )}
+
                   <h3 class="font-black text-slate-900 text-xs sm:text-base group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
-                    <a href={`/${hSlug}`} class="hover:underline">
-                      {hTitle}
-                    </a>
+                    <a href={`/${hSlug}/`} class="hover:underline">{hTitle}</a>
                   </h3>
 
-                  <p class="text-[10px] sm:text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
-                    <svg class="w-3 h-3 fill-emerald-600 shrink-0" viewBox="0 0 24 24">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                    <span class="truncate">{hLocation}</span>
-                  </p>
+                  {hLocation && (
+                    <p class="text-[11px] sm:text-xs text-slate-500 flex items-center gap-1 font-medium truncate">
+                      <svg aria-hidden="true" class="w-3 h-3 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                      <span class="truncate">{hLocation}</span>
+                    </p>
+                  )}
 
-                  <div class="pt-1 border-t border-slate-100 flex flex-col xs:flex-row xs:items-baseline justify-between gap-0.5">
-                    <span class="text-[9px] sm:text-[11px] text-slate-400 font-bold uppercase">From</span>
-                    <span class="text-xs sm:text-base font-black text-emerald-900 leading-tight">
-                      {hPrice.startsWith('$') || hPrice.startsWith('৳') ? hPrice : '$' + hPrice}
-                    </span>
+                  <div class="pt-1 border-t border-slate-100 flex items-baseline justify-between gap-1">
+                    <span class="text-[10px] sm:text-[11px] text-slate-500 font-bold uppercase">Rate</span>
+                    <span class="text-xs sm:text-base font-black text-emerald-900 leading-tight">{hPrice}</span>
                   </div>
 
                 </div>
               </div>
 
+              <!-- VIEW DETAILS CTA (trailing slash shoho canonical link) -->
               <div class="p-3 sm:p-5 pt-0">
-                <a 
-                  href={`/${hSlug}`} 
+                <a
+                  href={`/${hSlug}/`}
+                  aria-label={`View details of ${hTitle}`}
                   class="block w-full bg-slate-50 hover:bg-[#0d3b23] border border-slate-200 hover:border-transparent text-slate-800 hover:text-white font-black text-[11px] sm:text-xs text-center py-2 sm:py-2.5 rounded-xl transition duration-200 shadow-2xs hover:shadow-md"
                 >
-                  View Rates ➔
+                  View Details <span aria-hidden="true">➔</span>
                 </a>
               </div>
 
