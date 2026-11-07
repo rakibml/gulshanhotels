@@ -19,7 +19,7 @@ import { getCollection } from 'astro:content';
 export async function getStaticPaths() {
   const isProd = import.meta.env.PROD;
 
-  // ১. হোটেল ডাটা লোডার
+  // ১. হোটেল ডাটা লোডার (প্রোডাকশনে খসড়া/ড্রাফট ফিল্টার করা)
   let hotels: any[] = [];
   try { 
     hotels = await getCollection('hotels', ({ data }) => {
@@ -70,8 +70,6 @@ export async function getStaticPaths() {
       destinations = Object.entries(rawGlobDest).map(([filePath, item]: [string, any]) => ({
         id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, ''),
         data: item.frontmatter || item.data || {},
-        Content: item.default || item.Content || null,
-        body: item.compiledContent ? item.compiledContent() : ''
       }));
     } catch (e) {
       destinations = [];
@@ -112,6 +110,7 @@ export async function getStaticPaths() {
     }
   }
 
+  // ডুপ্লিকেট ইউআরএল প্রতিরোধ
   const takenSlugs = new Set([
     ...hotelPaths.map((p: any) => p.params.slug),
     ...destinationPaths.map((p: any) => p.params.slug)
@@ -134,21 +133,6 @@ export async function getStaticPaths() {
 
 const { type = 'hotel', entry } = Astro.props;
 
-// মার্কডাউন আর্টিকেল রেন্ডারার (Cloudflare Build-Safe with Try/Catch)
-let Content: any = null;
-if (type === 'destination' || type === 'page') {
-  try {
-    if (typeof entry?.render === 'function') {
-      const rendered = await entry.render();
-      Content = rendered.Content;
-    } else if (entry?.Content) {
-      Content = entry.Content;
-    }
-  } catch (err) {
-    Content = null;
-  }
-}
-
 // ================= হোটেল মেটাডাটা ও ক্লিন এসইও ইঞ্জিন =================
 const hotel = type === 'hotel' ? entry : null;
 const hotelData = hotel?.data || {};
@@ -157,6 +141,7 @@ const hotelCategory = String(hotelData.category || "Luxury Hotel").trim();
 const rawSlug = entry?.data?.slug || entry?.slug || entry?.id || "";
 const hotelSlug = String(rawSlug).split('/').pop()?.replace(/\.(md|mdx)$/, '').trim().toLowerCase();
 
+// লম্বা ঠিকানা থেকে শুধুমাত্র সংক্ষিপ্ত ও ক্লিন এলাকা বের করা (কীওয়ার্ড স্টাফিং রোধ)
 function getShortArea(loc: string): string {
   const s = String(loc || "").toLowerCase();
   if (s.includes('gulshan-2') || s.includes('gulshan 2')) return 'Gulshan 2, Dhaka';
@@ -169,12 +154,14 @@ function getShortArea(loc: string): string {
 
 const shortArea = getShortArea(hotelData.location);
 
+// ১. গুগল ফ্রেন্ডলি টাইটেল (৫০-৬০ অক্ষরের মধ্যে রাখা)
 let pageTitle = hotelData.seo_title ? String(hotelData.seo_title).trim() : "";
 if (!pageTitle && hotelTitle) {
   const candidate = `${hotelTitle}: ${hotelCategory} in ${shortArea} | Rates`;
   if (candidate.length <= 60) {
     pageTitle = candidate;
   } else {
+    // বড় নামের হোটেলের জন্য স্মার্ট টাইটেল
     pageTitle = `${hotelTitle} in ${shortArea} | Rates & Booking`;
     if (pageTitle.length > 60) {
       pageTitle = `${hotelTitle} (${shortArea.split(',')[0]}) | Rates`;
@@ -182,11 +169,13 @@ if (!pageTitle && hotelTitle) {
   }
 }
 
+// ২. গুগল ফ্রেন্ডলি মেটা ডেসক্রিপশন (সর্বোচ্চ ১৫০ অক্ষরের মধ্যে রাখা)
 let metaDescription = hotelData.seo_description ? String(hotelData.seo_description).trim() : "";
 if (!metaDescription && hotelTitle) {
   metaDescription = `Book your stay at ${hotelTitle} in ${shortArea}. Explore room rates, photos, amenities, guest reviews, and direct reservation details.`;
 }
 
+// কাভার ইমেজ (কোনো আনস্প্ল্যাশ ফলব্যাক নয়)
 const rawImage = hotelData.image || (Array.isArray(hotelData.gallery) && hotelData.gallery.length > 0 
   ? (typeof hotelData.gallery[0] === 'object' ? hotelData.gallery[0]?.photo || hotelData.gallery[0]?.image : hotelData.gallery[0]) 
   : "");
@@ -194,9 +183,9 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
 ---
 
 {type === 'destination' ? (
-  <LocationCategoryTemplate entry={entry} Content={Content} />
+  <LocationCategoryTemplate entry={entry} />
 ) : type === 'page' ? (
-  <PageView entry={entry} Content={Content} />
+  <PageView entry={entry} />
 ) : (
   <Layout 
     title={pageTitle}
