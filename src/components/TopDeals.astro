@@ -1,5 +1,5 @@
 ---
-// src/components/TopDeals.astro (100% Working Wishlist, Genuine Deals & Google SEO Compliant)
+// src/components/TopDeals.astro (100% Conflict-Free Wishlist, Realtime Deals & SEO Compliant)
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -14,7 +14,7 @@ const {
 
 const isProd = import.meta.env.PROD;
 
-// ১. হোটেল ডাটা লোডার
+// ১. ড্রাফট ফিল্টারসহ হোটেল লোডার
 let allHotels: any[] = [];
 try {
   const collectionHotels = await getCollection('hotels', ({ data }) => {
@@ -96,7 +96,7 @@ function getCardImage(url: string) {
   return cleanUrl;
 }
 
-// ৩. ডিল ক্যালকুলেটর
+// ৩. ডিল ক্যালকুলেটর (একই মুদ্রার তুলনা)
 const processedDeals = allHotels.map(hotelItem => {
   const hData = hotelItem.data || {};
   const hTitle = String(hData.title || hData.name || "Hotel Details").trim();
@@ -105,7 +105,7 @@ const processedDeals = allHotels.map(hotelItem => {
   
   const rawImg = hData.image || (Array.isArray(hData.gallery) && hData.gallery[0] ? (typeof hData.gallery[0] === 'object' ? hData.gallery[0].photo || hData.gallery[0].image : hData.gallery[0]) : "");
   const hImage = getCardImage(rawImg);
-  const hLocation = String(hData.locality || hData.location || "Gulshan, Dhaka").trim();
+  const hLocation = String(hData.locality || hData.location || "").trim();
 
   const normTitle = normalize(hTitle);
   const normSlug = normalize(hSlug);
@@ -228,12 +228,12 @@ const dealHotels = processedDeals
           {dealHotels.map((deal) => (
             <div class="deal-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group">
               
-              <!-- ১. কার্ড ছবি ও উইশলিস্ট বাটন -->
+              <!-- ১. কার্ড ছবি ও স্বতন্ত্র লাভ বাটন -->
               <div class="relative w-full aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
                 <a href={`/${deal.hSlug}/`} class="block w-full h-full" aria-label={`View deal for ${deal.hTitle}`}>
                   <img 
                     src={deal.hImage} 
-                    alt={`${deal.hTitle} Room Photo`} 
+                    alt={`${deal.hTitle} in ${deal.hLocation}`} 
                     loading="lazy" 
                     decoding="async" 
                     width="320"
@@ -248,15 +248,15 @@ const dealHotels = processedDeals
                   </div>
                 )}
 
-                <!-- Wishlist Heart Button (সরাসরি কাজ করবে) -->
+                <!-- স্বতন্ত্র লাভ বাটন (top-deal-heart ক্লাস দিয়ে আলাদা করা) -->
                 <button 
                   type="button"
-                  class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-20 shadow-sm transition active:scale-90"
+                  class="top-deal-heart absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-20 shadow-sm transition active:scale-90"
                   data-title={deal.hTitle}
                   data-image={deal.hImage}
                   data-url={`/${deal.hSlug}/`}
                   data-price={deal.dealPriceDisplay}
-                  aria-label="Add to Wishlist"
+                  aria-label="Save to Wishlist"
                 >
                   <svg aria-hidden="true" class="w-4 h-4 text-slate-700 pointer-events-none transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -264,7 +264,7 @@ const dealHotels = processedDeals
                 </button>
               </div>
 
-              <!-- ২. কার্ড বডি -->
+              <!-- ২. কার্ড ডিটেইলস -->
               <a href={`/${deal.hSlug}/`} class="block w-full pt-3 pb-1 px-0.5 space-y-1.5 hover:no-underline">
                 <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors">
                   {deal.hTitle}
@@ -328,7 +328,7 @@ const dealHotels = processedDeals
   </section>
 )}
 
-<!-- SCRIPT (POPULAR HOTELS-এর মতো হুবহু উইশলিস্ট স্ক্রিপ্ট) -->
+<!-- ৩. স্বতন্ত্র, বিচ্ছিন্ন ও মারামারিমুক্ত উইশলিস্ট স্ক্রিপ্ট -->
 <script is:inline>
   (() => {
     const initTopDealsSection = () => {
@@ -338,109 +338,91 @@ const dealHotels = processedDeals
 
       if (!track) return;
 
-      let isUpdating = false;
-      function updateArrows() {
-        if (isUpdating) return;
-        isUpdating = true;
+      // অ্যারো বাটন হ্যান্ডলার
+      if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => track.scrollBy({ left: -320, behavior: 'smooth' });
+        nextBtn.onclick = () => track.scrollBy({ left: 320, behavior: 'smooth' });
 
-        requestAnimationFrame(() => {
-          if (!track || !prevBtn || !nextBtn) {
-            isUpdating = false;
-            return;
-          }
-
+        const updateArrows = () => {
           const scrollLeft = track.scrollLeft;
           const maxScroll = track.scrollWidth - track.clientWidth - 5;
-
-          if (scrollLeft <= 5) {
-            prevBtn.classList.add('hidden');
-          } else {
-            prevBtn.classList.remove('hidden');
-          }
-
-          if (scrollLeft >= maxScroll) {
-            nextBtn.classList.add('hidden');
-          } else {
-            nextBtn.classList.remove('hidden');
-          }
-
-          isUpdating = false;
-        });
-      }
-
-      if (prevBtn && nextBtn) {
-        prevBtn.addEventListener('click', () => {
-          track.scrollBy({ left: -320, behavior: 'smooth' });
-        });
-
-        nextBtn.addEventListener('click', () => {
-          track.scrollBy({ left: 320, behavior: 'smooth' });
-        });
+          prevBtn.classList.toggle('hidden', scrollLeft <= 5);
+          nextBtn.classList.toggle('hidden', scrollLeft >= maxScroll);
+        };
 
         updateArrows();
         track.addEventListener('scroll', updateArrows, { passive: true });
-        window.addEventListener('resize', updateArrows, { passive: true });
       }
 
-      // PopularHotels-এর মতো হুবহু কার্যকর উইশলিস্ট টগল ইঞ্জিন
-      document.querySelectorAll('#deals .card-wishlist-btn').forEach(btn => {
-        const title = btn.getAttribute('data-title') || '';
+      // শুধুমাত্র TopDeals-এর নিজস্ব লাভ বাটনের জন্য নির্দিষ্ট কোড (No Conflict)
+      const dealButtons = track.querySelectorAll('.top-deal-heart');
+
+      const refreshDealHearts = () => {
         let list = [];
-        try {
-          list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
-        } catch (err) { list = []; }
+        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (e) { list = []; }
 
-        const isSaved = list.some(item => item.title === title);
-        const iconSvg = btn.querySelector('svg');
-        if (isSaved && iconSvg) {
-          iconSvg.setAttribute('fill', 'currentColor');
-          iconSvg.classList.add('text-rose-600');
-          iconSvg.classList.remove('text-slate-700');
-        }
+        dealButtons.forEach(btn => {
+          const title = btn.getAttribute('data-title') || '';
+          const isSaved = list.some(item => item.title === title);
+          const svg = btn.querySelector('svg');
+          if (svg) {
+            if (isSaved) {
+              svg.setAttribute('fill', 'currentColor');
+              svg.classList.add('text-rose-600');
+              svg.classList.remove('text-slate-700');
+            } else {
+              svg.setAttribute('fill', 'none');
+              svg.classList.remove('text-rose-600');
+              svg.classList.add('text-slate-700');
+            }
+          }
+        });
+      };
 
+      refreshDealHearts();
+
+      dealButtons.forEach(btn => {
         btn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
 
+          const title = btn.getAttribute('data-title') || '';
           const image = btn.getAttribute('data-image') || '';
           const url = btn.getAttribute('data-url') || '';
           const price = btn.getAttribute('data-price') || '';
 
+          let list = [];
           try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
 
           const existingIndex = list.findIndex(item => item.title === title);
+          const svg = btn.querySelector('svg');
 
           if (existingIndex > -1) {
             list.splice(existingIndex, 1);
-            if (iconSvg) {
-              iconSvg.setAttribute('fill', 'none');
-              iconSvg.classList.remove('text-rose-600');
-              iconSvg.classList.add('text-slate-700');
+            if (svg) {
+              svg.setAttribute('fill', 'none');
+              svg.classList.remove('text-rose-600');
+              svg.classList.add('text-slate-700');
             }
           } else {
             list.push({ title, image, url, price });
-            if (iconSvg) {
-              iconSvg.setAttribute('fill', 'currentColor');
-              iconSvg.classList.remove('text-slate-700');
-              iconSvg.classList.add('text-rose-600');
+            if (svg) {
+              svg.setAttribute('fill', 'currentColor');
+              svg.classList.remove('text-slate-700');
+              svg.classList.add('text-rose-600');
             }
           }
 
-          try {
-            localStorage.setItem('gh_wishlist', JSON.stringify(list));
-          } catch (err) {}
+          try { localStorage.setItem('gh_wishlist', JSON.stringify(list)); } catch (err) {}
 
-          // হেডারের কাউন্ট আপডেট
+          // হেডারের কাউন্টার সাথে সাথে আপডেট
           const countEl = document.getElementById('wishlist-count');
           if (countEl) {
-            if (list.length > 0) {
-              countEl.textContent = list.length.toString();
-              countEl.classList.remove('hidden');
-            } else {
-              countEl.classList.add('hidden');
-            }
+            countEl.textContent = list.length.toString();
+            countEl.classList.toggle('hidden', list.length === 0);
           }
 
+          // গ্লোবাল ইভেন্ট ফায়ার করা
           window.dispatchEvent(new CustomEvent('wishlist-updated'));
         };
       });
@@ -448,5 +430,28 @@ const dealHotels = processedDeals
 
     document.addEventListener('DOMContentLoaded', initTopDealsSection);
     document.addEventListener('astro:page-load', initTopDealsSection);
+    window.addEventListener('wishlist-updated', () => {
+      const track = document.getElementById('dealsHotelsTrack');
+      if (track) {
+        let list = [];
+        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (e) { list = []; }
+        track.querySelectorAll('.top-deal-heart').forEach(btn => {
+          const title = btn.getAttribute('data-title') || '';
+          const isSaved = list.some(item => item.title === title);
+          const svg = btn.querySelector('svg');
+          if (svg) {
+            if (isSaved) {
+              svg.setAttribute('fill', 'currentColor');
+              svg.classList.add('text-rose-600');
+              svg.classList.remove('text-slate-700');
+            } else {
+              svg.setAttribute('fill', 'none');
+              svg.classList.remove('text-rose-600');
+              svg.classList.add('text-slate-700');
+            }
+          }
+        });
+      }
+    });
   })();
 </script>
