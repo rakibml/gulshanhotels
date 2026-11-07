@@ -1,5 +1,5 @@
 ---
-// src/layouts/Layout.astro (Global Modern Layout with Important Pages Footer Column)
+// src/layouts/Layout.astro (Global Modern Layout - Development Mode: Noindex Active)
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
 import Header from '../components/Header.astro';
@@ -16,8 +16,11 @@ const {
   image = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
 } = Astro.props;
 
-const currentPath = Astro.url.pathname;
-const siteUrl = Astro.url.origin + currentPath;
+// নিশ্চিত ক্যানোনিকাল ইউআরএল
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || 'https://gulshanhotels.com').href;
+
+// সোশ্যাল প্রিভিউ ইমেজের জন্য সম্পূর্ণ নিরাপদ অ্যাবসোলিউট ইউআরএল
+const ogImage = image.startsWith('http') ? image : new URL(image, Astro.site || 'https://gulshanhotels.com').href;
 ---
 
 <!doctype html>
@@ -27,11 +30,16 @@ const siteUrl = Astro.url.origin + currentPath;
     <script is:inline>
       try { if (!sessionStorage.getItem('gh_intro')) { document.documentElement.classList.add('gh-intro'); sessionStorage.setItem('gh_intro','1'); } } catch(e) {}
     </script>
+    
+    <!-- ফন্ট ও ইমেজ CDN প্রিকানেক্ট (স্পিড অপ্টিমাইজেশন) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://media.gulshanhotels.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- BLOCK GOOGLE INDEXING DURING DEVELOPMENT -->
+    
+    <!-- 🛑 সাময়িকভাবে গুগল ইনডেক্সিং বন্ধ (সাইট রেডি হলে এটি index, follow করে দেবেন) -->
     <meta name="robots" content="noindex, nofollow" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
@@ -39,25 +47,27 @@ const siteUrl = Astro.url.origin + currentPath;
     <!-- PRIMARY SEO META TAGS -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={siteUrl} />
+    <link rel="canonical" href={canonicalUrl} />
 
     <!-- OPEN GRAPH / FACEBOOK / WHATSAPP PREVIEW -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={siteUrl} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={image} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="GulshanHotels.com" />
 
     <!-- TWITTER CARDS -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={siteUrl} />
+    <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image" content={ogImage} />
   </head>
-<body class="bg-white font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-800 selection:text-white">    
+  <body class="bg-white font-sans text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-800 selection:text-white">    
+    
     <!-- GLOBAL HEADER -->
-    <Header currentPath={currentPath} />
+    <Header currentPath={Astro.url.pathname} />
 
     <!-- INTERACTIVE WISHLIST MODAL DRAWER -->
     <div id="wishlist-modal" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden transition-opacity">
@@ -65,7 +75,7 @@ const siteUrl = Astro.url.origin + currentPath;
         <div>
           <div class="flex justify-between items-center border-b border-slate-100 pb-4">
             <h3 class="text-lg font-black text-[#0d3b23] uppercase tracking-wider flex items-center space-x-2">
-              <svg class="w-5 h-5 text-rose-500 fill-rose-500" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <svg aria-hidden="true" class="w-5 h-5 text-rose-500 fill-rose-500" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               <span>Saved Favorites</span>
             </h3>
             <button id="close-wishlist" aria-label="Close Favorites" class="text-slate-400 hover:text-slate-900 p-1 text-2xl font-bold cursor-pointer">&times;</button>
@@ -89,61 +99,56 @@ const siteUrl = Astro.url.origin + currentPath;
       <slot />
     </div>
 
-    <!-- GLOBAL MODERN FOOTER (CLEAN LIGHT THEME WITH IMPORTANT PAGES COLUMN) -->
-<footer class="w-full bg-white text-slate-900 pt-2 pb-8 text-center sm:text-left text-xs sm:text-sm">
-<div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+    <!-- GLOBAL MODERN FOOTER -->
+    <footer class="w-full bg-white text-slate-900 pt-2 pb-8 text-center sm:text-left text-xs sm:text-sm">
+      <div class="max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
         
-        <!-- ================= NEWSLETTER BANNER CONTAINER ================= -->
-<div class="bg-[#0d3b23] p-7 sm:p-10 rounded-3xl border border-emerald-800/80 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left text-white">
-  
-  <!-- Left Side: Copy -->
-  <div class="space-y-2">
-    <div class="flex items-center justify-center md:justify-start gap-2 text-emerald-300">
-      <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-      </svg>
-      <span class="text-[11px] font-black uppercase tracking-[0.2em]">VIP Travel Dispatch</span>
-    </div>
+        <!-- NEWSLETTER BANNER CONTAINER -->
+        <div class="bg-[#0d3b23] p-7 sm:p-10 rounded-3xl border border-emerald-800/80 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left text-white">
+          <div class="space-y-2">
+            <div class="flex items-center justify-center md:justify-start gap-2 text-emerald-300">
+              <svg aria-hidden="true" class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+              <span class="text-[11px] font-black uppercase tracking-[0.2em]">VIP Travel Dispatch</span>
+            </div>
 
-    <h3 class="text-2xl sm:text-3xl font-black text-white font-serif tracking-tight">
-      Get Exclusive Deals & Updates
-    </h3>
+            <h3 class="text-2xl sm:text-3xl font-black text-white font-serif tracking-tight">
+              Get Exclusive Deals & Updates
+            </h3>
 
-    <p class="text-xs sm:text-sm text-emerald-100/85 max-w-md leading-relaxed font-normal">
-      Subscribe to receive secret price drops, embassy stay alerts, and diplomatic hotel offers in Gulshan.
-    </p>
-  </div>
+            <p class="text-xs sm:text-sm text-emerald-100/85 max-w-md leading-relaxed font-normal">
+              Subscribe to receive secret price drops, embassy stay alerts, and diplomatic hotel offers in Gulshan.
+            </p>
+          </div>
 
-  <!-- Right Side: Form -->
-  <div class="w-full md:w-auto">
-    <form id="newsletterForm" class="flex flex-col sm:flex-row gap-2.5">
-      <input 
-        type="email" 
-        id="newsletterEmail"
-        required
-        placeholder="Enter your email address..." 
-        class="bg-black/25 border border-white/20 text-white placeholder-emerald-100/50 px-5 py-3.5 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-white w-full sm:w-80 transition" 
-      />
-      
-      <button 
-        type="submit" 
-        id="newsletterBtn" 
-        class="bg-white hover:bg-emerald-50 text-slate-950 font-black px-7 py-3.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer shrink-0 active:scale-95"
-      >
-        Subscribe
-      </button>
-    </form>
+          <div class="w-full md:w-auto">
+            <form id="newsletterForm" class="flex flex-col sm:flex-row gap-2.5">
+              <input 
+                type="email" 
+                id="newsletterEmail"
+                required
+                placeholder="Enter your email address..." 
+                class="bg-black/25 border border-white/20 text-white placeholder-emerald-100/50 px-5 py-3.5 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-white w-full sm:w-80 transition" 
+              />
+              
+              <button 
+                type="submit" 
+                id="newsletterBtn" 
+                class="bg-white hover:bg-emerald-50 text-slate-950 font-black px-7 py-3.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer shrink-0 active:scale-95"
+              >
+                Subscribe
+              </button>
+            </form>
 
-    <!-- Success Message with Clean SVG (No Emojis / Symbols) -->
-    <div id="newsletterSuccess" class="hidden text-emerald-200 font-bold text-xs sm:text-sm bg-black/30 p-3.5 rounded-xl border border-emerald-400/40 text-center mt-2.5 flex items-center justify-center gap-2">
-      <svg class="w-4 h-4 text-emerald-400 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-      <span>Thank you! You have been subscribed to exclusive Gulshan hotel deals.</span>
-    </div>
-  </div>
-
-</div>
+            <div id="newsletterSuccess" class="hidden text-emerald-200 font-bold text-xs sm:text-sm bg-black/30 p-3.5 rounded-xl border border-emerald-400/40 text-center mt-2.5 flex items-center justify-center gap-2">
+              <svg aria-hidden="true" class="w-4 h-4 text-emerald-400 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Thank you! You have been subscribed to exclusive Gulshan hotel deals.</span>
+            </div>
+          </div>
+        </div>
 
         <!-- 4-Column Modern SEO Footer Links -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center sm:text-left pt-2">
@@ -153,15 +158,15 @@ const siteUrl = Astro.url.origin + currentPath;
             <a href="/" aria-label="GulshanHotels.com home" class="inline-block">
               <Logo uid="ft" size={48} />
             </a>
-            <p class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium pt-1">
+            <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium pt-1">
               Your trusted portal to discover, compare, and book the finest luxury, boutique, and business hotels in Gulshan, Banani, and Baridhara, Dhaka.
             </p>
           </div>
 
-          <!-- Col 2: SEO Keyword Locations -->
+          <!-- Col 2: Locations -->
           <div class="space-y-3">
             <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Popular Locations</h4>
-            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
+            <ul class="space-y-2 text-slate-700 text-xs sm:text-sm font-semibold">
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels in Gulshan 1</a></li>
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels in Gulshan 2</a></li>
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">Hotels near US Embassy</a></li>
@@ -173,7 +178,7 @@ const siteUrl = Astro.url.origin + currentPath;
           <!-- Col 3: Categories -->
           <div class="space-y-3">
             <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Top Categories</h4>
-            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
+            <ul class="space-y-2 text-slate-700 text-xs sm:text-sm font-semibold">
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">5-Star Luxury Hotels</a></li>
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">Boutique Stays</a></li>
               <li><a href="/#hotels" class="hover:text-emerald-800 transition">Executive Business Accommodations</a></li>
@@ -184,19 +189,19 @@ const siteUrl = Astro.url.origin + currentPath;
           <!-- Col 4: Important Pages -->
           <div class="space-y-3">
             <h4 class="font-black text-slate-900 uppercase tracking-wider text-xs sm:text-sm border-b border-slate-200 pb-2">Important Pages</h4>
-            <ul class="space-y-2 text-slate-800 text-xs sm:text-sm font-bold">
-              <li><a href="/about" class="hover:text-emerald-800 transition">About Us</a></li>
-              <li><a href="/about" class="hover:text-emerald-800 transition">Contact Us</a></li>
+            <ul class="space-y-2 text-slate-700 text-xs sm:text-sm font-semibold">
+              <li><a href="/about/" class="hover:text-emerald-800 transition">About Us</a></li>
+              <li><a href="/about/" class="hover:text-emerald-800 transition">Contact Us</a></li>
               <li><a href="/sitemap-index.xml" class="hover:text-emerald-800 transition">Sitemap</a></li>
-              <li><a href="/privacy" class="hover:text-emerald-800 transition">Privacy Policy</a></li>
-              <li><a href="/disclaimer" class="hover:text-emerald-800 transition">Disclaimer</a></li>
+              <li><a href="/privacy/" class="hover:text-emerald-800 transition">Privacy Policy</a></li>
+              <li><a href="/disclaimer/" class="hover:text-emerald-800 transition">Disclaimer</a></li>
             </ul>
           </div>
 
         </div>
 
         <!-- Copyright Bar -->
-        <div class="pt-8 border-t border-slate-200 text-center text-slate-800 text-xs sm:text-sm font-bold">
+        <div class="pt-8 border-t border-slate-200 text-center text-slate-600 text-xs sm:text-sm font-medium">
           <p>© 2026 GulshanHotels.com. All Rights Reserved.</p>
         </div>
 
@@ -206,6 +211,9 @@ const siteUrl = Astro.url.origin + currentPath;
     <!-- CLIENT SCRIPTS -->
     <script is:inline>
       const initLayoutScript = () => {
+        if (window._layoutInitialized) return;
+        window._layoutInitialized = true;
+
         let lastScrollY = window.scrollY;
         const header = document.getElementById('main-header');
 
@@ -219,7 +227,7 @@ const siteUrl = Astro.url.origin + currentPath;
             header.classList.remove('-translate-y-full');
           }
           lastScrollY = currentScrollY;
-        });
+        }, { passive: true });
 
         const btn = document.getElementById('mobile-menu-btn');
         const menu = document.getElementById('mobile-menu');
@@ -229,7 +237,7 @@ const siteUrl = Astro.url.origin + currentPath;
           });
         }
 
-        // WISHLIST REALTIME LOCALSTORAGE LOGIC
+        // WISHLIST LOGIC
         const wishlistBtn = document.getElementById('wishlist-btn');
         const wishlistModal = document.getElementById('wishlist-modal');
         const closeWishlist = document.getElementById('close-wishlist');
@@ -258,7 +266,7 @@ const siteUrl = Astro.url.origin + currentPath;
               wishlistItemsEl.innerHTML = list.map((item, idx) => `
                 <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-200 bg-slate-50">
                   <div class="flex items-center gap-3">
-                    <img src="${item.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=120&q=80'}" alt="${item.title}" class="w-12 h-12 object-cover rounded-xl" />
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=120&q=80'}" alt="${item.title}" width="48" height="48" class="w-12 h-12 object-cover rounded-xl" />
                     <div>
                       <h4 class="font-bold text-slate-900 text-xs">${item.title || 'Hotel'}</h4>
                       <span class="text-[10px] font-bold text-emerald-800">${item.price || 'Check Rates'}</span>
@@ -298,7 +306,7 @@ const siteUrl = Astro.url.origin + currentPath;
           });
         }
 
-        // Newsletter form interactivity
+        // NEWSLETTER SUBMISSION
         const newsForm = document.getElementById('newsletterForm');
         const newsSuccess = document.getElementById('newsletterSuccess');
         if (newsForm && newsSuccess) {
@@ -323,7 +331,10 @@ const siteUrl = Astro.url.origin + currentPath;
       };
 
       document.addEventListener('DOMContentLoaded', initLayoutScript);
-      document.addEventListener('astro:page-load', initLayoutScript);
+      document.addEventListener('astro:page-load', () => {
+        window._layoutInitialized = false;
+        initLayoutScript();
+      });
     </script>
   </body>
 </html>
