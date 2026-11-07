@@ -20,7 +20,7 @@ gallery:
     alt: bathroom view
   - photo: https://media.gulshanhotels.com/deluxe_twin.webp
     alt: deluxe twin bed room
-popular: false
+popular: true
 sponsored: false
 spotlight_desc: ''
 about_notice: ''
