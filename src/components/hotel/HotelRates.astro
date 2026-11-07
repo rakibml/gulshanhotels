@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelRates.astro (Unified Range Picker + Interactive Guest Selector)
+// src/components/hotel/HotelRates.astro (Unified Range Picker + Interactive Guest Selector) — FIXED
 interface Props {
   hotel: any;
 }
@@ -15,8 +15,17 @@ const agodaId = String(data.agoda_id || data.agodaId || "").trim();
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
 
-let cleanWhatsapp = whatsapp.replace(/[^0-9]/g, '');
-if (cleanWhatsapp.startsWith('01')) cleanWhatsapp = '88' + cleanWhatsapp;
+// BD number normalizer: 01XXXXXXXXX / 1XXXXXXXXX / 8801XXXXXXXXX / +8801XXXXXXXXX -> 8801XXXXXXXXX
+function normalizeBdWhatsapp(raw: string): string {
+  let d = String(raw || '').replace(/[^0-9]/g, '');
+  if (!d) return '';
+  if (d.startsWith('880')) return d;
+  if (d.startsWith('0')) return '88' + d;
+  if (d.length === 10 && d.startsWith('1')) return '880' + d;
+  return d;
+}
+
+const cleanWhatsapp = normalizeBdWhatsapp(whatsapp);
 const cleanPhone = phone.replace(/[^0-9+]/g, '');
 const hasContact = Boolean(cleanPhone || cleanWhatsapp);
 const waMessage = 'Hi! I want to book a room at ' + hotelTitle;
@@ -35,6 +44,7 @@ const mainCurrency =
   detectCurrency(rawBasePrice) ||
   customChannels.map((c) => detectCurrency(c?.price)).find(Boolean) ||
   '$';
+const apiCurrency = mainCurrency === '৳' ? 'BDT' : 'USD';
 
 function formatPrice(p: any): string {
   const s = String(p || "").trim();
@@ -65,22 +75,14 @@ function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "",
     const p = url.replace(/[^0-9+]/g, '');
     return p ? `tel:${p}` : "#";
   }
-  if ((isWhatsapp || /^[0-9+\s\-()]+$/.test(url)) && !/^https?:/i.test(url)) {
-    let digits = url.replace(/[^0-9]/g, '');
+  // শুধু whatsapp preset/নাম হলেই number -> wa.me
+  if (isWhatsapp && !/^https?:/i.test(url)) {
+    const digits = normalizeBdWhatsapp(url);
     if (!digits) return "#";
-    if (digits.startsWith('01')) digits = '88' + digits;
     return `https://wa.me/${digits}?text=${encodeURIComponent('Hi! I want to book a room at ' + hName)}`;
   }
   if (!/^(https?:|tel:|mailto:)/i.test(url)) return safeUrl(`https://${url}`);
   return safeUrl(url);
-}
-
-function cleanSvgSSR(svg: string): string {
-  return String(svg || '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
-    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
-    .replace(/javascript:/gi, '');
 }
 
 const channels = customChannels
@@ -88,11 +90,9 @@ const channels = customChannels
     const providerName = String(item?.provider_name || "Booking Partner");
     const iconPreset = String(item?.icon_preset || "direct");
     const showPrice = item?.show_price !== false && item?.showPrice !== false;
-    const customSvg = item?.custom_svg ? cleanSvgSSR(item.custom_svg) : "";
     return {
       providerName,
       iconPreset,
-      customSvg,
       showPrice,
       rawPrice: item?.price,
       price: formatPrice(item?.price),
@@ -120,6 +120,16 @@ const displayStartingPrice =
     ? `${mainCurrency}${lowestNumericPrice.toLocaleString('en-US')}`
     : (formatPrice(rawBasePrice) || "Check Rates");
 
+// Agoda button fallback href (worker fail করলেও বাটন কাজ করবে)
+const agodaChannel = channels.find(
+  (c) => c.iconPreset === 'agoda' || /agoda/i.test(c.providerName) || /agoda\.com/i.test(c.url)
+);
+const agodaFallbackUrl = safeUrl(
+  String(data.agoda_url || "").trim() ||
+  agodaChannel?.url ||
+  (agodaId ? `https://www.agoda.com/partners/partnersearch.aspx?hid=${encodeURIComponent(agodaId)}` : "")
+);
+
 const presetSvgs: Record<string, string> = {
   agoda: `<div class="w-6 h-6 rounded-md bg-[#1d3557] text-white font-bold text-[8px] flex items-center justify-center shrink-0">agoda</div>`,
   booking: `<div class="w-6 h-6 rounded-md bg-[#003580] text-white font-bold text-[10px] flex items-center justify-center shrink-0">B.</div>`,
@@ -130,7 +140,16 @@ const presetSvgs: Record<string, string> = {
 ---
 
 <!-- ================= SLEEK & AIRY RATES CARD ================= -->
-<div id="rates-card" class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-6 text-left space-y-4 relative">
+<!-- data-* এখন root এ: "Other Options" না থাকলেও script কাজ করবে -->
+<div
+  id="rates-card"
+  data-hotel-title={hotelTitle}
+  data-hotel-slug={hotelSlug}
+  data-agoda-id={agodaId}
+  data-agoda-fallback={agodaFallbackUrl}
+  data-currency={apiCurrency}
+  class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-6 text-left space-y-4 relative"
+>
 
   <!-- ১. মেইন প্রাইস হেডার -->
   <div class="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -157,15 +176,18 @@ const presetSvgs: Record<string, string> = {
     </div>
   </div>
 
-  <!-- ২. ইন্টারেক্টিভ বুকিং কন্ট্রোলস (Unified Range Picker + Guests) -->
+  <!-- ২. ইন্টারেক্টিভ বুকিং কন্ট্রোলস -->
   <div class="space-y-2">
-    
-    <!-- (ক) একবারে চেক-ইন ও চেক-আউট সিলেক্টর বার -->
+
+    <!-- (ক) চেক-ইন / চেক-আউট রেঞ্জ -->
     <div class="relative">
-      <button 
-        type="button" 
-        id="dateRangeBtn" 
-        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left group shadow-2xs"
+      <button
+        type="button"
+        id="dateRangeBtn"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="calendarDropdown"
+        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left group shadow-sm"
       >
         <div class="flex items-center gap-2.5 min-w-0">
           <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -174,52 +196,53 @@ const presetSvgs: Record<string, string> = {
           <div class="truncate">
             <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400">Dates of Stay</span>
             <span id="dateRangeSummaryText" class="font-bold text-xs text-slate-800 block truncate">
-              Loading dates...
+              Select dates
             </span>
           </div>
         </div>
-        <span id="stayNightsBadge" class="bg-white border border-slate-200 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 shadow-2xs">
+        <span id="stayNightsBadge" class="bg-white border border-slate-200 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 shadow-sm">
           1 night
         </span>
       </button>
 
-      <!-- 🔥 এক ক্লিকে রেঞ্জ ক্যালেন্ডার ড্রপডাউন (Vanilla Range Calendar) 🔥 -->
-      <div 
-        id="calendarDropdown" 
+      <div
+        id="calendarDropdown"
+        role="dialog"
+        aria-label="Choose dates"
         class="hidden absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 space-y-3"
       >
-        <!-- ক্যালেন্ডার হেডার (মাস পরিবর্তন) -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-          <button type="button" id="prevMonthBtn" class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition" aria-label="Previous month">
+          <button type="button" id="prevMonthBtn" class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none" aria-label="Previous month">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <span id="calendarMonthYear" class="font-bold text-xs text-slate-800"></span>
+          <span id="calendarMonthYear" class="font-bold text-xs text-slate-800" aria-live="polite"></span>
           <button type="button" id="nextMonthBtn" class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition" aria-label="Next month">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
 
-        <!-- সপ্তাহের দিনের নাম -->
         <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400">
           <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
         </div>
 
-        <!-- দিনের গ্রিড -->
         <div id="calendarDaysGrid" class="grid grid-cols-7 gap-y-1 text-center text-xs"></div>
 
         <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[10px]">
-          <span class="text-slate-400">Click Check-in, then Check-out</span>
+          <span id="calendarHint" class="text-slate-400">Click Check-in, then Check-out</span>
           <button type="button" id="closeCalBtn" class="text-emerald-800 font-bold hover:underline">Close</button>
         </div>
       </div>
     </div>
 
-    <!-- (খ) ইন্টারঅ্যাক্টিভ গেস্ট ও রুম সিলেক্টর -->
+    <!-- (খ) গেস্ট ও রুম -->
     <div class="relative">
-      <button 
-        type="button" 
-        id="guestsBtn" 
-        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left shadow-2xs"
+      <button
+        type="button"
+        id="guestsBtn"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="guestsDropdown"
+        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left shadow-sm"
       >
         <div class="flex items-center gap-2.5">
           <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -230,50 +253,48 @@ const presetSvgs: Record<string, string> = {
             <span id="guestsSummaryText" class="font-bold text-xs text-slate-800 block">2 Adults · 1 Room</span>
           </div>
         </div>
-        <span class="text-slate-400 text-xs">▾</span>
+        <span class="text-slate-400 text-xs" aria-hidden="true">▾</span>
       </button>
 
-      <!-- 🔥 গেস্ট ও রুম সিলেক্টর পপআপ (+ / - বাটন) 🔥 -->
-      <div 
-        id="guestsDropdown" 
+      <div
+        id="guestsDropdown"
+        role="dialog"
+        aria-label="Choose guests and rooms"
         class="hidden absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 space-y-3 text-xs"
       >
-        <!-- Adults -->
         <div class="flex items-center justify-between">
           <div>
             <span class="font-bold text-slate-800 block leading-tight">Adults</span>
             <span class="text-[10px] text-slate-400">Ages 18+</span>
           </div>
           <div class="flex items-center gap-2.5">
-            <button type="button" id="adultMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <button type="button" id="adultMinus" aria-label="Decrease adults" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">−</button>
             <span id="adultCount" class="font-bold w-4 text-center">2</span>
-            <button type="button" id="adultPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+            <button type="button" id="adultPlus" aria-label="Increase adults" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">+</button>
           </div>
         </div>
 
-        <!-- Children -->
         <div class="flex items-center justify-between border-t border-slate-100 pt-2">
           <div>
             <span class="font-bold text-slate-800 block leading-tight">Children</span>
             <span class="text-[10px] text-slate-400">Ages 0–17</span>
           </div>
           <div class="flex items-center gap-2.5">
-            <button type="button" id="childMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <button type="button" id="childMinus" aria-label="Decrease children" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">−</button>
             <span id="childCount" class="font-bold w-4 text-center">0</span>
-            <button type="button" id="childPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+            <button type="button" id="childPlus" aria-label="Increase children" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">+</button>
           </div>
         </div>
 
-        <!-- Rooms -->
         <div class="flex items-center justify-between border-t border-slate-100 pt-2">
           <div>
             <span class="font-bold text-slate-800 block leading-tight">Rooms</span>
             <span class="text-[10px] text-slate-400">Total room count</span>
           </div>
           <div class="flex items-center gap-2.5">
-            <button type="button" id="roomMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <button type="button" id="roomMinus" aria-label="Decrease rooms" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">−</button>
             <span id="roomCount" class="font-bold w-4 text-center">1</span>
-            <button type="button" id="roomPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+            <button type="button" id="roomPlus" aria-label="Increase rooms" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30 disabled:pointer-events-none">+</button>
           </div>
         </div>
 
@@ -285,17 +306,17 @@ const presetSvgs: Record<string, string> = {
 
   </div>
 
-  <!-- ৩. মেইন লাইভ বুকিং বাটন (One-Click Agoda CTA) -->
+  <!-- ৩. মেইন বুকিং বাটন -->
   <div>
     <a
       id="agodaRowBtn"
-      href="#"
+      href={agodaFallbackUrl}
       target="_blank"
-      rel="sponsored nofollow noopener"
-      class="w-full bg-[#0d3b23] hover:bg-[#124e30] text-white font-bold text-xs sm:text-sm py-3 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
+      rel="sponsored nofollow noopener noreferrer"
+      class="w-full bg-[#0d3b23] hover:bg-[#124e30] text-white font-bold text-xs sm:text-sm py-3 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-[0.98]"
     >
       <span>Book Deal on Agoda</span>
-      <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+      <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
       </svg>
     </a>
@@ -308,13 +329,7 @@ const presetSvgs: Record<string, string> = {
         Other Options
       </span>
 
-      <div
-        id="aboutRatesTableContainer"
-        data-hotel-title={hotelTitle}
-        data-hotel-slug={hotelSlug}
-        data-agoda-id={agodaId}
-        class="space-y-1.5"
-      >
+      <div id="aboutRatesTableContainer" class="space-y-1.5">
         {channels.map((c) => {
           const isExternal = c.url.startsWith('http');
           return (
@@ -328,7 +343,7 @@ const presetSvgs: Record<string, string> = {
                 <a
                   href={c.url}
                   target={isExternal ? "_blank" : "_self"}
-                  rel={isExternal ? "sponsored nofollow noopener" : undefined}
+                  rel={isExternal ? "sponsored nofollow noopener noreferrer" : undefined}
                   class="text-[11px] font-bold text-emerald-800 hover:underline"
                 >
                   {c.buttonText} →
@@ -346,7 +361,7 @@ const presetSvgs: Record<string, string> = {
               href={`tel:${cleanPhone}`}
               class="border border-slate-200 hover:border-[#0d3b23] text-slate-700 hover:text-[#0d3b23] font-bold text-[11px] py-1.5 rounded-lg transition text-center flex items-center justify-center gap-1"
             >
-              <span>📞</span> Call Hotel
+              <span aria-hidden="true">📞</span> Call Hotel
             </a>
           )}
           {cleanWhatsapp && (
@@ -356,7 +371,7 @@ const presetSvgs: Record<string, string> = {
               rel="noopener noreferrer"
               class="border border-[#25D366]/40 bg-[#25D366]/5 hover:bg-[#25D366] text-[#0d3b23] hover:text-white font-bold text-[11px] py-1.5 rounded-lg transition text-center flex items-center justify-center gap-1"
             >
-              <span>💬</span> WhatsApp
+              <span aria-hidden="true">💬</span> WhatsApp
             </a>
           )}
         </div>
@@ -370,67 +385,74 @@ const presetSvgs: Record<string, string> = {
 
 </div>
 
-<!-- ================= ULTRA-FAST VANILLA RANGE CALENDAR & GUEST SCRIPT ================= -->
+<!-- ================= VANILLA RANGE CALENDAR & GUEST SCRIPT ================= -->
 <script>
-  let ratesAbortCtrl: AbortController | null = null;
+  let ratesAbortCtrl: AbortController | null = null;   // fetch cancel
+  let listenersCtrl: AbortController | null = null;    // document-level listeners cleanup
   const ratesMemoryCache = new Map<string, any>();
 
-  // তারিখ ইউটিলিটিজ
+  const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  // ---------- তারিখ ইউটিলিটিজ ----------
+  function addDays(dateStr: string, days: number): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d + days);
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  // Dhaka এর আজকের তারিখ (Intl দিয়ে, manual offset ছাড়া)
   function getDhakaDateString(offsetDays = 0): string {
-    const now = new Date();
-    const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const dhakaTime = new Date(utcMillis + (6 * 3600000));
-    dhakaTime.setDate(dhakaTime.getDate() + offsetDays);
-    const y = dhakaTime.getFullYear();
-    const m = String(dhakaTime.getMonth() + 1).padStart(2, '0');
-    const d = String(dhakaTime.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+    const base = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Dhaka',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date()); // YYYY-MM-DD
+    return offsetDays === 0 ? base : addDays(base, offsetDays);
   }
 
   function formatShortDate(dateStr: string): string {
     if (!dateStr) return '';
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const d = new Date(year, month - 1, day);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[d.getMonth()]} ${d.getDate()}`;
+    const [, month, day] = dateStr.split('-').map(Number);
+    return `${MONTH_SHORT[month - 1]} ${day}`;
   }
 
   function calculateNights(inStr: string, outStr: string): number {
     const [y1, m1, d1] = inStr.split('-').map(Number);
     const [y2, m2, d2] = outStr.split('-').map(Number);
-    const date1 = Date.UTC(y1, m1 - 1, d1);
-    const date2 = Date.UTC(y2, m2 - 1, d2);
-    const diff = Math.round((date2 - date1) / 86400000);
-    return diff > 0 ? diff : 1;
+    const diff = Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
+    return Math.max(diff, 1);
   }
 
-  function addDays(dateStr: string, days: number): string {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d + days);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-  }
+  function initHotelRatesCard() {
+    // আগের init এর document-level listener গুলো পরিষ্কার করো (duplicate/leak বন্ধ)
+    listenersCtrl?.abort();
+    listenersCtrl = new AbortController();
+    const { signal: lsig } = listenersCtrl;
 
-  async function initHotelRatesCard() {
-    const ratesContainer = document.getElementById('aboutRatesTableContainer');
+    const card = document.getElementById('rates-card');
+    if (!card) return;
+
     const startingPriceEl = document.getElementById('cardStartingPriceDisplay');
     const liveIndicatorEl = document.getElementById('agodaLiveIndicator');
     const agodaOriginalPriceEl = document.getElementById('agodaOriginalPrice');
     const agodaDiscountEl = document.getElementById('agodaDiscountBadge');
     const agodaBtnEl = document.getElementById('agodaRowBtn') as HTMLAnchorElement | null;
 
-    // Date Range UI
     const dateRangeBtn = document.getElementById('dateRangeBtn');
     const dateRangeSummaryText = document.getElementById('dateRangeSummaryText');
     const stayNightsBadge = document.getElementById('stayNightsBadge');
     const calendarDropdown = document.getElementById('calendarDropdown');
     const calendarDaysGrid = document.getElementById('calendarDaysGrid');
     const calendarMonthYear = document.getElementById('calendarMonthYear');
-    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const calendarHint = document.getElementById('calendarHint');
+    const prevMonthBtn = document.getElementById('prevMonthBtn') as HTMLButtonElement | null;
     const nextMonthBtn = document.getElementById('nextMonthBtn');
     const closeCalBtn = document.getElementById('closeCalBtn');
 
-    // Guests UI
     const guestsBtn = document.getElementById('guestsBtn');
     const guestsDropdown = document.getElementById('guestsDropdown');
     const guestsSummaryText = document.getElementById('guestsSummaryText');
@@ -446,47 +468,76 @@ const presetSvgs: Record<string, string> = {
     const roomMinus = document.getElementById('roomMinus') as HTMLButtonElement | null;
     const roomPlus = document.getElementById('roomPlus') as HTMLButtonElement | null;
 
-    if (!ratesContainer) return;
+    const hotelSlug = (card.getAttribute('data-hotel-slug') || '').trim();
+    const hotelName = (card.getAttribute('data-hotel-title') || '').trim();
+    const agodaId = (card.getAttribute('data-agoda-id') || '').trim();
+    const apiCurrency = (card.getAttribute('data-currency') || 'USD').trim();
+    const agodaFallback = (card.getAttribute('data-agoda-fallback') || '').trim();
 
-    const hotelSlug = (ratesContainer.getAttribute('data-hotel-slug') || '').trim();
-    const hotelName = (ratesContainer.getAttribute('data-hotel-title') || '').trim();
-    const agodaId = (ratesContainer.getAttribute('data-agoda-id') || '').trim();
-    const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
-
-    // স্টেট
+    // ---------- স্টেট ----------
+    const MAX_ADULTS = 8, MAX_CHILDREN = 6, MAX_ROOMS = 5;
     let checkIn = getDhakaDateString(0);
     let checkOut = getDhakaDateString(1);
-    let calViewDate = new Date();
     let tempCheckIn: string | null = null;
+    let adults = 2, children = 0, rooms = 1;
+    let agodaBaseUrl = agodaFallback && agodaFallback !== '#' ? agodaFallback : '';
 
-    let adults = 2;
-    let children = 0;
-    let rooms = 1;
+    // ক্যালেন্ডার ভিউ: মাসের ১ তারিখ ধরে (setMonth overflow bug এড়াতে year/month আলাদা)
+    let calYear = Number(checkIn.slice(0, 4));
+    let calMonth = Number(checkIn.slice(5, 7)) - 1;
 
-    // ================= ১. রেঞ্জ ক্যালেন্ডার রেন্ডারিং ইঞ্জিন =================
+    // ---------- Dropdown open/close + aria ----------
+    function setOpen(dd: HTMLElement | null, btn: HTMLElement | null, open: boolean) {
+      if (!dd) return;
+      dd.classList.toggle('hidden', !open);
+      btn?.setAttribute('aria-expanded', String(open));
+    }
+    function closeCalendar() {
+      setOpen(calendarDropdown, dateRangeBtn, false);
+      tempCheckIn = null; // stale state বন্ধ
+    }
+    function closeGuests() {
+      setOpen(guestsDropdown, guestsBtn, false);
+    }
+
+    // ---------- Agoda লিংক আপডেট ----------
+    function updateAgodaLink() {
+      if (!agodaBtnEl || !agodaBaseUrl) return;
+      try {
+        const urlObj = new URL(agodaBaseUrl);
+        urlObj.searchParams.set('checkin', checkIn);
+        urlObj.searchParams.set('checkout', checkOut);
+        urlObj.searchParams.set('adults', String(adults));
+        urlObj.searchParams.set('children', String(children));
+        urlObj.searchParams.set('rooms', String(rooms));
+        agodaBtnEl.href = urlObj.toString();
+      } catch {
+        agodaBtnEl.href = agodaBaseUrl;
+      }
+    }
+
+    // ---------- ১. ক্যালেন্ডার ----------
     function renderCalendar() {
       if (!calendarDaysGrid || !calendarMonthYear) return;
       calendarDaysGrid.innerHTML = '';
+      calendarMonthYear.textContent = `${MONTH_NAMES[calMonth]} ${calYear}`;
 
-      const y = calViewDate.getFullYear();
-      const m = calViewDate.getMonth();
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      calendarMonthYear.textContent = `${monthNames[m]} ${y}`;
-
-      const firstDay = new Date(y, m, 1).getDay();
-      const daysInMonth = new Date(y, m + 1, 0).getDate();
       const todayStr = getDhakaDateString(0);
+      const todayY = Number(todayStr.slice(0, 4));
+      const todayM = Number(todayStr.slice(5, 7)) - 1;
+      if (prevMonthBtn) prevMonthBtn.disabled = calYear < todayY || (calYear === todayY && calMonth <= todayM);
 
-      // ফাঁকা স্লট
-      for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement('div');
-        calendarDaysGrid.appendChild(empty);
+      if (calendarHint) {
+        calendarHint.textContent = tempCheckIn ? 'Now choose Check-out' : 'Click Check-in, then Check-out';
       }
 
-      // দিনসমূহ
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) calendarDaysGrid.appendChild(document.createElement('div'));
+
       for (let day = 1; day <= daysInMonth; day++) {
-        const pad = (n: number) => String(n).padStart(2, '0');
-        const thisDateStr = `${y}-${pad(m + 1)}-${pad(day)}`;
+        const thisDateStr = `${calYear}-${pad(calMonth + 1)}-${pad(day)}`;
         const isPast = thisDateStr < todayStr;
 
         const dayBtn = document.createElement('button');
@@ -495,15 +546,16 @@ const presetSvgs: Record<string, string> = {
         dayBtn.className = 'h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-xs font-semibold transition';
 
         if (isPast) {
+          dayBtn.disabled = true;
           dayBtn.className += ' text-slate-300 cursor-not-allowed pointer-events-none';
         } else {
-          // সিলেকশন স্টাইল
           const isStart = tempCheckIn ? thisDateStr === tempCheckIn : thisDateStr === checkIn;
           const isEnd = !tempCheckIn && thisDateStr === checkOut;
           const inRange = !tempCheckIn && thisDateStr > checkIn && thisDateStr < checkOut;
 
           if (isStart || isEnd) {
-            dayBtn.className += ' bg-[#0d3b23] text-white font-bold shadow-xs';
+            dayBtn.className += ' bg-[#0d3b23] text-white font-bold shadow-sm';
+            dayBtn.setAttribute('aria-pressed', 'true');
           } else if (inRange) {
             dayBtn.className += ' bg-emerald-50 text-emerald-900 rounded-none';
           } else {
@@ -512,31 +564,40 @@ const presetSvgs: Record<string, string> = {
 
           dayBtn.addEventListener('click', () => {
             if (!tempCheckIn) {
-              // প্রথম ক্লিক = চেক-ইন
-              tempCheckIn = thisDateStr;
+              tempCheckIn = thisDateStr; // প্রথম ক্লিক = চেক-ইন
+              renderCalendar();
+            } else if (thisDateStr <= tempCheckIn) {
+              tempCheckIn = thisDateStr; // আগের/একই দিন = চেক-ইন নতুন করে
               renderCalendar();
             } else {
-              // দ্বিতীয় ক্লিক = চেক-আউট
-              if (thisDateStr <= tempCheckIn) {
-                tempCheckIn = thisDateStr;
-                renderCalendar();
-              } else {
-                checkIn = tempCheckIn;
-                checkOut = thisDateStr;
-                tempCheckIn = null;
-                updateSummary();
-                if (calendarDropdown) calendarDropdown.classList.add('hidden');
-                fetchLiveRates();
-              }
+              checkIn = tempCheckIn; // দ্বিতীয় ক্লিক = চেক-আউট
+              checkOut = thisDateStr;
+              closeCalendar();
+              updateSummary();
+              updateAgodaLink();
+              fetchLiveRates();
             }
           });
         }
-
         calendarDaysGrid.appendChild(dayBtn);
       }
     }
 
-    // ================= ২. গেস্ট ও তারিখ সামারি আপডেট =================
+    // ---------- ২. সামারি + গেস্ট UI ----------
+    function syncGuestUI() {
+      if (adultCountEl) adultCountEl.textContent = String(adults);
+      if (childCountEl) childCountEl.textContent = String(children);
+      if (roomCountEl) roomCountEl.textContent = String(rooms);
+
+      // rooms <= adults নিয়ম: adults কখনো rooms এর নিচে যাবে না
+      if (adultMinus) adultMinus.disabled = adults <= Math.max(1, rooms);
+      if (adultPlus) adultPlus.disabled = adults >= MAX_ADULTS;
+      if (childMinus) childMinus.disabled = children <= 0;
+      if (childPlus) childPlus.disabled = children >= MAX_CHILDREN;
+      if (roomMinus) roomMinus.disabled = rooms <= 1;
+      if (roomPlus) roomPlus.disabled = rooms >= MAX_ROOMS;
+    }
+
     function updateSummary() {
       if (dateRangeSummaryText) {
         dateRangeSummaryText.textContent = `${formatShortDate(checkIn)} — ${formatShortDate(checkOut)}`;
@@ -551,36 +612,50 @@ const presetSvgs: Record<string, string> = {
         text += ` · ${rooms} ${rooms === 1 ? 'Room' : 'Rooms'}`;
         guestsSummaryText.textContent = text;
       }
+      syncGuestUI();
     }
 
-    // ================= ৩. ক্লাউডফ্লেয়ার আগোডা লাইভ প্রাইস ফেচ =================
+    // ---------- ৩. লাইভ প্রাইস ফেচ ----------
     async function fetchLiveRates() {
-      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${rooms}`;
+      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${children}_${rooms}_${apiCurrency}`;
       if (ratesMemoryCache.has(cacheKey)) {
         applyRates(ratesMemoryCache.get(cacheKey));
         return;
       }
 
       ratesAbortCtrl?.abort();
-      ratesAbortCtrl = new AbortController();
-      const { signal } = ratesAbortCtrl;
+      const ctrl = new AbortController();
+      ratesAbortCtrl = ctrl;
+      const { signal } = ctrl;
 
       if (startingPriceEl) startingPriceEl.style.opacity = '0.4';
 
-      const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
-      const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&adults=${adults}&children=${children}&rooms=${rooms}&currency=USD`;
+      const queryParam = agodaId
+        ? `id=${encodeURIComponent(agodaId)}`
+        : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
+      const apiUrl =
+        `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}` +
+        `&adults=${adults}&children=${children}&rooms=${rooms}&currency=${encodeURIComponent(apiCurrency)}`;
 
       try {
         const res = await fetch(apiUrl, { signal });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.success && json.rates) {
-            ratesMemoryCache.set(cacheKey, json.rates);
-            applyRates(json.rates);
-          }
+        if (!res.ok) {
+          console.warn('[HotelRates] worker responded', res.status);
+          return;
+        }
+        const json = await res.json();
+        if (json && json.success && json.rates) {
+          ratesMemoryCache.set(cacheKey, json.rates);
+          applyRates(json.rates);
+        } else {
+          console.warn('[HotelRates] no rates in response');
         }
       } catch (e: any) {
-        if (startingPriceEl) startingPriceEl.style.opacity = '1';
+        if (e?.name === 'AbortError') return; // নতুন request চলছে, কিছু করার নেই
+        console.warn('[HotelRates] fetch failed', e);
+      } finally {
+        // abort না হলে (success/fail যাই হোক) opacity ফিরিয়ে দাও
+        if (!signal.aborted && startingPriceEl) startingPriceEl.style.opacity = '1';
       }
     }
 
@@ -609,28 +684,21 @@ const presetSvgs: Record<string, string> = {
         }
       }
 
-      if (liveIndicatorEl) {
-        liveIndicatorEl.innerHTML = `
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-emerald-700 font-bold">Live Agoda Price</span>
-        `;
+      if (liveIndicatorEl && livePriceStr) {
+        liveIndicatorEl.innerHTML =
+          '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>' +
+          '<span class="text-emerald-700 font-bold">Live Agoda Price</span>';
       }
 
-      // বুকিং বাটন লিংক আপডেট (তারিখ ও গেস্ট সংখ্যা সহ সরাসরি আগোডায় যাবে)
-      const agodaDeal = Array.isArray(rates?.channelsList) ? rates.channelsList[0] : null;
-      if (agodaBtnEl && agodaDeal?.button_url) {
-        try {
-          const urlObj = new URL(agodaDeal.button_url);
-          urlObj.searchParams.set('checkin', checkIn);
-          urlObj.searchParams.set('checkout', checkOut);
-          urlObj.searchParams.set('adults', String(adults));
-          urlObj.searchParams.set('children', String(children));
-          urlObj.searchParams.set('rooms', String(rooms));
-          agodaBtnEl.href = urlObj.toString();
-        } catch {
-          agodaBtnEl.href = agodaDeal.button_url;
-        }
-      }
+      // [0] ধরে নেওয়া নয়: নাম/URL দেখে Agoda deal খুঁজে বের করো
+      const list: any[] = Array.isArray(rates?.channelsList) ? rates.channelsList : [];
+      const agodaDeal = list.find((c) => {
+        const name = String(c?.provider_name || c?.providerName || c?.name || '');
+        const url = String(c?.button_url || '');
+        return /agoda/i.test(name) || /agoda\.com/i.test(url);
+      });
+      if (agodaDeal?.button_url) agodaBaseUrl = String(agodaDeal.button_url);
+      updateAgodaLink();
 
       if (livePriceStr) {
         document.querySelectorAll('.hotel-live-price, [data-hotel-live-price]').forEach((el) => {
@@ -639,93 +707,109 @@ const presetSvgs: Record<string, string> = {
       }
     }
 
-    // ================= ৪. ইভেন্ট লিসেনার্স =================
-    // ক্যালেন্ডার ওপেন / ক্লোজ
+    // ---------- ৪. ইভেন্ট লিসেনার্স ----------
     dateRangeBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      guestsDropdown?.classList.add('hidden');
-      calendarDropdown?.classList.toggle('hidden');
+      closeGuests();
+      const willOpen = calendarDropdown?.classList.contains('hidden') ?? false;
       tempCheckIn = null;
-      renderCalendar();
+      if (willOpen) {
+        calYear = Number(checkIn.slice(0, 4));
+        calMonth = Number(checkIn.slice(5, 7)) - 1;
+        renderCalendar();
+      }
+      setOpen(calendarDropdown, dateRangeBtn, willOpen);
     });
 
     prevMonthBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      calViewDate.setMonth(calViewDate.getMonth() - 1);
+      if (prevMonthBtn.disabled) return;
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendar();
     });
 
     nextMonthBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      calViewDate.setMonth(calViewDate.getMonth() + 1);
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
       renderCalendar();
     });
 
-    closeCalBtn?.addEventListener('click', () => {
-      calendarDropdown?.classList.add('hidden');
-    });
+    closeCalBtn?.addEventListener('click', closeCalendar);
 
-    // গেস্ট ড্রপডাউন ওপেন / ক্লোজ
     guestsBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      calendarDropdown?.classList.add('hidden');
-      guestsDropdown?.classList.toggle('hidden');
+      closeCalendar();
+      const willOpen = guestsDropdown?.classList.contains('hidden') ?? false;
+      setOpen(guestsDropdown, guestsBtn, willOpen);
     });
 
     closeGuestsBtn?.addEventListener('click', () => {
-      guestsDropdown?.classList.add('hidden');
+      closeGuests();
       updateSummary();
+      updateAgodaLink();
       fetchLiveRates();
     });
 
-    // গেস্ট +/- বাটনস
     adultPlus?.addEventListener('click', () => {
-      if (adults < 8) { adults++; if (adultCountEl) adultCountEl.textContent = String(adults); }
-      if (adultMinus) adultMinus.disabled = adults <= 1;
+      if (adults < MAX_ADULTS) adults++;
+      updateSummary();
     });
     adultMinus?.addEventListener('click', () => {
-      if (adults > 1) { adults--; if (adultCountEl) adultCountEl.textContent = String(adults); }
-      if (adultMinus) adultMinus.disabled = adults <= 1;
+      if (adults > Math.max(1, rooms)) adults--;
+      updateSummary();
     });
 
     childPlus?.addEventListener('click', () => {
-      if (children < 6) { children++; if (childCountEl) childCountEl.textContent = String(children); }
-      if (childMinus) childMinus.disabled = children <= 0;
+      if (children < MAX_CHILDREN) children++;
+      updateSummary();
     });
     childMinus?.addEventListener('click', () => {
-      if (children > 0) { children--; if (childCountEl) childCountEl.textContent = String(children); }
-      if (childMinus) childMinus.disabled = children <= 0;
+      if (children > 0) children--;
+      updateSummary();
     });
 
     roomPlus?.addEventListener('click', () => {
-      if (rooms < 5) { rooms++; if (roomCountEl) roomCountEl.textContent = String(rooms); }
-      if (roomMinus) roomMinus.disabled = rooms <= 1;
+      if (rooms < MAX_ROOMS) {
+        rooms++;
+        if (adults < rooms) adults = rooms; // প্রতি রুমে অন্তত ১ adult
+      }
+      updateSummary();
     });
     roomMinus?.addEventListener('click', () => {
-      if (rooms > 1) { rooms--; if (roomCountEl) roomCountEl.textContent = String(rooms); }
-      if (roomMinus) roomMinus.disabled = rooms <= 1;
+      if (rooms > 1) rooms--;
+      updateSummary();
     });
 
-    // বাইরে ক্লিক করলে পপআপ ক্লোজ
+    // Document-level listeners: signal দিয়ে বাঁধা, তাই পরের init এ নিজে থেকেই remove হবে
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target as Node;
       if (!calendarDropdown?.contains(target) && !dateRangeBtn?.contains(target)) {
-        calendarDropdown?.classList.add('hidden');
+        if (!calendarDropdown?.classList.contains('hidden')) closeCalendar();
       }
       if (!guestsDropdown?.contains(target) && !guestsBtn?.contains(target)) {
-        guestsDropdown?.classList.add('hidden');
+        closeGuests();
       }
-    });
+    }, { signal: lsig });
 
-    // ইনিশিয়াল কল
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!calendarDropdown?.classList.contains('hidden')) { closeCalendar(); dateRangeBtn?.focus(); }
+      if (!guestsDropdown?.classList.contains('hidden')) { closeGuests(); guestsBtn?.focus(); }
+    }, { signal: lsig });
+
+    // ইনিশিয়াল
     updateSummary();
+    updateAgodaLink();
     fetchLiveRates();
   }
 
+  // শুধু astro:page-load: প্রথম লোড + প্রতিটি navigation এ একবারই চলে
+  document.addEventListener('astro:page-load', initHotelRatesCard);
+
   document.addEventListener('astro:before-swap', () => {
     ratesAbortCtrl?.abort();
+    listenersCtrl?.abort();
   });
-
-  document.addEventListener('DOMContentLoaded', initHotelRatesCard);
-  document.addEventListener('astro:page-load', initHotelRatesCard);
 </script>
