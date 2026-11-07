@@ -1,4 +1,5 @@
 ---
+// src/components/landing/LocationCategoryTemplate.astro
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -10,7 +11,7 @@ interface Props {
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
 
-// ১. সাইটের রুট ও ক্যানোনিক্যাল URL (শুধুমাত্র সাইট অরিজিন এখানে ডিফাইন করা)
+// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL
 const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
 
 const rawSlug = entry?.slug || entry?.id || "";
@@ -24,14 +25,14 @@ const cleanSlug = rawSlug
 
 const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
 
-// ২. মেটাডাটা (১০০% CMS ড্রাইভেন)
+// ২. মেটাডাটা
 const pageTitle = (data.title || "").trim();
 const locationSubtitle = data.location_subtitle || "";
 const description = (data.description || data.seo_description || "").trim();
 const heroImage = data.hero_image || data.image || "";
 const heroBadge = data.hero_badge || "";
 
-// ৩. সব হোটেল ডাটা লোডার (রুট সেফ)
+// ৩. হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -51,7 +52,7 @@ try {
   } catch (e) {}
 }
 
-// ৪. রিয়েল রিভিউ ডাটা লোডার
+// ৪. রিভিউ ডাটা লোডার
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
@@ -77,7 +78,7 @@ for (const item of rawReviewsList) {
   }
 }
 
-// ৫. টেক্সট নরম্যালাইজার ও নিরাপদ ফিল্টারিং (হাইফেন ও স্পেস সমতা)
+// ৫. টেক্সট নরম্যালাইজার ও ফিল্টারিং
 const normalizeText = (val: any) =>
   String(val || '')
     .toLowerCase()
@@ -111,7 +112,7 @@ const displayHotels = allHotels.filter(h => {
   return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
 });
 
-// ৬. হেল্পার ফাংশনসমূহ (কোনো জোরপূর্বক হার্ডকোডেড শব্দ নেই)
+// ৬. হেল্পার ফাংশন
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -143,7 +144,7 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. CMS সেকশন কনফিগারেশন
+// ৭. CMS ডাটা কনফিগারেশন
 const hotelsTag = data.hotels_tag || "";
 const hotelsTitle = data.hotels_title || (pageTitle ? `Top ${toTitleCase(pageTitle)}` : "");
 const allHotelsText = data.all_hotels_link_text || "";
@@ -161,7 +162,7 @@ const faqDescription = data.faq_description || "";
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৮. গুগল কমপ্লায়েন্ট JSON-LD স্কিমা (কোনো ফেক রেটিং ছাড়া)
+// ৮. গুগল স্কিমা
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -216,7 +217,6 @@ const masterSchemaJson = JSON.stringify({
   image={heroImage}
   canonical={canonicalUrl}
 >
-  <!-- GOOGLE COMPLIANT STRUCTURED DATA -->
   <script type="application/ld+json" set:html={masterSchemaJson} />
 
   <div class="w-full bg-[#f8faf9] text-slate-800 font-sans pb-20">
@@ -265,7 +265,6 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- Live Filter Bar -->
       <div class="absolute -bottom-7 left-4 right-4 max-w-7xl mx-auto z-20 px-0 sm:px-6 lg:px-8">
         <div class="bg-white rounded-2xl shadow-xl p-2 sm:p-2.5 flex items-center border border-slate-200 max-w-3xl">
           <div class="pl-3 pr-2 text-slate-400">
@@ -306,7 +305,6 @@ const masterSchemaJson = JSON.stringify({
         </div>
       )}
 
-      <!-- Hotels Grid -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -448,7 +446,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= 3. ABOUT SECTION (H2 -> H3 Compliant) ================= -->
+    <!-- ================= 3. ABOUT SECTION ================= -->
     {(aboutText || aboutImage || areaHighlights.length > 0) && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-left">
         <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
@@ -499,7 +497,7 @@ const masterSchemaJson = JSON.stringify({
       </section>
     )}
 
-    <!-- ================= 4. FAQ SECTION (100% CMS Controlled) ================= -->
+    <!-- ================= 4. FAQ SECTION ================= -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left">
         <div class="space-y-2 mb-8 sm:mb-10 text-left border-b border-slate-200 pb-6">
@@ -544,10 +542,10 @@ const masterSchemaJson = JSON.stringify({
       </section>
     )}
 
-    <!-- 5. Editorial Body -->
-    {(Content && (entry?.body?.trim() || data.body?.trim())) && (
-      <section class="max-w-4xl mx-auto px-4 pt-12 text-left">
-        <article class="prose prose-slate max-w-none">
+    <!-- ================= 5. EDITORIAL ARTICLE BODY (100% BUILD SAFE) ================= -->
+    {Content && (
+      <section class="max-w-4xl mx-auto px-4 pt-16 pb-12 text-left">
+        <article class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-a:text-emerald-700">
           <Content />
         </article>
       </section>
