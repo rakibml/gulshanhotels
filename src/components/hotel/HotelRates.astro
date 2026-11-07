@@ -95,6 +95,7 @@ type Row = {
   url: string;
   buttonText: string;
   isAgoda: boolean;
+  pending: boolean; // লিংক না থাকলে live data আসা পর্যন্ত row লুকানো
   order: number;
   best: boolean;
 };
@@ -126,6 +127,7 @@ const baseRows: Row[] = customChannels
       url,
       buttonText: String(item?.button_text || "View deal"),
       isAgoda: kind === 'agoda',
+      pending: false,
       order: 0,
       best: false,
     } as Row;
@@ -139,7 +141,8 @@ const agodaFallbackUrl = safeUrl(
   (agodaId ? `https://www.agoda.com/partners/partnersearch.aspx?hid=${encodeURIComponent(agodaId)}` : "")
 );
 
-if (!baseRows.some((r) => r.isAgoda) && agodaFallbackUrl !== "#") {
+// worker slug দিয়েও live price আনতে পারে, তাই agoda_id/agoda_url না থাকলেও row থাকবে
+if (!baseRows.some((r) => r.isAgoda) && (agodaFallbackUrl !== "#" || agodaId || hotelSlug)) {
   baseRows.push({
     name: "Agoda",
     kind: "agoda",
@@ -150,6 +153,7 @@ if (!baseRows.some((r) => r.isAgoda) && agodaFallbackUrl !== "#") {
     url: agodaFallbackUrl,
     buttonText: "View deal",
     isAgoda: true,
+    pending: agodaFallbackUrl === "#",
     order: 0,
     best: false,
   });
@@ -335,6 +339,7 @@ const rows: Row[] = baseRows
           data-price={r.priceNum ?? ''}
           data-price-text={r.priceText}
           data-agoda-row={r.isAgoda ? 'true' : undefined}
+          data-pending={r.pending ? 'true' : undefined}
           data-loading="false"
           data-live="false"
         >
@@ -474,6 +479,7 @@ const rows: Row[] = baseRows
   }
   .hr-row[data-best="true"] .hr-btn:hover { background: #2dd194; border-color: #2dd194; }
 
+  .hr-row[data-pending="true"] { display: none; }
   .hr-live-dot { display: none; }
   .hr-row[data-live="true"] .hr-live-dot { display: inline-block; }
 
@@ -887,6 +893,7 @@ const rows: Row[] = baseRows
       });
       if (agodaDeal?.button_url) agodaBaseUrl = String(agodaDeal.button_url);
       updateAgodaLink();
+      if (agodaBaseUrl) agodaRow.removeAttribute('data-pending');
 
       reorderRows(true);
       syncGlobalPrice();
@@ -972,7 +979,21 @@ const rows: Row[] = baseRows
     fetchLiveRates();
   }
 
-  document.addEventListener('astro:page-load', initHotelRatesCard);
+  // ClientRouter (View Transitions) না থাকলে 'astro:page-load' কখনোই fire হয় না,
+  // তাই DOM ready তে সরাসরি চালাও। প্রতিটি card এ শুধু একবারই init হবে।
+  function initOnce() {
+    const card = document.getElementById('rates-card');
+    if (!card || card.dataset.hrInit === 'true') return;
+    card.dataset.hrInit = 'true';
+    initHotelRatesCard();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOnce);
+  } else {
+    initOnce();
+  }
+  document.addEventListener('astro:page-load', initOnce); // ClientRouter থাকলে navigation এর পর
 
   document.addEventListener('astro:before-swap', () => {
     ratesAbortCtrl?.abort();
