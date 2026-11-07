@@ -12,40 +12,45 @@ editor:
   preview: false
 
 fields:
-  - label: "Page Title"
+  - label: "Page Title (H1)"
     name: "title"
     widget: "string"
-    hint: "যেমন: Hotels in Gulshan 1 অথবা Hotels in Gulshan 2"
+    hint: "যেমন: Hotels in Gulshan 1"
 
-  - label: "URL Slug (পেজের লিংক)"
+  - label: "URL Slug"
     name: "slug"
     widget: "string"
-    hint: "ছোট হাতের অক্ষর ও হাইফেন দিয়ে লিখবেন (যেমন: hotels-in-gulshan-1, hotels-near-us-embassy)"
+    pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'শুধুমাত্র ছোট হাতের ইংরেজি অক্ষর ও হাইফেন দিন (যেমন: hotels-in-gulshan-1)']
+    hint: "যেমন: hotels-in-gulshan-1"
 
   - label: "Location Subtitle"
     name: "location_subtitle"
     widget: "string"
-    default: "Dhaka, Bangladesh"
     required: false
-    hint: "হিরো ব্যানারে ম্যাপ পিনের পাশে যা দেখাবে (যেমন: Dhaka, Bangladesh)"
+    hint: "ম্যাপ পিনের পাশে যা দেখাবে (যেমন: Gulshan, Dhaka)"
 
-  - label: "Auto-Filter Keyword"
-    name: "filter_keyword"
+  - label: "Hero Badge (Optional)"
+    name: "hero_badge"
     widget: "string"
     required: false
-    hint: "যেমন: gulshan 1 বা 5-star। এই কি-ওয়ার্ড দিয়ে হোটেলের লোকেশন অটোমেটিক ফিল্টার হবে। ফাঁকা রাখলে স্লাগ দিয়ে খুঁজবে।"
+    hint: "যেমন: Direct Local Rates বা Diplomatic Zone Stays"
 
   - label: "Hero Banner Image"
     name: "hero_image"
     widget: "image"
     choose_url: true
     required: false
-    hint: "হিরো সেকশনের বড় ব্যাকগ্রাউন্ড ছবি"
 
-  - label: "SEO / Short Description"
+  - label: "SEO / Meta Description"
     name: "description"
     widget: "text"
-    hint: "হিরো ব্যানারে টাইটেলের নিচে এবং গুগল সার্চে দেখানোর ডেসক্রিপশন"
+    hint: "হিরো ব্যানারের বিবরণ ও গুগল সার্চের মেটা ডেসক্রিপশন"
+
+  - label: "Auto-Filter Keyword"
+    name: "filter_keyword"
+    widget: "string"
+    required: false
+    hint: "যেমন: gulshan 1 বা 5-star। ফাঁকা রাখলে স্লাগ থেকে অটো খুঁজবে।"
 
   - label: "Manually Select Hotels (Optional)"
     name: "selected_hotels"
@@ -56,48 +61,95 @@ fields:
     display_fields: ["title"]
     multiple: true
     required: false
-    hint: "নির্দিষ্ট হোটেল বাছতে চাইলে এখান থেকে সিলেক্ট করুন। ফাঁকা রাখলে কি-ওয়ার্ড দিয়ে অটোমেটিক আসবে।"
 
-  - label: "About Section Image (Why Stay...)"
+  # ================= HOTELS SECTION CONTROLS =================
+  - label: "Hotels Section Tag"
+    name: "hotels_tag"
+    widget: "string"
+    required: false
+    hint: "যেমন: CURATED ACCOMMODATIONS"
+
+  - label: "Hotels Section Title (H2)"
+    name: "hotels_title"
+    widget: "string"
+    required: false
+    hint: "ফাঁকা রাখলে পেজের টাইটেল অনুযায়ী অটো তৈরি হবে"
+
+  - label: "All Hotels Link Text"
+    name: "all_hotels_link_text"
+    widget: "string"
+    required: false
+    hint: "যেমন: Browse All Hotels"
+
+  - label: "All Hotels Link URL"
+    name: "all_hotels_link_url"
+    widget: "string"
+    required: false
+    hint: "যেমন: /hotels অথবা /#hotels"
+
+  # ================= ABOUT / WHY STAY SECTION =================
+  - label: "About Section Tag"
+    name: "about_tag"
+    widget: "string"
+    required: false
+    hint: "যেমন: AREA OVERVIEW"
+
+  - label: "About Section Heading (H2)"
+    name: "about_title"
+    widget: "string"
+    required: false
+    hint: "যেমন: Why Stay in Gulshan 1?"
+
+  - label: "About Section Image"
     name: "about_image"
     widget: "image"
     choose_url: true
     required: false
-    hint: "'Why Stay in...' সেকশনের ছবি (ঐচ্ছিক)"
 
   - label: "About Section Text"
     name: "about_text"
     widget: "text"
     required: false
-    hint: "'Why Stay in...' সেকশনের বিস্তারিত বিবরণ (ঐচ্ছিক)"
 
-  - label: "Area Highlights (Why Stay সেকশনের পয়েন্টসমূহ)"
+  - label: "Area Highlights"
     name: "area_highlights"
     widget: "list"
     required: false
     summary: "{{fields.title}}"
-    hint: "প্লাস (+) চাপ দিয়ে ছোট ছোট পয়েন্ট যোগ করতে পারেন (যেমন: Title: Safe & Secure, Desc: 24/7 Diplomatic Patrol)"
     fields:
-      - { label: "Highlight Title", name: "title", widget: "string" }
-      - { label: "Short Description", name: "desc", widget: "string" }
+      - { label: "Highlight Title (H3)", name: "title", widget: "string" }
+      - { label: "Short Description", name: "desc", widget: "string", required: false }
+
+  # ================= FAQ SECTION CONTROLS =================
+  - label: "FAQ Badge Text"
+    name: "faq_badge"
+    widget: "string"
+    required: false
+    hint: "যেমন: Verified Traveler FAQs"
+
+  - label: "FAQ Section Title (H2)"
+    name: "faq_title"
+    widget: "string"
+    required: false
+    hint: "যেমন: Frequently Asked Questions"
+
+  - label: "FAQ Subtitle / Description"
+    name: "faq_description"
+    widget: "text"
+    required: false
+    hint: "প্রশ্নের উপরে ছোট বিবরণ (ঐচ্ছিক)"
 
   - label: "FAQs"
     name: "faqs"
     widget: "list"
     required: false
     summary: "{{fields.question}}"
-    hint: "সাধারণ প্রশ্ন-উত্তর। এগুলো পেজে দেখাবে এবং গুগলের FAQ রিচ স্নিপেটেও যাবে।"
     fields:
-      - label: "Question"
-        name: "question"
-        widget: "string"
-      - label: "Answer"
-        name: "answer"
-        widget: "text"
-        hint: "সাধারণ লেখা লিখুন। HTML বা markdown দেবেন না।"
+      - { label: "Question", name: "question", widget: "string" }
+      - { label: "Answer", name: "answer", widget: "text" }
 
+  # ================= LONG ARTICLE BODY =================
   - label: "Detailed Article Body"
     name: "body"
     widget: "markdown"
     required: false
-    hint: "পেজের নিচে এসইও-র জন্য বড় আর্টিকেল লিখতে চাইলে এখানে লিখুন"
