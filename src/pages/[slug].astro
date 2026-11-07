@@ -112,7 +112,6 @@ export async function getStaticPaths() {
     }
   }
 
-  // ডুপ্লিকেট ইউআরএল প্রতিরোধ
   const takenSlugs = new Set([
     ...hotelPaths.map((p: any) => p.params.slug),
     ...destinationPaths.map((p: any) => p.params.slug)
@@ -135,14 +134,18 @@ export async function getStaticPaths() {
 
 const { type = 'hotel', entry } = Astro.props;
 
-// 🔥 ফিক্স: মার্কডাউন আর্টিকেল বডিকে কম্পোনেন্টে রেন্ডার করা 🔥
-let Content = null;
+// মার্কডাউন আর্টিকেল রেন্ডারার (Cloudflare Build-Safe with Try/Catch)
+let Content: any = null;
 if (type === 'destination' || type === 'page') {
-  if (typeof entry?.render === 'function') {
-    const rendered = await entry.render();
-    Content = rendered.Content;
-  } else if (entry?.Content) {
-    Content = entry.Content;
+  try {
+    if (typeof entry?.render === 'function') {
+      const rendered = await entry.render();
+      Content = rendered.Content;
+    } else if (entry?.Content) {
+      Content = entry.Content;
+    }
+  } catch (err) {
+    Content = null;
   }
 }
 
@@ -191,7 +194,6 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
 ---
 
 {type === 'destination' ? (
-  <!-- 🔥 ফিক্স: এখানে Content পাস করা হয়েছে 🔥 -->
   <LocationCategoryTemplate entry={entry} Content={Content} />
 ) : type === 'page' ? (
   <PageView entry={entry} Content={Content} />
