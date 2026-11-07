@@ -20,8 +20,8 @@ gallery:
     alt: bathroom view
   - photo: https://media.gulshanhotels.com/deluxe_twin.webp
     alt: deluxe twin bed room
-popular: true
-sponsored: true
+popular: false
+sponsored: false
 spotlight_desc: ''
 about_notice: about_section_header
 price: $150
