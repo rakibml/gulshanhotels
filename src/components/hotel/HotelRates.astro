@@ -11,6 +11,8 @@ const hotelTitle = String(data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const agodaId = String(data.agoda_id || data.agodaId || "").trim();
+// Agoda affiliate site id (cid): কমিশন track হওয়ার জন্য landing link এ লাগে
+const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || "").trim();
 
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
@@ -44,7 +46,7 @@ const mainCurrency =
   detectCurrency(rawBasePrice) ||
   customChannels.map((c) => detectCurrency(c?.price)).find(Boolean) ||
   '$';
-const apiCurrency = mainCurrency === '৳' ? 'BDT' : 'USD';
+const apiCurrency = 'USD'; // Agoda Long Tail API এর currency list এ BDT নেই
 
 function formatPrice(p: any): string {
   const s = String(p || "").trim();
@@ -138,7 +140,9 @@ const baseRows: Row[] = customChannels
 const agodaFallbackUrl = safeUrl(
   String(data.agoda_url || "").trim() ||
   baseRows.find((r) => r.isAgoda)?.url ||
-  (agodaId ? `https://www.agoda.com/partners/partnersearch.aspx?hid=${encodeURIComponent(agodaId)}` : "")
+  (agodaId
+    ? `https://www.agoda.com/partners/partnersearch.aspx?${agodaCid ? `cid=${encodeURIComponent(agodaCid)}&` : ''}hid=${encodeURIComponent(agodaId)}`
+    : "")
 );
 
 // worker slug দিয়েও live price আনতে পারে, তাই agoda_id/agoda_url না থাকলেও row থাকবে
@@ -181,6 +185,7 @@ const rows: Row[] = baseRows
   data-agoda-id={agodaId}
   data-agoda-fallback={agodaFallbackUrl}
   data-currency={apiCurrency}
+  data-main-currency={mainCurrency}
   class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left"
 >
   <h3 class="text-lg font-extrabold text-[#0d3b23] mb-4">Deals</h3>
@@ -799,9 +804,10 @@ const rows: Row[] = baseRows
         const u = new URL(agodaBaseUrl);
         u.searchParams.set('checkin', checkIn);
         u.searchParams.set('checkout', checkOut);
-        u.searchParams.set('adults', String(adults));
-        u.searchParams.set('children', String(children));
-        u.searchParams.set('rooms', String(rooms));
+        // Agoda landingURL এর parameter নাম (API doc অনুযায়ী) — ছোট হাতের adults/rooms কাজ করে না
+        u.searchParams.set('NumberofAdults', String(adults));
+        u.searchParams.set('NumberofChildren', String(children));
+        u.searchParams.set('Rooms', String(rooms));
         a.href = u.toString();
       } catch {
         a.href = agodaBaseUrl;
@@ -868,7 +874,10 @@ const rows: Row[] = baseRows
       const priceText = rates?.startingPrice ? String(rates.startingPrice) : '';
       const n = parsePrice(priceText);
       if (priceText && n > 0) {
-        agodaRow.dataset.price = String(n);
+        // currency না মিললে (যেমন ৳ হোটেলে Agoda $ দেয়) sort/“best” এ ধরা হবে না
+        const sameCurrency = priceText.includes(card.getAttribute('data-main-currency') || '$');
+        if (sameCurrency) agodaRow.dataset.price = String(n);
+        else delete agodaRow.dataset.price;
         agodaRow.dataset.priceText = priceText;
         agodaRow.dataset.live = 'true';
         if (priceEl) priceEl.textContent = priceText;
