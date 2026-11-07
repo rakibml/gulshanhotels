@@ -8,7 +8,6 @@ description: See locations and approximate prices. We currently list 1 hotel her
 filter_keyword: gulshan 2
 selected_hotels:
   - amari-dhaka
-  - amari-dhaka-bangladesh-1
   - amari-dhaka-bangladesh-2
   - amari-dhaka-bangladesh
 hotels_tag: ''
