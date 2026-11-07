@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelRates.astro (Ultra-Smooth, Zero-Lag Native Date Picker & Agoda Sync)
+// src/components/hotel/HotelRates.astro (Unified Range Picker + Interactive Guest Selector)
 interface Props {
   hotel: any;
 }
@@ -130,9 +130,9 @@ const presetSvgs: Record<string, string> = {
 ---
 
 <!-- ================= SLEEK & AIRY RATES CARD ================= -->
-<div id="rates-card" class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-6 text-left space-y-4">
+<div id="rates-card" class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-6 text-left space-y-4 relative">
 
-  <!-- ১. প্রাইস হেডার -->
+  <!-- ১. মেইন প্রাইস হেডার -->
   <div class="flex items-start justify-between border-b border-slate-100 pb-4">
     <div>
       <span id="agodaLiveIndicator" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-0.5">
@@ -157,48 +157,135 @@ const presetSvgs: Record<string, string> = {
     </div>
   </div>
 
-  <!-- ২. বাটার-স্মুথ ডেট সিলেক্টর (ল্যাগ-ফ্রি showPicker আর্কিটেকচার) -->
-  <div class="space-y-1.5">
-    <div class="relative bg-slate-50 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl overflow-hidden transition-all shadow-2xs">
-      <div class="grid grid-cols-2 divide-x divide-slate-200">
-        
-        <!-- Check-in Box (ক্লিক করলেই তাত্ক্ষণিক ক্যালেন্ডার ওপেন হবে) -->
-        <div id="checkInBox" class="relative p-2.5 px-3 hover:bg-emerald-50/40 active:bg-emerald-100/40 transition cursor-pointer select-none">
-          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400 pointer-events-none">Check-in</span>
-          <span id="checkInDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5 pointer-events-none">Loading...</span>
-          <input 
-            type="date" 
-            id="checkInInput" 
-            class="absolute inset-0 w-full h-full opacity-0 pointer-events-none" 
-            tabindex="-1"
-            aria-label="Check-in date" 
-          />
+  <!-- ২. ইন্টারেক্টিভ বুকিং কন্ট্রোলস (Unified Range Picker + Guests) -->
+  <div class="space-y-2">
+    
+    <!-- (ক) একবারে চেক-ইন ও চেক-আউট সিলেক্টর বার -->
+    <div class="relative">
+      <button 
+        type="button" 
+        id="dateRangeBtn" 
+        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left group shadow-2xs"
+      >
+        <div class="flex items-center gap-2.5 min-w-0">
+          <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <div class="truncate">
+            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400">Dates of Stay</span>
+            <span id="dateRangeSummaryText" class="font-bold text-xs text-slate-800 block truncate">
+              Loading dates...
+            </span>
+          </div>
+        </div>
+        <span id="stayNightsBadge" class="bg-white border border-slate-200 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 shadow-2xs">
+          1 night
+        </span>
+      </button>
+
+      <!-- 🔥 এক ক্লিকে রেঞ্জ ক্যালেন্ডার ড্রপডাউন (Vanilla Range Calendar) 🔥 -->
+      <div 
+        id="calendarDropdown" 
+        class="hidden absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 space-y-3"
+      >
+        <!-- ক্যালেন্ডার হেডার (মাস পরিবর্তন) -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <button type="button" id="prevMonthBtn" class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition" aria-label="Previous month">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <span id="calendarMonthYear" class="font-bold text-xs text-slate-800"></span>
+          <button type="button" id="nextMonthBtn" class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition" aria-label="Next month">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
         </div>
 
-        <!-- Check-out Box -->
-        <div id="checkOutBox" class="relative p-2.5 px-3 hover:bg-emerald-50/40 active:bg-emerald-100/40 transition cursor-pointer select-none">
-          <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400 pointer-events-none">Check-out</span>
-          <span id="checkOutDisplay" class="font-bold text-xs text-slate-800 block truncate mt-0.5 pointer-events-none">Loading...</span>
-          <input 
-            type="date" 
-            id="checkOutInput" 
-            class="absolute inset-0 w-full h-full opacity-0 pointer-events-none" 
-            tabindex="-1"
-            aria-label="Check-out date" 
-          />
+        <!-- সপ্তাহের দিনের নাম -->
+        <div class="grid grid-cols-7 text-center text-[10px] font-bold text-slate-400">
+          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
         </div>
 
+        <!-- দিনের গ্রিড -->
+        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-y-1 text-center text-xs"></div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[10px]">
+          <span class="text-slate-400">Click Check-in, then Check-out</span>
+          <button type="button" id="closeCalBtn" class="text-emerald-800 font-bold hover:underline">Close</button>
+        </div>
       </div>
     </div>
 
-    <!-- রাতের হিসাব ও ২ গেস্ট ইন্ডিকেটর -->
-    <div class="flex items-center justify-between text-[10px] font-semibold text-slate-500 px-1">
-      <span>👥 2 Guests · 1 Room</span>
-      <span id="stayNightsBadge" class="font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">1 night</span>
+    <!-- (খ) ইন্টারঅ্যাক্টিভ গেস্ট ও রুম সিলেক্টর -->
+    <div class="relative">
+      <button 
+        type="button" 
+        id="guestsBtn" 
+        class="w-full bg-slate-50 hover:bg-emerald-50/40 border border-slate-200/90 hover:border-emerald-700/60 rounded-xl p-2.5 px-3.5 flex items-center justify-between transition-all text-left shadow-2xs"
+      >
+        <div class="flex items-center gap-2.5">
+          <svg aria-hidden="true" class="w-4 h-4 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <div>
+            <span class="block text-[8px] font-bold uppercase tracking-wider text-slate-400">Occupancy</span>
+            <span id="guestsSummaryText" class="font-bold text-xs text-slate-800 block">2 Adults · 1 Room</span>
+          </div>
+        </div>
+        <span class="text-slate-400 text-xs">▾</span>
+      </button>
+
+      <!-- 🔥 গেস্ট ও রুম সিলেক্টর পপআপ (+ / - বাটন) 🔥 -->
+      <div 
+        id="guestsDropdown" 
+        class="hidden absolute left-0 right-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-4 space-y-3 text-xs"
+      >
+        <!-- Adults -->
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="font-bold text-slate-800 block leading-tight">Adults</span>
+            <span class="text-[10px] text-slate-400">Ages 18+</span>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button type="button" id="adultMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <span id="adultCount" class="font-bold w-4 text-center">2</span>
+            <button type="button" id="adultPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+          </div>
+        </div>
+
+        <!-- Children -->
+        <div class="flex items-center justify-between border-t border-slate-100 pt-2">
+          <div>
+            <span class="font-bold text-slate-800 block leading-tight">Children</span>
+            <span class="text-[10px] text-slate-400">Ages 0–17</span>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button type="button" id="childMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <span id="childCount" class="font-bold w-4 text-center">0</span>
+            <button type="button" id="childPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+          </div>
+        </div>
+
+        <!-- Rooms -->
+        <div class="flex items-center justify-between border-t border-slate-100 pt-2">
+          <div>
+            <span class="font-bold text-slate-800 block leading-tight">Rooms</span>
+            <span class="text-[10px] text-slate-400">Total room count</span>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button type="button" id="roomMinus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition disabled:opacity-30">−</button>
+            <span id="roomCount" class="font-bold w-4 text-center">1</span>
+            <button type="button" id="roomPlus" class="w-7 h-7 rounded-full border border-slate-200 hover:border-emerald-700 flex items-center justify-center font-black text-slate-600 transition">+</button>
+          </div>
+        </div>
+
+        <button type="button" id="closeGuestsBtn" class="w-full bg-[#0d3b23] text-white font-bold py-1.5 rounded-lg text-xs mt-1 hover:bg-[#124e30] transition">
+          Apply
+        </button>
+      </div>
     </div>
+
   </div>
 
-  <!-- ৩. মেইন লাইভ বুকিং বাটন -->
+  <!-- ৩. মেইন লাইভ বুকিং বাটন (One-Click Agoda CTA) -->
   <div>
     <a
       id="agodaRowBtn"
@@ -207,7 +294,7 @@ const presetSvgs: Record<string, string> = {
       rel="sponsored nofollow noopener"
       class="w-full bg-[#0d3b23] hover:bg-[#124e30] text-white font-bold text-xs sm:text-sm py-3 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
     >
-      <span>View Deal on Agoda</span>
+      <span>Book Deal on Agoda</span>
       <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
       </svg>
@@ -283,12 +370,12 @@ const presetSvgs: Record<string, string> = {
 
 </div>
 
-<!-- ================= 100% LAG-FREE CLIENT SCRIPT ================= -->
+<!-- ================= ULTRA-FAST VANILLA RANGE CALENDAR & GUEST SCRIPT ================= -->
 <script>
   let ratesAbortCtrl: AbortController | null = null;
-  // দ্রুততম রেসপন্সের জন্য ইন-মেমোরি ক্যাশ
   const ratesMemoryCache = new Map<string, any>();
 
+  // তারিখ ইউটিলিটিজ
   function getDhakaDateString(offsetDays = 0): string {
     const now = new Date();
     const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -300,13 +387,12 @@ const presetSvgs: Record<string, string> = {
     return `${y}-${m}-${d}`;
   }
 
-  function formatDisplayDate(dateStr: string): string {
+  function formatShortDate(dateStr: string): string {
     if (!dateStr) return '';
     const [year, month, day] = dateStr.split('-').map(Number);
     const d = new Date(year, month - 1, day);
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+    return `${months[d.getMonth()]} ${d.getDate()}`;
   }
 
   function calculateNights(inStr: string, outStr: string): number {
@@ -333,43 +419,172 @@ const presetSvgs: Record<string, string> = {
     const agodaDiscountEl = document.getElementById('agodaDiscountBadge');
     const agodaBtnEl = document.getElementById('agodaRowBtn') as HTMLAnchorElement | null;
 
-    const checkInBox = document.getElementById('checkInBox');
-    const checkOutBox = document.getElementById('checkOutBox');
-    const checkInInput = document.getElementById('checkInInput') as HTMLInputElement | null;
-    const checkOutInput = document.getElementById('checkOutInput') as HTMLInputElement | null;
-    const checkInDisplay = document.getElementById('checkInDisplay');
-    const checkOutDisplay = document.getElementById('checkOutDisplay');
-    const nightsBadge = document.getElementById('stayNightsBadge');
+    // Date Range UI
+    const dateRangeBtn = document.getElementById('dateRangeBtn');
+    const dateRangeSummaryText = document.getElementById('dateRangeSummaryText');
+    const stayNightsBadge = document.getElementById('stayNightsBadge');
+    const calendarDropdown = document.getElementById('calendarDropdown');
+    const calendarDaysGrid = document.getElementById('calendarDaysGrid');
+    const calendarMonthYear = document.getElementById('calendarMonthYear');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const closeCalBtn = document.getElementById('closeCalBtn');
 
-    if (!ratesContainer || !checkInInput || !checkOutInput) return;
+    // Guests UI
+    const guestsBtn = document.getElementById('guestsBtn');
+    const guestsDropdown = document.getElementById('guestsDropdown');
+    const guestsSummaryText = document.getElementById('guestsSummaryText');
+    const closeGuestsBtn = document.getElementById('closeGuestsBtn');
+
+    const adultCountEl = document.getElementById('adultCount');
+    const childCountEl = document.getElementById('childCount');
+    const roomCountEl = document.getElementById('roomCount');
+    const adultMinus = document.getElementById('adultMinus') as HTMLButtonElement | null;
+    const adultPlus = document.getElementById('adultPlus') as HTMLButtonElement | null;
+    const childMinus = document.getElementById('childMinus') as HTMLButtonElement | null;
+    const childPlus = document.getElementById('childPlus') as HTMLButtonElement | null;
+    const roomMinus = document.getElementById('roomMinus') as HTMLButtonElement | null;
+    const roomPlus = document.getElementById('roomPlus') as HTMLButtonElement | null;
+
+    if (!ratesContainer) return;
 
     const hotelSlug = (ratesContainer.getAttribute('data-hotel-slug') || '').trim();
     const hotelName = (ratesContainer.getAttribute('data-hotel-title') || '').trim();
     const agodaId = (ratesContainer.getAttribute('data-agoda-id') || '').trim();
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
 
-    const today = getDhakaDateString(0);
-    const tomorrow = getDhakaDateString(1);
+    // স্টেট
+    let checkIn = getDhakaDateString(0);
+    let checkOut = getDhakaDateString(1);
+    let calViewDate = new Date();
+    let tempCheckIn: string | null = null;
 
-    if (!checkInInput.value) {
-      checkInInput.value = today;
-      checkInInput.min = today;
-    }
-    if (!checkOutInput.value) {
-      checkOutInput.value = tomorrow;
-      checkOutInput.min = tomorrow;
-    }
+    let adults = 2;
+    let children = 0;
+    let rooms = 1;
 
-    function updateLabelsFast() {
-      if (checkInDisplay && checkInInput) checkInDisplay.textContent = formatDisplayDate(checkInInput.value);
-      if (checkOutDisplay && checkOutInput) checkOutDisplay.textContent = formatDisplayDate(checkOutInput.value);
-      if (nightsBadge && checkInInput && checkOutInput) {
-        const nights = calculateNights(checkInInput.value, checkOutInput.value);
-        nightsBadge.textContent = `${nights} ${nights === 1 ? 'night' : 'nights'}`;
+    // ================= ১. রেঞ্জ ক্যালেন্ডার রেন্ডারিং ইঞ্জিন =================
+    function renderCalendar() {
+      if (!calendarDaysGrid || !calendarMonthYear) return;
+      calendarDaysGrid.innerHTML = '';
+
+      const y = calViewDate.getFullYear();
+      const m = calViewDate.getMonth();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      calendarMonthYear.textContent = `${monthNames[m]} ${y}`;
+
+      const firstDay = new Date(y, m, 1).getDay();
+      const daysInMonth = new Date(y, m + 1, 0).getDate();
+      const todayStr = getDhakaDateString(0);
+
+      // ফাঁকা স্লট
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        calendarDaysGrid.appendChild(empty);
+      }
+
+      // দিনসমূহ
+      for (let day = 1; day <= daysInMonth; day++) {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const thisDateStr = `${y}-${pad(m + 1)}-${pad(day)}`;
+        const isPast = thisDateStr < todayStr;
+
+        const dayBtn = document.createElement('button');
+        dayBtn.type = 'button';
+        dayBtn.textContent = String(day);
+        dayBtn.className = 'h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-xs font-semibold transition';
+
+        if (isPast) {
+          dayBtn.className += ' text-slate-300 cursor-not-allowed pointer-events-none';
+        } else {
+          // সিলেকশন স্টাইল
+          const isStart = tempCheckIn ? thisDateStr === tempCheckIn : thisDateStr === checkIn;
+          const isEnd = !tempCheckIn && thisDateStr === checkOut;
+          const inRange = !tempCheckIn && thisDateStr > checkIn && thisDateStr < checkOut;
+
+          if (isStart || isEnd) {
+            dayBtn.className += ' bg-[#0d3b23] text-white font-bold shadow-xs';
+          } else if (inRange) {
+            dayBtn.className += ' bg-emerald-50 text-emerald-900 rounded-none';
+          } else {
+            dayBtn.className += ' hover:bg-slate-100 text-slate-700';
+          }
+
+          dayBtn.addEventListener('click', () => {
+            if (!tempCheckIn) {
+              // প্রথম ক্লিক = চেক-ইন
+              tempCheckIn = thisDateStr;
+              renderCalendar();
+            } else {
+              // দ্বিতীয় ক্লিক = চেক-আউট
+              if (thisDateStr <= tempCheckIn) {
+                tempCheckIn = thisDateStr;
+                renderCalendar();
+              } else {
+                checkIn = tempCheckIn;
+                checkOut = thisDateStr;
+                tempCheckIn = null;
+                updateSummary();
+                if (calendarDropdown) calendarDropdown.classList.add('hidden');
+                fetchLiveRates();
+              }
+            }
+          });
+        }
+
+        calendarDaysGrid.appendChild(dayBtn);
       }
     }
 
-    function applyRatesToUI(rates: any) {
+    // ================= ২. গেস্ট ও তারিখ সামারি আপডেট =================
+    function updateSummary() {
+      if (dateRangeSummaryText) {
+        dateRangeSummaryText.textContent = `${formatShortDate(checkIn)} — ${formatShortDate(checkOut)}`;
+      }
+      if (stayNightsBadge) {
+        const nights = calculateNights(checkIn, checkOut);
+        stayNightsBadge.textContent = `${nights} ${nights === 1 ? 'night' : 'nights'}`;
+      }
+      if (guestsSummaryText) {
+        let text = `${adults} ${adults === 1 ? 'Adult' : 'Adults'}`;
+        if (children > 0) text += `, ${children} ${children === 1 ? 'Child' : 'Children'}`;
+        text += ` · ${rooms} ${rooms === 1 ? 'Room' : 'Rooms'}`;
+        guestsSummaryText.textContent = text;
+      }
+    }
+
+    // ================= ৩. ক্লাউডফ্লেয়ার আগোডা লাইভ প্রাইস ফেচ =================
+    async function fetchLiveRates() {
+      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${rooms}`;
+      if (ratesMemoryCache.has(cacheKey)) {
+        applyRates(ratesMemoryCache.get(cacheKey));
+        return;
+      }
+
+      ratesAbortCtrl?.abort();
+      ratesAbortCtrl = new AbortController();
+      const { signal } = ratesAbortCtrl;
+
+      if (startingPriceEl) startingPriceEl.style.opacity = '0.4';
+
+      const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
+      const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&adults=${adults}&children=${children}&rooms=${rooms}&currency=USD`;
+
+      try {
+        const res = await fetch(apiUrl, { signal });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success && json.rates) {
+            ratesMemoryCache.set(cacheKey, json.rates);
+            applyRates(json.rates);
+          }
+        }
+      } catch (e: any) {
+        if (startingPriceEl) startingPriceEl.style.opacity = '1';
+      }
+    }
+
+    function applyRates(rates: any) {
       const livePriceStr = rates?.startingPrice ? String(rates.startingPrice) : null;
       if (startingPriceEl) {
         if (livePriceStr) startingPriceEl.textContent = livePriceStr;
@@ -401,9 +616,20 @@ const presetSvgs: Record<string, string> = {
         `;
       }
 
+      // বুকিং বাটন লিংক আপডেট (তারিখ ও গেস্ট সংখ্যা সহ সরাসরি আগোডায় যাবে)
       const agodaDeal = Array.isArray(rates?.channelsList) ? rates.channelsList[0] : null;
       if (agodaBtnEl && agodaDeal?.button_url) {
-        agodaBtnEl.href = agodaDeal.button_url;
+        try {
+          const urlObj = new URL(agodaDeal.button_url);
+          urlObj.searchParams.set('checkin', checkIn);
+          urlObj.searchParams.set('checkout', checkOut);
+          urlObj.searchParams.set('adults', String(adults));
+          urlObj.searchParams.set('children', String(children));
+          urlObj.searchParams.set('rooms', String(rooms));
+          agodaBtnEl.href = urlObj.toString();
+        } catch {
+          agodaBtnEl.href = agodaDeal.button_url;
+        }
       }
 
       if (livePriceStr) {
@@ -413,97 +639,87 @@ const presetSvgs: Record<string, string> = {
       }
     }
 
-    async function fetchLiveRates(checkIn: string, checkOut: string) {
-      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}`;
-      
-      // মেমোরিতে থাকলে ০ মিলিসেকেন্ডে ইনস্ট্যান্ট লোড হবে!
-      if (ratesMemoryCache.has(cacheKey)) {
-        applyRatesToUI(ratesMemoryCache.get(cacheKey));
-        return;
+    // ================= ৪. ইভেন্ট লিসেনার্স =================
+    // ক্যালেন্ডার ওপেন / ক্লোজ
+    dateRangeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      guestsDropdown?.classList.add('hidden');
+      calendarDropdown?.classList.toggle('hidden');
+      tempCheckIn = null;
+      renderCalendar();
+    });
+
+    prevMonthBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      calViewDate.setMonth(calViewDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextMonthBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      calViewDate.setMonth(calViewDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    closeCalBtn?.addEventListener('click', () => {
+      calendarDropdown?.classList.add('hidden');
+    });
+
+    // গেস্ট ড্রপডাউন ওপেন / ক্লোজ
+    guestsBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      calendarDropdown?.classList.add('hidden');
+      guestsDropdown?.classList.toggle('hidden');
+    });
+
+    closeGuestsBtn?.addEventListener('click', () => {
+      guestsDropdown?.classList.add('hidden');
+      updateSummary();
+      fetchLiveRates();
+    });
+
+    // গেস্ট +/- বাটনস
+    adultPlus?.addEventListener('click', () => {
+      if (adults < 8) { adults++; if (adultCountEl) adultCountEl.textContent = String(adults); }
+      if (adultMinus) adultMinus.disabled = adults <= 1;
+    });
+    adultMinus?.addEventListener('click', () => {
+      if (adults > 1) { adults--; if (adultCountEl) adultCountEl.textContent = String(adults); }
+      if (adultMinus) adultMinus.disabled = adults <= 1;
+    });
+
+    childPlus?.addEventListener('click', () => {
+      if (children < 6) { children++; if (childCountEl) childCountEl.textContent = String(children); }
+      if (childMinus) childMinus.disabled = children <= 0;
+    });
+    childMinus?.addEventListener('click', () => {
+      if (children > 0) { children--; if (childCountEl) childCountEl.textContent = String(children); }
+      if (childMinus) childMinus.disabled = children <= 0;
+    });
+
+    roomPlus?.addEventListener('click', () => {
+      if (rooms < 5) { rooms++; if (roomCountEl) roomCountEl.textContent = String(rooms); }
+      if (roomMinus) roomMinus.disabled = rooms <= 1;
+    });
+    roomMinus?.addEventListener('click', () => {
+      if (rooms > 1) { rooms--; if (roomCountEl) roomCountEl.textContent = String(rooms); }
+      if (roomMinus) roomMinus.disabled = rooms <= 1;
+    });
+
+    // বাইরে ক্লিক করলে পপআপ ক্লোজ
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!calendarDropdown?.contains(target) && !dateRangeBtn?.contains(target)) {
+        calendarDropdown?.classList.add('hidden');
       }
-
-      ratesAbortCtrl?.abort();
-      ratesAbortCtrl = new AbortController();
-      const { signal } = ratesAbortCtrl;
-
-      if (startingPriceEl) startingPriceEl.style.opacity = '0.4';
-
-      const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
-      const apiUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
-
-      try {
-        const res = await fetch(apiUrl, { signal });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.success && json.rates) {
-            ratesMemoryCache.set(cacheKey, json.rates);
-            applyRatesToUI(json.rates);
-          }
-        }
-      } catch (e: any) {
-        if (startingPriceEl) startingPriceEl.style.opacity = '1';
+      if (!guestsDropdown?.contains(target) && !guestsBtn?.contains(target)) {
+        guestsDropdown?.classList.add('hidden');
       }
-    }
+    });
 
-    // প্রথম লোড
-    updateLabelsFast();
-    fetchLiveRates(checkInInput.value, checkOutInput.value);
-
-    // 🔥 showPicker() ইনস্ট্যান্ট ওপেন (ক্যালেন্ডার কোনো ল্যাগ ছাড়া সাথে সাথে খুলবে) 🔥
-    if (checkInBox && !checkInBox.dataset.bound) {
-      checkInBox.dataset.bound = 'true';
-      checkInBox.addEventListener('click', (e) => {
-        e.preventDefault();
-        try {
-          if ('showPicker' in HTMLInputElement.prototype) {
-            checkInInput.showPicker();
-          } else {
-            checkInInput.focus();
-          }
-        } catch {
-          checkInInput.focus();
-        }
-      });
-    }
-
-    if (checkOutBox && !checkOutBox.dataset.bound) {
-      checkOutBox.dataset.bound = 'true';
-      checkOutBox.addEventListener('click', (e) => {
-        e.preventDefault();
-        try {
-          if ('showPicker' in HTMLInputElement.prototype) {
-            checkOutInput.showPicker();
-          } else {
-            checkOutInput.focus();
-          }
-        } catch {
-          checkOutInput.focus();
-        }
-      });
-    }
-
-    // তারিখ বদলানোর ইভেন্ট হ্যান্ডলার
-    if (checkInInput && !checkInInput.dataset.bound) {
-      checkInInput.dataset.bound = 'true';
-      checkInInput.addEventListener('change', () => {
-        const newIn = checkInInput.value;
-        const nextDayStr = addDays(newIn, 1);
-        checkOutInput.min = nextDayStr;
-        if (checkOutInput.value <= newIn) {
-          checkOutInput.value = nextDayStr;
-        }
-        updateLabelsFast();
-        fetchLiveRates(checkInInput.value, checkOutInput.value);
-      });
-    }
-
-    if (checkOutInput && !checkOutInput.dataset.bound) {
-      checkOutInput.dataset.bound = 'true';
-      checkOutInput.addEventListener('change', () => {
-        updateLabelsFast();
-        fetchLiveRates(checkInInput.value, checkOutInput.value);
-      });
-    }
+    // ইনিশিয়াল কল
+    updateSummary();
+    fetchLiveRates();
   }
 
   document.addEventListener('astro:before-swap', () => {
