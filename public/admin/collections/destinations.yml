@@ -11,46 +11,55 @@ sortable_fields: ["title"]
 editor:
   preview: false
 
+# এই ফিল্ডগুলো LocationCategoryTemplate.astro এর সাথে ১০০% মিলানো।
+# টেমপ্লেট যে ফিল্ড পড়ে না, তা এখানে রাখা হয়নি।
+
 fields:
+  # ================= PAGE BASICS =================
   - label: "Page Title (H1)"
     name: "title"
     widget: "string"
-    hint: "যেমন: Hotels in Gulshan 1"
+    hint: "যেমন: Hotels in Gulshan 2। পেজের বড় শিরোনাম ও ব্যানারে এটাই দেখাবে।"
 
   - label: "URL Slug"
     name: "slug"
     widget: "string"
-    pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'শুধুমাত্র ছোট হাতের ইংরেজি অক্ষর ও হাইফেন দিন (যেমন: hotels-in-gulshan-1)']
-    hint: "যেমন: hotels-in-gulshan-1"
+    pattern: ['^(?!(about|contact|privacy|disclaimer|admin|sitemap)$)[a-z0-9]+(?:-[a-z0-9]+)*$', 'শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন দিন। about, contact, privacy, disclaimer, admin, sitemap দেওয়া যাবে না।']
+    hint: "যেমন: hotels-in-gulshan-2। কোনো হোটেলের slug এর সাথে হুবহু মিলানো যাবে না, নইলে দুটো পেজ ঝগড়া করবে।"
 
   - label: "Location Subtitle"
     name: "location_subtitle"
     widget: "string"
     required: false
-    hint: "ম্যাপ পিনের পাশে যা দেখাবে (যেমন: Gulshan, Dhaka)"
-
-  - label: "Hero Badge (Optional)"
-    name: "hero_badge"
-    widget: "string"
-    required: false
-    hint: "যেমন: Direct Local Rates বা Diplomatic Zone Stays"
+    hint: "ব্যানারে শিরোনামের নিচে ছোট লেখা। যেমন: Gulshan, Dhaka"
 
   - label: "Hero Banner Image"
     name: "hero_image"
     widget: "image"
     choose_url: true
     required: false
+    hint: "ছবি অবশ্যই এই জায়গার সাথে মিলতে হবে, আর ব্যবহারের অনুমতি থাকতে হবে। সংযুক্ত না করলে কালো ব্যাকগ্রাউন্ড দেখাবে।"
 
-  - label: "SEO / Meta Description"
+  # ================= SEO =================
+  - label: "SEO Title (Optional)"
+    name: "seo_title"
+    widget: "string"
+    required: false
+    pattern: ['^.{10,65}$', '১০ থেকে ৬৫ অক্ষরের মধ্যে লিখুন']
+    hint: "গুগলে নীল শিরোনাম হিসেবে দেখায়। ফাঁকা রাখলে পেজের টাইটেল থেকে অটো তৈরি হবে। সত্যি কথা লিখুন, প্রমাণ ছাড়া best, top, luxury লিখবেন না।"
+
+  - label: "Description (Meta Description + Page Intro)"
     name: "description"
     widget: "text"
-    hint: "হিরো ব্যানারের বিবরণ ও গুগল সার্চের মেটা ডেসক্রিপশন"
+    pattern: ['^.{50,170}$', '৫০ থেকে ১৭০ অক্ষরের মধ্যে, এক অনুচ্ছেদে লিখুন']
+    hint: "এটা গুগল সার্চের নিচের লেখা এবং পেজের H1 এর নিচের পরিচিতি, দুই জায়গাতেই দেখায়। সত্যি ও সহজ লিখুন, ১২০ থেকে ১৬০ অক্ষর ভালো।"
 
+  # ================= HOTEL LIST CONTROLS =================
   - label: "Auto-Filter Keyword"
     name: "filter_keyword"
     widget: "string"
     required: false
-    hint: "যেমন: gulshan 1 বা 5-star। ফাঁকা রাখলে স্লাগ থেকে অটো খুঁজবে।"
+    hint: "যেমন: gulshan 2। হোটেলের location, category বা নামে এই শব্দ থাকলে পেজে আসবে। ফাঁকা রাখলে slug থেকে অটো খুঁজবে (hotels-in-gulshan-2 থেকে gulshan 2)। হাইফেন বা স্পেস একই ধরা হয়।"
 
   - label: "Manually Select Hotels (Optional)"
     name: "selected_hotels"
@@ -61,89 +70,27 @@ fields:
     display_fields: ["title"]
     multiple: true
     required: false
+    hint: "এখানে হোটেল বাছলে অটো-ফিল্টার বন্ধ হয়ে যাবে, শুধু এই হোটেলগুলো দেখাবে। ফাঁকা রাখলে অটো-ফিল্টার চলবে।"
 
-  # ================= HOTELS SECTION CONTROLS =================
   - label: "Hotels Section Tag"
     name: "hotels_tag"
     widget: "string"
     required: false
-    hint: "যেমন: CURATED ACCOMMODATIONS"
+    hint: "হোটেল তালিকার ওপরে ছোট লেখা। যেমন: STAYS IN GULSHAN 2। ফাঁকা রাখলে দেখাবে না।"
 
   - label: "Hotels Section Title (H2)"
     name: "hotels_title"
     widget: "string"
     required: false
-    hint: "ফাঁকা রাখলে পেজের টাইটেল অনুযায়ী অটো তৈরি হবে"
+    hint: "ফাঁকা রাখলে 'Accommodations in Gulshan 2' এর মতো অটো তৈরি হবে।"
 
-  - label: "All Hotels Link Text"
-    name: "all_hotels_link_text"
-    widget: "string"
-    required: false
-    hint: "যেমন: Browse All Hotels"
-
-  - label: "All Hotels Link URL"
-    name: "all_hotels_link_url"
-    widget: "string"
-    required: false
-    hint: "যেমন: /hotels অথবা /#hotels"
-
-  # ================= ABOUT / WHY STAY SECTION =================
-  - label: "About Section Tag"
-    name: "about_tag"
-    widget: "string"
-    required: false
-    hint: "যেমন: AREA OVERVIEW"
-
-  - label: "About Section Heading (H2)"
-    name: "about_title"
-    widget: "string"
-    required: false
-    hint: "যেমন: Why Stay in Gulshan 1?"
-
-  - label: "About Section Image"
-    name: "about_image"
-    widget: "image"
-    choose_url: true
-    required: false
-
-  - label: "About Section Text"
-    name: "about_text"
-    widget: "text"
-    required: false
-
-  - label: "Area Highlights"
-    name: "area_highlights"
-    widget: "list"
-    required: false
-    summary: "{{fields.title}}"
-    fields:
-      - { label: "Highlight Title (H3)", name: "title", widget: "string" }
-      - { label: "Short Description", name: "desc", widget: "string", required: false }
-
-  # ================= FAQ SECTION CONTROLS =================
-  - label: "FAQ Badge Text"
-    name: "faq_badge"
-    widget: "string"
-    required: false
-    hint: "যেমন: Verified Traveler FAQs"
-
-  - label: "FAQ Section Title (H2)"
-    name: "faq_title"
-    widget: "string"
-    required: false
-    hint: "যেমন: Frequently Asked Questions"
-
-  - label: "FAQ Subtitle / Description"
-    name: "faq_description"
-    widget: "text"
-    required: false
-    hint: "প্রশ্নের উপরে ছোট বিবরণ (ঐচ্ছিক)"
-
+  # ================= FAQ (শুধু প্রশ্ন ও উত্তর দুটোই থাকলে দেখাবে) =================
   - label: "FAQs"
     name: "faqs"
     widget: "list"
     required: false
     summary: "{{fields.question}}"
+    hint: "এখানের প্রশ্ন পেজে আর গুগলের FAQ Schema তে একই যাবে। শুধু সত্যি ও যাচাই করা উত্তর লিখুন।"
     fields:
       - { label: "Question", name: "question", widget: "string" }
       - { label: "Answer", name: "answer", widget: "text" }
@@ -153,3 +100,4 @@ fields:
     name: "body"
     widget: "markdown"
     required: false
+    hint: "পেজের মূল লেখা (H1 ও বর্ণনার নিচে, হোটেল তালিকার ওপরে)। এলাকা সম্পর্কে সত্যি তথ্য, হোটেল বাছার টিপস আর দামের নোট এখানে লিখুন। এটাই গুগলের কাছে সবচেয়ে মূল্যবান অংশ।"
