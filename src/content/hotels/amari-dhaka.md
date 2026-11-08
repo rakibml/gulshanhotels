@@ -271,9 +271,7 @@ policies:
 title_style: style_5
 ---
 
-Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka.
-
-The hotel has 134 rooms and suites, with a mix of modern design and simple Bangladeshi touches. The rooms are spacious and have large floor-to-ceiling windows that bring in plenty of natural light. Guests can choose from different room types, including Deluxe Rooms, Deluxe Studios, Junior Suites, and One Bedroom Suites.
+Amari Dhaka is a 5-star luxury business hotel located on Road 41 in Gulshan-2, Dhaka. The property features 134 modern guest rooms, a rooftop swimming pool (Deck 41), Breeze Spa, and 24-hour business facilities, with room rates starting from $130 per night.
 
 Food is another part of the experience at Amari Dhaka. The hotel has several dining options, including Amaya, Cascade, and Deck 41. Guests can enjoy Asian and international dishes, have coffee in a relaxed setting, or spend some time at the rooftop restaurant.
 
