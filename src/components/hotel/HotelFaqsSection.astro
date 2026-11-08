@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelFaqsSection.astro
-// 100% Dynamic CMS FAQs, SVG Accordion, XSS-Safe, Google FAQPage compliant
+// Dynamic CMS FAQs, SVG Accordions, 1:1 Schema-DOM Match, Google FAQPage Compliant
 interface Props {
   hotel: any;
 }
@@ -11,7 +11,7 @@ const data = hotel?.data || {};
 const hotelTitle = String(data.title || data.name || "Hotel Details").trim();
 const sectionTitle = data.faqs_title || `FAQs about ${hotelTitle}`;
 
-// HTML tag + entity cleanup (page text ar schema text jate hubohu ek hoy)
+// Clean HTML tags and entities to ensure schema matches rendered text
 const stripHtml = (html: string) =>
   String(html || "")
     .replace(/<[^>]*>/g, " ")
@@ -24,7 +24,7 @@ const stripHtml = (html: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-// 1. Shudhu question + answer duto thaka valid FAQ rakha
+// Include valid FAQs with non-empty question and answer
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const cleanFaqs = rawFaqs
   .map((item: any) => ({
@@ -35,10 +35,7 @@ const cleanFaqs = rawFaqs
 
 const showSection = data.enable_faqs !== false && cleanFaqs.length > 0;
 
-const VISIBLE_COUNT = 4;
-const extraCount = Math.max(cleanFaqs.length - VISIBLE_COUNT, 0);
-
-// 2. Google FAQPage schema (visible content-er sathe 100% match kore)
+// Google FAQPage schema: exactly matches all rendered questions in the DOM
 const faqSchema = showSection
   ? {
       "@context": "https://schema.org",
@@ -81,15 +78,10 @@ const faqJsonLd = faqSchema
         </p>
       </div>
 
-      <!-- FAQ GRID (prothom 4-ta visible, baki gulo hidden) -->
+      <!-- FAQ Grid: All items rendered as accessible accordions without display:none -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         {cleanFaqs.map((faq, idx) => (
-          <div
-            class:list={[
-              "faq-item-wrapper bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden group transition duration-300",
-              idx >= VISIBLE_COUNT && "extra-faq hidden",
-            ]}
-          >
+          <div class="faq-item-wrapper bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden group transition duration-300">
             <h3 class="m-0">
               <button
                 type="button"
@@ -129,34 +121,6 @@ const faqJsonLd = faqSchema
           </div>
         ))}
       </div>
-
-      <!-- READ MORE / LESS BUTTON -->
-      {extraCount > 0 && (
-        <div class="flex justify-center pt-2">
-          <button
-            type="button"
-            id="toggleFaqsBtn"
-            data-count={extraCount}
-            aria-expanded="false"
-            class="text-xs font-black uppercase text-emerald-800 tracking-wider bg-emerald-50 hover:bg-emerald-100 px-6 py-3 rounded-2xl border border-emerald-300 transition cursor-pointer flex items-center gap-2 shadow-2xs select-none active:scale-95"
-          >
-            <span id="toggleFaqsText">Read More FAQs (+{extraCount})</span>
-            <svg
-              aria-hidden="true"
-              id="toggleFaqsIcon"
-              class="w-3.5 h-3.5 shrink-0 transition-transform duration-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      )}
     </div>
   </section>
 )}
@@ -169,7 +133,7 @@ const faqJsonLd = faqSchema
     faqsAbortCtrl = new AbortController();
     const { signal } = faqsAbortCtrl;
 
-    // Accordion toggle
+    // Accordion toggle handler
     document.querySelectorAll<HTMLButtonElement>(".faq-accordion-trigger").forEach((trigger) => {
       trigger.addEventListener(
         "click",
@@ -190,29 +154,6 @@ const faqJsonLd = faqSchema
         { signal }
       );
     });
-
-    // Read More / Show Less toggle
-    const toggleBtn = document.getElementById("toggleFaqsBtn");
-    const toggleText = document.getElementById("toggleFaqsText");
-    const toggleIcon = document.getElementById("toggleFaqsIcon");
-    const extraItems = document.querySelectorAll<HTMLElement>(".extra-faq");
-
-    if (toggleBtn && toggleText && toggleIcon && extraItems.length > 0) {
-      const remainingCount = toggleBtn.getAttribute("data-count") || String(extraItems.length);
-
-      toggleBtn.addEventListener(
-        "click",
-        () => {
-          const willShow = toggleBtn.getAttribute("aria-expanded") !== "true";
-
-          extraItems.forEach((el) => el.classList.toggle("hidden", !willShow));
-          toggleText.textContent = willShow ? "Show Less FAQs" : `Read More FAQs (+${remainingCount})`;
-          toggleIcon.style.transform = willShow ? "rotate(-90deg)" : "rotate(0deg)";
-          toggleBtn.setAttribute("aria-expanded", String(willShow));
-        },
-        { signal }
-      );
-    }
   }
 
   document.addEventListener("DOMContentLoaded", initHotelFaqs);
