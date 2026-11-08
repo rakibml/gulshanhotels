@@ -1,30 +1,31 @@
-// src/pages/sitemap-index.xml.ts (100% Pure Dynamic Google & Bing Compliant XML Sitemap)
+// src/pages/sitemap-index.xml.ts
+// Google & Bing Compliant Dynamic XML Sitemap with Consistent Trailing Slashes
 import { getCollection } from 'astro:content';
 
 export async function GET() {
   const siteOrigin = 'https://gulshanhotels.com';
   const today = new Date().toISOString().split('T')[0];
 
-  // ১. ডুপ্লিকেট ইউআরএল ফিল্টারের জন্য ম্যাপ
   const urlMap = new Map<string, { loc: string; lastmod: string; changefreq: string; priority: string }>();
 
+  // Ensure all generated URLs strictly end with a trailing slash
   function addUrl(path: string, priority = '0.7', changefreq = 'weekly', lastmod = today) {
     const cleanPath = path.replace(/^\/+|\/+$/g, '');
-    const fullUrl = cleanPath ? `${siteOrigin}/${cleanPath}` : `${siteOrigin}/`;
+    const fullUrl = cleanPath ? `${siteOrigin}/${cleanPath}/` : `${siteOrigin}/`;
     if (!urlMap.has(fullUrl)) {
       urlMap.set(fullUrl, { loc: fullUrl, lastmod, changefreq, priority });
     }
   }
 
-  // ২. হোমপেজ ও প্রধান হাবসমূহ (সর্বোচ্চ প্রায়োরিটি ১.০)
+  // Core static hub routes
   addUrl('', '1.0', 'daily');
   addUrl('blog', '0.8', 'daily');
   addUrl('about', '0.6', 'monthly');
   addUrl('contact', '0.7', 'monthly');
-  addUrl('privacy-policy', '0.5', 'monthly');
+  addUrl('privacy', '0.5', 'monthly');
   addUrl('disclaimer', '0.5', 'monthly');
 
-  // ৩. সব হোটেল লোডার (প্রায়োরিটি ০.৯)
+  // Hotel listings collection
   let hotels: any[] = [];
   try {
     const hotelCol = await (getCollection as any)('hotels');
@@ -48,7 +49,7 @@ export async function GET() {
     }
   });
 
-  // ৪. সব এলাকা ও ক্যাটাগরি ক্লাস্টার পেজ (Hotels in Gulshan 1, US Embassy ইত্যাদি - প্রায়োরিটি ০.৯)
+  // Destinations & area guides
   let destinations: any[] = [];
   try {
     const destCol = await (getCollection as any)('destinations');
@@ -72,7 +73,7 @@ export async function GET() {
     }
   });
 
-  // ৫. সব ব্লগ পোস্ট লোডার (প্রায়োরিটি ০.৮)
+  // Blog posts collection
   let posts: any[] = [];
   try {
     const postCol = await (getCollection as any)('posts');
@@ -97,7 +98,7 @@ export async function GET() {
     }
   });
 
-  // ৬. সাধারণ পেজসমূহ (CMS Pages)
+  // CMS dynamic pages
   let pages: any[] = [];
   try {
     const pageCol = await (getCollection as any)('pages');
@@ -116,12 +117,11 @@ export async function GET() {
 
   pages.forEach((pg: any) => {
     const slug = String(pg.slug || pg.data?.slug || pg.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
-    if (slug && !urlMap.has(`${siteOrigin}/${slug}`)) {
+    if (slug && !urlMap.has(`${siteOrigin}/${slug}/`)) {
       addUrl(slug, '0.6', 'monthly', today);
     }
   });
 
-  // ৭. অফিসিয়াল XML সitemap স্ট্রিং তৈরি
   const urlsArray = Array.from(urlMap.values());
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
