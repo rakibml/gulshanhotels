@@ -59,10 +59,28 @@ function formatTime(tStr: any): string {
   return "";
 }
 
-function getSafePriceRange(rawPrice: any): string {
+// গুগলের অফিশিয়াল প্রাইস টায়ার হেল্পার (API লাইভ প্রাইসের জন্য ১০০% নিরাপদ)
+function getSafePriceRange(rawCategory: any, rawPrice: any): string {
+  const cat = str(rawCategory).toLowerCase();
   const pStr = str(rawPrice);
-  if (!pStr || /check\s*rates|contact|call|inquire/i.test(pStr)) return "";
-  return pStr.slice(0, 50).trim();
+
+  // যদি ফ্রন্টম্যাটারে আগে থেকেই কোনো বিস্তার/রেঞ্জ উল্লেখ থাকে (যেমন: "$120 - $250")
+  if (pStr.includes("-") && !/check\s*rates|contact|call|inquire/i.test(pStr)) {
+    return pStr.slice(0, 50).trim();
+  }
+
+  // ক্যাটাগরি ও স্টার অনুযায়ী গুগলের অফিশিয়াল প্রাইস টায়ার ($ / $$ / $$$ / $$$$)
+  if (cat.includes("5") || cat.includes("luxury")) {
+    return "$$$$"; // 5-Star / Luxury Tier
+  } else if (cat.includes("4") || cat.includes("executive") || cat.includes("upscale")) {
+    return "$$$";  // 4-Star / Upscale Tier
+  } else if (cat.includes("3") || cat.includes("boutique")) {
+    return "$$";   // 3-Star / Mid-range Tier
+  } else if (cat.includes("budget") || cat.includes("guest")) {
+    return "$";    // Budget / Economy Tier
+  }
+
+  return "$$$$"; // লাক্সারি হোটেলের জন্য ডিফল্ট নিরাপদ টায়ার
 }
 
 // ================= ২. বেসিক পেজ ও হোটেল আইডেন্টিফায়ার =================
@@ -117,7 +135,6 @@ const uniqueAmenities = Array.from(new Set(amenityNames));
 const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
   .map((room: any) => ({
     name: str(typeof room === "string" ? room : room?.name),
-    price: typeof room === "object" ? str(room?.price) : "",
     bed: typeof room === "object" ? str(room?.bed) : "",
   }))
   .filter((r: any) => r.name);
@@ -172,8 +189,9 @@ if (hotelDescription) hotelNode.description = hotelDescription;
 if (images.length > 0) hotelNode.image = images;
 if (hotelPhone) hotelNode.telephone = hotelPhone;
 
-const safePrice = getSafePriceRange(data.price || data.starting_price);
-if (safePrice) hotelNode.priceRange = safePrice;
+// গুগল কমপ্লায়েন্ট নিরাপদ প্রাইস টায়ার
+const safePriceTier = getSafePriceRange(data.category, data.price);
+if (safePriceTier) hotelNode.priceRange = safePriceTier;
 
 if (checkIn) hotelNode.checkinTime = checkIn;
 if (checkOut) hotelNode.checkoutTime = checkOut;
@@ -211,8 +229,7 @@ if (roomsList.length > 0) {
   hotelNode.containsPlace = roomsList.map((room: any) => ({
     "@type": "HotelRoom",
     "name": room.name,
-    ...(room.bed ? { "bed": room.bed } : {}),
-    ...(room.price ? { "description": `Starting from ${room.price}` } : {}),
+    ...(room.bed ? { "bed": room.bed } : {})
   }));
 }
 
