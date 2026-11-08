@@ -171,7 +171,11 @@ reviews_notice: ''
 reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
-faqs: []
+faqs:
+  - question: What is the check-in and check-out time at Amari Dhaka?
+    answer: At Amari Dhaka, check-in is available 24 hours starting from 14:00 (2:00 PM), and standard check-out time is until 12:00 (12:00 PM
+  - question: How far is Amari Dhaka from Hazrat Shahjalal International Airport?
+    answer: Amari Dhaka is located approximately 8 kilometers from Hazrat Shahjalal International Airport (DAC), which takes around 15 to 25 minutes via the Dhaka Elevated Expressway.
 enable_official_site: true
 enable_view_prices: true
 policies:
