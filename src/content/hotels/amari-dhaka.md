@@ -25,9 +25,6 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 price: $160
-agoda_id: '674390'
-agoda_url: ''
-agoda_cid: '1979567'
 booking_channels: []
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
