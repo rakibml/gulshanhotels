@@ -143,7 +143,7 @@ rooms_title: Room Types
 rooms_subtitle: Explore all rooms & suites
 rooms:
   - name: Deluxe King
-    price: $150
+    price: ''
     size: 37 sq msquare meters
     guests: Sleeps 2
     bed: 1 King Bed
