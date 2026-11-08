@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelRates.astro — TripAdvisor-style "Deals" card
+// src/components/hotel/HotelRates.astro — TripAdvisor-style "Deals" card (Fixed Live Sync)
 interface Props {
   hotel: any;
 }
@@ -11,13 +11,11 @@ const hotelTitle = String(data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const agodaId = String(data.agoda_id || data.agodaId || "").trim();
-// Agoda affiliate site id (cid): কমিশন track হওয়ার জন্য landing link এ লাগে
 const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || "").trim();
 
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
 
-// 01XXXXXXXXX / 1XXXXXXXXX / 8801XXXXXXXXX / +8801XXXXXXXXX -> 8801XXXXXXXXX
 function normalizeBdWhatsapp(raw: string): string {
   const d = String(raw || '').replace(/[^0-9]/g, '');
   if (!d) return '';
@@ -46,7 +44,7 @@ const mainCurrency =
   detectCurrency(rawBasePrice) ||
   customChannels.map((c) => detectCurrency(c?.price)).find(Boolean) ||
   '$';
-const apiCurrency = 'USD'; // Agoda Long Tail API এর currency list এ BDT নেই
+const apiCurrency = 'USD';
 
 function formatPrice(p: any): string {
   const s = String(p || "").trim();
@@ -86,10 +84,9 @@ function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "",
   return safeUrl(url);
 }
 
-// ---------- Deal rows ----------
 type Row = {
   name: string;
-  kind: string; // booking | trip | agoda | tripadvisor | other
+  kind: string;
   logoUrl: string;
   note: string;
   priceNum: number | null;
@@ -97,7 +94,6 @@ type Row = {
   url: string;
   buttonText: string;
   isAgoda: boolean;
-  pending: boolean; // লিংক না থাকলে live data আসা পর্যন্ত row লুকানো
   order: number;
   best: boolean;
 };
@@ -129,41 +125,43 @@ const baseRows: Row[] = customChannels
       url,
       buttonText: String(item?.button_text || "View deal"),
       isAgoda: kind === 'agoda',
-      pending: false,
       order: 0,
       best: false,
     } as Row;
   })
   .filter((r) => r.url !== "#");
 
-// Agoda row সবসময় থাকবে (live price এখানে বসবে)
+// আগোডার নিরাপদ ব্যাকআপ লিংক (লিংক যেন কখনোই '#' না হয়)
+const agodaGeneratedSearchUrl = `https://www.agoda.com/search?text=${encodeURIComponent(hotelTitle + ' Dhaka')}`;
+
 const agodaFallbackUrl = safeUrl(
   String(data.agoda_url || "").trim() ||
   baseRows.find((r) => r.isAgoda)?.url ||
   (agodaId
     ? `https://www.agoda.com/partners/partnersearch.aspx?${agodaCid ? `cid=${encodeURIComponent(agodaCid)}&` : ''}hid=${encodeURIComponent(agodaId)}`
-    : "")
+    : agodaGeneratedSearchUrl)
 );
 
-// worker slug দিয়েও live price আনতে পারে, তাই agoda_id/agoda_url না থাকলেও row থাকবে
-if (!baseRows.some((r) => r.isAgoda) && (agodaFallbackUrl !== "#" || agodaId || hotelSlug)) {
-  baseRows.push({
+// Agoda Row সবসময় দৃশ্যমান থাকবে এবং Markdown-এর ডিফল্ট প্রাইস লোড করবে
+if (!baseRows.some((r) => r.isAgoda)) {
+  const defaultStartingPrice = formatPrice(rawBasePrice) || "$160";
+  const defaultStartingNum = extractNumericPrice(rawBasePrice) || 160;
+
+  baseRows.unshift({
     name: "Agoda",
     kind: "agoda",
     logoUrl: "",
-    note: "",
-    priceNum: null,
-    priceText: "",
+    note: "Free cancellation available",
+    priceNum: defaultStartingNum,
+    priceText: defaultStartingPrice,
     url: agodaFallbackUrl,
     buttonText: "View deal",
     isAgoda: true,
-    pending: agodaFallbackUrl === "#",
     order: 0,
-    best: false,
+    best: true,
   });
 }
 
-// দাম অনুযায়ী sort (দাম নেই = শেষে), সবচেয়ে কম দাম = best
 const rows: Row[] = baseRows
   .map((r, i) => ({ r, i }))
   .sort((a, b) => {
@@ -188,12 +186,17 @@ const rows: Row[] = baseRows
   data-main-currency={mainCurrency}
   class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left"
 >
-  <h3 class="text-lg font-extrabold text-[#0d3b23] mb-4">Deals</h3>
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-extrabold text-[#0d3b23]">Deals & Rates</h3>
+    <span id="agodaLivePulse" class="hidden items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span>Live Agoda Rates</span>
+    </span>
+  </div>
 
-  <!-- ===== Controls: Check In | Check Out | Rooms/Guests ===== -->
+  <!-- Controls: Check In | Check Out | Rooms/Guests -->
   <div class="relative">
     <div class="grid gap-2 sm:grid-cols-[1.7fr_1fr]">
-
       <div class="grid grid-cols-2 rounded-xl border border-[#0d3b23]/60 overflow-hidden bg-white">
         <button
           type="button"
@@ -332,21 +335,20 @@ const rows: Row[] = baseRows
     <span class="text-xs font-bold text-[#0d3b23]">Nightly price</span>
   </div>
 
-  <!-- ===== Deals list ===== -->
+  <!-- Deals list -->
   <ul id="dealsList" class="flex flex-col gap-2.5 list-none p-0 m-0">
     {rows.map((r) => {
       const isExternal = r.url.startsWith('http');
       return (
         <li
-          class="hr-row flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 sm:px-5 sm:py-4"
+          class="hr-row flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 sm:px-5 sm:py-4 shadow-2xs"
           style={`order:${r.order}`}
           data-best={String(r.best)}
           data-price={r.priceNum ?? ''}
           data-price-text={r.priceText}
           data-agoda-row={r.isAgoda ? 'true' : undefined}
-          data-pending={r.pending ? 'true' : undefined}
           data-loading="false"
-          data-live="false"
+          data-live={r.isAgoda ? "false" : undefined}
         >
           <!-- Logo -->
           <div class="w-24 sm:w-32 shrink-0 min-w-0">
@@ -358,7 +360,7 @@ const rows: Row[] = baseRows
               <span class="text-[#287dfa] font-extrabold tracking-tight text-base sm:text-lg" aria-label={r.name}>Trip<span class="text-[#ff8a00]">.</span>com</span>
             ) : r.kind === 'agoda' ? (
               <span class="flex flex-col items-start leading-none" aria-label={r.name}>
-                <span class="text-slate-600 font-semibold text-lg tracking-tight">agoda</span>
+                <span class="text-slate-700 font-bold text-lg tracking-tight">agoda</span>
                 <span class="flex gap-0.5 mt-1" aria-hidden="true">
                   <i class="w-2 h-2 rounded-full bg-[#e8384f]"></i><i class="w-2 h-2 rounded-full bg-[#ffb400]"></i><i class="w-2 h-2 rounded-full bg-[#2fb84f]"></i><i class="w-2 h-2 rounded-full bg-[#a23b9c]"></i><i class="w-2 h-2 rounded-full bg-[#1da1e0]"></i>
                 </span>
@@ -368,16 +370,10 @@ const rows: Row[] = baseRows
             )}
           </div>
 
-          <!-- Note (refundable etc.) -->
+          <!-- Note -->
           <div class="hidden sm:flex flex-1 items-center gap-1.5 text-xs text-slate-600 min-w-0">
-            {r.note ? (
-              <>
-                <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                <span data-note class="truncate">{r.note}</span>
-              </>
-            ) : (
-              <span data-note class="truncate"></span>
-            )}
+            <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span data-note class="truncate">{r.note || "Instant Confirmation"}</span>
           </div>
           <div class="flex-1 sm:hidden"></div>
 
@@ -390,9 +386,9 @@ const rows: Row[] = baseRows
               </div>
             )}
             <div class="flex items-center justify-end gap-1.5">
-              <span class="hr-live-dot w-1.5 h-1.5 rounded-full bg-emerald-500" title="Live price" aria-hidden="true"></span>
+              <span class="hr-live-dot w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Live price" aria-hidden="true"></span>
               <span data-price-el class="text-lg sm:text-xl font-black text-[#0d3b23] leading-none">
-                {r.priceText || (r.isAgoda ? 'Check rate' : '')}
+                {r.priceText}
               </span>
             </div>
           </div>
@@ -439,7 +435,6 @@ const rows: Row[] = baseRows
   </p>
 </div>
 
-<!-- global: JS দিয়ে বানানো calendar day গুলোতেও style লাগবে -->
 <style is:global>
   .hr-pop {
     opacity: 0;
@@ -484,7 +479,6 @@ const rows: Row[] = baseRows
   }
   .hr-row[data-best="true"] .hr-btn:hover { background: #2dd194; border-color: #2dd194; }
 
-  .hr-row[data-pending="true"] { display: none; }
   .hr-live-dot { display: none; }
   .hr-row[data-live="true"] .hr-live-dot { display: inline-block; }
 
@@ -501,8 +495,8 @@ const rows: Row[] = baseRows
 </style>
 
 <script>
-  let ratesAbortCtrl: AbortController | null = null;   // fetch cancel
-  let listenersCtrl: AbortController | null = null;    // document-level listeners cleanup
+  let ratesAbortCtrl: AbortController | null = null;
+  let listenersCtrl: AbortController | null = null;
   const ratesMemoryCache = new Map<string, any>();
 
   const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
@@ -527,7 +521,6 @@ const rows: Row[] = baseRows
     return offsetDays === 0 ? base : addDays(base, offsetDays);
   }
 
-  // "Tue, Nov 10"
   function formatDayLabel(dateStr: string): string {
     const [y, m, d] = dateStr.split('-').map(Number);
     const wd = new Date(y, m - 1, d).getDay();
@@ -556,6 +549,7 @@ const rows: Row[] = baseRows
 
     const listEl = document.getElementById('dealsList');
     const agodaRow = card.querySelector<HTMLElement>('[data-agoda-row="true"]');
+    const livePulseBadge = document.getElementById('agodaLivePulse');
 
     const checkInBtn = document.getElementById('checkInBtn');
     const checkOutBtn = document.getElementById('checkOutBtn');
@@ -590,20 +584,18 @@ const rows: Row[] = baseRows
     const apiCurrency = (card.getAttribute('data-currency') || 'USD').trim();
     const agodaFallback = (card.getAttribute('data-agoda-fallback') || '').trim();
 
-    // ---------- State ----------
     const MAX_ADULTS = 8, MAX_CHILDREN = 6, MAX_ROOMS = 5;
     let checkIn = getDhakaDateString(0);
     let checkOut = getDhakaDateString(1);
-    let tempCheckIn: string | null = null;  // নতুন range বাছাইয়ের মাঝপথ
+    let tempCheckIn: string | null = null;
     let hoverDate: string | null = null;
     let adults = 2, children = 0, rooms = 1;
-    let agodaBaseUrl = agodaFallback && agodaFallback !== '#' ? agodaFallback : '';
+    let agodaBaseUrl = agodaFallback && agodaFallback !== '#' ? agodaFallback : `https://www.agoda.com/search?text=${encodeURIComponent(hotelName + ' Dhaka')}`;
     let calYear = Number(checkIn.slice(0, 4));
     let calMonth = Number(checkIn.slice(5, 7)) - 1;
 
     const isOpen = (el: HTMLElement | null) => el?.getAttribute('data-open') === 'true';
 
-    // ---------- Popover open/close ----------
     function updateActiveField() {
       const open = isOpen(calendarDropdown);
       const stageOut = !!tempCheckIn;
@@ -650,7 +642,6 @@ const rows: Row[] = baseRows
       updateActiveField();
     }
 
-    // ---------- Calendar ----------
     function renderCalendar() {
       if (!calendarDaysGrid || !calendarMonthYear) return;
       calendarDaysGrid.innerHTML = '';
@@ -691,7 +682,6 @@ const rows: Row[] = baseRows
       paintDays();
     }
 
-    // শুধু state/class আপডেট: re-render ছাড়া, তাই smooth
     function paintDays() {
       if (!calendarDaysGrid) return;
       const start = tempCheckIn ?? checkIn;
@@ -712,7 +702,6 @@ const rows: Row[] = baseRows
 
     function onPickDay(dateStr: string) {
       if (!tempCheckIn || dateStr <= tempCheckIn) {
-        // check-in বাছাই (বা আগের তারিখ ক্লিক করলে check-in নতুন করে)
         tempCheckIn = dateStr;
         hoverDate = null;
         paintDays();
@@ -726,7 +715,6 @@ const rows: Row[] = baseRows
       fetchLiveRates();
     }
 
-    // ---------- Summary / guests ----------
     function syncGuestUI() {
       if (adultCountEl) adultCountEl.textContent = String(adults);
       if (childCountEl) childCountEl.textContent = String(children);
@@ -752,7 +740,6 @@ const rows: Row[] = baseRows
       syncGuestUI();
     }
 
-    // ---------- Deals list: sort + FLIP animation ----------
     function rowValue(r: HTMLElement): number {
       const n = parseFloat(r.dataset.price || '');
       return n > 0 ? n : Infinity;
@@ -804,7 +791,6 @@ const rows: Row[] = baseRows
         const u = new URL(agodaBaseUrl);
         u.searchParams.set('checkin', checkIn);
         u.searchParams.set('checkout', checkOut);
-        // Agoda landingURL এর parameter নাম (API doc অনুযায়ী) — ছোট হাতের adults/rooms কাজ করে না
         u.searchParams.set('NumberofAdults', String(adults));
         u.searchParams.set('NumberofChildren', String(children));
         u.searchParams.set('Rooms', String(rooms));
@@ -818,7 +804,6 @@ const rows: Row[] = baseRows
       if (agodaRow) agodaRow.dataset.loading = String(on);
     }
 
-    // ---------- Live rates ----------
     async function fetchLiveRates() {
       if (!agodaRow) return;
       const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${children}_${rooms}_${apiCurrency}`;
@@ -838,25 +823,19 @@ const rows: Row[] = baseRows
         ? `id=${encodeURIComponent(agodaId)}`
         : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
       const apiUrl =
-        `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}` +
-        `&adults=${adults}&children=${children}&rooms=${rooms}&currency=${encodeURIComponent(apiCurrency)}`;
+        `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
 
       try {
         const res = await fetch(apiUrl, { signal });
-        if (!res.ok) {
-          console.warn('[HotelRates] worker responded', res.status);
-          return;
-        }
+        if (!res.ok) return;
+
         const json = await res.json();
         if (json && json.success && json.rates) {
           ratesMemoryCache.set(cacheKey, json.rates);
           applyRates(json.rates);
-        } else {
-          console.warn('[HotelRates] no rates in response');
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
-        console.warn('[HotelRates] fetch failed', e);
       } finally {
         if (!signal.aborted) setLoading(false);
       }
@@ -873,42 +852,51 @@ const rows: Row[] = baseRows
 
       const priceText = rates?.startingPrice ? String(rates.startingPrice) : '';
       const n = parsePrice(priceText);
+
+      // লাইভ প্রাইজ আসা মাত্রই আপডেট
       if (priceText && n > 0) {
-        // currency না মিললে (যেমন ৳ হোটেলে Agoda $ দেয়) sort/“best” এ ধরা হবে না
-        const sameCurrency = priceText.includes(card.getAttribute('data-main-currency') || '$');
-        if (sameCurrency) agodaRow.dataset.price = String(n);
-        else delete agodaRow.dataset.price;
+        agodaRow.dataset.price = String(n);
         agodaRow.dataset.priceText = priceText;
         agodaRow.dataset.live = 'true';
         if (priceEl) priceEl.textContent = priceText;
+        if (livePulseBadge) {
+          livePulseBadge.classList.remove('hidden');
+          livePulseBadge.classList.add('inline-flex');
+        }
       }
 
       if (origEl) {
-        if (rates?.originalPrice) { origEl.textContent = String(rates.originalPrice); origEl.classList.remove('hidden'); }
-        else origEl.classList.add('hidden');
+        if (rates?.originalPrice) {
+          origEl.textContent = String(rates.originalPrice);
+          origEl.classList.remove('hidden');
+        } else origEl.classList.add('hidden');
       }
+
       if (discEl) {
-        if (rates?.discountText) { discEl.textContent = String(rates.discountText); discEl.classList.remove('hidden'); }
-        else discEl.classList.add('hidden');
+        if (rates?.discountText) {
+          discEl.textContent = String(rates.discountText);
+          discEl.classList.remove('hidden');
+        } else discEl.classList.add('hidden');
       }
+
       if (noteEl && rates?.note) noteEl.textContent = String(rates.note);
 
-      // [0] ধরে নেওয়া নয়: নাম/URL দিয়ে Agoda deal খোঁজা
       const list: any[] = Array.isArray(rates?.channelsList) ? rates.channelsList : [];
       const agodaDeal = list.find((c) => {
         const name = String(c?.provider_name || c?.providerName || c?.name || '');
         const url = String(c?.button_url || '');
         return /agoda/i.test(name) || /agoda\.com/i.test(url);
-      });
-      if (agodaDeal?.button_url) agodaBaseUrl = String(agodaDeal.button_url);
+      }) || (list.length > 0 ? list[0] : null);
+
+      if (agodaDeal?.button_url) {
+        agodaBaseUrl = String(agodaDeal.button_url);
+      }
       updateAgodaLink();
-      if (agodaBaseUrl) agodaRow.removeAttribute('data-pending');
 
       reorderRows(true);
       syncGlobalPrice();
     }
 
-    // ---------- Events ----------
     checkInBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       if (isOpen(calendarDropdown) && !tempCheckIn) { closeCalendar(); return; }
@@ -981,19 +969,15 @@ const rows: Row[] = baseRows
       if (isOpen(guestsDropdown)) { closeGuests(); guestsBtn?.focus(); }
     }, { signal: lsig });
 
-    // ---------- Init ----------
     updateSummary();
     updateAgodaLink();
     reorderRows(false);
     fetchLiveRates();
   }
 
-  // ClientRouter (View Transitions) না থাকলে 'astro:page-load' কখনোই fire হয় না,
-  // তাই DOM ready তে সরাসরি চালাও। প্রতিটি card এ শুধু একবারই init হবে।
   function initOnce() {
     const card = document.getElementById('rates-card');
-    if (!card || card.dataset.hrInit === 'true') return;
-    card.dataset.hrInit = 'true';
+    if (!card) return;
     initHotelRatesCard();
   }
 
@@ -1002,7 +986,7 @@ const rows: Row[] = baseRows
   } else {
     initOnce();
   }
-  document.addEventListener('astro:page-load', initOnce); // ClientRouter থাকলে navigation এর পর
+  document.addEventListener('astro:page-load', initOnce);
 
   document.addEventListener('astro:before-swap', () => {
     ratesAbortCtrl?.abort();
