@@ -10,7 +10,7 @@ const data = hotel?.data || {};
 
 const SITE_ORIGIN = "https://gulshanhotels.com";
 
-// ================= ১. ক্লিনআপ হেল্পার ফাংশন =================
+// ================= ১. ক্লিনআপ ও স্মার্ট টেক্সট হেল্পার =================
 const str = (v: any): string => (v === null || v === undefined ? "" : String(v).trim());
 
 function cleanText(raw: any): string {
@@ -33,6 +33,31 @@ function truncate(text: string, max = 300): string {
   return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
+// 🔥 কাটা বাক্য রোধে প্রথম সম্পূর্ণ প্যারাগ্রাফ নেওয়ার ফাংশন 🔥
+function getCompleteSnippetDescription(rawBody: any, fallbackDesc: any): string {
+  const fallback = cleanText(fallbackDesc);
+  if (fallback && fallback.length >= 60 && fallback.length <= 350) {
+    return fallback;
+  }
+
+  const raw = str(rawBody);
+  if (!raw) return fallback ? truncate(fallback, 280) : "";
+
+  // প্যারাগ্রাফ অনুযায়ী ভাগ করা
+  const paragraphs = raw.split(/\r?\n\r?\n|\r?\n/).map(cleanText).filter(p => p.length >= 60);
+  
+  if (paragraphs.length > 0) {
+    const firstP = paragraphs[0];
+    // যদি প্রথম প্যারাগ্রাফটি সম্পূর্ণ ও মানানসই হয় (মাঝপথে কাটবে না)
+    if (firstP.length <= 350) {
+      return firstP;
+    }
+    return truncate(firstP, 300);
+  }
+
+  return truncate(cleanText(raw), 280);
+}
+
 function toAbsoluteImageUrl(url: any): string {
   const clean = str(typeof url === "string" ? url : url?.photo || url?.image || url?.src || url?.url);
   if (!clean || clean.includes("example-test.site")) return "";
@@ -40,14 +65,19 @@ function toAbsoluteImageUrl(url: any): string {
   return `${SITE_ORIGIN}${clean.startsWith("/") ? "" : "/"}${clean}`;
 }
 
-// গুগল স্ট্যান্ডার্ড টাইম ভ্যালিডেটর (HH:mm)
+// 🔥 স্মার্ট টাইম এক্সট্রাক্টর ("From 14:00 (2:00 PM)" থেকে সঠিক ISO টাইম বের করবে) 🔥
 function formatTime(tStr: any): string {
   const clean = str(tStr);
-  const match24 = clean.match(/^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/);
+  if (!clean || /available\s*24/i.test(clean)) return "";
+
+  // ১. ২৪ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "14:00")
+  const match24 = clean.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?\b/);
   if (match24) {
     return `${match24[1].padStart(2, '0')}:${match24[2]}`;
   }
-  const match12 = clean.match(/^(\d{1,2}):([0-5]\d)\s*(am|pm)$/i);
+
+  // ২. ১২ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "2:00 PM")
+  const match12 = clean.match(/\b(\d{1,2}):([0-5]\d)\s*(am|pm)\b/i);
   if (match12) {
     let h = parseInt(match12[1], 10);
     const m = match12[2];
@@ -56,20 +86,19 @@ function formatTime(tStr: any): string {
     if (meridiem === 'am' && h === 12) h = 0;
     return `${String(h).padStart(2, '0')}:${m}`;
   }
+
   return "";
 }
 
-// গুগলের অফিশিয়াল প্রাইস টায়ার হেল্পার (API লাইভ প্রাইসের জন্য ১০০% নিরাপদ)
+// গুগলের অফিশিয়াল প্রাইস টায়ার হেল্পার ($$$$)
 function getSafePriceRange(rawCategory: any, rawPrice: any): string {
   const cat = str(rawCategory).toLowerCase();
   const pStr = str(rawPrice);
 
-  // যদি ফ্রন্টম্যাটারে আগে থেকেই কোনো বিস্তার/রেঞ্জ উল্লেখ থাকে (যেমন: "$120 - $250")
   if (pStr.includes("-") && !/check\s*rates|contact|call|inquire/i.test(pStr)) {
     return pStr.slice(0, 50).trim();
   }
 
-  // ক্যাটাগরি ও স্টার অনুযায়ী গুগলের অফিশিয়াল প্রাইস টায়ার ($ / $$ / $$$ / $$$$)
   if (cat.includes("5") || cat.includes("luxury")) {
     return "$$$$"; // 5-Star / Luxury Tier
   } else if (cat.includes("4") || cat.includes("executive") || cat.includes("upscale")) {
@@ -80,7 +109,7 @@ function getSafePriceRange(rawCategory: any, rawPrice: any): string {
     return "$";    // Budget / Economy Tier
   }
 
-  return "$$$$"; // লাক্সারি হোটেলের জন্য ডিফল্ট নিরাপদ টায়ার
+  return "$$$$";
 }
 
 // ================= ২. বেসিক পেজ ও হোটেল আইডেন্টিফায়ার =================
@@ -88,10 +117,11 @@ const hotelTitle = str(data.title || data.name);
 const rawSlug = str(data.slug || hotel?.slug || hotel?.id);
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
 
-// ট্রেইলিং স্ল্যাশসহ সাইটের ক্যানোনিকাল URL
+// ট্রেইলিং স্ল্যাশসহ ক্যানোনিকাল URL
 const pageUrl = `${SITE_ORIGIN}/${hotelSlug}/`;
 
-const hotelDescription = truncate(cleanText(hotel?.body || data.description || data.overview || data.about));
+// সম্পূর্ণ অর্থপূর্ণ ডেসক্রিপশন
+const hotelDescription = getCompleteSnippetDescription(hotel?.body, data.description || data.overview || data.about);
 const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
 
 const rawOfficialSite = str(data.officialSite || data.official_site_url);
@@ -139,8 +169,8 @@ const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
   }))
   .filter((r: any) => r.name);
 
-const checkIn = formatTime(data.checkIn || data.check_in);
-const checkOut = formatTime(data.checkOut || data.check_out);
+const checkIn = formatTime(data.check_in || data.checkIn);
+const checkOut = formatTime(data.check_out || data.checkOut);
 
 const latNum = Number(data.latitude ?? data.lat ?? data.geo?.lat);
 const lngNum = Number(data.longitude ?? data.lng ?? data.geo?.lng);
@@ -178,7 +208,7 @@ const hotelNode: any = {
   "@type": "Hotel",
   "@id": hotelId,
   "name": hotelTitle,
-  "url": pageUrl // গুগলের নিয়মানুযায়ী ডোমেইনের ক্যানোনিকাল URL
+  "url": pageUrl
 };
 
 if (isValidOfficialSite) {
@@ -189,7 +219,6 @@ if (hotelDescription) hotelNode.description = hotelDescription;
 if (images.length > 0) hotelNode.image = images;
 if (hotelPhone) hotelNode.telephone = hotelPhone;
 
-// গুগল কমপ্লায়েন্ট নিরাপদ প্রাইস টায়ার
 const safePriceTier = getSafePriceRange(data.category, data.price);
 if (safePriceTier) hotelNode.priceRange = safePriceTier;
 
@@ -233,7 +262,7 @@ if (roomsList.length > 0) {
   }));
 }
 
-// ব্রেডক্রাম্ব ও পেজ অবজেক্ট
+// ব্রেডক্রাম্ব ও পেজ অবজেক্ট (কোনো বিভ্রান্তিকর "Verified" দাবি ছাড়া)
 const graph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -257,7 +286,7 @@ const graph: any[] = [
     "@type": "ItemPage",
     "@id": webpageId,
     "url": pageUrl,
-    "name": `${hotelTitle} — Overview, Photos & Verified Rates`,
+    "name": `${hotelTitle} — Overview, Photos & Room Rates`,
     "isPartOf": {
       "@type": "WebSite",
       "@id": `${SITE_ORIGIN}/#website`,
@@ -272,7 +301,10 @@ const graph: any[] = [
 
 // XSS-Safe JSON-LD স্ট্রিং তৈরি
 const jsonLd = hotelTitle
-  ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")
+  ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph })
+      .replace(/</g, "\\u003c")
+      .replace(/\u2028/g, "\\u2028")
+      .replace(/\u2029/g, "\\u2029")
   : "";
 ---
 
