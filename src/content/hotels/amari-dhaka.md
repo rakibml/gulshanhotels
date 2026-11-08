@@ -24,11 +24,11 @@ popular: true
 sponsored: false
 spotlight_desc: ''
 about_notice: ''
-price: $160
+price: $165
 booking_channels:
   - provider_name: Whatsapp
-    price: $145
-    show_price: true
+    price: ''
+    show_price: false
     button_text: Contact now ➔
     button_url: '01996322761'
     badge: For Best Rate
@@ -45,7 +45,7 @@ policies_notice: ''
 enable_policies: true
 check_in: Available 24 hours
 check_out: Available 24 hours
-cancellation_policy: Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection.
+cancellation_policy: Cancellation and prepayment policies vary according to accommodation type. Please check what conditions apply to each option when making your selection.
 child_policy_text: |-
   Children of all ages are welcome.
 
