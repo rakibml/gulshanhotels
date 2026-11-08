@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelMasterSchema.astro
-// ১০০% গুগল কমপ্লায়েন্ট, জিরো ফেক ডাটা, অ্যাডমিন প্যানেল ও পেজের বাকি ৭টি সেকশনের সাথে শতভাগ সিঙ্কড।
+// 100% Google Search Central & Schema.org Compliant (Hotel / LodgingBusiness)
 interface Props {
   hotel: any;
 }
@@ -9,7 +9,6 @@ const { hotel } = Astro.props;
 const data = hotel?.data || {};
 
 const SITE_ORIGIN = "https://gulshanhotels.com";
-const HOTELS_LIST_PATH = ""; // প্রয়োজন হলে যেমন "/hotels" দিতে পারেন, অন্যথায় খালি থাকবে
 
 // ================= ১. ক্লিনআপ হেল্পার ফাংশন =================
 const str = (v: any): string => (v === null || v === undefined ? "" : String(v).trim());
@@ -34,7 +33,6 @@ function truncate(text: string, max = 300): string {
   return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-// গ্যালারি অবজেক্টের photo, image, url, src সবই সাপোর্ট করবে (কোনো ডামি ছবি নেই)
 function toAbsoluteImageUrl(url: any): string {
   const clean = str(typeof url === "string" ? url : url?.photo || url?.image || url?.src || url?.url);
   if (!clean || clean.includes("example-test.site")) return "";
@@ -42,122 +40,55 @@ function toAbsoluteImageUrl(url: any): string {
   return `${SITE_ORIGIN}${clean.startsWith("/") ? "" : "/"}${clean}`;
 }
 
-function toIsoDate(dStr: any): string | null {
-  const raw = str(dStr);
-  if (!raw || raw.toLowerCase().includes("recent")) return null;
-  const cleanStr = raw.replace(" at ", " ");
-  const parsed = new Date(cleanStr);
-  if (!isNaN(parsed.getTime()) && parsed.getTime() <= Date.now()) {
-    return parsed.toISOString().split("T")[0];
-  }
-  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
-  return match ? match[1] : null;
-}
-
+// গুগল স্ট্যান্ডার্ড টাইম ভ্যালিডেটর (HH:mm)
 function formatTime(tStr: any): string {
-  const m = str(tStr).match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
-  if (!m) return "";
-  let h = Number(m[1]);
-  const min = Number(m[2] || 0);
-  const ap = (m[3] || "").toLowerCase();
-  if (ap === "pm" && h < 12) h += 12;
-  if (ap === "am" && h === 12) h = 0;
-  if (h > 23 || min > 59) return "";
-  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+  const clean = str(tStr);
+  const match24 = clean.match(/^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/);
+  if (match24) {
+    return `${match24[1].padStart(2, '0')}:${match24[2]}`;
+  }
+  const match12 = clean.match(/^(\d{1,2}):([0-5]\d)\s*(am|pm)$/i);
+  if (match12) {
+    let h = parseInt(match12[1], 10);
+    const m = match12[2];
+    const meridiem = match12[3].toLowerCase();
+    if (meridiem === 'pm' && h < 12) h += 12;
+    if (meridiem === 'am' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${m}`;
+  }
+  return "";
 }
 
-// গুগল স্ট্যান্ডার্ড প্রাইসরেঞ্জ (টেক্সট জাতীয় ভ্যালু ফিল্টার করবে)
 function getSafePriceRange(rawPrice: any): string {
   const pStr = str(rawPrice);
-  if (!pStr) return "";
-
-  if (/check\s*rates|contact|call|inquire/i.test(pStr)) {
-    return "";
-  }
-
-  return pStr.slice(0, 80).trim();
+  if (!pStr || /check\s*rates|contact|call|inquire/i.test(pStr)) return "";
+  return pStr.slice(0, 50).trim();
 }
 
-// ================= ২. বেসিক ডাটা =================
+// ================= ২. বেসিক পেজ ও হোটেল আইডেন্টিফায়ার =================
 const hotelTitle = str(data.title || data.name);
 const rawSlug = str(data.slug || hotel?.slug || hotel?.id);
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
-const pageUrl = new URL(Astro.url.pathname, SITE_ORIGIN).href;
+
+// ট্রেইলিং স্ল্যাশসহ সাইটের ক্যানোনিকাল URL
+const pageUrl = `${SITE_ORIGIN}/${hotelSlug}/`;
 
 const hotelDescription = truncate(cleanText(hotel?.body || data.description || data.overview || data.about));
 const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
 
-// অফিসিয়াল সাইটের লিংক ভ্যালিডেশন
 const rawOfficialSite = str(data.officialSite || data.official_site_url);
 const isValidOfficialSite =
   /^https?:\/\//i.test(rawOfficialSite) &&
   !rawOfficialSite.includes("youtube.com") &&
   !rawOfficialSite.includes("youtu.be/");
 
-// ================= ৩. গ্যালারি ইমেজ =================
+// ================= ৩. গ্যালারি ইমেজ অ্যারে =================
 const rawGalleryItems: any[] = Array.isArray(data.gallery) && data.gallery.length > 0
   ? data.gallery.filter(Boolean)
   : (data.image ? [data.image] : []);
 const images = Array.from(new Set(rawGalleryItems.map(toAbsoluteImageUrl).filter(Boolean))).slice(0, 10);
 
-// ================= ৪. জেনুইন রিভিউ (হেডার ও রিভিউ কম্পোনেন্টের সাথে সিঙ্কড) =================
-let allReviewsList: any[] = [];
-try {
-  const globReviews = import.meta.glob("/src/content/reviews/*.{md,mdx}", { eager: true });
-  allReviewsList = Object.values(globReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
-} catch {
-  try {
-    const relReviews = import.meta.glob("../../content/reviews/*.{md,mdx}", { eager: true });
-    allReviewsList = Object.values(relReviews).map((item: any) => item?.frontmatter || item?.data || item || {});
-  } catch {
-    allReviewsList = [];
-  }
-}
-
-const searchTitle = hotelTitle.toLowerCase();
-const searchSlug = hotelSlug;
-
-const approvedReviews = allReviewsList.filter((item: any) => {
-  if (!item) return false;
-  const isApproved = item.approved === true || str(item.approved).toLowerCase() === "true";
-  if (!isApproved) return false;
-
-  const rSlug = str(item.slug || item.hotelSlug || item.hotel_slug).replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
-  const rId = str(item.id).replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCase() || "";
-  const rHotel = str(item.hotel || item.hotelTitle || item.hotel_name).toLowerCase();
-
-  return (
-    (searchSlug !== "" && (rSlug === searchSlug || rId === searchSlug || rHotel === searchSlug)) ||
-    (searchTitle !== "" && rHotel === searchTitle)
-  );
-});
-
-const embeddedRevs = (Array.isArray(data.reviews) ? data.reviews : []).filter((r: any) => {
-  return r && (r.approved === undefined || r.approved === true || str(r.approved).toLowerCase() === "true");
-});
-
-const seenReviews = new Set<string>();
-const validReviews = [...approvedReviews, ...embeddedRevs]
-  .map((r: any) => ({
-    author: str(r?.name || r?.author) || "Guest Reviewer",
-    body: cleanText(r?.comment || r?.review || r?.body),
-    rating: Number(r?.rating),
-    date: toIsoDate(r?.date),
-  }))
-  .filter((r) => Number.isFinite(r.rating) && r.rating >= 1 && r.rating <= 5 && r.body.length >= 10)
-  .filter((r) => {
-    const key = `${r.author}|${r.body}`;
-    if (seenReviews.has(key)) return false;
-    seenReviews.add(key);
-    return true;
-  });
-
-const reviewCount = validReviews.length;
-const ratingValue = reviewCount > 0
-  ? Number((validReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1))
-  : null;
-
-// ================= ৫. অ্যামেনিটিস =================
+// ================= ৪. সুবিধাসমূহ (LocationFeatureSpecification) =================
 function extractName(item: any): string {
   if (typeof item === "string") return item.trim();
   if (item && typeof item === "object") {
@@ -182,7 +113,7 @@ const amenityNames: string[] = [];
 });
 const uniqueAmenities = Array.from(new Set(amenityNames));
 
-// ================= ৬. রুম, সময় ও জিও লোকেশন =================
+// ================= ৫. রুম, সময় ও জিও কোঅর্ডিনেট =================
 const roomsList = (Array.isArray(data.rooms) ? data.rooms : [])
   .map((room: any) => ({
     name: str(typeof room === "string" ? room : room?.name),
@@ -201,16 +132,13 @@ const hasGeo =
   Math.abs(latNum) <= 90 && Math.abs(lngNum) <= 180 &&
   !(latNum === 0 && lngNum === 0);
 
-// ================= ৭. অ্যাড্রেস (এডমিন প্যানেলের ইনপুট থেকে সরাসরি) =================
+// ================= ৬. অ্যাড্রেস অবজেক্ট =================
 const rawLocation = str(data.location || data.address);
-
-// অ্যাডমিন প্যানেল থেকে ইনপুট দেওয়া ফিল্ডগুলো নেওয়া হচ্ছে
 let streetAddress = str(data.street_address || data.streetAddress || data.address || rawLocation);
 let locality = str(data.locality || data.area);
 let region = str(data.region || data.state);
 let postalCode = str(data.postal_code || data.postalCode || data.zip);
 
-// ব্যাকওয়ার্ড কম্প্যাটিবিলিটি: যদি কোনো পুরানো ফাইলে আলাদা ফিল্ড না থাকে, তবে স্ট্রিং থেকে বের করা
 if (!postalCode && rawLocation) {
   const pMatch = rawLocation.match(/\b([1-9]\d{3})\b/);
   if (pMatch) postalCode = pMatch[1];
@@ -224,15 +152,21 @@ if (!locality && rawLocation) {
   }
 }
 
-// ================= ৮. স্কিমা অবজেক্ট গঠন =================
+// ================= ৭. পূর্ণাঙ্গ নলেজ গ্রাফ গঠন =================
 const hotelId = `${pageUrl}#hotel`;
+const webpageId = `${pageUrl}#webpage`;
+const breadcrumbId = `${pageUrl}#breadcrumb`;
 
 const hotelNode: any = {
   "@type": "Hotel",
   "@id": hotelId,
-  name: hotelTitle,
-  url: isValidOfficialSite ? rawOfficialSite : pageUrl,
+  "name": hotelTitle,
+  "url": pageUrl // গুগলের নিয়মানুযায়ী ডোমেইনের ক্যানোনিকাল URL
 };
+
+if (isValidOfficialSite) {
+  hotelNode.sameAs = [rawOfficialSite];
+}
 
 if (hotelDescription) hotelNode.description = hotelDescription;
 if (images.length > 0) hotelNode.image = images;
@@ -243,18 +177,16 @@ if (safePrice) hotelNode.priceRange = safePrice;
 
 if (checkIn) hotelNode.checkinTime = checkIn;
 if (checkOut) hotelNode.checkoutTime = checkOut;
-if (isValidOfficialSite) hotelNode.sameAs = [rawOfficialSite];
 
-// অ্যাড্রেস অবজেক্ট
 if (streetAddress || locality || region || postalCode) {
   const addressObj: any = {
     "@type": "PostalAddress",
-    addressCountry: str(data.country || data.country_code) || "BD",
+    "addressCountry": str(data.country || data.country_code) || "BD",
   };
   if (streetAddress) addressObj.streetAddress = streetAddress;
-  if (locality) addressObj.addressLocality = locality;       // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
-  if (region) addressObj.addressRegion = region;             // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
-  if (postalCode) addressObj.postalCode = postalCode;         // ➔ অ্যাডমিন প্যানেল থেকে সরাসরি
+  if (locality) addressObj.addressLocality = locality;
+  if (region) addressObj.addressRegion = region;
+  if (postalCode) addressObj.postalCode = postalCode;
 
   hotelNode.address = addressObj;
 }
@@ -262,87 +194,66 @@ if (streetAddress || locality || region || postalCode) {
 if (hasGeo) {
   hotelNode.geo = {
     "@type": "GeoCoordinates",
-    latitude: latNum,
-    longitude: lngNum,
+    "latitude": latNum,
+    "longitude": lngNum,
   };
-}
-
-// শুধুমাত্র বাস্তব ও অনুমোদিত রিভিউ থাকলে রেটিং স্কিমা যাবে
-if (reviewCount > 0 && ratingValue !== null) {
-  hotelNode.aggregateRating = {
-    "@type": "AggregateRating",
-    ratingValue,
-    reviewCount,
-    bestRating: 5,
-    worstRating: 1,
-  };
-
-  hotelNode.review = validReviews.slice(0, 5).map((r) => {
-    const rev: any = {
-      "@type": "Review",
-      author: { "@type": "Person", name: r.author },
-      reviewBody: r.body,
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: r.rating,
-        bestRating: 5,
-        worstRating: 1,
-      },
-    };
-    if (r.date) rev.datePublished = r.date;
-    return rev;
-  });
 }
 
 if (uniqueAmenities.length > 0) {
   hotelNode.amenityFeature = uniqueAmenities.map((name) => ({
     "@type": "LocationFeatureSpecification",
-    name,
-    value: true,
+    "name": name,
+    "value": true,
   }));
 }
 
 if (roomsList.length > 0) {
   hotelNode.containsPlace = roomsList.map((room: any) => ({
     "@type": "HotelRoom",
-    name: room.name,
-    ...(room.bed ? { bed: room.bed } : {}),
-    ...(room.price ? { description: `Starting from ${room.price}` } : {}),
+    "name": room.name,
+    ...(room.bed ? { "bed": room.bed } : {}),
+    ...(room.price ? { "description": `Starting from ${room.price}` } : {}),
   }));
 }
 
-// ব্রেডক্রাম্ব
-const crumbs: { name: string; item: string }[] = [{ name: "Home", item: `${SITE_ORIGIN}/` }];
-if (HOTELS_LIST_PATH) {
-  crumbs.push({ name: "Hotels in Gulshan", item: `${SITE_ORIGIN}${HOTELS_LIST_PATH}` });
-}
-crumbs.push({ name: hotelTitle, item: pageUrl });
-
-// ওয়েবপেজ নোড (গুগলকে স্পষ্ট করে এটি ডিরেক্টরি পেজ)
-const webPageNode: any = {
-  "@type": "WebPage",
-  "@id": pageUrl,
-  url: pageUrl,
-  name: `${hotelTitle} - Overview, Rates & Reviews`,
-  mainEntity: { "@id": hotelId },
-};
-
+// ব্রেডক্রাম্ব ও পেজ অবজেক্ট
 const graph: any[] = [
   {
     "@type": "BreadcrumbList",
-    "@id": `${pageUrl}#breadcrumb`,
-    itemListElement: crumbs.map((c, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: c.name,
-      item: c.item,
-    })),
+    "@id": breadcrumbId,
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": `${SITE_ORIGIN}/`
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": hotelTitle,
+        "item": pageUrl
+      }
+    ]
   },
-  webPageNode,
-  hotelNode,
+  {
+    "@type": "ItemPage",
+    "@id": webpageId,
+    "url": pageUrl,
+    "name": `${hotelTitle} — Overview, Photos & Verified Rates`,
+    "isPartOf": {
+      "@type": "WebSite",
+      "@id": `${SITE_ORIGIN}/#website`,
+      "name": "GulshanHotels.com",
+      "url": `${SITE_ORIGIN}/`
+    },
+    "breadcrumb": { "@id": breadcrumbId },
+    "mainEntity": { "@id": hotelId }
+  },
+  hotelNode
 ];
 
-// হোটেলের টাইটেল না থাকলে কোনো স্কিমাই যাবে না
+// XSS-Safe JSON-LD স্ট্রিং তৈরি
 const jsonLd = hotelTitle
   ? JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c")
   : "";
