@@ -1,5 +1,6 @@
 ---
-// src/components/PageView.astro (Universal Luxury Page Template - About, Privacy, Terms, Disclaimer)
+// src/components/PageView.astro
+// Universal Page Template with Canonical Trailing Slash
 import Layout from '../layouts/Layout.astro';
 
 interface Props {
@@ -14,20 +15,18 @@ const pageDescription = (pData.description || pData.seo_description || entry?.de
 const pageBody = entry?.body || "";
 const updatedDate = pData.last_updated || pData.updatedDate || pData.date || "Recent";
 
-// স্লাগ ও ক্যানোনিকাল ইউআরএল
 const rawSlug = String(entry?.slug || entry?.id || "").trim();
 const cleanSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
 const siteOrigin = "https://gulshanhotels.com";
-const pageUrl = `${siteOrigin}/${cleanSlug}`;
+// Enforce canonical trailing slash
+const pageUrl = `${siteOrigin}/${cleanSlug}/`;
 
-// পেজের বিষয়বস্তু বুঝে স্বয়ংক্রিয় প্রফেশনাল ব্যাজ নির্বাচন
 const isLegalPage = cleanSlug.includes('privacy') || cleanSlug.includes('terms') || cleanSlug.includes('disclaimer') || cleanSlug.includes('policy') || cleanSlug.includes('cookies');
 const isAboutPage = cleanSlug.includes('about') || pageTitle.toLowerCase().includes('about');
 const defaultBadge = isLegalPage ? "Official Policy & Transparency" : (isAboutPage ? "Mission & Hospitality Standard" : "Information");
 const badgeText = pData.badge || pData.category || defaultBadge;
 
-// Content Renderer
 let PageContent = null;
 if (typeof entry?.render === 'function') {
   try {
@@ -38,7 +37,6 @@ if (typeof entry?.render === 'function') {
   PageContent = entry.Content;
 }
 
-// GOOGLE & AI RICH SCHEMA
 const pageSchema = {
   "@context": "https://schema.org",
   "@type": isAboutPage ? "AboutPage" : "WebPage",
@@ -64,7 +62,8 @@ const pageSchema = {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": pageTitle
+        "name": pageTitle,
+        "item": pageUrl
       }
     ]
   }
@@ -76,13 +75,10 @@ const pageSchema = {
   description={pageDescription || `Official guidance, policies and information for ${pageTitle} on GulshanHotels.com.`}
   image={pData.hero_image || undefined}
 >
-
-  <!-- GOOGLE SCHEMA INJECTION -->
   <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
 
   <main class="w-full bg-white text-slate-900 pt-6 pb-20">
     
-    <!-- ================= 1. LUXURY HERO COVER IMAGE ================= -->
     {pData.hero_image && (
       <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-6">
         <div class="relative aspect-[21/9] sm:aspect-[24/9] w-full rounded-3xl overflow-hidden bg-slate-900 border border-slate-200/90 shadow-sm">
@@ -100,7 +96,6 @@ const pageSchema = {
       </div>
     )}
 
-    <!-- ================= 2. BREADCRUMBS ================= -->
     <div class="w-full max-w-[1550px] mx-auto px-4 sm:px-8 lg:px-12 mb-6">
       <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
@@ -109,10 +104,7 @@ const pageSchema = {
       </nav>
     </div>
 
-    <!-- ================= 3. EDITORIAL READING COLUMN (max-w-[920px]) ================= -->
     <div class="max-w-[920px] mx-auto px-4 sm:px-6 space-y-8 text-left">
-
-      <!-- HEADER WITH BADGES & LAST UPDATED -->
       <header class="space-y-3.5 pb-6 border-b border-slate-200 text-left">
         <div class="flex flex-wrap items-center gap-2.5">
           <span class="bg-emerald-50 text-emerald-800 text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-emerald-200">
@@ -134,7 +126,6 @@ const pageSchema = {
         )}
       </header>
 
-      <!-- ================= 4. LUXURY STATS CARDS (FIXED TAILWIND JIT) ================= -->
       {Array.isArray(pData.stats) && pData.stats.length > 0 && (
         <div class="my-8">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-center">
@@ -152,7 +143,6 @@ const pageSchema = {
         </div>
       )}
 
-      <!-- ================= 5. FEATURED PILLARS (ABOUT / VALUES) ================= -->
       {Array.isArray(pData.features) && pData.features.length > 0 && (
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-8">
           {pData.features.map((feat: any) => (
@@ -169,7 +159,6 @@ const pageSchema = {
         </div>
       )}
 
-      <!-- ================= 6. PROSE CONTENT (HIGH-CONTRAST AUTO-LINKS) ================= -->
       {(PageContent || pageBody) && (
         <div 
           id="pageBodyContent" 
@@ -192,7 +181,6 @@ const pageSchema = {
         </div>
       )}
 
-      <!-- ================= 7. ACCORDION FAQS WITH ANIMATED VECTOR CHEVRON ================= -->
       {Array.isArray(pData.faqs) && pData.faqs.length > 0 && (
         <div class="space-y-4 pt-10 border-t border-slate-200">
           <h3 class="font-serif text-2xl font-black text-slate-900">Frequently Asked Questions</h3>
@@ -212,7 +200,6 @@ const pageSchema = {
         </div>
       )}
 
-      <!-- ================= 8. DIRECT CONCIERGE CTA BANNER ================= -->
       {pData.show_cta !== false && (
         <div class="bg-[#0d3b23] text-white p-6 sm:p-8 rounded-3xl space-y-3 mt-12 shadow-sm">
           <span class="text-emerald-300 text-[10px] font-black uppercase tracking-widest block">Direct Concierge</span>
@@ -233,7 +220,6 @@ const pageSchema = {
   </main>
 </Layout>
 
-<!-- CLIENT SCRIPT: AUTO OPEN MARKDOWN LINKS IN NEW TAB -->
 <script is:inline>
   const initPageInteractions = () => {
     const pageLinks = document.querySelectorAll('#pageBodyContent a');
