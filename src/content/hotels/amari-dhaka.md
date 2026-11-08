@@ -219,7 +219,25 @@ reviews_notice: ''
 reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
-faqs: []
+faqs:
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
+  - question: Amari Dhaka is a well-known
+    answer: Amari Dhaka is a well-known 5-star hotel in Gulshan 2, Dhaka, offering a comfortable stay in one of the city's main business and diplomatic areas. Its location makes it a convenient choice for business travelers, tourists, and families visiting Dhaka. The hotel has 134
 enable_official_site: true
 enable_view_prices: true
 policies:
