@@ -1,5 +1,6 @@
 ---
-// src/components/landing/LocationCategoryTemplate.astro (Real-Time Agoda Live Pricing Integration)
+// src/components/landing/LocationCategoryTemplate.astro
+// Consistent Trailing Slash & Live Agoda Price Integration
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,7 +12,6 @@ interface Props {
 const { entry, Content } = Astro.props;
 const data = entry?.data || {};
 
-// ১. সাইট অরিজিন ও ক্যানোনিক্যাল URL
 const siteOrigin = Astro.site ? Astro.site.origin : "https://gulshanhotels.com";
 
 const rawSlug = entry?.slug || entry?.id || "";
@@ -23,16 +23,15 @@ const cleanSlug = rawSlug
   .trim()
   .replace(/\s+/g, '-') || "";
 
-const canonicalUrl = `${siteOrigin}/${cleanSlug}`;
+// Canonical URL with mandatory trailing slash
+const canonicalUrl = `${siteOrigin}/${cleanSlug}/`;
 
-// ২. মেটাডাটা
 const pageTitle = (data.title || "").trim();
 const locationSubtitle = (data.location_subtitle || "").trim();
 const description = (data.description || data.seo_description || "").trim();
 const heroImage = data.hero_image || data.image || "";
 const metaTitle = (data.seo_title || data.meta_title || `${toTitleCase(pageTitle)} — Stays & Travel Guide`).trim();
 
-// ৩. সব হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const hotelCol = await (getCollection as any)('hotels');
@@ -52,7 +51,6 @@ try {
   } catch (e) {}
 }
 
-// ৪. রিভিউ লোডার
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob(['/src/content/reviews/*.{md,mdx}', '../../content/reviews/*.{md,mdx}'], { eager: true });
@@ -78,7 +76,6 @@ for (const item of rawReviewsList) {
   }
 }
 
-// ৫. টেক্সট নরম্যালাইজার ও ফিল্টারিং
 const normalizeText = (val: any) =>
   String(val || '')
     .toLowerCase()
@@ -112,7 +109,6 @@ const displayHotels = allHotels.filter(h => {
   return hLoc.includes(normalizedKeyword) || hCat.includes(normalizedKeyword) || hTitle.includes(normalizedKeyword);
 });
 
-// ৬. হেল্পার ফাংশন
 function toTitleCase(str: string) {
   if (!str) return "";
   return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -144,7 +140,6 @@ function plainText(str: any) {
     .trim();
 }
 
-// ৭. স্মার্ট টাইটেল ফরম্যাটার
 const cleanTitleName = pageTitle
   .replace(/^hotels?\s+in\s+/i, '')
   .replace(/^hotels?\s+near\s+/i, '')
@@ -156,7 +151,6 @@ const hotelsTitle = (data.hotels_title || (cleanTitleName ? `Accommodations in $
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
-// ৮. ১০০% গুগল পলিসি কমপ্লায়েন্ট স্কিমা
 const schemaGraph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -179,7 +173,7 @@ if (displayHotels.length > 0) {
       "@type": "ListItem",
       "position": idx + 1,
       "name": toTitleCase(h.data?.title || h.data?.name || `Hotel Stay`),
-      "url": `${siteOrigin}/${h.slug}`
+      "url": `${siteOrigin}/${h.slug}/`
     }))
   });
 }
@@ -215,7 +209,7 @@ const masterSchemaJson = JSON.stringify({
 
   <div class="w-full bg-[#fcfbfa] text-slate-800 font-sans pb-24">
 
-    <!-- ================= ১. সিনেমাটিক ব্যানার (স্থায়ী লকড অংশ) ================= -->
+    <!-- Hero Banner -->
     <header class="relative w-full aspect-[21/9] min-h-[300px] sm:min-h-[420px] max-h-[520px] bg-slate-950 overflow-hidden">
       {heroImage ? (
         <img
@@ -230,7 +224,6 @@ const masterSchemaJson = JSON.stringify({
       
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-      <!-- ব্যানারের বাম কোণায় টাইটেল ও সাবটাইটেল -->
       <div class="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 lg:left-12 z-10 text-white space-y-1 text-left max-w-2xl">
         <span class="block font-serif text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-md text-white">
           {toTitleCase(pageTitle)}
@@ -245,11 +238,10 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </header>
 
-    <!-- ================= ২. ব্রেডক্রাম্ব ও H1 + আর্টিকেল (স্থায়ী লকড অংশ) ================= -->
+    <!-- Breadcrumb & H1 Article Intro -->
     <section class="w-full px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 text-left">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
-        <!-- বাম কলাম: ব্রেডক্রাম্ব -->
         <div class="lg:col-span-3 pt-2">
           <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm text-[#0d3b23] font-semibold tracking-wide">
             <a href="/" class="hover:underline">Home</a>
@@ -260,7 +252,6 @@ const masterSchemaJson = JSON.stringify({
           </nav>
         </div>
 
-        <!-- ডান কলাম: H1 হেডিং ও আর্টিকেল -->
         <div class="lg:col-span-9 max-w-4xl">
           <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
             {toTitleCase(pageTitle)}
@@ -282,10 +273,8 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৩. পাশাপাশি ২টি করে হোটেল কার্ডের গ্রিড (Agoda Live Price Enabled) ================= -->
+    <!-- Hotel Grid Section -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
-      
-      <!-- হেডার ও সার্চবার -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4 mb-8">
         <div>
           {hotelsTag && (
@@ -299,7 +288,6 @@ const masterSchemaJson = JSON.stringify({
           </p>
         </div>
 
-        <!-- অন-পেজ সার্চ ইনপুট -->
         <div class="w-full sm:w-72 bg-white rounded-xl shadow-xs px-3 py-2 flex items-center border border-slate-200">
           <svg aria-hidden="true" class="w-4 h-4 text-slate-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <circle cx="11" cy="11" r="8"/>
@@ -315,7 +303,6 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </div>
 
-      <!-- হোটেল গ্রিড -->
       <div id="landingHotelsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {displayHotels.length === 0 ? (
           <div class="col-span-full text-center py-12 text-slate-500 text-sm bg-white rounded-2xl border border-dashed border-slate-300">
@@ -326,7 +313,8 @@ const masterSchemaJson = JSON.stringify({
             const hd = h.data || {};
             const hotelTitle = (hd.title || hd.name || "").trim();
             const hotelSlug = String(h.slug || "").trim();
-            const hotelUrl = `/${hotelSlug}`;
+            // Trailing slash enforced
+            const hotelUrl = `/${hotelSlug}/`;
             const agodaId = hd.agoda_id || hd.agodaId || "";
 
             const starCount = extractStarsNumber(hd.category, hd.stars);
@@ -370,7 +358,6 @@ const masterSchemaJson = JSON.stringify({
                 data-hotel-name={hotelTitle}
                 data-agoda-id={agodaId}
               >
-                <!-- ইমেজ ও স্টার ব্যাজ -->
                 <div class="w-full sm:w-48 md:w-52 h-44 sm:h-full relative shrink-0 overflow-hidden bg-slate-100">
                   {cardImage && (
                     <a href={hotelUrl} class="block w-full h-full">
@@ -394,9 +381,7 @@ const masterSchemaJson = JSON.stringify({
                   )}
                 </div>
 
-                <!-- ডিটেইলস -->
                 <div class="flex-1 p-4 sm:p-4.5 flex flex-col justify-between space-y-2 overflow-hidden">
-                  
                   <div class="space-y-1.5">
                     <div class="flex items-center gap-1.5 text-[9px] font-bold">
                       {realBadge && (
@@ -404,9 +389,7 @@ const masterSchemaJson = JSON.stringify({
                           {realBadge}
                         </span>
                       )}
-                      <!-- রিয়েল-টাইম ডিসকাউন্ট ব্যাজ (Agoda থেকে আসলে স্ক্রিপ্ট পূরণ করবে) -->
-                      <span class="agoda-discount-badge hidden px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-extrabold animate-pulse">
-                      </span>
+                      <span class="agoda-discount-badge hidden px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-extrabold animate-pulse"></span>
                     </div>
 
                     <div>
@@ -424,7 +407,6 @@ const masterSchemaJson = JSON.stringify({
                       )}
                     </div>
 
-                    <!-- রেটিং -->
                     {reviewCount > 0 && reviewScore && (
                       <div class="flex items-center gap-1.5 text-xs">
                         <span class="text-amber-500 font-bold flex items-center gap-0.5">
@@ -436,7 +418,6 @@ const masterSchemaJson = JSON.stringify({
                       </div>
                     )}
 
-                    <!-- সুবিধাসমূহ -->
                     {topAmenities.length > 0 && (
                       <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-600 font-medium pt-0.5">
                         {topAmenities.map((item: string) => (
@@ -449,23 +430,17 @@ const masterSchemaJson = JSON.stringify({
                     )}
                   </div>
 
-                  <!-- প্রাইস ও বাটন বার (রিয়েলটাইম Agoda সিঙ্ক) -->
                   <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <!-- রেট স্ট্যাটাস লেবেল -->
                       <span class="hotel-rate-status text-[9px] text-slate-400 font-medium uppercase leading-none flex items-center gap-1">
                         <span>Direct Rate</span>
                       </span>
                       
                       <div class="flex items-baseline gap-1 mt-0.5">
-                        <!-- অরিজিনাল স্ট্রাইকথ্রু প্রাইস (যদি ছাড় থাকে) -->
                         <span class="agoda-original-price hidden text-[11px] text-slate-400 line-through"></span>
-                        
-                        <!-- আসল লাইভ প্রাইস -->
                         <span class="hotel-live-price text-base sm:text-lg font-black text-[#0d3b23]">
                           {price ? price : "Check Rates"}
                         </span>
-                        
                         <span class="hotel-per-night text-[10px] text-slate-500">
                           {price ? "/ night" : ""}
                         </span>
@@ -493,7 +468,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ================= ৪. FAQ সেকশন ================= -->
+    <!-- FAQ Section -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 text-left border-t border-slate-200 mt-16">
         <h2 class="font-serif text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight mb-8">
@@ -522,9 +497,7 @@ const masterSchemaJson = JSON.stringify({
   </div>
 </Layout>
 
-<!-- লাইভ সার্চ ও ক্লাউডফ্লেয়ার আগোডা লাইভ প্রাইস সিঙ্ক স্ক্রিপ্ট -->
 <script is:inline>
-  // ১. অন-পেজ সার্চ ফিল্টার
   const initOnPageFilter = () => {
     const input = document.getElementById('onPageHotelFilterInput');
     const cards = document.querySelectorAll('.landing-hotel-card');
@@ -559,7 +532,6 @@ const masterSchemaJson = JSON.stringify({
     }
   };
 
-  // ২. ক্লাউডফ্লেয়ার ওয়ার্কার থেকে আগোডার লাইভ রেট সিঙ্ক
   const syncAgodaLivePrices = async () => {
     const cards = document.querySelectorAll('.landing-hotel-card');
     if (!cards || cards.length === 0) return;
@@ -586,7 +558,6 @@ const masterSchemaJson = JSON.stringify({
           const origPriceEl = card.querySelector('.agoda-original-price');
           const discountEl = card.querySelector('.agoda-discount-badge');
 
-          // ১. লাইভ প্রাইস আপডেট
           if (priceEl) {
             priceEl.textContent = data.rates.startingPrice;
           }
@@ -595,7 +566,6 @@ const masterSchemaJson = JSON.stringify({
             perNightEl.textContent = "/ night";
           }
 
-          // ২. অরিজিনাল প্রাইস ও ডিসকাউন্ট ব্যাজ
           if (origPriceEl && data.rates.originalPrice) {
             origPriceEl.textContent = data.rates.originalPrice;
             origPriceEl.classList.remove('hidden');
@@ -606,7 +576,6 @@ const masterSchemaJson = JSON.stringify({
             discountEl.classList.remove('hidden');
           }
 
-          // ৩. লাইভ গ্রিন পালস স্ট্যাটাস
           if (statusEl) {
             statusEl.innerHTML = `
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -614,9 +583,7 @@ const masterSchemaJson = JSON.stringify({
             `;
           }
         }
-      } catch (e) {
-        // কোনো কারণে ওয়ার্কার অফলাইনে থাকলে পেজ স্বাভাবিক থাকবে
-      }
+      } catch (e) {}
     });
   };
 
