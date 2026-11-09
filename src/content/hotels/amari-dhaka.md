@@ -33,7 +33,7 @@ booking_channels:
   - provider_name: Whatsapp
     price: ''
     show_price: false
-    note: ''
+    note: free cancellation
     button_text: Contact now ➔
     button_url: '01996322761'
     badge: For Best Rate
