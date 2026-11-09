@@ -25,7 +25,7 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 enable_view_prices: true
-price: $165
+price: $170
 rates_title: Deals & Rates
 rates_live_badge: ''
 rates_price_label: Nightly price
