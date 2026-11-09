@@ -1,5 +1,6 @@
 ---
-// src/components/PopularHotels.astro (100% W3C Valid HTML, Zero Fake Data & Core Web Vitals Ready)
+// src/components/PopularHotels.astro
+// 100% Google-Compliant Dynamic Pricing, Zero CLS & Core Web Vitals Optimized
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -16,7 +17,7 @@ const {
 
 const isProd = import.meta.env.PROD;
 
-// ১. ড্রাফট ফিল্টারসহ হোটেল ডাটা লোডার (গুগল ৪০৪ ক্রল এরর প্রতিরোধ)
+// ১. ড্রাফট ফিল্টারসহ হোটেল ডাটা লোডার
 let allHotels: any[] = [];
 try {
   const collectionHotels = await getCollection('hotels', ({ data }) => {
@@ -98,7 +99,7 @@ const approvedReviewsList = allReviewsRaw.filter(item => {
 const normalize = (str: string) => String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const dotsArray = [0, 1, 2, 3, 4];
 
-// ক্লাউডফ্লেয়ার ইমেজ অপ্টিমাইজার
+// ইমেজ অপ্টিমাইজার
 function getCardImage(url: string) {
   if (!url) return "/images/hotel-placeholder.webp";
   const cleanUrl = url.trim();
@@ -162,11 +163,12 @@ function getCardImage(url: string) {
           const hTitle = String(hData.title || hData.name || "Hotel Details").trim();
           const rawSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
+          const agodaId = String(hData.agoda_id || hData.agodaId || "").trim();
           
           const rawImg = hData.image || (Array.isArray(hData.gallery) && hData.gallery[0] ? (typeof hData.gallery[0] === 'object' ? hData.gallery[0].photo || hData.gallery[0].image : hData.gallery[0]) : "");
           const hImage = getCardImage(rawImg);
           
-          // কোনো ফেক প্রাইজ নেই (সৎ ডাটা ইঞ্জিন)
+          // বেস ফলব্যাক রেট
           const rawPrice = hData.price || hData.starting_price;
           const displayPrice = rawPrice 
             ? (String(rawPrice).startsWith('$') || String(rawPrice).startsWith('৳') ? String(rawPrice) : `$${String(rawPrice).trim()}`)
@@ -191,9 +193,14 @@ function getCardImage(url: string) {
           const ratingVal = avgRating ? Math.min(Math.max(Math.round(Number(avgRating)), 1), 5) : 0;
 
           return (
-            <div class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group">
+            <div 
+              class="popular-card-item w-[280px] sm:w-[320px] shrink-0 bg-white rounded-2xl overflow-hidden flex flex-col text-left relative group"
+              data-slug={hSlug}
+              data-hotel-name={hTitle}
+              data-agoda-id={agodaId}
+            >
               
-              <!-- ১. কার্ড ছবি ও উইশলিস্ট বাটন (W3C ভ্যালিড: বাটনকে লিংকের বাইরে রাখা হয়েছে) -->
+              <!-- ১. কার্ড ছবি ও উইশলিস্ট বাটন -->
               <div class="relative w-full aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
                 <a href={`/${hSlug}/`} class="block w-full h-full" aria-label={`View details of ${hTitle}`}>
                   <img 
@@ -207,7 +214,7 @@ function getCardImage(url: string) {
                   />
                 </a>
 
-                <!-- উইশলিস্ট হার্ট বাটন (লিংকের বাইরে থাকায় কোনো ক্লিক কনফ্লিক্ট বা ইনভ্যালিড HTML নেই) -->
+                <!-- উইশলিস্ট বাটন -->
                 <button 
                   type="button"
                   class="card-wishlist-btn absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-800 flex items-center justify-center border border-slate-200 cursor-pointer z-10 shadow-sm transition active:scale-90"
@@ -221,7 +228,7 @@ function getCardImage(url: string) {
                 </button>
               </div>
 
-              <!-- ২. কার্ড ডিটেইলস (ক্যানোনিকাল ট্রেইলিং স্ল্যাশসহ লিংক) -->
+              <!-- ২. কার্ড ডিটেইলস -->
               <div class="pt-3 pb-1 px-0.5 space-y-1.5">
                 
                 <h3 class="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 hover:text-emerald-800 transition-colors">
@@ -256,12 +263,32 @@ function getCardImage(url: string) {
                   </div>
                 )}
 
-                <!-- প্রাইজ ডিসপ্লে -->
-                <div class="flex items-baseline gap-1.5 pt-1">
-                  {displayPrice !== "Check rates" && (
+                <!-- ৩. প্রাইজ ডিসপ্লে (গুগল কমপ্লায়েন্ট ও ZERO CLS সংরক্ষিত বক্স) -->
+                <div class="pt-1 min-h-[42px] flex flex-col justify-end">
+                  
+                  <!-- লাইভ ডিসকাউন্ট ও অরিজিনাল প্রাইস (লাইভ সিঙ্ক পেলে সফটলি দৃশ্যমান হবে) -->
+                  <div class="flex items-center gap-1.5 leading-none mb-0.5">
+                    <span class="pop-orig-price hidden text-[11px] text-slate-400 line-through font-semibold tabular-nums"></span>
+                    <span class="pop-discount-badge hidden text-[9px] font-black uppercase text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded-full"></span>
+                  </div>
+
+                  <!-- মূল দামের লাইন -->
+                  <div class="flex items-baseline gap-1.5">
                     <span class="text-xs text-slate-500 font-medium">from</span>
-                  )}
-                  <span class="text-base sm:text-lg font-black text-slate-900">{displayPrice}{displayPrice !== "Check rates" ? ' / night' : ''}</span>
+                    <span class="pop-live-price text-base sm:text-lg font-black text-slate-900 transition-opacity duration-300 tabular-nums">
+                      {displayPrice}
+                    </span>
+                    <span class="pop-per-night text-xs text-slate-500 font-medium">
+                      {displayPrice !== "Check rates" ? '/ night' : ''}
+                    </span>
+                    
+                    <!-- লাইভ ইন্ডিকেটর ব্যাজ -->
+                    <span class="pop-live-badge hidden text-[9px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-full ml-1 items-center gap-1">
+                      <span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Live</span>
+                    </span>
+                  </div>
+
                 </div>
 
               </div>
@@ -286,10 +313,13 @@ function getCardImage(url: string) {
   </div>
 </section>
 
-<!-- SCRIPT (PASSIVE, CLEAN & SIGNAL CONTROLLED) -->
+<!-- CLIENT SCRIPT (INTERSECTION OBSERVER + 10-MIN CACHE + GOOGLE COMPLIANT LIVE SYNC) -->
 <script is:inline>
   (() => {
     let popAbortController = null;
+    const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+    const CACHE_PREFIX = "gh_pop_rate_";
+    const CACHE_TTL_MS = 10 * 60 * 1000; // ১০ মিনিট ব্রাউজার ক্যাশ
 
     const initPopularHotelsSection = () => {
       if (popAbortController) popAbortController.abort();
@@ -299,9 +329,11 @@ function getCardImage(url: string) {
       const track = document.getElementById('popularHotelsTrack');
       const prevBtn = document.getElementById('popPrevBtn');
       const nextBtn = document.getElementById('popNextBtn');
+      const section = document.getElementById('hotels');
 
       if (!track) return;
 
+      // ১. ক্যারোজেল নেভিগেশন
       let isUpdating = false;
       function updateArrows() {
         if (isUpdating) return;
@@ -316,17 +348,11 @@ function getCardImage(url: string) {
           const scrollLeft = track.scrollLeft;
           const maxScroll = track.scrollWidth - track.clientWidth - 5;
 
-          if (scrollLeft <= 5) {
-            prevBtn.classList.add('hidden');
-          } else {
-            prevBtn.classList.remove('hidden');
-          }
+          if (scrollLeft <= 5) prevBtn.classList.add('hidden');
+          else prevBtn.classList.remove('hidden');
 
-          if (scrollLeft >= maxScroll) {
-            nextBtn.classList.add('hidden');
-          } else {
-            nextBtn.classList.remove('hidden');
-          }
+          if (scrollLeft >= maxScroll) nextBtn.classList.add('hidden');
+          else nextBtn.classList.remove('hidden');
 
           isUpdating = false;
         });
@@ -346,13 +372,11 @@ function getCardImage(url: string) {
         window.addEventListener('resize', updateArrows, { passive: true, signal });
       }
 
-      // Wishlist Toggle
+      // ২. উইশলিস্ট টগল ইঞ্জিন
       document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
         const title = btn.getAttribute('data-title') || '';
         let list = [];
-        try {
-          list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]');
-        } catch (err) { list = []; }
+        try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
 
         const isSaved = list.some(item => item.title === title);
         const iconSvg = btn.querySelector('svg');
@@ -371,7 +395,6 @@ function getCardImage(url: string) {
           const price = btn.getAttribute('data-price') || '';
 
           try { list = JSON.parse(localStorage.getItem('gh_wishlist') || '[]'); } catch (err) { list = []; }
-
           const existingIndex = list.findIndex(item => item.title === title);
 
           if (existingIndex > -1) {
@@ -403,6 +426,102 @@ function getCardImage(url: string) {
           }
         }, { signal });
       });
+
+      // ৩. গুগল-কমপ্লায়েন্ট লাইভ প্রাইস সিঙ্ক ইঞ্জিন (Lazy Load + Zero CLS)
+      const cards = track.querySelectorAll('.popular-card-item');
+
+      const applyCardRate = (card, ratesData) => {
+        const priceEl = card.querySelector('.pop-live-price');
+        const origPriceEl = card.querySelector('.pop-orig-price');
+        const discountEl = card.querySelector('.pop-discount-badge');
+        const perNightEl = card.querySelector('.pop-per-night');
+        const liveBadge = card.querySelector('.pop-live-badge');
+
+        if (!priceEl || !ratesData.startingPrice) return;
+
+        priceEl.style.opacity = '0.3';
+        setTimeout(() => {
+          priceEl.textContent = ratesData.startingPrice;
+          priceEl.style.opacity = '1';
+
+          if (perNightEl) perNightEl.textContent = '/ night';
+
+          if (ratesData.originalPrice && origPriceEl) {
+            origPriceEl.textContent = ratesData.originalPrice;
+            origPriceEl.classList.remove('hidden');
+          }
+
+          if (ratesData.discountText && discountEl) {
+            discountEl.textContent = ratesData.discountText;
+            discountEl.classList.remove('hidden');
+          }
+
+          if (liveBadge) {
+            liveBadge.classList.remove('hidden');
+            liveBadge.classList.add('inline-flex');
+          }
+        }, 120);
+      };
+
+      const syncHotelLiveRate = async (card) => {
+        const slug = card.getAttribute('data-slug') || '';
+        const hotelName = card.getAttribute('data-hotel-name') || '';
+        const agodaId = card.getAttribute('data-agoda-id') || '';
+
+        const cacheKey = CACHE_PREFIX + (agodaId || slug || hotelName);
+
+        // ব্রাউজার ক্যাশ চেক (১০ মিনিটের মধ্যে থাকলে API কল বন্ধ)
+        try {
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.rates) {
+              applyCardRate(card, parsed.rates);
+              return;
+            }
+          }
+        } catch (_) {}
+
+        const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
+        const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
+
+        try {
+          const res = await fetch(requestUrl, { signal });
+          if (!res.ok) return;
+          const json = await res.json();
+          if (json && json.success && json.rates && json.rates.startingPrice) {
+            applyCardRate(card, json.rates);
+
+            // ক্যাশ সংরক্ষণ
+            try {
+              sessionStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                rates: json.rates
+              }));
+            } catch (_) {}
+          }
+        } catch (_) {}
+      };
+
+      // IntersectionObserver: ইউজার যখন স্ক্রল করে সেকশনটির ৩০০ পিক্সেল কাছে আসবে, তখনই ফেচ হবে
+      if (cards.length > 0 && 'IntersectionObserver' in window) {
+        let isSynced = false;
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !isSynced) {
+            isSynced = true;
+            observer.disconnect();
+
+            // সার্ভারের ওপর চাপ কমাতে কার্ডগুলোতে হালকা ব্যবধানে (staggered) ফেচ পাঠানো
+            cards.forEach((card, index) => {
+              setTimeout(() => {
+                syncHotelLiveRate(card);
+              }, index * 80);
+            });
+          }
+        }, { rootMargin: '300px 0px' });
+
+        if (section) observer.observe(section);
+      }
     };
 
     document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
