@@ -1,10 +1,11 @@
 ---
-// src/components/LatestBlogs.astro (Mobile Side-by-Side 2-Cols & Desktop 3-Cols)
+// src/components/LatestBlogs.astro
+// 100% Google SEO & Webmaster Compliant, 4-Column Compact Grid, Zero CLS
 import { getCollection } from 'astro:content';
 
 let allPosts: any[] = [];
 
-// ১. প্রথমে Astro Content Layer দিয়ে চেষ্টা করবে
+// ১. Astro Content Layer দিয়ে চেষ্টা
 try {
   const posts = await getCollection('posts');
   if (Array.isArray(posts) && posts.length > 0) {
@@ -17,7 +18,7 @@ try {
   allPosts = [];
 }
 
-// ২. ফলব্যাক: সরাসরি ফাইল থেকে নিয়ে আসা (১০০% কাজ করবে)
+// ২. ফলব্যাক: সরাসরি ফাইল লোডার
 if (allPosts.length === 0) {
   try {
     const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../content/posts/*.{md,mdx}'], { eager: true });
@@ -30,79 +31,138 @@ if (allPosts.length === 0) {
   }
 }
 
-// তারিখ অনুযায়ী সাজিয়ে লেটেস্ট ৩টি পোস্ট নেওয়া
-const latestPosts = allPosts
-  .filter(p => (p.data?.title || p.slug))
+// ডুপ্লিকেট পোস্ট বাদ দেওয়া
+const uniquePostsMap = new Map<string, any>();
+allPosts.forEach((post) => {
+  const s = post.slug;
+  if (s && !uniquePostsMap.has(s) && post.data?.title) {
+    uniquePostsMap.set(s, post);
+  }
+});
+
+// ৩. তারিখ অনুযায়ী সাজিয়ে ডেক্সটপের ৪ কলামের জন্য লেটেস্ট ৪টি পোস্ট নেওয়া
+const latestPosts = Array.from(uniquePostsMap.values())
   .sort((a, b) => new Date(b.data?.date || 0).getTime() - new Date(a.data?.date || 0).getTime())
-  .slice(0, 3);
+  .slice(0, 4);
+
+// ৪. টেক্সট অতিরিক্ত বড় হওয়া রোধে নিরাপদ ও গুগল-কমপ্লায়েন্ট স্নিপেট হেল্পার
+function getSafeSnippet(text: string, maxChars = 85): string {
+  if (!text) return "Expert guide and local stay insights for Gulshan, Dhaka.";
+  const clean = String(text)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[*#_~`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (clean.length <= maxChars) return clean;
+  const cut = clean.slice(0, maxChars);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 35 ? cut.slice(0, lastSpace) : cut) + '...';
+}
+
+// ISO Date ফরম্যাটার (Google Schema ও <time> ট্যাগের জন্য)
+function toIsoDate(dStr: any): string {
+  const parsed = new Date(dStr);
+  return isNaN(parsed.getTime()) ? new Date().toISOString().split('T')[0] : parsed.toISOString().split('T')[0];
+}
 ---
 
 {latestPosts.length > 0 && (
-  <section id="latest-travel-guides" class="w-full bg-white py-8 sm:py-12 px-3 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
-    
-    <!-- সেকশন হেডার -->
-    <div class="flex items-end justify-between gap-2 border-b border-slate-100 pb-3 sm:pb-5 mb-5 sm:mb-8">
+  <section 
+    id="latest-travel-guides" 
+    class="w-full bg-white py-8 sm:py-12 px-3 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left"
+    aria-labelledby="latest-guides-title"
+  >
+    <!-- Section Header -->
+    <div class="flex items-end justify-between gap-4 border-b border-slate-100 pb-3 sm:pb-5 mb-5 sm:mb-7">
       <div>
         <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
           Editorial Travel Hub
         </span>
-        <h2 class="text-xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight mt-1">
+        <h2 id="latest-guides-title" class="text-xl sm:text-2xl lg:text-3xl font-sans font-black text-slate-900 tracking-tight leading-tight mt-0.5">
           Latest Travel Guides & Insights
         </h2>
       </div>
-      <a href="/blog" class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition shrink-0">
+      <a 
+        href="/blog" 
+        class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition shrink-0"
+        aria-label="View all travel guides"
+      >
         <span>View all</span>
-        <span>➔</span>
+        <span aria-hidden="true">➔</span>
       </a>
     </div>
 
-    <!-- 🎯 মোবাইলে পাশাপাশি ২ কলাম (grid-cols-2) এবং ডেক্সটপে ৩ কলাম (md:grid-cols-3) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+    <!-- 🎯 COMPACT RESPONSIVE GRID: মোবাইলে ২ কলাম, ট্যাবলেটে ৩ কলাম, ডেক্সটপে ৪ কলাম 🎯 -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
       {latestPosts.map((post) => {
         const pData = post.data || {};
         const pSlug = post.slug;
-        const pTitle = pData.title || "Gulshan Travel Guide";
+        const pTitle = String(pData.title || "Gulshan Travel Guide").trim();
         const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
+        const postUrl = `/blog/${pSlug}/`;
+        const postDate = pData.date || "Recent";
+        const isoDate = toIsoDate(postDate);
+        const snippet = getSafeSnippet(pData.description || pData.excerpt || "");
 
         return (
-          <article class="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
+          <article 
+            class="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-lg hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between"
+          >
             <div>
-              <!-- ছবি এবং ক্যাটাগরি ব্যাজ -->
-              <a href={`/blog/${pSlug}/`} class="block relative aspect-[16/10] overflow-hidden bg-slate-900">
+              <!-- ১. থাম্বনেইল ছবি (CLS রোধে নির্দিষ্ট width/height ও aspect ratio) -->
+              <a 
+                href={postUrl} 
+                class="block relative aspect-[16/10] overflow-hidden bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                tabindex="-1"
+                aria-hidden="true"
+              >
                 <img 
                   src={pImg} 
                   alt={pTitle}
+                  width="400"
+                  height="250"
                   loading="lazy" 
                   decoding="async"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
                 />
-                <span class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#0d3b23] text-white text-[8px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-xs">
+                <span class="absolute top-2 left-2 bg-[#0d3b23]/95 backdrop-blur-md text-white text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-xs">
                   {pData.category || "Guide"}
                 </span>
               </a>
 
-              <!-- কনটেন্ট এরিয়া -->
-              <div class="p-2.5 sm:p-5 space-y-1 sm:space-y-2">
-                <span class="text-[9px] sm:text-[11px] font-semibold text-slate-400 block truncate">
-                  {pData.date || "Recent"} • {pData.readTime || "4 min read"}
-                </span>
+              <!-- ২. কার্ড টেক্সট ও স্নিপেট -->
+              <div class="p-3 sm:p-4 space-y-1 sm:space-y-1.5">
+                <!-- তারিখ ও রিডিং টাইম -->
+                <div class="flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-slate-400">
+                  <time datetime={isoDate}>{postDate}</time>
+                  <span>•</span>
+                  <span>{pData.readTime || "3 min read"}</span>
+                </div>
                 
-                <h3 class="font-serif text-xs sm:text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
-                  <a href={`/blog/${pSlug}/`}>{pTitle}</a>
+                <!-- কার্ড টাইটেল (২ লাইনে অটো ক্ল্যাম্প) -->
+                <h3 class="font-serif text-xs sm:text-[15px] font-bold text-slate-900 group-hover:text-emerald-800 transition-colors line-clamp-2 leading-snug">
+                  <a href={postUrl} class="hover:underline focus:outline-none focus:ring-1 focus:ring-emerald-700 rounded">
+                    {pTitle}
+                  </a>
                 </h3>
 
-                <!-- মোবাইলে লেখা যাতে বেশি বড় হয়ে কার্ড নষ্ট না করে, তাই ডেসক্রিপশন শুধু বড় স্ক্রিনে দেখাবে -->
-                <p class="text-[11px] sm:text-xs text-slate-600 line-clamp-2 leading-relaxed hidden sm:block">
-                  {pData.description || "In-depth guide and local advice for your stay in Gulshan, Dhaka."}
+                <!-- স্নিপেট (৮৫ অক্ষরের বেশি হবে না এবং ২ লাইনের মধ্যে ফিক্সড থাকবে) -->
+                <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 leading-relaxed font-normal">
+                  {snippet}
                 </p>
               </div>
             </div>
 
-            <!-- নিচে লিংক বাটন -->
-            <div class="p-2.5 sm:p-5 pt-0">
-              <a href={`/blog/${pSlug}/`} class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-emerald-800 group-hover:underline pt-1.5 sm:pt-2 border-t border-slate-100 w-full justify-between">
+            <!-- ৩. ফুটার লিংক বাটন -->
+            <div class="p-3 sm:p-4 pt-0">
+              <a 
+                href={postUrl} 
+                class="inline-flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-emerald-800 group-hover:underline pt-2 border-t border-slate-100 w-full"
+                aria-label={`Read guide: ${pTitle}`}
+              >
                 <span>Read Guide</span>
-                <span>➔</span>
+                <span aria-hidden="true" class="group-hover:translate-x-0.5 transition-transform">➔</span>
               </a>
             </div>
           </article>
