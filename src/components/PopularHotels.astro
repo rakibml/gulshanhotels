@@ -1,6 +1,6 @@
 ---
 // src/components/PopularHotels.astro
-// 100% Google-Compliant Dynamic Pricing, Agoda Official API Adapted & Zero CLS
+// 100% Google-Compliant Dynamic Pricing, Zero CLS & No Live Badge
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -164,7 +164,6 @@ function getCardImage(url: string) {
           const rawSlug = String(hData.slug || hotelItem.slug || hotelItem.id || "hotel").trim();
           const hSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
           
-          // Agoda ID সব ফিল্ড ফরম্যাট থেকে সাপোর্ট করা
           const agodaId = String(hData.agoda_id || hData.agodaId || hData.agoda_hotel_id || "").trim();
           
           const rawImg = hData.image || (Array.isArray(hData.gallery) && hData.gallery[0] ? (typeof hData.gallery[0] === 'object' ? hData.gallery[0].photo || hData.gallery[0].image : hData.gallery[0]) : "");
@@ -265,7 +264,7 @@ function getCardImage(url: string) {
                   </div>
                 )}
 
-                <!-- ৩. প্রাইজ ডিসপ্লে (গুগল কমপ্লায়েন্ট ও ZERO CLS বক্স) -->
+                <!-- ৩. প্রাইজ ডিসপ্লে (বিনা কোনো Live ব্যাজ) -->
                 <div class="pt-1 min-h-[42px] flex flex-col justify-end">
                   
                   <!-- লাইভ ডিসকাউন্ট ও অরিজিনাল প্রাইস -->
@@ -283,8 +282,7 @@ function getCardImage(url: string) {
                     <span class="pop-per-night text-xs text-slate-500 font-medium">
                       {displayPrice !== "Check rates" ? '/ night' : ''}
                     </span>
-                    
-                     </div>
+                  </div>
 
                 </div>
 
@@ -310,15 +308,14 @@ function getCardImage(url: string) {
   </div>
 </section>
 
-<!-- CLIENT SCRIPT (AGODA OFFICIAL API ADAPTED LIVE SYNC) -->
+<!-- CLIENT SCRIPT -->
 <script is:inline>
   (() => {
     let popAbortController = null;
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
     const CACHE_PREFIX = "gh_pop_rate_";
-    const CACHE_TTL_MS = 10 * 60 * 1000; // ১০ মিনিট ব্রাউজার ক্যাশ
+    const CACHE_TTL_MS = 10 * 60 * 1000;
 
-    // ঢাকা টাইম অনুযায়ী আজকের এবং আগামীকালের তারিখ তৈরির নিখুঁত হেল্পার
     const getDhakaDates = () => {
       const now = new Date();
       const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -382,7 +379,7 @@ function getCardImage(url: string) {
         window.addEventListener('resize', updateArrows, { passive: true, signal });
       }
 
-      // ২. উইশলিস্ট টগল ইঞ্জিন
+      // ২. উইশলিস্ট টগল
       document.querySelectorAll('.card-wishlist-btn').forEach(btn => {
         const title = btn.getAttribute('data-title') || '';
         let list = [];
@@ -437,7 +434,7 @@ function getCardImage(url: string) {
         }, { signal });
       });
 
-      // ৩. লাইভ রেট সিঙ্ক ইঞ্জিন (Agoda Official Schema Adapted)
+      // ৩. লাইভ রেট সিঙ্ক (সম্পূর্ণ ব্যাজ মুক্ত)
       const cards = track.querySelectorAll('.popular-card-item');
 
       const applyCardRate = (card, ratesData) => {
@@ -464,7 +461,6 @@ function getCardImage(url: string) {
             discountEl.textContent = ratesData.discountText;
             discountEl.classList.remove('hidden');
           }
-         
         }, 120);
       };
 
@@ -489,10 +485,8 @@ function getCardImage(url: string) {
           }
         } catch (_) {}
 
-        // আজকের ও আগামীকালের তারিখ
         const { checkIn, checkOut } = getDhakaDates();
         
-        // Agoda Official PDF এর সকল ভ্যারিয়েন্ট অনুযায়ী প্যারামিটার গঠন
         const queryParams = new URLSearchParams();
         if (agodaId) {
           queryParams.set('id', agodaId);
@@ -513,17 +507,11 @@ function getCardImage(url: string) {
 
         try {
           const res = await fetch(requestUrl, { signal });
-          if (!res.ok) {
-            console.warn(`[PopularHotels Live Rate] Worker status ${res.status} for ${hotelName || agodaId}`);
-            return;
-          }
+          if (!res.ok) return;
           
           const json = await res.json();
-          console.log(`[PopularHotels Live Rate Response] for ${hotelName || agodaId}:`, json);
-
           let normalizedRates = null;
 
-          // ১. আগোডার অফিশিয়াল রেসপন্স ফরম্যাট (PDF Page 6 & 8)
           if (json?.results && Array.isArray(json.results) && json.results.length > 0) {
             const item = json.results[0];
             const curSym = item.currency === 'USD' ? '$' : (item.currency === 'BDT' ? '৳' : (item.currency || '$'));
@@ -536,13 +524,9 @@ function getCardImage(url: string) {
               originalPrice: origVal && origVal > (rateVal || 0) ? `${curSym}${origVal}` : '',
               discountText: discPct
             };
-          }
-          // ২. কাস্টম ওয়ার্কার র‍্যাপার ফরম্যাট
-          else if (json?.rates) {
+          } else if (json?.rates) {
             normalizedRates = json.rates;
-          }
-          // ৩. ফ্ল্যাট অবজেক্ট ফরম্যাট
-          else if (json?.dailyRate || json?.startingPrice) {
+          } else if (json?.dailyRate || json?.startingPrice) {
             normalizedRates = {
               startingPrice: json.startingPrice || `$${Math.round(Number(json.dailyRate))}`,
               originalPrice: json.originalPrice || (json.crossedOutRate ? `$${Math.round(Number(json.crossedOutRate))}` : ''),
@@ -553,7 +537,6 @@ function getCardImage(url: string) {
           if (normalizedRates && normalizedRates.startingPrice) {
             applyCardRate(card, normalizedRates);
 
-            // ক্যাশে রাখা
             try {
               sessionStorage.setItem(cacheKey, JSON.stringify({
                 timestamp: Date.now(),
@@ -562,13 +545,10 @@ function getCardImage(url: string) {
             } catch (_) {}
           }
         } catch (err) {
-          if (err.name !== 'AbortError') {
-            console.error(`[PopularHotels Fetch Error]`, err);
-          }
+          // Silent catch
         }
       };
 
-      // স্ক্রল বা পেজ লোডের সাথে সাথে ফেচ চালানো
       if (cards.length > 0) {
         let isSynced = false;
         const triggerSync = () => {
