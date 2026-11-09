@@ -3,9 +3,8 @@
 # ==============================================================================
 - label: "2. ABOUT HOTEL & LIVE RATES"
   name: "about_notice"
-  widget: "hidden"
-  default: "about_section_header"
-  hint: "Controls overview description, starting price, and live booking channels (Agoda, Booking, Direct, etc.)."
+  widget: "instructions"
+  description: "Controls overview description, starting price, Agoda live sync, and all booking channels."
   required: false
 
 # --- Overview Text ---
@@ -17,7 +16,35 @@
 - label: "Starting Price Text (e.g. $120 / night or ৳ 18,500)"
   name: "price"
   widget: "string"
-  default: "৳ 18,500 / night"
+  default: "$120"
+  hint: "Default starting price shown when live rate is loading or offline."
+
+# --- AGODA LIVE SYNC CONTROLS ---
+- label: "Agoda Hotel ID (For Instant Live Price Sync)"
+  name: "agoda_id"
+  widget: "string"
+  required: false
+  hint: "Numeric hotel ID from Agoda URL (e.g. 348841). If empty, auto-matches by hotel title."
+
+- label: "Direct Agoda Affiliate Link (Optional)"
+  name: "agoda_url"
+  widget: "string"
+  required: false
+  hint: "Paste direct Agoda affiliate link here if you don't want the auto-generated link."
+
+- label: "Custom Agoda Partner CID (Optional)"
+  name: "agoda_cid"
+  widget: "string"
+  required: false
+  hint: "Your custom Agoda affiliate CID for tracking bookings."
+
+# --- DEALS SECTION TITLES ---
+- label: "Deals Card Section Title"
+  name: "deals_title"
+  widget: "string"
+  default: "Deals"
+  required: false
+  hint: "Title shown above the rates table (e.g. Deals, Room Rates & Deals)."
 
 # --- 100% CUSTOM BOOKING CHANNELS LIST (DRAG & DROP SERIAL) ---
 - label: "Booking Channels List (Full Admin Control & Drag-and-Drop Order)"
@@ -25,9 +52,9 @@
   widget: "list"
   required: false
   summary: "{{fields.provider_name}} - {{fields.price}}"
-  hint: "Add, reorder (drag & drop serial), set custom SVG logo, price, badges, and button text!"
+  hint: "Add, reorder (drag & drop serial), set custom logo, price, badges, notes, and button text!"
   fields:
-    - label: "Channel Name / Title (e.g. Agoda, Official Site, WhatsApp Booking)"
+    - label: "Channel Name / Title (e.g. Agoda, Official Site, Booking.com)"
       name: "provider_name"
       widget: "string"
 
@@ -42,21 +69,33 @@
       widget: "boolean"
       default: true
 
-    - label: "Button Action Text (e.g. Book Now ➔, View Deal, Chat on WhatsApp)"
+    - label: "Special Feature / Note (e.g. Free cancellation, Breakfast included)"
+      name: "note"
+      widget: "string"
+      required: false
+      hint: "Short highlight displayed next to the logo on desktop (e.g. 'Free cancellation')."
+
+    - label: "Button Action Text (e.g. View deal, Book Now ➔, Chat on WhatsApp)"
       name: "button_text"
       widget: "string"
-      default: "Book Now ➔"
+      default: "View deal"
 
     - label: "Destination URL Link or Phone Number"
       name: "button_url"
       widget: "string"
-      hint: "e.g. https://www.agoda.com/... or phone number 01700000000"
+      hint: "e.g. https://www.booking.com/... or phone number 01700000000"
 
-    - label: "Top Badge Tag (Optional - e.g. Recommended, Official Site, Best Rate)"
+    - label: "Top Badge Tag (Optional)"
       name: "badge"
       widget: "string"
       required: false
       hint: "e.g. 'Recommended', 'Official Site', 'Best Rate'"
+
+    - label: "Channel Image Logo URL (Optional)"
+      name: "logo_url"
+      widget: "image"
+      required: false
+      hint: "Upload or select a custom brand logo image (overrides preset)."
 
     - label: "Preset Logo Icon"
       name: "icon_preset"
@@ -66,6 +105,7 @@
       options:
         - { label: "🔴 Agoda", value: "agoda" }
         - { label: "🔵 Booking.com", value: "booking" }
+        - { label: "🟠 Trip.com", value: "trip" }
         - { label: "🟢 TripAdvisor", value: "tripadvisor" }
         - { label: "🟡 Expedia", value: "expedia" }
         - { label: "🏨 Direct Hotel / Building", value: "direct" }
@@ -94,14 +134,19 @@
   widget: "string"
   required: false
 
+- label: "Rates Disclaimer Note (Bottom text)"
+  name: "rates_disclaimer"
+  widget: "text"
+  required: false
+  default: "Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you."
+
 # ==============================================================================
-# 3. HOTEL POLICIES & HOUSE RULES (PROFESSIONAL NO-EMOJI PATTERN)
+# 3. HOTEL POLICIES & HOUSE RULES
 # ==============================================================================
 - label: "3. HOTEL POLICIES & HOUSE RULES"
   name: "policies_notice"
-  widget: "hidden"
-  default: "policies_section_header"
-  hint: "Configure Booking.com style policies: Check-in/out, Child & Bed tables, and Payment method logos."
+  widget: "instructions"
+  description: "Configure Booking.com style policies: Check-in/out, Child & Bed tables, and Payment method logos."
   required: false
 
 - label: "Enable Hotel Policies Section?"
@@ -126,9 +171,8 @@
   name: "cancellation_policy"
   widget: "markdown"
   default: "Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection."
-  hint: "You can write links here like [conditions](#rates-card)."
 
-# --- CHILDREN & BEDS STRUCTURED BOOKING.COM WIDGET ---
+# --- CHILDREN & BEDS ---
 - label: "Child Policies General Rules"
   name: "child_policy_text"
   widget: "text"
@@ -136,32 +180,25 @@
     Children of all ages are welcome.
     Children 9 and above will be charged as adults at this property.
     To see correct prices and occupancy info, add the number and ages of children in your group to your search.
-  hint: "General text about children staying at the property."
 
 - label: "Cribs & Extra Beds Table (Structured List)"
   name: "extra_beds"
   widget: "list"
   required: false
   summary: "{{fields.age}}: {{fields.type}} ({{fields.price}})"
-  hint: "Click '+ Add' to add crib/bed age tiers (renders the exact Booking.com bordered table)!"
   fields:
     - label: "Age Tier / Range"
       name: "age"
       widget: "string"
       default: "1 - 6 years"
-      hint: "e.g. '1 - 6 years' or '12+ years' or '0 - 2 years'"
-
     - label: "Bed Type"
       name: "type"
       widget: "string"
       default: "Crib upon request"
-      hint: "e.g. 'Crib upon request' or 'Extra bed upon request'"
-
     - label: "Price / Charge"
       name: "price"
       widget: "string"
       default: "Free"
-      hint: "e.g. 'Free' or 'US$25 per person, per night' or '৳ 2,500'"
 
 - label: "Cribs & Extra Beds Disclaimer Notes"
   name: "extra_beds_notes"
@@ -170,7 +207,6 @@
     Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.
     The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.
     All cribs and extra beds are subject to availability.
-  hint: "Disclaimer text below the crib table."
 
 - label: "Minimum Check-in Age"
   name: "age_restriction"
@@ -182,8 +218,8 @@
   widget: "string"
   default: "Pets are not allowed."
 
-# --- PAYMENT METHOD LOGOS (MULTI-SELECT WITHOUT EMOJIS) ---
-- label: "Accepted Payment Methods (Auto Displays Official Vector Logos)"
+# --- PAYMENT METHOD LOGOS ---
+- label: "Accepted Payment Methods"
   name: "payment_methods"
   widget: "select"
   multiple: true
