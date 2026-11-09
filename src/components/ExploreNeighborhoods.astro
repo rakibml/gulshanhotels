@@ -1,26 +1,44 @@
 ---
-// src/components/LatestBlogs.astro
+// src/components/LatestBlogs.astro (Bulletproof Loader with Direct Glob Fallback)
 import { getCollection } from 'astro:content';
 
 let allPosts: any[] = [];
+
+// ১. প্রথমে Astro Content Layer দিয়ে চেষ্টা করবে
 try {
   const posts = await getCollection('posts');
-  allPosts = posts.map(p => ({
-    slug: (p.data?.slug || p.slug || p.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
-    data: p.data || {}
-  }));
+  if (Array.isArray(posts) && posts.length > 0) {
+    allPosts = posts.map((p: any) => ({
+      slug: String(p.data?.slug || p.slug || p.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
+      data: p.data || {}
+    }));
+  }
 } catch (e) {
   allPosts = [];
 }
 
+// ২. যদি কোনো কারণে getCollection না পায়, তবে সরাসরি ফাইল থেকে নিয়ে আসবে (১০০% গ্যারান্টিড)
+if (allPosts.length === 0) {
+  try {
+    const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../content/posts/*.{md,mdx}'], { eager: true });
+    allPosts = Object.entries(rawGlob).map(([filePath, item]: [string, any]) => ({
+      slug: String(item?.frontmatter?.slug || filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')).toLowerCase().trim(),
+      data: item?.frontmatter || item?.data || {}
+    }));
+  } catch (err) {
+    allPosts = [];
+  }
+}
+
 // তারিখ অনুযায়ী সাজিয়ে লেটেস্ট ৩টি পোস্ট নেওয়া
 const latestPosts = allPosts
+  .filter(p => (p.data?.title || p.slug))
   .sort((a, b) => new Date(b.data?.date || 0).getTime() - new Date(a.data?.date || 0).getTime())
   .slice(0, 3);
 ---
 
 {latestPosts.length > 0 && (
-  <section class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
+  <section id="latest-travel-guides" class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-100 pb-5 mb-8">
       <div>
         <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
@@ -37,40 +55,50 @@ const latestPosts = allPosts
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {latestPosts.map((post) => (
-        <article class="group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
-          <div>
-            <a href={`/blog/${post.slug}`} class="block relative aspect-[16/10] overflow-hidden bg-slate-900">
-              <img 
-                src={post.data?.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75"} 
-                alt={post.data?.title}
-                loading="lazy" 
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-              />
-              <span class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md">
-                {post.data?.category || "Guide"}
-              </span>
-            </a>
+      {latestPosts.map((post) => {
+        const pData = post.data || {};
+        const pSlug = post.slug;
+        const pTitle = pData.title || "Gulshan Travel Guide";
+        const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
 
-            <div class="p-5 space-y-2">
-              <span class="text-[11px] font-semibold text-slate-400 block">{post.data?.date || "Recent"} • {post.data?.readTime || "4 min read"}</span>
-              <h3 class="font-serif text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
-                <a href={`/blog/${post.slug}`}>{post.data?.title}</a>
-              </h3>
-              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                {post.data?.description}
-              </p>
+        return (
+          <article class="group bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
+            <div>
+              <a href={`/blog/${pSlug}/`} class="block relative aspect-[16/10] overflow-hidden bg-slate-900">
+                <img 
+                  src={pImg} 
+                  alt={pTitle}
+                  loading="lazy" 
+                  decoding="async"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
+                <span class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md">
+                  {pData.category || "Guide"}
+                </span>
+              </a>
+
+              <div class="p-5 space-y-2">
+                <span class="text-[11px] font-semibold text-slate-400 block">
+                  {pData.date || "Recent"} • {pData.readTime || "4 min read"}
+                </span>
+                <h3 class="font-serif text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
+                  <a href={`/blog/${pSlug}/`}>{pTitle}</a>
+                </h3>
+                <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                  {pData.description || "In-depth guide and local advice for your stay in Gulshan, Dhaka."}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div class="p-5 pt-0">
-            <a href={`/blog/${post.slug}`} class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 group-hover:underline">
-              <span>Read Full Article</span>
-              <span>➔</span>
-            </a>
-          </div>
-        </article>
-      ))}
+            <div class="p-5 pt-0">
+              <a href={`/blog/${pSlug}/`} class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 group-hover:underline">
+                <span>Read Full Article</span>
+                <span>➔</span>
+              </a>
+            </div>
+          </article>
+        );
+      })}
     </div>
   </section>
 )}
