@@ -24,19 +24,26 @@ popular: true
 sponsored: false
 spotlight_desc: ''
 about_notice: ''
+enable_view_prices: true
 price: $165
+rates_title: Deals & Rates
+rates_live_badge: ''
+rates_price_label: Nightly price
+rates_disclaimer: Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you.
+call_button_text: ''
+whatsapp_button_text: ''
+whatsapp_message: hi i want to book a room at amari dhaka hotel (From Gulshanhotels.com)
 agoda_id: '295767'
 agoda_url: ''
 agoda_cid: ''
-deals_title: Deals
 booking_channels:
   - provider_name: Whatsapp
     price: ''
     show_price: false
     note: free cancellation
+    badge: For Best Rate
     button_text: Contact now ➔
     button_url: '01996322761'
-    badge: For Best Rate
     logo_url: https://media.gulshanhotels.com/vecteezy_whatsapp-logo-png-whatsapp-logo-transparent-png-whatsapp_23986631.png
     icon_preset: ''
     custom_svg: |-
@@ -47,7 +54,6 @@ booking_channels:
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
 phone: ''
-rates_disclaimer: Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you.
 policies_notice: ''
 enable_policies: true
 check_in: Available 24 hours
@@ -183,8 +189,8 @@ faqs:
     answer: At Amari Dhaka, check-in is available 24 hours starting from 14:00 (2:00 PM), and standard check-out time is until 12:00 (12:00 PM)
   - question: How far is Amari Dhaka from Hazrat Shahjalal International Airport?
     answer: Amari Dhaka is located approximately 8 kilometers from Hazrat Shahjalal International Airport (DAC), which takes around 15 to 25 minutes via the Dhaka Elevated Expressway.
+deals_title: Deals
 enable_official_site: true
-enable_view_prices: true
 policies:
   - custom_svg: ''
     label: Check-in
