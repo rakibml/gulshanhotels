@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelRates.astro — TripAdvisor-style "Deals" card
-// 100% Dynamic — Zero Hardcoded Texts (Fully Controlled via CMS)
+// Fully Compliant with Agoda Affiliate Long Tail Search API & 100% Dynamic
 interface Props {
   hotel: any;
 }
@@ -13,7 +13,9 @@ const showRates = data.enable_view_prices !== false;
 const hotelTitle = String(data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
-const agodaId = String(data.agoda_id || data.agodaId || "").trim();
+
+// সব ধরনের ফিল্ড ফরম্যাট থেকে Agoda ID নেওয়ার সুরক্ষা
+const agodaId = String(data.agoda_id || data.agodaId || data.agoda_hotel_id || "").trim();
 const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || "").trim();
 const customAgodaUrl = String(data.agoda_url || "").trim();
 
@@ -31,7 +33,6 @@ const waMessage = customWaMessage || ('Hi! I want to book a room at ' + hotelTit
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
 
-// 01XXXXXXXXX / 1XXXXXXXXX / 8801XXXXXXXXX / +8801XXXXXXXXX -> 8801XXXXXXXXX
 function normalizeBdWhatsapp(raw: string): string {
   const d = String(raw || '').replace(/[^0-9]/g, '');
   if (!d) return '';
@@ -107,10 +108,9 @@ function cleanSvgSSR(svg: string): string {
     .replace(/javascript:/gi, '');
 }
 
-// ---------- Deal rows ----------
 type Row = {
   name: string;
-  kind: string; // agoda | booking | trip | tripadvisor | expedia | whatsapp | phone | direct | other
+  kind: string;
   logoUrl: string;
   customSvg: string;
   note: string;
@@ -171,7 +171,6 @@ const baseRows: Row[] = customChannels
   })
   .filter((r) => r.url !== "#");
 
-// Agoda fallback link builder
 function buildAgodaFallback(id: string, customUrl: string, title: string, cid: string): string {
   if (customUrl && /^https?:\/\//i.test(customUrl)) return customUrl;
   if (id) {
@@ -185,7 +184,7 @@ function buildAgodaFallback(id: string, customUrl: string, title: string, cid: s
 
 const agodaFallbackUrl = buildAgodaFallback(agodaId, customAgodaUrl, hotelTitle, agodaCid);
 
-// শুধুমাত্র যদি Agoda ID অথবা Agoda URL অ্যাডমিনে দেওয়া থাকে এবং আলাদা রো না থাকে, তবেই Agoda রো থাকবে
+// Agoda Row যোগ করা (যদি Agoda ID বা লিঙ্ক দেওয়া থাকে)
 const shouldShowAgoda = Boolean(agodaId || customAgodaUrl);
 if (shouldShowAgoda && !baseRows.some((r) => r.isAgoda)) {
   baseRows.push({
@@ -206,7 +205,6 @@ if (shouldShowAgoda && !baseRows.some((r) => r.isAgoda)) {
   });
 }
 
-// দাম অনুযায়ী sort
 const rows: Row[] = baseRows
   .map((r, i) => ({ r, i }))
   .sort((a, b) => {
@@ -242,7 +240,7 @@ const rows: Row[] = baseRows
       )}
     </div>
 
-    <!-- ===== Controls: Check In | Check Out | Rooms/Guests ===== -->
+    <!-- Controls: Check In | Check Out | Rooms/Guests -->
     <div class="relative">
       <div class="grid gap-2 sm:grid-cols-[1.7fr_1fr]">
 
@@ -387,7 +385,7 @@ const rows: Row[] = baseRows
       </div>
     )}
 
-    <!-- ===== Deals list ===== -->
+    <!-- Deals list -->
     <ul id="dealsList" class="flex flex-col gap-2.5 list-none p-0 m-0">
       {rows.map((r) => {
         const isExternal = /^https?:\/\//i.test(r.url);
@@ -487,7 +485,7 @@ const rows: Row[] = baseRows
       })}
     </ul>
 
-    <!-- Direct Reservation Options (WhatsApp & Phone) -->
+    <!-- Direct Reservation Options -->
     {hasContact && (
       <div class={`grid gap-2 mt-3 ${cleanPhone && cleanWhatsapp ? 'grid-cols-2' : 'grid-cols-1'}`}>
         {cleanPhone && (
@@ -894,6 +892,7 @@ const rows: Row[] = baseRows
 
     async function fetchLiveRates() {
       if (!agodaRow) return;
+
       const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${children}_${rooms}_${apiCurrency}`;
       if (ratesMemoryCache.has(cacheKey)) {
         applyRates(ratesMemoryCache.get(cacheKey));
@@ -907,23 +906,79 @@ const rows: Row[] = baseRows
 
       setLoading(true);
 
-      const queryParam = agodaId
-        ? `id=${encodeURIComponent(agodaId)}`
-        : `hotel=${encodeURIComponent(hotelSlug || hotelName)}`;
-      const apiUrl =
-        `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}` +
-        `&adults=${adults}&children=${children}&rooms=${rooms}&currency=${encodeURIComponent(apiCurrency)}`;
+      // আগোডার পিডিএফ অনুয়ায়ী সব ভ্যারিয়ান্ট পাঠানো হলো
+      const queryParams = new URLSearchParams();
+      if (agodaId) {
+        queryParams.set('id', agodaId);
+        queryParams.set('hotelId', agodaId);
+      } else {
+        queryParams.set('hotel', hotelSlug || hotelName);
+      }
+      queryParams.set('checkIn', checkIn);
+      queryParams.set('checkInDate', checkIn);
+      queryParams.set('checkOut', checkOut);
+      queryParams.set('checkOutDate', checkOut);
+      queryParams.set('adults', String(adults));
+      queryParams.set('numberOfAdult', String(adults));
+      queryParams.set('children', String(children));
+      queryParams.set('numberOfChildren', String(children));
+      queryParams.set('rooms', String(rooms));
+      queryParams.set('currency', apiCurrency);
+
+      const apiUrl = `${WORKER_ENDPOINT}?${queryParams.toString()}`;
 
       try {
         const res = await fetch(apiUrl, { signal });
-        if (!res.ok) return;
+        if (!res.ok) {
+          console.warn(`[HotelRates] Worker returned status ${res.status}`);
+          return;
+        }
+
         const json = await res.json();
-        if (json && json.success && json.rates) {
-          ratesMemoryCache.set(cacheKey, json.rates);
-          applyRates(json.rates);
+        console.log('[HotelRates API Response]', json);
+
+        // Agoda Official PDF Schema অথবা Custom Wrapper উভয়ই হ্যান্ডেল করার অ্যাডাপ্টার
+        let normalizedRates: any = null;
+
+        // ১. আগোডার অফিশিয়াল রেসপন্স ফরম্যাট (PDF Page 6 & 8)
+        if (json?.results && Array.isArray(json.results) && json.results.length > 0) {
+          const item = json.results[0];
+          const curSym = item.currency === 'USD' ? '$' : (item.currency === 'BDT' ? '৳' : (item.currency || '$'));
+          const rateVal = item.dailyRate ? Math.round(Number(item.dailyRate)) : null;
+          const origVal = item.crossedOutRate ? Math.round(Number(item.crossedOutRate)) : null;
+          const discPct = item.discountPercentage && Number(item.discountPercentage) > 0 ? `${Math.round(item.discountPercentage)}% OFF` : '';
+
+          normalizedRates = {
+            startingPrice: rateVal ? `${curSym}${rateVal}` : '',
+            originalPrice: origVal && origVal > (rateVal || 0) ? `${curSym}${origVal}` : '',
+            discountText: discPct,
+            landingUrl: item.landingURL || '',
+            note: item.includeBreakfast ? 'Breakfast included' : (item.freeWifi ? 'Free Wi-Fi' : '')
+          };
+        }
+        // ২. কাস্টম ওয়ার্কার র‍্যাপার ফরম্যাট
+        else if (json?.rates) {
+          normalizedRates = json.rates;
+        }
+        // ৩. সরাসরি ফ্ল্যাট অবজেক্ট ফরম্যাট
+        else if (json?.dailyRate || json?.startingPrice) {
+          normalizedRates = {
+            startingPrice: json.startingPrice || `$${Math.round(Number(json.dailyRate))}`,
+            originalPrice: json.originalPrice || (json.crossedOutRate ? `$${Math.round(Number(json.crossedOutRate))}` : ''),
+            discountText: json.discountText || (json.discountPercentage ? `${json.discountPercentage}% OFF` : ''),
+            landingUrl: json.landingURL || json.landingUrl || ''
+          };
+        } else if (json?.error) {
+          console.warn('[Agoda API Error Response]', json.error);
+        }
+
+        if (normalizedRates && normalizedRates.startingPrice) {
+          ratesMemoryCache.set(cacheKey, normalizedRates);
+          applyRates(normalizedRates);
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
+        console.error('[HotelRates Fetch Error]', e);
       } finally {
         if (!signal.aborted) setLoading(false);
       }
@@ -959,14 +1014,10 @@ const rows: Row[] = baseRows
       }
       if (noteEl && rates?.note) noteEl.textContent = String(rates.note);
 
-      const list: any[] = Array.isArray(rates?.channelsList) ? rates.channelsList : [];
-      const agodaDeal = list.find((c) => {
-        const name = String(c?.provider_name || c?.providerName || c?.name || '');
-        const url = String(c?.button_url || '');
-        return /agoda/i.test(name) || /agoda\.com/i.test(url);
-      });
-      if (agodaDeal?.button_url && agodaDeal.button_url !== '#') {
-        agodaBaseUrl = String(agodaDeal.button_url);
+      // আগোডার পিডিএফ থেকে পাওয়া লাইভ বুকিং লিঙ্ক সেট করা
+      const liveLandingUrl = rates?.landingUrl || rates?.landingURL;
+      if (liveLandingUrl && liveLandingUrl !== '#') {
+        agodaBaseUrl = String(liveLandingUrl);
       }
       
       updateAgodaLink();
