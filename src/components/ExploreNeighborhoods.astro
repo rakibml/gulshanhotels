@@ -1,245 +1,76 @@
 ---
-// src/components/ExploreNeighborhoods.astro
-// Dynamic Area Guides & Neighborhood Directory
+// src/components/LatestBlogs.astro
 import { getCollection } from 'astro:content';
 
-interface Props {
-  title?: string;
-  subtitle?: string;
-}
-
-const {
-  title = "Explore Neighborhoods in Gulshan",
-  subtitle = "Curated area guides for business hubs, diplomatic zones, and transit routes."
-} = Astro.props;
-
-const isProd = import.meta.env.PROD;
-
-// ১. ড্রাফট ফিল্টারসহ সব লাইভ হোটেল লোডার (আসল হোটেল সংখ্যা গোনার জন্য)
-let allHotels: any[] = [];
+let allPosts: any[] = [];
 try {
-  const hotelCol = await getCollection('hotels', ({ data }) => {
-    return isProd ? data?.draft !== true : true;
-  });
-  if (Array.isArray(hotelCol) && hotelCol.length > 0) {
-    allHotels = hotelCol.map(h => ({
-      slug: (h.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim(),
-      data: h.data || {}
-    }));
-  }
+  const posts = await getCollection('posts');
+  allPosts = posts.map(p => ({
+    slug: (p.data?.slug || p.slug || p.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase(),
+    data: p.data || {}
+  }));
 } catch (e) {
-  allHotels = [];
+  allPosts = [];
 }
 
-// কালেকশন খালি থাকলে বা এরর হলে গ্লোব ফলব্যাক
-if (!allHotels || allHotels.length === 0) {
-  try {
-    const rawGlobHotels = import.meta.glob(['/src/content/hotels/*.{md,mdx}', '../content/hotels/*.{md,mdx}'], { eager: true });
-    allHotels = Object.entries(rawGlobHotels)
-      .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
-      .map(([filePath, item]: [string, any]) => ({
-        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
-        data: item?.frontmatter || item?.data || {}
-      }));
-  } catch (err) {
-    allHotels = [];
-  }
-}
-
-// ২. ড্রাফট ফিল্টারসহ ডেস্টিনেশন / এরিয়া গাইড লোডার
-let destinations: any[] = [];
-try {
-  const destCol = await (getCollection as any)('destinations', ({ data }: any) => {
-    return isProd ? data?.draft !== true : true;
-  });
-  if (Array.isArray(destCol) && destCol.length > 0) {
-    destinations = destCol;
-  }
-} catch (e) {
-  destinations = [];
-}
-
-if (!destinations || destinations.length === 0) {
-  try {
-    const rawGlobDest = import.meta.glob(['/src/content/destinations/*.{md,mdx}', '../content/destinations/*.{md,mdx}'], { eager: true });
-    destinations = Object.entries(rawGlobDest)
-      .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
-      .map(([filePath, item]: [string, any]) => ({
-        slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase().trim(),
-        data: item?.frontmatter || item?.data || {}
-      }));
-  } catch (e) {
-    destinations = [];
-  }
-}
-
-// ইমেজ অপ্টিমাইজেশন হেল্পার (Core Web Vitals ও ফাস্ট লোডিংয়ের জন্য)
-function getOptimizedThumbnail(url: any): string {
-  if (!url || typeof url !== 'string') return '/images/hotel-placeholder.webp';
-  const cleanUrl = url.trim();
-  if (!cleanUrl) return '/images/hotel-placeholder.webp';
-  if (cleanUrl.startsWith('https://media.gulshanhotels.com/')) {
-    const path = cleanUrl.replace('https://media.gulshanhotels.com/', '');
-    return `https://media.gulshanhotels.com/cdn-cgi/image/width=640,quality=75,format=auto,onerror=redirect/${path}`;
-  }
-  if (cleanUrl.includes('unsplash.com')) {
-    const base = cleanUrl.split('?')[0];
-    return `${base}?auto=format&fit=crop&w=640&q=75&fm=webp`;
-  }
-  return cleanUrl;
-}
-
-const normalizeStr = (v: any) =>
-  String(v || '')
-    .toLowerCase()
-    .replace(/[-_]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-// ৩. হোটেল সংখ্যা গণনা (শুধুমাত্র লোকেশনে নির্ভুল ম্যাচ)
-function countRealHotelsForNeighborhood(dest: any): number {
-  const dData = dest?.data || {};
-  const manualList: any[] = Array.isArray(dData.selected_hotels) ? dData.selected_hotels : [];
-
-  if (manualList.length > 0) {
-    const cleanManualSlugs = manualList.map((s: any) =>
-      String(s || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim()
-    );
-    return allHotels.filter(h => cleanManualSlugs.includes(h.slug)).length;
-  }
-
-  const rawKey = String(dData.filter_keyword || dest?.slug || '')
-    .replace(/^(luxury|best|top|budget|cheap)-/i, '')
-    .replace(/^hotels?-(in|near)-/i, '')
-    .replace(/^hotels?-/i, '')
-    .replace(/-hotels?$/i, '');
-
-  const normKey = normalizeStr(rawKey);
-  if (!normKey) return 0; // কীওয়ার্ড না থাকলে ০, ভুল কাউন্ট এড়ানো
-
-  // কাউন্ট ম্যাচিং শুধুমাত্র লোকেশন ফিল্ডে (ব্রড টাইটেল বা ক্যাটাগরি ম্যাচ বাদ)
-  return allHotels.filter(h => {
-    const loc = normalizeStr(h.data?.location || h.data?.address);
-    return loc.includes(normKey);
-  }).length;
-}
-
-// ৪. সিএমএস অনুযায়ী ডেটা প্রস্তুত
-const activeNeighborhoods = destinations.map((dest: any) => {
-  const dData = dest?.data || {};
-  const rawSlug = String(dest.slug || dData.slug || dest.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase().trim() || "";
-  const pageTitle = String(dData.title || "").trim();
-  const subtitle = String(dData.location_subtitle || "").trim();
-  const description = String(dData.description || "").trim();
-  const rawImage = dData.hero_image || dData.image || "";
-  const heroImage = getOptimizedThumbnail(rawImage);
-  
-  const realCount = countRealHotelsForNeighborhood(dest);
-
-  return {
-    title: pageTitle,
-    slug: rawSlug,
-    subtitle,
-    description,
-    image: heroImage,
-    count: realCount,
-    url: `/${rawSlug}/`
-  };
-}).filter(n => n.slug !== "" && n.title !== "");
-
-const hasNeighborhoods = activeNeighborhoods.length > 0;
+// তারিখ অনুযায়ী সাজিয়ে লেটেস্ট ৩টি পোস্ট নেওয়া
+const latestPosts = allPosts
+  .sort((a, b) => new Date(b.data?.date || 0).getTime() - new Date(a.data?.date || 0).getTime())
+  .slice(0, 3);
 ---
 
-{hasNeighborhoods && (
-  <section 
-    id="explore-neighborhoods" 
-    class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 border-b border-slate-200 text-slate-900 scroll-mt-14"
-    aria-labelledby="neighborhoods-section-title"
-  >
-    <div class="max-w-7xl mx-auto space-y-8">
-      
-      <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-left border-b border-slate-100 pb-5">
-        <div class="space-y-1">
-          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
-            Area Guides
-          </span>
-          <h2 id="neighborhoods-section-title" class="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight">
-            {title}
-          </h2>
-        </div>
-        <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-md">
-          {subtitle}
-        </p>
+{latestPosts.length > 0 && (
+  <section class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-100 pb-5 mb-8">
+      <div>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
+          Editorial Travel Hub
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight mt-1">
+          Latest Travel Guides & Insights
+        </h2>
       </div>
+      <a href="/blog" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition">
+        <span>View all guides</span>
+        <span>➔</span>
+      </a>
+    </div>
 
-      <!-- DYNAMIC CMS NEIGHBORHOOD CARDS GRID -->
-      <div class={`grid gap-6 text-left ${activeNeighborhoods.length === 1 ? 'grid-cols-1 max-w-2xl' : activeNeighborhoods.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
-        {activeNeighborhoods.map((item) => (
-          <div class="group bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-600/40 overflow-hidden shadow-2xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-            
-            <div>
-              <!-- Thumbnail Banner (tabindex="-1" aria-hidden="true" to prevent redundant screen reader tab stop) -->
-              <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-900">
-                <a href={item.url} tabindex="-1" aria-hidden="true" class="block w-full h-full">
-                  <img 
-                    src={item.image} 
-                    alt="" 
-                    width="600"
-                    height="375"
-                    loading="lazy" 
-                    decoding="async" 
-                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-                  />
-                </a>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {latestPosts.map((post) => (
+        <article class="group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <a href={`/blog/${post.slug}`} class="block relative aspect-[16/10] overflow-hidden bg-slate-900">
+              <img 
+                src={post.data?.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75"} 
+                alt={post.data?.title}
+                loading="lazy" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+              />
+              <span class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md">
+                {post.data?.category || "Guide"}
+              </span>
+            </a>
 
-                <!-- Fact-based Real Count Badge (No unsupported "Verified" claim) -->
-                <div class="absolute top-3 left-3 bg-[#0d3b23]/95 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-white/10 shadow-sm flex items-center gap-1.5 pointer-events-none">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400" aria-hidden="true"></span>
-                  <span>{item.count > 0 ? `${item.count} ${item.count === 1 ? 'Hotel' : 'Hotels'} listed` : 'Area Guide'}</span>
-                </div>
-              </div>
-
-              <!-- Details Content -->
-              <div class="p-5 sm:p-6 space-y-2">
-                {item.subtitle && (
-                  <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider line-clamp-1">
-                    {item.subtitle}
-                  </p>
-                )}
-
-                <h3 class="font-serif text-xl sm:text-2xl font-black text-slate-900 group-hover:text-emerald-800 transition-colors leading-tight">
-                  <a href={item.url} class="hover:underline">
-                    {item.title}
-                  </a>
-                </h3>
-
-                {item.description && (
-                  <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed line-clamp-2 pt-0.5">
-                    {item.description}
-                  </p>
-                )}
-              </div>
+            <div class="p-5 space-y-2">
+              <span class="text-[11px] font-semibold text-slate-400 block">{post.data?.date || "Recent"} • {post.data?.readTime || "4 min read"}</span>
+              <h3 class="font-serif text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
+                <a href={`/blog/${post.slug}`}>{post.data?.title}</a>
+              </h3>
+              <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                {post.data?.description}
+              </p>
             </div>
-
-            <!-- Footer Action Button (Accessible Canonical Link) -->
-            <div class="p-5 sm:p-6 pt-0">
-              <a 
-                href={item.url} 
-                class="w-full inline-flex items-center justify-between bg-slate-50 hover:bg-[#0d3b23] text-slate-800 hover:text-white font-bold text-xs px-4 py-3 rounded-xl border border-slate-200 hover:border-transparent transition-all duration-200 shadow-2xs group/btn active:scale-98"
-                aria-label={`View area guide and hotels for ${item.title}`}
-              >
-                <span>Explore Stays & Area Guide</span>
-                <svg aria-hidden="true" class="w-3.5 h-3.5 stroke-current fill-none stroke-[2.5] transform group-hover/btn:translate-x-1 transition-transform" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                </svg>
-              </a>
-            </div>
-
           </div>
-        ))}
-      </div>
 
+          <div class="p-5 pt-0">
+            <a href={`/blog/${post.slug}`} class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 group-hover:underline">
+              <span>Read Full Article</span>
+              <span>➔</span>
+            </a>
+          </div>
+        </article>
+      ))}
     </div>
   </section>
 )}
