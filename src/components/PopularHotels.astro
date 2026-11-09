@@ -463,67 +463,51 @@ function getCardImage(url: string) {
         }, 120);
       };
 
-      const syncHotelLiveRate = async (card) => {
-        const slug = card.getAttribute('data-slug') || '';
-        const hotelName = card.getAttribute('data-hotel-name') || '';
-        const agodaId = card.getAttribute('data-agoda-id') || '';
+     // ঢাকা টাইম অনুযায়ী আজকের এবং আগামীকালের তারিখ তৈরির হেল্পার
+const getDhakaDates = () => {
+  const now = new Date();
+  const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const dhaka = new Date(utcMillis + (6 * 3600000));
+  
+  const d1 = dhaka.toISOString().split("T")[0];
+  dhaka.setDate(dhaka.getDate() + 1);
+  const d2 = dhaka.toISOString().split("T")[0];
+  return { checkIn: d1, checkOut: d2 };
+};
 
-        const cacheKey = CACHE_PREFIX + (agodaId || slug || hotelName);
+const syncHotelLiveRate = async (card) => {
+  const slug = (card.getAttribute('data-slug') || '').trim();
+  const hotelName = (card.getAttribute('data-hotel-name') || '').trim();
+  const agodaId = (card.getAttribute('data-agoda-id') || '').trim();
 
-        // ব্রাউজার ক্যাশ চেক (১০ মিনিটের মধ্যে থাকলে API কল বন্ধ)
-        try {
-          const cached = sessionStorage.getItem(cacheKey);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.rates) {
-              applyCardRate(card, parsed.rates);
-              return;
-            }
-          }
-        } catch (_) {}
+  // যদি আইডি এবং নাম কিছুই না থাকে
+  if (!agodaId && !slug && !hotelName) return;
 
-        const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
-        const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
+  const { checkIn, checkOut } = getDhakaDates();
+  const queryParam = agodaId ? `id=${encodeURIComponent(agodaId)}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
+  
+  // তারিখ ও কারেন্সি সহ ফুল প্যারামিটার
+  const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
 
-        try {
-          const res = await fetch(requestUrl, { signal });
-          if (!res.ok) return;
-          const json = await res.json();
-          if (json && json.success && json.rates && json.rates.startingPrice) {
-            applyCardRate(card, json.rates);
+  try {
+    const res = await fetch(requestUrl, { signal });
+    if (!res.ok) {
+      console.warn(`[Live Rate] Failed for ${hotelName || agodaId}: Status ${res.status}`);
+      return;
+    }
+    
+    const json = await res.json();
+    console.log(`[Live Rate Data] for ${hotelName}:`, json); // কনসোলে রেসপন্স দেখার জন্য
 
-            // ক্যাশ সংরক্ষণ
-            try {
-              sessionStorage.setItem(cacheKey, JSON.stringify({
-                timestamp: Date.now(),
-                rates: json.rates
-              }));
-            } catch (_) {}
-          }
-        } catch (_) {}
-      };
-
-      // IntersectionObserver: ইউজার যখন স্ক্রল করে সেকশনটির ৩০০ পিক্সেল কাছে আসবে, তখনই ফেচ হবে
-      if (cards.length > 0 && 'IntersectionObserver' in window) {
-        let isSynced = false;
-        const observer = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !isSynced) {
-            isSynced = true;
-            observer.disconnect();
-
-            // সার্ভারের ওপর চাপ কমাতে কার্ডগুলোতে হালকা ব্যবধানে (staggered) ফেচ পাঠানো
-            cards.forEach((card, index) => {
-              setTimeout(() => {
-                syncHotelLiveRate(card);
-              }, index * 80);
-            });
-          }
-        }, { rootMargin: '300px 0px' });
-
-        if (section) observer.observe(section);
-      }
-    };
-
+    if (json && json.success && json.rates && json.rates.startingPrice) {
+      applyCardRate(card, json.rates);
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error(`[Live Rate Network Error]`, err);
+    }
+  }
+};
     document.addEventListener('DOMContentLoaded', initPopularHotelsSection);
     document.addEventListener('astro:page-load', initPopularHotelsSection);
   })();
