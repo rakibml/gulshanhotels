@@ -1,5 +1,5 @@
 ---
-// src/components/LatestBlogs.astro (Bulletproof Loader with Direct Glob Fallback)
+// src/components/LatestBlogs.astro (Mobile Side-by-Side 2-Cols & Desktop 3-Cols)
 import { getCollection } from 'astro:content';
 
 let allPosts: any[] = [];
@@ -17,7 +17,7 @@ try {
   allPosts = [];
 }
 
-// ২. যদি কোনো কারণে getCollection না পায়, তবে সরাসরি ফাইল থেকে নিয়ে আসবে (১০০% গ্যারান্টিড)
+// ২. ফলব্যাক: সরাসরি ফাইল থেকে নিয়ে আসা (১০০% কাজ করবে)
 if (allPosts.length === 0) {
   try {
     const rawGlob = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../content/posts/*.{md,mdx}'], { eager: true });
@@ -38,23 +38,26 @@ const latestPosts = allPosts
 ---
 
 {latestPosts.length > 0 && (
-  <section id="latest-travel-guides" class="w-full bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-100 pb-5 mb-8">
+  <section id="latest-travel-guides" class="w-full bg-white py-8 sm:py-12 px-3 sm:px-6 lg:px-0 max-w-7xl mx-auto border-b border-slate-200 text-left">
+    
+    <!-- সেকশন হেডার -->
+    <div class="flex items-end justify-between gap-2 border-b border-slate-100 pb-3 sm:pb-5 mb-5 sm:mb-8">
       <div>
         <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">
           Editorial Travel Hub
         </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight mt-1">
+        <h2 class="text-xl sm:text-3xl lg:text-4xl font-sans font-black text-slate-900 tracking-tight leading-tight mt-1">
           Latest Travel Guides & Insights
         </h2>
       </div>
-      <a href="/blog" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition">
-        <span>View all guides</span>
+      <a href="/blog" class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition shrink-0">
+        <span>View all</span>
         <span>➔</span>
       </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- 🎯 মোবাইলে পাশাপাশি ২ কলাম (grid-cols-2) এবং ডেক্সটপে ৩ কলাম (md:grid-cols-3) -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
       {latestPosts.map((post) => {
         const pData = post.data || {};
         const pSlug = post.slug;
@@ -62,8 +65,9 @@ const latestPosts = allPosts
         const pImg = pData.image || "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=75";
 
         return (
-          <article class="group bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
+          <article class="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between">
             <div>
+              <!-- ছবি এবং ক্যাটাগরি ব্যাজ -->
               <a href={`/blog/${pSlug}/`} class="block relative aspect-[16/10] overflow-hidden bg-slate-900">
                 <img 
                   src={pImg} 
@@ -72,27 +76,32 @@ const latestPosts = allPosts
                   decoding="async"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
-                <span class="absolute top-3 left-3 bg-[#0d3b23] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md">
+                <span class="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#0d3b23] text-white text-[8px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-xs">
                   {pData.category || "Guide"}
                 </span>
               </a>
 
-              <div class="p-5 space-y-2">
-                <span class="text-[11px] font-semibold text-slate-400 block">
+              <!-- কনটেন্ট এরিয়া -->
+              <div class="p-2.5 sm:p-5 space-y-1 sm:space-y-2">
+                <span class="text-[9px] sm:text-[11px] font-semibold text-slate-400 block truncate">
                   {pData.date || "Recent"} • {pData.readTime || "4 min read"}
                 </span>
-                <h3 class="font-serif text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
+                
+                <h3 class="font-serif text-xs sm:text-lg font-black text-slate-900 group-hover:text-emerald-800 transition line-clamp-2 leading-snug">
                   <a href={`/blog/${pSlug}/`}>{pTitle}</a>
                 </h3>
-                <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+
+                <!-- মোবাইলে লেখা যাতে বেশি বড় হয়ে কার্ড নষ্ট না করে, তাই ডেসক্রিপশন শুধু বড় স্ক্রিনে দেখাবে -->
+                <p class="text-[11px] sm:text-xs text-slate-600 line-clamp-2 leading-relaxed hidden sm:block">
                   {pData.description || "In-depth guide and local advice for your stay in Gulshan, Dhaka."}
                 </p>
               </div>
             </div>
 
-            <div class="p-5 pt-0">
-              <a href={`/blog/${pSlug}/`} class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 group-hover:underline">
-                <span>Read Full Article</span>
+            <!-- নিচে লিংক বাটন -->
+            <div class="p-2.5 sm:p-5 pt-0">
+              <a href={`/blog/${pSlug}/`} class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-emerald-800 group-hover:underline pt-1.5 sm:pt-2 border-t border-slate-100 w-full justify-between">
+                <span>Read Guide</span>
                 <span>➔</span>
               </a>
             </div>
@@ -100,5 +109,6 @@ const latestPosts = allPosts
         );
       })}
     </div>
+
   </section>
 )}
