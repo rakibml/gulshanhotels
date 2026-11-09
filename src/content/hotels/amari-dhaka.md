@@ -25,7 +25,7 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 price: $165
-agoda_id: ''
+agoda_id: :295767
 agoda_url: ''
 agoda_cid: ''
 deals_title: Deals
