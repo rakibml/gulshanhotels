@@ -4,78 +4,78 @@
 - label: "2. ABOUT HOTEL & LIVE RATES"
   name: "about_notice"
   widget: "instructions"
-  description: "Controls overview description, starting price, Agoda live sync, and all booking channels."
+  description: "Controls overview description, starting price, Agoda live sync, and all booking channels. শুধু সত্যি তথ্য লিখুন। না জানলে ফাঁকা রাখুন।"
   required: false
 
 # --- Overview Text ---
 - label: "Hotel Description / About Overview"
   name: "body"
   widget: "markdown"
-  hint: "Write the detailed description and overview of the hotel."
+  hint: "নিজের ভাষায় লিখুন। অন্য সাইট থেকে কপি করবেন না।"
 
 - label: "Starting Price Text (e.g. $120 / night or ৳ 18,500)"
   name: "price"
   widget: "string"
-  default: "$120"
-  hint: "Default starting price shown when live rate is loading or offline."
+  required: false
+  hint: "শুধু সত্যি দাম লিখুন। না জানলে ফাঁকা রাখুন।"
 
 # --- AGODA LIVE SYNC CONTROLS ---
 - label: "Agoda Hotel ID (For Instant Live Price Sync)"
   name: "agoda_id"
   widget: "string"
   required: false
-  hint: "Numeric hotel ID from Agoda URL (e.g. 348841). If empty, auto-matches by hotel title."
+  hint: "Agoda URL থেকে hotel ID (যেমন 348841)। ফাঁকা থাকলে hotel-এর নাম দিয়ে খুঁজবে।"
 
 - label: "Direct Agoda Affiliate Link (Optional)"
   name: "agoda_url"
   widget: "string"
   required: false
-  hint: "Paste direct Agoda affiliate link here if you don't want the auto-generated link."
+  hint: "নিজের Agoda affiliate link এখানে দিন। না দিলে auto link হবে।"
 
 - label: "Custom Agoda Partner CID (Optional)"
   name: "agoda_cid"
   widget: "string"
   required: false
-  hint: "Your custom Agoda affiliate CID for tracking bookings."
+  hint: "Booking ট্র্যাক করার জন্য আপনার Agoda CID।"
 
-# --- DEALS SECTION TITLES ---
+# --- DEALS SECTION TITLE ---
 - label: "Deals Card Section Title"
   name: "deals_title"
   widget: "string"
-  default: "Deals"
+  default: "Deals & Rates"
   required: false
-  hint: "Title shown above the rates table (e.g. Deals, Room Rates & Deals)."
+  hint: "Rates card-এর উপরের শিরোনাম।"
 
-# --- 100% CUSTOM BOOKING CHANNELS LIST (DRAG & DROP SERIAL) ---
-- label: "Booking Channels List (Full Admin Control & Drag-and-Drop Order)"
+# --- BOOKING CHANNELS LIST ---
+- label: "Booking Channels List (Drag-and-Drop Order)"
   name: "booking_channels"
   widget: "list"
   required: false
   summary: "{{fields.provider_name}} - {{fields.price}}"
-  hint: "Add, reorder (drag & drop serial), set custom logo, price, badges, notes, and button text!"
+  hint: "চ্যানেল যোগ করুন, সাজান, দাম ও নোট দিন।"
   fields:
-    - label: "Channel Name / Title (e.g. Agoda, Official Site, Booking.com)"
+    - label: "Channel Name / Title (e.g. Agoda, Official Site)"
       name: "provider_name"
       widget: "string"
 
-    - label: "Price Text (Optional - Leave blank for no price tag)"
+    - label: "Price Text (Optional)"
       name: "price"
       widget: "string"
       required: false
-      hint: "e.g. '$114' or '৳ 12,500' (Leave empty if you don't want to show price)"
+      hint: "যেমন '$114' বা '৳ 12,500'। দাম না জানলে ফাঁকা রাখুন।"
 
     - label: "Show Price Tag on Website?"
       name: "show_price"
       widget: "boolean"
       default: true
 
-    - label: "Special Feature / Note (e.g. Free cancellation, Breakfast included)"
+    - label: "Special Feature / Note (Optional)"
       name: "note"
       widget: "string"
       required: false
-      hint: "Short highlight displayed next to the logo on desktop (e.g. 'Free cancellation')."
+      hint: "শুধু সত্যি জিনিস লিখুন (যেমন Free cancellation)। না জানলে ফাঁকা রাখুন।"
 
-    - label: "Button Action Text (e.g. View deal, Book Now ➔, Chat on WhatsApp)"
+    - label: "Button Action Text"
       name: "button_text"
       widget: "string"
       default: "View deal"
@@ -83,19 +83,23 @@
     - label: "Destination URL Link or Phone Number"
       name: "button_url"
       widget: "string"
-      hint: "e.g. https://www.booking.com/... or phone number 01700000000"
+      hint: "যেমন https://www.booking.com/... বা ফোন নম্বর 01700000000"
 
     - label: "Top Badge Tag (Optional)"
       name: "badge"
-      widget: "string"
+      widget: "select"
       required: false
-      hint: "e.g. 'Recommended', 'Official Site', 'Best Rate'"
+      hint: "'Best Rate' বা 'Cheapest' এখানে নেই, কারণ সবচেয়ে কম দাম সাইট নিজেই চিনে নেয়।"
+      options:
+        - { label: "Official Site", value: "Official Site" }
+        - { label: "Partner", value: "Partner" }
+        - { label: "Recommended", value: "Recommended" }
 
-    - label: "Channel Image Logo URL (Optional)"
+    - label: "Channel Image Logo (Optional)"
       name: "logo_url"
       widget: "image"
       required: false
-      hint: "Upload or select a custom brand logo image (overrides preset)."
+      hint: "শুধু যাদের লোগো ব্যবহারের অনুমতি আছে তাদের লোগো দিন।"
 
     - label: "Preset Logo Icon"
       name: "icon_preset"
@@ -108,15 +112,9 @@
         - { label: "🟠 Trip.com", value: "trip" }
         - { label: "🟢 TripAdvisor", value: "tripadvisor" }
         - { label: "🟡 Expedia", value: "expedia" }
-        - { label: "🏨 Direct Hotel / Building", value: "direct" }
+        - { label: "🏨 Direct Hotel / Other", value: "direct" }
         - { label: "💬 WhatsApp", value: "whatsapp" }
         - { label: "📞 Phone Call", value: "phone" }
-
-    - label: "Or Paste Custom Raw SVG Icon Code (Optional)"
-      name: "custom_svg"
-      widget: "text"
-      required: false
-      hint: "Paste raw <svg>...</svg> code here to display any custom brand logo!"
 
 # --- Direct Contacts ---
 - label: "Official Hotel Website Link (Optional)"
@@ -134,11 +132,12 @@
   widget: "string"
   required: false
 
+# commission-এর কথা কম্পোনেন্টে সবসময় দেখায়, এখানে মোছা যায় না।
 - label: "Rates Disclaimer Note (Bottom text)"
   name: "rates_disclaimer"
   widget: "text"
   required: false
-  default: "Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you."
+  default: "Prices are provided by our partners and reflect nightly room rates. Taxes may not be included."
 
 # ==============================================================================
 # 3. HOTEL POLICIES & HOUSE RULES
@@ -146,7 +145,7 @@
 - label: "3. HOTEL POLICIES & HOUSE RULES"
   name: "policies_notice"
   widget: "instructions"
-  description: "Configure Booking.com style policies: Check-in/out, Child & Bed tables, and Payment method logos."
+  description: "এই অংশের সব তথ্য hotel থেকে নিশ্চিত হয়ে লিখুন। না জানলে ফাঁকা রাখুন, ফাঁকা অংশ সাইটে দেখাবেন না।"
   required: false
 
 - label: "Enable Hotel Policies Section?"
@@ -158,28 +157,25 @@
 - label: "Check-in Schedule"
   name: "check_in"
   widget: "string"
-  default: "Available 24 hours"
-  hint: "e.g. 'From 14:00 to 00:00' or 'Available 24 hours'"
+  required: false
+  hint: "যেমন 'From 14:00 to 00:00' বা 'Available 24 hours'"
 
 - label: "Check-out Schedule"
   name: "check_out"
   widget: "string"
-  default: "Available 24 hours"
-  hint: "e.g. 'From 06:00 to 12:00' or 'Available 24 hours'"
+  required: false
+  hint: "যেমন 'From 06:00 to 12:00'"
 
 - label: "Cancellation / Prepayment Policy (Supports Markdown Links)"
   name: "cancellation_policy"
   widget: "markdown"
-  default: "Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection."
+  required: false
 
 # --- CHILDREN & BEDS ---
 - label: "Child Policies General Rules"
   name: "child_policy_text"
   widget: "text"
-  default: |
-    Children of all ages are welcome.
-    Children 9 and above will be charged as adults at this property.
-    To see correct prices and occupancy info, add the number and ages of children in your group to your search.
+  required: false
 
 - label: "Cribs & Extra Beds Table (Structured List)"
   name: "extra_beds"
@@ -190,40 +186,34 @@
     - label: "Age Tier / Range"
       name: "age"
       widget: "string"
-      default: "1 - 6 years"
     - label: "Bed Type"
       name: "type"
       widget: "string"
-      default: "Crib upon request"
     - label: "Price / Charge"
       name: "price"
       widget: "string"
-      default: "Free"
 
 - label: "Cribs & Extra Beds Disclaimer Notes"
   name: "extra_beds_notes"
   widget: "text"
-  default: |
-    Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.
-    The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.
-    All cribs and extra beds are subject to availability.
+  required: false
 
 - label: "Minimum Check-in Age"
   name: "age_restriction"
   widget: "string"
-  default: "The minimum age for check-in is 18"
+  required: false
 
 - label: "Pets Policy"
   name: "pets_policy"
   widget: "string"
-  default: "Pets are not allowed."
+  required: false
 
 # --- PAYMENT METHOD LOGOS ---
 - label: "Accepted Payment Methods"
   name: "payment_methods"
   widget: "select"
   multiple: true
-  default: ["amex", "visa", "mastercard", "unionpay", "cash"]
+  required: false
   options:
     - { label: "American Express (Amex)", value: "amex" }
     - { label: "Visa", value: "visa" }
@@ -243,7 +233,7 @@
     - label: "Policy Title"
       name: "label"
       widget: "string"
-      hint: "e.g. Couple Policy, Smoking Policy, Quiet Hours"
+      hint: "যেমন Couple Policy, Smoking Policy, Quiet Hours"
     - label: "Policy Details"
       name: "value"
       widget: "text"
