@@ -1,6 +1,5 @@
 ---
-// src/components/hotel/HotelRates.astro — TripAdvisor-style "Deals" card
-// 100% Google SEO, Affiliate-Safe (rel="sponsored nofollow") & Fully Admin Controlled
+// src/components/hotel/HotelRates.astro — "Deals" card (Google-safe version)
 interface Props {
   hotel: any;
 }
@@ -16,6 +15,10 @@ const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCa
 const agodaId = String(data.agoda_id || data.agodaId || "").trim();
 const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || "").trim();
 const customAgodaUrl = String(data.agoda_url || "").trim();
+
+// Admin থেকে আসা লেখা (এখন আর hardcode না)
+const dealsTitle = String(data.deals_title || "Deals & Rates").trim();
+const disclaimer = String(data.rates_disclaimer || "").trim();
 
 const whatsapp = String(data.whatsapp || "");
 const phone = String(data.phone || "");
@@ -69,12 +72,13 @@ function safeUrl(u: string) {
   return /^(https?:|tel:|mailto:)/i.test(v) ? v : "#";
 }
 
-function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "", hName: string = "") {
+function sanitizeLink(rawUrl: any = "", preset: string = "", hName: string = "") {
   const url = String(rawUrl || "").trim();
   if (!url || url === "#") return "#";
-  const lowerName = String(pName).toLowerCase();
-  const isPhone = preset === 'phone' || lowerName.includes('call');
-  const isWhatsapp = preset === 'whatsapp' || lowerName.includes('whatsapp');
+
+  const looksLikeNumber = /^\+?[0-9\s-]{7,}$/.test(url);
+  const isWhatsapp = preset === 'whatsapp';
+  const isPhone = !isWhatsapp && (preset === 'phone' || looksLikeNumber);
 
   if (isPhone && !/^(https?:|tel:)/i.test(url)) {
     const p = url.replace(/[^0-9+]/g, '');
@@ -89,20 +93,11 @@ function sanitizeLink(rawUrl: any = "", preset: string = "", pName: string = "",
   return safeUrl(url);
 }
 
-function cleanSvgSSR(svg: string): string {
-  return String(svg || '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
-    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
-    .replace(/javascript:/gi, '');
-}
-
 // ---------- Deal rows ----------
 type Row = {
   name: string;
   kind: string; // agoda | booking | trip | tripadvisor | expedia | whatsapp | phone | direct | other
   logoUrl: string;
-  customSvg: string;
   note: string;
   badge: string;
   priceNum: number | null;
@@ -110,7 +105,6 @@ type Row = {
   url: string;
   buttonText: string;
   isAgoda: boolean;
-  pending: boolean;
   order: number;
   best: boolean;
 };
@@ -118,35 +112,34 @@ type Row = {
 function detectKind(preset: string, name: string, url: string): string {
   const p = String(preset || '').trim().toLowerCase();
   if (p && p !== 'direct') return p;
-  const s = `${name} ${url}`.toLowerCase();
-  if (s.includes('agoda')) return 'agoda';
-  if (s.includes('tripadvisor')) return 'tripadvisor';
-  if (s.includes('trip.com') || s.includes('ctrip')) return 'trip';
-  if (s.includes('booking')) return 'booking';
-  if (s.includes('expedia')) return 'expedia';
-  if (s.includes('whatsapp') || s.includes('wa.me')) return 'whatsapp';
-  if (s.includes('tel:') || s.includes('call') || s.includes('phone')) return 'phone';
-  return p || 'other';
+  // শুধু URL দেখে চেনা হচ্ছে, নাম দেখে না। তাই "Direct Booking" নামে ভুল লোগো আসবে না।
+  const u = String(url || '').toLowerCase();
+  if (u.includes('agoda.com')) return 'agoda';
+  if (u.includes('tripadvisor.')) return 'tripadvisor';
+  if (u.includes('trip.com') || u.includes('ctrip.')) return 'trip';
+  if (u.includes('booking.com')) return 'booking';
+  if (u.includes('expedia.')) return 'expedia';
+  if (u.includes('wa.me') || u.includes('whatsapp.com')) return 'whatsapp';
+  if (u.startsWith('tel:')) return 'phone';
+  return 'other';
 }
 
 const baseRows: Row[] = customChannels
   .map((item: any) => {
     const name = String(item?.provider_name || "Booking Partner");
     const preset = String(item?.icon_preset || "direct");
-    const url = sanitizeLink(item?.button_url, preset, name, hotelTitle);
+    const url = sanitizeLink(item?.button_url, preset, hotelTitle);
     const showPrice = item?.show_price !== false && item?.showPrice !== false;
     const priceNum = showPrice ? extractNumericPrice(item?.price) : null;
     const kind = detectKind(preset, name, url);
     const rawLogo = String(item?.logo_url || "").trim();
     const logoUrl = /^(https?:|\/)/i.test(rawLogo) ? rawLogo : "";
-    const customSvg = item?.custom_svg ? cleanSvgSSR(item.custom_svg) : "";
     const badge = String(item?.badge || "").trim();
 
     return {
       name,
       kind,
       logoUrl,
-      customSvg,
       note: String(item?.note || "").trim(),
       badge,
       priceNum: priceNum && priceNum > 0 ? priceNum : null,
@@ -154,7 +147,6 @@ const baseRows: Row[] = customChannels
       url,
       buttonText: String(item?.button_text || "View deal"),
       isAgoda: kind === 'agoda',
-      pending: false,
       order: 0,
       best: false,
     } as Row;
@@ -175,13 +167,12 @@ function buildAgodaFallback(id: string, customUrl: string, title: string, cid: s
 
 const agodaFallbackUrl = buildAgodaFallback(agodaId, customAgodaUrl, hotelTitle, agodaCid);
 
-// Agoda row সবসময় নিশ্চিত রাখা হলো
+// Agoda row সবসময় থাকবে
 if (!baseRows.some((r) => r.isAgoda)) {
   baseRows.push({
     name: "Agoda",
     kind: "agoda",
     logoUrl: "",
-    customSvg: "",
     note: "",
     badge: "",
     priceNum: null,
@@ -189,13 +180,12 @@ if (!baseRows.some((r) => r.isAgoda)) {
     url: agodaFallbackUrl,
     buttonText: "View deal",
     isAgoda: true,
-    pending: false,
     order: 0,
     best: false,
   });
 }
 
-// দাম অনুযায়ী sort
+// দাম অনুযায়ী sort
 const rows: Row[] = baseRows
   .map((r, i) => ({ r, i }))
   .sort((a, b) => {
@@ -222,12 +212,15 @@ const rows: Row[] = baseRows
     class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left"
   >
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-extrabold text-[#0d3b23]">Deals & Rates</h3>
+      <h3 class="text-lg font-extrabold text-[#0d3b23]">{dealsTitle}</h3>
       {agodaId && (
-        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          Live Partner Sync
-        </span>
+        <!-- শুরুতে লুকানো। API থেকে সত্যি দাম এলে তবেই দেখাবে -->
+        <div id="liveBadge" class="hidden">
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Live Partner Sync
+          </span>
+        </div>
       )}
     </div>
 
@@ -369,7 +362,12 @@ const rows: Row[] = baseRows
       </div>
     </div>
 
-    <div class="flex justify-end mt-4 mb-2">
+    <!-- Affiliate disclosure: লিংকের ঠিক কাছে, পড়ার মতো সাইজে -->
+    <p class="mt-4 text-xs text-slate-600">
+      Some links below are partner links. We may earn a commission at no extra cost to you.
+    </p>
+
+    <div class="flex justify-end mt-2 mb-2">
       <span class="text-xs font-bold text-[#0d3b23]">Nightly price</span>
     </div>
 
@@ -392,8 +390,6 @@ const rows: Row[] = baseRows
             <div class="w-24 sm:w-32 shrink-0 min-w-0">
               {r.logoUrl ? (
                 <img src={r.logoUrl} alt={r.name} loading="lazy" class="max-h-7 w-auto object-contain" />
-              ) : r.customSvg ? (
-                <div class="w-7 h-7 shrink-0 flex items-center justify-center [&_svg]:w-full [&_svg]:h-full" set:html={r.customSvg} />
               ) : r.kind === 'booking' ? (
                 <span class="text-[#003580] font-extrabold tracking-tight text-base sm:text-lg" aria-label={r.name}>Booking<span class="text-[#0a6fd6]">.com</span></span>
               ) : r.kind === 'trip' ? (
@@ -499,9 +495,9 @@ const rows: Row[] = baseRows
       </div>
     )}
 
-    <p class="mt-4 text-[11px] leading-snug text-slate-500">
-      Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you.
-    </p>
+    {disclaimer && (
+      <p class="mt-4 text-xs leading-snug text-slate-500">{disclaimer}</p>
+    )}
   </div>
 )}
 
@@ -924,21 +920,26 @@ const rows: Row[] = baseRows
 
       const priceText = rates?.startingPrice ? String(rates.startingPrice) : '';
       const n = parsePrice(priceText);
-      if (priceText && n > 0) {
+      const gotLivePrice = Boolean(priceText && n > 0);
+
+      if (gotLivePrice) {
         const sameCurrency = priceText.includes(card.getAttribute('data-main-currency') || '$');
         if (sameCurrency) agodaRow.dataset.price = String(n);
         else delete agodaRow.dataset.price;
         agodaRow.dataset.priceText = priceText;
         agodaRow.dataset.live = 'true';
         if (priceEl) priceEl.textContent = priceText;
+        // সত্যিকারের দাম এলে তবেই "Live" ব্যাজ দেখাবে
+        document.getElementById('liveBadge')?.classList.remove('hidden');
       }
 
+      // আগের/ছাড়ের দাম শুধু তখনই দেখাবে যখন নতুন দামও এসেছে
       if (origEl) {
-        if (rates?.originalPrice) { origEl.textContent = String(rates.originalPrice); origEl.classList.remove('hidden'); }
+        if (gotLivePrice && rates?.originalPrice) { origEl.textContent = String(rates.originalPrice); origEl.classList.remove('hidden'); }
         else origEl.classList.add('hidden');
       }
       if (discEl) {
-        if (rates?.discountText) { discEl.textContent = String(rates.discountText); discEl.classList.remove('hidden'); }
+        if (gotLivePrice && rates?.discountText) { discEl.textContent = String(rates.discountText); discEl.classList.remove('hidden'); }
         else discEl.classList.add('hidden');
       }
       if (noteEl && rates?.note) noteEl.textContent = String(rates.note);
@@ -952,7 +953,7 @@ const rows: Row[] = baseRows
       if (agodaDeal?.button_url && agodaDeal.button_url !== '#') {
         agodaBaseUrl = String(agodaDeal.button_url);
       }
-      
+
       updateAgodaLink();
       reorderRows(true);
       syncGlobalPrice();
