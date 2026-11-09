@@ -33,7 +33,7 @@ rates_disclaimer: Prices are provided by our partners and reflect nightly room r
 call_button_text: ''
 whatsapp_button_text: ''
 whatsapp_message: hi i want to book a room at amari dhaka hotel (From Gulshanhotels.com)
-agoda_id: '295767'
+agoda_id: '547134'
 agoda_url: ''
 agoda_cid: ''
 booking_channels:
