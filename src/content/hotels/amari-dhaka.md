@@ -25,13 +25,19 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 price: $165
+agoda_id: ''
+agoda_url: ''
+agoda_cid: ''
+deals_title: Deals
 booking_channels:
   - provider_name: Whatsapp
     price: ''
     show_price: false
+    note: ''
     button_text: Contact now ➔
     button_url: '01996322761'
     badge: For Best Rate
+    logo_url: https://media.gulshanhotels.com/vecteezy_whatsapp-logo-png-whatsapp-logo-transparent-png-whatsapp_23986631.png
     icon_preset: ''
     custom_svg: |-
       <svg xmlns="http://w3.org" viewBox="0 0 448 512" width="100%" height="100%">
@@ -41,6 +47,7 @@ booking_channels:
 officialSite: https://www.amari.com/dhaka
 whatsapp: ''
 phone: ''
+rates_disclaimer: Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you.
 policies_notice: ''
 enable_policies: true
 check_in: Available 24 hours
