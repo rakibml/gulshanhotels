@@ -1,4 +1,4 @@
-// src/pages/sitemap-index.xml.ts
+// src/pages/sitemap.xml.ts
 // Clean, Minimal & 100% Google Compliant XML Sitemap (No Lastmod)
 import { getCollection } from 'astro:content';
 
