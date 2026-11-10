@@ -7,7 +7,7 @@ seo_title: ''
 description: See locations and approximate prices. We currently list 1 hotel here and are adding more.
 enable_comparison_table: false
 comparison_title: ''
-filter_keyword: gulshan 2
+filter_keyword: ''
 selected_hotels:
   - amari-dhaka
   - the-westin-dhaka
