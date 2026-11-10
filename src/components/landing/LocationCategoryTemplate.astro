@@ -1,6 +1,6 @@
 ---
 // src/components/landing/LocationCategoryTemplate.astro
-// Luxury Magazine-Grade Design, Auto-Generated Google Table Snippet & Live Agoda Price
+// Magazine-style design, Google-friendly comparison table, live Agoda price (fixed version)
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
@@ -99,7 +99,9 @@ const normalizedKeyword = normalizeText(rawKeyword);
 const displayHotels = allHotels.filter(h => {
   const hSlug = String(h.slug || '').toLowerCase();
   if (manualSlugs.length > 0) return manualSlugs.includes(hSlug);
-  if (!normalizedKeyword) return true;
+
+  // FIX: keyword না থাকলে সব হোটেল দেখাবে না (ডুপ্লিকেট পেজ হয়ে যেত)
+  if (!normalizedKeyword) return false;
 
   const hLoc = normalizeText(h.data?.location || h.data?.address);
   const hCat = normalizeText(h.data?.category);
@@ -212,14 +214,17 @@ const masterSchemaJson = JSON.stringify({
 
   <div class="w-full bg-[#fbfbf9] text-slate-800 font-sans pb-24">
 
-    <!-- 1. CINEMATIC HERO BANNER (With H1 Title Included) -->
+    <!-- 1. HERO BANNER (H1 এখানে) -->
     <header class="relative w-full aspect-[21/9] min-h-[320px] sm:min-h-[420px] max-h-[500px] bg-slate-950 overflow-hidden shadow-sm">
       {heroImage ? (
         <img
           src={heroImage}
           alt={pageTitle}
+          width="1400"
+          height="600"
           class="w-full h-full object-cover scale-102"
           fetchpriority="high"
+          decoding="async"
         />
       ) : (
         <div class="w-full h-full bg-slate-900" />
@@ -249,12 +254,12 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </header>
 
-    <!-- 2. BREADCRUMB & EDITORIAL INTRO SECTION -->
+    <!-- 2. BREADCRUMB & INTRO -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 text-left">
       <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-6">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span class="text-slate-300">/</span>
-              <span class="text-slate-900 font-bold truncate">{toTitleCase(pageTitle)}</span>
+        <span class="text-slate-900 font-bold truncate" aria-current="page">{toTitleCase(pageTitle)}</span>
       </nav>
 
       <div class="max-w-4xl space-y-5">
@@ -264,7 +269,6 @@ const masterSchemaJson = JSON.stringify({
           </p>
         )}
 
-        <!-- বডি কন্টেন্ট রেন্ডার (Content না থাকলেও body fallback) -->
         {Content ? (
           <div class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-a:text-emerald-800 pt-4 border-b border-slate-200/80 pb-8">
             <Content />
@@ -275,19 +279,20 @@ const masterSchemaJson = JSON.stringify({
           </div>
         ))}
 
-        <!-- ৩. GOOGLE TABLE SNIPPET COMPLIANT AUTO COMPARISON TABLE -->
+        <!-- 3. COMPARISON TABLE -->
         {showComparisonTable && (
           <div class="pt-6 pb-4 space-y-3">
-            <h3 class="font-serif text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <!-- FIX: h3 থেকে h2 (heading ক্রম ঠিক) -->
+            <h2 class="font-serif text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {comparisonTableTitle}
-            </h3>
+            </h2>
 
             <div class="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-2xs">
               <table class="w-full text-left text-xs sm:text-sm text-slate-700 border-collapse">
                 <thead>
                   <tr class="border-b border-slate-200 bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-600">
                     <th scope="col" class="py-3.5 px-4 sm:px-5">Hotel Name</th>
-                    <th scope="col" class="py-3.5 px-4 sm:px-5">Star & Class</th>
+                    <th scope="col" class="py-3.5 px-4 sm:px-5">Star Rating</th>
                     <th scope="col" class="py-3.5 px-4 sm:px-5">Starting Rate</th>
                     <th scope="col" class="py-3.5 px-4 sm:px-5">Key Highlights</th>
                   </tr>
@@ -303,7 +308,8 @@ const masterSchemaJson = JSON.stringify({
                     
                     const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
                     const topAmenities = rawAmenities.slice(0, 2).map((a: any) => typeof a === 'string' ? a.trim() : (a?.name || '').trim()).filter(Boolean);
-                    const highlightText = hd.ranking || hd.badge || (topAmenities.length > 0 ? topAmenities.join(' • ') : "Luxury stay in Gulshan");
+                    // FIX: ভুল ডিফল্ট "Luxury stay in Gulshan" সরানো হয়েছে
+                    const highlightText = hd.ranking || hd.badge || (topAmenities.length > 0 ? topAmenities.join(' • ') : "—");
 
                     return (
                       <tr class="hover:bg-slate-50/70 transition-colors">
@@ -313,7 +319,8 @@ const masterSchemaJson = JSON.stringify({
                           </a>
                         </td>
                         <td class="py-3.5 px-4 sm:px-5 font-semibold text-slate-700">
-                          {starCount ? `${starCount}-Star Luxury` : (hd.category || "Hotel")}
+                          {/* FIX: শুধু "3-Star", "5-Star" — "Luxury" শব্দ নেই */}
+                          {starCount ? `${starCount}-Star` : (hd.category || "Hotel")}
                         </td>
                         <td class="py-3.5 px-4 sm:px-5 font-black text-[#0d3b23] whitespace-nowrap">
                           {price ? `${price} / night` : "Check rates"}
@@ -336,7 +343,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- ৪. HOTEL LISTINGS SECTION -->
+    <!-- 4. HOTEL LISTINGS -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 text-left">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5 mb-8">
         <div>
@@ -413,6 +420,7 @@ const masterSchemaJson = JSON.stringify({
               ? (validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount).toFixed(1)
               : null;
 
+            // "Verified Stay" শুধু তখনই, যখন is_verified সত্যিই true
             const realBadge = hd.badge || hd.tag || (hd.is_verified === true ? "Verified Stay" : "");
 
             return (
@@ -456,7 +464,7 @@ const masterSchemaJson = JSON.stringify({
                           {realBadge}
                         </span>
                       )}
-                      <span class="agoda-discount-badge hidden px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-extrabold animate-pulse"></span>
+                      <span class="agoda-discount-badge hidden px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-extrabold"></span>
                     </div>
 
                     <h3 class="font-serif font-black text-lg sm:text-xl text-slate-900 group-hover:text-emerald-800 transition line-clamp-1">
@@ -498,12 +506,13 @@ const masterSchemaJson = JSON.stringify({
 
                   <!-- Price & View Button -->
                   <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <div>
-                      <span class="hotel-rate-status text-[9px] text-slate-400 font-bold uppercase leading-none block">
-                        Direct Rate
+                    <!-- FIX: min-h দেওয়া হয়েছে, যাতে দাম বদলালে পেজ লাফায় না (CLS) -->
+                    <div class="min-h-[48px] flex flex-col justify-center">
+                      <span class="hotel-rate-status text-[9px] text-slate-400 font-bold uppercase leading-none flex items-center gap-1 h-3">
+                        Starting from
                       </span>
                       
-                      <div class="flex items-baseline gap-1 mt-0.5">
+                      <div class="flex items-baseline gap-1 mt-0.5 h-7">
                         <span class="agoda-original-price hidden text-xs text-slate-400 line-through"></span>
                         <span class="hotel-live-price text-lg font-black text-[#0d3b23]">
                           {price ? price : "Check Rates"}
@@ -535,7 +544,7 @@ const masterSchemaJson = JSON.stringify({
       </div>
     </section>
 
-    <!-- 5. FAQ SECTION -->
+    <!-- 5. FAQ -->
     {faqs.length > 0 && (
       <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 border-t border-slate-200 text-left">
         <div class="space-y-1 mb-8">
@@ -614,70 +623,109 @@ const masterSchemaJson = JSON.stringify({
     return { checkIn: d1, checkOut: d2 };
   };
 
+  // ছোট cache: ৩০ মিনিট পর্যন্ত একই দাম আবার Worker থেকে আনবে না
+  const CACHE_MS = 30 * 60 * 1000;
+  const cacheGet = (key) => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (Date.now() - obj.t > CACHE_MS) return null;
+      return obj.v;
+    } catch (e) { return null; }
+  };
+  const cacheSet = (key, value) => {
+    try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value })); } catch (e) {}
+  };
+
+  const applyPrice = (card, p) => {
+    if (!p || !p.startingPrice) return;
+    const priceEl = card.querySelector('.hotel-live-price');
+    const perNightEl = card.querySelector('.hotel-per-night');
+    const statusEl = card.querySelector('.hotel-rate-status');
+    const origPriceEl = card.querySelector('.agoda-original-price');
+    const discountEl = card.querySelector('.agoda-discount-badge');
+
+    if (priceEl) priceEl.textContent = p.startingPrice;
+    if (perNightEl) perNightEl.textContent = "/ night";
+
+    if (origPriceEl && p.originalPrice) {
+      origPriceEl.textContent = p.originalPrice;
+      origPriceEl.classList.remove('hidden');
+    }
+
+    if (discountEl && p.discountText) {
+      discountEl.textContent = p.discountText;
+      discountEl.classList.remove('hidden');
+    }
+
+    if (statusEl) {
+      statusEl.innerHTML = `
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span class="text-emerald-700 font-bold">Live rate (Agoda)</span>
+      `;
+    }
+  };
+
+  const loadCardPrice = async (card, endpoint, checkIn, checkOut) => {
+    const slug = card.getAttribute('data-slug') || '';
+    const hotelName = card.getAttribute('data-hotel-name') || '';
+    const agodaId = card.getAttribute('data-agoda-id') || '';
+
+    const queryParam = agodaId ? `id=${agodaId}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
+    const cacheKey = `ghp:${queryParam}:${checkIn}`;
+
+    const cached = cacheGet(cacheKey);
+    if (cached) { applyPrice(card, cached); return; }
+
+    const requestUrl = `${endpoint}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+
+    try {
+      const response = await fetch(requestUrl, { signal: ctrl.signal });
+      if (!response.ok) return;
+
+      const data = await response.json();
+      let result = { startingPrice: '', originalPrice: '', discountText: '' };
+
+      if (data.success && data.rates && data.rates.startingPrice) {
+        result.startingPrice = data.rates.startingPrice;
+        result.originalPrice = data.rates.originalPrice || '';
+        result.discountText = data.rates.discountText || '';
+      } else if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+        const item = data.results[0];
+        result.startingPrice = item.dailyRate ? `$${Math.round(item.dailyRate)}` : '';
+        result.originalPrice = item.crossedOutRate ? `$${Math.round(item.crossedOutRate)}` : '';
+        result.discountText = item.discountPercentage ? `${Math.round(item.discountPercentage)}% OFF` : '';
+      }
+
+      if (result.startingPrice) {
+        cacheSet(cacheKey, result);
+        applyPrice(card, result);
+      }
+    } catch (e) {
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
   const syncAgodaLivePrices = async () => {
-    const cards = document.querySelectorAll('.landing-hotel-card');
-    if (!cards || cards.length === 0) return;
+    const cards = Array.from(document.querySelectorAll('.landing-hotel-card'));
+    if (cards.length === 0) return;
 
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
     const { checkIn, checkOut } = getDhakaDates();
 
-    cards.forEach(async (card) => {
-      const slug = card.getAttribute('data-slug') || '';
-      const hotelName = card.getAttribute('data-hotel-name') || '';
-      const agodaId = card.getAttribute('data-agoda-id') || '';
-
-      const queryParam = agodaId ? `id=${agodaId}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
-      const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
-
-      try {
-        const response = await fetch(requestUrl);
-        if (!response.ok) return;
-
-        const data = await response.json();
-        let startingPrice = '';
-        let originalPrice = '';
-        let discountText = '';
-
-        if (data.success && data.rates && data.rates.startingPrice) {
-          startingPrice = data.rates.startingPrice;
-          originalPrice = data.rates.originalPrice || '';
-          discountText = data.rates.discountText || '';
-        } else if (data.results && Array.isArray(data.results) && data.results.length > 0) {
-          const item = data.results[0];
-          startingPrice = item.dailyRate ? `$${Math.round(item.dailyRate)}` : '';
-          originalPrice = item.crossedOutRate ? `$${Math.round(item.crossedOutRate)}` : '';
-          discountText = item.discountPercentage ? `${Math.round(item.discountPercentage)}% OFF` : '';
-        }
-
-        if (startingPrice) {
-          const priceEl = card.querySelector('.hotel-live-price');
-          const perNightEl = card.querySelector('.hotel-per-night');
-          const statusEl = card.querySelector('.hotel-rate-status');
-          const origPriceEl = card.querySelector('.agoda-original-price');
-          const discountEl = card.querySelector('.agoda-discount-badge');
-
-          if (priceEl) priceEl.textContent = startingPrice;
-          if (perNightEl) perNightEl.textContent = "/ night";
-
-          if (origPriceEl && originalPrice) {
-            origPriceEl.textContent = originalPrice;
-            origPriceEl.classList.remove('hidden');
-          }
-
-          if (discountEl && discountText) {
-            discountEl.textContent = discountText;
-            discountEl.classList.remove('hidden');
-          }
-
-          if (statusEl) {
-            statusEl.innerHTML = `
-              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span class="text-emerald-700 font-bold">Agoda Live Rate</span>
-            `;
-          }
-        }
-      } catch (e) {}
-    });
+    // একসাথে সব না, একবারে ৩টা করে request (Worker-এর উপর চাপ কমে)
+    const queue = cards.slice();
+    const runner = async () => {
+      while (queue.length > 0) {
+        const card = queue.shift();
+        if (card) await loadCardPrice(card, WORKER_ENDPOINT, checkIn, checkOut);
+      }
+    };
+    await Promise.all([runner(), runner(), runner()]);
   };
 
   document.addEventListener('DOMContentLoaded', () => {
