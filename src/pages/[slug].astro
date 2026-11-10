@@ -6,7 +6,6 @@ import LocationCategoryTemplate from '../components/landing/LocationCategoryTemp
 import HotelHeader from '../components/hotel/HotelHeader.astro';
 import HotelSubNav from '../components/hotel/HotelSubNav.astro';
 
-// 🔥 আলাদা করা দুটি কম্পোনেন্ট ইমপোর্ট করা হলো 🔥
 import HotelAbout from '../components/hotel/HotelAbout.astro';
 import HotelRates from '../components/hotel/HotelRates.astro';
 
@@ -18,12 +17,12 @@ import HotelInsiderTips from '../components/hotel/HotelInsiderTips.astro';
 import HotelFaqsSection from '../components/hotel/HotelFaqsSection.astro';
 import HotelNearbyHotels from '../components/hotel/HotelNearbyHotels.astro';
 import PageView from '../components/PageView.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const isProd = import.meta.env.PROD;
 
-  // ১. হোটেল ডাটা লোডার (প্রোডাকশনে খসড়া/ড্রাফট ফিল্টার করা)
+  // ১. হোটেল ডাটা লোডার
   let hotels: any[] = [];
   try { 
     hotels = await getCollection('hotels', ({ data }) => {
@@ -94,7 +93,7 @@ export async function getStaticPaths() {
     }
   }
 
-  // ৩. সাধারণ পেজ ডাটা লোডার (About, Privacy, Terms etc.)
+  // ৩. সাধারণ পেজ ডাটা লোডার (About, Privacy, Terms ইত্যাদি)
   let pages: any[] = [];
   try { 
     pages = await getCollection('pages'); 
@@ -139,18 +138,21 @@ export async function getStaticPaths() {
 
 const { type = 'hotel', entry } = Astro.props;
 
-// মার্কডাউন আর্টিকেল রেন্ডারার
+// 🔥 Astro 7 Content Layer Compliant Markdown Renderer 🔥
 let Content: any = null;
 if (type === 'destination' || type === 'page') {
   try {
-    if (typeof entry?.render === 'function') {
-      const rendered = await entry.render();
-      Content = rendered.Content;
-    } else if (entry?.Content) {
-      Content = entry.Content;
-    }
+    const rendered = await render(entry);
+    Content = rendered?.Content || null;
   } catch (err) {
-    Content = null;
+    if (entry?.Content) {
+      Content = entry.Content;
+    } else if (typeof entry?.render === 'function') {
+      const res = await entry.render();
+      Content = res?.Content || null;
+    } else {
+      Content = null;
+    }
   }
 }
 
@@ -213,15 +215,12 @@ const hotelImage = rawImage || "/images/hotel-placeholder.webp";
     <HotelHeader hotel={hotel} />
     <HotelSubNav hotel={hotel} />
 
-    <!-- 🔥 আলাদা করা HotelAbout (বামে) এবং HotelRates (ডানে) বসানো হলো 🔥 -->
     <section id="about-and-rates" class="bg-white py-12 px-4 sm:px-6 lg:px-0 max-w-7xl mx-auto text-slate-800 border-b border-slate-200 scroll-mt-14 sm:scroll-mt-16">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-        <!-- বামে: শুধুমাত্র About সেকশন -->
         <div class="lg:col-span-7">
           <HotelAbout hotel={hotel} />
         </div>
 
-        <!-- ডানে: শুধুমাত্র Rates, ডেট পিকার ও Agoda Live Sync কার্ড -->
         <div class="lg:col-span-5 lg:sticky lg:top-16 z-20">
           <HotelRates hotel={hotel} />
         </div>
