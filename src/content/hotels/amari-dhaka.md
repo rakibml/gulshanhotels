@@ -210,7 +210,7 @@ longitude: ''
 map_query: ''
 nearby_places:
   - name: Hazrat Shahjalal International Airport
-    distance: around 9 to 11 km
+    distance: 9 km away
   - name: Gulshan Central Azad Masjid
     distance: 0.2 km away
   - name: Justice Shahabuddin Ahmed Park
