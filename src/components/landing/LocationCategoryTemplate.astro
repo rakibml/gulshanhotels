@@ -147,9 +147,9 @@ const cleanTitleName = pageTitle
 const hotelsTag = (data.hotels_tag || "").trim();
 const hotelsTitle = (data.hotels_title || (cleanTitleName ? `Accommodations in ${toTitleCase(cleanTitleName)}` : `Available Accommodations`)).trim();
 
-// টেবিলের হেডিং
-const comparisonTableTitle = data.comparison_title || `Quick Comparison of Hotels in ${toTitleCase(cleanTitleName || pageTitle)}`;
+// CMS থেকে টেবিল কন্ট্রোল (ডিফল্ট: true)
 const showComparisonTable = data.enable_comparison_table !== false && displayHotels.length > 0;
+const comparisonTableTitle = data.comparison_title || `Quick Comparison of Hotels in ${toTitleCase(cleanTitleName || pageTitle)}`;
 
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
@@ -212,8 +212,8 @@ const masterSchemaJson = JSON.stringify({
 
   <div class="w-full bg-[#fbfbf9] text-slate-800 font-sans pb-24">
 
-    <!-- 1. CINEMATIC HERO BANNER -->
-    <header class="relative w-full aspect-[21/9] min-h-[280px] sm:min-h-[380px] max-h-[460px] bg-slate-950 overflow-hidden shadow-sm">
+    <!-- 1. CINEMATIC HERO BANNER (With H1 Title Included) -->
+    <header class="relative w-full aspect-[21/9] min-h-[320px] sm:min-h-[420px] max-h-[500px] bg-slate-950 overflow-hidden shadow-sm">
       {heroImage ? (
         <img
           src={heroImage}
@@ -225,13 +225,18 @@ const masterSchemaJson = JSON.stringify({
         <div class="w-full h-full bg-slate-900" />
       )}
       
-      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent"></div>
 
-      <div class="absolute bottom-6 sm:bottom-10 left-4 sm:left-8 lg:left-12 z-10 text-white space-y-2 text-left max-w-3xl">
+      <div class="absolute bottom-6 sm:bottom-12 left-4 sm:left-8 lg:left-12 z-10 text-white space-y-2.5 text-left max-w-4xl pr-4">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-[11px] font-black uppercase tracking-widest text-emerald-300">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>Verified Area Guide</span>
         </div>
+
+        <!-- H1 টাইটেল ব্যানারে যুক্ত করা হলো -->
+        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+          {toTitleCase(pageTitle)}
+        </h1>
         
         {locationSubtitle && (
           <p class="text-xs sm:text-sm font-bold tracking-wider text-slate-200 flex items-center gap-1.5 drop-shadow">
@@ -244,7 +249,7 @@ const masterSchemaJson = JSON.stringify({
     </header>
 
     <!-- 2. BREADCRUMB & EDITORIAL INTRO SECTION -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 text-left">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 text-left">
       <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-6">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span class="text-slate-300">/</span>
@@ -254,23 +259,24 @@ const masterSchemaJson = JSON.stringify({
       </nav>
 
       <div class="max-w-4xl space-y-5">
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-[#002b11] tracking-tight leading-tight">
-          {toTitleCase(pageTitle)}
-        </h1>
-
         {description && (
-          <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed border-l-4 border-emerald-800 pl-4 py-1">
+          <p class="text-base sm:text-lg text-slate-700 font-normal leading-relaxed border-l-4 border-emerald-800 pl-4 py-1">
             {description}
           </p>
         )}
 
-        {Content && (
+        <!-- বডি কন্টেন্ট রেন্ডার (Content না থাকলেও body fallback) -->
+        {Content ? (
           <div class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-a:text-emerald-800 pt-4 border-b border-slate-200/80 pb-8">
             <Content />
           </div>
-        )}
+        ) : (entry?.body && (
+          <div class="prose prose-slate prose-lg max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 prose-p:leading-relaxed prose-a:text-emerald-800 pt-4 border-b border-slate-200/80 pb-8 whitespace-pre-line">
+            {entry.body}
+          </div>
+        ))}
 
-        <!-- 🔥 ৩. GOOGLE TABLE SNIPPET COMPLIANT AUTO COMPARISON TABLE 🔥 -->
+        <!-- ৩. GOOGLE TABLE SNIPPET COMPLIANT AUTO COMPARISON TABLE -->
         {showComparisonTable && (
           <div class="pt-6 pb-4 space-y-3">
             <h3 class="font-serif text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -296,7 +302,6 @@ const masterSchemaJson = JSON.stringify({
                     const starCount = extractStarsNumber(hd.category, hd.stars);
                     const price = formatPriceDisplay(hd.price);
                     
-                    // অটোমেটিক হাইলাইটস নির্বাচন
                     const rawAmenities = Array.isArray(hd.amenities) ? hd.amenities : [];
                     const topAmenities = rawAmenities.slice(0, 2).map((a: any) => typeof a === 'string' ? a.trim() : (a?.name || '').trim()).filter(Boolean);
                     const highlightText = hd.ranking || hd.badge || (topAmenities.length > 0 ? topAmenities.join(' • ') : "Luxury stay in Gulshan");
@@ -492,7 +497,7 @@ const masterSchemaJson = JSON.stringify({
                     )}
                   </div>
 
-                  <!-- Price & Full Tap Target CTA -->
+                  <!-- Price & View Button -->
                   <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div>
                       <span class="hotel-rate-status text-[9px] text-slate-400 font-bold uppercase leading-none block">
@@ -598,11 +603,24 @@ const masterSchemaJson = JSON.stringify({
     }
   };
 
+  const getDhakaDates = () => {
+    const now = new Date();
+    const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const dhaka = new Date(utcMillis + (6 * 3600000));
+    const pad = (n) => String(n).padStart(2, '0');
+    
+    const d1 = `${dhaka.getFullYear()}-${pad(dhaka.getMonth() + 1)}-${pad(dhaka.getDate())}`;
+    dhaka.setDate(dhaka.getDate() + 1);
+    const d2 = `${dhaka.getFullYear()}-${pad(dhaka.getMonth() + 1)}-${pad(dhaka.getDate())}`;
+    return { checkIn: d1, checkOut: d2 };
+  };
+
   const syncAgodaLivePrices = async () => {
     const cards = document.querySelectorAll('.landing-hotel-card');
     if (!cards || cards.length === 0) return;
 
     const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+    const { checkIn, checkOut } = getDhakaDates();
 
     cards.forEach(async (card) => {
       const slug = card.getAttribute('data-slug') || '';
@@ -610,35 +628,45 @@ const masterSchemaJson = JSON.stringify({
       const agodaId = card.getAttribute('data-agoda-id') || '';
 
       const queryParam = agodaId ? `id=${agodaId}` : `hotel=${encodeURIComponent(slug || hotelName)}`;
-      const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&currency=USD`;
+      const requestUrl = `${WORKER_ENDPOINT}?${queryParam}&checkIn=${checkIn}&checkOut=${checkOut}&currency=USD`;
 
       try {
         const response = await fetch(requestUrl);
         if (!response.ok) return;
 
         const data = await response.json();
+        let startingPrice = '';
+        let originalPrice = '';
+        let discountText = '';
+
         if (data.success && data.rates && data.rates.startingPrice) {
+          startingPrice = data.rates.startingPrice;
+          originalPrice = data.rates.originalPrice || '';
+          discountText = data.rates.discountText || '';
+        } else if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+          const item = data.results[0];
+          startingPrice = item.dailyRate ? `$${Math.round(item.dailyRate)}` : '';
+          originalPrice = item.crossedOutRate ? `$${Math.round(item.crossedOutRate)}` : '';
+          discountText = item.discountPercentage ? `${Math.round(item.discountPercentage)}% OFF` : '';
+        }
+
+        if (startingPrice) {
           const priceEl = card.querySelector('.hotel-live-price');
           const perNightEl = card.querySelector('.hotel-per-night');
           const statusEl = card.querySelector('.hotel-rate-status');
           const origPriceEl = card.querySelector('.agoda-original-price');
           const discountEl = card.querySelector('.agoda-discount-badge');
 
-          if (priceEl) {
-            priceEl.textContent = data.rates.startingPrice;
-          }
+          if (priceEl) priceEl.textContent = startingPrice;
+          if (perNightEl) perNightEl.textContent = "/ night";
 
-          if (perNightEl) {
-            perNightEl.textContent = "/ night";
-          }
-
-          if (origPriceEl && data.rates.originalPrice) {
-            origPriceEl.textContent = data.rates.originalPrice;
+          if (origPriceEl && originalPrice) {
+            origPriceEl.textContent = originalPrice;
             origPriceEl.classList.remove('hidden');
           }
 
-          if (discountEl && data.rates.discountText) {
-            discountEl.textContent = data.rates.discountText;
+          if (discountEl && discountText) {
+            discountEl.textContent = discountText;
             discountEl.classList.remove('hidden');
           }
 
