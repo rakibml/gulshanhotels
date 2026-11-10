@@ -1,34 +1,48 @@
 ---
 // src/components/layout/TopBanner.astro
+// SSR-rendered dynamic month & year (Zero CLS and instant accuracy)
+const now = new Date();
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+const currentMonthYear = `Verified Rates for ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 ---
 
-<section class="relative bg-[#0d3b23] text-white py-6 sm:py-10 px-4 overflow-hidden border-b border-white/10">
+<section class="relative bg-[#0d3b23] text-white py-6 sm:py-10 px-4 overflow-hidden border-b border-white/10 text-left">
   <div class="max-w-[1280px] mx-auto relative z-10">
     <div class="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
       
       <div class="space-y-2">
         <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-            <span class="bg-emerald-500 text-[#0d3b23] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">
-                Direct Deal
-            </span>
-            <!-- এখানে এখন বর্তমান মাস ও বছর দেখাবে, যা একদম সত্যি -->
-            <span id="current-month-year" class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest opacity-90">
-                Verified Rates for September 2024
-            </span>
+          <span class="bg-emerald-500 text-[#0d3b23] text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Direct Deal
+          </span>
+          <!-- SSR ডায়নামিক তারিখ: ব্রাউজার ও গুগল বট প্রথমেই বর্তমান মাস ও বছর পাবে -->
+          <span id="current-month-year" class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest opacity-90">
+            {currentMonthYear}
+          </span>
         </div>
-        <h2 class="text-2xl sm:text-4xl font-black leading-tight tracking-tight">
-          <span id="greeting-text">Book Directly</span> & Save <span class="text-emerald-400">Up to 20%</span>
+
+        <h2 class="text-2xl sm:text-4xl font-black leading-tight tracking-tight text-white">
+          <span id="greeting-text">Book Directly</span> &amp; Save <span class="text-emerald-400">Up to 20%</span>
         </h2>
-        <p class="text-sm sm:text-lg text-emerald-100/80 font-medium max-w-2xl">
+
+        <p class="text-sm sm:text-base text-emerald-100/80 font-medium max-w-2xl leading-relaxed">
           Verified luxury stays in Gulshan with best rate guarantee. 
           <span class="hidden sm:inline">No hidden fees, no extra charges.</span>
         </p>
       </div>
 
       <div class="shrink-0">
-        <button id="smart-deals-trigger" class="inline-flex items-center gap-2 bg-white text-[#0d3b23] hover:bg-emerald-50 px-8 py-4 rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider transition-all shadow-xl active:scale-95 group cursor-pointer">
-          Show Best Deals
-          <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button 
+          type="button"
+          id="smart-deals-trigger" 
+          aria-label="Show best hotel deals"
+          class="inline-flex items-center gap-2 bg-white text-[#0d3b23] hover:bg-emerald-50 px-7 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl hover:shadow-2xl active:scale-95 group cursor-pointer"
+        >
+          <span>Show Best Deals</span>
+          <svg aria-hidden="true" class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
@@ -44,22 +58,25 @@
     const dateEl = document.getElementById('current-month-year');
     const triggerBtn = document.getElementById('smart-deals-trigger');
 
-    // ১. স্মার্ট গ্রিটিং লজিক (সময় অনুযায়ী)
-    const hour = new Date().getHours();
-    if (hour < 12) greetingEl.innerText = "Good Morning!";
-    else if (hour < 18) greetingEl.innerText = "Good Afternoon!";
-    else greetingEl.innerText = "Good Evening!";
+    // ১. ইউজারের লোকাল সময় অনুযায়ী গ্রিটিং
+    if (greetingEl) {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 12) greetingEl.textContent = "Good Morning!";
+      else if (hour >= 12 && hour < 18) greetingEl.textContent = "Good Afternoon!";
+      else greetingEl.textContent = "Good Evening!";
+    }
 
-    // ২. রিয়েল টাইম ডেট লজিক (বর্তমান মাস ও বছর দেখাবে)
+    // ২. ক্লায়েন্ট ব্রাউজারের তারিখ সিঙ্ক
     const now = new Date();
-    const monthNames = ["January", "February", "March", "April", "May", "June",
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
     if (dateEl) {
-      dateEl.innerText = `Verified Rates for ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+      dateEl.textContent = `Verified Rates for ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
     }
 
-    // ৩. স্মার্ট বাটন লজিক (Scroll + Filter)
+    // ৩. ডিলস বাটনে ক্লিক করলে স্ক্রল হয়ে ফিল্টার অটো-অ্যাক্টিভ হওয়া
     if (triggerBtn) {
       triggerBtn.onclick = () => {
         const hotelSection = document.getElementById('hotels') || document.querySelector('.directory-card-item');
@@ -69,14 +86,16 @@
 
         setTimeout(() => {
           const dealsBtn = document.getElementById('quickDealsBtn');
-          if (dealsBtn && !dealsBtn.classList.contains('bg-red-600')) {
+          // StickyBar কম্পোনেন্টে 'bg-rose-600' টগল হয়, তাই নির্ভুল চেক নিশ্চিত করা হলো
+          if (dealsBtn && !dealsBtn.classList.contains('bg-rose-600')) {
             dealsBtn.click();
           }
-        }, 800);
+        }, 600);
       };
     }
   }
 
+  // পেজ ইনিশিয়াল লোড ও ক্লায়েন্ট-সাইড নেভিগেশন (Astro View Transitions) হ্যান্ডলিং
   initSmartBanner();
   document.addEventListener('astro:after-swap', initSmartBanner);
   document.addEventListener('astro:page-load', initSmartBanner);
