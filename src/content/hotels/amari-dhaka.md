@@ -151,12 +151,54 @@ rooms:
     price: ''
     size: 37 sq msquare meters
     guests: Sleeps 2
-    bed: 1 King Bed
+    bed: King or twin beds
     image: https://media.gulshanhotels.com/deluxe_king.webp
     image_alt: Deluxe King
-    photos: []
+    photos:
+      - https://media.gulshanhotels.com/deluxe_desk.webp
+      - https://media.gulshanhotels.com/deluxe_lounge.webp
     badges: []
     checklist: []
+  - name: One Bedroom Suite
+    price: ''
+    size: 75 sqm
+    guests: ideal 2 adults and 1 child or 3 adults
+    bed: King Bed
+    image: https://media.gulshanhotels.com/amaridhakaroom.webp
+    image_alt: amari dhaka hotel One Bedroom Suite
+    photos: []
+    badges: []
+    checklist:
+      - name: Mini-bar
+        icon: checkmark
+        custom_svg: ''
+      - name: Safety box
+        icon: checkmark
+        custom_svg: ''
+      - name: Individual climate control
+        icon: checkmark
+        custom_svg: ''
+      - name: Work space
+        icon: checkmark
+        custom_svg: ''
+      - name: Bathtub and shower
+        icon: checkmark
+        custom_svg: ''
+      - name: Bathrobes and slippers
+        icon: checkmark
+        custom_svg: ''
+      - name: Towels
+        icon: checkmark
+        custom_svg: ''
+      - name: Shaving point
+        icon: checkmark
+        custom_svg: ''
+      - name: Hair-dryer
+        icon: checkmark
+        custom_svg: ''
+      - name: Complimentary toiletries
+        icon: checkmark
+        custom_svg: ''
 location_notice: ''
 street_address: 47, Road No 41, Gulshan-2
 locality: Gulshan-2
