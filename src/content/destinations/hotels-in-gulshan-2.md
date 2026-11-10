@@ -10,7 +10,6 @@ comparison_title: ''
 filter_keyword: ''
 selected_hotels:
   - amari-dhaka
-  - the-westin-dhaka
 hotels_tag: ''
 hotels_title: ''
 faqs: []
