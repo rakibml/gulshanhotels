@@ -4,7 +4,7 @@ title: Amari Dhaka Bangladesh
 draft: false
 seo_title: ''
 seo_description: ''
-is_verified: true
+is_verified: false
 ranking: ''
 category: 5-Star Luxury Stay
 location: Gulshan-2, Dhaka Bangladesh 1212
