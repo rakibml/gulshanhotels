@@ -5,7 +5,7 @@ location_subtitle: Gulshan 2, Dhaka 1212, Bangladesh
 hero_image: https://media.gulshanhotels.com/photo_1_2026-11-07_16-24-15.webp
 seo_title: ''
 description: See locations and approximate prices. We currently list 1 hotel here and are adding more.
-enable_comparison_table: true
+enable_comparison_table: false
 comparison_title: ''
 filter_keyword: gulshan 2
 selected_hotels:
