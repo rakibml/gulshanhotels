@@ -25,7 +25,7 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 enable_view_prices: true
-price: $170
+price: $165
 rates_title: Deals & Rates
 rates_live_badge: ''
 rates_price_label: Nightly price
@@ -208,7 +208,17 @@ country: BD
 latitude: ''
 longitude: ''
 map_query: ''
-nearby_places: []
+nearby_places:
+  - name: Hazrat Shahjalal International Airport
+    distance: around 9 to 11 km depending on the route
+  - name: Gulshan Central Azad Masjid
+    distance: 0.2 km away
+  - name: Justice Shahabuddin Ahmed Park
+    distance: 0.9 km away
+  - name: Unimart (Gulshan-2)
+    distance: 0.6 km away
+  - name: Jamuna Future Park
+    distance: 3.0 km away
 insider_tips: []
 reviews_notice: ''
 reviews: []
