@@ -11,34 +11,31 @@ sortable_fields: ["title"]
 editor:
   preview: false
 
-# এই ফিল্ডগুলো LocationCategoryTemplate.astro এর সাথে ১০০% মিলানো।
-# টেমপ্লেট যে ফিল্ড পড়ে না, তা এখানে রাখা হয়নি।
-
 fields:
   # ================= PAGE BASICS =================
   - label: "Page Title (H1)"
     name: "title"
     widget: "string"
-    hint: "যেমন: Hotels in Gulshan 2। পেজের বড় শিরোনাম ও ব্যানারে এটাই দেখাবে।"
+    hint: "যেমন: Hotels in Gulshan 2। পেজের মূল শিরোনাম ও ব্যানারে এটাই দেখাবে।"
 
   - label: "URL Slug"
     name: "slug"
     widget: "string"
-    pattern: ['^(?!(about|contact|privacy|disclaimer|admin|sitemap)$)[a-z0-9]+(?:-[a-z0-9]+)*$', 'শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন দিন। about, contact, privacy, disclaimer, admin, sitemap দেওয়া যাবে না।']
-    hint: "যেমন: hotels-in-gulshan-2। কোনো হোটেলের slug এর সাথে হুবহু মিলানো যাবে না, নইলে দুটো পেজ ঝগড়া করবে।"
+    pattern: ['^(?!(about|contact|privacy|disclaimer|admin|sitemap)$)[a-z0-9]+(?:-[a-z0-9]+)*$', 'শুধু ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও হাইফেন দিন। about, contact, privacy, disclaimer, admin, sitemap দেওয়া যাবে না।']
+    hint: "যেমন: hotels-in-gulshan-2। কোনো হোটেলের slug এর সাথে হুবহু মিলানো যাবে না।"
 
   - label: "Location Subtitle"
     name: "location_subtitle"
     widget: "string"
     required: false
-    hint: "ব্যানারে শিরোনামের নিচে ছোট লেখা। যেমন: Gulshan, Dhaka"
+    hint: "ব্যানারে শিরোনামের নিচে ছোট লেখা। যেমন: Gulshan 2, Dhaka"
 
   - label: "Hero Banner Image"
     name: "hero_image"
     widget: "image"
     choose_url: true
     required: false
-    hint: "ছবি অবশ্যই এই জায়গার সাথে মিলতে হবে, আর ব্যবহারের অনুমতি থাকতে হবে। সংযুক্ত না করলে কালো ব্যাকগ্রাউন্ড দেখাবে।"
+    hint: "ব্যানার কভার ছবি আপলোড করুন।"
 
   # ================= SEO =================
   - label: "SEO Title (Optional)"
@@ -46,20 +43,41 @@ fields:
     widget: "string"
     required: false
     pattern: ['^.{10,65}$', '১০ থেকে ৬৫ অক্ষরের মধ্যে লিখুন']
-    hint: "গুগলে নীল শিরোনাম হিসেবে দেখায়। ফাঁকা রাখলে পেজের টাইটেল থেকে অটো তৈরি হবে। সত্যি কথা লিখুন, প্রমাণ ছাড়া best, top, luxury লিখবেন না।"
+    hint: "গুগলে নীল শিরোনাম হিসেবে দেখায়। ফাঁকা রাখলে পেজের টাইটেল থেকে অটো তৈরি হবে।"
 
   - label: "Description (Meta Description + Page Intro)"
     name: "description"
     widget: "text"
-    pattern: ['^.{50,170}$', '৫০ থেকে ১৭০ অক্ষরের মধ্যে, এক অনুচ্ছেদে লিখুন']
-    hint: "এটা গুগল সার্চের নিচের লেখা এবং পেজের H1 এর নিচের পরিচিতি, দুই জায়গাতেই দেখায়। সত্যি ও সহজ লিখুন, ১২০ থেকে ১৬০ অক্ষর ভালো।"
+    pattern: ['^.{50,170}$', '৫০ থেকে ১৭০ অক্ষরের মধ্যে লিখুন']
+    hint: "গুগল সার্চ ও পেজ ইন্ট্রো হিসেবে দেখায়। ১২০ থেকে ১৬০ অক্ষর আদর্শ।"
+
+  # ================= LONG ARTICLE BODY =================
+  - label: "Detailed Article Body"
+    name: "body"
+    widget: "markdown"
+    required: false
+    hint: "পেজের মূল আর্টিকেল (এলাকা সম্পর্কে তথ্য, এলাকা গাইড ইত্যাদি)। এটি গুগলের জন্য অত্যন্ত গুরুত্বপূর্ণ।"
+
+  # ================= COMPARISON TABLE CONTROLS =================
+  - label: "Show Hotel Comparison Table?"
+    name: "enable_comparison_table"
+    widget: "boolean"
+    default: true
+    required: false
+    hint: "গুগল টেবিল স্নিপেটের জন্য স্বয়ংক্রিয় তুলনা টেবিল দেখাতে চান কি না।"
+
+  - label: "Comparison Table Title"
+    name: "comparison_title"
+    widget: "string"
+    required: false
+    hint: "ফাঁকা রাখলে 'Quick Comparison of Hotels in...' স্বয়ংক্রিয়ভাবে তৈরি হবে।"
 
   # ================= HOTEL LIST CONTROLS =================
   - label: "Auto-Filter Keyword"
     name: "filter_keyword"
     widget: "string"
     required: false
-    hint: "যেমন: gulshan 2। হোটেলের location, category বা নামে এই শব্দ থাকলে পেজে আসবে। ফাঁকা রাখলে slug থেকে অটো খুঁজবে (hotels-in-gulshan-2 থেকে gulshan 2)। হাইফেন বা স্পেস একই ধরা হয়।"
+    hint: "যেমন: gulshan 2। হোটেলের location, category বা নামে এই শব্দ থাকলে পেজে আসবে।"
 
   - label: "Manually Select Hotels (Optional)"
     name: "selected_hotels"
@@ -70,34 +88,27 @@ fields:
     display_fields: ["title"]
     multiple: true
     required: false
-    hint: "এখানে হোটেল বাছলে অটো-ফিল্টার বন্ধ হয়ে যাবে, শুধু এই হোটেলগুলো দেখাবে। ফাঁকা রাখলে অটো-ফিল্টার চলবে।"
+    hint: "হাতে কলমে নির্দিষ্ট কিছু হোটেল বেছে দিতে চাইলে এখানে সিলেক্ট করুন।"
 
   - label: "Hotels Section Tag"
     name: "hotels_tag"
     widget: "string"
     required: false
-    hint: "হোটেল তালিকার ওপরে ছোট লেখা। যেমন: STAYS IN GULSHAN 2। ফাঁকা রাখলে দেখাবে না।"
+    hint: "হোটেল তালিকার ওপরে ছোট লেখা (যেমন: STAYS IN GULSHAN 2)।"
 
   - label: "Hotels Section Title (H2)"
     name: "hotels_title"
     widget: "string"
     required: false
-    hint: "ফাঁকা রাখলে 'Accommodations in Gulshan 2' এর মতো অটো তৈরি হবে।"
+    hint: "ফাঁকা রাখলে 'Accommodations in Gulshan 2' অটো তৈরি হবে।"
 
-  # ================= FAQ (শুধু প্রশ্ন ও উত্তর দুটোই থাকলে দেখাবে) =================
+  # ================= FAQ =================
   - label: "FAQs"
     name: "faqs"
     widget: "list"
     required: false
     summary: "{{fields.question}}"
-    hint: "এখানের প্রশ্ন পেজে আর গুগলের FAQ Schema তে একই যাবে। শুধু সত্যি ও যাচাই করা উত্তর লিখুন।"
+    hint: "প্রশ্ন ও উত্তর উভয়ই দিলে তা পেজে এবং গুগল FAQ Schema-তে যুক্ত হবে।"
     fields:
       - { label: "Question", name: "question", widget: "string" }
       - { label: "Answer", name: "answer", widget: "text" }
-
-  # ================= LONG ARTICLE BODY =================
-  - label: "Detailed Article Body"
-    name: "body"
-    widget: "markdown"
-    required: false
-    hint: "পেজের মূল লেখা (H1 ও বর্ণনার নিচে, হোটেল তালিকার ওপরে)। এলাকা সম্পর্কে সত্যি তথ্য, হোটেল বাছার টিপস আর দামের নোট এখানে লিখুন। এটাই গুগলের কাছে সবচেয়ে মূল্যবান অংশ।"
