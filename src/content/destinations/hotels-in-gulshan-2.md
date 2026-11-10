@@ -13,13 +13,7 @@ selected_hotels:
   - the-westin-dhaka
 hotels_tag: ''
 hotels_title: ''
-faqs:
-  - question: test hello
-    answer: sadfdsfdsfdfsdf
-  - question: test hello
-    answer: sadfdsfdsfdfsdf
-  - question: test hello
-    answer: sadfdsfdsfdfsdf
+faqs: []
 about_image: https://media.gulshanhotels.com/amaridhaka.webp
 about_tag: ''
 about_text: |-
