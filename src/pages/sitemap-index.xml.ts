@@ -1,19 +1,15 @@
 // src/pages/sitemap-index.xml.ts
-// 100% Google Search Central & Sitemaps.org Protocol Compliant
+// 100% Real File Modification & Frontmatter Date Finder (Google Search Central Compliant)
+import fs from 'node:fs';
+import path from 'node:path';
 import { getCollection } from 'astro:content';
 
 export async function GET() {
   const siteOrigin = 'https://gulshanhotels.com';
   const isProd = import.meta.env.PROD;
+  const today = new Date().toISOString().split('T')[0];
 
   const urlMap = new Map<string, { loc: string; lastmod: string }>();
-
-  // নিরাপদ তারিখ ফরম্যাটার (কখনোই ক্র্যাশ করবে না)
-  function toSafeIsoDate(d: any): string | null {
-    if (!d) return null;
-    const parsed = new Date(d);
-    return isNaN(parsed.getTime()) ? null : parsed.toISOString().split('T')[0];
-  }
 
   // XML নিরাপদ টেক্সট এস্কেপার
   function escapeXml(str: string): string {
@@ -25,28 +21,71 @@ export async function GET() {
       .replace(/'/g, '&apos;');
   }
 
-  // ক্যানোনিকাল স্ল্যাশ নিশ্চিত করে URL যুক্ত করা
-  function addUrl(path: string, lastmod?: string | null) {
-    const cleanPath = path.replace(/^\/+|\/+$/g, '');
+  // ১. ফাইল সিস্টেম ও ফ্রন্টম্যাটার থেকে ১০০% আসল তারিখ বের করার ফাংশন
+  function getRealFileDate(relPath: string, frontmatterDate?: any): string {
+    // ক. ফ্রন্টম্যাটারে তারিখ থাকলে সেটা নেবে
+    if (frontmatterDate) {
+      const parsed = new Date(frontmatterDate);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split('T')[0];
+      }
+    }
+
+    // খ. ফ্রন্টম্যাটারে না থাকলে ফাইলটি কম্পিউটারে শেষ কবে সেভ হয়েছে সেই আসল তারিখ নেবে
+    try {
+      const fullPath = path.resolve(process.cwd(), relPath);
+      if (fs.existsSync(fullPath)) {
+        const stats = fs.statSync(fullPath);
+        return stats.mtime.toISOString().split('T')[0];
+      }
+    } catch (e) {}
+
+    // গ. ফাইল না পেলে আজকের আসল তারিখ
+    return today;
+  }
+
+  // ২. কন্টেন্ট ফোল্ডারের ফাইল থেকে আসল তারিখ খোঁজার হেল্পার
+  function getContentFileDate(folder: string, filename: string, frontmatterDate?: any): string {
+    if (frontmatterDate) {
+      const parsed = new Date(frontmatterDate);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().split('T')[0];
+      }
+    }
+
+    const extensions = ['.md', '.mdx', ''];
+    for (const ext of extensions) {
+      const relPath = path.join('src/content', folder, filename.endsWith(ext) ? filename : `${filename}${ext}`);
+      try {
+        const fullPath = path.resolve(process.cwd(), relPath);
+        if (fs.existsSync(fullPath)) {
+          return fs.statSync(fullPath).mtime.toISOString().split('T')[0];
+        }
+      } catch (e) {}
+    }
+
+    return today;
+  }
+
+  // ৩. সাইটম্যাপে URL যুক্ত করা
+  function addUrl(pathStr: string, lastmodDate: string) {
+    const cleanPath = pathStr.replace(/^\/+|\/+$/g, '');
     const fullUrl = cleanPath ? `${siteOrigin}/${cleanPath}/` : `${siteOrigin}/`;
-    
-    // সাইটের বেস/ডিফল্ট আপডেটেড তারিখ (আজকের তারিখ নয়)
-    const safeDate = lastmod || '2026-03-01';
 
     if (!urlMap.has(fullUrl)) {
-      urlMap.set(fullUrl, { loc: escapeXml(fullUrl), lastmod: safeDate });
+      urlMap.set(fullUrl, { loc: escapeXml(fullUrl), lastmod: lastmodDate });
     }
   }
 
-  // ১. মূল স্ট্যাটিক পাতাগুলো (Static Hub Routes)
-  addUrl('', '2026-03-01');
-  addUrl('blog', '2026-03-01');
-  addUrl('about', '2026-02-15');
-  addUrl('contact', '2026-02-15');
-  addUrl('privacy', '2026-01-10');
-  addUrl('disclaimer', '2026-01-10');
+  // ================= মূল স্ট্যাটিক পেজসমূহ (ফাইলের আসল এডিট ডেট) =================
+  addUrl('', getRealFileDate('src/pages/index.astro'));
+  addUrl('blog', getRealFileDate('src/pages/blog/index.astro'));
+  addUrl('about', getRealFileDate('src/pages/about.astro'));
+  addUrl('contact', getRealFileDate('src/pages/contact.astro'));
+  addUrl('privacy', getRealFileDate('src/pages/privacy.astro'));
+  addUrl('disclaimer', getRealFileDate('src/pages/disclaimer.astro'));
 
-  // ২. হোটেল কালেকশন (ড্রাফট ফিল্টারসহ)
+  // ================= হোটেল কালেকশন =================
   let hotels: any[] = [];
   try {
     const hotelCol = await (getCollection as any)('hotels', ({ data }: any) => {
@@ -61,6 +100,7 @@ export async function GET() {
       hotels = Object.entries(rawGlob)
         .filter(([_, item]: [string, any]) => (isProd ? item?.frontmatter?.draft !== true : true))
         .map(([filePath, item]: [string, any]) => ({
+          id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
           slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
           data: item?.frontmatter || item?.data || {}
         }));
@@ -68,14 +108,15 @@ export async function GET() {
   }
 
   hotels.forEach((h: any) => {
+    const fileId = String(h.id || h.slug || '').replace(/\.(md|mdx)$/, '');
     const slug = String(h.slug || h.data?.slug || h.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
     if (slug) {
-      const updatedDate = toSafeIsoDate(h.data?.last_updated || h.data?.updated || h.data?.date) || '2026-02-20';
-      addUrl(slug, updatedDate);
+      const realDate = getContentFileDate('hotels', fileId, h.data?.last_updated || h.data?.updated || h.data?.date);
+      addUrl(slug, realDate);
     }
   });
 
-  // ৩. ডেস্টিনেশন ও এরিয়া গাইড (Destinations)
+  // ================= ডেস্টিনেশন ও এরিয়া গাইড =================
   let destinations: any[] = [];
   try {
     const destCol = await (getCollection as any)('destinations');
@@ -86,6 +127,7 @@ export async function GET() {
     try {
       const rawGlobDest = import.meta.glob(['/src/content/destinations/*.{md,mdx}', '../../content/destinations/*.{md,mdx}'], { eager: true });
       destinations = Object.entries(rawGlobDest).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         data: item?.frontmatter || item?.data || {}
       }));
@@ -93,14 +135,15 @@ export async function GET() {
   }
 
   destinations.forEach((d: any) => {
+    const fileId = String(d.id || d.slug || '').replace(/\.(md|mdx)$/, '');
     const slug = String(d.slug || d.data?.slug || d.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
     if (slug) {
-      const updatedDate = toSafeIsoDate(d.data?.last_updated || d.data?.updated) || '2026-02-25';
-      addUrl(slug, updatedDate);
+      const realDate = getContentFileDate('destinations', fileId, d.data?.last_updated || d.data?.updated);
+      addUrl(slug, realDate);
     }
   });
 
-  // ৪. ট্রাভেল গাইড ও ব্লগ পোস্ট (Posts)
+  // ================= ব্লগ পোস্ট =================
   let posts: any[] = [];
   try {
     const postCol = await (getCollection as any)('posts');
@@ -111,6 +154,7 @@ export async function GET() {
     try {
       const rawGlobPosts = import.meta.glob(['/src/content/posts/*.{md,mdx}', '../../content/posts/*.{md,mdx}'], { eager: true });
       posts = Object.entries(rawGlobPosts).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         data: item?.frontmatter || item?.data || {}
       }));
@@ -118,14 +162,15 @@ export async function GET() {
   }
 
   posts.forEach((p: any) => {
+    const fileId = String(p.id || p.slug || '').replace(/\.(md|mdx)$/, '');
     const slug = String(p.slug || p.data?.slug || p.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
     if (slug) {
-      const postDate = toSafeIsoDate(p.data?.date) || '2026-02-01';
-      addUrl(`blog/${slug}`, postDate);
+      const realDate = getContentFileDate('posts', fileId, p.data?.date || p.data?.last_updated);
+      addUrl(`blog/${slug}`, realDate);
     }
   });
 
-  // ৫. সাধারণ পেজসমূহ (Pages)
+  // ================= সাধারণ কন্টেন্ট পেজ =================
   let pages: any[] = [];
   try {
     const pageCol = await (getCollection as any)('pages');
@@ -136,6 +181,7 @@ export async function GET() {
     try {
       const rawGlobPages = import.meta.glob(['/src/content/pages/*.{md,mdx}', '../../content/pages/*.{md,mdx}'], { eager: true });
       pages = Object.entries(rawGlobPages).map(([filePath, item]: [string, any]) => ({
+        id: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         slug: filePath.split('/').pop()?.replace(/\.(md|mdx)$/, '')?.toLowerCase(),
         data: item?.frontmatter || item?.data || {}
       }));
@@ -143,14 +189,15 @@ export async function GET() {
   }
 
   pages.forEach((pg: any) => {
+    const fileId = String(pg.id || pg.slug || '').replace(/\.(md|mdx)$/, '');
     const slug = String(pg.slug || pg.data?.slug || pg.id || '').replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase();
     if (slug && !urlMap.has(`${siteOrigin}/${slug}/`)) {
-      const pageDate = toSafeIsoDate(pg.data?.last_updated || pg.data?.updated) || '2026-01-15';
-      addUrl(slug, pageDate);
+      const realDate = getContentFileDate('pages', fileId, pg.data?.last_updated || pg.data?.updated);
+      addUrl(slug, realDate);
     }
   });
 
-  // XML তৈরি (গুগলের ক্লিন ফরম্যাট: শুধু loc এবং lastmod)
+  // XML তৈরি
   const urlsArray = Array.from(urlMap.values());
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
