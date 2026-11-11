@@ -1,4 +1,3 @@
----
 // src/components/hotel/HotelRates.astro — TripAdvisor-style "Deals" card
 // Fully Compliant with Agoda Affiliate Long Tail Search API & 100% Dynamic
 interface Props {
@@ -14,9 +13,12 @@ const hotelTitle = String(data.title || data.name || "").trim();
 const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 
-// সব ধরনের ফিল্ড ফরম্যাট থেকে Agoda ID নেওয়ার সুরক্ষা
+// আপনার মূল CID ডিফল্ট হিসেবে সেট করা হলো
+const DEFAULT_AGODA_CID = "1979567";
+
+// কন্ট্রোল প্যানেলে CID দেওয়া থাকলে সেটি নিবে, না থাকলে অটো 1979567 নিবে
 const agodaId = String(data.agoda_id || data.agodaId || data.agoda_hotel_id || "").trim();
-const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || "").trim();
+const agodaCid = String(data.agoda_cid || import.meta.env.PUBLIC_AGODA_CID || DEFAULT_AGODA_CID).trim() || DEFAULT_AGODA_CID;
 const customAgodaUrl = String(data.agoda_url || "").trim();
 
 // অ্যাডমিন প্যানেলের কাস্টম টেক্সটসমূহ
@@ -179,7 +181,7 @@ function buildAgodaFallback(id: string, customUrl: string, title: string, cid: s
   if (title) {
     return `https://www.agoda.com/search?text=${encodeURIComponent(title + ' Dhaka')}${cid ? `&cid=${encodeURIComponent(cid)}` : ''}`;
   }
-  return "https://www.agoda.com/";
+  return `https://www.agoda.com/?cid=${encodeURIComponent(cid || DEFAULT_AGODA_CID)}`;
 }
 
 const agodaFallbackUrl = buildAgodaFallback(agodaId, customAgodaUrl, hotelTitle, agodaCid);
@@ -225,6 +227,7 @@ const rows: Row[] = baseRows
     data-hotel-title={hotelTitle}
     data-hotel-slug={hotelSlug}
     data-agoda-id={agodaId}
+    data-agoda-cid={agodaCid}
     data-agoda-fallback={agodaFallbackUrl}
     data-currency={apiCurrency}
     data-main-currency={mainCurrency}
@@ -584,6 +587,8 @@ const rows: Row[] = baseRows
   const ratesMemoryCache = new Map<string, any>();
 
   const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+  const DEFAULT_AGODA_CID = "1979567"; // ক্লায়েন্ট স্ক্রিপ্টে ডিফল্ট CID
+
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -664,6 +669,7 @@ const rows: Row[] = baseRows
     const hotelSlug = (card.getAttribute('data-hotel-slug') || '').trim();
     const hotelName = (card.getAttribute('data-hotel-title') || '').trim();
     const agodaId = (card.getAttribute('data-agoda-id') || '').trim();
+    const agodaCid = (card.getAttribute('data-agoda-cid') || DEFAULT_AGODA_CID).trim() || DEFAULT_AGODA_CID;
     const apiCurrency = (card.getAttribute('data-currency') || 'USD').trim();
     const agodaFallback = (card.getAttribute('data-agoda-fallback') || '').trim();
 
@@ -877,6 +883,13 @@ const rows: Row[] = baseRows
         u.searchParams.set('NumberofAdults', String(adults));
         u.searchParams.set('NumberofChildren', String(children));
         u.searchParams.set('Rooms', String(rooms));
+
+        // CID নিশ্চিত করা হচ্ছে
+        const targetCid = agodaCid || DEFAULT_AGODA_CID;
+        if (!u.searchParams.get('cid')) {
+          u.searchParams.set('cid', targetCid);
+        }
+
         a.href = u.toString();
       } catch {
         a.href = agodaBaseUrl;
@@ -893,7 +906,8 @@ const rows: Row[] = baseRows
     async function fetchLiveRates() {
       if (!agodaRow) return;
 
-      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${children}_${rooms}_${apiCurrency}`;
+      const currentCid = agodaCid || DEFAULT_AGODA_CID;
+      const cacheKey = `${hotelSlug || agodaId}_${checkIn}_${checkOut}_${adults}_${children}_${rooms}_${apiCurrency}_${currentCid}`;
       if (ratesMemoryCache.has(cacheKey)) {
         applyRates(ratesMemoryCache.get(cacheKey));
         return;
@@ -906,7 +920,6 @@ const rows: Row[] = baseRows
 
       setLoading(true);
 
-      // আগোডার পিডিএফ অনুয়ায়ী সব ভ্যারিয়ান্ট পাঠানো হলো
       const queryParams = new URLSearchParams();
       if (agodaId) {
         queryParams.set('id', agodaId);
@@ -914,6 +927,8 @@ const rows: Row[] = baseRows
       } else {
         queryParams.set('hotel', hotelSlug || hotelName);
       }
+      // CID বাধ্যতামূলকভাবে Worker-এ পাঠানো হচ্ছে
+      queryParams.set('cid', currentCid);
       queryParams.set('checkIn', checkIn);
       queryParams.set('checkInDate', checkIn);
       queryParams.set('checkOut', checkOut);
@@ -937,10 +952,9 @@ const rows: Row[] = baseRows
         const json = await res.json();
         console.log('[HotelRates API Response]', json);
 
-        // Agoda Official PDF Schema অথবা Custom Wrapper উভয়ই হ্যান্ডেল করার অ্যাডাপ্টার
         let normalizedRates: any = null;
 
-        // ১. আগোডার অফিশিয়াল রেসপন্স ফরম্যাট (PDF Page 6 & 8)
+        // ১. আগোডার অফিশিয়াল রেসপন্স ফরম্যাট
         if (json?.results && Array.isArray(json.results) && json.results.length > 0) {
           const item = json.results[0];
           const curSym = item.currency === 'USD' ? '$' : (item.currency === 'BDT' ? '৳' : (item.currency || '$'));
@@ -1014,7 +1028,7 @@ const rows: Row[] = baseRows
       }
       if (noteEl && rates?.note) noteEl.textContent = String(rates.note);
 
-      // আগোডার পিডিএফ থেকে পাওয়া লাইভ বুকিং লিঙ্ক সেট করা
+      // আগোডার লাইভ ল্যান্ডিং ইউআরএল
       const liveLandingUrl = rates?.landingUrl || rates?.landingURL;
       if (liveLandingUrl && liveLandingUrl !== '#') {
         agodaBaseUrl = String(liveLandingUrl);
