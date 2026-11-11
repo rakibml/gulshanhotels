@@ -41,7 +41,7 @@ whatsapp_button_text: ''
 whatsapp_message: ''
 agoda_id: '40550646'
 agoda_url: ''
-agoda_cid: ''
+agoda_cid: '1979567'
 booking_channels: []
 officialSite: ''
 whatsapp: ''
