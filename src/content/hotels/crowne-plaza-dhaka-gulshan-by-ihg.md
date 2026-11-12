@@ -3,7 +3,7 @@ header_notice: ''
 title: Crowne Plaza Dhaka Gulshan by IHG
 draft: false
 seo_title: Crowne Plaza Dhaka Gulshan by IHG 5-Star Hotel in Gulshan 2
-seo_description: ''
+seo_description: Crowne Plaza Dhaka Gulshan at 6A North Avenue, Gulshan 2. 149 rooms, rooftop pool, 3 restaurants and on-site parking. Rooms, nearby places and tips.
 is_verified: false
 ranking: ''
 category: 5-Star Luxury Stay
