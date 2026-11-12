@@ -6,4 +6,5 @@ popular_hotels_subtitle: Popular Hotels in Gulshan
 max_hotels: 10
 featured_hotels:
   - amari-dhaka
+  - crowne-plaza-dhaka-gulshan-by-ihg
 ---
