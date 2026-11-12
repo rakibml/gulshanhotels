@@ -8,7 +8,7 @@ is_verified: false
 ranking: ''
 category: 5-Star Luxury Stay
 location: Gulshan 2, Dhaka, Bangladesh
-map_url: <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d912.6700484316483!2d90.41325492849904!3d23.79439999865959!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7b52f19ea6d%3A0x84fd21beef8ef9ed!2sCrowne%20Plaza%20Dhaka%20Gulshan%20by%20IHG!5e0!3m2!1sen!2sbd!4v1794498928479!5m2!1sen!2sbd" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+map_url: ''
 image: https://media.gulshanhotels.com/crowne-plaza-dhaka-gulshanhotels.com.webp
 image_alt: Crowne Plaza Dhaka Gulshan by IHG
 gallery:
