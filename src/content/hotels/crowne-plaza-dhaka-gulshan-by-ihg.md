@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: Crowne Plaza Dhaka Gulshan by IHG
-draft: true
+draft: false
 seo_title: Crowne Plaza Dhaka Gulshan by IHG 5-Star Hotel in Gulshan 2
 seo_description: ''
 is_verified: false
