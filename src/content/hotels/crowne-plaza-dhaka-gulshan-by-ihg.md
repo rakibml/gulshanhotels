@@ -80,27 +80,114 @@ custom_policies: []
 amenities_notice: ''
 enable_amenities: true
 amenities_title: Amenities & Services
-amenities: []
+amenities:
+  - name: Daily housekeeping
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <!-- jharur hat -->
+        <path d="M19 3l-6.5 6.5"/>
+        <!-- jharur matha -->
+        <path d="M9.5 10.5L13.5 14.5L9 20H4Q4 15 9.5 10.5Z"/>
+        <!-- sparkle -->
+        <path d="M19 14v4M17 16h4"/>
+        <path d="M5 3v3M3.5 4.5h3"/>
+      </svg>
+  - name: Fitness center
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <!-- majher rod -->
+        <path d="M6 12h12"/>
+        <!-- bhitorer weight -->
+        <path d="M6 7v10"/>
+        <path d="M18 7v10"/>
+        <!-- baire'r weight -->
+        <path d="M3 9.5v5"/>
+        <path d="M21 9.5v5"/>
+      </svg>
+  - name: On-site parking
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <!-- box -->
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <!-- P okkhor -->
+        <path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>
+      </svg>
+  - name: Pool
+    icon: checkmark
+    custom_svg: |-
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <!-- shiri (ladder) -->
+        <path d="M8 4v10"/>
+        <path d="M16 4v10"/>
+        <path d="M8 7h8"/>
+        <path d="M8 11h8"/>
+        <!-- pani'r dheu -->
+        <path d="M2 17c1.5-1.5 3-1.5 4.5 0s3 1.5 4.5 0 3-1.5 4.5 0 3 1.5 4.5 0"/>
+        <path d="M2 21c1.5-1.5 3-1.5 4.5 0s3 1.5 4.5 0 3-1.5 4.5 0 3 1.5 4.5 0"/>
+      </svg>
+  - name: 6 on-site restaurants
+    icon: checkmark
+    custom_svg: ''
+  - name: Wi-Fi
+    icon: checkmark
+    custom_svg: ''
 categorized_amenities: []
 rooms_title: Room Types
 rooms_subtitle: Explore all available rooms & suites
 rooms: []
 location_notice: ''
-street_address: ''
-locality: ''
+street_address: 6A Gulshan North Ave
+locality: Gulshan 2
 region: Dhaka
-postal_code: ''
+postal_code: '1212'
 country: BD
 latitude: ''
 longitude: ''
 map_query: ''
-nearby_places: []
+nearby_places:
+  - name: Hazrat Shahjalal International Airport
+    distance: 10-11 Km away
+  - name: North End Coffee Roasters and Secret Recipe
+    distance: 2 minute walk.
+  - name: Embassy of Turkey
+    distance: 10 minute walk
+  - name: The Westin Dhaka
+    distance: only about 160 metres away
+  - name: Gulshan Lake
+    distance: 10 minute walk
 insider_tips: []
 reviews_notice: ''
 reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
-faqs: []
+faqs:
+  - question: Where is Crowne Plaza Dhaka Gulshan located?
+    answer: It is at 6A North Avenue Commercial Area, Gulshan 2, Dhaka 1212. Gulshan 2 Circle is close by.
+  - question: How many rooms does the hotel have?
+    answer: 149 rooms and suites, split between the Tower Wing and the Residences Wing.
+  - question: Does the hotel have a swimming pool?
+    answer: Yes. The pool is on the rooftop.
+  - question: Is there parking?
+    answer: Yes, the hotel has on-site parking.
+  - question: Can I hold a meeting or small event here?
+    answer: Yes, the hotel has meeting and event spaces. Contact the hotel directly for sizes and prices.
+  - question: Is Crowne Plaza Dhaka Gulshan the same as Crowne Plaza Residence?
+    answer: No. They are two different properties with similar names. Check the full name and address before you pay
+  - question: Which other big hotels are near it?
+    answer: The Westin Dhaka, Amari Dhaka and Six Seasons Hotel are all in the Gulshan area.
+  - question: Is it a good hotel for business trips?
+    answer: It works well if your meetings are in Gulshan. Many offices and embassies are nearby.
 ---
 
 Crowne Plaza Dhaka Gulshan is at 6A North Avenue, Gulshan 2, Dhaka 1212. It sits in the North Avenue Commercial Area, close to Gulshan 2 Circle. The area is full of offices, embassies, restaurants and shops, so you will not struggle to find things to do or places to eat nearby.
