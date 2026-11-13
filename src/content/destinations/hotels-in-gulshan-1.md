@@ -8,7 +8,8 @@ description: Planning a visit to Gulshan 1? Here is our practical, street-tested
 enable_comparison_table: false
 comparison_title: ''
 filter_keyword: ''
-selected_hotels: []
+selected_hotels:
+  - renaissance-dhaka-gulshan-hotel
 hotels_tag: STAYS IN GULSHAN 1
 hotels_title: Accommodations & Hotels in Gulshan 1
 faqs:
