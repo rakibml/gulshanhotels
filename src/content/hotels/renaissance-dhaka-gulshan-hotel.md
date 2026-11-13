@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: Renaissance Dhaka Gulshan Hotel
-draft: true
+draft: false
 seo_title: Renaissance Dhaka Gulshan Hotel | 5 Star Hotel in Gulshan 1
 seo_description: Explore Renaissance Dhaka Gulshan Hotel in Gulshan 1. Read our guide covering its 211 rooms, rooftop pool, 5 dining spots, free parking, and check-in rules.
 is_verified: false
