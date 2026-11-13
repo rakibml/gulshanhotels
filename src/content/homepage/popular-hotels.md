@@ -7,4 +7,5 @@ max_hotels: 10
 featured_hotels:
   - amari-dhaka
   - crowne-plaza-dhaka-gulshan-by-ihg
+  - renaissance-dhaka-gulshan-hotel
 ---
