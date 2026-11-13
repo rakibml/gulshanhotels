@@ -210,7 +210,7 @@ longitude: ''
 map_query: ''
 nearby_places:
   - name: Hazrat Shahjalal International Airport
-    distance: 9 km away
+    distance: 10.8 km away
   - name: Gulshan Central Azad Masjid
     distance: 0.2 km away
   - name: Justice Shahabuddin Ahmed Park
@@ -228,7 +228,7 @@ faqs:
   - question: What is the check-in and check-out time at Amari Dhaka?
     answer: At Amari Dhaka, check-in is available 24 hours starting from 14:00 (2:00 PM), and standard check-out time is until 12:00 (12:00 PM)
   - question: How far is Amari Dhaka from Hazrat Shahjalal International Airport?
-    answer: Amari Dhaka is located approximately 8 kilometers from Hazrat Shahjalal International Airport (DAC), which takes around 15 to 25 minutes via the Dhaka Elevated Expressway.
+    answer: Amari Dhaka is located approximately 10.8 kilometers from Hazrat Shahjalal International Airport (DAC), which takes around 15 to 25 minutes via the Dhaka Elevated Expressway.
 deals_title: Deals
 enable_official_site: true
 policies:
@@ -256,6 +256,6 @@ Food is another part of the experience at Amari Dhaka. The hotel has several din
 
 For guests who want to relax or stay active, the hotel offers a rooftop swimming pool, a fitness centre, and Breeze Spa. There are also meeting and event spaces for business meetings, conferences, and special occasions.
 
-One of the biggest advantages of staying at Amari Dhaka is its location. It is close to many embassies, international offices, banks, and business centres in Gulshan. Gulshan Market is around 800 metres away, while Hazrat Shahjalal International Airport is about 8 km from the hotel.
+One of the biggest advantages of staying at Amari Dhaka is its location. It is close to many embassies, international offices, banks, and business centres in Gulshan. Gulshan Market is around 800 metres away, while Hazrat Shahjalal International Airport is about 10.8 km from the hotel.
 
 Overall, Amari Dhaka is worth considering if you are looking for a 5-star hotel in Gulshan 2 with comfortable rooms, dining options, modern facilities, and easy access to Dhaka's business district.
