@@ -128,9 +128,10 @@ const isValidOfficialSite =
   !rawOfficialSite.includes("youtu.be/");
 
 // ================= ৩. গ্যালারি ইমেজ অ্যারে =================
-const rawGalleryItems: any[] = Array.isArray(data.gallery) && data.gallery.length > 0
-  ? data.gallery.filter(Boolean)
-  : (data.image ? [data.image] : []);
+const rawGalleryItems: any[] = [
+  ...(data.image ? [data.image] : []),
+  ...(Array.isArray(data.gallery) ? data.gallery.filter(Boolean) : [])
+];
 const images = Array.from(new Set(rawGalleryItems.map(toAbsoluteImageUrl).filter(Boolean))).slice(0, 10);
 
 // ================= ৪. সুবিধাসমূহ (LocationFeatureSpecification) =================
