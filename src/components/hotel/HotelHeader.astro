@@ -98,28 +98,35 @@ function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   return cleanUrl;
 }
 
-const rawGalleryData: any[] = (Array.isArray(data.gallery) && data.gallery.length > 0)
-  ? data.gallery
-  : (coverImage ? [{ photo: coverImage, alt: coverAlt }] : []);
+const rawGalleryData: any[] = [
+  ...(coverImage ? [{ photo: coverImage, alt: coverAlt }] : []),
+  ...(Array.isArray(data.gallery) ? data.gallery.filter(Boolean) : [])
+];
 
+const seenGalleryUrls = new Set<string>();
 const processedGallery = rawGalleryData.map((item: any, idx: number) => {
   const isObj = typeof item === 'object' && item !== null;
   const rawUrl = isObj ? (item.photo || item.image || item.url || '') : String(item);
-  const altText = isObj && item.alt 
-    ? String(item.alt).trim() 
+  const cleanRaw = String(rawUrl || '').trim();
+  const altText = isObj && item.alt
+    ? String(item.alt).trim()
     : (idx === 0 && coverAlt ? coverAlt : `${hotelTitle || 'Hotel'} - Photo ${idx + 1}`);
 
-  const desktopUrl = getOptimizedImageUrl(rawUrl, 1200, 80);
+  const desktopUrl = getOptimizedImageUrl(cleanRaw, 1200, 80);
 
   return {
-    url: rawUrl,
+    url: cleanRaw,
     alt: altText,
-    mobile: getOptimizedImageUrl(rawUrl, 640, 75),
+    mobile: getOptimizedImageUrl(cleanRaw, 640, 75),
     desktop: desktopUrl,
     // Lightbox-এর জন্য আলাদা 1600 বাদ দিয়ে Desktop 1200 রি-ইউজ (ক্যাশ সেভ ও কোটা বাঁচানো)
     lightbox: desktopUrl
   };
-}).filter(g => Boolean(g.url));
+}).filter(g => {
+  if (!g.url || seenGalleryUrls.has(g.url)) return false;
+  seenGalleryUrls.add(g.url);
+  return true;
+});
 
 const totalPhotos = processedGallery.length;
 
