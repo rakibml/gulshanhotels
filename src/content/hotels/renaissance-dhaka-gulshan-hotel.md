@@ -116,7 +116,32 @@ reviews_notice: ''
 reviews: []
 faqs_notice: ''
 faqs_title: Travelers are asking
-faqs: []
+faqs:
+  - question: Where is Renaissance Dhaka Gulshan Hotel?
+    answer: It is at 78 Gulshan Avenue, Dhaka 1212. Gulshan Circle 1 is about a 5 minute walk away, around 0.5 km.
+  - question: Is it a 5-star hotel?
+    answer: Yes, it is a 5-star hotel, and it opened in 2019.
+  - question: What are the check-in and check-out times?
+    answer: Check-in is at 3:00 PM and check-out is at 12:00 PM. Need an early check-in or a late check-out? Message the hotel before you arrive. It depends on how full they are that day.
+  - question: How far is the airport from the hotel?
+    answer: |-
+      The airport is about 11.6 km from the hotel. In normal traffic, plan for around 24 minutes.
+
+      Here is the route, step by step:
+
+      Leave the hotel and drive through Gulshan. Take Bir Uttam AK Khandakar Road and Gulshan Avenue, then continue on Kemal Ataturk Avenue and Road 27. This first part is about 4.3 km and takes roughly 16 minutes. It is the slowest stretch, because it runs through busy Gulshan streets.
+      Join the Dhaka-Mymensingh Highway (N3). You drive about 7 km along the N3, which usually takes around 11 minutes.
+      Turn slightly left at the end. A short 270 metre stretch takes you to the airport.
+
+      The slow part is the first 4 km inside Gulshan, not the highway. At rush hour, that stretch can take much longer than 16 minutes, so keep some extra time in hand. If you are catching an international flight, leaving 3 hours before departure is a safe plan. Your driver will know these roads well, so this is mostly useful if you are going by yourself.
+  - question: Can I bring my pet?
+    answer: No, pets are not allowed. Rules can change, so ask the hotel if this matters for your trip.
+  - question: How do I book a room?
+    answer: You can book on the official Marriott website. You can also compare prices on other booking sites. The price depends on your dates, the room type and how many rooms are left.
+  - question: Is parking free?
+    answer: Yes, both self parking and valet parking are free.
+  - question: Does the hotel have a swimming pool?
+    answer: Yes, and it is a good one. The rooftop infinity pool is temperature-controlled and has city views. There is also a separate children’s pool.
 ---
 
 Looking for a big, proper hotel in the middle of Gulshan? Then this one is worth a look. It is at **78 Gulshan Avenue, Dhaka 1212**.
