@@ -33,7 +33,7 @@ function truncate(text: string, max = 300): string {
   return (lastSpace > 150 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-// 🔥 কাটা বাক্য রোধে প্রথম সম্পূর্ণ প্যারাগ্রাফ নেওয়ার ফাংশন 🔥
+// কাটা বাক্য রোধে প্রথম সম্পূর্ণ প্যারাগ্রাফ নেওয়ার ফাংশন
 function getCompleteSnippetDescription(rawBody: any, fallbackDesc: any): string {
   const fallback = cleanText(fallbackDesc);
   if (fallback && fallback.length >= 60 && fallback.length <= 350) {
@@ -43,12 +43,10 @@ function getCompleteSnippetDescription(rawBody: any, fallbackDesc: any): string 
   const raw = str(rawBody);
   if (!raw) return fallback ? truncate(fallback, 280) : "";
 
-  // প্যারাগ্রাফ অনুযায়ী ভাগ করা
   const paragraphs = raw.split(/\r?\n\r?\n|\r?\n/).map(cleanText).filter(p => p.length >= 60);
-  
+
   if (paragraphs.length > 0) {
     const firstP = paragraphs[0];
-    // যদি প্রথম প্যারাগ্রাফটি সম্পূর্ণ ও মানানসই হয় (মাঝপথে কাটবে না)
     if (firstP.length <= 350) {
       return firstP;
     }
@@ -65,26 +63,26 @@ function toAbsoluteImageUrl(url: any): string {
   return `${SITE_ORIGIN}${clean.startsWith("/") ? "" : "/"}${clean}`;
 }
 
-// 🔥 স্মার্ট টাইম এক্সট্রাক্টর ("From 14:00 (2:00 PM)" থেকে সঠিক ISO টাইম বের করবে) 🔥
+// 🔥 ফিক্সড টাইম এক্সট্রাক্টর: আগে ১২-ঘণ্টা (AM/PM), তারপর ২৪-ঘণ্টা ফরম্যাট চেক করবে 🔥
 function formatTime(tStr: any): string {
   const clean = str(tStr);
   if (!clean || /available\s*24/i.test(clean)) return "";
 
-  // ১. ২৪ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "14:00")
-  const match24 = clean.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?\b/);
-  if (match24) {
-    return `${match24[1].padStart(2, '0')}:${match24[2]}`;
-  }
-
-  // ২. ১২ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "2:00 PM")
+  // ১. আগে ১২ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "2:00 PM" -> "14:00")
   const match12 = clean.match(/\b(\d{1,2}):([0-5]\d)\s*(am|pm)\b/i);
   if (match12) {
     let h = parseInt(match12[1], 10);
     const m = match12[2];
     const meridiem = match12[3].toLowerCase();
-    if (meridiem === 'pm' && h < 12) h += 12;
-    if (meridiem === 'am' && h === 12) h = 0;
-    return `${String(h).padStart(2, '0')}:${m}`;
+    if (meridiem === "pm" && h < 12) h += 12;
+    if (meridiem === "am" && h === 12) h = 0;
+    return `${String(h).padStart(2, "0")}:${m}`;
+  }
+
+  // ২. তারপর ২৪ ঘণ্টার ফরম্যাট খোঁজা (যেমন: "14:00")
+  const match24 = clean.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?\b/);
+  if (match24) {
+    return `${match24[1].padStart(2, "0")}:${match24[2]}`;
   }
 
   return "";
@@ -100,13 +98,13 @@ function getSafePriceRange(rawCategory: any, rawPrice: any): string {
   }
 
   if (cat.includes("5") || cat.includes("luxury")) {
-    return "$$$$"; // 5-Star / Luxury Tier
+    return "$$$$";
   } else if (cat.includes("4") || cat.includes("executive") || cat.includes("upscale")) {
-    return "$$$";  // 4-Star / Upscale Tier
+    return "$$$";
   } else if (cat.includes("3") || cat.includes("boutique")) {
-    return "$$";   // 3-Star / Mid-range Tier
+    return "$$";
   } else if (cat.includes("budget") || cat.includes("guest")) {
-    return "$";    // Budget / Economy Tier
+    return "$";
   }
 
   return "$$$$";
@@ -120,7 +118,6 @@ const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, "").split("/").pop()?.toLowerCa
 // ট্রেইলিং স্ল্যাশসহ ক্যানোনিকাল URL
 const pageUrl = `${SITE_ORIGIN}/${hotelSlug}/`;
 
-// সম্পূর্ণ অর্থপূর্ণ ডেসক্রিপশন
 const hotelDescription = getCompleteSnippetDescription(hotel?.body, data.description || data.overview || data.about);
 const hotelPhone = str(data.phone || data.telephone || data.contact_phone);
 
@@ -262,7 +259,6 @@ if (roomsList.length > 0) {
   }));
 }
 
-// ব্রেডক্রাম্ব ও পেজ অবজেক্ট (কোনো বিভ্রান্তিকর "Verified" দাবি ছাড়া)
 const graph: any[] = [
   {
     "@type": "BreadcrumbList",
@@ -287,6 +283,14 @@ const graph: any[] = [
     "@id": webpageId,
     "url": pageUrl,
     "name": `${hotelTitle} — Overview, Photos & Room Rates`,
+    ...(images.length > 0 ? {
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "@id": `${pageUrl}#primaryimage`,
+        "url": images[0],
+        "contentUrl": images[0]
+      }
+    } : {}),
     "isPartOf": {
       "@type": "WebSite",
       "@id": `${SITE_ORIGIN}/#website`,
