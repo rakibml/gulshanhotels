@@ -33,9 +33,9 @@ sponsored: false
 spotlight_desc: ''
 about_notice: ''
 enable_view_prices: true
-price: $120
+price: $135
 rates_title: Deals & Rates
-rates_live_badge: Live Partner Sync
+rates_live_badge: ''
 rates_price_label: Nightly price
 rates_disclaimer: Prices are provided by our partners and reflect nightly room rates. Taxes may not be included. We may earn a commission at no extra cost to you.
 call_button_text: Call Hotel
@@ -123,7 +123,7 @@ Looking for a big, proper hotel in the middle of Gulshan? Then this one is worth
 
 It is not small. The hotel opened in **December 2019** and has **211 rooms and suites** across 19 floors, so you are not booking into a tiny place where everyone knows your name. The beds have memory foam, every room has a minibar and a safe, and each one is uniquely designed with local touches like Jamdani-inspired art.
 
-## Rooms & Design
+## **Rooms & Design**
 
 Fancy a swim? There is a **rooftop infinity pool**, a children’s pool, and a full-service spa (**R Spa**), with a rooftop bar (**R Bar**) right there if you want a drink afterwards. There is also a **24-hour fitness centre** on the 19th floor and **five distinct dining and bar outlets**—including **Bahar** for international buffets, **SEAR** on the 18th floor for fusion fine dining, **Sear Bar** (Dhaka's first jazz bar), and the 24/7 **Gulshan Baking Company** deli.
 
