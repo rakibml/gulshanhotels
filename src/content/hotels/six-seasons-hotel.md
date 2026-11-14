@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: Six Seasons Hotel
-draft: true
+draft: false
 seo_title: 'Six Seasons Hotel: 5 Star hotel in Gulshan 2 | Gulshan Hotels'
 seo_description: |-
   Want a hotel that looks at something nice? Six Seasons does. It is just a one-minute walk from Gulshan Lake, and the address is House 19, Road 96, Gulshan 2, Dhaka 1212. The building has an Italian look. It opened in 2013, stands 15 floors high, and overlooks the lake and the park. So if you ask for a room with a view, you are not asking for much.
