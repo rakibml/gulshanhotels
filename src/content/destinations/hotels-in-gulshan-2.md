@@ -12,6 +12,7 @@ selected_hotels:
   - amari-dhaka
   - hotel-tropical-daisy
   - crowne-plaza-dhaka-gulshan-by-ihg
+  - six-seasons-hotel
 hotels_tag: Stay in Gulshan 2, Dhaka
 hotels_title: ''
 faqs:
