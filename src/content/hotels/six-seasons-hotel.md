@@ -3,15 +3,7 @@ header_notice: ''
 title: Six Seasons Hotel
 draft: false
 seo_title: 'Six Seasons Hotel: 5 Star hotel in Gulshan 2 | Gulshan Hotels'
-seo_description: |-
-  Want a hotel that looks at something nice? Six Seasons does. It is just a one-minute walk from Gulshan Lake, and the address is House 19, Road 96, Gulshan 2, Dhaka 1212. The building has an Italian look. It opened in 2013, stands 15 floors high, and overlooks the lake and the park. So if you ask for a room with a view, you are not asking for much.
-  Speaking of rooms, what is inside? Each room is individually furnished, the beds have premium bedding, and you get a minibar. Some of the suites also come with a kitchenette and a jacuzzi. That is a rare mix for a hotel in this part of town.
-  Hungry? There are three main restaurants—Sky Pool Restaurant, Bunka The Oriental Cuisine, and Bhinno Shaad—along with a 24-hour cafe called 6 on 96. Breakfast is a buffet, and the hotel lists halal, vegetarian, vegan, and dairy-free options. Not a bad list for one building.
-  Now, the part people book for. The rooftop infinity pool is temperature-controlled, and the spa is called Saran Rom Spa. There is also a sauna, a children’s pool, and a pool bar. After a long day of meetings, that sounds about right.
-  A few small things that make life easier. Valet parking is free, Wi-Fi is free in public areas, and the manager hosts a free reception every day. An airport shuttle is available too.
-  What is around it? The Embassy of Turkey is a quick walk away. Bistro E is about a 4-minute walk, the Diplomatic Enclave and Gulshan South Paka Market are around 2 km away, and Jamuna Future Park is just a short drive from here.
-  Before you go, check three things. Check-in is at 3:00 PM and check-out is at 11:00 AM, so it is an hour earlier than some other Gulshan hotels. Bring your passport for check-in, and keep in mind that pets are not allowed.
-  So, who is it for? Anyone who wants a lake view and a spa more than a busy mall next door. If that is you, it is worth a look.
+seo_description: Explore Six Seasons Hotel in Gulshan 2, Dhaka. Just a minute from Gulshan Lake, it offers a heated rooftop pool, Saran Rom Spa, three restaurants, and lake-view rooms.
 is_verified: false
 ranking: ''
 category: 5-Star Luxury Stay
@@ -135,4 +127,18 @@ faqs:
     answer: The hotel has event space with a conference centre. Call them for room sizes and prices, since they depend on your group.
 ---
 
-Explore Six Seasons Hotel in Gulshan 2, Dhaka. Just a minute from Gulshan Lake, it offers a heated rooftop pool, Saran Rom Spa, three restaurants, and lake-view rooms.
+Want a hotel that looks at something nice? Six Seasons does. It is just a one-minute walk from Gulshan Lake, and the address is House 19, Road 96, Gulshan 2, Dhaka 1212. The building has an Italian look. It opened in 2013, stands 15 floors high, and overlooks the lake and the park. So if you ask for a room with a view, you are not asking for much.
+
+Speaking of rooms, what is inside? Each room is individually furnished, the beds have premium bedding, and you get a minibar. Some of the suites also come with a kitchenette and a jacuzzi. That is a rare mix for a hotel in this part of town.
+
+Hungry? There are three main restaurants—Sky Pool Restaurant, Bunka The Oriental Cuisine, and Bhinno Shaad—along with a 24-hour cafe called 6 on 96. Breakfast is a buffet, and the hotel lists halal, vegetarian, vegan, and dairy-free options. Not a bad list for one building.
+
+Now, the part people book for. The rooftop infinity pool is temperature-controlled, and the spa is called Saran Rom Spa. There is also a sauna, a children’s pool, and a pool bar. After a long day of meetings, that sounds about right.
+
+A few small things that make life easier. Valet parking is free, Wi-Fi is free in public areas, and the manager hosts a free reception every day. An airport shuttle is available too.
+
+What is around it? The Embassy of Turkey is a quick walk away. Bistro E is about a 4-minute walk, the Diplomatic Enclave and Gulshan South Paka Market are around 2 km away, and Jamuna Future Park is just a short drive from here.
+
+Before you go, check three things. Check-in is at 3:00 PM and check-out is at 11:00 AM, so it is an hour earlier than some other Gulshan hotels. Bring your passport for check-in, and keep in mind that pets are not allowed.
+
+So, who is it for? Anyone who wants a lake view and a spa more than a busy mall next door. If that is you, it is worth a look.
