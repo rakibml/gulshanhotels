@@ -8,4 +8,5 @@ featured_hotels:
   - amari-dhaka
   - crowne-plaza-dhaka-gulshan-by-ihg
   - renaissance-dhaka-gulshan-hotel
+  - six-seasons-hotel
 ---
