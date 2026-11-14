@@ -53,4 +53,4 @@ Gulshan 2 is one of the well-known areas in Dhaka, especially for business trave
 
 _Because of its location, Gulshan 2 is a popular place to stay for people visiting Dhaka for business meetings, embassy appointments or personal trips. It also offers easy access to other important areas of the city, including Banani and Gulshan 1._
 
-Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking
+Before choosing a hotel, think about where you need to go and what matters most during your stay. Here are a few things worth checking.
