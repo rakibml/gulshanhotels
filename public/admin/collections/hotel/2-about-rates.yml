@@ -184,7 +184,7 @@
 - label: "3. HOTEL POLICIES & HOUSE RULES"
   name: "policies_notice"
   widget: "instructions"
-  description: "Configure Booking.com style policies: Check-in/out, Child & Bed tables, and Payment method logos."
+  description: "Configure flexible hotel policies: Leave any field blank if it does not apply to this hotel."
   required: false
 
 - label: "Enable Hotel Policies Section?"
@@ -196,27 +196,28 @@
 - label: "Check-in Schedule"
   name: "check_in"
   widget: "string"
-  default: "Available 24 hours"
+  required: false
+  hint: "e.g. From 2:00 PM (or leave empty if unknown)"
 
 - label: "Check-out Schedule"
   name: "check_out"
   widget: "string"
-  default: "Available 24 hours"
+  required: false
+  hint: "e.g. Until 12:00 PM"
 
-- label: "Cancellation / Prepayment Policy (Supports Markdown Links)"
+- label: "Cancellation / Prepayment Policy (Supports **bold** & [links](url))"
   name: "cancellation_policy"
-  widget: "markdown"
-  default: "Cancellation and prepayment policies vary according to accommodation type. Please check what [conditions](#rates-card) apply to each option when making your selection."
+  widget: "text"
+  required: false
+  hint: "e.g. Cancellation policies vary by room type. Check [rates](#rates-card) before booking."
 
-- label: "Child Policies General Rules"
+- label: "Child Policies General Rules (Optional)"
   name: "child_policy_text"
   widget: "text"
-  default: |
-    Children of all ages are welcome.
-    Children 9 and above will be charged as adults at this property.
-    To see correct prices and occupancy info, add the number and ages of children in your group to your search.
+  required: false
+  hint: "e.g. Children of all ages are welcome. Leave empty if you don't want to show this row."
 
-- label: "Cribs & Extra Beds Table (Structured List)"
+- label: "Cribs & Extra Beds Table (Optional)"
   name: "extra_beds"
   widget: "list"
   required: false
@@ -225,57 +226,74 @@
     - label: "Age Tier / Range"
       name: "age"
       widget: "string"
-      default: "1 - 6 years"
+      required: false
+      hint: "e.g. 0 - 6 years"
     - label: "Bed Type"
       name: "type"
       widget: "string"
-      default: "Crib upon request"
+      required: false
+      hint: "e.g. Crib upon request"
     - label: "Price / Charge"
       name: "price"
       widget: "string"
-      default: "Free"
+      required: false
+      hint: "e.g. Free or $25 per night"
 
-- label: "Cribs & Extra Beds Disclaimer Notes"
+- label: "Cribs & Extra Beds Notes (Optional)"
   name: "extra_beds_notes"
   widget: "text"
-  default: |
-    Prices for cribs and extra beds aren't included in the total price. They'll have to be paid for separately during your stay.
-    The number of extra beds and cribs allowed depends on the option you choose. Check your selected option for more info.
-    All cribs and extra beds are subject to availability.
+  required: false
+  hint: "e.g. Extra beds are subject to availability."
 
-- label: "Minimum Check-in Age"
+- label: "Minimum Check-in Age (Optional)"
   name: "age_restriction"
   widget: "string"
-  default: "The minimum age for check-in is 18"
+  required: false
+  hint: "e.g. Minimum check-in age: 18"
 
-- label: "Pets Policy"
+- label: "Pets Policy (Optional)"
   name: "pets_policy"
   widget: "string"
-  default: "Pets are not allowed."
+  required: false
+  hint: "e.g. Pets are not allowed."
 
-- label: "Accepted Payment Methods"
+- label: "Accepted Payment Methods (Select Applicable)"
   name: "payment_methods"
   widget: "select"
   multiple: true
-  default: ["amex", "visa", "mastercard", "unionpay", "cash"]
+  required: false
   options:
-    - { label: "American Express (Amex)", value: "amex" }
     - { label: "Visa", value: "visa" }
     - { label: "MasterCard", value: "mastercard" }
+    - { label: "American Express (Amex)", value: "amex" }
     - { label: "UnionPay", value: "unionpay" }
     - { label: "Cash on Arrival", value: "cash" }
     - { label: "bKash", value: "bkash" }
     - { label: "Nagad", value: "nagad" }
+    - { label: "Rocket", value: "Rocket" }
+    - { label: "Bank Transfer", value: "Bank Transfer" }
+    - { label: "Pay at Property", value: "Pay at Property" }
+    - { label: "JCB", value: "JCB" }
+    - { label: "Diners Club", value: "Diners Club" }
 
-- label: "Other Custom Policies (Optional)"
+- label: "Other Custom Payment Methods (Optional)"
+  name: "other_payment_methods"
+  widget: "string"
+  required: false
+  hint: "Add any extra payment methods separated by commas (e.g. Upay, Apple Pay, City Bank Card)"
+
+- label: "Other Custom Policies (Smoking, ID/Passport, Deposit, etc.)"
   name: "custom_policies"
   widget: "list"
   required: false
   summary: "{{fields.label}}: {{fields.value}}"
+  hint: "Use this to add any unique policy pattern for this hotel (supports **bold** and [links](url))."
   fields:
     - label: "Policy Title"
       name: "label"
       widget: "string"
+      hint: "e.g. Required Documents / Smoking Policy / Security Deposit"
     - label: "Policy Details"
       name: "value"
       widget: "text"
+      hint: "e.g. Valid passport or NID is required at check-in."
