@@ -68,7 +68,37 @@ payment_methods:
   - mastercard
   - JCB
   - Diners Club
-other_payment_methods: American Express
+other_payment_methods: ''
+custom_payment_methods:
+  - name: American Express
+    icon: ''
+    svg: |-
+      <svg xmlns="http://w3.org" viewBox="0 0 240 240" width="240" height="240">
+        <!-- Background Square -->
+        <rect width="240" height="240" rx="16" fill="#006FCF"/>
+        
+        <!-- Inner Subtle Border -->
+        <rect x="8" y="8" width="224" height="224" rx="12" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.25"/>
+        
+        <!-- AMERICAN Text -->
+        <text x="120" y="108" 
+              font-family="Arial Black, Impact, sans-serif" 
+              font-weight="900" 
+              font-size="33" 
+              fill="#FFFFFF" 
+              text-anchor="middle" 
+              letter-spacing="1.5">AMERICAN</text>
+              
+        <!-- EXPRESS Text -->
+        <text x="120" y="148" 
+              font-family="Arial Black, Impact, sans-serif" 
+              font-weight="900" 
+              font-size="35" 
+              fill="#FFFFFF" 
+              text-anchor="middle" 
+              letter-spacing="2">EXPRESS</text>
+      </svg>
+    show_label: false
 custom_policies: []
 amenities_notice: ''
 enable_amenities: true
