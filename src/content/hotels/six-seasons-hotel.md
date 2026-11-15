@@ -66,6 +66,9 @@ pets_policy: Pets are not allowed.
 payment_methods:
   - visa
   - mastercard
+  - JCB
+  - Diners Club
+other_payment_methods: American Express
 custom_policies: []
 amenities_notice: ''
 enable_amenities: true
