@@ -57,11 +57,16 @@ const ageRestriction = String(data.age_restriction || data.ageRestriction || "")
 const petsPolicy = String(data.pets_policy || data.petsPolicy || data.pets || "").trim();
 
 // 5. Flexible Payment Methods (Array বা Comma-separated উভয়ই কাজ করবে + যেকোনো নতুন মেথড দেখাবে)
-const rawPayments: string[] = Array.isArray(data.payment_methods)
-  ? data.payment_methods.map((p: any) => String(p || "").trim()).filter(Boolean)
-  : typeof data.payment_methods === "string"
-    ? data.payment_methods.split(",").map((p: string) => p.trim()).filter(Boolean)
-    : [];
+const rawPayments: string[] = [
+  ...(Array.isArray(data.payment_methods)
+    ? data.payment_methods.map((p: any) => String(p || "").trim())
+    : typeof data.payment_methods === "string"
+      ? data.payment_methods.split(",").map((p: string) => p.trim())
+      : []),
+  ...(typeof data.other_payment_methods === "string"
+    ? data.other_payment_methods.split(",").map((p: string) => p.trim())
+    : [])
+].filter(Boolean);
 
 const acceptedPayments = Array.from(new Set(rawPayments));
 
