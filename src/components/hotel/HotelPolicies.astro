@@ -1,5 +1,5 @@
 ---
-// src/components/hotel/HotelPolicies.astro (100% Flexible CMS Data, All Payment Methods & XSS-Safe Formatting)
+// src/components/hotel/HotelPolicies.astro (Full Custom Payment Logo/SVG Control + Flexible Policies)
 interface Props {
   hotel: any;
 }
@@ -26,7 +26,6 @@ function safeFormatPolicyText(text: string): string {
   };
   const escaped = text.replace(/[&<>"']/g, (c) => map[c]);
 
-  // নিরাপদ মার্কডাউন লিংক পার্স করা
   const withLinks = escaped.replace(/\[(.*?)\]\((.*?)\)/g, (_, label, url) => {
     const cleanUrl = String(url || '').trim();
     const isSafe = /^(https?:\/\/|\/|#)/i.test(cleanUrl);
@@ -35,7 +34,6 @@ function safeFormatPolicyText(text: string): string {
     return `<a href="${finalHref}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''} class="text-emerald-800 hover:text-emerald-950 underline font-bold">${label}</a>`;
   });
 
-  // নিরাপদ **Bold** পার্স করা
   return withLinks.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>');
 }
 
@@ -56,8 +54,62 @@ const hasChildrenBeds = Boolean(childPolicyText || extraBedsList.length > 0 || e
 const ageRestriction = String(data.age_restriction || data.ageRestriction || "").trim();
 const petsPolicy = String(data.pets_policy || data.petsPolicy || data.pets || "").trim();
 
-// 5. Flexible Payment Methods (Array বা Comma-separated উভয়ই কাজ করবে + যেকোনো নতুন মেথড দেখাবে)
-const rawPayments: string[] = [
+// 5. Full Control Payment Methods (Custom SVG / Uploaded Logo + Legacy Fallback)
+type PaymentEntry = {
+  name: string;
+  builtinKey: string;
+  icon: string;
+  svg: string;
+  showLabel: boolean;
+};
+
+function sanitizeSvg(raw: any): string {
+  const s = String(raw || "").trim();
+  if (!s.toLowerCase().includes("<svg")) return "";
+  return s
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/javascript:/gi, "");
+}
+
+function getNormalizedKey(name: string): string {
+  const lower = name.toLowerCase().replace(/[\s_-]+/g, "");
+  if (lower === "americanexpress") return "amex";
+  if (lower === "cashonly") return "cash";
+  return lower;
+}
+
+function getBuiltinKey(normKey: string): string {
+  if (["visa", "mastercard", "amex", "unionpay", "cash", "bkash", "nagad"].includes(normKey)) {
+    return normKey;
+  }
+  return "other";
+}
+
+const paymentMap = new Map<string, PaymentEntry>();
+
+// ক) প্রথমে Admin Panel-এর কাস্টম লোগো/SVG লিস্ট পড়া (সর্বোচ্চ অগ্রাধিকার)
+if (Array.isArray(data.custom_payment_methods)) {
+  data.custom_payment_methods.forEach((item: any) => {
+    if (!item) return;
+    const name = String(item.name || item.label || "").trim();
+    const icon = String(item.icon || item.image || "").trim();
+    const svg = sanitizeSvg(item.svg);
+    if (!name && !icon && !svg) return;
+
+    const normKey = getNormalizedKey(name || icon || svg);
+    paymentMap.set(normKey, {
+      name: name || "Payment",
+      builtinKey: getBuiltinKey(normKey),
+      icon,
+      svg,
+      showLabel: item.show_label === true || (!icon && !svg),
+    });
+  });
+}
+
+// খ) এরপর আগের select / comma-separated পেমেন্ট মেথডগুলো যোগ করা (ডুপ্লিকেট বাদ দিয়ে)
+const legacyPayments: string[] = [
   ...(Array.isArray(data.payment_methods)
     ? data.payment_methods.map((p: any) => String(p || "").trim())
     : typeof data.payment_methods === "string"
@@ -68,21 +120,22 @@ const rawPayments: string[] = [
     : [])
 ].filter(Boolean);
 
-const acceptedPayments = Array.from(new Set(rawPayments));
+legacyPayments.forEach((name) => {
+  const normKey = getNormalizedKey(name);
+  if (!paymentMap.has(normKey)) {
+    paymentMap.set(normKey, {
+      name,
+      builtinKey: getBuiltinKey(normKey),
+      icon: "",
+      svg: "",
+      showLabel: false,
+    });
+  }
+});
 
-function getPaymentKey(name: string): string {
-  const lower = name.toLowerCase().replace(/[\s_-]+/g, "");
-  if (lower === "visa") return "visa";
-  if (lower === "mastercard") return "mastercard";
-  if (lower === "amex" || lower === "americanexpress") return "amex";
-  if (lower === "unionpay") return "unionpay";
-  if (lower === "cash" || lower === "cashonly") return "cash";
-  if (lower === "bkash") return "bkash";
-  if (lower === "nagad") return "nagad";
-  return "other";
-}
+const acceptedPayments = Array.from(paymentMap.values());
 
-// 6. Custom Extra Policies (যেকোনো হোটেলের আলাদা পলিসি প্যাটার্নের জন্য)
+// 6. Custom Extra Policies
 const rawCustom = Array.isArray(data.custom_policies)
   ? data.custom_policies
   : Array.isArray(data.policies)
@@ -257,7 +310,7 @@ const hasAnyPolicy = Boolean(
         </div>
       )}
 
-      <!-- 7. ACCEPTED PAYMENT METHODS (Dynamic & Case-Insensitive) -->
+      <!-- 7. ACCEPTED PAYMENT METHODS (Custom SVG / Uploaded Logo / Built-in Icons) -->
       {acceptedPayments.length > 0 && (
         <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
           <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900">
@@ -269,8 +322,45 @@ const hasAnyPolicy = Boolean(
           </div>
           
           <div class="md:col-span-8 lg:col-span-9 flex flex-wrap items-center gap-2.5 pt-0.5">
-            {acceptedPayments.map((method) => {
-              const key = getPaymentKey(method);
+            {acceptedPayments.map((item) => {
+              // ১. কাস্টম SVG কোড থাকলে
+              if (item.svg) {
+                return (
+                  <div
+                    class={`h-7 rounded border border-slate-200 bg-white flex items-center justify-center shadow-2xs shrink-0 ${item.showLabel ? 'px-2.5 gap-1.5' : 'w-11 p-1'}`}
+                    title={item.name}
+                  >
+                    <span
+                      aria-hidden="true"
+                      class={`flex items-center justify-center shrink-0 [&_svg]:max-h-full [&_svg]:max-w-full ${item.showLabel ? 'w-4 h-4 [&_svg]:w-4 [&_svg]:h-4' : 'w-full h-full [&_svg]:w-full [&_svg]:h-full'}`}
+                      set:html={item.svg}
+                    />
+                    {item.showLabel && <span class="text-[11px] font-bold text-slate-800 whitespace-nowrap">{item.name}</span>}
+                  </div>
+                );
+              }
+
+              // ২. কাস্টম Logo ইমেজ আপলোড করা থাকলে
+              if (item.icon) {
+                return (
+                  <div
+                    class={`h-7 rounded border border-slate-200 bg-white flex items-center justify-center shadow-2xs shrink-0 ${item.showLabel ? 'px-2.5 gap-1.5' : 'px-1.5 min-w-[44px]'}`}
+                    title={item.name}
+                  >
+                    <img
+                      src={item.icon}
+                      alt={item.name}
+                      loading="lazy"
+                      decoding="async"
+                      class={`object-contain shrink-0 ${item.showLabel ? 'h-4 w-4' : 'h-5 w-auto max-w-[44px]'}`}
+                    />
+                    {item.showLabel && <span class="text-[11px] font-bold text-slate-800 whitespace-nowrap">{item.name}</span>}
+                  </div>
+                );
+              }
+
+              // ৩. বিল্ট-ইন আইকন (আগের হোটেলগুলোর সাথে সামঞ্জস্য রাখার জন্য)
+              const key = item.builtinKey;
 
               if (key === "amex") {
                 return (
@@ -339,10 +429,10 @@ const hasAnyPolicy = Boolean(
                 );
               }
 
-              // যেকোনো নতুন পেমেন্ট মেথড (যেমন: Bank Transfer, Rocket, JCB, Pay at Property)
+              // ৪. কোনো আইকন/SVG না থাকলে সুন্দর টেক্সট ব্যাজ
               return (
-                <div class="h-7 px-3 rounded border border-slate-200 bg-slate-50 text-slate-800 flex items-center justify-center shadow-2xs shrink-0" title={method}>
-                  <span class="text-[11px] font-bold tracking-tight">{method}</span>
+                <div class="h-7 px-3 rounded border border-slate-200 bg-slate-50 text-slate-800 flex items-center justify-center shadow-2xs shrink-0" title={item.name}>
+                  <span class="text-[11px] font-bold tracking-tight whitespace-nowrap">{item.name}</span>
                 </div>
               );
             })}
@@ -350,7 +440,7 @@ const hasAnyPolicy = Boolean(
         </div>
       )}
 
-      <!-- 8. ANY EXTRA CUSTOM POLICIES (যেকোনো হোটেলের আলাদা পলিসি) -->
+      <!-- 8. ANY EXTRA CUSTOM POLICIES -->
       {customPolicies.map((item: any) => (
         <div class="p-5 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-start hover:bg-slate-50/50 transition">
           <div class="md:col-span-4 lg:col-span-3 flex items-center gap-2.5 font-bold text-slate-900 capitalize">
