@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelNearbyHotels.astro
-// 100% Real CMS Data, Cloudflare Optimized & Google SEO Compliant
+// 100% Real CMS Data, Zone-First Related Sorting, Cloudflare Optimized & Google SEO Compliant
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -21,9 +21,19 @@ const normalizeSlug = (value: any): string =>
 
 const norm = (v: any): string => String(v || '').trim().toLowerCase();
 
+// স্মার্ট জোন শনাক্তকরণ (Gulshan-1 / Gulshan 1 / Gulshan 2, Dhaka সব ম্যাচ করবে)
+const extractZone = (data: any): string => {
+  const text = `${data?.zone || ''} ${data?.area || ''} ${data?.locality || ''} ${data?.location || ''}`
+    .toLowerCase()
+    .trim();
+  if (/gulshan[\s-]*1\b/.test(text)) return 'gulshan-1';
+  if (/gulshan[\s-]*2\b/.test(text)) return 'gulshan-2';
+  return norm(data?.locality || data?.location);
+};
+
 const currentCleanSlug = normalizeSlug(currentData.slug || currentHotel?.slug || currentHotel?.id);
 const currentCategory = norm(currentData.category);
-const currentLocality = norm(currentData.locality || currentData.location);
+const currentZone = extractZone(currentData);
 
 const isProd = import.meta.env.PROD;
 let allHotels: any[] = [];
@@ -83,14 +93,14 @@ try {
   }
 }
 
-// 3. Similar hotel selection: same category (+2) ar same locality (+1) age
+// 3. Related hotel selection: একই জোন প্রথম অগ্রাধিকার (+10), এরপর একই ক্যাটাগরি (+2)
 const nearbyHotels = allHotels
   .map((h) => {
     const hSlug = normalizeSlug(h.data?.slug || h.slug || h.id);
-    const score =
-      (currentCategory && norm(h.data?.category) === currentCategory ? 2 : 0) +
-      (currentLocality && norm(h.data?.locality || h.data?.location) === currentLocality ? 1 : 0);
-    return { ...h, hSlug, score };
+    const hZone = extractZone(h.data);
+    const sameZoneScore = currentZone && hZone === currentZone ? 10 : 0;
+    const sameCategoryScore = currentCategory && norm(h.data?.category) === currentCategory ? 2 : 0;
+    return { ...h, hSlug, score: sameZoneScore + sameCategoryScore };
   })
   .filter((h) => h.hSlug !== '' && h.hSlug !== currentCleanSlug)
   .sort((a, b) => b.score - a.score)
@@ -117,7 +127,7 @@ function formatPrice(data: any): string {
   const raw = data.price || data.starting_price;
   if (!raw) return 'Check rates';
   const str = String(raw).trim();
-  if (/^[^\d\s]/.test(str)) return str; // already symbol/text diye shuru (e.g. $120, ৳5000)
+  if (/^[^\d\s]/.test(str)) return str;
   const currency = String(data.currency || data.currency_symbol || '').trim();
   return currency ? `${currency} ${str}` : 'Check rates';
 }
@@ -182,7 +192,6 @@ function formatPrice(data: any): string {
 
           const embeddedRevs = Array.isArray(hData.reviews) ? hData.reviews : [];
 
-          // Duplicate review dedupe (id thakle id diye)
           const seen = new Set<string>();
           const totalRealReviews = [...matchingReviews, ...embeddedRevs]
             .filter((r: any) => r && Number(r.rating) >= 1 && Number(r.rating) <= 5)
