@@ -1,6 +1,6 @@
 ---
 // src/components/hotel/HotelNearbyHotels.astro
-// 100% Real CMS Data, Zone-First Related Sorting, Cloudflare Optimized & Google SEO Compliant
+// Zone-First Related Hotels + No Empty Review Text + Real Live Agoda Rates
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -21,7 +21,7 @@ const normalizeSlug = (value: any): string =>
 
 const norm = (v: any): string => String(v || '').trim().toLowerCase();
 
-// স্মার্ট জোন শনাক্তকরণ (Gulshan-1 / Gulshan 1 / Gulshan 2, Dhaka সব ম্যাচ করবে)
+// স্মার্ট জোন শনাক্তকরণ (Gulshan-1 / Gulshan 1 / Gulshan 2, Dhaka সব সাপোর্ট করবে)
 const extractZone = (data: any): string => {
   const text = `${data?.zone || ''} ${data?.area || ''} ${data?.locality || ''} ${data?.location || ''}`
     .toLowerCase()
@@ -39,7 +39,7 @@ const isProd = import.meta.env.PROD;
 let allHotels: any[] = [];
 let allReviewsList: any[] = [];
 
-// 1. Hotel loader (production-e draft bad, jate Google-e 404 link na jay)
+// 1. Hotel loader (production-e draft bad)
 try {
   const cmsHotels = await getCollection('hotels', ({ data }) => {
     return isProd ? data?.draft !== true : true;
@@ -74,7 +74,7 @@ if (allHotels.length === 0) {
   }
 }
 
-// 2. Review loader (collection age, na hole glob fallback)
+// 2. Review loader
 try {
   const cmsReviews = await getCollection('reviews');
   allReviewsList = cmsReviews.map((r: any) => ({ id: r.id, ...(r.data || {}) }));
@@ -106,7 +106,7 @@ const nearbyHotels = allHotels
   .sort((a, b) => b.score - a.score)
   .slice(0, 4);
 
-// Cloudflare image optimizer (mobile speed-er jonno)
+// Cloudflare image optimizer
 function getOptimizedThumbnail(url: any): string {
   if (!url || typeof url !== 'string') return '/images/hotel-placeholder.webp';
   const cleanUrl = url.trim();
@@ -122,14 +122,15 @@ function getOptimizedThumbnail(url: any): string {
   return cleanUrl;
 }
 
-// Price formatter: currency na jene `$` dhore neya hoy na
+// Price formatter
 function formatPrice(data: any): string {
   const raw = data.price || data.starting_price;
   if (!raw) return 'Check rates';
-  const str = String(raw).trim();
-  if (/^[^\d\s]/.test(str)) return str;
-  const currency = String(data.currency || data.currency_symbol || '').trim();
-  return currency ? `${currency} ${str}` : 'Check rates';
+  const s = String(raw).trim();
+  if (!s || /check|contact|inquire/i.test(s)) return 'Check rates';
+  if (/^[^\d\s]/.test(s)) return s;
+  const currency = String(data.currency || data.currency_symbol || '$').trim();
+  return `${currency}${s}`;
 }
 ---
 
@@ -154,7 +155,7 @@ function formatPrice(data: any): string {
       </div>
 
       <!-- 4-HOTEL GRID -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-left">
+      <div id="nearbyHotelsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 text-left">
         {nearbyHotels.map((h) => {
           const hData = h.data || {};
           const hTitle = String(hData.title || hData.name || 'Hotel').trim();
@@ -162,6 +163,7 @@ function formatPrice(data: any): string {
           const hLocation = String(hData.locality || hData.location || '').trim();
           const hPrice = formatPrice(hData);
           const hSlug = h.hSlug;
+          const agodaId = String(hData.agoda_id || hData.agodaId || hData.agoda_hotel_id || '').trim();
 
           const firstGallery = Array.isArray(hData.gallery) ? hData.gallery[0] : null;
           const rawImg =
@@ -215,7 +217,12 @@ function formatPrice(data: any): string {
           const finalCountDisplay = realCount > 0 ? realCount : Number(hData.reviews_count || 0);
 
           return (
-            <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group">
+            <div
+              class="nearby-hotel-card bg-white rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-emerald-600/40 transition-all duration-300 flex flex-col justify-between group"
+              data-slug={hSlug}
+              data-hotel-name={hTitle}
+              data-agoda-id={agodaId}
+            >
               <div>
 
                 <!-- CARD PHOTO -->
@@ -248,7 +255,8 @@ function formatPrice(data: any): string {
                 <!-- CARD DETAILS -->
                 <div class="p-3 sm:p-5 space-y-1.5 sm:space-y-2.5">
 
-                  {realRatingNumber ? (
+                  {/* রিভিউ থাকলেই শুধু দেখাবে; না থাকলে কিছুই দেখাবে না */}
+                  {realRatingNumber && (
                     <div class="flex items-center gap-1.5">
                       <div
                         class="flex items-center gap-0.5"
@@ -270,8 +278,6 @@ function formatPrice(data: any): string {
                         <span class="text-[10px] font-bold text-slate-500">({finalCountDisplay})</span>
                       )}
                     </div>
-                  ) : (
-                    <p class="text-[11px] font-medium text-slate-500">No reviews yet</p>
                   )}
 
                   <h3 class="font-black text-slate-900 text-xs sm:text-base group-hover:text-emerald-800 transition line-clamp-1 leading-snug">
@@ -287,15 +293,36 @@ function formatPrice(data: any): string {
                     </p>
                   )}
 
-                  <div class="pt-1 border-t border-slate-100 flex items-baseline justify-between gap-1">
-                    <span class="text-[10px] sm:text-[11px] text-slate-500 font-bold uppercase">Rate</span>
-                    <span class="text-xs sm:text-base font-black text-emerald-900 leading-tight">{hPrice}</span>
+                  {/* RATE & LIVE AGODA INDICATOR */}
+                  <div class="pt-2 border-t border-slate-100 space-y-1">
+                    <div class="nearby-live-badge hidden items-center gap-1.5 leading-none">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true"></span>
+                      <span class="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
+                        Live Rate (Agoda)
+                      </span>
+                    </div>
+
+                    <div class="flex items-baseline justify-between gap-1">
+                      <div class="flex items-baseline gap-1 min-w-0">
+                        <span class="nearby-live-price text-sm sm:text-lg font-black text-emerald-900 leading-tight tabular-nums transition-opacity duration-300">
+                          {hPrice}
+                        </span>
+                        <span class="nearby-per-night text-[10px] sm:text-xs text-slate-500 font-medium">
+                          {hPrice !== 'Check rates' ? ' / night' : ''}
+                        </span>
+                      </div>
+
+                      <div class="flex items-center gap-1 shrink-0">
+                        <span class="nearby-orig-price hidden text-[10px] sm:text-[11px] text-slate-400 line-through font-semibold tabular-nums"></span>
+                        <span class="nearby-discount-badge hidden text-[9px] font-black uppercase text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-full"></span>
+                      </div>
+                    </div>
                   </div>
 
                 </div>
               </div>
 
-              <!-- VIEW DETAILS CTA (trailing slash shoho canonical link) -->
+              <!-- VIEW DETAILS CTA -->
               <div class="p-3 sm:p-5 pt-0">
                 <a
                   href={`/${hSlug}/`}
@@ -314,3 +341,176 @@ function formatPrice(data: any): string {
     </div>
   </section>
 )}
+
+<!-- LIVE AGODA RATE CLIENT SCRIPT -->
+<script is:inline>
+  (() => {
+    let nearbyAbortController = null;
+    const WORKER_ENDPOINT = "https://gulshanhotels.rmollah394.workers.dev";
+    const CACHE_PREFIX = "gh_pop_rate_";
+    const CACHE_TTL_MS = 10 * 60 * 1000;
+
+    const getDhakaDates = () => {
+      const now = new Date();
+      const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const dhaka = new Date(utcMillis + (6 * 3600000));
+      const pad = (n) => String(n).padStart(2, '0');
+
+      const d1 = `${dhaka.getFullYear()}-${pad(dhaka.getMonth() + 1)}-${pad(dhaka.getDate())}`;
+      dhaka.setDate(dhaka.getDate() + 1);
+      const d2 = `${dhaka.getFullYear()}-${pad(dhaka.getMonth() + 1)}-${pad(dhaka.getDate())}`;
+      return { checkIn: d1, checkOut: d2 };
+    };
+
+    const initNearbyHotelsRates = () => {
+      if (nearbyAbortController) nearbyAbortController.abort();
+      nearbyAbortController = new AbortController();
+      const { signal } = nearbyAbortController;
+
+      const section = document.getElementById('nearby-hotels');
+      const grid = document.getElementById('nearbyHotelsGrid');
+      if (!grid) return;
+
+      const cards = grid.querySelectorAll('.nearby-hotel-card');
+      if (cards.length === 0) return;
+
+      const applyCardRate = (card, ratesData) => {
+        const priceEl = card.querySelector('.nearby-live-price');
+        const origPriceEl = card.querySelector('.nearby-orig-price');
+        const discountEl = card.querySelector('.nearby-discount-badge');
+        const perNightEl = card.querySelector('.nearby-per-night');
+        const liveBadgeEl = card.querySelector('.nearby-live-badge');
+
+        if (!priceEl || !ratesData?.startingPrice) return;
+
+        priceEl.style.opacity = '0.3';
+        setTimeout(() => {
+          priceEl.textContent = ratesData.startingPrice;
+          priceEl.style.opacity = '1';
+
+          if (perNightEl) perNightEl.textContent = ' / night';
+          if (liveBadgeEl) {
+            liveBadgeEl.classList.remove('hidden');
+            liveBadgeEl.classList.add('flex');
+          }
+
+          if (ratesData.originalPrice && origPriceEl) {
+            origPriceEl.textContent = ratesData.originalPrice;
+            origPriceEl.classList.remove('hidden');
+          }
+
+          if (ratesData.discountText && discountEl) {
+            discountEl.textContent = ratesData.discountText;
+            discountEl.classList.remove('hidden');
+          }
+        }, 120);
+      };
+
+      const syncHotelLiveRate = async (card) => {
+        const slug = (card.getAttribute('data-slug') || '').trim();
+        const hotelName = (card.getAttribute('data-hotel-name') || '').trim();
+        const agodaId = (card.getAttribute('data-agoda-id') || '').trim();
+
+        if (!agodaId && !slug && !hotelName) return;
+
+        const cacheKey = CACHE_PREFIX + (agodaId || slug || hotelName);
+
+        try {
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.rates) {
+              applyCardRate(card, parsed.rates);
+              return;
+            }
+          }
+        } catch (_) {}
+
+        const { checkIn, checkOut } = getDhakaDates();
+        const queryParams = new URLSearchParams();
+        if (agodaId) {
+          queryParams.set('id', agodaId);
+          queryParams.set('hotelId', agodaId);
+        } else {
+          queryParams.set('hotel', slug || hotelName);
+        }
+        queryParams.set('checkIn', checkIn);
+        queryParams.set('checkInDate', checkIn);
+        queryParams.set('checkOut', checkOut);
+        queryParams.set('checkOutDate', checkOut);
+        queryParams.set('adults', '2');
+        queryParams.set('numberOfAdult', '2');
+        queryParams.set('rooms', '1');
+        queryParams.set('currency', 'USD');
+
+        const requestUrl = `${WORKER_ENDPOINT}?${queryParams.toString()}`;
+
+        try {
+          const res = await fetch(requestUrl, { signal });
+          if (!res.ok) return;
+
+          const json = await res.json();
+          let normalizedRates = null;
+
+          if (json?.results && Array.isArray(json.results) && json.results.length > 0) {
+            const item = json.results[0];
+            const curSym = item.currency === 'USD' ? '$' : (item.currency === 'BDT' ? '৳' : (item.currency || '$'));
+            const rateVal = item.dailyRate ? Math.round(Number(item.dailyRate)) : null;
+            const origVal = item.crossedOutRate ? Math.round(Number(item.crossedOutRate)) : null;
+            const discPct = item.discountPercentage && Number(item.discountPercentage) > 0 ? `${Math.round(item.discountPercentage)}% OFF` : '';
+
+            normalizedRates = {
+              startingPrice: rateVal ? `${curSym}${rateVal}` : '',
+              originalPrice: origVal && origVal > (rateVal || 0) ? `${curSym}${origVal}` : '',
+              discountText: discPct
+            };
+          } else if (json?.rates) {
+            normalizedRates = json.rates;
+          } else if (json?.dailyRate || json?.startingPrice) {
+            normalizedRates = {
+              startingPrice: json.startingPrice || `$${Math.round(Number(json.dailyRate))}`,
+              originalPrice: json.originalPrice || (json.crossedOutRate ? `$${Math.round(Number(json.crossedOutRate))}` : ''),
+              discountText: json.discountText || (json.discountPercentage ? `${json.discountPercentage}% OFF` : '')
+            };
+          }
+
+          if (normalizedRates && normalizedRates.startingPrice) {
+            applyCardRate(card, normalizedRates);
+            try {
+              sessionStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                rates: normalizedRates
+              }));
+            } catch (_) {}
+          }
+        } catch (err) {}
+      };
+
+      let isSynced = false;
+      const triggerSync = () => {
+        if (isSynced) return;
+        isSynced = true;
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            syncHotelLiveRate(card);
+          }, index * 80);
+        });
+      };
+
+      if ('IntersectionObserver' in window && section) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            observer.disconnect();
+            triggerSync();
+          }
+        }, { rootMargin: '300px 0px' });
+        observer.observe(section);
+      } else {
+        setTimeout(triggerSync, 1000);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', initNearbyHotelsRates);
+    document.addEventListener('astro:page-load', initNearbyHotelsRates);
+  })();
+</script>
