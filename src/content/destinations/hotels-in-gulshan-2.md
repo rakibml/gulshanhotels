@@ -5,7 +5,7 @@ location_subtitle: Gulshan 2, Dhaka 1212, Bangladesh
 hero_image: https://media.gulshanhotels.com/photo_1_2026-11-07_16-24-15.webp
 seo_title: Hotels in Gulshan 2, Dhaka
 description: Compare hotels in Gulshan 2, Dhaka. See 3 to 5-star stays near embassies and Gulshan Lake, with locations, amenities and approximate prices.
-enable_comparison_table: true
+enable_comparison_table: false
 comparison_title: ''
 filter_keyword: ''
 selected_hotels:
