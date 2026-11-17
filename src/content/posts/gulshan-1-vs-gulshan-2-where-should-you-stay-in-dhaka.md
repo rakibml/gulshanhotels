@@ -84,7 +84,7 @@ Both zones are roughly **8 to 12 kilometers** from Hazrat Shahjalal Internationa
 
 ***
 
-Frequently Asked Questions
+**Frequently Asked Questions**
 
 ## **Is Gulshan 1 or Gulshan 2 better for first-time visitors to Dhaka?**
 
