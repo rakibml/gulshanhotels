@@ -76,6 +76,8 @@ payment_methods:
   - visa
   - mastercard
   - unionpay
+other_payment_methods: ''
+custom_payment_methods: []
 custom_policies: []
 amenities_notice: ''
 enable_amenities: true
@@ -196,7 +198,7 @@ The hotel has 149 rooms and suites in two parts: the Tower Wing and the Residenc
 
 There are three places to eat inside the hotel: The Flair, The Beast and The Deli. On the rooftop you will find a swimming pool. There is also a gym, free Wi-Fi and parking. If you need a place for a meeting or a small event, the hotel has space for that too.
 
-Other big hotels are close by, like The Westin, Amari Dhaka and Six Seasons. Gulshan Lake Park is nearby if you want a short walk. Shopping places in Gulshan are also easy to reach.
+Other big hotels are close by, like [The Westin](https://gulshanhotels.com/the-westin-dhaka/), [Amari Dhaka](https://gulshanhotels.com/amari-dhaka/) and [Six Seasons](https://gulshanhotels.com/six-seasons-hotel/). Gulshan Lake Park is nearby if you want a short walk. Shopping places in Gulshan are also easy to reach.
 
 It suits people who come to Dhaka for work, especially if their meetings are in Gulshan. It is also fine for families who want to stay in a well-known area.
 
