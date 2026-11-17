@@ -86,22 +86,22 @@ Both zones are roughly **8 to 12 kilometers** from Hazrat Shahjalal Internationa
 
 Frequently Asked Questions
 
-Is Gulshan 1 or Gulshan 2 better for first-time visitors to Dhaka?
+## **Is Gulshan 1 or Gulshan 2 better for first-time visitors to Dhaka?**
 
 For most first-time international visitors, **Gulshan 2** is slightly easier because it has calmer side streets, Gulshan Lake Park, flagship cafes, and the largest selection of international 5-star hotels. However, **Gulshan 1** is better if your business meetings are further south near Hatirjheel or Tejgaon.
 
-Which zone is closer to embassies in Dhaka?
+## **Which zone is closer to embassies in Dhaka?**
 
 **Gulshan 2** is closer to the diplomatic enclave and most foreign embassies in Gulshan and neighboring Baridhara.
 
-Which area is closer to Dhaka Airport (DAC)?
+## **Which area is closer to Dhaka Airport (DAC)?**
 
 **Gulshan 2** is slightly closer to Hazrat Shahjalal International Airport (around 8 to 10 km away), though both Gulshan 1 and Gulshan 2 connect via the Banani/Airport Road corridor and the Dhaka Elevated Expressway.
 
-Can I find budget or 3-star hotels in Gulshan 2?
+## **Can I find budget or 3-star hotels in Gulshan 2?**
 
 Yes. While Gulshan 2 is famous for 5-star properties like The Westin, Amari, Crowne Plaza, and Six Seasons, there are also 3-star and budget stays in the area, such as Hotel Tropical Daisy.
 
-How far is Gulshan 1 from Gulshan 2?
+## **How far is Gulshan 1 from Gulshan 2?**
 
 They are connected by Gulshan Avenue and sit roughly **2 to 3 kilometers apart**—about a 5-to-10-minute drive late at night, or 15 to 30 minutes during busy Dhaka traffic hours.
