@@ -53,7 +53,7 @@ rates_disclaimer: Prices are provided by our partners and reflect nightly room r
 call_button_text: ''
 whatsapp_button_text: ''
 whatsapp_message: ''
-agoda_id: ''
+agoda_id: '1199111'
 agoda_url: ''
 agoda_cid: ''
 booking_channels: []
