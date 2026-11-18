@@ -111,14 +111,19 @@ const processedGallery = rawGalleryData.map((item: any, idx: number) => {
     : (idx === 0 && coverAlt ? coverAlt : `${hotelTitle || 'Hotel'} - Photo ${idx + 1}`);
 
   const desktopUrl = getOptimizedImageUrl(cleanRaw, 1200, 80);
+  const smallUrl = getOptimizedImageUrl(cleanRaw, 480, 75);
+  const midUrl = getOptimizedImageUrl(cleanRaw, 800, 75);
+  const canResize = desktopUrl !== cleanRaw;
 
   return {
     url: cleanRaw,
     alt: altText,
     thumb: getOptimizedImageUrl(cleanRaw, 600, 75),
-    mobile: getOptimizedImageUrl(cleanRaw, 800, 75),
+    mobile: midUrl,
     desktop: desktopUrl,
-    lightbox: desktopUrl
+    lightbox: desktopUrl,
+    src: midUrl,
+    srcset: canResize ? `${smallUrl} 480w, ${midUrl} 800w, ${desktopUrl} 1200w` : undefined
   };
 }).filter(g => {
   if (!g.url || seenGalleryUrls.has(g.url)) return false;
@@ -137,9 +142,9 @@ const sideThumbs = processedGallery.slice(1, 5);
 const sideCount = sideThumbs.length;
 
 function thumbSpanClass(i: number, n: number): string {
-  if (n === 1) return 'col-span-2 row-span-2';
-  if (n === 2) return 'row-span-2';
-  if (n === 3 && i === 0) return 'row-span-2';
+  if (n === 1) return 'md:col-span-2 md:row-span-2';
+  if (n === 2) return 'md:row-span-2';
+  if (n === 3 && i === 0) return 'md:row-span-2';
   return '';
 }
 
@@ -263,7 +268,7 @@ const currentHotelWishlistData = {
           <div class="flex sm:hidden items-center gap-2 ml-1">
             <button
               type="button"
-              class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1 active:scale-95 cursor-pointer"
+              class="open-write-review-trigger border border-slate-900 hover:bg-slate-100 text-slate-900 font-bold text-xs px-3 py-2 rounded-full flex items-center gap-1 active:scale-95 cursor-pointer"
             >
               <svg aria-hidden="true" class="w-3 h-3 stroke-slate-900 fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"/>
@@ -275,7 +280,7 @@ const currentHotelWishlistData = {
             {hotelSlug && (
               <button
                 type="button"
-                class="hotel-wishlist-toggle-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-[11px] font-bold"
+                class="hotel-wishlist-toggle-btn flex items-center gap-1 text-slate-900 hover:text-red-600 cursor-pointer select-none text-xs font-bold py-2 px-1"
                 aria-pressed="false"
               >
                 <svg class="wishlist-heart-icon w-3.5 h-3.5 stroke-slate-900 fill-none stroke-2 shrink-0 transition-colors" viewBox="0 0 24 24">
@@ -308,127 +313,67 @@ const currentHotelWishlistData = {
 
     </div>
 
-    <!-- ================= 2. GALLERY ================= -->
+    <!-- ================= 2. GALLERY (single DOM: mobile slider -> desktop grid) ================= -->
     {totalPhotos > 0 && (
-      <div class="pt-2">
-
-        <!-- ---------- MOBILE: SWIPEABLE SLIDER ---------- -->
-        <div class="md:hidden relative rounded-2xl overflow-hidden bg-slate-100">
-          <div
-            id="heroMobileSlider"
-            class="hero-slider flex overflow-x-auto snap-x snap-mandatory h-[260px] sm:h-[360px]"
-          >
-            {processedGallery.map((g, i) => (
+      <div class="pt-2 relative">
+        <div
+          id="heroMobileSlider"
+          class="hero-slider flex overflow-x-auto snap-x snap-mandatory h-[260px] sm:h-[360px] rounded-2xl bg-slate-100 md:grid md:grid-cols-4 md:grid-rows-2 md:gap-1 md:overflow-hidden md:h-[420px] lg:h-[480px] md:rounded-3xl"
+        >
+          {processedGallery.map((g, i) => {
+            const isMain = i === 0;
+            const spanClass = isMain
+              ? (sideCount > 0 ? 'md:col-span-2 md:row-span-2' : 'md:col-span-4 md:row-span-2')
+              : (i <= 4 ? thumbSpanClass(i - 1, sideCount) : 'md:hidden');
+            return (
               <div
-                class="relative shrink-0 w-full h-full snap-center cursor-pointer"
+                class={`relative shrink-0 w-full h-full snap-center cursor-pointer overflow-hidden group md:w-auto md:shrink ${spanClass}`}
                 data-gallery-trigger={i}
                 role="button"
                 tabindex="0"
                 aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo ${i + 1}: ${g.alt}`}
               >
                 <img
-                  src={g.mobile}
-                  alt={g.alt}
+                  id={isMain ? 'heroMainViewImg' : undefined}
+                  src={g.src}
+                  srcset={g.srcset}
+                  sizes={isMain ? '(min-width: 768px) 50vw, 100vw' : '(min-width: 768px) 25vw, 100vw'}
                   width="800"
-                  height="520"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  fetchpriority={i === 0 ? 'high' : 'auto'}
+                  height="480"
+                  alt={g.alt}
+                  loading={isMain ? 'eager' : 'lazy'}
+                  fetchpriority={isMain ? 'high' : 'low'}
                   decoding="async"
-                  class="w-full h-full object-cover object-center"
+                  class="w-full h-full object-cover object-center md:transition-transform md:duration-500 md:group-hover:scale-[1.02]"
                 />
-              </div>
-            ))}
-          </div>
-
-          <!-- Counter badge -->
-          <div
-            aria-hidden="true"
-            class="absolute bottom-3 right-3 bg-[#002b11]/90 text-white backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg border border-white/20 pointer-events-none z-10"
-          >
-            <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-              <circle cx="9" cy="9" r="2"/>
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-            </svg>
-            <span class="text-xs font-bold tracking-wide">
-              <span id="heroSliderIdx">1</span> / {totalPhotos}
-            </span>
-          </div>
-        </div>
-
-        <!-- ---------- DESKTOP: 1 LARGE + 4 GRID ---------- -->
-        <div class="hidden md:block relative">
-          <div class="grid grid-cols-4 gap-1 md:h-[420px] lg:h-[480px] rounded-3xl overflow-hidden bg-slate-100">
-
-            <!-- Main large image -->
-            <div
-              class={`relative h-full overflow-hidden group cursor-pointer ${sideCount > 0 ? 'col-span-2' : 'col-span-4'}`}
-              data-gallery-trigger="0"
-              role="button"
-              tabindex="0"
-              aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo 1: ${processedGallery[0].alt}`}
-            >
-              <img
-                id="heroMainViewImg"
-                src={processedGallery[0].desktop}
-                srcset={`${processedGallery[0].mobile} 800w, ${processedGallery[0].desktop} 1200w`}
-                sizes="(max-width: 1280px) 50vw, 640px"
-                width="800"
-                height="480"
-                alt={processedGallery[0].alt}
-                loading="eager"
-                fetchpriority="high"
-                decoding="async"
-                class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
-              />
-            </div>
-
-            <!-- Right side thumbnails -->
-            {sideCount > 0 && (
-              <div class="col-span-2 grid grid-cols-2 grid-rows-2 gap-1 h-full">
-                {sideThumbs.map((g, i) => (
-                  <div
-                    class={`relative h-full overflow-hidden group cursor-pointer ${thumbSpanClass(i, sideCount)}`}
-                    data-gallery-trigger={i + 1}
-                    role="button"
-                    tabindex="0"
-                    aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo ${i + 2}: ${g.alt}`}
-                  >
-                    <img
-                      src={g.thumb}
-                      alt={g.alt}
-                      width="400"
-                      height="240"
-                      loading="lazy"
-                      decoding="async"
-                      class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-                    />
-                    {i === 3 && totalPhotos > 5 && (
-                      <div class="absolute inset-0 bg-black/45 flex items-center justify-center text-white font-bold text-sm pointer-events-none">
-                        +{totalPhotos - 5} photos
-                      </div>
-                    )}
+                {i === 4 && totalPhotos > 5 && (
+                  <div class="hidden md:flex absolute inset-0 bg-black/45 items-center justify-center text-white font-bold text-sm pointer-events-none">
+                    +{totalPhotos - 5} photos
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-
-          <!-- Show all photos button -->
-          <button
-            type="button"
-            data-gallery-trigger="0"
-            class="absolute bottom-4 right-4 z-10 bg-white text-slate-900 font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-md border border-slate-300 hover:bg-slate-50 transition active:scale-95 cursor-pointer flex items-center gap-2"
-          >
-            <svg aria-hidden="true" class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-              <circle cx="9" cy="9" r="2"/>
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-            </svg>
-            Show all {totalPhotos} photos
-          </button>
+            );
+          })}
         </div>
 
+        <!-- Mobile counter -->
+        <div
+          aria-hidden="true"
+          class="md:hidden absolute bottom-3 right-3 bg-[#002b11]/90 text-white px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg border border-white/20 pointer-events-none z-10"
+        >
+          <span class="text-xs font-bold tracking-wide">
+            <span id="heroSliderIdx">1</span> / {totalPhotos}
+          </span>
+        </div>
+
+        <!-- Desktop: Show all photos -->
+        <button
+          type="button"
+          data-gallery-trigger="0"
+          class="hidden md:flex absolute bottom-4 right-4 z-10 bg-white text-slate-900 font-bold text-sm px-4 py-2 rounded-lg shadow-md border border-slate-300 hover:bg-slate-50 transition active:scale-95 cursor-pointer items-center gap-2"
+        >
+          Show all {totalPhotos} photos
+        </button>
       </div>
     )}
 
@@ -468,7 +413,7 @@ const currentHotelWishlistData = {
   <div id="lightboxTouchArea" class="relative max-w-5xl mx-auto my-auto w-full h-[60vh] sm:h-[70vh] flex items-center justify-center touch-pan-y">
     <img
       id="lightboxModalImg"
-      src={processedGallery[0]?.lightbox || coverImage}
+      src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
       alt={processedGallery[0]?.alt || hotelTitle}
       decoding="async"
       class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200 pointer-events-none"
