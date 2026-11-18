@@ -8,6 +8,7 @@ featured_hotels:
   - the-westin-dhaka
   - amari-dhaka
   - renaissance-dhaka-gulshan-hotel
+  - the-way-dhaka
   - six-seasons-hotel
   - crowne-plaza-dhaka-gulshan-by-ihg
 ---
