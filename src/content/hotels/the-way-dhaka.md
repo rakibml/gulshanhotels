@@ -374,7 +374,7 @@ Unlike Dhaka’s massive 200-room business hotels, THE WAY Dhaka feels much more
 For most guests, the rooftop is the real highlight. After a long day of meetings or exploring the city, you can take a dip in the rooftop infinity pool, relax on the open-air Aqua Deck, or recharge at the fitness center with its sauna and steam rooms. In the evening, **Top Of The Way**, the rooftop restaurant, offers a great setting for dinner with a view. If you just want a quick coffee or a casual bite downstairs, the 24-hour **Converse Café** and the open-air **Courtyard Café** have you covered.
 
 **What guests love most**
-People who stay here often talk about how warm and attentive the staff are. Clean, modern rooms, reliable Wi-Fi, and a genuinely calm atmosphere make it an easy favorite for repeat visitors. Many travelers also feel it gives great value for money compared to nearby 5-star properties like The Westin Dhaka (just a 5-minute walk away), Amari Dhaka, Crowne Plaza Dhaka Gulshan, or Six Seasons Hotel.
+People who stay here often talk about how warm and attentive the staff are. Clean, modern rooms, reliable Wi-Fi, and a genuinely calm atmosphere make it an easy favorite for repeat visitors. Many travelers also feel it gives great value for money compared to nearby 5-star properties like [The Westin Dhaka](https://gulshanhotels.com/the-westin-dhaka/) (just a 5-minute walk away), [Amari Dhaka](https://gulshanhotels.com/amari-dhaka/), [Crowne Plaza Dhaka Gulshan](https://gulshanhotels.com/crowne-plaza-dhaka-gulshan-by-ihg/), or [Six Seasons Hotel](https://gulshanhotels.com/six-seasons-hotel/).
 
 **A few things to keep in mind before you book**
 Because it is a boutique property, the spaces are naturally more compact:
