@@ -1,5 +1,6 @@
 ---
-// src/components/hotel/HotelHeader.astro (Bulletproof Dialog, Mobile Swipe, Cloudflare Optimized & Zero Fake Reviews)
+// src/components/hotel/HotelHeader.astro
+// Desktop: 1 large + 4 grid | Mobile: swipeable slider | Native <dialog> lightbox
 interface Props {
   hotel: any;
 }
@@ -14,7 +15,6 @@ const rawSlug = String(data.slug || hotel?.slug || hotel?.id || "").trim();
 const hotelSlug = rawSlug.replace(/\.(md|mdx)$/, '').split('/').pop()?.toLowerCase() || "";
 const isDraft = data.draft === true || String(data.draft).toLowerCase() === 'true';
 
-// ড্রাফট না হলে এবং টাইটেল না থাকলে বিল্ড সরাসরি আটকে যাবে (ভুল পেজ লাইভ হওয়া রোধ)
 if (!hotelTitle && !isDraft) {
   throw new Error(`[HotelHeader] Hotel title missing in slug: "${hotelSlug || 'unknown'}". Please define title in frontmatter.`);
 }
@@ -23,12 +23,12 @@ const searchTitle = hotelTitle.toLowerCase();
 const searchSlug = hotelSlug.toLowerCase();
 const isVerified = data.is_verified === true;
 
-// ================= 2. 100% GENUINE GUEST REVIEWS (NO SELF-WRITTEN REVIEWS) =================
+// ================= 2. GENUINE GUEST REVIEWS =================
 let rawReviewsList: any[] = [];
 try {
   const globFiles = import.meta.glob('/src/content/reviews/*.{md,mdx}', { eager: true });
   const entries = Object.values(globFiles);
-  
+
   if (entries.length > 0) {
     rawReviewsList = entries.map((item: any) => item?.frontmatter || item?.data || item || {});
   } else {
@@ -39,7 +39,6 @@ try {
   rawReviewsList = [];
 }
 
-// শুধুমাত্র অতিথিদের পাঠানো এবং অ্যাডমিনের যাচাইকৃত আসল রিভিউ
 const seenReviews = new Set<string>();
 const approvedReviews = rawReviewsList.filter((item: any) => {
   if (!item) return false;
@@ -75,24 +74,23 @@ const avgRating = avgRatingNum > 0 ? avgRatingNum.toFixed(1) : "";
 const hotelRanking = String(data.ranking || data.ranking_text || "").trim();
 const locationMapUrl = data.map_url || "#location-map";
 
-// ================= 3. CLOUDFLARE RESILIENT RESPONSIVE IMAGES =================
+// ================= 3. IMAGES =================
 const coverImage = data.image ? String(data.image).trim() : "";
 const coverAlt = String(data.image_alt || `${hotelTitle} - Photo 1`).trim();
 
 function getOptimizedImageUrl(url: string, width = 800, quality = 80) {
   if (!url) return '';
   const cleanUrl = url.trim();
-  
-  // Unsplash fallback
+
   if (cleanUrl.includes('unsplash.com')) {
     const base = cleanUrl.split('?')[0];
     return `${base}?auto=format&fit=crop&w=${width}&q=${quality}&fm=webp`;
   }
-  
-  // Cloudflare Transformations with onerror=redirect (কোটা পার হলেও ছবি ভাঙবে না)
+
+  // Cloudflare Image Transformations (fit=scale-down: kokhono crop kore na)
   if (cleanUrl.startsWith('https://media.gulshanhotels.com/')) {
     const path = cleanUrl.replace('https://media.gulshanhotels.com/', '');
-    return `https://media.gulshanhotels.com/cdn-cgi/image/width=${width},quality=${quality},format=auto,onerror=redirect/${path}`;
+    return `https://media.gulshanhotels.com/cdn-cgi/image/width=${width},quality=${quality},fit=scale-down,format=auto,onerror=redirect/${path}`;
   }
 
   return cleanUrl;
@@ -106,7 +104,7 @@ const rawGalleryData: any[] = [
 const seenGalleryUrls = new Set<string>();
 const processedGallery = rawGalleryData.map((item: any, idx: number) => {
   const isObj = typeof item === 'object' && item !== null;
-  const rawUrl = isObj ? (item.photo || item.image || item.url || '') : String(item);
+  const rawUrl = isObj ? (item.photo || item.image || item.url || item.src || '') : String(item);
   const cleanRaw = String(rawUrl || '').trim();
   const altText = isObj && item.alt
     ? String(item.alt).trim()
@@ -117,9 +115,9 @@ const processedGallery = rawGalleryData.map((item: any, idx: number) => {
   return {
     url: cleanRaw,
     alt: altText,
-    mobile: getOptimizedImageUrl(cleanRaw, 640, 75),
+    thumb: getOptimizedImageUrl(cleanRaw, 600, 75),
+    mobile: getOptimizedImageUrl(cleanRaw, 800, 75),
     desktop: desktopUrl,
-    // Lightbox-এর জন্য আলাদা 1600 বাদ দিয়ে Desktop 1200 রি-ইউজ (ক্যাশ সেভ ও কোটা বাঁচানো)
     lightbox: desktopUrl
   };
 }).filter(g => {
@@ -134,9 +132,20 @@ const galleryPayload = {
   photos: processedGallery.map(g => ({ src: g.lightbox, alt: g.alt }))
 };
 
+// Desktop right-side thumbnails (max 4) + layout depending on how many exist
+const sideThumbs = processedGallery.slice(1, 5);
+const sideCount = sideThumbs.length;
+
+function thumbSpanClass(i: number, n: number): string {
+  if (n === 1) return 'col-span-2 row-span-2';
+  if (n === 2) return 'row-span-2';
+  if (n === 3 && i === 0) return 'row-span-2';
+  return '';
+}
+
 // ================= 4. WISHLIST PAYLOAD =================
 const rawPrice = data.price || data.starting_price;
-const hotelPrice = rawPrice 
+const hotelPrice = rawPrice
   ? (String(rawPrice).trim().startsWith('$') || String(rawPrice).trim().startsWith('৳') ? String(rawPrice).trim() : `$${String(rawPrice).trim()}`)
   : "Check rates";
 
@@ -144,15 +153,22 @@ const currentHotelWishlistData = {
   title: hotelTitle,
   slug: hotelSlug,
   price: hotelPrice,
-  image: processedGallery[0]?.mobile || coverImage || "",
+  image: processedGallery[0]?.thumb || coverImage || "",
   url: hotelSlug ? `/${hotelSlug}/` : "#"
 };
 ---
 
-<!-- পেছনের পেজ স্ক্রল হওয়া বন্ধ করতে আধুনিক CSS :has() -->
+<!-- Lightbox open thakle background scroll bondho -->
 <style is:global>
   html:has(#heroLightboxModal[open]) {
     overflow: hidden !important;
+  }
+  .hero-slider {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hero-slider::-webkit-scrollbar {
+    display: none;
   }
 </style>
 
@@ -162,7 +178,7 @@ const currentHotelWishlistData = {
 
     <!-- ================= 1. HEADER INFO AREA ================= -->
     <div class="space-y-3 pb-2">
-      
+
       <!-- ROW 1: TITLE & ACTION BUTTONS -->
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2">
@@ -180,7 +196,7 @@ const currentHotelWishlistData = {
           )}
         </div>
 
-        <!-- Right Side: Desktop Action Buttons -->
+        <!-- Desktop Action Buttons -->
         <div class="hidden sm:flex items-center gap-4 sm:gap-5">
           {hotelSlug && (
             <button
@@ -215,7 +231,6 @@ const currentHotelWishlistData = {
             <>
               <span class="font-bold text-slate-900">{avgRating}</span>
 
-              <!-- নির্ভুল ফ্র্যাকশনাল স্টার -->
               <div class="flex items-center gap-0.5" role="img" aria-label={`Rated ${avgRating} out of 5 stars`}>
                 {Array.from({ length: 5 }).map((_, i) => {
                   const pct = Math.round(Math.max(0, Math.min(1, avgRatingNum - i)) * 100);
@@ -293,93 +308,127 @@ const currentHotelWishlistData = {
 
     </div>
 
-    <!-- ================= 2. RESPONSIVE HERO GALLERY COLLAGE ================= -->
+    <!-- ================= 2. GALLERY ================= -->
     {totalPhotos > 0 && (
       <div class="pt-2">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-1 h-[280px] sm:h-[400px] md:h-[450px] lg:h-[480px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm bg-slate-100">
-          
-          <!-- 1. MAIN LARGE IMAGE -->
-          <div 
-            class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos >= 2 ? 'md:col-span-2' : 'md:col-span-3'}`}
-            data-gallery-trigger="0"
-            role="button"
-            tabindex="0"
-            aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo 1: ${processedGallery[0].alt}`}
+
+        <!-- ---------- MOBILE: SWIPEABLE SLIDER ---------- -->
+        <div class="md:hidden relative rounded-2xl overflow-hidden bg-slate-100">
+          <div
+            id="heroMobileSlider"
+            class="hero-slider flex overflow-x-auto snap-x snap-mandatory h-[260px] sm:h-[360px]"
           >
-            <img
-              id="heroMainViewImg"
-              src={processedGallery[0].desktop}
-              srcset={`${processedGallery[0].mobile} 640w, ${processedGallery[0].desktop} 1200w`}
-              sizes="(max-width: 768px) 100vw, 850px"
-              width="850"
-              height="480"
-              alt={processedGallery[0].alt}
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-
-            <!-- Visual Badge -->
-            <div
-              aria-hidden="true"
-              class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-[#002b11]/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-white/20 transition group-hover:scale-105 pointer-events-none z-10"
-            >
-              <svg class="w-4 h-4 fill-none stroke-currentColor stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                <circle cx="9" cy="9" r="2"/>
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-              </svg>
-              <span class="text-xs sm:text-sm font-bold tracking-wide">{totalPhotos}</span>
-            </div>
-          </div>
-
-          <!-- 2. RIGHT SIDE: STACKED PHOTOS -->
-          {totalPhotos >= 2 && (
-            <div class="hidden md:grid grid-rows-2 gap-1 h-full">
-              <!-- Photo 2 (Row-span-2 if exactly 2 photos) -->
-              <div 
-                class={`relative h-full overflow-hidden group cursor-pointer ${totalPhotos === 2 ? 'row-span-2' : ''}`}
-                data-gallery-trigger="1"
+            {processedGallery.map((g, i) => (
+              <div
+                class="relative shrink-0 w-full h-full snap-center cursor-pointer"
+                data-gallery-trigger={i}
                 role="button"
                 tabindex="0"
-                aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo 2: ${processedGallery[1].alt}`}
+                aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo ${i + 1}: ${g.alt}`}
               >
                 <img
-                  src={processedGallery[1].desktop}
-                  alt={processedGallery[1].alt}
-                  width="400"
-                  height={totalPhotos === 2 ? 480 : 240}
-                  loading="lazy"
+                  src={g.mobile}
+                  alt={g.alt}
+                  width="800"
+                  height="520"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : 'auto'}
                   decoding="async"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  class="w-full h-full object-cover object-center"
                 />
               </div>
+            ))}
+          </div>
 
-              <!-- Photo 3 -->
-              {totalPhotos >= 3 && (
-                <div 
-                  class="relative h-full overflow-hidden group cursor-pointer"
-                  data-gallery-trigger="2"
-                  role="button"
-                  tabindex="0"
-                  aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo 3: ${processedGallery[2].alt}`}
-                >
-                  <img
-                    src={processedGallery[2].desktop}
-                    alt={processedGallery[2].alt}
-                    width="400"
-                    height="240"
-                    loading="lazy"
-                    decoding="async"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
+          <!-- Counter badge -->
+          <div
+            aria-hidden="true"
+            class="absolute bottom-3 right-3 bg-[#002b11]/90 text-white backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg border border-white/20 pointer-events-none z-10"
+          >
+            <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            <span class="text-xs font-bold tracking-wide">
+              <span id="heroSliderIdx">1</span> / {totalPhotos}
+            </span>
+          </div>
         </div>
+
+        <!-- ---------- DESKTOP: 1 LARGE + 4 GRID ---------- -->
+        <div class="hidden md:block relative">
+          <div class="grid grid-cols-4 gap-1 md:h-[420px] lg:h-[480px] rounded-3xl overflow-hidden bg-slate-100">
+
+            <!-- Main large image -->
+            <div
+              class={`relative h-full overflow-hidden group cursor-pointer ${sideCount > 0 ? 'col-span-2' : 'col-span-4'}`}
+              data-gallery-trigger="0"
+              role="button"
+              tabindex="0"
+              aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo 1: ${processedGallery[0].alt}`}
+            >
+              <img
+                id="heroMainViewImg"
+                src={processedGallery[0].desktop}
+                srcset={`${processedGallery[0].mobile} 800w, ${processedGallery[0].desktop} 1200w`}
+                sizes="(max-width: 1280px) 50vw, 640px"
+                width="800"
+                height="480"
+                alt={processedGallery[0].alt}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+            </div>
+
+            <!-- Right side thumbnails -->
+            {sideCount > 0 && (
+              <div class="col-span-2 grid grid-cols-2 grid-rows-2 gap-1 h-full">
+                {sideThumbs.map((g, i) => (
+                  <div
+                    class={`relative h-full overflow-hidden group cursor-pointer ${thumbSpanClass(i, sideCount)}`}
+                    data-gallery-trigger={i + 1}
+                    role="button"
+                    tabindex="0"
+                    aria-label={`Open photo gallery (${totalPhotos} photos), viewing photo ${i + 2}: ${g.alt}`}
+                  >
+                    <img
+                      src={g.thumb}
+                      alt={g.alt}
+                      width="400"
+                      height="240"
+                      loading="lazy"
+                      decoding="async"
+                      class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                    {i === 3 && totalPhotos > 5 && (
+                      <div class="absolute inset-0 bg-black/45 flex items-center justify-center text-white font-bold text-sm pointer-events-none">
+                        +{totalPhotos - 5} photos
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <!-- Show all photos button -->
+          <button
+            type="button"
+            data-gallery-trigger="0"
+            class="absolute bottom-4 right-4 z-10 bg-white text-slate-900 font-bold text-xs sm:text-sm px-4 py-2 rounded-lg shadow-md border border-slate-300 hover:bg-slate-50 transition active:scale-95 cursor-pointer flex items-center gap-2"
+          >
+            <svg aria-hidden="true" class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+            Show all {totalPhotos} photos
+          </button>
+        </div>
+
       </div>
     )}
 
@@ -390,7 +439,7 @@ const currentHotelWishlistData = {
 <script type="application/json" id="hotel-gallery-data" set:html={JSON.stringify(galleryPayload).replace(/</g, '\\u003c')} />
 <script type="application/json" id="hotel-wishlist-data" set:html={JSON.stringify(currentHotelWishlistData).replace(/</g, '\\u003c')} />
 
-<!-- NATIVE <dialog> MODAL (Zero Heading Conflicts) -->
+<!-- NATIVE <dialog> LIGHTBOX -->
 <dialog
   id="heroLightboxModal"
   aria-label="Image Gallery Lightbox"
@@ -398,7 +447,6 @@ const currentHotelWishlistData = {
 >
   <div class="flex items-center justify-between max-w-7xl mx-auto w-full border-b border-slate-800 pb-4">
     <div>
-      <!-- H2 বাদ দিয়ে clean p ট্যাগ যাতে পেজের হেডিং স্ট্রাকচার নষ্ট না হয় -->
       <p class="text-base sm:text-lg font-black font-sans text-white">{hotelTitle}</p>
       <span class="text-xs text-slate-400">Photo Gallery</span>
     </div>
@@ -422,11 +470,10 @@ const currentHotelWishlistData = {
       id="lightboxModalImg"
       src={processedGallery[0]?.lightbox || coverImage}
       alt={processedGallery[0]?.alt || hotelTitle}
-      loading="lazy"
       decoding="async"
       class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-200 pointer-events-none"
     />
-    
+
     {totalPhotos > 1 && (
       <>
         <button
@@ -481,6 +528,24 @@ const currentHotelWishlistData = {
     let activeIdx = 0;
     let pushedByUs = false;
 
+    // ================= MOBILE SLIDER COUNTER =================
+    const slider = document.getElementById('heroMobileSlider');
+    const sliderIdx = document.getElementById('heroSliderIdx');
+    if (slider && sliderIdx) {
+      let ticking = false;
+      slider.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const w = slider.clientWidth || 1;
+          const i = Math.round(slider.scrollLeft / w);
+          sliderIdx.textContent = String(Math.min(Math.max(i, 0), Math.max(count - 1, 0)) + 1);
+          ticking = false;
+        });
+      }, { passive: true, signal });
+    }
+
+    // ================= LIGHTBOX =================
     function updateModalImage(idx: number) {
       if (!modalImg || count === 0) return;
       activeIdx = (idx + count) % count;
@@ -492,7 +557,7 @@ const currentHotelWishlistData = {
 
     function hideLightboxDOM() {
       if (!modal) return;
-      pushedByUs = false; // Reset pushed flag
+      pushedByUs = false;
       if (modal.open) {
         modal.close();
       }
@@ -542,7 +607,7 @@ const currentHotelWishlistData = {
       if (e.key === 'ArrowRight') updateModalImage(activeIdx + 1);
     }, { signal });
 
-    // ================= MOBILE TOUCH SWIPE SUPPORT =================
+    // ================= LIGHTBOX TOUCH SWIPE =================
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -554,8 +619,8 @@ const currentHotelWishlistData = {
       touchEndX = e.changedTouches[0].screenX;
       const swipeDistance = touchEndX - touchStartX;
       if (Math.abs(swipeDistance) > 45) {
-        if (swipeDistance < 0) updateModalImage(activeIdx + 1); // সোয়াইপ লেফট -> পরের ছবি
-        else updateModalImage(activeIdx - 1); // সোয়াইপ রাইট -> আগের ছবি
+        if (swipeDistance < 0) updateModalImage(activeIdx + 1);
+        else updateModalImage(activeIdx - 1);
       }
     }, { passive: true, signal });
 
@@ -578,7 +643,7 @@ const currentHotelWishlistData = {
     });
 
     closeModalBtn?.addEventListener('click', closeLightboxByUI, { signal });
-    
+
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeLightboxByUI();
     }, { signal });
@@ -661,7 +726,9 @@ const currentHotelWishlistData = {
             });
           }
 
-          localStorage.setItem('gh_wishlist', JSON.stringify(list));
+          try {
+            localStorage.setItem('gh_wishlist', JSON.stringify(list));
+          } catch {}
           updateWishlistButtonUI();
 
           window.dispatchEvent(new CustomEvent('wishlist-updated'));
