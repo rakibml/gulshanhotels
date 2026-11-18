@@ -13,6 +13,7 @@ selected_hotels:
   - hotel-tropical-daisy
   - crowne-plaza-dhaka-gulshan-by-ihg
   - six-seasons-hotel
+  - the-way-dhaka
 hotels_tag: Stay in Gulshan 2, Dhaka
 hotels_title: ''
 faqs:
