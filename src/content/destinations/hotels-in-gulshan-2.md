@@ -14,6 +14,7 @@ selected_hotels:
   - crowne-plaza-dhaka-gulshan-by-ihg
   - six-seasons-hotel
   - the-way-dhaka
+  - the-westin-dhaka
 hotels_tag: Stay in Gulshan 2, Dhaka
 hotels_title: ''
 faqs:
