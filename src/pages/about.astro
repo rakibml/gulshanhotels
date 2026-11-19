@@ -4,84 +4,175 @@ import Layout from '../layouts/Layout.astro';
 
 const SITE_URL = 'https://gulshanhotels.com';
 
-// ---- Real details (already filled) ----
+// ---- Real details (Verified & Privacy-safe) ----
 const FOUNDER_NAME = 'Mohammed Rakib';
+const FOUNDER_ROLE = 'Founder & Editor';
 const CONTACT_EMAIL = 'info@gulshanhotels.com';
-const WHATSAPP_NUMBER = '8801996322761'; // digits only, with country code
+const WHATSAPP_NUMBER = ''; // নিরাপত্তার জন্য খালি রাখা হয়েছে (খালি থাকলে বাটন দেখাবে না)
+const LAST_REVIEWED = '2026-11-19';
 
-// ---- Fill these ONLY with true things. Empty = not shown. ----
-const FOUNDER_PHOTO = '';      // e.g. '/rakib.webp' (a real photo of you)
-const FOUNDER_STORY = '';      // 2-3 true sentences: why you built this site, in your own words
-const FACEBOOK_URL = '';       // your real Facebook page, e.g. 'https://facebook.com/yourpage'
-const LISTING_POLICY = '';     // e.g. 'Listing a hotel is free. Hotels cannot pay to be ranked higher.' (only if true)
+// ---- Brand Social Pages (Organization schema + page links) ----
+const FACEBOOK_URL = ''; // আপনার GulshanHotels.com ফেসবুক পেজের লিংক পেলে এখানে বসাবেন
+const COMPANY_LINKEDIN_URL = 'https://www.linkedin.com/company/gulshanhotels/';
+const INSTAGRAM_URL = 'https://www.instagram.com/gulshanhotels/';
+
+// ---- Founder Personal Details (Fill ONLY with true things. Empty = not shown) ----
+const FOUNDER_PHOTO = '';        // e.g. '/webp' (আপনার আসল ছবি)
+const FOUNDER_STORY = 'I built GulshanHotels.com after seeing how confusing it is for visitors to compare hotels in Gulshan 1 and Gulshan 2 on global booking sites—many listings mix up nearby areas or leave out practical Dhaka details like traffic and embassy proximity. My goal is to keep one focused, honest guide so travelers can pick the right stay faster.';        // ২-৩টি সত্য লাইন: কেন আপনি সাইটটি বানিয়েছেন
+const FOUNDER_LINKEDIN_URL = ''; // আপনার ব্যক্তিগত প্রোফাইল (linkedin.com/in/...) থাকলে দিন
+const LISTING_POLICY = 'Listing a hotel is free.';       // যেমন: 'Listing a hotel is free. Hotels cannot pay to be ranked higher.' (সত্য হলেই কেবল লিখুন)
+
+// ---- Internal routes (আপনার src/pages/ ফোল্ডারের আসল পাথ অনুযায়ী বসান, খালি রাখলে লিংক দেখাবে না) ----
+const GUIDES_URL = '/blog/';           // যেমন '/guides/' বা '/travel-guides/' (সঠিক পাথ দিন)
+const PRIVACY_URL = '/privacy/';          // যেমন '/privacy-policy/' (সঠিক পাথ দিন)
+const DISCLAIMER_URL = '/disclaimer/';       // যেমন '/disclaimer/' (সঠিক পাথ দিন)
 
 // Change if your affiliate partner is different
 const PARTNER_NAME = 'Agoda';
 
 const features = [
   {
-    title: 'Discover',
-    text: 'Browse luxury, boutique and business hotels in Gulshan 1 and Gulshan 2.',
+    title: 'Discover by zone',
+    text: 'Browse luxury, boutique and business hotels across Gulshan 1 and Gulshan 2 based on where your meetings or embassy visits are.',
     icon: 'M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z',
   },
   {
-    title: 'Check rates',
-    text: 'Where our booking partner gives us live rates, we show them. Other prices are approximate.',
+    title: 'Check live & guide rates',
+    text: `Where ${PARTNER_NAME} gives us live rates, we show them clearly. Other prices are approximate guide rates to help you budget.`,
     icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   {
-    title: 'Save',
-    text: 'Tap the heart on any hotel to save it, then come back to your shortlist later.',
+    title: 'Save & compare',
+    text: 'Tap the heart on any hotel to save it, build a shortlist, and compare locations before you book.',
     icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
   },
 ];
 
 const areas = [
-  { name: 'Gulshan 1', href: '/hotels-in-gulshan-1/' },
-  { name: 'Gulshan 2', href: '/hotels-in-gulshan-2/' },
+  { name: 'Hotels in Gulshan 1', href: '/hotels-in-gulshan-1/' },
+  { name: 'Hotels in Gulshan 2', href: '/hotels-in-gulshan-2/' },
+  ...(GUIDES_URL ? [{ name: 'Gulshan Travel Guides', href: GUIDES_URL }] : []),
 ];
 
 const principles = [
   {
     title: 'Where our information comes from',
-    text: 'Hotel details and prices come from the hotels\u2019 own pages, public booking sites and our booking partner. Where live rates are available we show them; otherwise prices are approximate and can be out of date. We do not take payment for bookings on this site. Always confirm the final price and your dates with the hotel or booking partner.',
+    text: `Hotel details, facilities and rates come from the hotels’ own pages, public booking platforms and our booking partner (${PARTNER_NAME}). Where live partner rates are available, we show them; otherwise prices are approximate starting rates and can change with dates or availability.`,
   },
   {
-    title: 'How we are supported',
-    text: `Some booking links on this site are affiliate links (for example, to ${PARTNER_NAME}). If you book through them, we may earn a commission at no extra cost to you.`,
+    title: 'How we review & keep listings useful',
+    text: 'We review hotel details and neighborhood notes periodically so travelers understand practical Dhaka differences—such as road access, proximity to embassies, and commercial vs. residential zones. We do not take payment for bookings on this site; always confirm final room terms, taxes and dates with the hotel or booking partner.',
+  },
+  {
+    title: 'How we are supported (Affiliate Disclosure)',
+    text: `Some booking links on this site are affiliate links (for example, to ${PARTNER_NAME}). If you book through them, we may earn a commission at no extra cost to you. This helps keep the guide free to use.`,
   },
   {
     title: 'Found a mistake?',
-    text: `Email us at ${CONTACT_EMAIL}. We will check it and fix it.`,
+    text: `Email us at ${CONTACT_EMAIL} or use our contact form. We will verify the details and fix them.`,
   },
 ];
 
 if (LISTING_POLICY) {
-  principles.splice(2, 0, { title: 'Hotel listings', text: LISTING_POLICY });
+  principles.splice(2, 0, { title: 'Editorial independence & hotel listings', text: LISTING_POLICY });
 }
 
-const sameAs = [FACEBOOK_URL].filter(Boolean);
+const orgSameAs = [FACEBOOK_URL, COMPANY_LINKEDIN_URL, INSTAGRAM_URL].filter(Boolean);
+const personSameAs = [FOUNDER_LINKEDIN_URL].filter(Boolean);
 
 const schema = {
   '@context': 'https://schema.org',
-  '@type': 'AboutPage',
-  url: `${SITE_URL}/about/`,
-  name: 'About GulshanHotels.com',
-  mainEntity: {
-    '@type': 'Organization',
-    name: 'GulshanHotels.com',
-    url: SITE_URL,
-    logo: `${SITE_URL}/mylogo.png`,
-    email: CONTACT_EMAIL,
-    founder: { '@type': 'Person', name: FOUNDER_NAME },
-    ...(sameAs.length ? { sameAs } : {}),
-  },
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: 'GulshanHotels.com',
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'GulshanHotels.com',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/mylogo.png`,
+      },
+      email: CONTACT_EMAIL,
+      description:
+        'An independent hotel directory and local travel guide for Gulshan 1 and Gulshan 2 in Dhaka, Bangladesh.',
+      founder: { '@id': `${SITE_URL}/#founder` },
+      areaServed: {
+        '@type': 'Place',
+        name: 'Gulshan, Dhaka, Bangladesh',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Gulshan, Dhaka',
+          postalCode: '1212',
+          addressCountry: 'BD',
+        },
+      },
+      knowsAbout: [
+        'Hotels in Gulshan 1, Dhaka',
+        'Hotels in Gulshan 2, Dhaka',
+        'Business and Diplomatic Stays in Dhaka',
+        'Gulshan Neighborhood Travel Guide',
+      ],
+      publishingPrinciples: `${SITE_URL}/about/#how-we-work`,
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: CONTACT_EMAIL,
+        url: `${SITE_URL}/contact/`,
+        availableLanguage: ['English', 'Bengali'],
+      },
+      ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE_URL}/#founder`,
+      name: FOUNDER_NAME,
+      jobTitle: FOUNDER_ROLE,
+      url: `${SITE_URL}/about/#founder`,
+      worksFor: { '@id': `${SITE_URL}/#organization` },
+      knowsAbout: [
+        'Gulshan Hospitality',
+        'Dhaka Business Travel',
+        'Gulshan 1 and Gulshan 2 Hotels',
+      ],
+      ...(FOUNDER_PHOTO ? { image: `${SITE_URL}${FOUNDER_PHOTO}` } : {}),
+      ...(personSameAs.length ? { sameAs: personSameAs } : {}),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${SITE_URL}/about/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'About Us', item: `${SITE_URL}/about/` },
+      ],
+    },
+    {
+      '@type': 'AboutPage',
+      '@id': `${SITE_URL}/about/#webpage`,
+      url: `${SITE_URL}/about/`,
+      name: 'About GulshanHotels.com',
+      description:
+        'GulshanHotels.com is an independent hotel guide for Gulshan 1 and Gulshan 2, Dhaka, run by Mohammed Rakib. Learn how we verify details, show rates and support travelers.',
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      mainEntity: { '@id': `${SITE_URL}/#organization` },
+      about: { '@id': `${SITE_URL}/#organization` },
+      breadcrumb: { '@id': `${SITE_URL}/about/#breadcrumb` },
+      lastReviewed: LAST_REVIEWED,
+    },
+  ],
 };
 ---
 
 <Layout
-  title="About Us | GulshanHotels.com"
-  description="GulshanHotels.com is an independent hotel guide for Gulshan 1 and Gulshan 2, Dhaka, run by Mohammed Rakib. See where our prices come from and how we are supported."
+  title="About Us | GulshanHotels.com — Independent Gulshan Hotel Guide"
+  description="GulshanHotels.com is an independent hotel guide for Gulshan 1 and Gulshan 2, Dhaka, run by Mohammed Rakib. See where our prices come from and how we work."
 >
   <script type="application/ld+json" set:html={JSON.stringify(schema)} />
 
@@ -90,6 +181,14 @@ const schema = {
     <!-- Intro -->
     <section class="bg-gradient-to-b from-emerald-50/70 to-white">
       <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-8 sm:py-24">
+        <nav aria-label="Breadcrumb" class="mb-5 flex justify-center text-xs font-medium text-slate-500">
+          <ol class="flex items-center gap-2">
+            <li><a href="/" class="hover:text-emerald-800 hover:underline">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="text-slate-700" aria-current="page">About Us</li>
+          </ol>
+        </nav>
+
         <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
           Find the right hotel in Gulshan, faster.
         </h1>
@@ -102,33 +201,56 @@ const schema = {
             Explore Gulshan hotels
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
+          {GUIDES_URL && (
+            <a href={GUIDES_URL} class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50">
+              Read Gulshan travel guides
+            </a>
+          )}
         </div>
       </div>
     </section>
 
+    <!-- Why we focus on Gulshan -->
+    <section class="mx-auto max-w-3xl px-4 pt-14 sm:px-8 sm:pt-20">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Why we focus on Gulshan</h2>
+      <div class="mt-5 space-y-4 text-base leading-relaxed text-slate-600">
+        <p>
+          Gulshan is the center of Dhaka’s diplomatic and corporate life. Whether you are visiting an embassy,
+          attending business meetings, or arriving from Hazrat Shahjalal International Airport (about 8–12 km away),
+          staying in the right part of Gulshan 1 or Gulshan 2 can save hours in Dhaka traffic.
+        </p>
+        <p>
+          Large global booking platforms list properties across all of Dhaka without explaining local nuances—such as
+          commercial bustle around Gulshan 1 versus quieter diplomatic lanes in Gulshan 2. GulshanHotels.com focuses
+          specifically on this neighborhood so choosing where to stay is simpler and faster.
+        </p>
+      </div>
+    </section>
+
     <!-- Who runs this site -->
-    <section class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
+    <section id="founder" class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
       <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Who runs this site</h2>
       <div class="mt-8 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
         {FOUNDER_PHOTO ? (
-          <img src={FOUNDER_PHOTO} alt={FOUNDER_NAME} width="96" height="96" loading="lazy" class="h-24 w-24 shrink-0 rounded-full object-cover" />
+          <img src={FOUNDER_PHOTO} alt={`${FOUNDER_NAME}, ${FOUNDER_ROLE} at GulshanHotels.com`} width="96" height="96" loading="lazy" class="h-24 w-24 shrink-0 rounded-full object-cover ring-2 ring-emerald-100" />
         ) : (
           <span class="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-2xl font-bold text-emerald-800" aria-hidden="true">MR</span>
         )}
         <div>
           <p class="text-lg font-bold text-slate-900">{FOUNDER_NAME}</p>
-          <p class="mt-1 text-base leading-relaxed text-slate-600">
+          <p class="text-sm font-medium text-emerald-800">{FOUNDER_ROLE} &middot; Dhaka, Bangladesh</p>
+          <p class="mt-2 text-base leading-relaxed text-slate-600">
             GulshanHotels.com is built and run by {FOUNDER_NAME}.
           </p>
           {FOUNDER_STORY && (
             <p class="mt-3 text-base leading-relaxed text-slate-600">{FOUNDER_STORY}</p>
           )}
-          <p class="mt-3 text-sm text-slate-600">
+          <p class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
             <a class="font-semibold text-emerald-800 underline-offset-2 hover:underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            {FACEBOOK_URL && (
+            {FOUNDER_LINKEDIN_URL && (
               <>
-                <span aria-hidden="true"> &middot; </span>
-                <a class="font-semibold text-emerald-800 underline-offset-2 hover:underline" href={FACEBOOK_URL} rel="noopener">Facebook</a>
+                <span aria-hidden="true">&middot;</span>
+                <a class="font-semibold text-emerald-800 underline-offset-2 hover:underline" href={FOUNDER_LINKEDIN_URL} rel="noopener noreferrer" target="_blank">Personal LinkedIn</a>
               </>
             )}
           </p>
@@ -155,8 +277,11 @@ const schema = {
     </section>
 
     <!-- How we work -->
-    <section class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
-      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">How we work</h2>
+    <section id="how-we-work" class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">How we work</h2>
+        <p class="text-xs font-medium text-slate-500">Last reviewed: {LAST_REVIEWED}</p>
+      </div>
       <dl class="mt-8 divide-y divide-slate-200">
         {principles.map((p) => (
           <div class="py-5">
@@ -165,6 +290,14 @@ const schema = {
           </div>
         ))}
       </dl>
+
+      {(PRIVACY_URL || DISCLAIMER_URL) && (
+        <div class="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-600">
+          <span class="font-semibold text-slate-800">Policies:</span>
+          {DISCLAIMER_URL && <a href={DISCLAIMER_URL} class="font-medium text-emerald-800 underline-offset-2 hover:underline">Disclaimer &amp; Disclosures</a>}
+          {PRIVACY_URL && <a href={PRIVACY_URL} class="font-medium text-emerald-800 underline-offset-2 hover:underline">Privacy Policy</a>}
+        </div>
+      )}
     </section>
 
     <!-- Areas -->
@@ -173,7 +306,7 @@ const schema = {
         <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Areas we cover</h2>
         <div class="mt-8 flex flex-wrap justify-center gap-2.5">
           {areas.map((a) => (
-            <a href={a.href} class="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">Hotels in {a.name}</a>
+            <a href={a.href} class="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">{a.name}</a>
           ))}
         </div>
       </div>
@@ -184,13 +317,36 @@ const schema = {
       <div class="rounded-3xl bg-[#0d3b23] p-8 text-center text-white sm:p-12">
         <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Get in touch</h2>
         <p class="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-emerald-100/90 sm:text-base">
-          Have a question, a correction, or want to list your hotel? Write to us.
+          Have a question, a rate correction, or want to list your hotel? Write to us.
         </p>
         <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a href="/contact/" class="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-50">List your hotel</a>
           <a href={`mailto:${CONTACT_EMAIL}`} class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">{CONTACT_EMAIL}</a>
-          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} rel="noopener" class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">WhatsApp</a>
+          {WHATSAPP_NUMBER && (
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} rel="noopener noreferrer" target="_blank" class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">WhatsApp</a>
+          )}
         </div>
+
+        {(FACEBOOK_URL || INSTAGRAM_URL || COMPANY_LINKEDIN_URL) && (
+          <p class="mt-6 text-xs text-emerald-100/80">
+            Follow GulshanHotels.com:
+            {FACEBOOK_URL && (
+              <a href={FACEBOOK_URL} rel="noopener noreferrer" target="_blank" class="ml-2 font-semibold text-white underline underline-offset-2 hover:text-emerald-200">
+                Facebook
+              </a>
+            )}
+            {INSTAGRAM_URL && (
+              <a href={INSTAGRAM_URL} rel="noopener noreferrer" target="_blank" class="ml-3 font-semibold text-white underline underline-offset-2 hover:text-emerald-200">
+                Instagram
+              </a>
+            )}
+            {COMPANY_LINKEDIN_URL && (
+              <a href={COMPANY_LINKEDIN_URL} rel="noopener noreferrer" target="_blank" class="ml-3 font-semibold text-white underline underline-offset-2 hover:text-emerald-200">
+                LinkedIn
+              </a>
+            )}
+          </p>
+        )}
       </div>
     </section>
 
