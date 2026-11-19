@@ -7,6 +7,10 @@ const CONTACT_EMAIL = "contact@gulshanhotels.com";
 const WHATSAPP_NUMBER = "8801945529869";
 const OFFICE_LOCATION = "Gulshan 2, Diplomatic Enclave, Dhaka 1212, Bangladesh";
 
+// Form backend: free key from https://web3forms.com (sent to CONTACT_EMAIL).
+// Put it in .env as PUBLIC_WEB3FORMS_KEY=xxxxxxxx
+const WEB3FORMS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? "";
+
 const siteOrigin = "https://gulshanhotels.com";
 const canonicalUrl = `${siteOrigin}/contact/`;
 
@@ -41,7 +45,7 @@ const contactSchema = {
 
   <main class="w-full bg-white text-slate-900 pt-6 pb-24">
     <div class="max-w-[1280px] mx-auto px-4 sm:px-8 space-y-12">
-      
+
       <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span>/</span>
@@ -62,11 +66,11 @@ const contactSchema = {
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
-        
+
         <div class="lg:col-span-5 space-y-4">
           <div class="p-6 rounded-3xl bg-[#f7faf8] border border-emerald-900/10 space-y-4 shadow-2xs">
             <div class="w-12 h-12 rounded-2xl bg-[#25D366] text-white flex items-center justify-center shadow-sm">
-              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/>
               </svg>
             </div>
@@ -76,20 +80,20 @@ const contactSchema = {
                 Fastest response for foreign diplomats, urgent hotel room availability, and airport taxi advice.
               </p>
             </div>
-            <a 
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I am inquiring via GulshanHotels.com.")}`} 
-              target="_blank" 
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I am inquiring via GulshanHotels.com.")}`}
+              target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl transition uppercase tracking-wider shadow-xs hover:scale-102 active:scale-95"
             >
               <span>Chat on WhatsApp</span>
-              <span>➔</span>
+              <span aria-hidden="true">➔</span>
             </a>
           </div>
 
           <div class="p-6 rounded-3xl bg-white border border-slate-200/90 space-y-3 shadow-2xs">
             <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
             </div>
@@ -104,7 +108,7 @@ const contactSchema = {
 
           <div class="p-6 rounded-3xl bg-white border border-slate-200/90 space-y-2 shadow-2xs">
             <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
@@ -126,26 +130,40 @@ const contactSchema = {
             <p class="text-xs text-slate-500 font-normal">Select your topic below so we can route your message to the right specialist.</p>
           </div>
 
-          <form id="contactInquiryForm" class="space-y-4">
+          <form
+            id="contactInquiryForm"
+            class="space-y-4"
+            novalidate
+            data-key={WEB3FORMS_KEY}
+            data-email={CONTACT_EMAIL}
+            data-whatsapp={WHATSAPP_NUMBER}
+          >
+            <!-- Honeypot: real users never see or fill this -->
+            <input type="text" name="botcheck" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label for="contactName" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Name</label>
-                <input 
-                  type="text" 
-                  id="contactName" 
-                  required 
-                  placeholder="e.g. David Miller" 
+                <input
+                  type="text"
+                  id="contactName"
+                  name="name"
+                  required
+                  autocomplete="name"
+                  placeholder="e.g. David Miller"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
                 />
               </div>
 
               <div>
                 <label for="contactEmail" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Email Address</label>
-                <input 
-                  type="email" 
-                  id="contactEmail" 
-                  required 
-                  placeholder="name@domain.com" 
+                <input
+                  type="email"
+                  id="contactEmail"
+                  name="email"
+                  required
+                  autocomplete="email"
+                  placeholder="name@domain.com"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
                 />
               </div>
@@ -153,8 +171,9 @@ const contactSchema = {
 
             <div>
               <label for="contactTopic" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Inquiry Type</label>
-              <select 
-                id="contactTopic" 
+              <select
+                id="contactTopic"
+                name="topic"
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-slate-800 text-xs sm:text-sm"
               >
                 <option value="Hotel Listing">List My Hotel on GulshanHotels.com</option>
@@ -166,36 +185,41 @@ const contactSchema = {
 
             <div>
               <label for="contactPhone" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Phone / WhatsApp (Optional)</label>
-              <input 
-                type="text" 
-                id="contactPhone" 
-                placeholder="+8801... or +1..." 
+              <input
+                type="tel"
+                id="contactPhone"
+                name="phone"
+                autocomplete="tel"
+                placeholder="+8801... or +1..."
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
               />
             </div>
 
             <div>
               <label for="contactMessage" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Message</label>
-              <textarea 
-                id="contactMessage" 
-                rows="4" 
-                required 
-                placeholder="Tell us about your dates, hotel property, or questions..." 
+              <textarea
+                id="contactMessage"
+                name="message"
+                rows="4"
+                required
+                placeholder="Tell us about your dates, hotel property, or questions..."
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm leading-relaxed font-medium"
               ></textarea>
             </div>
 
-            <button 
-              type="submit" 
-              id="submitContactBtn" 
-              class="w-full bg-[#0d3b23] hover:bg-[#061e14] text-white font-black py-4 rounded-xl shadow-md transition uppercase tracking-wider text-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            <p id="contactErrorMsg" class="hidden p-4 bg-red-50 text-red-800 rounded-xl text-xs font-semibold border border-red-200" role="alert"></p>
+
+            <button
+              type="submit"
+              id="submitContactBtn"
+              class="w-full bg-[#0d3b23] hover:bg-[#061e14] disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl shadow-md transition uppercase tracking-wider text-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
-              <span>Transmit Inquiry</span>
-              <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <span id="submitBtnLabel">Transmit Inquiry</span>
+              <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
           </form>
 
-          <div id="contactSuccessMsg" class="hidden mt-4 p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-1">
+          <div id="contactSuccessMsg" class="hidden mt-4 p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-1" role="status">
             <div class="text-2xl mb-1">✓</div>
             <p class="font-black text-emerald-900">Inquiry Transmitted Successfully!</p>
             <p class="text-xs text-slate-600 font-normal">Our local Gulshan concierge team will review your message and reply via email shortly.</p>
@@ -232,26 +256,95 @@ const contactSchema = {
 
     </div>
   </main>
+
+  <script>
+    const form = document.getElementById('contactInquiryForm') as HTMLFormElement | null;
+    const successMsg = document.getElementById('contactSuccessMsg');
+    const errorMsg = document.getElementById('contactErrorMsg');
+    const submitBtn = document.getElementById('submitContactBtn') as HTMLButtonElement | null;
+    const btnLabel = document.getElementById('submitBtnLabel');
+
+    function showError(html: string) {
+      if (!errorMsg) return;
+      errorMsg.innerHTML = html;
+      errorMsg.classList.remove('hidden');
+    }
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMsg?.classList.add('hidden');
+
+        // Native validation (form has novalidate so we control the flow)
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const data = new FormData(form);
+
+        // Honeypot filled => bot. Pretend success, send nothing.
+        if (data.get('botcheck')) {
+          form.classList.add('hidden');
+          successMsg?.classList.remove('hidden');
+          return;
+        }
+
+        const accessKey = form.dataset.key;
+        const email = form.dataset.email;
+        const whatsapp = form.dataset.whatsapp;
+
+        // Fallback links used when the request fails or no key is configured
+        const summary =
+          `Inquiry type: ${data.get('topic')}\n` +
+          `Name: ${data.get('name')}\n` +
+          `Email: ${data.get('email')}\n` +
+          `Phone: ${data.get('phone') || '-'}\n\n` +
+          `${data.get('message')}`;
+        const waLink = `https://wa.me/${whatsapp}?text=${encodeURIComponent(summary)}`;
+        const mailLink = `mailto:${email}?subject=${encodeURIComponent('Inquiry: ' + data.get('topic'))}&body=${encodeURIComponent(summary)}`;
+        const fallbackHtml =
+          `Could not send automatically. Please send it directly: ` +
+          `<a class="underline font-black" href="${waLink}" target="_blank" rel="noopener noreferrer">WhatsApp</a> or ` +
+          `<a class="underline font-black" href="${mailLink}">Email</a>.`;
+
+        if (!accessKey) {
+          showError(fallbackHtml);
+          return;
+        }
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (btnLabel) btnLabel.textContent = 'Transmitting...';
+
+        try {
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: accessKey,
+              subject: `GulshanHotels.com — ${data.get('topic')}`,
+              from_name: 'GulshanHotels.com Contact Form',
+              name: data.get('name'),
+              email: data.get('email'),
+              phone: data.get('phone'),
+              topic: data.get('topic'),
+              message: data.get('message'),
+            }),
+          });
+          const json = await res.json();
+
+          if (res.ok && json.success) {
+            form.classList.add('hidden');
+            successMsg?.classList.remove('hidden');
+          } else {
+            throw new Error(json.message || 'Request failed');
+          }
+        } catch (err) {
+          showError(fallbackHtml);
+          if (submitBtn) submitBtn.disabled = false;
+          if (btnLabel) btnLabel.textContent = 'Transmit Inquiry';
+        }
+      });
+    }
+  </script>
 </Layout>
-
-<script is:inline>
-  const form = document.getElementById('contactInquiryForm');
-  const successMsg = document.getElementById('contactSuccessMsg');
-  const submitBtn = document.getElementById('submitContactBtn');
-
-  if (form) {
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Transmitting...';
-      }
-
-      setTimeout(() => {
-        form.classList.add('hidden');
-        if (successMsg) successMsg.classList.remove('hidden');
-      }, 800);
-    };
-  }
-</script>
