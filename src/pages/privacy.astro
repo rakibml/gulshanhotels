@@ -1,210 +1,268 @@
 ---
 // src/pages/privacy.astro
-// Privacy Policy & Data Protection with Canonical Trailing Slash
 import Layout from '../layouts/Layout.astro';
 
-const LAST_UPDATED = "November 2026";
-const CONTACT_EMAIL = "privacy@gulshanhotels.com";
-const siteOrigin = "https://gulshanhotels.com";
-// Canonical URL matched to route name with trailing slash
-const canonicalUrl = `${siteOrigin}/privacy/`;
+const SITE_URL = 'https://gulshanhotels.com';
+const CONTACT_EMAIL = 'info@gulshanhotels.com'; // আপনার privacy@ ইমেইলটি আসলেই চালু থাকলে কেবল সেটি দিন
+const PARTNER_NAME = 'Agoda';
+const LAST_REVIEWED = '2026-11-20';
+const LAST_UPDATED_TEXT = 'November 2026';
+
+const canonicalUrl = `${SITE_URL}/privacy/`;
+const pageDescription =
+  'Read the Privacy Policy of GulshanHotels.com to learn how contact inquiries, browser wishlist storage, Google Analytics 4, security logs, and outbound booking links are handled.';
 
 const pageSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "@id": `${canonicalUrl}#webpage`,
-  "url": canonicalUrl,
-  "name": "Privacy Policy | GulshanHotels.com",
-  "description": "Official Privacy Policy and Data Protection standards of GulshanHotels.com.",
-  "inLanguage": "en-US",
-  "isPartOf": {
-    "@type": "WebSite",
-    "@id": `${siteOrigin}/#website`,
-    "name": "GulshanHotels.com",
-    "url": `${siteOrigin}/`
-  },
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
-      { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": canonicalUrl }
-    ]
-  }
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: 'GulshanHotels.com',
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'GulshanHotels.com',
+      url: `${SITE_URL}/`,
+      email: CONTACT_EMAIL,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${SITE_URL}/privacy/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: canonicalUrl },
+      ],
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/privacy/#webpage`,
+      url: canonicalUrl,
+      name: 'Privacy Policy | GulshanHotels.com',
+      description: pageDescription,
+      inLanguage: 'en',
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      about: { '@id': `${SITE_URL}/#organization` },
+      publisher: { '@id': `${SITE_URL}/#organization` },
+      breadcrumb: { '@id': `${SITE_URL}/privacy/#breadcrumb` },
+      lastReviewed: LAST_REVIEWED,
+      dateModified: LAST_REVIEWED,
+    },
+  ],
 };
 ---
 
 <Layout
   title="Privacy Policy | GulshanHotels.com"
-  description="Learn how GulshanHotels.com collects, safeguards, and processes visitor data, verified reviews, and booking partner interactions."
+  description={pageDescription}
 >
   <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
 
-  <main class="w-full bg-white text-slate-900 pt-6 pb-24">
-    <div class="max-w-[880px] mx-auto px-4 sm:px-6 space-y-10 text-left">
-      
-      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400">
-        <a href="/" class="hover:text-emerald-800 transition">Home</a>
-        <span>/</span>
-        <span class="text-slate-900 font-bold" aria-current="page">Privacy Policy</span>
+  <main>
+    <!-- Header (about.astro-এর সাথে সামঞ্জস্যপূর্ণ) -->
+    <section class="bg-gradient-to-b from-emerald-50/70 to-white">
+      <div class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-8 sm:py-20">
+        <nav aria-label="Breadcrumb" class="mb-5 flex justify-center text-xs font-medium text-slate-600">
+          <ol class="flex items-center gap-2">
+            <li><a href="/" class="hover:text-emerald-800 hover:underline">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-slate-800" aria-current="page">Privacy Policy</li>
+          </ol>
+        </nav>
+
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          Privacy Policy
+        </h1>
+        <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+          GulshanHotels.com respects your privacy. This page explains clearly what limited information is processed when you browse our hotel guide or contact us.
+        </p>
+        <p class="mt-3 text-xs font-medium text-slate-600">
+          Last updated: <strong class="text-slate-800">{LAST_UPDATED_TEXT}</strong>
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
+      <!-- Zero Data Sale Box -->
+      <div class="mb-8 flex items-start gap-3.5 rounded-2xl border border-emerald-900/10 bg-[#f7faf8] p-5">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-800">
+          <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+          </svg>
+        </div>
+        <div class="text-sm leading-relaxed text-slate-700">
+          <p class="font-bold text-slate-900">We Do Not Sell Your Personal Data</p>
+          <p class="mt-0.5">
+            GulshanHotels.com does not sell, rent, or trade your personal details or browsing activity to data brokers or marketers.
+          </p>
+        </div>
+      </div>
+
+      <!-- Jump Navigation -->
+      <nav aria-label="Privacy policy sections" class="mb-10 flex flex-wrap gap-2">
+        <a href="#collect" class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+          1. Information We Collect
+        </a>
+        <a href="#usage" class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+          2. How We Use Data
+        </a>
+        <a href="#partners" class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+          3. External Booking Links
+        </a>
+        <a href="#cookies" class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+          4. Cookies &amp; Analytics
+        </a>
+        <a href="#rights" class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">
+          5. Your Rights
+        </a>
       </nav>
 
-      <header class="space-y-4 border-b border-slate-200 pb-8">
-        <div class="flex flex-wrap items-center gap-3">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-black uppercase tracking-wider">
-            <svg class="w-3.5 h-3.5 fill-emerald-700 shrink-0" viewBox="0 0 24 24">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-            </svg>
-            <span>Official Legal Notice</span>
-          </span>
+      <!-- Sections -->
+      <div class="space-y-10 text-base leading-relaxed text-slate-600">
+        <section id="collect" class="space-y-3 border-t border-slate-200 pt-8">
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            1. Information We Collect
+          </h2>
+          <p>
+            You can browse GulshanHotels.com without creating an account. We only process the limited data described below:
+          </p>
+          <ul class="list-disc space-y-2 pl-5">
+            <li>
+              <strong class="text-slate-900">Contact Form &amp; Email Inquiries:</strong> When you write to us through our{' '}
+              <a href="/contact/" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">contact page</a>{' '}
+              or send an email, we receive the name, email address, optional phone number, and message you submit. Contact form submissions are transmitted securely via Web3Forms to deliver your message to our inbox.
+            </li>
+            <li>
+              <strong class="text-slate-900">Website Analytics (Google Analytics 4):</strong> We use Google Analytics 4 (GA4) to collect aggregated traffic information—such as pages visited, approximate city or country, device/browser type, and referral sources. We do not send your name, email, or phone number to Google Analytics.
+            </li>
+            <li>
+              <strong class="text-slate-900">Saved Hotel Shortlist (Local Only):</strong> When you tap the heart icon to save hotels, your shortlist is stored strictly inside your own browser—we do not collect or store your wishlist on our servers.
+            </li>
+            <li>
+              <strong class="text-slate-900">Server &amp; Security Logs:</strong> Our hosting and security network (such as Cloudflare) automatically processes standard technical request data—like IP address, browser type, and requested URL—to protect the website from spam, bots, and DDoS attacks.
+            </li>
+          </ul>
+        </section>
 
-          <span class="text-xs text-slate-400 font-medium">
-            Effective Date: <strong class="text-slate-700">{LAST_UPDATED}</strong>
-          </span>
-        </div>
+        <section id="usage" class="space-y-3 border-t border-slate-200 pt-8">
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            2. How We Use Information
+          </h2>
+          <p>
+            Information processed on GulshanHotels.com is used solely for practical site operations:
+          </p>
+          <ul class="list-disc space-y-1.5 pl-5">
+            <li>To read and reply to your hotel listing submissions, rate correction reports, or general questions.</li>
+            <li>To understand overall visitor traffic and improve which hotel guides and neighborhood details are most helpful (using aggregated Google Analytics 4 reports).</li>
+            <li>To keep your saved hotel shortlist working smoothly in your browser.</li>
+            <li>To maintain website security, prevent automated form spam, and keep pages fast and reliable.</li>
+          </ul>
+        </section>
 
-        <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-          Privacy Policy & Data Protection
-        </h1>
-
-        <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
-          At GulshanHotels.com, we prioritize the confidentiality and security of our guests, international travelers, and hotel partners. This statement outlines our transparent data practices.
-        </p>
-
-        <div class="p-4 sm:p-5 rounded-2xl bg-[#f7faf8] border border-emerald-900/10 flex items-start gap-3.5">
-          <div class="w-8 h-8 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-emerald-800 shrink-0 shadow-2xs">
-            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-            </svg>
+        <section id="partners" class="space-y-3 border-t border-slate-200 pt-8">
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            3. Third-Party Links &amp; Booking Partners
+          </h2>
+          <p>
+            GulshanHotels.com does not take payments or process bookings directly. When you click an outbound link to visit a hotel’s website or our booking partner (such as {PARTNER_NAME}), you leave GulshanHotels.com and enter a third-party website.
+          </p>
+          <p>
+            Those external websites operate under their own privacy policies and may use their own cookies to track reservations or referrals. Please review the booking platform’s privacy policy before entering payment or passport details.
+          </p>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <strong class="text-slate-900">Affiliate Note:</strong> Some outbound links to {PARTNER_NAME} are affiliate links. If you book a room through them, we may earn a commission at no extra cost to you. See our{' '}
+            <a href="/disclaimer/" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">Disclaimer</a>{' '}
+            and{' '}
+            <a href="/about/#how-we-work" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">About page</a>{' '}
+            for details.
           </div>
-          <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            <strong class="font-bold text-slate-900 block mb-0.5">Zero Data Sale Commitment</strong>
-            We do not sell, rent, or trade your personal information or browsing history to third-party data brokers under any circumstances.
-          </div>
-        </div>
-      </header>
+        </section>
 
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <a href="#collect" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">1. Information Collected</a>
-        <a href="#usage" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">2. Usage of Data</a>
-        <a href="#partners" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">3. Booking Partners</a>
-        <a href="#cookies" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">4. Cookies & Storage</a>
-        <a href="#rights" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">5. Your Rights</a>
-      </div>
-
-      <div 
-        id="policyBody" 
-        class="prose prose-slate max-w-none text-[16px] sm:text-[17px] leading-[1.85] font-normal text-slate-700
-               prose-headings:font-serif prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight 
-               prose-h2:text-2xl sm:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pt-6 prose-h2:border-t prose-h2:border-slate-100
-               prose-h3:text-lg sm:prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 
-               prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6 prose-li:my-1.5
-               [&_a]:text-emerald-800 [&_a]:font-bold [&_a]:underline [&_a]:decoration-emerald-500/80 [&_a]:underline-offset-4 hover:[&_a]:text-emerald-950 transition-colors"
-      >
-        <section id="collect">
-          <h2>1. Information We Collect</h2>
+        <section id="cookies" class="space-y-3 border-t border-slate-200 pt-8">
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            4. Cookies, Analytics &amp; Browser Storage
+          </h2>
           <p>
-            GulshanHotels.com operates as an independent hotel directory and curated reservation guide. We collect minimal information strictly necessary to provide accurate lodging details:
+            We use the following browser technologies on GulshanHotels.com:
           </p>
-          <ul>
+          <ul class="list-disc space-y-2 pl-5">
             <li>
-              <strong>Voluntarily Submitted Information:</strong> When you submit a guest review, contact our concierge desk, or subscribe to our newsletter, we store details such as your name, email address, rating score, and feedback text.
+              <strong class="text-slate-900">Google Analytics 4 Cookies:</strong> GA4 uses cookies (such as <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-800">_ga</code>) to distinguish general visits and measure site usage. You can learn how Google handles data in{' '}
+              <a
+                href="https://policies.google.com/technologies/partner-sites"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-emerald-800 underline-offset-2 hover:underline"
+              >
+                How Google uses information from sites or apps that use our services
+              </a>, or prevent GA4 tracking using the{' '}
+              <a
+                href="https://tools.google.com/dlpage/gaoptout"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-emerald-800 underline-offset-2 hover:underline"
+              >
+                Google Analytics Opt-out Browser Add-on
+              </a>.
             </li>
             <li>
-              <strong>Technical Device Logs:</strong> For security monitoring and DDoS mitigation, our edge hosting infrastructure (Cloudflare) automatically processes standard web server logs (including truncated IP addresses, browser types, and visited page paths).
+              <strong class="text-slate-900">Local Browser Storage (LocalStorage):</strong> Used on your device solely to remember hotels you saved with the Wishlist Heart button. You can clear this anytime in your browser settings.
             </li>
             <li>
-              <strong>Direct Hotel Inquiries:</strong> Communications initiated via our WhatsApp concierge links transfer directly to the respective hotel or concierge team under end-to-end encryption.
+              <strong class="text-slate-900">Essential Security Cookies:</strong> Our CDN/security provider (Cloudflare) may set strictly necessary cookies for SSL security, bot verification, and caching.
             </li>
           </ul>
-        </section>
-
-        <section id="usage">
-          <h2>2. How We Use Your Information</h2>
-          <p>
-            Information collected through our platform is utilized solely for legitimate operational purposes:
-          </p>
-          <ul>
-            <li>To display verified stay experiences and authentic guest ratings across our hotel profiles.</li>
-            <li>To dispatch hotel availability confirmations and response inquiries initiated via our contact forms.</li>
-            <li>To audit and prevent fraudulent reviews, rate manipulation, or automated web scraping.</li>
-            <li>To maintain Core Web Vitals performance and technical stability across global content delivery networks.</li>
-          </ul>
-        </section>
-
-        <section id="partners">
-          <h2>3. Third-Party Booking Partners & Affiliate Disclosure</h2>
-          <p>
-            GulshanHotels.com aggregates verified reservation channels, including direct hotel reception desks and global booking platforms (such as Agoda, Booking.com, and Expedia).
-          </p>
-          <p>
-            When you click an external reservation link (e.g., "Book Now" or "Official Website"), you are directed to an external third-party domain. These partner websites operate under their own independent privacy policies and tracking protocols. We recommend reviewing their respective privacy statements before completing transactions.
-          </p>
-          <p class="text-sm bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <strong>Disclosure:</strong> Some reservation buttons on this portal contain partner referral links. If you complete a hotel booking through these links, we may receive a referral commission at zero additional cost to you.
+          <p class="text-sm text-slate-600">
+            You can also block or delete cookies anytime through your web browser settings.
           </p>
         </section>
 
-        <section id="cookies">
-          <h2>4. Cookies & Local Browser Storage</h2>
+        <section id="rights" class="space-y-3 border-t border-slate-200 pt-8">
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">
+            5. Data Retention &amp; Your Rights
+          </h2>
           <p>
-            We adhere to privacy-friendly principles and do not deploy invasive cross-site profiling trackers:
+            We keep email or contact form correspondence only as long as needed to handle your request or update a listing. No matter where you live, you have the right to:
           </p>
-          <ul>
-            <li>
-              <strong>Local Browser Storage (LocalStorage):</strong> Used strictly on your local device to remember your saved hotels ("Wishlist Heart" feature) so you can review your shortlisted accommodations upon returning.
-            </li>
-            <li>
-              <strong>Essential Infrastructure Cookies:</strong> Deployed by Cloudflare strictly for SSL security verification, bot management, and speed caching.
-            </li>
-          </ul>
-        </section>
-
-        <section id="rights">
-          <h2>5. Data Retention & Your Rights (GDPR / Global Standards)</h2>
-          <p>
-            Regardless of your geographic location, you retain full rights over any personal information submitted to our platform:
-          </p>
-          <ul>
-            <li><strong>Right to Access:</strong> You may request a summary of any personal data linked to your email address.</li>
-            <li><strong>Right to Erasure / Deletion:</strong> You may request the immediate removal of any guest review, comment, or email subscription you previously submitted.</li>
-            <li><strong>Right to Correction:</strong> If you represent a listed hotel property and notice inaccurate rate details or contact coordinates, you may request an immediate audit update.</li>
+          <ul class="list-disc space-y-1.5 pl-5">
+            <li><strong class="text-slate-900">Request Access:</strong> Ask what personal messages or contact details we hold from your past inquiries.</li>
+            <li><strong class="text-slate-900">Request Correction:</strong> Ask us to fix inaccurate details in a message or hotel listing you submitted.</li>
+            <li><strong class="text-slate-900">Request Deletion:</strong> Ask us to permanently delete any emails or contact form records associated with your email address.</li>
           </ul>
         </section>
       </div>
 
-      <div class="mt-12 bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <!-- Bottom CTA -->
+      <div class="mt-12 flex flex-col items-start justify-between gap-6 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:flex-row sm:items-center sm:p-8">
         <div class="space-y-1">
-          <h3 class="font-serif font-bold text-slate-900 text-lg">Have Questions or Data Removal Requests?</h3>
-          <p class="text-xs sm:text-sm text-slate-500 font-normal">
-            Our data privacy team reviews and processes all user requests within 48 business hours.
+          <h2 class="text-lg font-bold text-slate-900">Questions or Data Deletion Requests?</h2>
+          <p class="text-sm text-slate-600">
+            Write to us anytime and we will review and respond to your privacy request, typically within 48 hours.
           </p>
         </div>
-        <a 
-          href={`mailto:${CONTACT_EMAIL}`}
-          class="bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl uppercase tracking-wider transition shrink-0 shadow-xs flex items-center gap-2"
-        >
-          <span>Contact Privacy Desk</span>
-          <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-          </svg>
-        </a>
+        <div class="flex shrink-0 flex-wrap gap-2.5">
+          <a
+            href="/contact/"
+            class="inline-flex items-center gap-2 rounded-full bg-[#0d3b23] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#061e14]"
+          >
+            <span>Contact Us</span>
+            <svg class="h-3.5 w-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            class="inline-flex items-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-xs font-bold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
+          >
+            {CONTACT_EMAIL}
+          </a>
+        </div>
       </div>
-
-    </div>
+    </section>
   </main>
 </Layout>
-
-<script is:inline>
-  const initPrivacyLinks = () => {
-    const links = document.querySelectorAll('#policyBody a');
-    links.forEach(link => {
-      const href = link.getAttribute('href');
-      if (href && !href.startsWith('#')) {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
-      }
-    });
-  };
-  document.addEventListener('DOMContentLoaded', initPrivacyLinks);
-  document.addEventListener('astro:page-load', initPrivacyLinks);
-</script>
