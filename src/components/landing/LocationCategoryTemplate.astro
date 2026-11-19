@@ -156,7 +156,53 @@ const comparisonTableTitle = data.comparison_title || `Quick Comparison of Hotel
 const rawFaqs = Array.isArray(data.faqs) ? data.faqs : [];
 const faqs = rawFaqs.filter((f: any) => f && plainText(f.question).length > 0 && plainText(f.answer).length > 0);
 
+// ---- Author & Freshness (CMS frontmatter থেকে না পেলে ডিফল্ট Mohammed Rakib) ----
+const authorName = String(data.author || 'Mohammed Rakib').trim();
+const authorRole = String(data.author_role || 'Founder & Editor').trim();
+const authorInitials = authorName
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((w: string) => w[0].toUpperCase())
+  .join('') || 'MR';
+
+const rawUpdated = data.updated_at || data.last_updated || data.date || '';
+const updatedDate = rawUpdated instanceof Date
+  ? rawUpdated.toISOString().split('T')[0]
+  : String(rawUpdated || '').trim();
+
 const schemaGraph: any[] = [
+  {
+    "@type": "CollectionPage",
+    "@id": `${canonicalUrl}#webpage`,
+    "url": canonicalUrl,
+    "name": metaTitle,
+    ...(description ? { "description": description } : {}),
+    "isPartOf": { "@id": `${siteOrigin}/#website` },
+    "breadcrumb": { "@id": `${canonicalUrl}#breadcrumb` },
+    ...(displayHotels.length > 0 ? { "mainEntity": { "@id": `${canonicalUrl}#itemlist` } } : {}),
+    ...(updatedDate ? { "dateModified": updatedDate } : {}),
+    "about": {
+      "@type": "Place",
+      "name": cleanTitleName ? `${toTitleCase(cleanTitleName)}, Dhaka, Bangladesh` : "Gulshan, Dhaka, Bangladesh"
+    },
+    "author": {
+      "@type": "Person",
+      "@id": `${siteOrigin}/#founder`,
+      "name": authorName,
+      "url": `${siteOrigin}/about/#founder`
+    },
+    "publisher": {
+      "@type": "Organization",
+      "@id": `${siteOrigin}/#organization`,
+      "name": "GulshanHotels.com",
+      "url": siteOrigin,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteOrigin}/mylogo.png`
+      }
+    }
+  },
   {
     "@type": "BreadcrumbList",
     "@id": `${canonicalUrl}#breadcrumb`,
@@ -237,7 +283,7 @@ const masterSchemaJson = JSON.stringify({
           
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-[11px] font-black uppercase tracking-widest text-emerald-300">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Area hotels Guide</span>
+            <span>Area Hotel Guide</span>
           </div>
 
           <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md">
@@ -256,11 +302,33 @@ const masterSchemaJson = JSON.stringify({
 
     <!-- 2. BREADCRUMB & INTRO -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 text-left">
-      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-6">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-4">
         <a href="/" class="hover:text-emerald-800 transition">Home</a>
         <span class="text-slate-300">/</span>
         <span class="text-slate-900 font-bold truncate" aria-current="page">{toTitleCase(pageTitle)}</span>
       </nav>
+
+      <!-- Author & Rate Verification Byline -->
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 mb-6 pb-4 border-b border-slate-200/70">
+        <span class="inline-flex items-center gap-2">
+          <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-black text-emerald-900" aria-hidden="true">
+            {authorInitials}
+          </span>
+          <span>
+            Curated by <a href="/about/#founder" class="font-bold text-slate-900 hover:text-emerald-800 hover:underline">{authorName}</a>
+          </span>
+        </span>
+        {updatedDate && (
+          <>
+            <span class="text-slate-300" aria-hidden="true">&middot;</span>
+            <span>Updated <time datetime={updatedDate}>{updatedDate}</time></span>
+          </>
+        )}
+        <span class="text-slate-300" aria-hidden="true">&middot;</span>
+        <a href="/about/#how-we-work" class="font-medium text-emerald-800 hover:underline">
+          How we verify rates
+        </a>
+      </div>
 
       <div class="max-w-4xl space-y-5">
         {description && (
@@ -572,6 +640,36 @@ const masterSchemaJson = JSON.stringify({
         </div>
       </section>
     )}
+
+    <!-- 6. AUTHOR & EDITORIAL TRUST BOX -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 text-left">
+      <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-sm font-black text-emerald-800 border border-emerald-200" aria-hidden="true">
+            {authorInitials}
+          </span>
+          <div class="space-y-1">
+            <p class="text-[11px] font-black uppercase tracking-wider text-emerald-800">Local Guide Editor</p>
+            <p class="text-base font-bold text-slate-900">
+              <a href="/about/#founder" class="hover:text-emerald-800 hover:underline">{authorName}</a>
+              <span class="text-xs font-medium text-slate-500 ml-1.5">&middot; {authorRole}</span>
+            </p>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
+              This {toTitleCase(cleanTitleName || pageTitle)} guide is maintained independently for Dhaka travelers.
+              Live rates come from our booking partner when available; other prices are approximate starting rates.
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap sm:flex-col gap-2 shrink-0 text-xs font-bold">
+          <a href="/about/#how-we-work" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 transition">
+            Editorial &amp; rate policy
+          </a>
+          <a href="/contact/" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-700 hover:border-emerald-300 hover:text-emerald-800 transition">
+            Report a correction
+          </a>
+        </div>
+      </div>
+    </section>
 
   </div>
 </Layout>
