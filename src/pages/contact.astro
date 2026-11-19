@@ -1,133 +1,182 @@
 ---
 // src/pages/contact.astro
-// Direct Concierge & Partnerships with Canonical Trailing Slash
 import Layout from '../layouts/Layout.astro';
 
-const CONTACT_EMAIL = "contact@gulshanhotels.com";
-const WHATSAPP_NUMBER = "8801945529869";
-const OFFICE_LOCATION = "Gulshan 2, Diplomatic Enclave, Dhaka 1212, Bangladesh";
+const SITE_URL = 'https://gulshanhotels.com';
 
-// Form backend: free key from https://web3forms.com (sent to CONTACT_EMAIL).
-// Put it in .env as PUBLIC_WEB3FORMS_KEY=xxxxxxxx
-const WEB3FORMS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? "";
+// about.astro-এর সাথে মিল রেখে একই ইমেইল ও তথ্য ব্যবহার করুন
+const CONTACT_EMAIL = 'info@gulshanhotels.com';
+const WHATSAPP_NUMBER: string = ''; // ব্যবহার করতে চাইলে about.astro এবং এখানে দু'জায়গাতেই দিন
+const COVERAGE_AREA = 'Gulshan 1 & Gulshan 2, Dhaka, Bangladesh';
+const LAST_REVIEWED = '2026-11-20';
 
-const siteOrigin = "https://gulshanhotels.com";
-const canonicalUrl = `${siteOrigin}/contact/`;
+// Form backend: Web3Forms key (.env ফাইলে PUBLIC_WEB3FORMS_KEY=xxxxxxxx দিন)
+const WEB3FORMS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
+
+const canonicalUrl = `${SITE_URL}/contact/`;
+const pageDescription =
+  'Contact GulshanHotels.com to submit a hotel listing, report a rate or detail correction, or ask a question about staying in Gulshan 1 and Gulshan 2, Dhaka.';
 
 const contactSchema = {
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
-  "@id": `${canonicalUrl}#webpage`,
-  "url": canonicalUrl,
-  "name": "Contact Concierge & Hotel Partnerships | GulshanHotels.com",
-  "description": "Direct concierge support for travelers, hotel listing inquiries, and rate verification in Gulshan, Dhaka.",
-  "isPartOf": {
-    "@type": "WebSite",
-    "@id": `${siteOrigin}/#website`,
-    "name": "GulshanHotels.com",
-    "url": `${siteOrigin}/`
-  },
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteOrigin}/` },
-      { "@type": "ListItem", "position": 2, "name": "Contact Us", "item": canonicalUrl }
-    ]
-  }
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: 'GulshanHotels.com',
+      inLanguage: 'en',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'GulshanHotels.com',
+      url: `${SITE_URL}/`,
+      email: CONTACT_EMAIL,
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: CONTACT_EMAIL,
+        url: canonicalUrl,
+        availableLanguage: ['English', 'Bengali'],
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${SITE_URL}/contact/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: 'Contact Us', item: canonicalUrl },
+      ],
+    },
+    {
+      '@type': 'ContactPage',
+      '@id': `${SITE_URL}/contact/#webpage`,
+      url: canonicalUrl,
+      name: 'Contact Us | GulshanHotels.com',
+      description: pageDescription,
+      inLanguage: 'en',
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+      mainEntity: { '@id': `${SITE_URL}/#organization` },
+      about: { '@id': `${SITE_URL}/#organization` },
+      breadcrumb: { '@id': `${SITE_URL}/contact/#breadcrumb` },
+      lastReviewed: LAST_REVIEWED,
+      dateModified: LAST_REVIEWED,
+    },
+  ],
 };
+
+const faqs = [
+  {
+    q: 'How do I list a hotel on GulshanHotels.com?',
+    a: 'Select "List My Hotel" in the form above or email us with your hotel name, exact road/block in Gulshan 1 or Gulshan 2, and official website. Listing a hotel is free, and we review submitted details before publishing.',
+  },
+  {
+    q: 'Can I book a hotel directly through this contact form?',
+    a: 'No. GulshanHotels.com is an independent hotel directory and guide—we do not process room bookings or take payments. Please book directly with the hotel or through our booking partner (such as Agoda).',
+  },
+  {
+    q: 'How can I report wrong hotel info or outdated rates?',
+    a: 'Choose "Report Rate or Info Correction" in the form or send us an email with the hotel name and the detail that needs updating. We will verify it against the hotel’s official information and update the listing.',
+  },
+  {
+    q: 'Is asking a question about Gulshan free?',
+    a: 'Yes. If you have a general question about comparing Gulshan 1 and Gulshan 2 areas for your stay, feel free to write to us. Please note we are an informational guide, not a travel agency or transport operator.',
+  },
+];
 ---
 
 <Layout
-  title="Contact Concierge & Hotel Partnerships | GulshanHotels.com"
-  description="Get in touch with our local Gulshan audit team for hotel recommendations, embassy transit advice, or property listing inquiries."
+  title="Contact Us | GulshanHotels.com — Hotel Listings & Inquiries"
+  description={pageDescription}
 >
   <script type="application/ld+json" set:html={JSON.stringify(contactSchema)} />
 
-  <main class="w-full bg-white text-slate-900 pt-6 pb-24">
-    <div class="max-w-[1280px] mx-auto px-4 sm:px-8 space-y-12">
+  <main>
+    <!-- Header (about.astro-এর সাথে সামঞ্জস্যপূর্ণ) -->
+    <section class="bg-gradient-to-b from-emerald-50/70 to-white">
+      <div class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-8 sm:py-20">
+        <nav aria-label="Breadcrumb" class="mb-5 flex justify-center text-xs font-medium text-slate-600">
+          <ol class="flex items-center gap-2">
+            <li><a href="/" class="hover:text-emerald-800 hover:underline">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-slate-800" aria-current="page">Contact Us</li>
+          </ol>
+        </nav>
 
-      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs font-semibold text-slate-400 text-left">
-        <a href="/" class="hover:text-emerald-800 transition">Home</a>
-        <span>/</span>
-        <span class="text-slate-900 font-bold" aria-current="page">Contact Us</span>
-      </nav>
-
-      <header class="text-left space-y-3 max-w-3xl border-b border-slate-100 pb-8">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
-          <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-          <span>Direct Concierge & Partnerships</span>
-        </div>
-        <h1 class="font-serif text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-          How can our local team assist you?
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+          Contact GulshanHotels.com
         </h1>
-        <p class="text-xs sm:text-base text-slate-600 font-normal leading-relaxed">
-          Whether you need assistance selecting the right diplomatic stay, require airport pickup routes, or want to list your hotel on GulshanHotels.com, our desk is here to help.
+        <p class="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+          Have a hotel listing to submit, spotted outdated information, or have a general question about staying in Gulshan 1 or Gulshan 2? Write to us below.
         </p>
-      </header>
+      </div>
+    </section>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
+    <!-- Contact Channels + Form -->
+    <section class="mx-auto max-w-[1150px] px-4 py-12 sm:px-8 sm:py-16">
+      <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
 
-        <div class="lg:col-span-5 space-y-4">
-          <div class="p-6 rounded-3xl bg-[#f7faf8] border border-emerald-900/10 space-y-4 shadow-2xs">
-            <div class="w-12 h-12 rounded-2xl bg-[#25D366] text-white flex items-center justify-center shadow-sm">
-              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.763.459 3.48 1.332 5.001l-1.416 5.163 5.281-1.388c1.464.798 3.118 1.22 4.79 1.22h.004c5.506 0 9.989-4.478 9.99-9.984 0-2.668-1.038-5.176-2.923-7.062a9.923 9.923 0 0 0-7.058-2.934z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="font-serif font-black text-slate-900 text-lg sm:text-xl leading-snug">Instant WhatsApp Desk</h3>
-              <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                Fastest response for foreign diplomats, urgent hotel room availability, and airport taxi advice.
+        <!-- Left Info Cards -->
+        <div class="space-y-4 lg:col-span-5">
+          <h2 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+            Direct Contact Details
+          </h2>
+
+          {WHATSAPP_NUMBER && (
+            <div class="space-y-3 rounded-3xl border border-emerald-900/10 bg-[#f7faf8] p-6">
+              <h3 class="text-lg font-bold text-slate-900">WhatsApp</h3>
+              <p class="text-sm leading-relaxed text-slate-600">
+                For quick listing updates or general inquiries about Gulshan 1 and Gulshan 2 hotels.
               </p>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi! I am writing from GulshanHotels.com.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 rounded-full bg-[#0d3b23] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#061e14]"
+              >
+                <span>Message on WhatsApp</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
             </div>
+          )}
+
+          <div class="space-y-2 rounded-3xl border border-slate-200 bg-white p-6">
+            <h3 class="text-base font-bold text-slate-900">Editorial &amp; Support Email</h3>
+            <p class="text-sm leading-relaxed text-slate-600">
+              For hotel submissions, rate or detail corrections, and general inquiries.
+            </p>
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I am inquiring via GulshanHotels.com.")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 bg-[#0d3b23] hover:bg-[#061e14] text-white font-extrabold text-xs px-5 py-3 rounded-xl transition uppercase tracking-wider shadow-xs hover:scale-102 active:scale-95"
+              href={`mailto:${CONTACT_EMAIL}`}
+              class="mt-1 inline-block text-sm font-bold text-emerald-800 underline-offset-2 hover:underline"
             >
-              <span>Chat on WhatsApp</span>
-              <span aria-hidden="true">➔</span>
+              {CONTACT_EMAIL}
             </a>
           </div>
 
-          <div class="p-6 rounded-3xl bg-white border border-slate-200/90 space-y-3 shadow-2xs">
-            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <div>
-              <h4 class="font-bold text-slate-900 text-base">Direct Editorial Email</h4>
-              <p class="text-xs text-slate-500 mt-0.5">For formal hotel partnership proposals and rate audits.</p>
-              <a href={`mailto:${CONTACT_EMAIL}`} class="text-xs sm:text-sm font-extrabold text-emerald-800 hover:underline block mt-2">
-                {CONTACT_EMAIL}
-              </a>
-            </div>
-          </div>
-
-          <div class="p-6 rounded-3xl bg-white border border-slate-200/90 space-y-2 shadow-2xs">
-            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-              <svg class="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-            </div>
-            <h4 class="font-bold text-slate-900 text-base">Local Audit Coverage</h4>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">
-              {OFFICE_LOCATION}
+          <div class="space-y-2 rounded-3xl border border-slate-200 bg-white p-6">
+            <h3 class="text-base font-bold text-slate-900">Guide Coverage</h3>
+            <p class="text-sm leading-relaxed text-slate-600">{COVERAGE_AREA}</p>
+            <p class="text-xs font-medium text-slate-600">
+              Typical email reply time: within 24–48 hours.
             </p>
-            <div class="pt-2 flex items-center gap-2 text-[11px] font-bold text-emerald-800">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-              <span>Typical response: 2–4 hours</span>
-            </div>
+            <p class="pt-1 text-xs text-slate-600">
+              Want to know how we verify listings and earn affiliate commissions? Read our{' '}
+              <a href="/about/#how-we-work" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">
+                About &amp; Editorial Process
+              </a>.
+            </p>
           </div>
         </div>
 
-        <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-xs">
-          <div class="space-y-1 mb-6 border-b border-slate-100 pb-4">
-            <h3 class="font-serif font-black text-2xl text-slate-900">Send an Inquiry</h3>
-            <p class="text-xs text-slate-500 font-normal">Select your topic below so we can route your message to the right specialist.</p>
+        <!-- Right Form -->
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 lg:col-span-7">
+          <div class="mb-6 space-y-1 border-b border-slate-100 pb-4">
+            <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Send a Message</h2>
+            <p class="text-sm text-slate-600">
+              Select a topic below so we can review your message quickly.
+            </p>
           </div>
 
           <form
@@ -138,144 +187,169 @@ const contactSchema = {
             data-email={CONTACT_EMAIL}
             data-whatsapp={WHATSAPP_NUMBER}
           >
-            <!-- Honeypot: real users never see or fill this -->
+            <!-- Honeypot -->
             <input type="text" name="botcheck" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label for="contactName" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Name</label>
+                <label for="contactName" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Your Name
+                </label>
                 <input
                   type="text"
                   id="contactName"
                   name="name"
                   required
                   autocomplete="name"
-                  placeholder="e.g. David Miller"
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
+                  placeholder="Your full name"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-900 outline-none focus:border-emerald-700"
                 />
               </div>
 
               <div>
-                <label for="contactEmail" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Email Address</label>
+                <label for="contactEmail" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Email Address
+                </label>
                 <input
                   type="email"
                   id="contactEmail"
                   name="email"
                   required
                   autocomplete="email"
-                  placeholder="name@domain.com"
-                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
+                  placeholder="you@example.com"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-900 outline-none focus:border-emerald-700"
                 />
               </div>
             </div>
 
             <div>
-              <label for="contactTopic" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Inquiry Type</label>
+              <label for="contactTopic" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Inquiry Type
+              </label>
               <select
                 id="contactTopic"
                 name="topic"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 font-bold text-slate-800 text-xs sm:text-sm"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-700"
               >
-                <option value="Hotel Listing">List My Hotel on GulshanHotels.com</option>
-                <option value="Traveler Help">Traveler Guidance / Embassy Transit Advice</option>
-                <option value="Data Correction">Report Rate or Information Discrepancy</option>
-                <option value="General Inquiries">General Business Inquiry</option>
+                <option value="Hotel Listing">List My Hotel on GulshanHotels.com (Free)</option>
+                <option value="Data Correction">Report Rate or Info Correction</option>
+                <option value="Traveler Question">General Question About Staying in Gulshan</option>
+                <option value="General Inquiry">Partnership or Other Inquiry</option>
               </select>
             </div>
 
             <div>
-              <label for="contactPhone" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Phone / WhatsApp (Optional)</label>
+              <label for="contactPhone" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Phone / WhatsApp (Optional)
+              </label>
               <input
                 type="tel"
                 id="contactPhone"
                 name="phone"
                 autocomplete="tel"
-                placeholder="+8801... or +1..."
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm font-medium"
+                placeholder="+8801..."
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-900 outline-none focus:border-emerald-700"
               />
             </div>
 
             <div>
-              <label for="contactMessage" class="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1 block">Your Message</label>
+              <label for="contactMessage" class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Your Message
+              </label>
               <textarea
                 id="contactMessage"
                 name="message"
                 rows="4"
                 required
-                placeholder="Tell us about your dates, hotel property, or questions..."
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-700 text-xs sm:text-sm leading-relaxed font-medium"
+                placeholder="Share your hotel details, the correction needed, or your question..."
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium leading-relaxed text-slate-900 outline-none focus:border-emerald-700"
               ></textarea>
             </div>
 
-            <p id="contactErrorMsg" class="hidden p-4 bg-red-50 text-red-800 rounded-xl text-xs font-semibold border border-red-200" role="alert"></p>
+            <p
+              id="contactErrorMsg"
+              class="hidden rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-800"
+              role="alert"
+            ></p>
 
             <button
               type="submit"
               id="submitContactBtn"
-              class="w-full bg-[#0d3b23] hover:bg-[#061e14] disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl shadow-md transition uppercase tracking-wider text-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#0d3b23] py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#061e14] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <span id="submitBtnLabel">Transmit Inquiry</span>
-              <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <span id="submitBtnLabel">Send Message</span>
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
             </button>
+
+            <p class="text-center text-xs text-slate-600">
+              We only use your contact details to reply to your message. Read our{' '}
+              <a href="/privacy/" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">Privacy Policy</a>
+              {' '}and{' '}
+              <a href="/disclaimer/" class="font-semibold text-emerald-800 underline-offset-2 hover:underline">Disclaimer</a>.
+            </p>
           </form>
 
-          <div id="contactSuccessMsg" class="hidden mt-4 p-6 bg-emerald-50 text-emerald-950 font-bold rounded-2xl text-center text-xs sm:text-sm border border-emerald-200 space-y-1" role="status">
-            <div class="text-2xl mb-1">✓</div>
-            <p class="font-black text-emerald-900">Inquiry Transmitted Successfully!</p>
-            <p class="text-xs text-slate-600 font-normal">Our local Gulshan concierge team will review your message and reply via email shortly.</p>
+          <div
+            id="contactSuccessMsg"
+            class="mt-4 hidden space-y-1 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center text-sm text-emerald-950"
+            role="status"
+          >
+            <p class="text-2xl font-bold text-emerald-800">&#10003;</p>
+            <p class="font-bold text-emerald-900">Message Sent Successfully</p>
+            <p class="text-xs text-slate-700">
+              Thank you for writing to GulshanHotels.com. We will review your message and reply by email soon.
+            </p>
           </div>
         </div>
 
       </div>
+    </section>
 
-      <section class="pt-8 border-t border-slate-200 text-left space-y-6">
-        <div class="space-y-1">
-          <span class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-emerald-800 block">Frequently Asked</span>
-          <h2 class="font-serif text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Concierge & Listing Questions</h2>
+    <!-- FAQ Section (সঠিক H2 > H3 কাঠামো ও সৎ উত্তর) -->
+    <section class="bg-slate-50">
+      <div class="mx-auto max-w-[1150px] px-4 py-14 sm:px-8 sm:py-16">
+        <div class="mb-8 space-y-1">
+          <p class="text-xs font-bold uppercase tracking-widest text-emerald-800">Frequently Asked</p>
+          <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            Contact &amp; Listing Questions
+          </h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl">
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-            <h4 class="font-bold text-slate-900 text-sm">How do I list my property?</h4>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">Select 'List My Hotel' in the form above or reach out via WhatsApp with your hotel name and address. Our verification team conducts an on-site audit before listing.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-            <h4 class="font-bold text-slate-900 text-sm">Are traveler concierge inquiries free?</h4>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">Yes, our advice on embassy distances, traffic routes, and neighborhood recommendations is completely free for international visitors.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-            <h4 class="font-bold text-slate-900 text-sm">How are hotel prices verified?</h4>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">We audit hotel rates through direct reception calls, verified partner APIs, and local inspections to ensure zero hidden checkout surprises.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-            <h4 class="font-bold text-slate-900 text-sm">Can I request airport pickup arrangements?</h4>
-            <p class="text-xs text-slate-600 leading-relaxed font-normal">Yes, inform us of your arrival flight details on WhatsApp. We can assist in coordinating direct hotel shuttle vans via the Elevated Expressway.</p>
-          </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {faqs.map((item) => (
+            <div class="space-y-2 rounded-3xl border border-slate-200 bg-white p-6">
+              <h3 class="text-base font-bold text-slate-900">{item.q}</h3>
+              <p class="text-sm leading-relaxed text-slate-600">{item.a}</p>
+            </div>
+          ))}
         </div>
-      </section>
-
-    </div>
+      </div>
+    </section>
   </main>
 
   <script>
-    const form = document.getElementById('contactInquiryForm') as HTMLFormElement | null;
-    const successMsg = document.getElementById('contactSuccessMsg');
-    const errorMsg = document.getElementById('contactErrorMsg');
-    const submitBtn = document.getElementById('submitContactBtn') as HTMLButtonElement | null;
-    const btnLabel = document.getElementById('submitBtnLabel');
+    function initContactForm() {
+      const form = document.getElementById('contactInquiryForm') as HTMLFormElement | null;
+      if (!form || form.dataset.bound === 'true') return;
+      form.dataset.bound = 'true';
 
-    function showError(html: string) {
-      if (!errorMsg) return;
-      errorMsg.innerHTML = html;
-      errorMsg.classList.remove('hidden');
-    }
+      const successMsg = document.getElementById('contactSuccessMsg');
+      const errorMsg = document.getElementById('contactErrorMsg');
+      const submitBtn = document.getElementById('submitContactBtn') as HTMLButtonElement | null;
+      const btnLabel = document.getElementById('submitBtnLabel');
 
-    if (form) {
+      function showError(html: string) {
+        if (!errorMsg) return;
+        errorMsg.innerHTML = html;
+        errorMsg.classList.remove('hidden');
+      }
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errorMsg?.classList.add('hidden');
 
-        // Native validation (form has novalidate so we control the flow)
         if (!form.checkValidity()) {
           form.reportValidity();
           return;
@@ -283,7 +357,6 @@ const contactSchema = {
 
         const data = new FormData(form);
 
-        // Honeypot filled => bot. Pretend success, send nothing.
         if (data.get('botcheck')) {
           form.classList.add('hidden');
           successMsg?.classList.remove('hidden');
@@ -291,22 +364,22 @@ const contactSchema = {
         }
 
         const accessKey = form.dataset.key;
-        const email = form.dataset.email;
-        const whatsapp = form.dataset.whatsapp;
+        const email = form.dataset.email || '';
+        const whatsapp = form.dataset.whatsapp || '';
 
-        // Fallback links used when the request fails or no key is configured
         const summary =
           `Inquiry type: ${data.get('topic')}\n` +
           `Name: ${data.get('name')}\n` +
           `Email: ${data.get('email')}\n` +
           `Phone: ${data.get('phone') || '-'}\n\n` +
           `${data.get('message')}`;
-        const waLink = `https://wa.me/${whatsapp}?text=${encodeURIComponent(summary)}`;
+
         const mailLink = `mailto:${email}?subject=${encodeURIComponent('Inquiry: ' + data.get('topic'))}&body=${encodeURIComponent(summary)}`;
-        const fallbackHtml =
-          `Could not send automatically. Please send it directly: ` +
-          `<a class="underline font-black" href="${waLink}" target="_blank" rel="noopener noreferrer">WhatsApp</a> or ` +
-          `<a class="underline font-black" href="${mailLink}">Email</a>.`;
+        const waLink = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(summary)}` : '';
+
+        const fallbackHtml = waLink
+          ? `Could not send automatically. Please contact us directly via <a class="underline font-bold" href="${waLink}" target="_blank" rel="noopener noreferrer">WhatsApp</a> or <a class="underline font-bold" href="${mailLink}">Email</a>.`
+          : `Could not send automatically. Please send your message directly via <a class="underline font-bold" href="${mailLink}">Email (${email})</a>.`;
 
         if (!accessKey) {
           showError(fallbackHtml);
@@ -314,7 +387,7 @@ const contactSchema = {
         }
 
         if (submitBtn) submitBtn.disabled = true;
-        if (btnLabel) btnLabel.textContent = 'Transmitting...';
+        if (btnLabel) btnLabel.textContent = 'Sending...';
 
         try {
           const res = await fetch('https://api.web3forms.com/submit', {
@@ -339,12 +412,15 @@ const contactSchema = {
           } else {
             throw new Error(json.message || 'Request failed');
           }
-        } catch (err) {
+        } catch {
           showError(fallbackHtml);
           if (submitBtn) submitBtn.disabled = false;
-          if (btnLabel) btnLabel.textContent = 'Transmit Inquiry';
+          if (btnLabel) btnLabel.textContent = 'Send Message';
         }
       });
     }
+
+    initContactForm();
+    document.addEventListener('astro:page-load', initContactForm);
   </script>
 </Layout>
