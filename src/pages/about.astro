@@ -2,66 +2,100 @@
 // src/pages/about.astro
 import Layout from '../layouts/Layout.astro';
 
-// Fill these in. Anything left empty is simply not shown.
-const CONTACT_EMAIL = '';      // e.g. 'name@yourdomain.com'
-const WHATSAPP_NUMBER = '';    // digits only with country code, e.g. '8801XXXXXXXXX'
+const SITE_URL = 'https://gulshanhotels.com';
+
+// ---- Real details (already filled) ----
+const FOUNDER_NAME = 'Mohammed Rakib';
+const CONTACT_EMAIL = 'info@gulshanhotels.com';
+const WHATSAPP_NUMBER = '8801996322761'; // digits only, with country code
+
+// ---- Fill these ONLY with true things. Empty = not shown. ----
+const FOUNDER_PHOTO = '';      // e.g. '/rakib.webp' (a real photo of you)
+const FOUNDER_STORY = '';      // 2-3 true sentences: why you built this site, in your own words
+const FACEBOOK_URL = '';       // your real Facebook page, e.g. 'https://facebook.com/yourpage'
+const LISTING_POLICY = '';     // e.g. 'Listing a hotel is free. Hotels cannot pay to be ranked higher.' (only if true)
+
+// Change if your affiliate partner is different
+const PARTNER_NAME = 'Agoda';
 
 const features = [
   {
     title: 'Discover',
-    text: 'Browse luxury, boutique and business hotels across Gulshan 1, Gulshan 2, Banani and Baridhara.',
+    text: 'Browse luxury, boutique and business hotels in Gulshan 1 and Gulshan 2.',
     icon: 'M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z',
   },
   {
-    title: 'Compare',
-    text: 'Look at hotels side by side, check live prices where available, and spot current deals.',
-    icon: 'M3 6h18M3 12h12M3 18h6',
+    title: 'Check rates',
+    text: 'Where our booking partner gives us live rates, we show them. Other prices are approximate.',
+    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   {
     title: 'Save',
-    text: 'Tap the heart on any hotel to save it, then come back to your shortlist whenever you are ready.',
+    text: 'Tap the heart on any hotel to save it, then come back to your shortlist later.',
     icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
   },
 ];
 
 const areas = [
-  'Gulshan 1', 'Gulshan 2', 'Banani', 'Baridhara',
-  'Near US Embassy', 'Near IVAC Visa Center',
+  { name: 'Gulshan 1', href: '/hotels-in-gulshan-1/' },
+  { name: 'Gulshan 2', href: '/hotels-in-gulshan-2/' },
 ];
 
 const principles = [
   {
-    title: 'Clear information',
-    text: 'We aim to show each hotel\u2019s location, category and pricing in a simple, easy-to-scan way.',
+    title: 'Where our information comes from',
+    text: 'Hotel details and prices come from the hotels\u2019 own pages, public booking sites and our booking partner. Where live rates are available we show them; otherwise prices are approximate and can be out of date. We do not take payment for bookings on this site. Always confirm the final price and your dates with the hotel or booking partner.',
   },
-  {
-    title: 'Check before you pay',
-    text: 'Room rates and availability can change quickly. Always confirm the final price and your dates with the hotel or booking partner before you pay.',
-  },
-  // CONFIRM THIS ONE: keep it only if it is true for your site, otherwise delete this item.
   {
     title: 'How we are supported',
-    text: 'Some links on this site may be partner or booking links. If you book through them we may earn a commission, at no extra cost to you.',
+    text: `Some booking links on this site are affiliate links (for example, to ${PARTNER_NAME}). If you book through them, we may earn a commission at no extra cost to you.`,
+  },
+  {
+    title: 'Found a mistake?',
+    text: `Email us at ${CONTACT_EMAIL}. We will check it and fix it.`,
   },
 ];
+
+if (LISTING_POLICY) {
+  principles.splice(2, 0, { title: 'Hotel listings', text: LISTING_POLICY });
+}
+
+const sameAs = [FACEBOOK_URL].filter(Boolean);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  url: `${SITE_URL}/about/`,
+  name: 'About GulshanHotels.com',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'GulshanHotels.com',
+    url: SITE_URL,
+    logo: `${SITE_URL}/mylogo.png`,
+    email: CONTACT_EMAIL,
+    founder: { '@type': 'Person', name: FOUNDER_NAME },
+    ...(sameAs.length ? { sameAs } : {}),
+  },
+};
 ---
 
 <Layout
   title="About Us | GulshanHotels.com"
-  description="GulshanHotels.com is a hotel guide for Gulshan, Banani and Baridhara, Dhaka. Discover, compare and shortlist places to stay in one place."
+  description="GulshanHotels.com is an independent hotel guide for Gulshan 1 and Gulshan 2, Dhaka, run by Mohammed Rakib. See where our prices come from and how we are supported."
 >
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
   <main>
 
     <!-- Intro -->
     <section class="bg-gradient-to-b from-emerald-50/70 to-white">
       <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-8 sm:py-24">
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-emerald-800">About us</p>
-        <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+        <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
           Find the right hotel in Gulshan, faster.
         </h1>
         <p class="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-          GulshanHotels.com is a hotel guide for Gulshan, Banani and Baridhara in Dhaka.
-          We help you discover, compare and shortlist places to stay, all in one place.
+          GulshanHotels.com is an independent hotel guide for Gulshan 1 and Gulshan 2 in Dhaka.
+          We list hotels, show rates and help you shortlist where to stay.
         </p>
         <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a href="/#hotels" class="inline-flex items-center gap-2 rounded-full bg-[#0d3b23] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-px hover:shadow-lg hover:shadow-emerald-900/25">
@@ -72,59 +106,74 @@ const principles = [
       </div>
     </section>
 
-    <!-- What you can do -->
-    <section class="mx-auto max-w-[1100px] px-4 py-14 sm:px-8 sm:py-20">
-      <h2 class="text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">What you can do here</h2>
-      <div class="mt-10 grid gap-5 sm:grid-cols-3">
-        {features.map((f) => (
-          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-2xs transition hover:-translate-y-0.5 hover:shadow-md">
-            <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-800">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
-            </span>
-            <h3 class="mt-4 text-lg font-bold text-slate-900">{f.title}</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <!-- Why we built it -->
-    <section class="bg-slate-50">
-      <div class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
-        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Why we built this</h2>
-        <div class="mt-5 space-y-4 text-base leading-relaxed text-slate-600">
-          <p>
-            Gulshan is the heart of Dhaka’s diplomatic and business life. Whether you are visiting an embassy,
-            attending meetings, or heading to a visa appointment, staying close by can save hours in Dhaka traffic.
+    <!-- Who runs this site -->
+    <section class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Who runs this site</h2>
+      <div class="mt-8 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+        {FOUNDER_PHOTO ? (
+          <img src={FOUNDER_PHOTO} alt={FOUNDER_NAME} width="96" height="96" loading="lazy" class="h-24 w-24 shrink-0 rounded-full object-cover" />
+        ) : (
+          <span class="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-2xl font-bold text-emerald-800" aria-hidden="true">MR</span>
+        )}
+        <div>
+          <p class="text-lg font-bold text-slate-900">{FOUNDER_NAME}</p>
+          <p class="mt-1 text-base leading-relaxed text-slate-600">
+            GulshanHotels.com is built and run by {FOUNDER_NAME}.
           </p>
-          <p>
-            Finding the right hotel nearby often means jumping between many tabs and phone calls.
-            GulshanHotels.com brings the options together so that choosing where to stay takes minutes instead of an evening.
+          {FOUNDER_STORY && (
+            <p class="mt-3 text-base leading-relaxed text-slate-600">{FOUNDER_STORY}</p>
+          )}
+          <p class="mt-3 text-sm text-slate-600">
+            <a class="font-semibold text-emerald-800 underline-offset-2 hover:underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            {FACEBOOK_URL && (
+              <>
+                <span aria-hidden="true"> &middot; </span>
+                <a class="font-semibold text-emerald-800 underline-offset-2 hover:underline" href={FACEBOOK_URL} rel="noopener">Facebook</a>
+              </>
+            )}
           </p>
         </div>
       </div>
     </section>
 
-    <!-- Areas -->
-    <section class="mx-auto max-w-3xl px-4 py-14 text-center sm:px-8 sm:py-20">
-      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Areas we cover</h2>
-      <div class="mt-8 flex flex-wrap justify-center gap-2.5">
-        {areas.map((a) => (
-          <a href="/#hotels" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">{a}</a>
-        ))}
+    <!-- What you can do -->
+    <section class="bg-slate-50">
+      <div class="mx-auto max-w-[1100px] px-4 py-14 sm:px-8 sm:py-20">
+        <h2 class="text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">What you can do here</h2>
+        <div class="mt-10 grid gap-5 sm:grid-cols-3">
+          {features.map((f) => (
+            <div class="rounded-3xl border border-slate-200 bg-white p-6">
+              <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-800">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
+              </span>
+              <h3 class="mt-4 text-lg font-bold text-slate-900">{f.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-slate-600">{f.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
-    <!-- Principles -->
+    <!-- How we work -->
+    <section class="mx-auto max-w-3xl px-4 py-14 sm:px-8 sm:py-20">
+      <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">How we work</h2>
+      <dl class="mt-8 divide-y divide-slate-200">
+        {principles.map((p) => (
+          <div class="py-5">
+            <dt class="text-base font-bold text-slate-900">{p.title}</dt>
+            <dd class="mt-2 text-base leading-relaxed text-slate-600">{p.text}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <!-- Areas -->
     <section class="bg-slate-50">
-      <div class="mx-auto max-w-[1100px] px-4 py-14 sm:px-8 sm:py-20">
-        <h2 class="text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">How we work</h2>
-        <div class="mt-10 grid gap-5 sm:grid-cols-3">
-          {principles.map((p) => (
-            <div class="rounded-3xl border border-slate-200 bg-white p-6">
-              <h3 class="text-base font-bold text-slate-900">{p.title}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-slate-600">{p.text}</p>
-            </div>
+      <div class="mx-auto max-w-3xl px-4 py-14 text-center sm:px-8 sm:py-20">
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Areas we cover</h2>
+        <div class="mt-8 flex flex-wrap justify-center gap-2.5">
+          {areas.map((a) => (
+            <a href={a.href} class="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800">Hotels in {a.name}</a>
           ))}
         </div>
       </div>
@@ -135,16 +184,12 @@ const principles = [
       <div class="rounded-3xl bg-[#0d3b23] p-8 text-center text-white sm:p-12">
         <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Get in touch</h2>
         <p class="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-emerald-100/90 sm:text-base">
-          Have a question, spotted something that needs correcting, or want to list your hotel? We would love to hear from you.
+          Have a question, a correction, or want to list your hotel? Write to us.
         </p>
         <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a href="/contact/" class="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-bold text-slate-900 transition hover:bg-emerald-50">List your hotel</a>
-          {CONTACT_EMAIL && (
-            <a href={`mailto:${CONTACT_EMAIL}`} class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">{CONTACT_EMAIL}</a>
-          )}
-          {WHATSAPP_NUMBER && (
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} rel="noopener" class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">WhatsApp</a>
-          )}
+          <a href={`mailto:${CONTACT_EMAIL}`} class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">{CONTACT_EMAIL}</a>
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} rel="noopener" class="inline-flex items-center rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10">WhatsApp</a>
         </div>
       </div>
     </section>
