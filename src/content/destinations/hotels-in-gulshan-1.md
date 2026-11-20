@@ -11,6 +11,7 @@ filter_keyword: ''
 selected_hotels:
   - renaissance-dhaka-gulshan-hotel
   - hotel-century-park
+  - shinepukur-suites
 hotels_tag: STAYS IN GULSHAN 1
 hotels_title: Accommodations & Hotels in Gulshan 1
 faqs:
