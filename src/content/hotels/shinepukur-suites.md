@@ -1,7 +1,7 @@
 ---
 header_notice: ''
 title: Shinepukur Suites
-draft: true
+draft: false
 seo_title: 'Shinepukur Suites: Boutique hotel in Gulshan-1, Dhaka'
 seo_description: ''
 is_verified: false
