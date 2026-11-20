@@ -118,6 +118,16 @@ faqs:
     answer: Standard check-in starts between 12:30 PM and 1:00 PM, and check-out is at 12:00 PM (noon). Early check-in or late check-out can usually be arranged through the 24-hour front desk for an additional fee, depending on room availability.
   - question: How far is the hotel from Hazrat Shahjalal International Airport, and is an airport shuttle available?
     answer: The hotel is roughly 12 to 15 km from the airport. Late at night with clear roads, the drive takes about 25 to 30 minutes, though daytime traffic will make it longer. An airport shuttle is available upon request for an extra charge (typically around USD 10 per person).
+  - question: Is breakfast included with the stay?
+    answer: Yes, a complimentary buffet breakfast is included for guests. The hotel also has an on-site restaurant, a coffee shop, and a snack bar for lunch, dinner, or quick bites throughout the day.
+  - question: What is within walking distance of the hotel?
+    answer: Gulshan Lake, Hatir Jheel, and Police Plaza Concord shopping mall are all about a two-minute walk away. Gulshan Circle 1 is roughly a 10-minute stroll, and casual dining spots like Baguettee Paris, Herfy, and Farmhouse Burger are within five to six minutes on foot.
+  - question: Does Shinepukur Suites offer free parking and Wi-Fi?
+    answer: Yes, free self-parking and complimentary in-room Wi-Fi are available for all guests.
+  - question: What are the visitor and pet policies?
+    answer: Pets are not allowed at the property. For security and privacy, only registered guests are permitted inside the rooms, and guests must be at least 18 years old with a valid photo ID to check in.
+  - question: How big are the rooms?
+    answer: Because it is a 30-room boutique property, standard rooms can feel somewhat compact. Studio and double rooms typically range from 200 to 270 sq. ft., while Executive Suites offer around 400 to 420 sq. ft. with a separate sitting area and soundproofing.
 ---
 
 Shinepukur Suites is a small, 30-room hotel tucked away at Road 143, House 8(C) in Gulshan 1, Dhaka. Since opening in 2020, it has operated more like a quiet boutique guesthouse than a typical big-brand tower.
