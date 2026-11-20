@@ -3,7 +3,7 @@ header_notice: ''
 title: Shinepukur Suites
 draft: false
 seo_title: 'Shinepukur Suites: Boutique hotel in Gulshan-1, Dhaka'
-seo_description: ''
+seo_description: Experience comfort at Shinepukur Suites in Gulshan 1, Dhaka. Book boutique rooms with Egyptian cotton sheets, free breakfast, and airport shuttle service.
 is_verified: false
 ranking: ''
 category: 3-Star
